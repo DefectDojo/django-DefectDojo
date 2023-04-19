@@ -5,58 +5,76 @@ from django.contrib import messages
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 
-from dojo.forms import NoteTypeForm, EditNoteTypeForm, DisableOrEnableNoteTypeForm
+from dojo.forms import (
+    NoteTypeForm,
+    EditNoteTypeForm,
+    DisableOrEnableNoteTypeForm,
+)
 from dojo.models import Note_Type
 from dojo.filters import NoteTypesFilter
 from dojo.utils import get_page_items, add_breadcrumb
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+from dojo.authorization.authorization_decorators import (
+    user_is_configuration_authorized,
+)
 
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized('dojo.view_note_type')
+@user_is_configuration_authorized("dojo.view_note_type")
 def note_type(request):
-    initial_queryset = Note_Type.objects.all().order_by('name')
-    name_words = initial_queryset.values_list('name', flat=True)
+    initial_queryset = Note_Type.objects.all().order_by("name")
+    name_words = initial_queryset.values_list("name", flat=True)
     ntl = NoteTypesFilter(request.GET, queryset=initial_queryset)
     nts = get_page_items(request, ntl.qs, 25)
     add_breadcrumb(title="Note Type List", top_level=True, request=request)
-    return render(request, 'dojo/note_type.html', {
-        'name': 'Note Type List',
-        'metric': False,
-        'user': request.user,
-        'nts': nts,
-        'ntl': ntl,
-        'name_words': name_words})
+    return render(
+        request,
+        "dojo/note_type.html",
+        {
+            "name": "Note Type List",
+            "metric": False,
+            "user": request.user,
+            "nts": nts,
+            "ntl": ntl,
+            "name_words": name_words,
+        },
+    )
 
 
-@user_is_configuration_authorized('dojo.change_note_type')
+@user_is_configuration_authorized("dojo.change_note_type")
 def edit_note_type(request, ntid):
     nt = get_object_or_404(Note_Type, pk=ntid)
     is_single = nt.is_single
     nt_form = EditNoteTypeForm(instance=nt, is_single=is_single)
-    if request.method == "POST" and request.POST.get('edit_note_type'):
-        nt_form = EditNoteTypeForm(request.POST, instance=nt, is_single=is_single)
+    if request.method == "POST" and request.POST.get("edit_note_type"):
+        nt_form = EditNoteTypeForm(
+            request.POST, instance=nt, is_single=is_single
+        )
         if nt_form.is_valid():
             nt = nt_form.save()
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Note type updated successfully.',
+                "Note type updated successfully.",
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("note_type"))
 
     add_breadcrumb(title="Edit Note Type", top_level=False, request=request)
-    return render(request, 'dojo/edit_note_type.html', {
-        'name': 'Edit Note Type',
-        'metric': False,
-        'user': request.user,
-        'nt_form': nt_form,
-        'nt': nt})
+    return render(
+        request,
+        "dojo/edit_note_type.html",
+        {
+            "name": "Edit Note Type",
+            "metric": False,
+            "user": request.user,
+            "nt_form": nt_form,
+            "nt": nt,
+        },
+    )
 
 
-@user_is_configuration_authorized('dojo.change_note_type')
+@user_is_configuration_authorized("dojo.change_note_type")
 def disable_note_type(request, ntid):
     nt = get_object_or_404(Note_Type, pk=ntid)
     nt_form = DisableOrEnableNoteTypeForm(instance=nt)
@@ -67,21 +85,26 @@ def disable_note_type(request, ntid):
         messages.add_message(
             request,
             messages.SUCCESS,
-            'Note type Disabled successfully.',
+            "Note type Disabled successfully.",
             extra_tags="alert-success",
         )
         return HttpResponseRedirect(reverse("note_type"))
 
     add_breadcrumb(title="Disable Note Type", top_level=False, request=request)
-    return render(request, 'dojo/disable_note_type.html', {
-        'name': 'Disable Note Type',
-        'metric': False,
-        'user': request.user,
-        'nt_form': nt_form,
-        'nt': nt})
+    return render(
+        request,
+        "dojo/disable_note_type.html",
+        {
+            "name": "Disable Note Type",
+            "metric": False,
+            "user": request.user,
+            "nt_form": nt_form,
+            "nt": nt,
+        },
+    )
 
 
-@user_is_configuration_authorized('dojo.change_note_type')
+@user_is_configuration_authorized("dojo.change_note_type")
 def enable_note_type(request, ntid):
     nt = get_object_or_404(Note_Type, pk=ntid)
     nt_form = DisableOrEnableNoteTypeForm(instance=nt)
@@ -97,30 +120,41 @@ def enable_note_type(request, ntid):
         )
         return HttpResponseRedirect(reverse("note_type"))
     add_breadcrumb(title="Enable Note Type", top_level=False, request=request)
-    return render(request, 'dojo/enable_note_type.html', {
-        'name': 'Enable Note Type',
-        'metric': False,
-        'user': request.user,
-        'nt_form': nt_form,
-        'nt': nt})
+    return render(
+        request,
+        "dojo/enable_note_type.html",
+        {
+            "name": "Enable Note Type",
+            "metric": False,
+            "user": request.user,
+            "nt_form": nt_form,
+            "nt": nt,
+        },
+    )
 
 
-@user_is_configuration_authorized('dojo.add_note_type')
+@user_is_configuration_authorized("dojo.add_note_type")
 def add_note_type(request):
     form = NoteTypeForm()
-    if request.method == 'POST':
+    if request.method == "POST":
         form = NoteTypeForm(request.POST)
         if form.is_valid():
-            note_type = form.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Note Type added successfully.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('note_type'))
+            form.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Note Type added successfully.",
+                extra_tags="alert-success",
+            )
+            return HttpResponseRedirect(reverse("note_type"))
     add_breadcrumb(title="Add Note Type", top_level=False, request=request)
-    return render(request, 'dojo/add_note_type.html', {
-        'name': 'Add Note Type',
-        'metric': False,
-        'user': request.user,
-        'form': form,
-    })
+    return render(
+        request,
+        "dojo/add_note_type.html",
+        {
+            "name": "Add Note Type",
+            "metric": False,
+            "user": request.user,
+            "form": form,
+        },
+    )
