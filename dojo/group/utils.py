@@ -8,14 +8,16 @@ from django.conf import settings
 
 def get_auth_group_name(group, attempt=0):
     if attempt > 999:
-        raise Exception(f'Cannot find name for authorization group for Dojo_Group {group.name}, aborted after 999 attempts.')
+        raise Exception(
+            f"Cannot find name for authorization group for Dojo_Group {group.name}, aborted after 999 attempts."
+        )
     if attempt == 0:
         auth_group_name = group.name
     else:
-        auth_group_name = group.name + '_' + str(attempt)
+        auth_group_name = group.name + "_" + str(attempt)
 
     try:
-        auth_group = Group.objects.get(name=auth_group_name)
+        Group.objects.get(name=auth_group_name)
         return get_auth_group_name(group, attempt + 1)
     except Group.DoesNotExist:
         return auth_group_name
@@ -23,8 +25,8 @@ def get_auth_group_name(group, attempt=0):
 
 @receiver(post_save, sender=Dojo_Group)
 def group_post_save_handler(sender, **kwargs):
-    created = kwargs.pop('created')
-    group = kwargs.pop('instance')
+    created = kwargs.pop("created")
+    group = kwargs.pop("instance")
     if created:
         # Create authentication group
         auth_group = Group(name=get_auth_group_name(group))
@@ -45,7 +47,7 @@ def group_post_save_handler(sender, **kwargs):
 
 @receiver(post_delete, sender=Dojo_Group)
 def group_post_delete_handler(sender, **kwargs):
-    group = kwargs.pop('instance')
+    group = kwargs.pop("instance")
     # Authorization group doesn't get deleted automatically
     if group.auth_group:
         group.auth_group.delete()
@@ -53,8 +55,8 @@ def group_post_delete_handler(sender, **kwargs):
 
 @receiver(post_save, sender=Dojo_Group_Member)
 def group_member_post_save_handler(sender, **kwargs):
-    created = kwargs.pop('created')
-    group_member = kwargs.pop('instance')
+    created = kwargs.pop("created")
+    group_member = kwargs.pop("instance")
     if created:
         # Add user to authentication group as well
         if group_member.group.auth_group:
@@ -63,7 +65,7 @@ def group_member_post_save_handler(sender, **kwargs):
 
 @receiver(post_delete, sender=Dojo_Group_Member)
 def group_member_post_delete_handler(sender, **kwargs):
-    group_member = kwargs.pop('instance')
+    group_member = kwargs.pop("instance")
     # Remove user from the authentication group as well
     if group_member.group.auth_group:
         group_member.group.auth_group.user_set.remove(group_member.user)
