@@ -38,5 +38,5 @@ repos:
     hooks:
       - id: flake8
         args:
-          - --ignore=E203,W503,C901
+          - --ignore=E203,W503,C901,E731
           - --max-line-length=120
