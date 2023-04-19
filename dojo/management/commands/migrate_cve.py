@@ -21,7 +21,8 @@ def create_vulnerability_id(finding):
 
 def create_vulnerability_id_template(finding_template):
     Vulnerability_Id_Template.objects.get_or_create(
-        finding_template=finding_template, vulnerability_id=finding_template.cve
+        finding_template=finding_template,
+        vulnerability_id=finding_template.cve,
     )
 
 
@@ -33,7 +34,6 @@ class Command(BaseCommand):
     help = "Usage: manage.py migrate_cve"
 
     def handle(self, *args, **options):
-
         logger.info("Starting migration of cves for Findings")
         findings = Finding.objects.filter(cve__isnull=False)
         mass_model_updater(

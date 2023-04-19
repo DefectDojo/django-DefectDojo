@@ -12,7 +12,8 @@ class Command(BaseCommand):
     authorization is removed from the code now, this management command is
     empty. It cannot be removed because it is called in a db migration.
     """
-    help = 'Usage: manage.py migration_authorization_v2'
+
+    help = "Usage: manage.py migration_authorization_v2"
 
     def handle(self, *args, **options):
         pass

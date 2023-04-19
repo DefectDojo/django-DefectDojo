@@ -8,8 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-
-    help = 'Usage: manage.py remove_broken_endpoint_statuses.py'
+    help = "Usage: manage.py remove_broken_endpoint_statuses.py"
 
     def handle(self, *args, **options):
         remove_broken_endpoint_statuses(apps=apps)

@@ -1,11 +1,14 @@
-
+import logging
 from django.core.management.base import BaseCommand
-
 from dojo.models import Finding, Notes
+
 # from dojo.utils import get_system_setting, do_dedupe_finding, dojo_async_task
 from dojo.celery import app
 from functools import wraps
 from dojo.utils import test_valentijn
+
+# Create global
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -57,7 +60,7 @@ def my_decorator_outside(func):
         func(*args, **kwargs)
         print("outside after")
 
-    if getattr(func, 'delay', None):
+    if getattr(func, "delay", None):
         wrapper.delay = my_decorator_outside(func.delay)
 
     return wrapper
@@ -69,6 +72,7 @@ def my_decorator_inside(func):
         print("inside before")
         func(*args, **kwargs)
         print("inside after")
+
     return wrapper
 
 
@@ -76,17 +80,21 @@ def my_decorator_inside(func):
 @app.task
 @my_decorator_inside
 def my_test_task(new_finding, *args, **kwargs):
-    print('oh la la what a nice task')
+    print("oh la la what a nice task")
 
 
 # example working with multiple parameters...
-@dojo_model_to_id(parameter=1)
-@dojo_model_to_id
-@dojo_async_task
-@app.task
-@dojo_model_from_id(model=Notes, parameter=1)
-@dojo_model_from_id
+
+# docorator not undefined
+
+
+# @dojo_model_to_id(parameter=1)
+# @dojo_model_to_id
+# @dojo_async_task
+# @app.task
+# @dojo_model_from_id(model=Notes, parameter=1)
+# @dojo_model_from_id
 def test_valentijn_task(new_finding, note, **kwargs):
-    logger.debug('test_valentijn:')
+    logger.debug("test_valentijn:")
     logger.debug(new_finding)
     logger.debug(note)
