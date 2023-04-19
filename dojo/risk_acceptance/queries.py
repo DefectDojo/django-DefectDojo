@@ -1,8 +1,16 @@
 from crum import get_current_user
 from django.db.models import Exists, OuterRef, Q
-from dojo.models import Product_Member, Product_Type_Member, \
-    Product_Group, Product_Type_Group, Risk_Acceptance
-from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
+from dojo.models import (
+    Product_Member,
+    Product_Type_Member,
+    Product_Group,
+    Product_Type_Group,
+    Risk_Acceptance,
+)
+from dojo.authorization.authorization import (
+    get_roles_for_permission,
+    user_has_global_permission,
+)
 
 
 def get_authorized_risk_acceptances(permission):
@@ -19,28 +27,36 @@ def get_authorized_risk_acceptances(permission):
 
     roles = get_roles_for_permission(permission)
     authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef('engagement__product__prod_type_id'),
+        product_type=OuterRef("engagement__product__prod_type_id"),
         user=user,
-        role__in=roles)
+        role__in=roles,
+    )
     authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef('engagement__product_id'),
-        user=user,
-        role__in=roles)
+        product=OuterRef("engagement__product_id"), user=user, role__in=roles
+    )
     authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef('engagement__product__prod_type_id'),
+        product_type=OuterRef("engagement__product__prod_type_id"),
         group__users=user,
-        role__in=roles)
+        role__in=roles,
+    )
     authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef('engagement__product_id'),
+        product=OuterRef("engagement__product_id"),
         group__users=user,
-        role__in=roles)
+        role__in=roles,
+    )
     risk_acceptances = Risk_Acceptance.objects.annotate(
         product__prod_type__member=Exists(authorized_product_type_roles),
         product__member=Exists(authorized_product_roles),
-        product__prod_type__authorized_group=Exists(authorized_product_type_groups),
-        product__authorized_group=Exists(authorized_product_groups))
+        product__prod_type__authorized_group=Exists(
+            authorized_product_type_groups
+        ),
+        product__authorized_group=Exists(authorized_product_groups),
+    )
     risk_acceptances = risk_acceptances.filter(
-        Q(product__prod_type__member=True) | Q(product__member=True) |
-        Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
+        Q(product__prod_type__member=True)
+        | Q(product__member=True)
+        | Q(product__prod_type__authorized_group=True)
+        | Q(product__authorized_group=True)
+    )
 
     return risk_acceptances
