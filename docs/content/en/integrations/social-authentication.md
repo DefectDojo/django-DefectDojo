@@ -248,6 +248,8 @@ Follow along below.
     DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT = True
     {{< /highlight >}}
 
+    **Important:** if you enable this setting on already working instance with gitlab integrations, it will require new grant "read_repository" by user
+ 
 5. Restart DefectDojo, and you should now see a **Login with Gitlab**
     button on the login page.
 
