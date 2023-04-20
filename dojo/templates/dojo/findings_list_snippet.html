@@ -16,7 +16,8 @@
                                     type="button"
                                     id="downloadMenu"
                                     data-toggle="dropdown"
-                                    aria-expanded="true">
+                                    aria-expanded="true"
+                                    aria-label="dropdown-menu">
                                 <span class="fa-solid fa-download"></span>
                                 <span class="caret"></span>
                             </button>
@@ -40,7 +41,8 @@
                             <button id="show-filters"
                                     data-toggle="collapse"
                                     data-target="#the-filters"
-                                    class="btn btn-primary toggle-filters">
+                                    class="btn btn-primary toggle-filters"
+                                    aria-label="show-filters">
                                 <i class="fa-solid fa-filter"></i> <i class="caret"></i>
                             </button>
                         </div>
@@ -249,14 +251,15 @@
                         <thead>
                             <tr>
                                 {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
-                                    <th class="hidden-sm centered" title="Select all visible findings.">
+                                    <th class="hidden-sm centered" title="Select all visible findings." aria-label="select-all">
                                         <div class="dropdown">
                                             <button class="btn btn-primary dropdown-toggle"
                                                     type="button"
                                                     id="dropdownMenu1"
                                                     data-toggle="dropdown"
                                                     aria-haspopup="true"
-                                                    aria-expanded="true">
+                                                    aria-expanded="true"
+                                                    aria-label="bulk-edit-dropdown-menu">
                                                 <form class="inline-form" action="#">
                                                     <input type="checkbox" name="select_all" id="select_all"/>
                                                 </form>
@@ -365,7 +368,7 @@
                                     {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
                                         <td class="hidden-sm centered">
                                             <form action="#">
-                                                <input type="checkbox" name="select_{{ finding.id }}" id="{{ finding.id }}" class="select_one {{ finding.severity }}"/>
+                                                <input type="checkbox" name="select_{{ finding.id }}" id="{{ finding.id }}" class="select_one {{ finding.severity }}" aria-label="select-finding"/>
                                             </form>
                                         </td>
                                     {% endif %}

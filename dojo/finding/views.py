@@ -46,7 +46,7 @@ import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized, user_has_global_permission
+from dojo.authorization.authorization_decorators import user_is_authorized, user_has_global_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.queries import get_authorized_findings
 from dojo.test.queries import get_authorized_tests
