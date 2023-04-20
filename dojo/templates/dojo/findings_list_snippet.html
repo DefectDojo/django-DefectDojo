@@ -251,7 +251,7 @@
                         <thead>
                             <tr>
                                 {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
-                                    <th class="hidden-sm centered" title="Select all visible findings." aria-label="select-all">
+                                    <th class="hidden-sm centered" title="Select all visible findings.">
                                         <div class="dropdown">
                                             <button class="btn btn-primary dropdown-toggle"
                                                     type="button"
@@ -261,7 +261,7 @@
                                                     aria-expanded="true"
                                                     aria-label="bulk-edit-dropdown-menu">
                                                 <form class="inline-form" action="#">
-                                                    <input type="checkbox" name="select_all" id="select_all"/>
+                                                    <input type="checkbox" name="select_all" id="select_all" aria-label="select-all"/>
                                                 </form>
                                                 <span class="caret"></span>
                                             </button>
