@@ -46,7 +46,7 @@ import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized
+from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized, user_has_global_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.queries import get_authorized_findings
 from dojo.test.queries import get_authorized_tests
@@ -1127,7 +1127,7 @@ def clear_finding_review(request, fid):
     })
 
 
-@user_is_configuration_authorized('dojo.add_finding_template')
+@user_has_global_permission(Permissions.Finding_Add)
 def mktemplate(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     templates = Finding_Template.objects.filter(title=finding.title)
@@ -1169,7 +1169,6 @@ def mktemplate(request, fid):
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
-@user_is_configuration_authorized('dojo.view_finding_template')
 def find_template_to_apply(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     test = get_object_or_404(Test, id=finding.test.id)
@@ -1471,7 +1470,7 @@ def promote_to_finding(request, fid):
         })
 
 
-@user_is_configuration_authorized('dojo.view_finding_template')
+@user_has_global_permission(Permissions.Finding_Edit)
 def templates(request):
     templates = Finding_Template.objects.all().order_by('cwe')
     templates = TemplateFindingFilter(request.GET, queryset=templates)
@@ -1489,7 +1488,7 @@ def templates(request):
         })
 
 
-@user_is_configuration_authorized('dojo.view_finding_template')
+@user_has_global_permission(Permissions.Finding_Edit)
 def export_templates_to_json(request):
     leads_as_json = serializers.serialize('json', Finding_Template.objects.all())
     return HttpResponse(leads_as_json, content_type='json')
@@ -1540,7 +1539,7 @@ def apply_cwe_mitigation(apply_to_findings, template, update=True):
     return count
 
 
-@user_is_configuration_authorized('dojo.add_finding_template')
+@user_has_global_permission(Permissions.Finding_Add)
 def add_template(request):
     form = FindingTemplateForm()
     if request.method == 'POST':
@@ -1575,7 +1574,7 @@ def add_template(request):
     })
 
 
-@user_is_configuration_authorized('dojo.change_finding_template')
+@user_has_global_permission(Permissions.Finding_Edit)
 def edit_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
     form = FindingTemplateForm(
@@ -1621,7 +1620,7 @@ def edit_template(request, tid):
     })
 
 
-@user_is_configuration_authorized('dojo.delete_finding_template')
+@user_has_global_permission(Permissions.Finding_Delete)
 def delete_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
 
