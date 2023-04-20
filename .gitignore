@@ -134,3 +134,7 @@ helm/defectdojo/charts
 docs/public
 docs/node_modules
 docs/resources
+
+# Sonar
+.scannerwork
+sonar-project.properties
