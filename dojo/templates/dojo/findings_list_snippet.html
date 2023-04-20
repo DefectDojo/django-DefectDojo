@@ -668,12 +668,8 @@
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
                 $('#bulk_edit_menu #id_bulk_under_review').prop('checked', false);
-                if ($('#bulk_edit_menu #id_bulk_false_p').prop('checked') == true) {
-                    $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
-                }
-                if ($('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked') == true) {
-                    $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
-                }
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
             })
 
             $('#bulk_edit_menu #id_bulk_false_p').on("click", function (e){
