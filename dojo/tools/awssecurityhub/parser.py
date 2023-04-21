@@ -45,8 +45,9 @@ def get_item(finding, test):
     references = finding.get('Remediation', {}).get('Recommendation', {}).get('Url')
     false_p = False
 
-    if finding.get('Compliance', {}).get('Status', "PASSED"):
+    if finding.get('Compliance', {}).get('Status', "PASSED") == 'PASSED':
         is_Mitigated = True
+        active = False
         if finding.get('LastObservedAt', None):
             try:
                 mitigated = datetime.strptime(finding.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -57,6 +58,7 @@ def get_item(finding, test):
     else:
         mitigated = None
         is_Mitigated = False
+        active = True
 
     finding = Finding(title=f"Resource: {resource_id} - {title}",
                       test=test,
@@ -64,7 +66,7 @@ def get_item(finding, test):
                       mitigation=mitigation,
                       references=references,
                       severity=severity,
-                      active=True,
+                      active=active,
                       verified=False,
                       false_p=false_p,
                       unique_id_from_tool=finding_id,

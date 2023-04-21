@@ -42,7 +42,7 @@ class CheckovParser(object):
             except:
                 deserialized = json.loads(data)
         except:
-            raise Exception("Invalid format")
+            raise ValueError("Invalid format")
 
         return [deserialized] if type(deserialized) is not list else deserialized
 
@@ -72,8 +72,14 @@ def get_item(vuln, test, check_type):
         lines = vuln['file_line_range']
         source_line = lines[0]
 
-    resource = vuln['resource'] if 'resource' in vuln else None
-    severity = vuln['severity'].capitalize() if 'severity' in vuln else 'Medium'
+    resource = None
+    if 'resource' in vuln:
+        resource = vuln['resource']
+
+    severity = 'Medium'
+    if 'severity' in vuln and vuln['severity'] is not None:
+        severity = vuln['severity'].capitalize()
+
     mitigation = ''
 
     references = vuln['guideline'] if 'guideline' in vuln else ''

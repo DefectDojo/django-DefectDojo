@@ -1,7 +1,8 @@
-# #  findings
-from dojo.utils import Product_Tab
-from dojo.forms import DeleteFindingGroupForm
+from dojo.utils import Product_Tab, add_breadcrumb, get_words_for_field, get_page_items
+from dojo.forms import DeleteFindingGroupForm, EditFindingGroupForm, FindingBulkUpdateForm
 from dojo.notifications.helper import create_notification
+from dojo.finding.views import prefetch_for_findings
+from dojo.filters import FindingFilter
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.db.utils import DEFAULT_DB_ALIAS
@@ -9,31 +10,101 @@ from django.http.response import HttpResponse, HttpResponseRedirect, JsonRespons
 from django.shortcuts import get_object_or_404, render
 from django.urls.base import reverse
 from django.views.decorators.http import require_POST
-from dojo.models import Finding_Group
+from dojo.models import Finding_Group, Product, Engagement, Finding, GITHUB_PKey
 import logging
 import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization import user_has_permission_or_403
 
 logger = logging.getLogger(__name__)
 
 
 @user_is_authorized(Finding_Group, Permissions.Finding_Group_View, 'fgid')
 def view_finding_group(request, fgid):
-    logger.debug('view finding group: %s', fgid)
-    return HttpResponse('Not implemented yet')
+    finding_group = get_object_or_404(Finding_Group, pk=fgid)
+    findings = finding_group.findings.all()
+    edit_finding_group_form = EditFindingGroupForm(instance=finding_group)
 
+    show_product_column = True
+    custom_breadcrumb = None
+    product_tab = None
+    jira_project = None
+    github_config = None
 
-@user_is_authorized(Finding_Group, Permissions.Finding_Group_Edit, 'fgid')
-def edit_finding_group(request, fgid):
-    logger.debug('edit finding group: %s', fgid)
-    return HttpResponse('Not implemented yet')
+    if finding_group.test.engagement.product.id:
+        pid = finding_group.test.engagement.product.id
+        product = get_object_or_404(Product, id=pid)
+        user_has_permission_or_403(request.user, product, Permissions.Product_View)
+        product_tab = Product_Tab(product, title="Findings", tab="findings")
+        jira_project = jira_helper.get_jira_project(product)
+        github_config = GITHUB_PKey.objects.filter(product=pid).first()
+        findings_filter = FindingFilter(request.GET, findings, user=request.user, pid=pid)
+    elif finding_group.test.engagement.id:
+        eid = finding_group.test.engagement.id
+        engagement = get_object_or_404(Engagement, id=eid)
+        user_has_permission_or_403(request.user, engagement, Permissions.Engagement_View)
+        product_tab = Product_Tab(engagement.product, title=engagement.name, tab="engagements")
+        jira_project = jira_helper.get_jira_project(engagement)
+        github_config = GITHUB_PKey.objects.filter(product__engagement=eid).first()
+        findings_filter = FindingFilter(request.GET, findings, user=request.user, eid=eid)
+
+    title_words = get_words_for_field(Finding, 'title')
+    component_words = get_words_for_field(Finding, 'component_name')
+
+    paged_findings = get_page_items(request, findings_filter.qs, 25)
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list, 'all')
+
+    bulk_edit_form = FindingBulkUpdateForm(request.GET)
+
+    if github_config:
+        github_config = github_config.git_conf_id
+
+    filter_name = finding_group.name
+
+    if request.method == 'POST':
+        edit_finding_group_form = EditFindingGroupForm(request.POST, instance=finding_group)
+        if edit_finding_group_form.is_valid():
+            finding_group.name = edit_finding_group_form.cleaned_data.get('name', '')
+            push_to_jira = edit_finding_group_form.cleaned_data.get('push_to_jira')
+            jira_issue = edit_finding_group_form.cleaned_data.get('jira_issue')
+
+            if jira_issue:
+                # See if the submitted issue was a issue key or the full URL
+                jira_instance = jira_helper.get_jira_project(finding_group).jira_instance
+                if jira_issue.startswith(jira_instance.url + '/browse/'):
+                    jira_issue = jira_issue[len(jira_instance.url + '/browse/'):]
+
+                if finding_group.has_jira_issue and not jira_issue == jira_helper.get_jira_key(finding_group):
+                    jira_helper.unlink_jira(request, finding_group)
+                    jira_helper.finding_group_link_jira(request, finding_group, jira_issue)
+                elif not finding_group.has_jira_issue:
+                    jira_helper.finding_group_link_jira(request, finding_group, jira_issue)
+            elif push_to_jira:
+                jira_helper.push_to_jira(finding_group, sync=True)
+
+            finding_group.save()
+            return HttpResponseRedirect(reverse('view_test', args=(finding_group.test.id,)))
+
+    add_breadcrumb(title=finding_group.name, top_level=not len(request.GET), request=request)
+    return render(request, 'dojo/view_finding_group.html', {
+        'show_product_column': show_product_column,
+        'product_tab': product_tab,
+        'findings': paged_findings,
+        'filtered': findings_filter,
+        'title_words': title_words,
+        'component_words': component_words,
+        'custom_breadcrumb': custom_breadcrumb,
+        'filter_name': filter_name,
+        'jira_project': jira_project,
+        'bulk_edit_form': bulk_edit_form,
+        'edit_finding_group_form': edit_finding_group_form,
+    })
 
 
 @user_is_authorized(Finding_Group, Permissions.Finding_Group_Delete, 'fgid')
 @require_POST
 def delete_finding_group(request, fgid):
-    logger.debug('delete finding group: %s', fgid)
     finding_group = get_object_or_404(Finding_Group, pk=fgid)
     form = DeleteFindingGroupForm(instance=finding_group)
 
@@ -61,12 +132,12 @@ def delete_finding_group(request, fgid):
     rels = collector.nested()
     product_tab = Product_Tab(finding_group.test.engagement.product, title="Product", tab="settings")
 
-    return render(request, 'dojo/delete_finding_group.html',
-                  {'finding_group': finding_group,
-                   'form': form,
-                   'product_tab': product_tab,
-                   'rels': rels,
-                   })
+    return render(request, 'dojo/delete_finding_group.html', {
+        'finding_group': finding_group,
+        'form': form,
+        'product_tab': product_tab,
+        'rels': rels,
+    })
 
 
 @user_is_authorized(Finding_Group, Permissions.Finding_Group_Edit, 'fgid')
@@ -113,7 +184,7 @@ def push_to_jira(request, fgid):
         logger.info('trying to push %d:%s to JIRA to create or update JIRA issue', group.id, group.name)
         logger.debug('pushing to jira from group.push_to-jira()')
 
-        # it may look like succes here, but the push_to_jira are swallowing exceptions
+        # it may look like success here, but the push_to_jira are swallowing exceptions
         # but cant't change too much now without having a test suite, so leave as is for now with the addition warning message to check alerts for background errors.
         if jira_helper.push_to_jira(group, sync=True):
             messages.add_message(
@@ -138,4 +209,3 @@ def push_to_jira(request, fgid):
             'Error pushing to JIRA',
             extra_tags='alert-danger')
         return HttpResponse(status=500)
-    # return redirect_to_return_url_or_else(request, reverse('view_finding', args=(group.id,)))

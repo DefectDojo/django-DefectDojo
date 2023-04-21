@@ -1,79 +1,12 @@
 name: Integration tests
-# pull requests:
-# push:
-#      run on every push, which is when something gets merged also
-on:
-  workflow_dispatch:
-  pull_request:
-  push:
-    branches:
-      - master
-      - dev
-      - release/**
-      - hotfix/**
 
-env:
-  DD_DOCKER_REPO: defectdojo
+on:
+  workflow_call:
 
 jobs:
-  build:
-    # build with docker so we can use layer caching
-    name: Build Image
-
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        docker-image: [django, nginx, integration-tests]
-    steps:
-      # - name: Login to DockerHub
-      #   uses: docker/login-action@v1
-      #   with:
-      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-
-      - name: Read Docker Image Identifiers
-        id: read-docker-image-identifiers
-        run: echo "IMAGE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-        with:
-          buildkitd-flags: --debug
-          driver-opts: image=moby/buildkit:master # needed to get the fix for https://github.com/moby/buildkit/issues/2426
-          
-      - name: Build
-        id: docker_build
-        uses: docker/build-push-action@v3
-        env:
-          docker-image: ${{ matrix.docker-image }}
-        with:
-          context: .
-          push: false
-          tags: |
-            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:latest
-          file: Dockerfile.${{ env.docker-image }}
-          outputs: type=docker,dest=${{ env.docker-image }}_img
-          cache-from: type=gha,scope=${{ matrix.docker-image }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.docker-image }}
-          
-      # export docker images to be used in next jobs below
-      - name: Upload image ${{ matrix.docker-image }} as artifact
-        uses:  actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.docker-image }}
-          path: ${{ matrix.docker-image }}_img
-          retention-days: 1
-
   integration_tests:
     # run tests with docker-compose
-    name: test
-    needs: build
+    name: User Interface Tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -100,12 +33,13 @@ jobs:
           "tests/dedupe_test.py",
           "tests/check_various_pages.py",
           "tests/notifications_test.py",
+          "tests/tool_config.py",
         ]
         profile: ["mysql-rabbitmq", "postgres-redis"]
+        os: [alpine, debian]
       fail-fast: false
 
     steps:
-
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -115,31 +49,40 @@ jobs:
 
       - name: Load docker images
         run: |-
-             docker load -i nginx/nginx_img
-             docker load -i django/django_img
-             docker load -i integration-tests/integration-tests_img
+             docker load -i nginx/nginx-${{ matrix.os }}_img
+             docker load -i django/django-${{ matrix.os }}_img
+             docker load -i integration-tests/integration-tests-debian_img
              docker images
 
       - name: Set integration-test mode
         run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
 
       # phased startup with MySQL and RabbitMQ so we can use the exit code from integrationtest container
-
       - name: Start Dojo MySQL + RabbitMQ
         if: matrix.profile == 'mysql-rabbitmq'
         run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps -d mysql nginx celerybeat celeryworker mailhog uwsgi rabbitmq
+        env:
+          DJANGO_VERSION: ${{ matrix.os }}
+          NGINX_VERSION: ${{ matrix.os }}
 
       - name: Start Dojo PostgreSQL + Redis
         if: matrix.profile == 'postgres-redis'
         run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi redis
+        env:
+          DJANGO_VERSION: ${{ matrix.os }}
+          NGINX_VERSION: ${{ matrix.os }}
 
       - name: Initialize
         run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps --exit-code-from initializer initializer
+        env:
+          DJANGO_VERSION: ${{ matrix.os }}
+          NGINX_VERSION: ${{ matrix.os }}
 
       - name: Integration tests
         run: docker-compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps --exit-code-from integration-tests integration-tests
         env:
           DD_INTEGRATION_TEST_FILENAME: ${{ matrix.test-case }}
+          INTEGRATION_TESTS_VERSION: debian
 
       - name: Logs
         if: always()

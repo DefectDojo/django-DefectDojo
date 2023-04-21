@@ -1,0 +1,195 @@
+[
+    {
+        "id": "a4201d47-62e1-4287-9ff6-30807ae9d36a",
+        "type": "submission",
+        "attributes": {
+            "bug_url": "https://example.com/",
+            "custom_fields": {},
+            "description": "Vulnerability Name: JWT alg none",
+            "duplicate": false,
+            "extra_info": null,
+            "http_request": null,
+            "last_transitioned_to_informational_at": "2002-04-01T21:59:56.546Z",
+            "last_transitioned_to_not_applicable_at": null,
+            "last_transitioned_to_not_reproducible_at": null,
+            "last_transitioned_to_out_of_scope_at": null,
+            "last_transitioned_to_resolved_at": null,
+            "last_transitioned_to_triaged_at": null,
+            "last_transitioned_to_unresolved_at": null,
+            "remediation_advice": "Properly do JWT",
+            "severity": 5,
+            "source": "external_form",
+            "state": "unresolved",
+            "submitted_at": "2002-04-01T21:59:56.546Z",
+            "title": "JWT Alg none",
+            "vrt_id": "broken_authentication_and_session_management.authentication_bypass",
+            "vrt_version": "1.10.1",
+            "vulnerability_references": ""
+        },
+        "relationships": {
+            "activities": {
+                "data": [
+                    {
+                        "id": "9b31ab18-0090-462c-a69d-75840e3aec7a",
+                        "type": "activity"
+                    },
+                    {
+                        "id": "1c332e75-b5bf-4eed-aa13-d1836a8be292",
+                        "type": "activity"
+                    },
+                    {
+                        "id": "5b9d763b-91e9-4f63-93ef-91ed891ae5d5",
+                        "type": "activity"
+                    },
+                    {
+                        "id": "91a81042-f43c-464f-a7a0-cff78ee28783",
+                        "type": "activity"
+                    },
+                    {
+                        "id": "5aa428b9-62f9-403b-a28c-e2cb5b01146d",
+                        "type": "activity"
+                    }
+                ],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 5,
+                            "total_hits": 5
+                        }
+                    }
+                }
+            },
+            "assignee": {
+                "data": null,
+                "links": {
+                    "related": {
+                        "href": null
+                    }
+                }
+            },
+            "claim_ticket": {
+                "data": {
+                    "id": "d7ebbb6b-521b-4325-80af-e87161d1c1bc",
+                    "type": "claim_ticket"
+                },
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)"
+                    }
+                }
+            },
+            "comments": {
+                "data": [
+                    {
+                        "id": "f13040a4-2b21-4921-8f81-61b093da0542",
+                        "type": "comment"
+                    }
+                ],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 1,
+                            "total_hits": 1
+                        }
+                    }
+                }
+            },
+            "duplicate_of": {
+                "data": null,
+                "links": {
+                    "related": {
+                        "href": null
+                    }
+                }
+            },
+            "duplicates": {
+                "data": [],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 0,
+                            "total_hits": 0
+                        }
+                    }
+                }
+            },
+            "external_issues": {
+                "data": [],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 1,
+                            "total_hits": 1
+                        }
+                    }
+                }
+            },
+            "file_attachments": {
+                "data": [
+                    {
+                        "id": "e5a0fd57-0cbb-4f0b-a44e-3401a859b8ba",
+                        "type": "file_attachment"
+                    }
+                ],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 1,
+                            "total_hits": 1
+                        }
+                    }
+                }
+            },
+            "monetary_rewards": {
+                "data": [],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 0,
+                            "total_hits": 0
+                        }
+                    }
+                }
+            },
+            "program": {
+                "data": {
+                    "id": "fd3d5a81-a84e-49fa-8487-796b96a7fce9",
+                    "type": "program"
+                },
+                "links": {
+                    "related": {
+                        "href": "/programs/fd3d5a81-a84e-49fa-8487-796b96a7fce9"
+                    }
+                }
+            },
+            "researcher": {
+                "data": {
+                    "id": "3660d761-7a3e-4351-a7d4-e2e21c3fda26",
+                    "type": "identity"
+                },
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)"
+                    }
+                }
+            },
+            "target": {
+                "data": null,
+                "links": {
+                    "related": {
+                        "href": null
+                    }
+                }
+            }
+        },
+        "links": {
+            "self": "/submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a"
+        }
+    }
+]

@@ -50,6 +50,7 @@ class TestTrivyParser(DojoTestCase):
         self.assertEqual("CVE-2020-15999", finding.unsaved_vulnerability_ids[0])
         self.assertEqual(787, finding.cwe)
         self.assertEqual("freetype", finding.component_name)
+        self.assertEqual("app/libs/freetype-2.9.1-r2", finding.file_path)
         self.assertEqual("2.9.1-r2", finding.component_version)
         self.assertIsNotNone(finding.description)
         self.assertIsNotNone(finding.references)
@@ -65,6 +66,7 @@ class TestTrivyParser(DojoTestCase):
         self.assertEqual("CVE-2020-28196", finding.unsaved_vulnerability_ids[0])
         self.assertEqual(674, finding.cwe)
         self.assertEqual("krb5-libs", finding.component_name)
+        self.assertEqual("app/libs/krb5-libs-1.15.5-r0", finding.file_path)
         self.assertEqual("1.15.5-r0", finding.component_version)
         self.assertIsNotNone(finding.description)
         self.assertIsNotNone(finding.references)
@@ -169,3 +171,20 @@ Container 'follower' of Deployment 'redis-follower' should set 'securityContext.
         self.assertIsNone(finding.component_name)
         self.assertIsNone(finding.component_version)
         self.assertEqual('default / Deployment / redis-follower', finding.service)
+
+    def test_license_scheme(self):
+        test_file = open(sample_path("license_scheme.json"))
+        parser = TrivyParser()
+        findings = parser.get_findings(test_file, Test())
+
+        self.assertEqual(len(findings), 19)
+        finding = findings[0]
+        self.assertEqual("High", finding.severity)
+        self.assertEqual("", finding.file_path)
+        self.assertEqual(1, finding.scanner_confidence)
+        self.assertEqual("", finding.url)
+        description = '''GPL-2.0
+**Category:** restricted
+**Package:** alpine-baselayout
+'''
+        self.assertEqual(description, finding.description)

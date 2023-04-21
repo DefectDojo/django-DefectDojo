@@ -1,21 +1,24 @@
-import os
-from django.utils import timezone
-from vcr_unittest import VCRTestCase
-from dojo.models import DojoMeta, Product_Type, Test_Type, User, Endpoint, Notes, Finding, Endpoint_Status, Test, JIRA_Issue, JIRA_Project, \
-                        Product
-from dojo.models import System_Settings, Engagement
-from django.urls import reverse
-from rest_framework.test import APITestCase, APIClient
-from rest_framework.authtoken.models import Token
+import copy
 import json
-from django.test import TestCase
+import logging
+import os
+import pprint
 from itertools import chain
+
+from django.test import TestCase
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.http import urlencode
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient, APITestCase
+from vcr_unittest import VCRTestCase
+
 from dojo.jira_link import helper as jira_helper
 from dojo.jira_link.views import get_custom_field
-import logging
-import pprint
-import copy
-from django.utils.http import urlencode
+from dojo.models import (SEVERITIES, DojoMeta, Endpoint, Endpoint_Status,
+                         Engagement, Finding, JIRA_Issue, JIRA_Project, Notes,
+                         Product, Product_Type, System_Settings, Test,
+                         Test_Type, User)
 
 logger = logging.getLogger(__name__)
 
@@ -349,7 +352,7 @@ class DojoTestUtilsMixin(object):
         findings = Test.objects.get(id=test_id).finding_set.all()
         for finding in findings:
             logger.debug('finding!')
-            self.assertEquals(jira_helper.get_jira_updated(finding), updated_map[finding.id])
+            self.assertEqual(jira_helper.get_jira_updated(finding), updated_map[finding.id])
 
     def assert_jira_updated_map_changed(self, test_id, updated_map):
         findings = Test.objects.get(id=test_id).finding_set.all()
@@ -401,6 +404,10 @@ class DojoTestCase(TestCase, DojoTestUtilsMixin):
     def __init__(self, *args, **kwargs):
         TestCase.__init__(self, *args, **kwargs)
 
+    def common_check_finding(self, finding):
+        self.assertIn(finding.severity, SEVERITIES)
+        finding.clean()
+
 
 class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
@@ -440,10 +447,10 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         # print('test.content: ', response.content)
         return json.loads(response.content)
 
-    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True,
+    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=False,
                                 push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None, engagement_name=None,
                                 product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None,
-                                scan_date=None, service=None):
+                                scan_date=None, service=None, forceActive=True, forceVerified=True):
         payload = {
                 "minimum_severity": minimum_severity,
                 "active": active,
@@ -492,7 +499,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         return self.import_scan(payload, expected_http_status_code)
 
-    def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None,
+    def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=False, push_to_jira=None,
                                   tags=None, close_old_findings=True, group_by=None, engagement_name=None, scan_date=None,
                                   product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None):
         payload = {

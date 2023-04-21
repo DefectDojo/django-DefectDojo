@@ -18,7 +18,7 @@ from dojo.cred.queries import get_authorized_cred_mappings
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized('dojo.add_cred_user')
+@user_is_configuration_authorized(Permissions.Credential_Add)
 def new_cred(request):
     if request.method == 'POST':
         tform = CredUserForm(request.POST)
@@ -49,7 +49,7 @@ def all_cred_product(request, pid):
     return render(request, 'dojo/view_cred_prod.html', {'product_tab': product_tab, 'creds': creds, 'prod': prod})
 
 
-@user_is_configuration_authorized('dojo.change_cred_user')
+@user_is_authorized(Cred_User, Permissions.Credential_Edit, 'ttid')
 def edit_cred(request, ttid):
     tool_config = Cred_User.objects.get(pk=ttid)
     if request.method == 'POST':
@@ -81,7 +81,7 @@ def edit_cred(request, ttid):
     })
 
 
-@user_is_configuration_authorized('dojo.view_cred_user')
+@user_is_authorized(Cred_User, Permissions.Credential_View, 'ttid')
 def view_cred_details(request, ttid):
     cred = Cred_User.objects.get(pk=ttid)
     notes = cred.notes.all()
@@ -118,7 +118,7 @@ def view_cred_details(request, ttid):
     })
 
 
-@user_is_configuration_authorized('dojo.view_cred_user')
+@user_is_configuration_authorized(Permissions.Credential_View)
 def cred(request):
     confs = Cred_User.objects.all().order_by('name', 'environment', 'username')
     add_breadcrumb(title="Credential Manager", top_level=True, request=request)
@@ -128,7 +128,7 @@ def cred(request):
 
 
 @user_is_authorized(Product, Permissions.Product_View, 'pid')
-@user_is_configuration_authorized('dojo.view_cred_user')
+@user_is_authorized(Cred_User, Permissions.Credential_View, 'ttid')
 def view_cred_product(request, pid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -183,8 +183,8 @@ def view_cred_product(request, pid, ttid):
         })
 
 
-@user_is_authorized(Product, Permissions.Endpoint_View, 'eid')
-@user_is_configuration_authorized('dojo.view_cred_user')
+@user_is_authorized(Product, Permissions.Engagement_View, 'eid')
+@user_is_authorized(Cred_User, Permissions.Credential_View, 'ttid')
 def view_cred_product_engagement(request, eid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -238,7 +238,7 @@ def view_cred_product_engagement(request, eid, ttid):
 
 
 @user_is_authorized(Product, Permissions.Test_View, 'tid')
-@user_is_configuration_authorized('dojo.view_cred_user')
+@user_is_authorized(Cred_User, Permissions.Credential_View, 'ttid')
 def view_cred_engagement_test(request, tid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -294,7 +294,7 @@ def view_cred_engagement_test(request, tid, ttid):
 
 
 @user_is_authorized(Product, Permissions.Finding_View, 'fid')
-@user_is_configuration_authorized('dojo.view_cred_user')
+@user_is_authorized(Cred_User, Permissions.Credential_View, 'ttid')
 def view_cred_finding(request, fid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -350,6 +350,7 @@ def view_cred_finding(request, fid, ttid):
 
 
 @user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Cred_User, Permissions.Credential_Edit, 'ttid')
 def edit_cred_product(request, pid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -377,6 +378,7 @@ def edit_cred_product(request, pid, ttid):
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
+@user_is_authorized(Cred_User, Permissions.Credential_Edit, 'ttid')
 def edit_cred_product_engagement(request, eid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -596,6 +598,7 @@ def new_cred_finding(request, fid):
         })
 
 
+@user_is_authorized(Cred_User, Permissions.Credential_Delete, 'ttid')
 def delete_cred_controller(request, destination_url, id, ttid):
     cred = None
     try:
@@ -681,26 +684,30 @@ def delete_cred_controller(request, destination_url, id, ttid):
     })
 
 
-@user_is_configuration_authorized('dojo.delete_cred_user')
+@user_is_authorized(Cred_User, Permissions.Credential_Delete, 'ttid')
 def delete_cred(request, ttid):
     return delete_cred_controller(request, "cred", 0, ttid)
 
 
 @user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Cred_User, Permissions.Credential_Delete, 'ttid')
 def delete_cred_product(request, pid, ttid):
     return delete_cred_controller(request, "all_cred_product", pid, ttid)
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
+@user_is_authorized(Cred_User, Permissions.Credential_Delete, 'ttid')
 def delete_cred_engagement(request, eid, ttid):
     return delete_cred_controller(request, "view_engagement", eid, ttid)
 
 
 @user_is_authorized(Test, Permissions.Test_Edit, 'tid')
+@user_is_authorized(Cred_User, Permissions.Credential_Delete, 'ttid')
 def delete_cred_test(request, tid, ttid):
     return delete_cred_controller(request, "view_test", tid, ttid)
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
+@user_is_authorized(Cred_User, Permissions.Credential_Delete, 'ttid')
 def delete_cred_finding(request, fid, ttid):
     return delete_cred_controller(request, "view_finding", fid, ttid)

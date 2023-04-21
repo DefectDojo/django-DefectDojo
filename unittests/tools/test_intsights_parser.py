@@ -21,8 +21,8 @@ class TestIntSightsParser(DojoTestCase):
         self.assertEqual(
             'HTTP headers weakness in initech.com web server',
             finding.title)
-        self.assertEquals('Critical', finding.severity)
-        self.assertEquals(
+        self.assertEqual('Critical', finding.severity)
+        self.assertEqual(
             "https://dashboard.intsights.com/#/threat-command/alerts?search=5c80dbf83b4a3900078b6be6",
             finding.references)
 
@@ -63,3 +63,17 @@ class TestIntSightsParser(DojoTestCase):
                 "unittests/scans/intsights/intsights_invalid_file.txt")
             parser = IntSightsParser()
             findings = parser.get_findings(testfile, Test())
+
+    def test_intsights_parser_with_no_alerts_json(self):
+        testfile = open("unittests/scans/intsights/intsights_zero_vuln.json")
+        parser = IntSightsParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(0, len(findings))
+
+    def test_intsights_parser_with_no_alerts_csv(self):
+        testfile = open("unittests/scans/intsights/intsights_zero_vuln.csv")
+        parser = IntSightsParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(0, len(findings))

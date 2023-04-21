@@ -490,7 +490,7 @@ def prefetch_for_view_tests(tests):
         prefetched = prefetched.annotate(total_reimport_count=Count('test_import__id', filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
 
     else:
-        logger.warn('unable to prefetch because query was already executed')
+        logger.warning('unable to prefetch because query was already executed')
 
     return prefetched
 
@@ -611,8 +611,8 @@ def import_scan_results(request, eid=None, pid=None):
             scan = request.FILES.get('file', None)
             scan_date = form.cleaned_data['scan_date']
             minimum_severity = form.cleaned_data['minimum_severity']
-            active = form.cleaned_data['active']
-            verified = form.cleaned_data['verified']
+            activeChoice = form.cleaned_data.get('active', None)
+            verifiedChoice = form.cleaned_data.get('verified', None)
             scan_type = request.POST['scan_type']
             tags = form.cleaned_data['tags']
             version = form.cleaned_data['version']
@@ -622,6 +622,11 @@ def import_scan_results(request, eid=None, pid=None):
             api_scan_configuration = form.cleaned_data.get('api_scan_configuration', None)
             service = form.cleaned_data.get('service', None)
             close_old_findings = form.cleaned_data.get('close_old_findings', None)
+            # close_old_findings_prodct_scope is a modifier of close_old_findings.
+            # If it is selected, close_old_findings should also be selected.
+            close_old_findings_product_scope = form.cleaned_data.get('close_old_findings_product_scope', None)
+            if close_old_findings_product_scope:
+                close_old_findings = True
             # Will save in the provided environment or in the `Development` one if absent
             environment_id = request.POST.get('environment', 'Development')
             environment = Development_Environment.objects.get(id=environment_id)
@@ -664,12 +669,25 @@ def import_scan_results(request, eid=None, pid=None):
             # Save newly added endpoints
             added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, engagement.product)
 
+            active = None
+            if activeChoice:
+                if activeChoice == 'force_to_true':
+                    active = True
+                elif activeChoice == 'force_to_false':
+                    active = False
+            verified = None
+            if verifiedChoice:
+                if verifiedChoice == 'force_to_true':
+                    verified = True
+                elif verifiedChoice == 'force_to_false':
+                    verified = False
+
             try:
                 importer = Importer()
                 test, finding_count, closed_finding_count, _ = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
                             minimum_severity=minimum_severity, endpoints_to_add=list(form.cleaned_data['endpoints']) + added_endpoints, scan_date=scan_date,
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
-                            close_old_findings=close_old_findings, group_by=group_by, api_scan_configuration=api_scan_configuration, service=service,
+                            close_old_findings=close_old_findings, close_old_findings_product_scope=close_old_findings_product_scope, group_by=group_by, api_scan_configuration=api_scan_configuration, service=service,
                             create_finding_groups_for_all_findings=create_finding_groups_for_all_findings)
 
                 message = f'{scan_type} processed a total of {finding_count} findings'
@@ -1033,7 +1051,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     accepted_findings = risk_acceptance.accepted_findings.order_by('numerical_severity')
     fpage = get_page_items(request, accepted_findings, 15)
 
-    unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all()) \
+    unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False) \
         .exclude(id__in=accepted_findings).order_by("title")
     add_fpage = get_page_items(request, unaccepted_findings, 10, 'apage')
     # on this page we need to add unaccepted findings as possible findings to add as accepted

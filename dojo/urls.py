@@ -1,5 +1,6 @@
 from django.conf import settings
-from django.conf.urls import include, url
+from django.urls import re_path
+from django.conf.urls import include
 from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views as tokenviews
@@ -10,18 +11,19 @@ from django.http import HttpResponse
 from dojo import views
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
-    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
+    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, CredentialsViewSet, CredentialsMappingViewSet, \
     SLAConfigurationViewset, StubFindingsViewSet, TestImportViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
     AppAnalysisViewSet, EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
-    RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
+    RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, RiskAcceptanceViewSet, \
     DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet, RoleViewSet, GlobalRoleViewSet, \
     DojoGroupMemberViewSet, ImportLanguagesView, LanguageTypeViewSet, LanguageViewSet, \
     NotificationsViewSet, EngagementPresetsViewset, NetworkLocationsViewset, UserContactInfoViewSet, \
     ProductAPIScanConfigurationViewSet, UserProfileView, EndpointMetaImporterView, \
-    ConfigurationPermissionViewSet
+    ConfigurationPermissionViewSet, QuestionnaireQuestionViewSet, QuestionnaireAnswerViewSet, \
+    QuestionnaireGeneralSurveyViewSet, QuestionnaireEngagementSurveyViewSet, QuestionnaireAnsweredSurveyViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -50,14 +52,13 @@ from dojo.system_settings.urls import urlpatterns as system_settings_urls
 from dojo.notifications.urls import urlpatterns as notifications_urls
 from dojo.object.urls import urlpatterns as object_urls
 from dojo.benchmark.urls import urlpatterns as benchmark_urls
-from dojo.rules.urls import urlpatterns as rule_urls
 from dojo.notes.urls import urlpatterns as notes_urls
 from dojo.note_type.urls import urlpatterns as note_type_urls
-from dojo.google_sheet.urls import urlpatterns as google_sheets_urls
 from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.survey.urls import urlpatterns as survey_urls
 from dojo.components.urls import urlpatterns as component_urls
 from dojo.regulations.urls import urlpatterns as regulations
+from dojo.announcement.urls import urlpatterns as announcement_urls
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 import logging
@@ -65,10 +66,16 @@ logger = logging.getLogger(__name__)
 
 admin.autodiscover()
 
+# custom handlers
+handler500 = 'dojo.views.custom_error_view'
+handler400 = 'dojo.views.custom_bad_request_view'
+
 # v2 api written in django-rest-framework
 v2_api = DefaultRouter()
 v2_api.register(r'technologies', AppAnalysisViewSet)
 v2_api.register(r'configuration_permissions', ConfigurationPermissionViewSet)
+v2_api.register(r'credentials', CredentialsViewSet)
+v2_api.register(r'credential_mappings', CredentialsMappingViewSet)
 v2_api.register(r'endpoints', EndPointViewSet)
 v2_api.register(r'endpoint_meta_import', EndpointMetaImporterView, basename='endpointmetaimport')
 v2_api.register(r'endpoint_status', EndpointStatusViewSet)
@@ -111,12 +118,18 @@ v2_api.register(r'notes', NotesViewSet)
 v2_api.register(r'note_type', NoteTypeViewSet)
 v2_api.register(r'system_settings', SystemSettingsViewSet)
 v2_api.register(r'regulations', RegulationsViewSet)
+v2_api.register(r'risk_acceptance', RiskAcceptanceViewSet)
 v2_api.register(r'language_types', LanguageTypeViewSet)
 v2_api.register(r'languages', LanguageViewSet)
 v2_api.register(r'import-languages', ImportLanguagesView, basename='importlanguages')
 v2_api.register(r'notifications', NotificationsViewSet, basename='notifications')
 v2_api.register(r'engagement_presets', EngagementPresetsViewset)
 v2_api.register(r'network_locations', NetworkLocationsViewset)
+v2_api.register(r'questionnaire_answers', QuestionnaireAnswerViewSet)
+v2_api.register(r'questionnaire_answered_questionnaires', QuestionnaireAnsweredSurveyViewSet)
+v2_api.register(r'questionnaire_engagement_questionnaires', QuestionnaireEngagementSurveyViewSet)
+v2_api.register(r'questionnaire_general_questionnaires', QuestionnaireGeneralSurveyViewSet)
+v2_api.register(r'questionnaire_questions', QuestionnaireQuestionViewSet)
 ur = []
 ur += dev_env_urls
 ur += endpoint_urls
@@ -144,13 +157,18 @@ ur += system_settings_urls
 ur += notifications_urls
 ur += object_urls
 ur += benchmark_urls
-ur += rule_urls
 ur += notes_urls
 ur += note_type_urls
-ur += google_sheets_urls
 ur += banner_urls
 ur += component_urls
 ur += regulations
+ur += announcement_urls
+
+api_v2_urls = [
+    #  Django Rest Framework API v2
+    re_path(r'^%sapi/v2/' % get_system_setting('url_prefix'), include(v2_api.urls)),
+    re_path(r'^%sapi/v2/user_profile/' % get_system_setting('url_prefix'), UserProfileView.as_view(), name='user_profile'),
+]
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -162,49 +180,48 @@ schema_view = get_schema_view(
     public=True,
     # The API of a OpenSource project should be public accessible
     permission_classes=[permissions.AllowAny],
+    # url pattersns specific to the API
+    patterns=api_v2_urls,
 )
 
 urlpatterns = [
-    #  Django Rest Framework API v2
-    url(r'^%sapi/v2/' % get_system_setting('url_prefix'), include(v2_api.urls)),
     # action history
-    url(r'^%shistory/(?P<cid>\d+)/(?P<oid>\d+)$' % get_system_setting('url_prefix'), views.action_history,
-        name='action_history'),
-    url(r'^%s' % get_system_setting('url_prefix'), include(ur)),
-    url(r'^%sapi/v2/user_profile/' % get_system_setting('url_prefix'), UserProfileView.as_view(), name='user_profile'),
+    re_path(r'^%shistory/(?P<cid>\d+)/(?P<oid>\d+)$' % get_system_setting('url_prefix'), views.action_history, name='action_history'),
+    re_path(r'^%s' % get_system_setting('url_prefix'), include(ur)),
 
     # drf-yasg = OpenAPI2
-    url(r'^%sapi/v2/doc/' % get_system_setting('url_prefix'), schema_view.with_ui('swagger', cache_timeout=0), name='api_v2_schema'),
+    re_path(r'^%sapi/v2/doc/' % get_system_setting('url_prefix'), schema_view.with_ui('swagger', cache_timeout=0), name='api_v2_schema'),
 
     # drf-spectacular = OpenAPI3
-    url(r'^%sapi/v2/oa3/schema/' % get_system_setting('url_prefix'), SpectacularAPIView.as_view(), name='schema_oa3'),
-    url(r'^%sapi/v2/oa3/swagger-ui/' % get_system_setting('url_prefix'), SpectacularSwaggerView.as_view(url=get_system_setting('url_prefix') + '/api/v2/oa3/schema/?format=json'), name='swagger-ui_oa3'),
+    re_path(r'^%sapi/v2/oa3/schema/' % get_system_setting('url_prefix'), SpectacularAPIView.as_view(), name='schema_oa3'),
+    re_path(r'^%sapi/v2/oa3/swagger-ui/' % get_system_setting('url_prefix'), SpectacularSwaggerView.as_view(url=get_system_setting('url_prefix') + '/api/v2/oa3/schema/?format=json'), name='swagger-ui_oa3'),
 
-    url(r'^robots.txt', lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
-    url(r'^manage_files/(?P<oid>\d+)/(?P<obj_type>\w+)$', views.manage_files, name='manage_files'),
-    url(r'^access_file/(?P<fid>\d+)/(?P<oid>\d+)/(?P<obj_type>\w+)$', views.access_file, name='access_file'),
-    url(r'^%s/(?P<path>.*)$' % settings.MEDIA_URL.strip('/'), views.protected_serve, {'document_root': settings.MEDIA_ROOT})
+    re_path(r'^robots.txt', lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
+    re_path(r'^manage_files/(?P<oid>\d+)/(?P<obj_type>\w+)$', views.manage_files, name='manage_files'),
+    re_path(r'^access_file/(?P<fid>\d+)/(?P<oid>\d+)/(?P<obj_type>\w+)$', views.access_file, name='access_file'),
+    re_path(r'^%s/(?P<path>.*)$' % settings.MEDIA_URL.strip('/'), views.protected_serve, {'document_root': settings.MEDIA_ROOT})
 ]
 
+urlpatterns += api_v2_urls
 urlpatterns += survey_urls
 
 if hasattr(settings, 'DJANGO_METRICS_ENABLED'):
     if settings.DJANGO_METRICS_ENABLED:
-        urlpatterns += [url(r'^%sdjango_metrics/' % get_system_setting('url_prefix'), include('django_prometheus.urls'))]
+        urlpatterns += [re_path(r'^%sdjango_metrics/' % get_system_setting('url_prefix'), include('django_prometheus.urls'))]
 
 if hasattr(settings, 'SAML2_ENABLED'):
     if settings.SAML2_ENABLED:
         # django saml2
-        urlpatterns += [url(r'^saml2/', include('djangosaml2.urls'))]
+        urlpatterns += [re_path(r'^saml2/', include('djangosaml2.urls'))]
 
 if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
     if settings.DJANGO_ADMIN_ENABLED:
         #  django admin
-        urlpatterns += [url(r'^%sadmin/' % get_system_setting('url_prefix'), admin.site.urls)]
+        urlpatterns += [re_path(r'^%sadmin/' % get_system_setting('url_prefix'), admin.site.urls)]
 
 if hasattr(settings, 'API_TOKENS_ENABLED'):
     if settings.API_TOKENS_ENABLED:
-        urlpatterns += [url(r'^%sapi/v2/api-token-auth/' % get_system_setting('url_prefix'), tokenviews.obtain_auth_token, name='api-token-auth')]
+        urlpatterns += [re_path(r'^%sapi/v2/api-token-auth/' % get_system_setting('url_prefix'), tokenviews.obtain_auth_token, name='api-token-auth')]
 
 # sometimes urlpatterns needed be added from local_settings.py to avoid having to modify core defect dojo files
 if hasattr(settings, 'EXTRA_URL_PATTERNS'):

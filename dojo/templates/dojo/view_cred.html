@@ -10,18 +10,18 @@
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
                         Credential Manager
-                        {% if "DB_KEY"|get_config_setting == True and "dojo.add_cred_user"|has_configuration_permission %}
+                        {% if "DB_KEY"|get_config_setting == True and "dojo.add_cred_user"|has_configuration_permission:request %}
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-wrench"></span>
+                                <span class="fa-solid fa-screwdriver-wrench"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
                                         <a href="{% url 'add_cred' %}">
-                                            <i class="fa fa-plus"></i> Add Credential
+                                            <i class="fa-solid fa-plus"></i> Add Credential
                                         </a>
                                     </li>
                             </ul>
@@ -63,11 +63,11 @@
                                     <div class="btn-group">
                                         <a class="btn btn-sm btn-secondary"
                                            href="{% url 'view_cred_details' conf.id  %}">View</a>
-                                        {% if "dojo.change_cred_user"|has_configuration_permission %}
+                                        {% if "dojo.change_cred_user"|has_configuration_permission:request %}
                                         <a class="btn btn-sm btn-warning"
                                            href="{% url 'edit_cred' conf.id  %}">Edit</a>
                                         {% endif %}
-                                        {% if "dojo.delete_cred_user"|has_configuration_permission %}
+                                        {% if "dojo.delete_cred_user"|has_configuration_permission:request %}
                                         <a class="btn btn-sm btn-danger delete-finding"
                                            href="{% url 'delete_cred' conf.id  %}">Delete</a>
                                         {% endif %}

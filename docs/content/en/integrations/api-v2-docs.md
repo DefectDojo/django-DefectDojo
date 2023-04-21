@@ -12,7 +12,7 @@ DefectDojo\'s API is created using [Django Rest
 Framework](http://www.django-rest-framework.org/). The documentation of
 each endpoint is available within each DefectDojo installation at
 [`/api/v2/doc/`](https://demo.defectdojo.org/api/v2/) and can be accessed by choosing the API v2
-Docs link on the user drop down menu in the header.
+Docs link on the user drop down menu in the header. 
 
 ![image](../../images/api_v2_1.png)
 

@@ -11,11 +11,11 @@
                     <h3 class="has-filters">
                         {{ name }}
                         <div class="dropdown pull-right">
-                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                             {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Add" %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-wrench"></span>
+                                <span class="fa-solid fa-screwdriver-wrench"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
@@ -26,7 +26,7 @@
                                       {% else %}
                                         <a href="{% url 'add_product_endpoint' %}">
                                       {% endif %}
-                                            <i class="fa fa-plus"></i> New Endpoint
+                                            <i class="fa-solid fa-plus"></i> New Endpoint
                                         </a>
                                     </li>
                             </ul>
@@ -54,7 +54,7 @@
                         {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Delete" %}
 						<button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Endpoint">
 								<a class="white-color delete-bulk" href="#" alt="Delete Endpoints">
-								<i class="fa fa-trash"></i>
+								<i class="fa-solid fa-trash"></i>
 								</a>
 						</button>
                         {% endif %}
@@ -102,7 +102,7 @@
                                   <td><a href="{% url 'view_endpoint_host' e.id %}">{{ e.host }}</a>
                                 {% else %}
                                 <td>
-                                  <a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
+                                  <a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
                                 {% endif %}
                                   {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                 </td>

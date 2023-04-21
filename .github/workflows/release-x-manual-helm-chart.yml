@@ -6,7 +6,18 @@ env:
 on:
   workflow_dispatch:
     inputs:
+      # the actual branch that can be chosen on the UI is made irrelevant by further steps
+      # because someone will forget one day to change it.
       release_number:
+        type: string
+        description: 'Release number'
+        required: true
+  workflow_call:
+    inputs:
+      # the actual branch that can be chosen on the UI is made irrelevant by further steps
+      # because someone will forget one day to change it.
+      release_number:
+        type: string
         description: 'Release number'
         required: true
 
@@ -18,14 +29,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
+          ref: master
           fetch-depth: 0
       
-      - name: Get upload URL
-        id: get-upload-url
-        uses: pdamianik/release-tag-to-upload-url-action@v1.0.1
-        with:
-          tag: ${{ github.event.inputs.release_number }}
-          token: ${{ github.token }}
+      # This action is deprecated. Not sure if it is even being used anymore...
+      # - name: Get upload URL
+      #   id: get-upload-url
+      #   uses: pdamianik/release-tag-to-upload-url-action@v1.0.1
+      #   with:
+      #     tag: ${{ github.event.inputs.release_number }}
+      #     token: ${{ github.token }}
       
       - name: Configure git
         run: |
@@ -48,12 +61,12 @@ jobs:
         run: |
           mkdir build
           helm package helm/defectdojo/ --destination ./build
-          echo "chart_version=$(ls build | cut -d '-' -f 2 | sed 's|\.tgz||')" >> #GITHUB_ENV
+          echo "chart_version=$(ls build | cut -d '-' -f 2 | sed 's|\.tgz||')" >> $GITHUB_ENV
       
       - name: Create release ${{ github.event.inputs.release_number }}
         uses: softprops/action-gh-release@v1
         with:
-          name: Release ${{ github.event.inputs.release_number }}
+          name: '${{ github.event.inputs.release_number }} 🌈'
           tag_name: ${{ github.event.inputs.release_number }}
           body: Run the release drafter to populate the release notes.
           draft: true

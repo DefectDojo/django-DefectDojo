@@ -41,12 +41,14 @@ textarea,
     margin-left: 6px;
 }
 
-a {
-  color: #546474;
+.min,
+.max {
+    overscroll-behavior: none!important;
+    overflow-x: clip!important;
 }
 
-.progress-bar {
-  background-color: #546474;
+a {
+  color: #546474;
 }
 
 .panel-default .btn-primary {
@@ -380,6 +382,12 @@ form.metric_form p label {
     margin: -10px 1px 10px;
 }
 
+.error-page-box {
+    display: inline-block;
+    vertical-align: middle;
+    padding-right: 25px;
+}
+
 .inline-block {
     display: inline-block;
 }
@@ -685,6 +693,80 @@ div.page_select {
 
 input#simple_search {
     width: 100%!important;
+}
+
+.support-page-wrapper {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+}
+
+.support-container {
+    display: flex;
+    width: 75%;
+    margin-bottom: 150px;
+}
+
+.support-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    flex: 1;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.support-box.shape {
+    border-radius: 12px;
+    padding: 10px 25px 25px 25px;
+    margin: 0px 10px 0px 10px;
+    transition: transform .5s;
+}
+
+.community {
+    color: #546474!important;
+    background-color: #e7e7e7!important;
+}
+
+.commercial {
+    color: #e7e7e7!important;
+    background-color: #1d4565!important;
+}
+
+.support-box.hover:hover {
+    transform: translateY(-10px);
+}
+
+.btn-primary.support {
+    font-size: 16px;
+    font-weight: 500;
+    padding: 10px!important;
+    border-radius: 6px!important;
+    margin: 20px 10px 0px 10px!important;
+    border: none!important;
+}
+
+.btn-primary.support.dark:hover {
+    color: #546474!important;
+    background-color: #f7f7f7!important;
+}
+
+.btn-primary.support.light:hover {
+    color: #e7e7e7!important;
+    background-color: #235175!important;
+}
+
+.divider {
+    border-bottom: 1px solid;
+    margin: 10px 25px 15px 25px;
+}
+
+.divider.dark {
+    border-color: #546474!important
+}
+
+.divider.light {
+    border-color: #e7e7e7!important
 }
 
 .dojo-modals-wrapper {
@@ -1015,6 +1097,11 @@ div.custom-search-form {
     width: 265px;
 }
 
+.announcement-banner {
+    margin: 0px -15px;
+    border-radius: 0px 0px 4px 4px;
+}
+
 @media (min-width: 795px) {
     div.custom-search-form {
         height: 21px;
@@ -1140,6 +1227,10 @@ div.custom-search-form {
 
     body.max #min-menu i:before {
         content: "\f0a8" !important;
+    }
+    
+    .announcement-banner {
+        margin: 0px -30px;
     }
 
 }
@@ -1365,26 +1456,15 @@ span.pull-right.clickable i.glyphicon-chevron-up, span.pull-right.clickable i.gl
     background-color: rgb(255, 255, 123);
 }
 
-.level1 {
-    background-color: #FEFFA2;
-}
-.level2 {
-    background-color: #B7D784;
-}
-.level3 {
-    background-color: #BDE8EF;
-}
+
 .benchmark_pass {
-  background-color: #DAF89F;
+  background-color: #dff0d8;
 }
 .benchmark_fail {
-  background-color: #FFEEEE;
+  background-color: #f2dede;
 }
 .benchmark_disabled {
   background-color: #eaedf2
-}
-.highlight_asvs_level_1 {
-  background-color: #89C4F4
 }
 
 form#quick-add-form {
@@ -1733,6 +1813,10 @@ small {
 
 .select2-container {
     min-width:200px;
+}
+
+.EasyMDEContainer .table {
+    width: unset!important;
 }
 
 /* remove spinners (up & down arrow) for integer / number fields

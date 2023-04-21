@@ -39,7 +39,7 @@ class BugCrowdParser(object):
             pre_description = self.split_description(row.get('description', None))
             Description = pre_description.get('description', '') + '\n\n' + pre_description.get('poc', '')
             Description += row.get('extra_info') + '\n\n' if row.get('extra_info', None) else ''
-            Description += 'BugCrowd Reference Nubmer: ' + row.get('reference_number') + '\n' if row.get('reference_number', None) else ''
+            Description += 'BugCrowd Reference Number: ' + row.get('reference_number') + '\n' if row.get('reference_number', None) else ''
             Description += 'Bug URL: ' + url + '\n' if url else ''
             Description += 'Bug Source: ' + row.get('source') + '\n' if row.get('source', None) else ''
             Description += 'BugCrowd User: ' + row.get('username') + '\n' if row.get('username', None) else ''
@@ -49,7 +49,7 @@ class BugCrowdParser(object):
             Description += 'Closed at: ' + row.get('closed_at') + '\n' if row.get('closed_at', None) else ''
             Description += 'Target name: ' + row.get('target_name') + '\n' if row.get('target_name', None) else ''
             Description += 'Target category: ' + row.get('target_category') + '\n' if row.get('target_category', None) else ''
-            References = 'BugCrowd Reference Nubmer: ' + row.get('reference_number') + '\n' if row.get('reference_number', None) else ''
+            References = 'BugCrowd Reference Number: ' + row.get('reference_number') + '\n' if row.get('reference_number', None) else ''
             References += row.get('vulnerability_ids', '')
 
             finding.title = row.get('title', '')

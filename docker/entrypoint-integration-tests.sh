@@ -211,6 +211,14 @@ else
         fail $test
     fi
 
+    test="Global Announcement Banner tests"
+    echo "Running: $test"
+    if python3 tests/announcement_banner_test.py ; then
+        success $test
+    else
+        fail $test
+    fi
+
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
 
@@ -238,5 +246,14 @@ else
     # else
     #     echo "Error: Zap integration test failed"; exit 1
     # fi
+
+    test="Tool Config integration tests"
+    echo "Running: $test"
+    if python3 tests/tool_config.py ; then
+        success $test
+    else
+        fail $test
+    fi
+
     exec echo "Done Running all configured integration tests."
 fi

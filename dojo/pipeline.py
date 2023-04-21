@@ -73,7 +73,7 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
         token = soc.extra_data['access_token']
         group_names = []
         if 'groups' not in kwargs['response'] or kwargs['response']['groups'] == "":
-            logger.warn("No groups in response. Stopping to update groups of user based on azureAD")
+            logger.warning("No groups in response. Stopping to update groups of user based on azureAD")
             return
         group_IDs = kwargs['response']['groups']
         try:
@@ -83,6 +83,7 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
                 if is_group_id(group_from_response):
                     logger.debug("detected " + group_from_response + " as groupID and will fetch the displayName from microsoft graph")
                     group_name_request = requests.get((str(soc.extra_data['resource']) + '/v1.0/groups/' + str(group_from_response) + '?$select=displayName'), headers=request_headers)
+                    group_name_request.raise_for_status()
                     group_name_request_json = group_name_request.json()
                     group_name = group_name_request_json['displayName']
                 else:
@@ -173,8 +174,15 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
                 Product_Member.objects.filter(product=product, user=user).delete()
 
 
+def sanitize_username(username):
+    allowed_chars_regex = re.compile(r'[\w@.+_-]')
+    allowed_chars = filter(lambda char: allowed_chars_regex.match(char), list(username))
+    return "".join(allowed_chars)
+
+
 def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if not settings.SOCIAL_AUTH_CREATE_USER:
         return
     else:
+        details["username"] = sanitize_username(details.get("username"))
         return social_core.pipeline.user.create_user(strategy, details, backend, user, args, kwargs)

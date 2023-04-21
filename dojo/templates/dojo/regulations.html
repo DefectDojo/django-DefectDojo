@@ -9,18 +9,18 @@
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
                         Regulations
-                        {% if "dojo.add_regulation"|has_configuration_permission %}
+                        {% if "dojo.add_regulation"|has_configuration_permission:request %}
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-wrench"></span>
+                                <span class="fa-solid fa-screwdriver-wrench"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
                                         <a href="{% url 'new_regulation' %}">
-                                            <i class="fa fa-plus"></i> Add regulation
+                                            <i class="fa-solid fa-plus"></i> Add regulation
                                         </a>
                                     </li>
                             </ul>
@@ -52,7 +52,7 @@
                         {% for conf in confs %}
                             <tr>
                                 <td>
-                                    {% if "dojo.change_regulation"|has_configuration_permission %}
+                                    {% if "dojo.change_regulation"|has_configuration_permission:request %}
                                     <a href="{% url 'edit_regulations' conf.id %}"><b>{{ conf.name }}</b></a>
                                     {% else %}
                                     {{ conf.name }}

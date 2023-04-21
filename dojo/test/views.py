@@ -4,12 +4,8 @@ from dojo.engagement.queries import get_authorized_engagements
 from dojo.importers.utils import construct_imported_message
 import logging
 import operator
-import json
-import httplib2
 import base64
 from datetime import datetime
-import googleapiclient.discovery
-from google.oauth2 import service_account
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
@@ -129,43 +125,6 @@ def view_test(request, tid):
     finding_groups = test.finding_group_set.all().prefetch_related('findings', 'jira_issue', 'creator', 'findings__vulnerability_id_set')
 
     bulk_edit_form = FindingBulkUpdateForm(request.GET)
-
-    google_sheets_enabled = system_settings.enable_google_sheets
-    sheet_url = None
-    if google_sheets_enabled and system_settings.credentials:
-        spreadsheet_name = test.engagement.product.name + "-" + test.engagement.name + "-" + str(test.id)
-        system_settings = get_object_or_404(System_Settings, id=1)
-        service_account_info = json.loads(system_settings.credentials)
-        SCOPES = ['https://www.googleapis.com/auth/drive']
-        credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
-        try:
-            drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials, cache_discovery=False)
-            folder_id = system_settings.drive_folder_ID
-            gs_files = drive_service.files().list(q="mimeType='application/vnd.google-apps.spreadsheet' and parents in '%s' and name='%s'" % (folder_id, spreadsheet_name),
-                                                  spaces='drive',
-                                                  pageSize=10,
-                                                  fields='files(id, name)').execute()
-
-        except googleapiclient.errors.HttpError:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                _("There is a problem with the Google Sheets Sync Configuration. Contact your system admin to solve the issue. Until fixed, the Google Sheets Sync feature cannot be used."),
-                extra_tags="alert-danger",
-            )
-            google_sheets_enabled = False
-        except httplib2.ServerNotFoundError:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                _("Unable to reach the Google Sheet API."),
-                extra_tags="alert-danger",
-            )
-        else:
-            spreadsheets = gs_files.get('files')
-            if len(spreadsheets) == 1:
-                spreadsheetId = spreadsheets[0].get('id')
-                sheet_url = 'https://docs.google.com/spreadsheets/d/' + spreadsheetId
     return render(request, 'dojo/view_test.html',
                   {'test': test,
                    'prod': prod,
@@ -184,8 +143,6 @@ def view_test(request, tid):
                    'creds': creds,
                    'cred_test': cred_test,
                    'jira_project': jira_project,
-                   'show_export': google_sheets_enabled and system_settings.credentials,
-                   'sheet_url': sheet_url,
                    'bulk_edit_form': bulk_edit_form,
                    'paged_test_imports': paged_test_imports,
                    'test_import_filter': test_import_filter,
@@ -573,7 +530,10 @@ def add_temp_finding(request, tid, fid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
+
+            new_finding.tags = form.cleaned_data['tags']
             new_finding.date = form.cleaned_data['date'] or datetime.today()
+
             finding_helper.update_finding_status(new_finding, request.user)
 
             new_finding.save(dedupe_option=False, false_history=False)
@@ -692,8 +652,9 @@ def re_import_scan_results(request, tid):
 
             minimum_severity = form.cleaned_data['minimum_severity']
             scan = request.FILES.get('file', None)
-            active = form.cleaned_data['active']
-            verified = form.cleaned_data['verified']
+            activeChoice = form.cleaned_data.get('active', None)
+            verifiedChoice = form.cleaned_data.get('verified', None)
+            do_not_reactivate = form.cleaned_data['do_not_reactivate']
             tags = form.cleaned_data['tags']
             version = form.cleaned_data.get('version', None)
             branch_tag = form.cleaned_data.get('branch_tag', None)
@@ -707,6 +668,20 @@ def re_import_scan_results(request, tid):
             close_old_findings = form.cleaned_data.get('close_old_findings', True)
 
             group_by = form.cleaned_data.get('group_by', None)
+            create_finding_groups_for_all_findings = form.cleaned_data.get('create_finding_groups_for_all_findings')
+
+            active = None
+            if activeChoice:
+                if activeChoice == 'force_to_true':
+                    active = True
+                elif activeChoice == 'force_to_false':
+                    active = False
+            verified = None
+            if verifiedChoice:
+                if verifiedChoice == 'force_to_true':
+                    verified = True
+                elif verifiedChoice == 'force_to_false':
+                    verified = False
 
             # Tags are replaced, same behaviour as with django-tagging
             test.tags = tags
@@ -730,7 +705,8 @@ def re_import_scan_results(request, tid):
                                                 version=version, branch_tag=branch_tag, build_id=build_id,
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,
                                                 close_old_findings=close_old_findings, group_by=group_by,
-                                                api_scan_configuration=api_scan_configuration, service=service)
+                                                api_scan_configuration=api_scan_configuration, service=service, do_not_reactivate=do_not_reactivate,
+                                                create_finding_groups_for_all_findings=create_finding_groups_for_all_findings)
             except Exception as e:
                 logger.exception(e)
                 add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))

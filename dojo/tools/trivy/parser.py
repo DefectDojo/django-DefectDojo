@@ -38,6 +38,11 @@ SECRET_DESCRIPTION_TEMPLATE = """{title}
 **Match:** {match}
 """
 
+LICENSE_DESCRIPTION_TEMPLATE = """{title}
+**Category:** {category}
+**Package:** {package}
+"""
+
 
 class TrivyParser:
 
@@ -126,6 +131,7 @@ class TrivyParser:
                     vuln_id = vuln.get('VulnerabilityID', '0')
                     package_name = vuln['PkgName']
                     severity = TRIVY_SEVERITIES[vuln['Severity']]
+                    file_path = vuln.get('PkgPath')
                 except KeyError as exc:
                     logger.warning('skip vulnerability due %r', exc)
                     continue
@@ -160,6 +166,7 @@ class TrivyParser:
                     title=title,
                     cwe=cwe,
                     severity=severity,
+                    file_path=file_path,
                     references=references,
                     description=description,
                     mitigation=mitigation,
@@ -244,6 +251,39 @@ class TrivyParser:
                     description=description,
                     file_path=target_target,
                     line=secret_start_line,
+                    static_finding=True,
+                    dynamic_finding=False,
+                    tags=[target_class],
+                    service=service_name,
+                )
+                items.append(finding)
+
+            licenses = target_data.get('Licenses', [])
+            for license in licenses:
+                license_severity = license.get('Severity')
+                license_category = license.get('Category')
+                license_pkgname = license.get('PkgName')
+                license_filepath = license.get('FilePath')
+                license_name = license.get('Name')
+                license_confidence = license.get('Confidence')
+                license_link = license.get('Link')
+
+                title = f'License detected in {target_target} - {license_name}'
+                description = LICENSE_DESCRIPTION_TEMPLATE.format(
+                    title=license_name,
+                    category=license_category,
+                    package=license_pkgname,
+                )
+                severity = TRIVY_SEVERITIES[license_severity]
+
+                finding = Finding(
+                    test=test,
+                    title=title,
+                    severity=severity,
+                    description=description,
+                    file_path=license_filepath,
+                    scanner_confidence=license_confidence,
+                    url=license_link,
                     static_finding=True,
                     dynamic_finding=False,
                     tags=[target_class],

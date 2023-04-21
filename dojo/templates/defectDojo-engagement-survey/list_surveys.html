@@ -24,7 +24,7 @@
                         {% for survey in surveys %}
                             <tr>
                                 <td>
-                                    {% if "dojo.change_engagement_survey"|has_configuration_permission %}
+                                    {% if "dojo.change_engagement_survey"|has_configuration_permission:request %}
                                     <a title="{{ survey.name }}" href="{% url 'edit_questionnaire' survey.id %}">{{ survey.name }}</a>
                                     {% else %}
                                     {{ survey.name }}
@@ -47,8 +47,8 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     General Questionnaires
-                    {% if "dojo.add_engagement_survey"|has_configuration_permission %}
-                    <a title="Add Questionnaire" class="pull-right btn btn-sm btn-primary" href="/empty_questionnaire"><span class="fa fa-plus"></span></a>
+                    {% if "dojo.add_engagement_survey"|has_configuration_permission:request %}
+                    <a title="Add Questionnaire" class="pull-right btn btn-sm btn-primary" href="/empty_questionnaire"><span class="fa-solid fa-plus"></span></a>
                     {% endif %}
                 </div>
                 <div class="panel-body">
@@ -74,9 +74,9 @@
                                             <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal"
                                                     data-target="#shareQuestionnaireModal"
                                                     data-whatever="/empty_questionnaire/{{ survey.id }}/answer">
-                                                <i class="fa fa-share-alt"></i> Share Questionnaire
+                                                <i class="fa-solid fa-share"></i> Share Questionnaire
                                             </button>
-                                            {% if "dojo.delete_engagement_survey"|has_configuration_permission %}
+                                            {% if "dojo.delete_engagement_survey"|has_configuration_permission:request %}
                                             <a class="btn btn-sm btn-danger"
                                                 href="general_questionnaire/{{ survey.id }}/delete"> Delete
                                             Questionnaire </a>
@@ -98,7 +98,7 @@
         <div class="col-md-2">
             <div class="panel panel-default filters">
                 {% if filtered.form %}
-                {% if "dojo.add_engagement_survey"|has_configuration_permission %}
+                {% if "dojo.add_engagement_survey"|has_configuration_permission:request %}
                         <div class="panel-heading">Actions</div>
                         <div class="panel-body centered">
                             <a class="btn btn-sm btn-secondary" href="{% url 'create_questionnaire' %}">

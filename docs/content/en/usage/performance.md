@@ -12,7 +12,7 @@ This feature works in most use cases, but struggles when doing things such as pu
 to Jira during the import process. Because Endpoints are still being processed and 
 created even after the import procedure is completed, pushing Findings to Jira can
 result in incomplete Jira tickets. It is advised to wait until after import has been
-completed 100%.
+completed (reaches 100%).
 
 To enable this feature, set `ASYNC_FINDING_IMPORT` to True in `local_settings.py`
 

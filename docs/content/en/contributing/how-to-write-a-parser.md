@@ -13,10 +13,10 @@ All commands assume that you're located at the root of the django-DefectDojo clo
 
 - You have forked https://github.com/DefectDojo/django-DefectDojo and cloned locally.
 - Checkout `dev` and make sure you're up to date with the latest changes.
-- It's advised that you create a dedicated branch for your development, such as `git checkout -b parser-name` yet that's up to you.
+- It's advised that you create a dedicated branch for your development, such as `git checkout -b parser-name`.
 
-It is probably easier to use the docker-compose stack (and benefit from the hot-reload capbility for uWSGI).
-Set up your environment to use the debug environment, such as:
+It is easiest to use the docker-compose deployment as it has hot-reload capbility for uWSGI.
+Set up your environment to use the debug environment:
 
 `$ docker/setEnv.sh debug`
 
@@ -24,7 +24,7 @@ Please have a look at [DOCKER.md](https://github.com/DefectDojo/django-DefectDoj
 
 ### Docker images
 
-You'd want to build your docker images locally, and eventually pass in your local user's `uid` to be able to write to the image (handy for database migration files). Assuming your user's `uid` is `1000`, then:
+You will want to build your docker images locally, and eventually pass in your local user's `uid` to be able to write to the image (handy for database migration files). Assuming your user's `uid` is `1000`, then:
 
 {{< highlight bash >}}
 $ docker-compose build --build-arg uid=1000
@@ -39,6 +39,7 @@ $ docker-compose build --build-arg uid=1000
 |`unittests/scans/<parser_dir>/{many_vulns,no_vuln,one_vuln}.json` | Sample files containing meaningful data for unit tests. The minimal set.
 |`unittests/tools/test_<parser_name>_parser.py` | Unit tests of the parser.
 |`dojo/settings/settings.dist.py`               | If you want to use a modern hashcode based deduplication algorithm
+|`doc/content/en/integrations/parsers/<file/api>/<parser_file>.md` | Documentation, what kind of file format is required and how it should be obtained 
 
 ## Factory contract
 
@@ -91,6 +92,10 @@ class MyToolParser(object):
 
 ```
 
+## API Parsers
+
+DefectDojo has a limited number of API parsers. While we won’t remove these connectors, adding API connectors has been problematic and thus we cannot accept new API parsers / connectors from the community at this time for supportability reasonsing. To maintain a high quality API connector, it is necessary to have a license to the tool. To get that license requires partnership with the author or vendor. We're close to announcing a new program to help address this and bring API connectors to DefectDojo.
+
 ## Template Generator
 
 Use the [template](https://github.com/DefectDojo/cookiecutter-scanner-parser)  parser to quickly generate the files required. To get started you will need to install [cookiecutter](https://github.com/cookiecutter/cookiecutter).
@@ -109,7 +114,7 @@ Read [more](https://github.com/DefectDojo/cookiecutter-scanner-parser) on the te
 
 ## Things to pay attention to
 
-Here is a list of advise that will make your parser future proof.
+Here is a list of considerations that will make the parser robust for both common cases and edge cases.
 
 ### Do not parse URLs by hand
 
@@ -157,7 +162,7 @@ Good example:
 
 ### Do not parse CVSS by hand (vector, score or severity)
 
-Data can have `CVSS` vectors or scores. Don't try to write your own CVSS score algorithm.
+Data can have `CVSS` vectors or scores. Don't write your own CVSS score algorithm.
 For parser, we rely on module `cvss`.
 
 It's easy to use and will make the parser aligned with the rest of the code.
@@ -283,6 +288,12 @@ for finding in findings:
     for endpoint in finding.unsaved_endpoints:
         endpoint.clean()
 ```
+
+### Tests API Parsers
+
+Not only parser but also importer should be tested.
+`patch` method from `unittest.mock` is usualy usefull for simulating API responses.
+It is highly recommeded to use it.
 
 ## Other files that could be involved
 

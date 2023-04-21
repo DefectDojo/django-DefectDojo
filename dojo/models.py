@@ -37,7 +37,6 @@ from django.db.models import JSONField
 import hyperlink
 from cvss import CVSS3
 from dojo.settings.settings import SLA_BUSINESS_DAYS
-from numpy import busday_count
 
 
 logger = logging.getLogger(__name__)
@@ -395,6 +394,30 @@ class System_Settings(models.Model):
         verbose_name=_("Enable Finding SLA's"),
         help_text=_("Enables Finding SLA's for time to remediate."))
 
+    enable_notify_sla_active = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Enable Notify SLA's Breach for active Findings"),
+        help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for active Findings."))
+
+    enable_notify_sla_active_verified = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Enable Notify SLA's Breach for active, verified Findings"),
+        help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for active, verified Findings."))
+
+    enable_notify_sla_jira_only = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Enable Notify SLA's Breach only for Findings linked to JIRA"),
+        help_text=_("Enables Notify when time to remediate according to Finding SLA's is breached for Findings that are linked to JIRA issues. Notification is disabled for Findings not linked to JIRA issues"))
+
+    enable_notify_sla_exponential_backoff = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Enable an exponential backoff strategy for SLA breach notifications."),
+        help_text=_("Enable an exponential backoff strategy for SLA breach notifications, e.g. 1, 2, 4, 8, etc. Otherwise it alerts every day"))
+
     allow_anonymous_survey_repsonse = models.BooleanField(
         default=False,
         blank=False,
@@ -405,9 +428,6 @@ class System_Settings(models.Model):
     disclaimer = models.TextField(max_length=3000, default='', blank=True,
                                   verbose_name=_('Custom Disclaimer'),
                                   help_text=_("Include this custom disclaimer on all notifications and generated reports"))
-    column_widths = models.TextField(max_length=1500, blank=True)
-    drive_folder_ID = models.CharField(max_length=100, blank=True)
-    email_address = models.EmailField(max_length=100, blank=True)
     risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text=_("Default expiry period for risk acceptance form."))
     risk_acceptance_notify_before_expiration = models.IntegerField(null=True, blank=True, default=10,
                     verbose_name=_('Risk acceptance expiration heads up days'), help_text=_("Notify X days before risk acceptance expires. Leave empty to disable."))
@@ -431,16 +451,6 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_('Enable Endpoint Metadata Import'),
         help_text=_("With this setting turned off, endpoint metadata import will be disabled in the user interface."))
-    enable_google_sheets = models.BooleanField(
-        default=False,
-        blank=False,
-        verbose_name=_('Enable Google Sheets Integration'),
-        help_text=_("With this setting turned off, the Google sheets integration will be disabled in the user interface."))
-    enable_rules_framework = models.BooleanField(
-        default=False,
-        blank=False,
-        verbose_name=_('Enable Rules Framework'),
-        help_text=_("With this setting turned off, the rules framwork will be disabled in the user interface."))
     enable_user_profile_editable = models.BooleanField(
         default=True,
         blank=False,
@@ -478,6 +488,34 @@ class System_Settings(models.Model):
         default='',
         blank=True,
         help_text=_("New users will only be assigned to the default group, when their email address matches this regex pattern. This is optional condition."))
+    minimum_password_length = models.IntegerField(
+        default=9,
+        verbose_name=_('Minimum password length'),
+        help_text=_("Requires user to set passwords greater than minimum length."))
+    maximum_password_length = models.IntegerField(
+        default=48,
+        verbose_name=_('Maximum password length'),
+        help_text=_("Requires user to set passwords less than maximum length."))
+    number_character_required = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Password must contain one digit"),
+        help_text=_("Requires user passwords to contain at least one digit (0-9)."))
+    special_character_required = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Password must contain one special character"),
+        help_text=_("Requires user passwords to contain at least one special character (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?)."))  # noqa W605
+    lowercase_character_required = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Password must contain one lowercase letter"),
+        help_text=_("Requires user passwords to contain at least one lowercase letter (a-z)."))
+    uppercase_character_required = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Password must contain one uppercase letter"),
+        help_text=_("Requires user passwords to contain at least one uppercase letter (A-Z)."))
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
@@ -616,7 +654,7 @@ class FileUpload(models.Model):
         elif isinstance(obj, Finding):
             obj_type = 'Finding'
 
-        return 'access_url/{file_id}/{obj_id}/{obj_type}'.format(
+        return 'access_file/{file_id}/{obj_id}/{obj_type}'.format(
             file_id=self.id,
             obj_id=obj_id,
             obj_type=obj_type
@@ -906,6 +944,12 @@ class Product(models.Model):
 
     enable_simple_risk_acceptance = models.BooleanField(default=False, help_text=_('Allows simple risk acceptance by checking/unchecking a checkbox.'))
     enable_full_risk_acceptance = models.BooleanField(default=True, help_text=_('Allows full risk acceptance using a risk acceptance form, expiration date, uploaded proof, etc.'))
+
+    disable_sla_breach_notifications = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Disable SLA breach notifications"),
+        help_text=_("Disable SLA breach notifications if configured in the global settings"))
 
     def __str__(self):
         return self.name
@@ -1358,9 +1402,9 @@ class Endpoint_Status(models.Model):
     def age(self):
 
         if self.mitigated:
-            diff = self.mitigated_time.date() - self.date.date()
+            diff = self.mitigated_time.date() - self.date
         else:
-            diff = get_current_date() - self.date.date()
+            diff = get_current_date() - self.date
         days = diff.days
         return days if days > 0 else 0
 
@@ -1616,7 +1660,8 @@ class Endpoint(models.Model):
                           Q(finding__out_of_scope=True) |
                           Q(finding__mitigated__isnull=False) |
                           Q(finding__false_p=True) |
-                          Q(finding__duplicate=True))
+                          Q(finding__duplicate=True) |
+                          Q(finding__active=False))
         return Endpoint.objects.filter(status_endpoint__in=meps).distinct()
 
     @property
@@ -2018,7 +2063,7 @@ class Finding(models.Model):
                                  help_text=_("Denotes if this flaw is active or not."))
     # note that false positive findings cannot be verified
     # in defectdojo verified means: "we have verified the finding and it turns out that it's not a false positive"
-    verified = models.BooleanField(default=True,
+    verified = models.BooleanField(default=False,
                                    verbose_name=_('Verified'),
                                    help_text=_("Denotes if this flaw has been manually verified by the tester."))
     false_p = models.BooleanField(default=False,
@@ -2566,11 +2611,12 @@ class Finding(models.Model):
         return ", ".join([str(s) for s in status])
 
     def _age(self, start_date):
+        from dojo.utils import get_work_days
         if SLA_BUSINESS_DAYS:
             if self.mitigated:
-                days = busday_count(self.date, self.mitigated.date())
+                days = get_work_days(self.date, self.mitigated.date())
             else:
-                days = busday_count(self.date, get_current_date())
+                days = get_work_days(self.date, get_current_date())
         else:
             if self.mitigated:
                 diff = self.mitigated.date() - start_date
@@ -2608,7 +2654,7 @@ class Finding(models.Model):
     def sla_deadline(self):
         days_remaining = self.sla_days_remaining()
         if days_remaining:
-            return self.date + relativedelta(days=days_remaining)
+            return get_current_date() + relativedelta(days=days_remaining)
         return None
 
     def github(self):
@@ -2697,10 +2743,6 @@ class Finding(models.Model):
                 self.cvssv3_score = cvss_object.scores()[2]
             except Exception as ex:
                 logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
-
-        if rules_option:
-            from dojo.utils import do_apply_rules
-            do_apply_rules(self, *args, **kwargs)
 
         # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
         # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
@@ -2813,21 +2855,30 @@ class Finding(models.Model):
             return None
         if self.test.engagement.source_code_management_uri is None:
             return escape(self.file_path)
+        link = self.get_file_path_with_raw_link()
+        return create_bleached_link(link, self.file_path)
+
+    def get_file_path_with_raw_link(self):
+        if self.file_path is None:
+            return None
         link = self.test.engagement.source_code_management_uri
-        if "https://github.com/" in self.test.engagement.source_code_management_uri:
-            if self.test.commit_hash is not None:
+        if (self.test.engagement.source_code_management_uri is not None
+                and "https://github.com/" in self.test.engagement.source_code_management_uri):
+            if self.test.commit_hash:
                 link += '/blob/' + self.test.commit_hash + '/' + self.file_path
-            elif self.test.engagement.commit_hash is not None:
+            elif self.test.engagement.commit_hash:
                 link += '/blob/' + self.test.engagement.commit_hash + '/' + self.file_path
-            elif self.test.branch_tag is not None:
+            elif self.test.branch_tag:
                 link += '/blob/' + self.test.branch_tag + '/' + self.file_path
-            elif self.test.engagement.branch_tag is not None:
+            elif self.test.engagement.branch_tag:
                 link += '/blob/' + self.test.engagement.branch_tag + '/' + self.file_path
+            else:
+                link += '/' + self.file_path
         else:
             link += '/' + self.file_path
         if self.line:
             link = link + '#L' + str(self.line)
-        return create_bleached_link(link, self.file_path)
+        return link
 
     def get_references_with_links(self):
         import re
@@ -2913,7 +2964,10 @@ class Stub_Finding(models.Model):
 
 class Finding_Group(TimeStampedModel):
 
-    GROUP_BY_OPTIONS = [('component_name', 'Component Name'), ('component_name+component_version', 'Component Name + Version'), ('file_path', 'File path')]
+    GROUP_BY_OPTIONS = [('component_name', 'Component Name'),
+                        ('component_name+component_version', 'Component Name + Version'),
+                        ('file_path', 'File path'),
+                        ('finding_title', 'Finding Title')]
 
     name = models.CharField(max_length=255, blank=False, null=False)
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
@@ -3145,6 +3199,14 @@ class Risk_Acceptance(models.Model):
         (TREATMENT_TRANSFER, 'Transfer (The risk is transferred to a 3rd party)'),
     ]
 
+    TREATMENT_TRANSLATIONS = {
+        'A': 'Accept (The risk is acknowledged, yet remains)',
+        'V': 'Avoid (Do not engage with whatever creates the risk)',
+        'M': 'Mitigate (The risk still exists, yet compensating controls make it less of a threat)',
+        'F': 'Fix (The risk is eradicated)',
+        'T': 'Transfer (The risk is transferred to a 3rd party)',
+    }
+
     name = models.CharField(max_length=300, null=False, blank=False, help_text=_("Descriptive name which in the future may also be used to group risk acceptances together across engagements and products"))
 
     accepted_findings = models.ManyToManyField(Finding)
@@ -3249,6 +3311,28 @@ class FileAccessToken(models.Model):
         return super(FileAccessToken, self).save(*args, **kwargs)
 
 
+ANNOUNCEMENT_STYLE_CHOICES = (
+    ('info', 'Info'),
+    ('success', 'Success'),
+    ('warning', 'Warning'),
+    ('danger', 'Danger')
+)
+
+
+class Announcement(models.Model):
+    message = models.CharField(max_length=500,
+                                help_text=_("This dismissable message will be displayed on all pages for authenticated users. It can contain basic html tags, for example <a href='https://www.fred.com' style='color: #337ab7;' target='_blank'>https://example.com</a>"),
+                                default='')
+    dismissable = models.BooleanField(default=False, null=True, blank=True)
+    style = models.CharField(max_length=64, choices=ANNOUNCEMENT_STYLE_CHOICES, default='info',
+                            help_text=_("The style of banner to display. (info, success, warning, danger)"))
+
+
+class UserAnnouncement(models.Model):
+    announcement = models.ForeignKey(Announcement, null=True, editable=False, on_delete=models.CASCADE, related_name='user_announcement')
+    user = models.ForeignKey(Dojo_User, null=True, editable=False, on_delete=models.CASCADE)
+
+
 class BannerConf(models.Model):
     banner_enable = models.BooleanField(default=False, null=True, blank=True)
     banner_message = models.CharField(max_length=500, help_text=_("This message will be displayed on the login page. It can contain basic html tags, for example <a href='https://www.fred.com' style='color: #337ab7;' target='_blank'>https://example.com</a>"), default='')
@@ -3312,7 +3396,7 @@ class JIRA_Instance(models.Model):
                                         ('Bug', 'Bug'),
                                         ('Security', 'Security')
                                     )
-    default_issue_type = models.CharField(max_length=15,
+    default_issue_type = models.CharField(max_length=255,
                                           choices=default_issue_type_choices,
                                           default='Bug',
                                           help_text=_('You can define extra issue types in settings.py'))
@@ -3332,6 +3416,7 @@ class JIRA_Instance(models.Model):
     accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text=_('JIRA resolution names (comma-separated values) that maps to an Accepted Finding'))
     false_positive_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text=_('JIRA resolution names (comma-separated values) that maps to a False Positive Finding'))
     global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name=_("Globally send SLA notifications as comment?"), help_text=_("This setting can be overidden at the Product level"))
+    finding_jira_sync = models.BooleanField(default=False, blank=False, verbose_name=_("Automatically sync Findings with JIRA?"), help_text=_("If enabled, this will sync changes to a Finding automatically to JIRA"))
 
     @property
     def accepted_resolutions(self):
@@ -3398,6 +3483,8 @@ class JIRA_Project(models.Model):
     component = models.CharField(max_length=200, blank=True)
     custom_fields = models.JSONField(max_length=200, blank=True, null=True,
                                    help_text=_("JIRA custom field JSON mapping of Id to value, e.g. {\"customfield_10122\": [{\"name\": \"8.0.1\"}]}"))
+    default_assignee = models.CharField(max_length=200, blank=True, null=True,
+                                     help_text=_("JIRA default assignee (name). If left blank then it defaults to whatever is configured in JIRA."))
     jira_labels = models.CharField(max_length=200, blank=True, null=True,
                                    help_text=_('JIRA issue labels space seperated'))
     add_vulnerability_id_to_jira_label = models.BooleanField(default=False,
@@ -3470,7 +3557,7 @@ class JIRA_Issue(models.Model):
         elif type(obj) == Engagement:
             self.engagement = obj
         else:
-            raise ValueError('unknown objec type whiel creating JIRA_Issue: %s' % to_str_typed(obj))
+            raise ValueError('unknown object type while creating JIRA_Issue: %s' % to_str_typed(obj))
 
     def __str__(self):
         text = ""
@@ -3843,77 +3930,6 @@ class Benchmark_Product_Summary(models.Model):
         unique_together = [('product', 'benchmark_type')]
 
 
-# product_opts = [f.name for f in Product._meta.fields]
-# test_opts = [f.name for f in Test._meta.fields]
-# test_type_opts = [f.name for f in Test_Type._meta.fields]
-finding_opts = [f.name for f in Finding._meta.fields if f.name not in ['last_status_update']]
-# endpoint_opts = [f.name for f in Endpoint._meta.fields]
-# engagement_opts = [f.name for f in Engagement._meta.fields]
-# product_type_opts = [f.name for f in Product_Type._meta.fields]
-# single_options = product_opts + test_opts + test_type_opts + finding_opts + \
-#                  endpoint_opts + engagement_opts + product_type_opts
-all_options = []
-for x in finding_opts:
-    all_options.append((x, x))
-operator_options = (('Matches', 'Matches'),
-                    ('Contains', 'Contains'))
-application_options = (('Append', 'Append'),
-                      ('Replace', 'Replace'))
-blank_options = (('', ''),)
-
-
-class Rule(models.Model):
-    # add UI notification to let people know what rules were applied
-
-    name = models.CharField(max_length=200)
-    enabled = models.BooleanField(default=True)
-    text = models.TextField()
-    operator = models.CharField(max_length=30, choices=operator_options)
-    """
-    model_object_options = (('Product', 'Product'),
-                            ('Engagement', 'Engagement'), ('Test', 'Test'),
-                            ('Finding', 'Finding'), ('Endpoint', 'Endpoint'),
-                            ('Product Type', 'Product_Type'), ('Test Type', 'Test_Type'))
-    """
-    model_object_options = (('Finding', 'Finding'),)
-    model_object = models.CharField(max_length=30, choices=model_object_options)
-    match_field = models.CharField(max_length=200, choices=all_options)
-    match_text = models.TextField()
-    application = models.CharField(max_length=200, choices=application_options)
-    applies_to = models.CharField(max_length=30, choices=model_object_options)
-    # TODO: Add or ?
-    # and_rules = models.ManyToManyField('self')
-    applied_field = models.CharField(max_length=200, choices=(all_options))
-    child_rules = models.ManyToManyField('self', editable=False)
-    parent_rule = models.ForeignKey('self', editable=False, null=True, on_delete=models.CASCADE)
-
-
-class Child_Rule(models.Model):
-    # add UI notification to let people know what rules were applied
-    operator = models.CharField(max_length=30, choices=operator_options)
-    """
-    model_object_options = (('Product', 'Product'),
-                            ('Engagement', 'Engagement'), ('Test', 'Test'),
-                            ('Finding', 'Finding'), ('Endpoint', 'Endpoint'),
-                            ('Product Type', 'Product_Type'), ('Test Type', 'Test_Type'))
-    """
-    model_object_options = (('Finding', 'Finding'),)
-    model_object = models.CharField(max_length=30, choices=model_object_options)
-    match_field = models.CharField(max_length=200, choices=all_options)
-    match_text = models.TextField()
-    # TODO: Add or ?
-    # and_rules = models.ManyToManyField('self')
-    parent_rule = models.ForeignKey(Rule, editable=False, null=True, on_delete=models.CASCADE)
-
-
-class FieldRule(models.Model):
-    field = models.CharField(max_length=200)
-    update_options = (('Append', 'Append'),
-                        ('Replace', 'Replace'))
-    update_type = models.CharField(max_length=30, choices=update_options)
-    text = models.CharField(max_length=200)
-
-
 # ==========================
 # Defect Dojo Engaegment Surveys
 # ==============================
@@ -4144,6 +4160,8 @@ admin.site.register(Engagement)
 admin.site.register(Risk_Acceptance)
 admin.site.register(Check_List)
 admin.site.register(Test_Type)
+admin.site.register(Endpoint_Params)
+admin.site.register(Endpoint_Status)
 admin.site.register(Endpoint)
 admin.site.register(Product)
 admin.site.register(Product_Type)
@@ -4155,6 +4173,9 @@ admin.site.register(JIRA_Issue)
 admin.site.register(JIRA_Instance, JIRA_Instance_Admin)
 admin.site.register(JIRA_Project)
 admin.site.register(GITHUB_Conf)
+admin.site.register(GITHUB_Issue)
+admin.site.register(GITHUB_Clone)
+admin.site.register(GITHUB_Details_Cache)
 admin.site.register(GITHUB_PKey)
 admin.site.register(Tool_Configuration, Tool_Configuration_Admin)
 admin.site.register(Tool_Product_Settings)
@@ -4172,3 +4193,30 @@ admin.site.register(Dojo_Group)
 # SonarQube Integration
 admin.site.register(Sonarqube_Issue)
 admin.site.register(Sonarqube_Issue_Transition)
+
+admin.site.register(Dojo_Group_Member)
+admin.site.register(Product_Member)
+admin.site.register(Product_Group)
+admin.site.register(Product_Type_Member)
+admin.site.register(Product_Type_Group)
+
+admin.site.register(Contact)
+admin.site.register(NoteHistory)
+admin.site.register(Product_Line)
+admin.site.register(Report_Type)
+admin.site.register(DojoMeta)
+admin.site.register(Product_API_Scan_Configuration)
+admin.site.register(Development_Environment)
+admin.site.register(Finding_Template)
+admin.site.register(Vulnerability_Id)
+admin.site.register(Vulnerability_Id_Template)
+admin.site.register(BurpRawRequestResponse)
+admin.site.register(Announcement)
+admin.site.register(UserAnnouncement)
+admin.site.register(BannerConf)
+admin.site.register(Notifications)
+admin.site.register(Tool_Product_History)
+admin.site.register(General_Survey)
+admin.site.register(Test_Import)
+admin.site.register(Test_Import_Finding_Action)
+admin.site.register(Finding_Group)

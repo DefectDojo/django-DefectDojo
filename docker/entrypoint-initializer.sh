@@ -13,6 +13,29 @@ initialize_data()
     python3 manage.py initialize_permissions
 }
 
+create_announcement_banner() 
+{
+# Load the announcement banner
+if [ -z "$CREATE_INITIAL_BANNER" ]; then
+echo "Creating Announcement Banner"
+cat <<EOD | python3 manage.py shell
+from dojo.models import Announcement, UserAnnouncement, Dojo_User
+announcement, created = Announcement.objects.get_or_create(id=1)
+announcement.message = '<a href="https://www.defectdojo.com/pricing" target="_blank">Cloud and On-Premise Subscriptions Now Available! Click here for more details</a>'
+announcement.dismissable = True
+announcement.save()
+for dojo_user in Dojo_User.objects.all():
+    user_announcments = UserAnnouncement.objects.filter(
+        user=dojo_user,
+        announcement=announcement)
+    if user_announcments.count() == 0:
+        UserAnnouncement.objects.get_or_create(
+            user=dojo_user,
+            announcement=announcement)
+EOD
+fi
+}
+
 # Allow for bind-mount multiple settings.py overrides
 FILES=$(ls /app/docker/extra_settings/* 2>/dev/null)
 NUM_FILES=$(echo "$FILES" | wc -w)
@@ -56,6 +79,7 @@ then
     echo "Admin password: Initialization detected that the admin user ${DD_ADMIN_USER} already exists in your database."
     echo "If you don't remember the ${DD_ADMIN_USER} password, you can create a new superuser with:"
     echo "$ docker-compose exec uwsgi /bin/bash -c 'python manage.py createsuperuser'"
+    create_announcement_banner
     initialize_data
     exit
 fi
@@ -109,6 +133,6 @@ EOD
   echo "Migration of textquestions for surveys"
   python3 manage.py migrate_textquestions
 
+  create_announcement_banner
   initialize_data
-
 fi

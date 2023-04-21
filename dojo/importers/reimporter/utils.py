@@ -61,11 +61,24 @@ def update_endpoint_status(existing_finding, new_finding, user):
     # using `.all()` will mark as mitigated also `endpoint_status` with flags `false_positive`, `out_of_scope` and `risk_accepted`. This is a known issue. This is not a bug. This is a future.
     existing_finding_endpoint_status_list = existing_finding.status_finding.all()
     new_finding_endpoints_list = new_finding.unsaved_endpoints
-    endpoint_status_to_mitigate = list(
-        filter(
-            lambda existing_finding_endpoint_status: existing_finding_endpoint_status.endpoint not in new_finding_endpoints_list,
-            existing_finding_endpoint_status_list)
-    )
+    if new_finding.is_mitigated:
+        # New finding is mitigated, so mitigate all old endpoints
+        endpoint_status_to_mitigate = existing_finding_endpoint_status_list
+    else:
+        # Mitigate any endpoints in the old finding not found in the new finding
+        endpoint_status_to_mitigate = list(
+            filter(
+                lambda existing_finding_endpoint_status: existing_finding_endpoint_status.endpoint not in new_finding_endpoints_list,
+                existing_finding_endpoint_status_list)
+        )
+        # Re-activate any endpoints in the old finding that are in the new finding
+        endpoint_status_to_reactivate = list(
+            filter(
+                lambda existing_finding_endpoint_status: existing_finding_endpoint_status.endpoint in new_finding_endpoints_list,
+                existing_finding_endpoint_status_list)
+        )
+        chunk_endpoints_and_reactivate(endpoint_status_to_reactivate)
+
     # Determine if this can be run async
     if settings.ASYNC_FINDING_IMPORT:
         chunk_list = importer_utils.chunk_list(endpoint_status_to_mitigate)
@@ -83,25 +96,45 @@ def update_endpoint_status(existing_finding, new_finding, user):
 @dojo_async_task
 @app.task()
 def mitigate_endpoint_status(endpoint_status_list, user, **kwargs):
+    """ Only mitigate endpoints that are actually active """
     for endpoint_status in endpoint_status_list:
-        logger.debug("Re-import: mitigating endpoint %s that is no longer present", str(endpoint_status.endpoint))
-        endpoint_status.mitigated_by = user
-        endpoint_status.mitigated_time = timezone.now()
-        endpoint_status.mitigated = True
-        endpoint_status.last_modified = timezone.now()
-        endpoint_status.save()
+        # Only mitigate endpoints that are actually active
+        if not endpoint_status.mitigated:
+            logger.debug("Re-import: mitigating endpoint %s that is no longer present", str(endpoint_status.endpoint))
+            endpoint_status.mitigated_by = user
+            endpoint_status.mitigated_time = timezone.now()
+            endpoint_status.mitigated = True
+            endpoint_status.last_modified = timezone.now()
+            endpoint_status.save()
+
+
+def chunk_endpoints_and_reactivate(endpoint_statuses, **kwargs):
+    # Determine if this can be run async
+    if settings.ASYNC_FINDING_IMPORT:
+        chunk_list = importer_utils.chunk_list(endpoint_statuses)
+        # If there is only one chunk, then do not bother with async
+        if len(chunk_list) < 2:
+            reactivate_endpoint_status(endpoint_statuses, sync=True)
+        logger.debug('IMPORT_SCAN: Split endpoints into ' + str(len(chunk_list)) + ' chunks of ' + str(chunk_list[0]))
+        # First kick off all the workers
+        for endpoint_status_list in chunk_list:
+            reactivate_endpoint_status(endpoint_status_list, sync=False)
+    else:
+        reactivate_endpoint_status(endpoint_statuses, sync=True)
 
 
 @dojo_async_task
 @app.task()
 def reactivate_endpoint_status(endpoint_status_list, **kwargs):
     for endpoint_status in endpoint_status_list:
-        logger.debug("Re-import: reactivating endpoint %s that is present in this scan", str(endpoint_status.endpoint))
-        endpoint_status.mitigated_by = None
-        endpoint_status.mitigated_time = None
-        endpoint_status.mitigated = False
-        endpoint_status.last_modified = timezone.now()
-        endpoint_status.save()
+        # Only reactivate endpoints that are actually mitigated
+        if endpoint_status.mitigated:
+            logger.debug("Re-import: reactivating endpoint %s that is present in this scan", str(endpoint_status.endpoint))
+            endpoint_status.mitigated_by = None
+            endpoint_status.mitigated_time = None
+            endpoint_status.mitigated = False
+            endpoint_status.last_modified = timezone.now()
+            endpoint_status.save()
 
 
 def get_target_product_if_exists(product_name=None, product_type_name=None):
@@ -186,7 +219,7 @@ def get_or_create_product(product_name=None, product_type_name=None, auto_create
             member.role = Role.objects.get(is_owner=True)
             member.save()
 
-        product = Product.objects.create(name=product_name, prod_type=product_type)
+        product = Product.objects.create(name=product_name, prod_type=product_type, description=product_name)
         member = Product_Member()
         member.user = get_current_user()
         member.product = product
@@ -196,7 +229,8 @@ def get_or_create_product(product_name=None, product_type_name=None, auto_create
         return product
 
 
-def get_or_create_engagement(engagement_id=None, engagement_name=None, product_name=None, product_type_name=None, auto_create_context=None, deduplication_on_engagement=False):
+def get_or_create_engagement(engagement_id=None, engagement_name=None, product_name=None, product_type_name=None, auto_create_context=None,
+                             deduplication_on_engagement=False, source_code_management_uri=None, target_end=None):
     # try to find the engagement (and product)
     product = get_target_product_if_exists(product_name, product_type_name)
     engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
@@ -212,6 +246,13 @@ def get_or_create_engagement(engagement_id=None, engagement_name=None, product_n
         if not product:
             raise ValueError('no product, unable to create engagement')
 
-        engagement = Engagement.objects.create(engagement_type="CI/CD", name=engagement_name, product=product, lead=get_current_user(), target_start=timezone.now().date(), target_end=(timezone.now() + timedelta(days=365)).date(), deduplication_on_engagement=deduplication_on_engagement)
+        target_start = timezone.now().date()
+        if (target_end is None) or (target_start > target_end):
+            target_end = (timezone.now() + timedelta(days=365)).date()
+
+        engagement = Engagement.objects.create(engagement_type="CI/CD", name=engagement_name, product=product, lead=get_current_user(),
+                                               target_start=target_start, target_end=target_end,
+                                               deduplication_on_engagement=deduplication_on_engagement,
+                                               source_code_management_uri=source_code_management_uri)
 
         return engagement

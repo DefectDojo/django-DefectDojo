@@ -1,5 +1,5 @@
 $(function () {
-    $('body').append('<a id="toTop" title="Back to Top" class="btn btn-primary btn-circle"><i class="fa fa-fw fa-arrow-up"></i></a>');
+    $('body').append('<a id="toTop" title="Back to Top" class="btn btn-primary btn-circle"><i class="fa-solid fa-arrow-up fa-fw"></i></a>');
     $(window).scroll(function () {
         if ($(this).scrollTop() > 300) {
             $('#toTop').fadeIn();
@@ -25,7 +25,7 @@ $(function () {
     })
 
     setTimeout(function () {
-        $('.alert-dismissible').slideUp('slow')
+        $('.alert-dismissible').not('.announcement-banner').slideUp('slow')
     }, 20000);
 
     $('#side-menu').metisMenu();
@@ -61,7 +61,6 @@ $.fn.serializeObject = function()
     });
     return o;
 };
-
 
 function sidebar() {  // minimize side nav bar
     var action = 'min';
@@ -247,11 +246,11 @@ function togglePassVisibility() {
     // swap password
     if (passwdInput.type === "password") {
         passwdInput.type = "text";
-        toggleBox.innerHTML = "<i class='fa fa-eye-slash'></i>\
+        toggleBox.innerHTML = "<i class='fa-solid fa-eye-slash'></i>\
         <span><b>Hide Password</b></span>";
     } else {
         passwdInput.type = "password";
-        toggleBox.innerHTML = "<i class='fa fa-eye'></i>\
+        toggleBox.innerHTML = "<i class='fa-solid fa-eye'></i>\
         <span><b>Show Password</b></span>";
     }
 }

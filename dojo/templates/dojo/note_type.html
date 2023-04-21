@@ -10,18 +10,18 @@
                     <h3 class="has-filters">
                         Note Type List
                         <div class="dropdown pull-right">
-                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
-                            {% if "dojo.add_note_type"|has_configuration_permission %}
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                            {% if "dojo.add_note_type"|has_configuration_permission:request %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                   data-toggle="dropdown" aria-expanded="true">
-                              <span class="fa fa-wrench"></span>
+                              <span class="fa-solid fa-screwdriver-wrench"></span>
                               <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
                                         <a href="{% url 'add_note_type' %}">
-                                            <i class="fa fa-plus"></i> Add Note Type
+                                            <i class="fa-solid fa-plus"></i> Add Note Type
                                         </a>
                                     </li>
                             </ul>
@@ -77,23 +77,23 @@
                                 <a>Disabled</a>
                                 {% endif %}
                               </td>
-                              {% if "dojo.change_note_type"|has_configuration_permission %}
+                              {% if "dojo.change_note_type"|has_configuration_permission:request %}
                                     <td>
                                         <div class="centered">
                                             <div class="btn-group" role="group">
                                                 <a class="btn btn-sm btn-warning"
                                                    href="{% url 'edit_note_type' nt.id %}">
-                                                    <i class="fa fa-pencil"></i> Edit Note Type
+                                                    <i class="fa-solid fa-file"></i> Edit Note Type
                                                 </a>
                                                 {% if nt.is_active %}
                                                 <a class="btn btn-sm btn-danger"
                                                    href="{% url 'disable_note_type' nt.id %}">
-                                                    <i class="fa fa-times"></i> Disable Note Type
+                                                    <i class="fa-solid fa-xmark"></i> Disable Note Type
                                                 </a>
                                                 {% else %}
                                                 <a class="btn btn-sm btn-success"
                                                    href="{% url 'enable_note_type' nt.id %}">
-                                                    <i class="fa fa-check"></i> Enable Note Type
+                                                    <i class="fa-solid fa-check"></i> Enable Note Type
                                                 </a>
                                                 {% endif %}
                                             </div>

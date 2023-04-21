@@ -31,19 +31,19 @@
                 <div id="test-pulldown" class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" aria-expanded="true">
-                        <span class="fa fa-bars"></span>
+                        <span class="fa-solid fa-bars"></span>
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         {% if test|has_object_permission:"Test_Edit" %}
                         <li role="presentation">
                             <a href="{% url 'edit_test' test.id %}">
-                                <i class="fa fa-pencil-square-o"></i> Edit Test
+                                <i class="fa-solid fa-pen-to-square"></i> Edit Test
                             </a>
                         </li>
                         <li>
                             <a class="" href="{% url 'copy_test' test.id %}?return_url={{ request.get_full_path|urlencode }}"/>
-                                <i class="fa fa-copy"></i> Copy Test
+                                <i class="fa-solid fa-copy"></i> Copy Test
                             </a>
                         </li>
                         {% endif %}
@@ -51,7 +51,7 @@
                         {% if test|has_object_permission:"Import_Scan_Result" %}
                             <li role="presentation">
                                 <a href="{% url 're_import_scan_results' test.id %}">
-                                    <i class="fa fa-upload"></i> Re-Upload Scan
+                                    <i class="fa-solid fa-upload"></i> Re-Upload Scan
                                 </a>
                             </li>
                         {% endif %}
@@ -59,50 +59,30 @@
                         {% if test|has_object_permission:"Note_Add" %}
                         <li role="presentation">
                             <a id="add_notes_link" href="#add_notes">
-                                <i class="fa fa-comments"></i> Add Notes
+                                <i class="fa-solid fa-comments"></i> Add Notes
                             </a>
                         </li>
                         {% endif %}
                         <li role="presentation">
                             <a href="{% url 'test_report' test.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
-                                <i class="fa fa-file-text-o"></i> Report
+                                <i class="fa-solid fa-file-lines"></i> Report
                             </a>
                         </li>
-                      {% if show_export %}
-                        {% if sheet_url is null %}
-                          <li role="presentation">
-                              <a href="{% url 'export_to_sheet' test.id %}">
-                                  <i class="fa fa-file-excel-o"></i> Create Google Sheet
-                              </a>
-                          </li>
-                        {% else %}
-                          <li role="presentation">
-                              <a href="{{ sheet_url }}">
-                                  <i class="fa fa-file-excel-o"></i> View Google Sheet
-                              </a>
-                          </li>
-                          <li role="presentation">
-                              <a href="{% url 'export_to_sheet' test.id %}">
-                                  <i class="fa fa-refresh"></i> Sync Google Sheet
-                              </a>
-                          </li>
-                        {% endif %}
-                      {% endif %}
                         <li role="presentation">
                             <a href="{% url 'test_ics' test.id %}">
-                                <i class="fa fa-calendar-plus-o"></i> Add To Calendar
+                                <i class="fa-solid fa-calendar-plus"></i> Add To Calendar
                             </a>
                         </li>
                         <li role="presentation">
                             <a href="{% url 'action_history' test|content_type test.id %}">
-                                <i class="fa fa-history"></i> View History
+                                <i class="fa-solid fa-clock-rotate-left"></i> View History
                             </a>
                         </li>
                         {% if test|has_object_permission:"Test_Delete" %}
                         <li role="separator" class="divider"></li>
                         <li role="presentation">
                             <a class="text-danger" href="{% url 'delete_test' test.id %}">
-                                <i class="fa fa-trash"></i> Delete Test
+                                <i class="fa-solid fa-trash"></i> Delete Test
                             </a>
                         </li>
                         {% endif %}
@@ -123,7 +103,7 @@
                     <th>Version</th>
                     {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.test_import_set.all %}
                         <th>Reimports
-                            <i class="fa fa-question-circle has-popover" data-trigger="hover"
+                            <i class="fa-solid fa-circle-question has-popover" data-trigger="hover"
                                 data-content="Total numbers of reimports done for this test."
                                 data-placement="right" data-container="body" data-original-title="" title="">
                             </i>
@@ -199,12 +179,12 @@
             <div class="panel-heading">
                 <div class="clearfix">
                     <h4 class="has-filters">Import History ({{  test.total_reimport_count }})
-                        <i class="fa fa-question-circle has-popover" data-trigger="hover"
+                        <i class="fa-solid fa-circle-question has-popover" data-trigger="hover"
                             data-content="List of imports/reimports that created/closed/reactivated any findings in this test."
                             data-placement="right" data-container="body" data-original-title="" title="">
                         </i>
                         <div class="dropdown pull-right">
-                            <button id="show-filters" data-toggle="collapse" data-target="#import-history-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            <button id="show-filters" data-toggle="collapse" data-target="#import-history-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                             &nbsp;
                             <span class="pull-right">
                                 <a data-toggle="collapse" href="#import_history">
@@ -304,7 +284,6 @@
     </div>
 
     <div id="finding_groups_panel" class="panel panel-default table-responsive collapse">
-        <span>Experimental feature, use bulk edit to create/edit them</span>
         {% if finding_groups %}
             <table id="finding_groups" class="table-striped tablesorter-bootstrap table table-condensed table-hover">
                 <thead>
@@ -337,17 +316,12 @@
                         <td class="nowrap">
                             <div class="align-top">
                             <div class="dropdown">
-                                <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
+                                <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
                                 <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                                    <li>
-                                        <a class="" href="{% url 'view_finding_group' group.id %}">
-                                        <i class="fa fa-arrow-circle-right"></i> View
-                                        </a>
-                                    </li>
                                     {% if group|has_object_permission:"Finding_Group_Edit" %}
                                         <li>
-                                            <a class="" href="{% url 'edit_finding_group' group.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                            <i class="fa fa-pencil-square-o"></i> Edit
+                                            <a class="" href="{% url 'view_finding_group' group.id %}">
+                                            <i class="fa-solid fa-pen-to-square"></i> View/Edit
                                             </a>
                                         </li>
                                     {% endif %}
@@ -360,7 +334,7 @@
                                             <input type="hidden" name="id" value="{{ finding.id }}"/>
                                             </form>
                                             <a class="text-danger delete-finding-group" id="delete-finding-group-menu-{{ group.id }}" data-group-id={{ group.id }} href="#">
-                                            <i class="fa fa-trash"></i> Delete
+                                            <i class="fa-solid fa-trash"></i> Delete
                                             </a>
                                         </li>
                                     {% endif %}
@@ -420,13 +394,13 @@
                                     {% if group.jira_issue %}
                                         <a href="{{ group | jira_issue_url }}"
                                         target="_blank" title="{{ group | jira_issue_url }}">{{ group | jira_key }}</a>
-                                        <i id="unlink_group_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa fa-trash unlink_group_jira" title="Unlink JIRA issue from this group of findings."></i>
-                                        <i id="push_group_to_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa fa-share-square push_group_to_jira" title="Update JIRA issue with current data from this group of findings."></i>
+                                        <i id="unlink_group_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa-solid fa-trash unlink_group_jira" title="Unlink JIRA issue from this group of findings."></i>
+                                        <i id="push_group_to_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa-solid fa-share-from-square push_group_to_jira" title="Update JIRA issue with current data from this group of findings."></i>
                                     {% else %}
                                         None
-                                        <i id="push_group_to_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa fa-share-square push_group_to_jira" title="Create JIRA issue for this group of findings"></i>
+                                        <i id="push_group_to_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa-solid fa-share-from-square push_group_to_jira" title="Create JIRA issue for this group of findings"></i>
                                         {% comment %} <a href="{% url 'finding_link_to_jira' group.id %}" title="Link existing JIRA issue to finding.">
-                                            <i class="fa fa-asterisk" title="Link existing JIRA issue to finding."></i>
+                                            <i class="fa-solid fa-asterisk" title="Link existing JIRA issue to finding."></i>
                                         </a> {% endcomment %}
                                     {% endif %}
                                 </td>
@@ -460,17 +434,17 @@
                 <h4 class="has-filters"> Findings ({{findings.total_count}}) <small>{{ test.id|get_severity_count:"test" }}</small>
                     <div class="dropdown pull-right"></div>
                     <div id="test-pulldown" class="dropdown pull-right">
-                        &nbsp;<button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                        &nbsp;<button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                         {% if test|has_object_permission:"Finding_Add" %}
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu_test_add"
                                 data-toggle="dropdown" aria-expanded="true">
-                            <span class="fa fa-plus"></span>
+                            <span class="fa-solid fa-plus"></span>
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu_test_add">
                             <li role="presentation">
                                 <a title="Add Finding" href="{% url 'add_findings' test.id %}">
-                                    <span class="fa fa-bug"></span> New Finding
+                                    <span class="fa-solid fa-bug"></span> New Finding
                                 </a>
                             </li>
                             <li role="presentation">
@@ -485,23 +459,23 @@
                     <div id="test-pulldown" class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" aria-expanded="true">
-                        <span class="fa fa-download"></span>
+                        <span class="fa-solid fa-download"></span>
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                     <li role="presentation">
                         <a href="{% url 'quick_report' %}?url={{ request.get_full_path }}">
-                            <i class="fa fa-file-text-o"></i> Report
+                            <i class="fa-solid fa-file-lines"></i> Report
                         </a>
                     </li>
                     <li role="presentation">
                         <a href="{% url 'csv_export' %}?url={{ request.get_full_path }}">
-                            <i class="fa fa-table"></i> CSV Export
+                            <i class="fa-solid fa-table"></i> CSV Export
                         </a>
                     </li>
                     <li role="presentation">
                         <a href="{% url 'excel_export' %}?url={{ request.get_full_path }}">
-                            <i class="fa fa-file-excel-o"></i> Excel Export
+                            <i class="fa-solid fa-file-excel"></i> Excel Export
                         </a>
                     </li>
                     </ul>
@@ -529,14 +503,14 @@
                 {% if product_tab and not 'DISABLE_FINDING_MERGE'|setting_enabled %}
                     <button type="button" id="merge_findings" class="btn btn-info btn-sm btn-secondary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
                         <a class="white-color merge" href="#" alt="Merge Findings">
-                            <i class="fa fa-compress"></i>
+                            <i class="fa-solid fa-down-left-and-up-right-to-center"></i>
                         </a>
                     </button>
                 {% endif %}
                 {% if test|has_object_permission:"Finding_Delete" %}
                     <button type="button" class="btn btn-info btn-sm btn-secondary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
                         <a class="white-color delete-bulk" href="#" alt="Delete Findings">
-                            <i class="fa fa-trash"></i>
+                            <i class="fa-solid fa-trash"></i>
                         </a>
                     </button>
                 {% endif %}
@@ -703,22 +677,22 @@
                         <td class="nowrap">
                             <div class="align-top">
                             <div class="dropdown">
-                                <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
+                                <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
                                 <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
                                     <li>
                                         <a class="" href="{% url 'view_finding' finding.id %}">
-                                        <i class="fa fa-arrow-circle-right"></i> View
+                                        <i class="fa-solid fa-circle-right"></i> View
                                         </a>
                                     </li>
                                     {% if finding|has_object_permission:"Finding_Edit" %}
                                         <li>
                                             <a class="" href="{% url 'edit_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                            <i class="fa fa-pencil-square-o"></i> Edit
+                                            <i class="fa-solid fa-pen-to-square"></i> Edit
                                             </a>
                                         </li>
                                         <li>
                                             <a class="" href="{% url 'copy_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}"/>
-                                            <i class="fa fa-copy"></i> Copy
+                                            <i class="fa-solid fa-copy"></i> Copy
                                             </a>
                                         </li>
                                         <li class="divider"></li>
@@ -737,33 +711,33 @@
                                         {% endif %}
                                         <li role="presentation">
                                             <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                <i class="fa fa-clock-o"></i> Touch Finding
+                                                <i class="fa-solid fa-clock"></i> Touch Finding
                                             </a>
                                         </li>
                                     {% endif %}
-                                    {% if "dojo.add_finding_template"|has_configuration_permission %}
+                                    {% if "dojo.add_finding_template"|has_configuration_permission:request %}
                                         <li role="presentation">
                                             <a href="{% url 'mktemplate' finding.id %}">
-                                                <i class="fa fa-copy"></i> Make Finding a Template
+                                                <i class="fa-solid fa-copy"></i> Make Finding a Template
                                             </a>
                                         </li>
                                     {% endif %}
-                                    {% if finding|has_object_permission:"Finding_Edit" and "dojo.view_finding_template"|has_configuration_permission %}
+                                    {% if finding|has_object_permission:"Finding_Edit" and "dojo.view_finding_template"|has_configuration_permission:request %}
                                         <li role="presentation">
                                             <a href="{% url 'find_template_to_apply' finding.id %}">
-                                                <i class="fa fa-copy"></i> Apply Template to Finding
+                                                <i class="fa-solid fa-copy"></i> Apply Template to Finding
                                             </a>
                                         </li>
                                         {% if finding.active %}
                                             <li role="presentation">
                                                 <a href="{% url 'close_finding' finding.id %}">
-                                                    <i class="fa fa-fire-extinguisher"></i> Close Finding
+                                                    <i class="fa-solid fa-fire-extinguisher"></i> Close Finding
                                                 </a>
                                             </li>
                                         {% else %}
                                             <li role="presentation">
                                                 <a href="{% url 'reopen_finding' finding.id %}">
-                                                    <i class="fa fa-bug"></i> Open Finding
+                                                    <i class="fa-solid fa-bug"></i> Open Finding
                                                 </a>
                                             </li>
                                         {% endif %}
@@ -772,7 +746,7 @@
                                         {% if finding.risk_accepted %}
                                             <li role="presentation">
                                             <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                <i class="fa fa-exclamation-circle"></i> Unaccept Risk
+                                                <i class="fa-solid fa-circle-exclamation"></i> Unaccept Risk
                                             </a>
                                             </li>
                                         {% else %}
@@ -780,14 +754,14 @@
                                                 {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
                                                     <li role="presentation">
                                                         <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                            <i class="fa fa-exclamation-circle"></i> Accept Risk
+                                                            <i class="fa-solid fa-circle-exclamation"></i> Accept Risk
                                                         </a>
                                                     </li>
                                                 {% endif %}
                                                 {% if finding.test.engagement.product.enable_full_risk_acceptance %}
                                                     <li role="presentation">
                                                         <a href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
-                                                            <i class="fa fa-exclamation-circle"></i> Add Risk Acceptance...
+                                                            <i class="fa-solid fa-circle-exclamation"></i> Add Risk Acceptance...
                                                         </a>
                                                     </li>
                                                 {% endif %}
@@ -797,7 +771,7 @@
                                     <li class="divider"></li>
                                     <li role="presentation">
                                         <a href="{% url 'action_history' finding|content_type finding.id %}">
-                                            <i class="fa fa-history"></i> View History
+                                            <i class="fa-solid fa-clock-rotate-left"></i> View History
                                         </a>
                                     </li>
                                     {% if finding|has_object_permission:"Finding_Delete" %}
@@ -810,7 +784,7 @@
                                             <input type="hidden" name="id" value="{{ finding.id }}"/>
                                             </form>
                                             <a class="text-danger delete-finding" id="delete-finding-menu-{{ finding.id }}" href="#">
-                                            <i class="fa fa-trash"></i> Delete
+                                            <i class="fa-solid fa-trash"></i> Delete
                                             </a>
                                         </li>
                                     {% endif %}
@@ -847,7 +821,7 @@
                                         {% else %}
                                             &#10005;
                                         {% endif %}
-                                         {{ endpoint_status.endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}<br/>
+                                         {{ endpoint_status.endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}<br/>
                                     {% endfor %}
                                 " data-placement="right" data-container="body" data-original-title="Endpoints ({{finding.active_endpoint_count}} Active, {{finding.mitigated_endpoint_count}} Mitigated)" title=""></i>
                               {% endif %}
@@ -863,7 +837,7 @@
                         <td class="nowrap">
                         {% if finding.cwe > 0 %}
                           <a target="_blank" href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
-                              <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                              <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe }}
                           </a>
                         {% endif %}
                         </td>
@@ -872,7 +846,7 @@
                             {% if first_vulnerability_id %}
                                 {% if first_vulnerability_id|has_vulnerability_url %}
                                 <a target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">
-                                    <i class="fa fa-external-link"></i> {{ first_vulnerability_id|default:"" }}
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ first_vulnerability_id|default:"" }}
                                 </a>
                                 {% else %}
                                     {{ first_vulnerability_id }}
@@ -966,7 +940,7 @@
                                    name="{{ test.id }}"/>
                             <span class="input-group-btn">
                                     <button id="the_button" class="btn btn-success" type="submit"><i id="fa-icon"
-                                                                                                     class="fa fa-fw fa-plus"></i>
+                                                                                                     class="fa-solid fa-plus fa-fw"></i>
                                         Add Potential Finding
                                     </button>
                                 </span>
@@ -1042,7 +1016,7 @@
                 <h4>Credentials
                   {% if not cred_test and creds and test|has_object_permission:"Test_Edit" %}
                     <a title="Add New Credential" class="pull-right btn btn-primary btn-sm"
-                       href="{% url 'new_cred_engagement_test' test.id %}"><span class="fa fa-plus"></span></a>
+                       href="{% url 'new_cred_engagement_test' test.id %}"><span class="fa-solid fa-plus"></span></a>
                   {% endif %}
                 </h4>
             </div>
@@ -1146,7 +1120,7 @@
                     {% if test|has_object_permission:"Test_Edit" %}
                     <a title="Manage Files" name="Manage Files" class="btn btn-sm btn-primary pull-right"
                     href="{% url 'manage_files' oid=test.id obj_type='Test' %}">
-                    <span class="fa fa-edit"></span></a>
+                    <span class="fa-solid fa-pen-to-square"></span></a>
                     {% endif %}
                 </h4>
             </div>
@@ -1178,7 +1152,7 @@
 {% include "dojo/snippets/comments.html" with notes=notes object=test destination="test" %}
 
 <div class="protip">
-    <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit this test. Type <kbd>a</kbd> to add a finding to this test.
+    <i class="fa-solid fa-lightbulb"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit this test. Type <kbd>a</kbd> to add a finding to this test.
 </div>
 {% endblock %}
 {% block postscript %}
@@ -1623,7 +1597,7 @@
         });
 
         function jira_action(elem, url) {
-            $(elem).removeClass().addClass('fa fa-spinner fa-spin')
+            $(elem).removeClass().addClass('fa-solid fa-spin fa-spinner')
 
             $.ajax({
                 type: "post",

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load static %}
 {% block content %}
     {{ block.super }}
@@ -11,12 +12,12 @@
                         class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <thead>
                         <tr>
-                            <th>Type</th>
-                            <th>Source</th>
-                            <th>Title</th>
-                            <th>Description</th>
-                            <th>Timeframe</th>
-                            <th class="hidden-sm centered" title="Select all visible alerts.">
+                            <th>{% trans "Type" %}</th>
+                            <th>{% trans "Source" %}</th>
+                            <th>{% trans "Title" %}</th>
+                            <th>{% trans "Description" %}</th>
+                            <th>{% trans "Timeframe" %}</th>
+                            <th class="hidden-sm centered" title="{% trans "Select all visible alerts" %}">
                                     <input type="checkbox" name="select_all" id="select_all"/>
                             </th>
                         </tr>
@@ -24,7 +25,7 @@
                         <tbody>
                         {% for alert in alerts %}
                             <tr>
-                                <td class="text-center"><i class="fa fa-{{ alert.icon }} fa-fw"></i></td>
+                                <td class="text-center"><i class="fa-solid fa-{{ alert.icon }} fa-fw"></i></td>
                                 <td class="text-center">{{ alert.source }}</td>
                                 <td>{%if alert.url %}<a href="{{ alert.url }}">{% endif %}{{ alert.title }}{% if alert.url %}</a>{% endif %}</td>
                                 <td>{{ alert.description|linebreaks }}</td>
@@ -38,15 +39,15 @@
                         </tbody>
                     </table>
                 </div>
-                <button class="btn btn-primary pull-right" type="submit">Remove selected</button>
+                <button class="btn btn-primary pull-right" type="submit">{% trans "Remove selected" %}</button>
             </form>
         </div>
         <div class="col-md-12">
             <div class="clearfix">
-                {% include "dojo/paging_snippet.html" with page=alerts page_size=False%}
+                {% include "dojo/paging_snippet.html" with page=alerts page_size=False %}
             </div>
             {% else %}
-                <p class="text-center">No alerts found.</p>
+                <p class="text-center">{% trans "No alerts found." %}</p>
             {% endif %}
         </div>
     </div>

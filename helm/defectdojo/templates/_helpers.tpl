@@ -71,7 +71,16 @@ Create chart name and version as used by the chart label.
 {{- if .Values.redis.enabled -}}
 {{- printf "%s-%s" .Release.Name "redis-master" | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- printf "%s" .Values.redis.redisServer -}}
+{{- printf "%s" (.Values.celery.brokerHost | default .Values.redis.redisServer) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- define "rabbitmq.hostname" -}}
+{{- if eq .Values.celery.broker "rabbitmq" -}}
+{{- if .Values.rabbitmq.enabled -}}
+{{- printf "%s-%s" .Release.Name "rabbitmq" | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- .Values.celery.brokerHost -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -83,6 +92,8 @@ Create chart name and version as used by the chart label.
 {{- if eq .Values.celery.broker "redis" -}}
 {{- if .Values.redis.transportEncryption.enabled -}}
 {{- printf "rediss" -}}
+{{- else if eq .Values.redis.scheme "sentinel" -}}
+{{- printf "sentinel" -}}
 {{- else -}}
 {{- printf "redis" -}}
 {{- end -}}

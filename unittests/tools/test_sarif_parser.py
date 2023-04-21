@@ -28,6 +28,19 @@ class TestSarifParser(DojoTestCase):
         for finding in findings:
             self.common_checks(finding)
 
+    def test_suppression_report(self):
+        """test report file having different suppression definitions"""
+        testfile = open(path.join(path.dirname(__file__), "../scans/sarif/suppression_test.sarif"))
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            if finding.title == "Suppressed":
+                self.assertEqual(True, finding.false_p)
+                self.assertEqual(False, finding.active)
+            else:
+                self.assertEqual(False, finding.false_p)
+                self.assertEqual(True, finding.active)
+
     def test_example2_report(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sarif/appendix_k.sarif"))
         parser = SarifParser()
@@ -69,7 +82,7 @@ class TestSarifParser(DojoTestCase):
         self.assertEqual(15, item.line)
         description = """**Result message:** Variable "count" was used without being initialized.
 **Rule full description:** A variable was used without being initialized. This can result in runtime errors such as null reference exceptions."""
-        self.assertEquals(description, item.description)
+        self.assertEqual(description, item.description)
         for finding in findings:
             self.common_checks(finding)
 
@@ -535,14 +548,14 @@ class TestSarifParser(DojoTestCase):
     def test_get_fingerprints_hashes(self):
         # example from 3.27.16 of the spec
         data = {"fingerprints": {"stableResultHash/v2": "234567900abcd", "stableResultHash/v3": "34567900abcde"}}
-        self.assertEquals(
+        self.assertEqual(
             {"stableResultHash": {"version": 3, "value": "34567900abcde"}},
             get_fingerprints_hashes(data["fingerprints"]),
         )
 
         # example than reverse the order
         data2 = {"fingerprints": {"stableResultHash/v2": "234567900abcd", "stableResultHash/v1": "34567900abcde"}}
-        self.assertEquals(
+        self.assertEqual(
             {"stableResultHash": {"version": 2, "value": "234567900abcd"}},
             get_fingerprints_hashes(data2["fingerprints"]),
         )

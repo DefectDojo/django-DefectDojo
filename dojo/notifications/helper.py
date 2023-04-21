@@ -63,7 +63,7 @@ def create_notification(event=None, **kwargs):
 
         # System notifications
         try:
-            system_notifications = Notifications.objects.get(user=None)
+            system_notifications = Notifications.objects.get(user=None, template=False)
         except Exception:
             system_notifications = Notifications()
 
@@ -128,8 +128,7 @@ def create_description(event, *args, **kwargs):
 
 
 def create_notification_message(event, user, notification_type, *args, **kwargs):
-    template = 'notifications/%s.tpl' % event.replace('/', '')
-    kwargs.update({'type': notification_type})
+    template = f"notifications/{notification_type}/{event.replace('/', '')}.tpl"
     kwargs.update({'user': user})
 
     notification_message = None
@@ -143,7 +142,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     finally:
         if not notification_message:
             kwargs["description"] = create_description(event, *args, **kwargs)
-            notification_message = render_to_string('notifications/other.tpl', kwargs)
+            notification_message = render_to_string(f"notifications/{notification_type}/other.tpl", kwargs)
 
     return notification_message if notification_message else ''
 
@@ -291,7 +290,7 @@ def send_mail_notification(event, user=None, *args, **kwargs):
         )
         email.content_subtype = 'html'
         logger.debug('sending email alert')
-        # logger.info(create_notification_message(event, 'mail'))
+        # logger.info(create_notification_message(event, user, 'mail', *args, **kwargs))
         email.send(fail_silently=False)
 
     except Exception as e:

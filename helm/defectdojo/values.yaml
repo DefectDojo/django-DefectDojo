@@ -109,6 +109,8 @@ annotations: {}
 # Components
 celery:
   broker: rabbitmq
+  # To use an external celery broker, set the hostname here
+  brokerHost: ""
   logLevel: INFO
   beat:
     annotations: {}
@@ -415,7 +417,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.33.0
+    tag: 1.33.6
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
@@ -468,6 +470,7 @@ rabbitmq:
 # For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/master/bitnami/redis
 redis:
   enabled: false
+  scheme: "redis"
   transportEncryption:
     enabled: false
     params: ''
@@ -479,6 +482,7 @@ redis:
   # To use an external Redis instance, set enabled to false and uncomment
   # the line below:
   # redisServer: myrediscluster
+
 
 # To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
 # NOTE  Do not store any kind of sensitive information inside of it

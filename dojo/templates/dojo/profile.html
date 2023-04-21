@@ -1,26 +1,27 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load i18n %}
 {% block content %}
     {{ block.super }}
-    <h3> User Profile - {{ user.get_full_name }}</h3>
+    <h3>{% blocktrans with full_name=user.get_full_name %} User Profile - {{ full_name }}{% endblocktrans %}</h3>
     <div class="row">
         <div class="col-md-7">
             <form class="form-horizontal" method="post">{% csrf_token %}
                 <fieldset>
-                    <legend>Default Information</legend>
+                    <legend>{% trans "Default Information" %}</legend>
                     {% include "dojo/form_fields.html" with form=form %}
                 </fieldset>
                         <fieldset>
-                    <legend>Additional Contact Information</legend>
+                    <legend>{% trans "Additional Contact Information" %}</legend>
                     {% include "dojo/form_fields.html" with form=contact_form %}
                 </fieldset>
                 <fieldset>
-                    <legend>Global Role</legend>
+                    <legend>{% trans "Global Role" %}</legend>
                     {% include "dojo/form_fields.html" with form=global_role_form %}
                 </fieldset>
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
-                        <input class="btn btn-primary" type="submit" value="Submit"/>
+                        <input class="btn btn-primary" type="submit" value="{% trans "Submit" %}"/>
                     </div>
                 </div>
             </form>
@@ -28,36 +29,36 @@
         <div class="col-md-4">
             <div class="well">
                 <ul class="list-unstyled">
-                    <li><b>Last Login: </b>{{ user.last_login }}</li>
-                    <li><b>Date Joined: </b>{{ user.date_joined }}</li>
+                    <li><b>{% trans "Last Login:" %} </b>{{ user.last_login }}</li>
+                    <li><b>{% trans "Date Joined:" %} </b>{{ user.date_joined }}</li>
                 </ul>
                 <div class="center" style="margin: auto; text-align: center;">
                 {% if user.has_usable_password %}
-                    <a class="btn btn-sm btn-primary" href="{% url 'change_password' %}">Change Password</a>
+                    <a class="btn btn-sm btn-primary" href="{% url 'change_password' %}">{% trans "Change Password" %}</a>
                 {% endif %}
                 {% if API_TOKENS_ENABLED %}
-                    <a class="btn btn-sm btn-primary" href="{% url 'api_v2_key' %}">API Key</a>
+                    <a class="btn btn-sm btn-primary" href="{% url 'api_v2_key' %}">{% trans "API Key" %}</a>
                 {% endif %}
                 </div>
             </div>
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="clearfix">
-                        <h4 class="pull-left">Groups</h4>
+                        <h4 class="pull-left">{% trans "Groups" %}</h4>
                         &nbsp;
                         <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
-                            <i class="fa fa-question-circle"></i></a>
+                            <i class="fa-solid fa-circle-question"></i></a>
                         {% if request.user.is_superuser %}
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddGroupMember"
                                     data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-bars"></span>
+                                <span class="fa-solid fa-bars"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu4">
                                 <li role="presentation">
                                     <a id="addGroupMember" href="{% url 'add_group_member_user' user.id %}">
-                                        <i class="fa fa-plus"></i> Add Groups
+                                        <i class="fa-solid fa-plus"></i>{% trans "Add Groups" %}
                                     </a>
                                 </li>
                             </ul>
@@ -71,8 +72,8 @@
                         <thead>
                         <tr>
                             <th></th>
-                            <th>Group</th>
-                            <th>Group role</th>
+                            <th>{% trans "Group" %}</th>
+                            <th>{% trans "Group role" %}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -89,7 +90,7 @@
                 </div>
                 {% else %}
                 <div class="panel-body">
-                    <small class="text-muted"><em>No group members found.</em></small>
+                    <small class="text-muted"><em>{% trans "No group members found." %}</em></small>
                 </div>
                 {% endif %}
             </div>

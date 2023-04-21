@@ -10,16 +10,17 @@ from django.apps import apps
 from auditlog.models import LogEntry
 from django.conf import settings
 import six
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
     BooleanFilter, NumberFilter, DateFilter
 from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate
+from django.db.models import JSONField
 import pytz
 from django.db.models import Q
 from dojo.models import Dojo_User, Finding_Group, Product_API_Scan_Configuration, Product_Type, Finding, Product, Test_Import, Test_Type, \
-    Endpoint, Development_Environment, Finding_Template, Note_Type, \
+    Endpoint, Development_Environment, Finding_Template, Note_Type, Risk_Acceptance, Cred_Mapping, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
     ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, Dojo_Group, Vulnerability_Id
 from dojo.utils import get_system_setting
@@ -206,7 +207,7 @@ def get_tags_label_from_model(model):
         return 'Tags (Unknown)'
 
 
-def get_finding_filter_fields(metrics=False, similar=False):
+def get_finding_filterset_fields(metrics=False, similar=False):
     fields = []
 
     if similar:
@@ -870,6 +871,7 @@ class ApiEngagementFilter(DojoFilter):
 
 class ProductFilter(DojoFilter):
     name = CharFilter(lookup_expr='icontains', label="Product Name")
+    name_exact = CharFilter(field_name='name', lookup_expr='iexact', label="Exact Product Name")
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
@@ -968,6 +970,7 @@ class ProductFilter(DojoFilter):
         # tuple-mapping retains order
         fields=(
             ('name', 'name'),
+            ('name_exact', 'name_exact'),
             ('prod_type__name', 'prod_type__name'),
             ('business_criticality', 'business_criticality'),
             ('platform', 'platform'),
@@ -978,6 +981,7 @@ class ProductFilter(DojoFilter):
         ),
         field_labels={
             'name': 'Product Name',
+            'name_exact': 'Exact Product Name',
             'prod_type__name': 'Product Type',
             'business_criticality': 'Business Criticality',
             'platform': 'Platform ',
@@ -1002,7 +1006,7 @@ class ProductFilter(DojoFilter):
 
     class Meta:
         model = Product
-        fields = ['name', 'prod_type', 'business_criticality', 'platform', 'lifecycle', 'origin', 'external_audience',
+        fields = ['name', 'name_exact', 'prod_type', 'business_criticality', 'platform', 'lifecycle', 'origin', 'external_audience',
                   'internet_accessible', 'tags']
 
 
@@ -1012,6 +1016,7 @@ class ApiProductFilter(DojoFilter):
     internet_accessible = BooleanFilter(field_name='internet_accessible')
     # CharFilter
     name = CharFilter(lookup_expr='icontains')
+    name_exact = CharFilter(field_name='name', lookup_expr='iexact')
     description = CharFilter(lookup_expr='icontains')
     business_criticality = CharFilter(method=custom_filter, field_name='business_criticality')
     platform = CharFilter(method=custom_filter, field_name='platform')
@@ -1105,6 +1110,8 @@ class ApiFindingFilter(DojoFilter):
     steps_to_reproduce = CharFilter(lookup_expr='icontains')
     unique_id_from_tool = CharFilter(lookup_expr='icontains')
     title = CharFilter(lookup_expr='icontains')
+    product_name = CharFilter(lookup_expr='engagement__product__name__iexact', field_name='test', label='exact product name')
+    product_name_contains = CharFilter(lookup_expr='engagement__product__name__icontains', field_name='test', label='exact product name')
     # DateRangeFilter
     created = DateRangeFilter()
     date = DateRangeFilter()
@@ -1352,7 +1359,7 @@ class FindingFilter(FindingFilterWithTags):
 
     class Meta:
         model = Finding
-        fields = get_finding_filter_fields()
+        fields = get_finding_filterset_fields()
 
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoints', 'references',
@@ -1419,7 +1426,7 @@ class SimilarFindingFilter(FindingFilter):
     class Meta(FindingFilter.Meta):
         model = Finding
         # slightly different fields from FindingFilter, but keep the same ordering for UI consistency
-        fields = get_finding_filter_fields(similar=True)
+        fields = get_finding_filterset_fields(similar=True)
 
     def __init__(self, data=None, *args, **kwargs):
         self.user = None
@@ -1593,7 +1600,7 @@ class MetricsFindingFilter(FindingFilter):
 
     class Meta(FindingFilter.Meta):
         model = Finding
-        fields = get_finding_filter_fields(metrics=True)
+        fields = get_finding_filterset_fields(metrics=True)
 
 
 class MetricsEndpointFilter(FilterSet):
@@ -1806,6 +1813,24 @@ class ApiEndpointFilter(DojoFilter):
         fields = ['id', 'protocol', 'userinfo', 'host', 'port', 'path', 'query', 'fragment', 'product']
 
 
+class ApiRiskAcceptanceFilter(DojoFilter):
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('name', 'name'),
+        ),
+    )
+
+    class Meta:
+        model = Risk_Acceptance
+        fields = [
+            'name', 'accepted_findings', 'recommendation', 'recommendation_details',
+            'decision', 'decision_details', 'accepted_by', 'owner', 'expiration_date',
+            'expiration_date_warned', 'expiration_date_handled', 'reactivate_expired',
+            'restart_sla_expired', 'notes',
+        ]
+
+
 class EngagementTestFilter(DojoFilter):
     lead = ModelChoiceFilter(queryset=Dojo_User.objects.none(), label="Lead")
     version = CharFilter(lookup_expr='icontains', label='Version')
@@ -1931,6 +1956,12 @@ class ApiAppAnalysisFilter(DojoFilter):
     class Meta:
         model = App_Analysis
         fields = ['product', 'name', 'user', 'version']
+
+
+class ApiCredentialsFilter(DojoFilter):
+    class Meta:
+        model = Cred_Mapping
+        fields = '__all__'
 
 
 class EndpointReportFilter(DojoFilter):
@@ -2132,6 +2163,14 @@ class LogEntryFilter(DojoFilter):
         model = LogEntry
         exclude = ['content_type', 'object_pk', 'object_id', 'object_repr',
                    'changes', 'additional_data', 'remote_addr']
+        filter_overrides = {
+            JSONField: {
+                'filter_class': CharFilter,
+                'extra': lambda f: {
+                    'lookup_expr': 'icontains',
+                }
+            }
+        }
 
 
 class ProductTypeFilter(DojoFilter):

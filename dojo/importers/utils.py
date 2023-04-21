@@ -28,16 +28,22 @@ def update_timestamps(test, version, branch_tag, build_id, commit_hash, now, sca
 
     if branch_tag:
         test.branch_tag = branch_tag
-        test.engagement.version = version
 
     if build_id:
         test.build_id = build_id
 
-    if branch_tag:
+    if commit_hash:
         test.commit_hash = commit_hash
 
     test.save()
     test.engagement.save()
+
+
+def update_tags(test, tags):
+    if tags:
+        test.tags = tags
+
+    test.save()
 
 
 def update_import_history(type, active, verified, tags, minimum_severity, endpoints_to_add, version, branch_tag,
@@ -53,7 +59,6 @@ def update_import_history(type, active, verified, tags, minimum_severity, endpoi
     import_settings['push_to_jira'] = push_to_jira
     import_settings['tags'] = tags
 
-    # tags=tags TODO no tags field in api for reimport it seems
     if endpoints_to_add:
         import_settings['endpoints'] = [str(endpoint) for endpoint in endpoints_to_add]
 
@@ -108,14 +113,17 @@ def chunk_list(list):
 
 
 def chunk_endpoints_and_disperse(finding, test, endpoints, **kwargs):
-    chunked_list = chunk_list(endpoints)
-    # If there is only one chunk, then do not bother with async
-    if len(chunked_list) < 2:
+    if settings.ASYNC_FINDING_IMPORT:
+        chunked_list = chunk_list(endpoints)
+        # If there is only one chunk, then do not bother with async
+        if len(chunked_list) < 2:
+            add_endpoints_to_unsaved_finding(finding, test, endpoints, sync=True)
+            return []
+        # First kick off all the workers
+        for endpoints_list in chunked_list:
+            add_endpoints_to_unsaved_finding(finding, test, endpoints_list, sync=False)
+    else:
         add_endpoints_to_unsaved_finding(finding, test, endpoints, sync=True)
-        return []
-    # First kick off all the workers
-    for endpoints_list in chunked_list:
-        add_endpoints_to_unsaved_finding(finding, test, endpoints_list, sync=False)
 
 
 # Since adding a model to a ManyToMany relationship does not require an additional

@@ -1,7 +1,9 @@
-name-template: '$NEXT_MINOR_VERSION 🌈'
-tag-template: '$NEXT_MINOR_VERSION'
+name-template: '$RESOLVED_VERSION 🌈'
+tag-template: '$RESOLVED_VERSION'
+
 branches:
   - master
+
 categories:
   - title: '💣 Breaking changes'
     labels:
@@ -35,17 +37,32 @@ categories:
       - 'bug'
   - title: 📝 Documentation updates
     label: 'documentation'
+  - title: '🖌 Updates in UI'
+    label: 'ui'
+  - title: '🗣 Updates in localization'
+    label: 'localization'
   - title: '🧰 Maintenance'
     labels:
       - 'dependencies'
       - 'maintenance'
-  - title: '🖌 Updates in UI'
-    label: 'ui'
 exclude-labels:
-  - 'skip-changelog'      
+  - 'skip-changelog'    
+  
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
   Please consult the [Upgrade notes in the documentation ](https://documentation.defectdojo.com/getting_started/upgrading/) for specific instructions for this release, and general upgrade instructions. Below is an automatically generated list of all PRs merged since the previous release.
   
   ## Changes since $PREVIOUS_TAG
   $CHANGES
+
+version-resolver:
+  major:
+    labels:
+      - 'major'
+  minor:
+    labels:
+      - 'minor'
+  patch:
+    labels:
+      - 'patch'
+  default: patch

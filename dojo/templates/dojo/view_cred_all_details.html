@@ -18,31 +18,31 @@
                 <div id="test-pulldown" class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" aria-expanded="true">
-                        <span class="fa fa-bars"></span>
+                        <span class="fa-solid fa-bars"></span>
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         {% if edit_link %}
                         <li role="presentation">
                             <a href="{{edit_link}}">
-                                <i class="fa fa-pencil-square-o"></i> Edit {{cred_type}} Credential
+                                <i class="fa-solid fa-pen-to-square"></i> Edit {{cred_type}} Credential
                             </a>
                         </li>
                         {% endif %}
                         <li role="presentation">
                             <a href="{% url 'edit_cred' cred.cred_id.id  %}">
-                                <i class="fa fa-pencil-square-o"></i> Edit Global Credential
+                                <i class="fa-solid fa-pen-to-square"></i> Edit Global Credential
                             </a>
                         </li>
                         <li role="presentation">
                             <a id="add_notes_link" href="#add_notes">
-                                <i class="fa fa-comments"></i> Add Notes
+                                <i class="fa-solid fa-comments"></i> Add Notes
                             </a>
                         </li>
                         <li role="separator" class="divider"></li>
                         <li role="presentation">
                             <a class="text-danger" href="{{delete_link}}">
-                                <i class="fa fa-trash"></i> Delete {{cred_type}} Credential Mapping
+                                <i class="fa-solid fa-trash"></i> Delete {{cred_type}} Credential Mapping
                             </a>
                         </li>
 

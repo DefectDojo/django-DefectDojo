@@ -11,7 +11,7 @@ services:
   nginx:
     build:
       context: ./
-      dockerfile: Dockerfile.nginx
+      dockerfile: "Dockerfile.nginx-${DEFECT_DOJO_OS:-debian}"
     image: "defectdojo/defectdojo-nginx:${NGINX_VERSION:-latest}"
     profiles: 
       - mysql-rabbitmq
@@ -36,7 +36,7 @@ services:
   uwsgi:
     build:
       context: ./
-      dockerfile: Dockerfile.django
+      dockerfile: "Dockerfile.django-${DEFECT_DOJO_OS:-debian}"
       target: django
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
     profiles: 
@@ -130,7 +130,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   mysql:
-    image: mysql:5.7.40@sha256:f5e2d4d7dccdc3f2a1d592bd3f0eb472b2f72f9fb942a84ff5b5cc049fe63a04
+    image: mysql:5.7.42@sha256:f57eef421000aaf8332a91ab0b6c96b3c83ed2a981c29e6528b21ce10197cd16
     profiles: 
       - mysql-rabbitmq
       - mysql-redis
@@ -143,7 +143,7 @@ services:
     volumes:
       - defectdojo_data:/var/lib/mysql
   postgres:
-    image: postgres:15.0-alpine@sha256:09d57b502063c77d8896683ff5126187025d7b2e2b4378a896b90dced36bc083
+    image: postgres:15.2-alpine@sha256:0ce2f7c363133126dbcb1d3409dc523ecd243c55ca95a19b9b3c73c31c670b4a
     profiles: 
       - postgres-rabbitmq
       - postgres-redis
@@ -154,14 +154,14 @@ services:
     volumes:
       - defectdojo_postgres:/var/lib/postgresql/data
   rabbitmq:
-    image: rabbitmq:3.11.2-alpine@sha256:2b0f0452ab7821049f14aff2f45dc737eea164e02dc505777fc40891baed10d1
+    image: rabbitmq:3.11.13-alpine@sha256:4114c3b1f41c6a1cfd07e000d752701d8d08c5900b0608c57b03d744ea959a65
     profiles: 
       - mysql-rabbitmq
       - postgres-rabbitmq
     volumes:
        - defectdojo_rabbitmq:/var/lib/rabbitmq
   redis:
-    image: redis:7.0.5-alpine@sha256:52a9a5fdb81c609cb9ae1048d21616340673eff358dcad300647761c05d75df3
+    image: redis:7.0.11-alpine@sha256:da0cc759968a286f9fa8e3a0d8faca70e4dcf8ffc25fd290a041c59a9eb725c7
     profiles: 
       - mysql-redis
       - postgres-redis

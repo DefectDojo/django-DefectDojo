@@ -14,21 +14,21 @@
               <h3 class="has-filters">
                   Metrics Overview
                 <div class="dropdown pull-right ">
-                    <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                    <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
-                        <span class="fa fa-bars"></span>
+                        <span class="fa-solid fa-bars"></span>
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
                             <a href="{% url 'view_product_metrics' prod.id %}?type=Finding">
-                                <i class="fa fa-file-text-o"></i> Measure Findings
+                                <i class="fa-solid fa-file-lines"></i> Measure Findings
                             </a>
                         </li>
                         <li role="presentation">
                             <a href="{% url 'view_product_metrics' prod.id %}?type=Endpoint">
-                                <i class="fa fa-file-text-o"></i> Measure Affected Endpoints
+                                <i class="fa-solid fa-file-lines"></i> Measure Affected Endpoints
                             </a>
                         </li>
                     </ul>
@@ -48,7 +48,7 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-crosshairs fa-2x"></i>
+                                <i class="fa-solid fa-crosshairs fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ verified_objs|length }}</span>
@@ -56,7 +56,7 @@
                                             href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that are open/active and verified">Verified
                                         {{ view }}{{ verified_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -67,7 +67,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Since {{ start_date }}."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Verified since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -77,14 +77,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-bug fa-2x"></i>
+                                <i class="fa-solid fa-bug fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ open_objs|length }}</span>
                                     <span><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                         title="Findings that are open/active, but not (yet) verified">Open
                                         {{ view }}{{ open_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -95,7 +95,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Opened since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Opened since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -105,14 +105,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-check fa-2x"></i>
+                                <i class="fa-solid fa-check fa-2x"></i>
 
                                 <div class="pull-right text-right">
                                     <span class="fa-2x">{{ accepted_objs|length }}</span>
                                     <span><a
                                             href="{% url 'accepted_findings' %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that have been accepted in a risk acceptance.">Risk Accepted
-                                    {{ view }}s <i class="fa fa-arrow-circle-right"></i></a>
+                                    {{ view }}s <i class="fa-solid fa-circle-right"></i></a>
                                 </span>
                                 </div>
                             </div>
@@ -123,7 +123,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Accepted since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Risk Accepted since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -133,14 +133,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-fire-extinguisher fa-2x"></i>
+                                <i class="fa-solid fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="text-right pull-right">
                                     <span class="fa-2x">{{ closed_objs|length }}</span>
                                     <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are closed and mitigated.">Closed
                                         {{ view }}{{ closed_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -151,7 +151,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Closed since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Closed since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -161,14 +161,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-fire-extinguisher fa-2x"></i>
+                                <i class="fa-solid fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="text-right pull-right">
                                     <span class="fa-2x">{{ false_positive_objs|length }}</span>
                                     <span><a href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are marked as false postive.">False-postive
                                         {{ view }}{{ false_positive_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -179,7 +179,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Flagged since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Flagged since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -189,7 +189,7 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-fire-extinguisher fa-2x"></i>
+                                <i class="fa-solid fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ out_of_scope_objs|length }}</span>
@@ -197,7 +197,7 @@
                                             href="{% url 'product_out_of_scope_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that are marked as out of scope.">Out Of Scope
                                         {{ view }}{{ out_of_scope_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -208,7 +208,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Since {{ start_date }}."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Since {{ start_date|date:"D., M. d, Y" }}.</small>
                     </div>
                 </div>
@@ -218,14 +218,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-bullseye fa-2x"></i>
+                                <i class="fa-solid fa-bullseye fa-2x"></i>
 
                                 <div class="text-right pull-right">
                                     <span class="fa-2x">{{ all_objs|length }}</span>
                                     <span><a href="{% url 'product_all_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="All findings.">Total
                                         {{ view }}{{ all_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -236,7 +236,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -246,14 +246,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-bug fa-2x"></i>
+                                <i class="fa-solid fa-bug fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ inactive_objs|length }}</span>
                                     <span><a href="{% url 'product_inactive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are not active but not mitigated for some reason">Inactive
                                         {{ view }}{{ inactive_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -264,7 +264,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Ingested since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Ingested since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -283,7 +283,7 @@
                     <div class="btn-group">
                       <!--
                         <button class="btn btn-primary clickable panel-collapsed">
-                            <span><i class="fa fa-bar-chart"></i></span>
+                            <span><i class="fa-solid fa-chart-column"></i></span>
                         </button>
                       -->
                     </div>
@@ -296,14 +296,14 @@
                     <div class="panel-heading">
                         Open, Closed, and Accepted Week to Week
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div id="open_close_weekly" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -313,14 +313,14 @@
                     <div class="panel-heading">
                         Week to Week by Severity
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div id="severity_weekly" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -330,14 +330,14 @@
                     <div class="panel-heading">
                         Critical Week to Week
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div id="severity_critical" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -347,14 +347,14 @@
                     <div class="panel-heading">
                         High Week to Week
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div id="severity_high" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -364,14 +364,14 @@
                     <div class="panel-heading">
                         Medium Week to Week
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div id="severity_medium" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -386,7 +386,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Finding age of {{ open_objs|length|apnumber }} open
                             finding{{ open_objs|length|pluralize }}</small>
                     </div>
@@ -397,14 +397,14 @@
                     <div class="panel-heading">
                         Weekly activity of findings reported
                             <i title="Weeks are only displayed if findings are available."
-                            class="text-info fa fa-info-circle"></i>
+                            class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div class="graph" id="punchcard"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -414,14 +414,14 @@
                     <div class="panel-heading">
                         Findings by Test Type
                         <i title="Test Types shown only if available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div class="graph" id="test_type"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Test Types shown only if available.</small>
                     </div>
                 </div>
@@ -436,7 +436,7 @@
                         <div id="open_vulnerabilities" class="graph"></div>
                     </div>
                     <div class="panel-footer">
-                        <i class="text-info fa fa-info-circle"></i>
+                        <i class="text-info fa-solid fa-circle-info"></i>
                         <small>Showing {{ open_vulnerabilities|length|apnumber }}
                             vulnerabilit{{ open_vulnerabilities|length|pluralize:"y,ies"}} from Open findings</small>
                     </div>
@@ -451,7 +451,7 @@
                         <div id="all_vulnerabilities" class="graph"></div>
                     </div>
                     <div class="panel-footer">
-                        <i class="text-info fa fa-info-circle"></i>
+                        <i class="text-info fa-solid fa-circle-info"></i>
                         <small>Showing {{ all_vulnerabilities|length|apnumber }}
                             vulnerabilit{{ all_vulnerabilities|length|pluralize:"y,ies"}} from all findings</small>
                     </div>
@@ -510,332 +510,83 @@
                 }
             });
 
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
+
             var ticks = [
                 [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
             ];
-            {% for f in accepted_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
 
-            var d1 = [
-                [0, critical],
-            ];
-            var d2 = [
-                [1, high],
-            ];
-            var d3 = [
-                [2, medium],
-            ];
-            var d4 = [
-                [3, low],
-            ];
-            var d5 = [
-                [4, info],
-            ];
-            accepted_objs(d1, d2, d3, d4, d5, ticks);
+            accepted_objs(
+                [[0, {{ accepted_objs_by_severity.Critical }}]],
+                [[1, {{ accepted_objs_by_severity.High }}]],
+                [[2, {{ accepted_objs_by_severity.Medium }}]],
+                [[3, {{ accepted_objs_by_severity.Low }}]],
+                [[4, {{ accepted_objs_by_severity.Info }}]],
+                ticks);
 
-            critical = 0;
-            high = 0;
-            medium = 0;
-            low = 0;
-            info = 0;
-            {% for f in inactive_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
+            inactive_objs(
+                [[0, {{ inactive_objs_by_severity.Critical }}]],
+                [[1, {{ inactive_objs_by_severity.High }}]],
+                [[2, {{ inactive_objs_by_severity.Medium }}]],
+                [[3, {{ inactive_objs_by_severity.Low }}]],
+                [[4, {{ inactive_objs_by_severity.Info }}]],
+                ticks);
 
-            d1 = [
-                [0, critical],
-            ];
-            d2 = [
-                [1, high],
-            ];
-            d3 = [
-                [2, medium],
-            ];
-            d4 = [
-                [3, low],
-            ];
-            d5 = [
-                [4, info],
-            ];
-            inactive_objs(d1, d2, d3, d4, d5, ticks);
+            open_objs(
+                [[0, {{ open_objs_by_severity.Critical }}]],
+                [[1, {{ open_objs_by_severity.High }}]],
+                [[2, {{ open_objs_by_severity.Medium }}]],
+                [[3, {{ open_objs_by_severity.Low }}]],
+                [[4, {{ open_objs_by_severity.Info }}]],
+                ticks);
 
-            critical = 0;
-            high = 0;
-            medium = 0;
-            low = 0;
-            info = 0;
-            {% for f in open_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
+            false_positive_objs(
+                [[0, {{ false_positive_objs_by_severity.Critical }}]],
+                [[1, {{ false_positive_objs_by_severity.High }}]],
+                [[2, {{ false_positive_objs_by_severity.Medium }}]],
+                [[3, {{ false_positive_objs_by_severity.Low }}]],
+                [[4, {{ false_positive_objs_by_severity.Info }}]],
+                ticks);
 
-            d1 = [
-                [0, critical],
-            ];
-            d2 = [
-                [1, high],
-            ];
-            d3 = [
-                [2, medium],
-            ];
-            d4 = [
-                [3, low],
-            ];
-            d5 = [
-                [4, info],
-            ];
-            open_objs(d1, d2, d3, d4, d5, ticks);
+            verified_objs(
+                [[0, {{ verified_objs_by_severity.Critical }}]],
+                [[1, {{ verified_objs_by_severity.High }}]],
+                [[2, {{ verified_objs_by_severity.Medium }}]],
+                [[3, {{ verified_objs_by_severity.Low }}]],
+                [[4, {{ verified_objs_by_severity.Info }}]],
+                ticks);
 
-            critical = 0;
-            high = 0;
-            medium = 0;
-            low = 0;
-            info = 0;
-            {% for f in false_positive_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
+            out_of_scope_objs(
+                [[0, {{ out_of_scope_objs_by_severity.Critical }}]],
+                [[1, {{ out_of_scope_objs_by_severity.High }}]],
+                [[2, {{ out_of_scope_objs_by_severity.Medium }}]],
+                [[3, {{ out_of_scope_objs_by_severity.Low }}]],
+                [[4, {{ out_of_scope_objs_by_severity.Info }}]],
+                ticks);
 
-            d1 = [
-                [0, critical],
-            ];
-            d2 = [
-                [1, high],
-            ];
-            d3 = [
-                [2, medium],
-            ];
-            d4 = [
-                [3, low],
-            ];
-            d5 = [
-                [4, info],
-            ];
-            false_positive_objs(d1, d2, d3, d4, d5, ticks);
-            
-            critical = 0;
-            high = 0;
-            medium = 0;
-            low = 0;
-            info = 0;
-            {% for f in verified_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
+            all_objs(
+                [[0, {{ all_objs_by_severity.Critical }}]],
+                [[1, {{ all_objs_by_severity.High }}]],
+                [[2, {{ all_objs_by_severity.Medium }}]],
+                [[3, {{ all_objs_by_severity.Low }}]],
+                [[4, {{ all_objs_by_severity.Info }}]],
+                ticks);
 
-            d1 = [
-                [0, critical],
-            ];
-            d2 = [
-                [1, high],
-            ];
-            d3 = [
-                [2, medium],
-            ];
-            d4 = [
-                [3, low],
-            ];
-            d5 = [
-                [4, info],
-            ];
-            verified_objs(d1, d2, d3, d4, d5, ticks);
-            
-            critical = 0;
-            high = 0;
-            medium = 0;
-            low = 0;
-            info = 0;
-            {% for f in out_of_scope_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
+            closed_objs(
+                [[0, {{ closed_objs_by_severity.Critical }}]],
+                [[1, {{ closed_objs_by_severity.High }}]],
+                [[2, {{ closed_objs_by_severity.Medium }}]],
+                [[3, {{ closed_objs_by_severity.Low }}]],
+                [[4, {{ closed_objs_by_severity.Info }}]],
+                ticks);
 
-            d1 = [
-                [0, critical],
-            ];
-            d2 = [
-                [1, high],
-            ];
-            d3 = [
-                [2, medium],
-            ];
-            d4 = [
-                [3, low],
-            ];
-            d5 = [
-                [4, info],
-            ];
-            out_of_scope_objs(d1, d2, d3, d4, d5, ticks);
-            
-            critical = 0;
-            high = 0;
-            medium = 0;
-            low = 0;
-            info = 0;
-            {% for f in all_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
+            new_objs(
+                [[0, {{ new_objs_by_severity.Critical }}]],
+                [[1, {{ new_objs_by_severity.High }}]],
+                [[2, {{ new_objs_by_severity.Medium }}]],
+                [[3, {{ new_objs_by_severity.Low }}]],
+                [[4, {{ new_objs_by_severity.Info }}]],
+                ticks);
 
-            d1 = [
-                [0, critical],
-            ];
-            d2 = [
-                [1, high],
-            ];
-            d3 = [
-                [2, medium],
-            ];
-            d4 = [
-                [3, low],
-            ];
-            d5 = [
-                [4, info],
-            ];
-            all_objs(d1, d2, d3, d4, d5, ticks);
-
-            critical = 0;
-            high = 0;
-            medium = 0;
-            low = 0;
-            info = 0;
-            {% for f in closed_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
-
-            d1 = [
-                [0, critical],
-            ];
-            d2 = [
-                [1, high],
-            ];
-            d3 = [
-                [2, medium],
-            ];
-            d4 = [
-                [3, low],
-            ];
-            d5 = [
-                [4, info],
-            ];
-            closed_objs(d1, d2, d3, d4, d5, ticks);
-            
-            critical = 0;
-            high = 0;
-            medium = 0;
-            low = 0;
-            info = 0;
-            {% for f in new_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
-
-            d1 = [
-                [0, critical],
-            ];
-            d2 = [
-                [1, high],
-            ];
-            d3 = [
-                [2, medium],
-            ];
-            d4 = [
-                [3, low],
-            ];
-            d5 = [
-                [4, info],
-            ];
-            new_objs(d1, d2, d3, d4, d5, ticks);
             
             var opened = [];
             var closed = [];
@@ -849,11 +600,11 @@
             {% endfor %}
             open_close_weekly(opened, closed, accepted, ticks);
             
-            critical = [];
-            high = [];
-            medium = [];
-            low = [];
-            info = [];
+            let critical = [];
+            let high = [];
+            let medium = [];
+            let low = [];
+            let info = [];
             ticks = [];
             {% for week, values in severity_weekly.items %}
                 ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"]);
@@ -891,19 +642,11 @@
             {% endfor %}
             test_type(data);
             
-            var data_1 = {};
             var data_2 = []
             var ticks = []
-            {% for f in open_objs %}
-                if (data_1[{{ f.age }}]) {
-                    data_1[{{ f.age }}] += 1
-                }
-                else {
-                    data_1[{{ f.age }}] = 1
-                }
-            {% endfor %}
+
             var i = 0;
-            $.each(data_1, function (index, value) {
+            $.each({{ open_objs_by_age }}, function (index, value) {
                 if (value > 0) {
                     data_2.push([i, value]);
                     ticks.push([i, index])

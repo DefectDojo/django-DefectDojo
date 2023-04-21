@@ -268,11 +268,11 @@ def view_finding(request, fid):
     logger.debug(findings)
     try:
         prev_finding_id = findings[(list(findings).index(finding.id)) - 1]
-    except AssertionError:
+    except (AssertionError, ValueError):
         prev_finding_id = finding.id
     try:
         next_finding_id = findings[(list(findings).index(finding.id)) + 1]
-    except IndexError:
+    except (IndexError, ValueError):
         next_finding_id = finding.id
 
     cred_finding = Cred_Mapping.objects.filter(
@@ -430,7 +430,7 @@ def close_finding(request, fid):
                 'Note Saved.',
                 extra_tags='alert-success')
 
-            if len(missing_note_types) == 0:
+            if len(missing_note_types) <= 1:
                 finding.active = False
                 now = timezone.now()
                 finding.mitigated = form.cleaned_data.get("mitigated") or now
@@ -438,6 +438,9 @@ def close_finding(request, fid):
                 finding.is_mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
+                finding.false_p = form.cleaned_data.get("false_p", False)
+                finding.out_of_scope = form.cleaned_data.get("out_of_scope", False)
+                finding.duplicate = form.cleaned_data.get("duplicate", False)
                 endpoint_status = finding.status_finding.all()
                 for status in endpoint_status:
                     status.mitigated_by = form.cleaned_data.get("mitigated_by") or request.user
@@ -741,7 +744,7 @@ def edit_finding(request, fid):
                            can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user))
 
         if finding.active:
-            if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
+            if (form['active'].value() is False or form['false_p'].value() or form['out_of_scope'].value()) and form['duplicate'].value() is False:
                 note_type_activation = Note_Type.objects.filter(is_active=True).count()
                 closing_disabled = 0
                 if note_type_activation:
@@ -751,13 +754,17 @@ def edit_finding(request, fid):
                                                      code='inactive_without_mandatory_notes')
                     error_false_p = ValidationError('Can not set a finding as false positive without adding all mandatory notes',
                                                     code='false_p_without_mandatory_notes')
+                    error_out_of_scope = ValidationError('Can not set a finding as out of scope without adding all mandatory notes',
+                                                         code='out_of_scope_without_mandatory_notes')
                     if form['active'].value() is False:
                         form.add_error('active', error_inactive)
                     if form['false_p'].value():
                         form.add_error('false_p', error_false_p)
+                    if form['out_of_scope'].value():
+                        form.add_error('out_of_scope', error_out_of_scope)
                     messages.add_message(request,
                                          messages.ERROR,
-                                         'Can not set a finding as inactive or false positive without adding all mandatory notes',
+                                         'Can not set a finding as inactive, false positive or out of scope without adding all mandatory notes',
                                          extra_tags='alert-danger')
 
         if use_jira:
@@ -800,10 +807,10 @@ def edit_finding(request, fid):
 
             # If active is not checked and CAN_EDIT_MIIGATED_DATA, mitigate the finding and the associated endpoints status
             if finding_helper.can_edit_mitigated_data(request.user):
-                if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
+                if (form['active'].value() is False or form['false_p'].value() or form['out_of_scope'].value()) and form['duplicate'].value() is False:
                     now = timezone.now()
                     new_finding.is_mitigated = True
-                    endpoint_status = new_finding.endpoint_status.all()
+                    endpoint_status = new_finding.status_finding.all()
                     for status in endpoint_status:
                         status.mitigated_by = form.cleaned_data.get("mitigated_by") or request.user
                         status.mitigated_time = form.cleaned_data.get("mitigated") or now
@@ -870,7 +877,8 @@ def edit_finding(request, fid):
             # if there's a finding group, that's what we need to push
             push_group_to_jira = push_to_jira and new_finding.finding_group
             # any existing finding should be updated
-            push_to_jira = push_to_jira and not push_group_to_jira and not new_finding.has_jira_issue
+            push_to_jira = (push_to_jira and not push_group_to_jira and new_finding.has_jira_issue
+                and jira_helper.get_jira_instance(finding).finding_jira_sync)
 
             finding_helper.save_vulnerability_ids(new_finding, form.cleaned_data['vulnerability_ids'].split())
 
@@ -1284,7 +1292,7 @@ def add_stub_finding(request, tid):
                 messages.SUCCESS,
                 'Stub Finding created successfully.',
                 extra_tags='alert-success')
-            if request.is_ajax():
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 data = {
                     'message': 'Stub Finding created successfully.',
                     'id': stub_finding.id,
@@ -1294,7 +1302,7 @@ def add_stub_finding(request, tid):
                 }
                 return HttpResponse(json.dumps(data))
         else:
-            if request.is_ajax():
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 data = {
                     'message':
                     'Stub Finding form has error, please revise and try again.',
@@ -1931,6 +1939,11 @@ def finding_bulk_update_all(request, pid=None):
 
                     for prod in prods:
                         calculate_grade(prod)
+
+                if form.cleaned_data['date']:
+                    for finding in finds:
+                        finding.date = form.cleaned_data['date']
+                        finding.save_no_options()
 
                 if form.cleaned_data['planned_remediation_date']:
                     for finding in finds:

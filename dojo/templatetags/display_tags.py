@@ -2,17 +2,19 @@ from itertools import chain
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import stringfilter
+from django.utils import timezone
 from django.utils.html import escape, conditional_escape
 from django.utils.safestring import mark_safe, SafeData
 from django.utils.text import normalize_newlines
+from django.utils.translation import gettext as _
 from django.urls import reverse
 from django.contrib.auth.models import User
+
 from dojo.utils import prepare_for_view, get_system_setting, get_full_url, get_file_images
 import dojo.utils
-from dojo.models import Check_List, FileAccessToken, Finding, System_Settings, Product, Dojo_User
+from dojo.models import Check_List, FileAccessToken, Finding, System_Settings, Product, Dojo_User, Benchmark_Product
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
-from django.utils import timezone
 import dateutil.relativedelta
 import datetime
 import bleach
@@ -26,19 +28,19 @@ logger = logging.getLogger(__name__)
 register = template.Library()
 
 # Tags suitable for rendering markdown
-markdown_tags = [
+markdown_tags = {
     "h1", "h2", "h3", "h4", "h5", "h6",
     "b", "i", "strong", "em", "tt",
     "table", "thead", "th", "tbody", "tr", "td",  # enables markdown.extensions.tables
     "p", "br",
     "pre", "div",  # used for code highlighting
-    "span", "div", "blockquote", "code", "hr", "pre",
+    "span", "blockquote", "code", "hr",
     "ul", "ol", "li", "dd", "dt",
     "img",
     "a",
     "sub", "sup",
     "center",
-]
+}
 
 markdown_attrs = {
     "*": ["id"],
@@ -54,9 +56,9 @@ markdown_styles = [
 ]
 
 finding_related_action_classes_dict = {
-    'reset_finding_duplicate_status': 'fa fa-eraser',
-    'set_finding_as_original': 'fa fa-superpowers',
-    'mark_finding_duplicate': 'fa fa-copy'
+    'reset_finding_duplicate_status': 'fa-solid fa-eraser',
+    'set_finding_as_original': 'fa-brands fa-superpowers',
+    'mark_finding_duplicate': 'fa-solid fa-copy'
 }
 
 finding_related_action_title_dict = {
@@ -66,9 +68,9 @@ finding_related_action_title_dict = {
 }
 
 supported_file_formats = [
-        'apng', 'avif', 'gif', 'jpg',
-        'jpeg', 'jfif', 'pjpeg', 'pjp',
-        'png', 'svg', 'webp', 'pdf'
+    'apng', 'avif', 'gif', 'jpg',
+    'jpeg', 'jfif', 'pjpeg', 'pjp',
+    'png', 'svg', 'webp', 'pdf'
 ]
 
 
@@ -168,10 +170,10 @@ def remove_string(string, value):
     return string.replace(value, '')
 
 
-@register.filter(name='percentage')
+@register.filter
 def percentage(fraction, value):
     return_value = ''
-    if int(value) > 0 and int(fraction) > 0:
+    if int(value) > 0:
         try:
             return_value = "%.1f%%" % ((float(fraction) / float(value)) * 100)
         except ValueError:
@@ -180,49 +182,46 @@ def percentage(fraction, value):
 
 
 def asvs_calc_level(benchmark_score):
-    level = 0
-    total_pass = 0
     total = 0
+    total_pass = 0
+    total_fail = 0
+    total_wait = 0
+    total_viewed = 0
+
     if benchmark_score:
-        total = benchmark_score.asvs_level_1_benchmark + \
-                benchmark_score.asvs_level_2_benchmark + benchmark_score.asvs_level_3_benchmark
-        total_pass = benchmark_score.asvs_level_1_score + \
-                     benchmark_score.asvs_level_2_score + benchmark_score.asvs_level_3_score
-
+        benchmarks = Benchmark_Product.objects.filter(product_id=benchmark_score.product_id, enabled=True,
+                                                      control__category__type=benchmark_score.benchmark_type)
         if benchmark_score.desired_level == "Level 1":
-            total = benchmark_score.asvs_level_1_benchmark
-            total_pass = benchmark_score.asvs_level_1_score
+            benchmarks = benchmarks.filter(control__level_1=True)
         elif benchmark_score.desired_level == "Level 2":
-            total = benchmark_score.asvs_level_1_benchmark + \
-                    benchmark_score.asvs_level_2_benchmark
-            total_pass = benchmark_score.asvs_level_1_score + \
-                         benchmark_score.asvs_level_2_score
+            benchmarks = benchmarks.filter(control__level_2=True)
         elif benchmark_score.desired_level == "Level 3":
-            total = benchmark_score.asvs_level_1_benchmark + \
-                    benchmark_score.asvs_level_2_benchmark + benchmark_score.asvs_level_3_benchmark
+            benchmarks = benchmarks.filter(control__level_3=True)
 
-        level = percentage(total_pass, total)
+        noted_benchmarks = benchmarks.filter(notes__isnull=False).order_by('id').distinct()
+        noted_benchmarks_ids = [b.id for b in noted_benchmarks]
 
-    return benchmark_score.desired_level, level, str(total_pass), str(total)
+        total = len(benchmarks)
+        total_pass = len([bench for bench in benchmarks if bench.pass_fail])
+        total_fail = len([bench for bench in benchmarks if not bench.pass_fail and bench.id in noted_benchmarks_ids])
+        total_wait = len(
+            [bench for bench in benchmarks if not bench.pass_fail and bench.id not in noted_benchmarks_ids])
+        total_viewed = total_pass + total_fail
+
+    return benchmark_score.desired_level, total, total_pass, total_wait, total_fail, total_viewed
 
 
-def get_level(benchmark_score):
-    benchmark_score.desired_level, level, total_pass, total = asvs_calc_level(benchmark_score)
-    level = percentage(total_pass, total)
-    return level
-
-
-@register.filter(name='asvs_level')
+@register.filter
 def asvs_level(benchmark_score):
-    benchmark_score.desired_level, level, total_pass, total = asvs_calc_level(
-        benchmark_score)
-    if level is None:
-        level = ""
-    else:
-        level = "(" + level + ")"
+    benchmark_score.desired_level, total, total_pass, total_wait, total_fail, total_viewed = asvs_calc_level(benchmark_score)
 
-    return "ASVS " + str(benchmark_score.desired_level) + " " + level + " Pass: " + str(
-        total_pass) + " Total:  " + total
+    level = percentage(total_viewed, total)
+
+    return _("Checklist is %(level)s full (pass: %(total_viewed)s, total: %(total)s)") % {
+        'level': level,
+        'total_viewed': total_viewed,
+        'total': total
+    }
 
 
 @register.filter(name='version_num')
@@ -267,12 +266,11 @@ def finding_sla(finding):
                 find_sla) + ' days past SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
     else:
         status = "green"
-        status_text = 'Remediation for ' + severity.lower() + ' findings in ' + str(sla_age) + ' days or less since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
+        status_text = 'Remediation for ' + severity.lower() + ' findings in ' + str(sla_age) + ' days or less since ' + finding.get_sla_start_date().strftime("%b %d, %Y")
         if find_sla and find_sla < 0:
             status = "red"
-            find_sla = abs(find_sla)
             status_text = 'Overdue: Remediation for ' + severity.lower() + ' findings in ' + str(
-                sla_age) + ' days or less since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
+                sla_age) + ' days or less since ' + finding.get_sla_start_date().strftime("%b %d, %Y")
 
     if find_sla is not None:
         title = '<a class="has-popover" data-toggle="tooltip" data-placement="bottom" title="" href="#" data-content="' + status_text + '">' \
@@ -458,20 +456,20 @@ def tracked_object_type(current_object):
 
 
 def icon(name, tooltip):
-    return '<i class="fa fa-' + name + ' has-popover" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
+    return '<i class="fa-solid fa-' + name + ' has-popover" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
 
 
 def not_specified_icon(tooltip):
-    return '<i class="fa fa-question fa-fw text-danger has-popover" aria-hidden="true" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
+    return '<i class="fa-solid fa-question fa-fw text-danger has-popover" aria-hidden="true" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
 
 
 def stars(filled, total, tooltip):
     code = '<i class="has-popover" data-placement="bottom" data-content="' + tooltip + '">'
     for i in range(0, total):
         if i < filled:
-            code += '<i class="fa fa-star has-popover" aria-hidden="true"></span>'
+            code += '<i class="fa-solid fa-star has-popover" aria-hidden="true"></span>'
         else:
-            code += '<i class="fa fa-star-o text-muted has-popover" aria-hidden="true"></span>'
+            code += '<i class="fa-regular fa-star text-muted has-popover" aria-hidden="true"></span>'
     code += '</i>'
     return code
 
@@ -1001,8 +999,8 @@ def import_history(finding, autoescape=True):
 
     html = """
 
-    <i class="fa fa-history has-popover"
-        title="<i class='fa fa-history'></i> <b>Import History</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="right"
+    <i class="fa-solid fa-clock-rotate-left has-popover"
+        title="<i class='fa-solid fa-clock-rotate-left'></i> <b>Import History</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="right"
         data-content="%s<br/>Currently only showing status changes made by import/reimport."
     </i>
     """

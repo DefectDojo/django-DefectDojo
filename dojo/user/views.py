@@ -1,5 +1,7 @@
+import contextlib
 import logging
 from crum import get_current_user
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib import messages
@@ -8,6 +10,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.contrib.auth.views import LoginView, PasswordResetView
+from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.core.mail import get_connection
 from django.core.mail.backends.smtp import EmailBackend
 from django.core import serializers
@@ -20,6 +23,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.translation import gettext as _
+from django.utils.timezone import now
 
 from rest_framework.authtoken.models import Token
 
@@ -38,6 +42,27 @@ from dojo.authorization.authorization_decorators import user_is_configuration_au
 import hyperlink
 
 logger = logging.getLogger(__name__)
+
+
+class DojoLoginView(LoginView):
+    template_name = 'dojo/login.html'
+    authentication_form = AuthenticationForm
+
+    def form_valid(self, form):
+        last_login = None
+        with contextlib.suppress(Exception):
+            username = form.cleaned_data.get('username')
+            user = Dojo_User.objects.get(username=username)
+            last_login = user.last_login
+        response = super().form_valid(form)
+        name = self.request.user.first_name or self.request.user.username
+        last_login = last_login or self.request.user.last_login
+        messages.add_message(
+            self.request,
+            messages.SUCCESS,
+            _(f'Hello {name}! Your last login was {naturaltime(last_login)} ({last_login.strftime("%Y-%m-%d %I:%M:%S %p")})'),
+            extra_tags='alert-success')
+        return response
 
 
 # #  Django Rest Framework API v2
@@ -91,7 +116,6 @@ def login_view(request):
         settings.GITLAB_OAUTH2_ENABLED,
         settings.AUTH0_OAUTH2_ENABLED,
         settings.KEYCLOAK_OAUTH2_ENABLED,
-        settings.GITHUB_OAUTH2_ENABLED,
         settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED,
         settings.SAML2_ENABLED
     ]) == 1 and not ('force_login_form' in request.GET):
@@ -107,8 +131,6 @@ def login_view(request):
             social_auth = 'keycloak'
         elif settings.AUTH0_OAUTH2_ENABLED:
             social_auth = 'auth0'
-        elif settings.GITHUB_OAUTH2_ENABLED:
-            social_auth = 'github'
         elif settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED:
             social_auth = 'github-enterprise'
         else:
@@ -119,7 +141,7 @@ def login_view(request):
         except:
             return HttpResponseRedirect(reverse('social:begin', args=[social_auth]))
     else:
-        return LoginView.as_view(template_name='dojo/login.html', authentication_form=AuthenticationForm)(request)
+        return DojoLoginView.as_view(template_name='dojo/login.html', authentication_form=AuthenticationForm)(request)
 
 
 def logout_view(request):
@@ -235,8 +257,6 @@ def view_profile(request):
                                  extra_tags='alert-success')
     add_breadcrumb(title=_("User Profile - %(user_full_name)s") % {'user_full_name': user.get_full_name()}, top_level=True, request=request)
     return render(request, 'dojo/profile.html', {
-        'name': 'Engineer Profile',
-        'metric': False,
         'user': user,
         'form': form,
         'contact_form': contact_form,
@@ -266,29 +286,28 @@ def change_password(request):
             return HttpResponseRedirect(reverse('view_profile'))
 
     add_breadcrumb(title=_("Change Password"), top_level=False, request=request)
-    return render(request, 'dojo/change_pwd.html', {
-        'name': 'ChangePassword',
-        'form': form})
+    return render(request, 'dojo/change_pwd.html', {'form': form})
 
 
 @user_is_configuration_authorized('auth.view_user')
 def user(request):
+    page_name = _("All Users")
     users = Dojo_User.objects.all() \
         .select_related('usercontactinfo', 'global_role') \
         .order_by('username', 'last_name', 'first_name')
     users = UserFilter(request.GET, queryset=users)
     paged_users = get_page_items(request, users.qs, 25)
-    add_breadcrumb(title=_("All Users"), top_level=True, request=request)
-    return render(request,
-                  'dojo/users.html',
-                  {"users": paged_users,
-                   "filtered": users,
-                   "name": "All Users",
-                   })
+    add_breadcrumb(title=page_name, top_level=True, request=request)
+    return render(request, 'dojo/users.html', {
+        "users": paged_users,
+        "filtered": users,
+        "name": page_name,
+    })
 
 
 @user_is_configuration_authorized('auth.add_user')
 def add_user(request):
+    page_name = _("Add User")
     form = AddDojoUserForm()
     contact_form = UserContactInfoForm()
     global_role_form = GlobalRoleForm()
@@ -302,12 +321,12 @@ def add_user(request):
             if not request.user.is_superuser and form.cleaned_data['is_superuser']:
                 messages.add_message(request,
                                     messages.ERROR,
-                                    'Only superusers are allowed to add superusers. User was not saved.',
+                                    _('Only superusers are allowed to add superusers. User was not saved.'),
                                     extra_tags='alert-danger')
             elif not request.user.is_superuser and global_role_form.cleaned_data['role']:
                 messages.add_message(request,
                                     messages.ERROR,
-                                    'Only superusers are allowed to add users with a global role. User was not saved.',
+                                    _('Only superusers are allowed to add users with a global role. User was not saved.'),
                                     extra_tags='alert-danger')
             else:
                 user = form.save(commit=False)
@@ -334,9 +353,9 @@ def add_user(request):
                                  messages.ERROR,
                                  _('User was not added successfully.'),
                                  extra_tags='alert-danger')
-    add_breadcrumb(title=_("Add User"), top_level=False, request=request)
+    add_breadcrumb(title=page_name, top_level=False, request=request)
     return render(request, "dojo/add_user.html", {
-        'name': 'Add User',
+        'name': page_name,
         'form': form,
         'contact_form': contact_form,
         'global_role_form': global_role_form,
@@ -362,6 +381,7 @@ def view_user(request, uid):
 
 @user_is_configuration_authorized('auth.change_user')
 def edit_user(request, uid):
+    page_name = _("Edit User")
     user = get_object_or_404(Dojo_User, id=uid)
     form = EditDojoUserForm(instance=user)
 
@@ -417,9 +437,9 @@ def edit_user(request, uid):
                                 messages.ERROR,
                                 _('User was not saved successfully.'),
                                 extra_tags='alert-danger')
-    add_breadcrumb(title=_("Edit User"), top_level=False, request=request)
+    add_breadcrumb(title=page_name, top_level=False, request=request)
     return render(request, "dojo/add_user.html", {
-        'name': 'Edit User',
+        'name': page_name,
         'form': form,
         'contact_form': contact_form,
         'global_role_form': global_role_form,
@@ -462,7 +482,7 @@ def delete_user(request, uid):
                     except RestrictedError as err:
                         messages.add_message(request,
                                             messages.WARNING,
-                                            'User cannot be deleted: {}'.format(err),
+                                            _('User cannot be deleted: %(error)s') % {'error': err},
                                             extra_tags='alert-warning')
                     return HttpResponseRedirect(reverse('users'))
 
@@ -578,13 +598,15 @@ def edit_permissions(request, uid):
     return HttpResponseRedirect(reverse('view_user', args=(uid,)))
 
 
-class DojoPasswordResetForm(PasswordResetForm):
+class DojoForgotUsernameForm(PasswordResetForm):
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
 
         from_email = get_system_setting('email_from')
 
         url = hyperlink.parse(settings.SITE_URL)
+        subject_template_name = 'dojo/forgot_username_subject.html'
+        email_template_name = 'notifications/mail/forgot_username.tpl'
         context['site_name'] = url.host
         context['protocol'] = url.scheme
         context['domain'] = settings.SITE_URL[len(f'{url.scheme}://'):]
@@ -601,5 +623,34 @@ class DojoPasswordResetForm(PasswordResetForm):
             raise ValidationError("SMTP server is not configured correctly...")
 
 
+class DojoPasswordResetForm(PasswordResetForm):
+    def send_mail(self, subject_template_name, email_template_name,
+                  context, from_email, to_email, html_email_template_name=None):
+
+        from_email = get_system_setting('email_from')
+
+        url = hyperlink.parse(settings.SITE_URL)
+        email_template_name = 'notifications/mail/forgot_password.tpl'
+        context['site_name'] = url.host
+        context['protocol'] = url.scheme
+        context['domain'] = settings.SITE_URL[len(f'{url.scheme}://'):]
+        context['link_expiration_date'] = naturaltime(now() + timedelta(seconds=settings.PASSWORD_RESET_TIMEOUT))
+
+        super().send_mail(subject_template_name, email_template_name, context, from_email, to_email, html_email_template_name)
+
+    def clean(self):
+        try:
+            connection = get_connection()
+            if isinstance(connection, EmailBackend):
+                connection.open()
+                connection.close()
+        except Exception:
+            raise ValidationError("SMTP server is not configured correctly...")
+
+
 class DojoPasswordResetView(PasswordResetView):
     form_class = DojoPasswordResetForm
+
+
+class DojoForgotUsernameView(PasswordResetView):
+    form_class = DojoForgotUsernameForm
