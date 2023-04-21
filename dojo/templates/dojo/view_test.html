@@ -27,7 +27,7 @@
                 <h3 class="pull-left">
                     {{ test }}
                     {% include "dojo/snippets/tags.html" with tags=test.tags.all %}
-                    <small>Updated {{ test.updated|naturaltime|default_if_none:"" }}, Created {{ test.created|naturaltime|default_if_none:"" }}</small>
+                    <small>{% trans "Updated" %} {{ test.updated|naturaltime|default_if_none:"" }}, {% trans "Created" %} {{ test.created|naturaltime|default_if_none:"" }}</small>
                 </h3>
                 <div id="test-pulldown" class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle"
@@ -44,12 +44,12 @@
                         {% if test|has_object_permission:"Test_Edit" %}
                             <li role="presentation">
                                 <a href="{% url 'edit_test' test.id %}">
-                                    <i class="fa-solid fa-pen-to-square"></i> Edit Test
+                                    <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit Test" %}
                                 </a>
                             </li>
                             <li>
                                 <a class="" href="{% url 'copy_test' test.id %}?return_url={{ request.get_full_path|urlencode }}"/>
-                                    <i class="fa-solid fa-copy"></i> Copy Test
+                                    <i class="fa-solid fa-copy"></i> {% trans "Copy Test" %}
                                 </a>
                             </li>
                         {% endif %}
@@ -57,7 +57,7 @@
                             {% if test|has_object_permission:"Import_Scan_Result" %}
                                 <li role="presentation">
                                     <a href="{% url 're_import_scan_results' test.id %}">
-                                        <i class="fa-solid fa-upload"></i> Re-Upload Scan
+                                        <i class="fa-solid fa-upload"></i> {% trans "Re-Upload Scan" %}
                                     </a>
                                 </li>
                             {% endif %}
@@ -65,30 +65,30 @@
                         {% if test|has_object_permission:"Note_Add" %}
                             <li role="presentation">
                                 <a id="add_notes_link" href="#add_notes">
-                                    <i class="fa-solid fa-comments"></i> Add Notes
+                                    <i class="fa-solid fa-comments"></i> {% trans "Add Notes" %}
                                 </a>
                             </li>
                         {% endif %}
                         <li role="presentation">
                             <a href="{% url 'test_report' test.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
-                                <i class="fa-solid fa-file-lines"></i> Report
+                                <i class="fa-solid fa-file-lines"></i> {% trans "Report" %}
                             </a>
                         </li>
                         <li role="presentation">
                             <a href="{% url 'test_ics' test.id %}">
-                                <i class="fa-solid fa-calendar-plus"></i> Add To Calendar
+                                <i class="fa-solid fa-calendar-plus"></i> {% trans "Add To Calendar" %}
                             </a>
                         </li>
                         <li role="presentation">
                             <a href="{% url 'action_history' test|content_type test.id %}">
-                                <i class="fa-solid fa-clock-rotate-left"></i> View History
+                                <i class="fa-solid fa-clock-rotate-left"></i> {% trans "View History" %}
                             </a>
                         </li>
                         {% if test|has_object_permission:"Test_Delete" %}
                             <li role="separator" class="divider"></li>
                             <li role="presentation">
                                 <a class="text-danger" href="{% url 'delete_test' test.id %}">
-                                    <i class="fa-solid fa-trash"></i> Delete Test
+                                    <i class="fa-solid fa-trash"></i> {% trans "Delete Test" %}
                                 </a>
                             </li>
                         {% endif %}
@@ -99,15 +99,15 @@
         <div class="table-responsive">
             <table class="table-striped table table-condensed table-hover centered">
                 <tr>
-                    <th>Engagement</th>
-                    <th>Environment</th>
-                    <th>Dates</th>
-                    <th>Updated</th>
-                    {% if test.percent_complete > 0 %}<th>Progress</th>{% endif %}
-                    <th>Version</th>
+                    <th>{% trans "Engagement" %}</th>
+                    <th>{% trans "Environment" %}</th>
+                    <th>{% trans "Dates" %}</th>
+                    <th>{% trans "Updated" %}</th>
+                    {% if test.percent_complete > 0 %}<th>{% trans "Progress" %}</th>{% endif %}
+                    <th>{% trans "Version" %}</th>
                     {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.test_import_set.all %}
                         <th>
-                            Reimports
+                            {% trans "Reimports" %}
                             <i class="fa-solid fa-circle-question has-popover"
                             data-trigger="hover"
                             data-content="Total numbers of reimports done for this test."
@@ -118,7 +118,7 @@
                             </i>
                         </th>
                     {% endif %}
-                    {% if test.api_scan_configuration %}<th>API Scan Configuration</th>{% endif %}
+                    {% if test.api_scan_configuration %}<th>{% trans "API Scan Configuration" %}</th>{% endif %}
                 </tr>
                 <tr>
                     <td>
@@ -177,7 +177,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h4>
-                            Details <span class="pull-right"><a data-toggle="collapse" href="#vuln_desc"><i class="glyphicon glyphicon-chevron-up"></i></a></span>
+                            {% trans "Details" %} <span class="pull-right"><a data-toggle="collapse" href="#vuln_desc"><i class="glyphicon glyphicon-chevron-up"></i></a></span>
                         </h4>
                     </div>
                     <div id="vuln_desc" class="panel-body finding-description collapse in">{{ test.description|markdown_render }}</div>
@@ -192,7 +192,7 @@
             <div class="panel-heading">
                 <div class="clearfix">
                     <h4 class="has-filters">
-                        Import History ({{  test.total_reimport_count }})
+                        {% trans "Import History" %} ({{  test.total_reimport_count }})
                         <i class="fa-solid fa-circle-question has-popover"
                         data-trigger="hover"
                         data-content="List of imports/reimports that created/closed/reactivated any findings in this test."
@@ -226,16 +226,14 @@
                     <table class="table-striped tablesorter-bootstrap table table-hover centered">
                         <thead>
                             <tr>
-                                <th>Type</th>
-                                <th>Date/Time</th>
-                                <th>Branch/Tag</th>
-                                <th>Build ID</th>
-                                <th>Commit</th>
-                                <th>Version</th>
-                                <th>Endpoint</th>
-                                <th>
-                                    Actions
-                                </th>
+                                <th>{% trans "Type" %}</th>
+                                <th>{% trans "Date/Time" %}</th>
+                                <th>{% trans "Branch/Tag" %}</th>
+                                <th>{% trans "Build ID" %}</th>
+                                <th>{% trans "Commit" %}</th>
+                                <th>{% trans "Version" %}</th>
+                                <th>{% trans "Endpoint" %}</th>
+                                <th>{% trans "Actions" %}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -281,7 +279,7 @@
                 {% else %}
                     <div class="panel-body">
                         <p class="text-center">
-                            No import history found.
+                            {% trans "No import history found." %}
                         </p>
                     </div>
                 {% endif %}
@@ -298,7 +296,7 @@
             <div class="panel-heading tight">
                 <div class="clearfix">
                     <h4>
-                        Groups ({{ finding_groups|length }})
+                        {% trans "Groups" %} ({{ finding_groups|length }})
                         <div class="dropdown pull-right">
                             <span class="pull-right">
                                 <a data-toggle="collapse" href="#finding_groups_panel">
@@ -321,47 +319,47 @@
                             <th>
                             </th>
                             <th class="centered">
-                                Severity
+                                {% trans "Severity" %}
                             </th>
                             <th>
-                                Name
+                                {% trans "Name" %}
                             </th>
                             <th>
-                                Findings
+                                {% trans "Findings" %}
                             </th>
                             <th>
-                                Vulnerability Ids
+                                {% trans "Vulnerability Ids" %}
                             </th>
                             <th>
-                                Components
+                                {% trans "Components" %}
                             </th>
                             <th>
-                                Date
+                                {% trans "Date" %}
                             </th>
                             <th>
-                                Age
+                                {% trans "Age" %}
                             </th>
                             {% if system_settings.enable_finding_sla %}
                                 <th>
-                                    SLA
+                                    {% trans "SLA" %}
                                 </th>
                             {% endif %}
                             <th>
-                                Creator
+                                {% trans "Creator" %}
                             </th>
                             <th>
-                                Status
+                                {% trans "Status" %}
                             </th>
                             {% if system_settings.enable_jira %}
                                 {% if jira_project and product_tab or not product_tab %}
                                     <th>
-                                        Jira
+                                        {% trans "Jira" %}
                                     </th>
                                     <th>
-                                        Jira Age
+                                        {% trans "Jira Age" %}
                                     </th>
                                     <th>
-                                        Jira Change
+                                        {% trans "Jira Change" %}
                                     </th>
                                 {% endif %}
                             {% endif %}
@@ -378,7 +376,7 @@
                                                 {% if group|has_object_permission:"Finding_Group_Edit" %}
                                                     <li>
                                                         <a class="" href="{% url 'view_finding_group' group.id %}">
-                                                            <i class="fa-solid fa-pen-to-square"></i> View/Edit
+                                                            <i class="fa-solid fa-pen-to-square"></i> {% trans "View/Edit" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
@@ -394,7 +392,7 @@
                                                             <input type="hidden" name="id" value="{{ finding.id }}"/>
                                                         </form>
                                                         <a class="text-danger delete-finding-group" id="delete-finding-group-menu-{{ group.id }}" data-group-id={{ group.id }} href="#">
-                                                            <i class="fa-solid fa-trash"></i> Delete
+                                                            <i class="fa-solid fa-trash"></i> {% trans "Delete" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
@@ -473,7 +471,7 @@
                                                 class="fa-solid fa-share-from-square push_group_to_jira"
                                                 title="Update JIRA issue with current data from this group of findings."></i>
                                             {% else %}
-                                                None
+                                                {% trans "None" %}
                                                 <i id="push_group_to_jira_{{ group.id }}"
                                                 data-group-id="{{ group.id }}"
                                                 class="fa-solid fa-share-from-square push_group_to_jira"
@@ -498,7 +496,7 @@
             {% else %}
                 <div class="panel-body">
                     <p class="text-center">
-                        No Groups found.
+                        {% trans "No Groups found." %}
                     </p>
                 </div>
             {% endif %}
@@ -510,7 +508,7 @@
         <div class="panel-heading tight">
             <div class="clearfix">
                 <h4 class="has-filters">
-                    Findings ({{ findings.total_count }}) <small>{{ test.id|get_severity_count:"test" }}</small>
+                    {% trans "Findings" %} ({{ findings.total_count }}) <small>{{ test.id|get_severity_count:"test" }}</small>
                     <div class="dropdown pull-right"></div>
                     <div id="test-pulldown" class="dropdown pull-right">
                         &nbsp;
@@ -534,12 +532,12 @@
                                 aria-labelledby="dropdownMenu_test_add">
                                 <li role="presentation">
                                     <a title="Add Finding" href="{% url 'add_findings' test.id %}">
-                                        <span class="fa-solid fa-bug"></span> New Finding
+                                        <span class="fa-solid fa-bug"></span> {% trans "New Finding" %}
                                     </a>
                                 </li>
                                 <li role="presentation">
                                     <a title="Add Finding from Template" href="{% url 'search' test.id %}">
-                                        <span class="icon-add-template"></span> Finding From Template
+                                        <span class="icon-add-template"></span> {% trans "Finding From Template" %}
                                     </a>
                                 </li>
                             </ul>
@@ -560,17 +558,17 @@
                             aria-labelledby="dropdownMenu1">
                             <li role="presentation">
                                 <a href="{% url 'quick_report' %}?url={{ request.get_full_path }}">
-                                    <i class="fa-solid fa-file-lines"></i> Report
+                                    <i class="fa-solid fa-file-lines"></i> {% trans "Report" %}
                                 </a>
                             </li>
                             <li role="presentation">
                                 <a href="{% url 'csv_export' %}?url={{ request.get_full_path }}">
-                                    <i class="fa-solid fa-table"></i> CSV Export
+                                    <i class="fa-solid fa-table"></i> {% trans "CSV Export" %}
                                 </a>
                             </li>
                             <li role="presentation">
                                 <a href="{% url 'excel_export' %}?url={{ request.get_full_path }}">
-                                    <i class="fa-solid fa-file-excel"></i> Excel Export
+                                    <i class="fa-solid fa-file-excel"></i> {% trans "Excel Export" %}
                                 </a>
                             </li>
                         </ul>
@@ -596,7 +594,7 @@
                                 data-toggle="dropdown"
                                 aria-haspopup="true"
                                 aria-expanded="true">
-                            Bulk Edit
+                                {% trans "Bulk Edit" %}
                             <span class="caret"></span>
                         </button>
                     {% endif %}
@@ -627,7 +625,7 @@
                     </div>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
                         <li class="dropdown-header">
-                            Choose wisely...
+                            {% trans "Choose wisely..." %}
                         </li>
                         <li style="padding-left: 8px;padding-right: 8px;">
                             <form action="{% url 'finding_bulk_update_all_product' product_tab.product.id %}"
@@ -640,28 +638,28 @@
                                 </label>
                                 <select name="severity" id="severity" style="font-size: 80%">
                                     <option value="">
-                                        Choose...
+                                        {% trans "Choose..." %}
                                     </option>
                                     <option value="Info">
-                                        Info
+                                        {% trans "Info" %}
                                     </option>
                                     <option value="Low">
-                                        Low
+                                        {% trans "Low" %}
                                     </option>
                                     <option value="Medium">
-                                        Medium
+                                        {% trans "Medium" %}
                                     </option>
                                     <option value="High">
-                                        High
+                                        {% trans "High" %}
                                     </option>
                                     <option value="Critical">
-                                        Critical
+                                        {% trans "Critical" %}
                                     </option>
                                 </select>
                                 <br />
                                 <br />
                                 <label>
-                                    <b>Planned Remediation Date</b>
+                                    <b>{% trans "Planned Remediation Date" %}</b>
                                 </label>
                                 <br />
                                 <input id="id_bulk_planned_remediation_date"
@@ -671,7 +669,7 @@
                                     alt="Select the date the Finding will be remediated"/>
                                 <br />
                                 <label>
-                                    <b>Status</b>
+                                    <b>{% trans "Status" %}</b>
                                     <input id="id_bulk_status"
                                         name="status"
                                         type="checkbox"
@@ -681,32 +679,32 @@
                                 <br />
                                 <label style="font-size: 80%; font-weight: normal; display: block">
                                     <input id="id_bulk_active" name="active" type="checkbox" disabled/>
-                                    <span>Active</span>
+                                    <span>{% trans "Active" %}</span>
                                 </label>
                                 <label style="font-size: 80%; font-weight: normal; display: block">
                                     <input id="id_bulk_verified" name="verified" type="checkbox" disabled/>
-                                    <span>Verified</span>
+                                    <span>{% trans "Verified" %}</span>
                                 </label>
                                 <label style="font-size: 80%; font-weight: normal; display: block">
                                     <input id="id_bulk_false_p" name="false_p" type="checkbox" disabled/>
-                                    <span>False Positive</span>
+                                    <span>{% trans "False Positive" %}</span>
                                 </label>
                                 <label style="font-size: 80%; font-weight: normal; display: block">
                                     <input id="id_bulk_out_of_scope"
                                         name="out_of_scope"
                                         type="checkbox"
                                         disabled/>
-                                    <span>Out of scope</span>
+                                    <span>{% trans "Out of scope" %}</span>
                                 </label>
                                 <label style="font-size: 80%; font-weight: normal; display: block">
                                     <input id="id_bulk_is_mitigated"
                                         name="is_mitigated"
                                         type="checkbox"
                                         disabled/>
-                                    <span>Mitigated</span>
+                                    <span>{% trans "Mitigated" %}</span>
                                 </label>
                                 <label>
-                                    <b>Risk Acceptance</b>
+                                    <b>{% trans "Risk Acceptance" %}</b>
                                     <input id="id_bulk_risk_acceptance"
                                         name="risk_acceptance"
                                         type="checkbox"
@@ -715,18 +713,18 @@
                                 <br />
                                 <label style="font-size: 80%; font-weight: normal; display: block">
                                     <input id="id_bulk_risk_accept" name="risk_accept" type="checkbox" disabled/>
-                                    <span>Accept</span>
+                                    <span>{% trans "Accept" %}</span>
                                 </label>
                                 <label style="font-size: 80%; font-weight: normal; display: block">
                                     <input id="id_bulk_risk_unaccept"
                                         name="risk_unaccept"
                                         type="checkbox"
                                         disabled/>
-                                    <span>Unaccept</span>
+                                    <span>{% trans "Unaccept" %}</span>
                                 </label>
                                 {% if 'is_finding_groups_enabled'|system_setting_enabled %}
                                     <label>
-                                        <b>Group</b>
+                                        <b>{% trans "Group" %}</b>
                                         <input id="id_bulk_finding_group"
                                             name="finding_group"
                                             type="checkbox"
@@ -739,7 +737,7 @@
                                             class="finding_group_option"
                                             type="checkbox"
                                             disabled/>
-                                        <span>Create</span>
+                                        <span>{% trans "Create" %}</span>
                                         <input id="id_bulk_finding_group_create_name"
                                             name="finding_group_create_name"
                                             style="font-size: 100%;
@@ -754,7 +752,7 @@
                                                 class="finding_group_option"
                                                 type="checkbox"
                                                 disabled/>
-                                            <span>Add to...</span>
+                                            <span>{% trans "Add to..." %}</span>
                                         </label>
                                         <select id="id_add_to_finding_group_id"
                                                 name="add_to_finding_group_id"
@@ -775,7 +773,7 @@
                                             class="finding_group_option"
                                             type="checkbox"
                                             disabled/>
-                                        <span>Remove from any group</span>
+                                        <span>{% trans "Remove from any group" %}</span>
                                     </label>
                                     <span>
                                         <label style="font-size: 80%; font-weight: normal; display: block">
@@ -784,12 +782,12 @@
                                                 class="finding_group_option"
                                                 type="checkbox"
                                                 disabled/>
-                                            <span>Group by</span>
+                                            <span>{% trans "Group by" %}</span>
                                             <select id="id_finding_group_by_option"
                                                     name="finding_group_by_option"
                                                     style="font-size: 80%">
                                                 <option value="">
-                                                    Choose...
+                                                    {% trans "Choose..." %}
                                                 </option>
                                                 {% for finding_group_by_option in finding_group_by_options %}
                                                     <option value="{{ finding_group_by_option.0 }}">
@@ -801,7 +799,7 @@
                                     </span>
                                 {% endif %}
                                 {% if system_settings.enable_jira %}
-                                    <b>Push to JIRA</b>
+                                    <b>{% trans "Push to JIRA" %}</b>
                                     <input id="id_push_tojira"
                                         name="push_to_jira"
                                         type="checkbox"
@@ -810,11 +808,11 @@
                                     <br />
                                 {% endif %}
                                 <label style="display: block">
-                                    Notes
+                                    {% trans "Notes" %}
                                 </label>
                                 {{ bulk_edit_form.notes }}
                                 <label style="display: block">
-                                    Tags
+                                    {% trans "Tags" %}
                                 </label>
                                 {% comment %}
                                     Quick hack to make bulk edit work without refactoring the whole bulk edit form
@@ -859,27 +857,27 @@
                                             aria-labelledby="dropdownMenu1"
                                             id="select_by_severity">
                                             <li>
-                                                <a id="Info">Info</a>
+                                                <a id="Info">{% trans "Info" %}</a>
                                             </li>
                                             <li>
-                                                <a id="Low">Low</a>
+                                                <a id="Low">{% trans "Low" %}</a>
                                             </li>
                                             <li>
-                                                <a id="Medium">Medium</a>
+                                                <a id="Medium">{% trans "Medium" %}</a>
                                             </li>
                                             <li>
-                                                <a id="High">High</a>
+                                                <a id="High">{% trans "High" %}</a>
                                             </li>
                                             <li>
-                                                <a id="Critical">Critical</a>
+                                                <a id="Critical">{% trans "Critical" %}</a>
                                             </li>
                                             <li role="separator" class="divider">
                                             </li>
                                             <li>
-                                                <a id="All">All</a>
+                                                <a id="All">{% trans "All" %}</a>
                                             </li>
                                             <li>
-                                                <a id="None">None</a>
+                                                <a id="None">{% trans "None" %}</a>
                                             </li>
                                         </ul>
                                     </div>
@@ -887,54 +885,54 @@
                             {% endif %}
                             <th></th>
                             <th class="centered severity-sort">
-                                Severity
+                                {% trans "Severity" %}
                             </th>
                             <th>
-                                Name
+                                {% trans "Name" %}
                             </th>
                             <th>
-                                CWE
+                                {% trans "CWE" %}
                             </th>
                             <th>
-                                Vulnerability Id
+                                {% trans "Vulnerability Id" %}
                             </th>
                             <th>
-                                Date
+                                {% trans "Date" %}
                             </th>
                             <th>
-                                Age
+                                {% trans "Age" %}
                             </th>
                             {% if system_settings.enable_finding_sla %}
                                 <th>
-                                    SLA
+                                    {% trans "SLA" %}
                                 </th>
                             {% endif %}
                             <th>
-                                Reporter
+                                {% trans "Reporter" %}
                             </th>
                             <th>
-                                Status
+                                {% trans "Status" %}
                             </th>
                             {% if system_settings.enable_jira %}
                                 {% if jira_project and product_tab or not product_tab %}
                                     <th>
-                                        Jira
+                                        {% trans "Jira" %}
                                     </th>
                                     <th>
-                                        Jira Age
+                                        {% trans "Jira Age" %}
                                     </th>
                                     <th>
-                                        Jira Change
+                                        {% trans "Jira Change" %}
                                     </th>
                                 {% endif %}
                             {% endif %}
                             {% if 'is_finding_groups_enabled'|system_setting_enabled %}
                                 <th>
-                                    Group
+                                    {% trans "Group" %}
                                 </th>
                             {% endif %}
                             <th>
-                                Planned Remediation
+                                {% trans "Planned Remediation" %}
                             </th>
                         </tr>
                     </thead>
@@ -960,64 +958,64 @@
                                             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
                                                 <li>
                                                     <a class="" href="{% url 'view_finding' finding.id %}">
-                                                        <i class="fa-solid fa-circle-right"></i> View
+                                                        <i class="fa-solid fa-circle-right"></i> {% trans "View" %}
                                                     </a>
                                                 </li>
                                                 {% if finding|has_object_permission:"Finding_Edit" %}
                                                     <li>
                                                         <a class=""
                                                         href="{% url 'edit_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                                                            <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}
                                                         </a>
                                                     </li>
                                                     <li>
                                                         <a class="" href="{% url 'copy_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}"/>
-                                                            <i class="fa-solid fa-copy"></i> Copy
+                                                            <i class="fa-solid fa-copy"></i> {% trans "Copy" %}
                                                         </a>
                                                     </li>
                                                     <li class="divider"></li>
                                                     {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by and finding.under_review %}
                                                         <li role="presentation">
                                                             <a href="{% url 'clear_finding_review' finding.id %}">
-                                                                <i class="icon-user-check"></i> Clear Review
+                                                                <i class="icon-user-check"></i> {% trans "Clear Review" %}
                                                             </a>
                                                         </li>
                                                     {% elif not finding.under_review %}
                                                         <li role="presentation">
                                                             <a href="{% url 'request_finding_review' finding.id %}">
-                                                                <i class="icon-user-check"></i> Request Peer Review
+                                                                <i class="icon-user-check"></i> {% trans "Request Peer Review" %}
                                                             </a>
                                                         </li>
                                                     {% endif %}
                                                     <li role="presentation">
                                                         <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                            <i class="fa-solid fa-clock"></i> Touch Finding
+                                                            <i class="fa-solid fa-clock"></i> {% trans "Touch Finding" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
                                                 {% if finding|has_object_permission:"Finding_Add" %}
                                                     <li role="presentation">
                                                         <a href="{% url 'mktemplate' finding.id %}">
-                                                            <i class="fa-solid fa-copy"></i> Make Finding a Template
+                                                            <i class="fa-solid fa-copy"></i> {% trans "Make Finding a Template" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
                                                 {% if finding|has_object_permission:"Finding_Edit" %}
                                                     <li role="presentation">
                                                         <a href="{% url 'find_template_to_apply' finding.id %}">
-                                                            <i class="fa-solid fa-copy"></i> Apply Template to Finding
+                                                            <i class="fa-solid fa-copy"></i> {% trans "Apply Template to Finding" %}
                                                         </a>
                                                     </li>
                                                     {% if finding.active %}
                                                         <li role="presentation">
                                                             <a href="{% url 'close_finding' finding.id %}">
-                                                                <i class="fa-solid fa-fire-extinguisher"></i> Close Finding
+                                                                <i class="fa-solid fa-fire-extinguisher"></i> {% trans "Close Finding" %}
                                                             </a>
                                                         </li>
                                                     {% else %}
                                                         <li role="presentation">
                                                             <a href="{% url 'reopen_finding' finding.id %}">
-                                                                <i class="fa-solid fa-bug"></i> Open Finding
+                                                                <i class="fa-solid fa-bug"></i> {% trans "Open Finding" %}
                                                             </a>
                                                         </li>
                                                     {% endif %}
@@ -1026,7 +1024,7 @@
                                                     {% if finding.risk_accepted %}
                                                         <li role="presentation">
                                                             <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                                <i class="fa-solid fa-circle-exclamation"></i> Unaccept Risk
+                                                                <i class="fa-solid fa-circle-exclamation"></i> {% trans "Unaccept Risk" %}
                                                             </a>
                                                         </li>
                                                     {% else %}
@@ -1034,7 +1032,7 @@
                                                             {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
                                                                 <li role="presentation">
                                                                     <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                                        <i class="fa-solid fa-circle-exclamation"></i> Accept Risk
+                                                                        <i class="fa-solid fa-circle-exclamation"></i> {% trans "Accept Risk" %}
                                                                     </a>
                                                                 </li>
                                                             {% endif %}
@@ -1042,7 +1040,7 @@
                                                                 <li role="presentation">
                                                                     <a href
                                                                     {% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}>
-                                                                        <i class="fa-solid fa-circle-exclamation"></i> Add Risk Acceptance...
+                                                                        <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Risk Acceptance..." %}
                                                                     </a>
                                                                 </li>
                                                             {% endif %}
@@ -1052,7 +1050,7 @@
                                                 <li class="divider"></li>
                                                 <li role="presentation">
                                                     <a href="{% url 'action_history' finding|content_type finding.id %}">
-                                                        <i class="fa-solid fa-clock-rotate-left"></i> View History
+                                                        <i class="fa-solid fa-clock-rotate-left"></i> {% trans "View History" %}
                                                     </a>
                                                 </li>
                                                 {% if finding|has_object_permission:"Finding_Delete" %}
@@ -1070,7 +1068,7 @@
                                                         <a class="text-danger delete-finding"
                                                         id="delete-finding-menu-{{ finding.id }}"
                                                         href="#">
-                                                            <i class="fa-solid fa-trash"></i> Delete
+                                                            <i class="fa-solid fa-trash"></i> {% trans "Delete" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
@@ -1233,7 +1231,7 @@
         {% else %}
             <div class="panel-body">
                 <p class="text-center">
-                    No findings found.
+                    {% trans "No findings found." %}
                 </p>
             </div>
         {% endif %}
@@ -1244,7 +1242,7 @@
         <div class="panel-heading">
             <div class="clearfix">
                 <h4 class="pull-left">
-                    Potential Findings
+                    {% trans "Potential Findings" %}
                 </h4>
                 {% if test|has_object_permission:"Finding_Add" %}
                     <form id="quick-add-form" method="post" class="pull-right">
@@ -1259,7 +1257,7 @@
                             <span class="input-group-btn">
                                 <button id="the_button" class="btn btn-success" type="submit">
                                     <i id="fa-icon" class="fa-solid fa-plus fa-fw"></i>
-                                    Add Potential Finding
+                                    {% trans "Add Potential Finding" %}
                                 </button>
                             </span>
                         </div>
@@ -1272,19 +1270,19 @@
             <thead>
                 <tr>
                     <th>
-                        Name
+                        {% trans "Name" %}
                     </th>
                     <th>
-                        Severity
+                        {% trans "Severity" %}
                     </th>
                     <th>
-                        Reporter
+                        {% trans "Reporter" %}
                     </th>
                     <th>
-                        Date
+                        {% trans "Date" %}
                     </th>
                     <th>
-                        Actions
+                        {% trans "Actions" %}
                     </th>
                 </tr>
             </thead>
@@ -1318,7 +1316,7 @@
                         <td>
                             <div class="btn-group">
                                 {% if test|has_object_permission:"Finding_Add" %}
-                                    <a class="btn btn-sm btn-warning"href="{% url 'promote_to_finding' finding.id %}">Promote To Finding</a>
+                                    <a class="btn btn-sm btn-warning"href="{% url 'promote_to_finding' finding.id %}">{% trans "Promote To Finding" %}</a>
                                 {% endif %}
                                 {% if test|has_object_permission:"Finding_Edit" %}
                                     <form method="post"
@@ -1352,7 +1350,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h4>
-                            Credentials
+                            {% trans "Credentials" %}
                             {% if not cred_test and creds and test|has_object_permission:"Test_Edit" %}
                                 <a title="Add New Credential"
                                 class="pull-right btn btn-primary btn-sm"
@@ -1365,35 +1363,35 @@
                             <thead>
                                 <tr>
                                     <th>
-                                        Name
+                                        {% trans "Name" %}
                                     </th>
                                     <th>
-                                        Username
+                                        {% trans "Username" %}
                                     </th>
                                     <th>
-                                        Role
+                                        {% trans "Role" %}
                                     </th>
                                     <th>
-                                        Environment
+                                        {% trans "Environment" %}
                                     </th>
                                     <th>
-                                        Authentication Provider
+                                        {% trans "Authentication Provider" %}
                                     </th>
                                     <th>
-                                        Login Valid
+                                        {% trans "Login Valid" %}
                                     </th>
                                     <th>
-                                        Actions
+                                        {% trans "Actions" %}
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td colspan="7">
-                                        Credentials Configured for this <strong>Test</strong>
+                                        {% trans "Credentials Configured for this" %} <strong>{% trans "Test" %}</strong>
                                         {% if not cred_test %}
                                             <br />
-                                            <center>None configured</center>
+                                            <center>{% trans "None configured" %}</center>
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -1421,11 +1419,11 @@
                                             <div class="btn-group">
                                                 {% if user.is_superuser %}
                                                     <a class="btn btn-sm btn-secondary"
-                                                    href="{% url 'view_cred_engagement_test' cred.test.id cred.id  %}">View</a>
+                                                    href="{% url 'view_cred_engagement_test' cred.test.id cred.id  %}">{% trans "View" %}</a>
                                                 {% endif %}
                                                 {% if test|has_object_permission:"Test_Edit" %}
                                                     <a class="btn btn-sm btn-danger delete"
-                                                    href="{% url 'delete_cred_test' cred.test.id cred.id  %}">Delete</a>
+                                                    href="{% url 'delete_cred_test' cred.test.id cred.id  %}">{% trans "Delete" %}</a>
                                                 {% endif %}
                                             </div>
                                         </td>
@@ -1433,7 +1431,7 @@
                                 {% endfor %}
                                 <tr>
                                     <td colspan="7">
-                                        Credentials Configured for this <strong>Engagement</strong>
+                                        {% trans "Credentials Configured for this" %} <strong>{% trans "Engagement" %}</strong>
                                     </td>
                                 </tr>
                                 {% for cred in creds %}
@@ -1459,7 +1457,7 @@
                                         <td>
                                             <div class="btn-group">
                                                 <a class="btn btn-sm btn-primary"
-                                                href="{% url 'view_cred_product_engagement' cred.engagement.id cred.id  %}">View</a>
+                                                href="{% url 'view_cred_product_engagement' cred.engagement.id cred.id  %}">{% trans "View" %}</a>
                                             </div>
                                         </td>
                                     </tr>
@@ -1469,8 +1467,10 @@
                     {% else %}
                         <div class="panel-body">
                             <p>
-                                No credentials configured.
-                                {% if not creds %}Configure engagement credentials first, then add credentials to the test.{% endif %}
+                                {% trans "No credentials configured." %}
+                                {% if not creds %}
+                                    {% trans "Configure engagement credentials first, then add credentials to the test." %}
+                                {% endif %}
                             </p>
                         </div>
                     {% endif %}
@@ -1485,7 +1485,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4>
-                        Files<span class="pull-right">&nbsp;
+                        {% trans "Files" %}<span class="pull-right">&nbsp;
                         <a data-toggle="collapse" href="#add_feat_files">
                             <i class="glyphicon glyphicon-chevron-down"></i></a></span>
                         {% if test|has_object_permission:"Test_Edit" %}
@@ -1523,7 +1523,7 @@
     <!--Files end -->
     {% include "dojo/snippets/comments.html" with notes=notes object=test destination="test" %}
     <div class="protip">
-        <i class="fa-solid fa-lightbulb"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit this test. Type <kbd>a</kbd> to add a finding to this test.
+        <i class="fa-solid fa-lightbulb"></i> <strong>{% trans "ProTip!" %}</strong> {% trans "Type" %}s <kbd>e</kbd> {% trans "to edit this test. Type" %} <kbd>a</kbd> {% trans "to add a finding to this test." %}
     </div>
 {% endblock %}
 {% block postscript %}

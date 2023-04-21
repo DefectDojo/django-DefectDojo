@@ -3,13 +3,14 @@
 {% load authorization_tags %}
 {% load get_endpoint_status %}
 {% load static %}
+{% load i18n %}
 {% block findings_list %}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        {{ filter_name }} Findings
+                        {% blocktrans %}{{ filter_name }} Findings{% endblocktrans %}
                         <div class="dropdown pull-right">
                             &nbsp;
                             <button class="btn btn-primary dropdown-toggle"
@@ -24,17 +25,17 @@
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="downloadMenu">
                                 <li role="presentation">
                                     <a id="report" href="{% url 'quick_report' %}?url={{ request.get_full_path }}">
-                                        <i class="fa-solid fa-file-lines"></i> Report
+                                        <i class="fa-solid fa-file-lines"></i> {% trans "Report" %}
                                     </a>
                                 </li>
                                 <li role="presentation">
                                     <a id="csv_export" href="{% url 'csv_export' %}?url={{ request.get_full_path }}">
-                                        <i class="fa-solid fa-table"></i> CSV Export
+                                        <i class="fa-solid fa-table"></i> {% trans "CSV Export" %}
                                     </a>
                                 </li>
                                 <li role="presentation">
                                     <a id="excel_export" href="{% url 'excel_export' %}?url={{ request.get_full_path }}">
-                                        <i class="fa-solid fa-file-excel"></i> Excel Export
+                                        <i class="fa-solid fa-file-excel"></i> {% trans "Excel Export" %}
                                     </a>
                                 </li>
                             </ul>
@@ -63,7 +64,7 @@
                                     data-toggle="dropdown"
                                     aria-haspopup="true"
                                     aria-expanded="true">
-                                Bulk Edit
+                                {% trans "Bulk Edit" %}
                                 <span class="caret"></span>
                             </button>
                         {% endif %}
@@ -93,7 +94,7 @@
                             {% endif %}
                         </div>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
-                            <li class="dropdown-header">Choose wisely...</li>
+                            <li class="dropdown-header">{% trans "Choose wisely..." %}</li>
                             <li style="padding-left: 8px;">
                                 {% if product_tab %}
                                     <form action="{% url 'finding_bulk_update_all_product' product_tab.product.id %}" method="post" id="bulk_change_form">
@@ -102,43 +103,43 @@
                                 {% endif %}
                                 {% csrf_token %}
                                         <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
-                                        <label style="display: block" for="severity">Severity</label>
+                                        <label style="display: block" for="severity">{% trans "Severity" %}</label>
                                         <select name="severity" id="severity" style="font-size: 80%">
                                             <option value="">
-                                                Choose...
+                                                {% trans "Choose..." %}
                                             </option>
                                             <option value="Info">
-                                                Info
+                                                {% trans "Info" %}
                                             </option>
                                             <option value="Low">
-                                                Low
+                                                {% trans "Low" %}
                                             </option>
                                             <option value="Medium">
-                                                Medium
+                                                {% trans "Medium" %}
                                             </option>
                                             <option value="High">
-                                                High
+                                                {% trans "High" %}
                                             </option>
                                             <option value="Critical">
-                                                Critical
+                                                {% trans "Critical" %}
                                             </option>
                                         </select>
                                         <br />
                                         <br />
-                                        <label style="display: block" for="id_bulk_date">Date</label>
+                                        <label style="display: block" for="id_bulk_date">{% trans "Date" %}</label>
                                         <input id="id_bulk_date"
                                             name="date"
                                             type="date"
                                             alt="Select the date the Findings were discovered"/>
                                         <br />
-                                        <label style="display: block" for="id_bulk_planned_remediation_date">Planned Remediation Date</label>
+                                        <label style="display: block" for="id_bulk_planned_remediation_date">{% trans "Planned Remediation Date" %}</label>
                                         <input id="id_bulk_planned_remediation_date"
                                             name="planned_remediation_date"
                                             type="date"
                                             alt="Select the date the Finding will be remediated"/>
                                         <br />
                                         <label>
-                                            <b>Status</b>
+                                            <b>{% trans "Status" %}</b>
                                             <input id="id_bulk_status"
                                                 name="status"
                                                 type="checkbox"
@@ -147,33 +148,33 @@
                                         <br />
                                         <label style="font-size: 80%; font-weight: normal; display: block">
                                             <input id="id_bulk_active" name="active" type="checkbox" disabled/>
-                                            <span>Active</span>
+                                            <span>{% trans "Active" %}</span>
                                         </label>
                                         <label style="font-size: 80%; font-weight: normal; display: block">
                                             <input id="id_bulk_verified" name="verified" type="checkbox" disabled/>
-                                            <span>Verified</span>
+                                            <span>{% trans "Verified" %}</span>
                                         </label>
                                         <label style="font-size: 80%; font-weight: normal; display: block">
                                             <input id="id_bulk_false_p" name="false_p" type="checkbox" disabled/>
-                                            <span>False Positive</span>
+                                            <span>{% trans "False Positive" %}</span>
                                         </label>
                                         <label style="font-size: 80%; font-weight: normal; display: block">
                                             <input id="id_bulk_out_of_scope"
                                                 name="out_of_scope"
                                                 type="checkbox"
                                                 disabled/>
-                                            <span>Out of scope</span>
+                                            <span>{% trans "Out of scope" %}</span>
                                         </label>
                                         <label style="font-size: 80%; font-weight: normal; display: block">
                                             <input id="id_bulk_is_mitigated"
                                                 name="is_mitigated"
                                                 type="checkbox"
                                                 disabled/>
-                                            <span>Mitigated</span>
+                                            <span>{% trans "Mitigated" %}</span>
                                         </label>
                                         <br />
                                         <label>
-                                            <b>Risk Acceptance</b>
+                                            <b>{% trans "Risk Acceptance" %}</b>
                                             <input id="id_bulk_risk_acceptance"
                                                 name="risk_acceptance"
                                                 type="checkbox"
@@ -182,31 +183,31 @@
                                         <br />
                                         <label style="font-size: 80%; font-weight: normal; display: block">
                                             <input id="id_bulk_risk_accept" name="risk_accept" type="checkbox" disabled/>
-                                            <span>Accept</span>
+                                            <span>{% trans "Accept" %}</span>
                                         </label>
                                         <label style="font-size: 80%; font-weight: normal; display: block">
                                             <input id="id_bulk_risk_unaccept"
                                                 name="risk_unaccept"
                                                 type="checkbox"
                                                 disabled/>
-                                            <span>Unaccept</span>
+                                            <span>{% trans "Unaccept" %}</span>
                                         </label>
                                         {% if 'is_finding_groups_enabled'|system_setting_enabled %}
                                             <label>
-                                                <b>Group</b>
+                                                <b>{% trans "Group" %}</b>
                                             </label>
                                             <label style="font-size: 80%; font-weight: normal; display: block">
                                                 <input id="id_bulk_finding_group_remove"
                                                     name="finding_group_remove"
                                                     class="finding_group_option"
                                                     type="checkbox"/>
-                                                <span>Remove from any group</span>
+                                                <span>{% trans "Remove from any group" %}</span>
                                             </label>
                                         {% endif %}
                                         <br>
                                         {% if system_settings.enable_jira %}
                                             <label style="font-size: 80%; font-weight: bold; display: block">
-                                                Push to Jira
+                                                {% trans "Push to Jira" %}
                                                 <input id="id_push_tojira"
                                                     name="push_to_jira"
                                                     type="checkbox"
@@ -218,7 +219,7 @@
                                         {% endif %}
                                         {% if system_settings.enable_github %}
                                             <label style="font-size: 80%; font-weight: bold; display: block">
-                                                Push to GitHub
+                                                {% trans "Push to GitHub" %}
                                                 <input id="id_push_togithub"
                                                     name="push_to_github"
                                                     type="checkbox"
@@ -226,14 +227,14 @@
                                             </label>
                                             <br />
                                         {% endif %}
-                                        <label style="display: block">Notes</label>
+                                        <label style="display: block">{% trans "Notes" %}</label>
                                         {% comment %}
                                             Quick hack to make bulk edit work without refactoring the whole bulk edit form
                                             {{ bulk_edit_form.media.css }}
                                             {{ bulk_edit_form.media.js }}
                                         {% endcomment %}
                                         {{ bulk_edit_form.notes }}
-                                        <label style="display: block">Tags</label>
+                                        <label style="display: block">{% trans "Tags" %}</label>
                                         {% comment %}
                                             Quick hack to make bulk edit work without refactoring the whole bulk edit form
                                             {{ bulk_edit_form.media.css }}
@@ -269,26 +270,26 @@
                                                 aria-labelledby="dropdownMenu1"
                                                 id="select_by_severity">
                                                 <li>
-                                                    <a id="Info">Info</a>
+                                                    <a id="Info">{% trans "Info" %}</a>
                                                 </li>
                                                 <li>
-                                                    <a id="Low">Low</a>
+                                                    <a id="Low">{% trans "Low" %}</a>
                                                 </li>
                                                 <li>
-                                                    <a id="Medium">Medium</a>
+                                                    <a id="Medium">{% trans "Medium" %}</a>
                                                 </li>
                                                 <li>
-                                                    <a id="High">High</a>
+                                                    <a id="High">{% trans "High" %}</a>
                                                 </li>
                                                 <li>
-                                                    <a id="Critical">Critical</a>
+                                                    <a id="Critical">{% trans "Critical" %}</a>
                                                 </li>
                                                 <li role="separator" class="divider"></li>
                                                 <li>
-                                                    <a id="All">All</a>
+                                                    <a id="All">{% trans "All" %}</a>
                                                 </li>
                                                 <li>
-                                                    <a id="None">None</a>
+                                                    <a id="None">{% trans "None" %}</a>
                                                 </li>
                                             </ul>
                                         </div>
@@ -296,69 +297,73 @@
                                 {% endif %}
                                 <th></th>
                                 <th class="nowrap centered severity-sort">
-                                    Severity
+                                    {% trans "Severity" %}
                                 </th>
                                 <th class="nowrap">
+                                    {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                     {% dojo_sort request 'Name' 'title' %}
                                 </th>
                                 <th>
-                                    CWE
+                                    {% trans "CWE" %}
                                 </th>
                                 <th>
-                                    Vulnerability Id
+                                    {% trans "Vulnerability Id" %}
                                 </th>
                                 <th class="nowrap">
                                     {% if filter_name == 'Closed' %}
-                                            {% dojo_sort request 'Closed Date' 'mitigated' %}
+                                        {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
+                                        {% dojo_sort request 'Closed Date' 'mitigated' %}
                                     {% else %}
-                                            {% dojo_sort request 'Date' 'date' %}
+                                        {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
+                                        {% dojo_sort request 'Date' 'date' %}
                                     {% endif %}
                                 </th>
                                 <th class="nowrap">
-                                    Age
+                                    {% trans "Age" %}
                                 </th>
                                 {% if system_settings.enable_finding_sla %}
                                     <th>
-                                        SLA
+                                        {% trans "SLA" %}
                                     </th>
                                 {% endif %}
                                 <th>
-                                    Reporter
+                                    {% trans "Reporter" %}
                                 </th>
                                 <th>
-                                    Found By
+                                    {% trans "Found By" %}
                                 </th>
                                 <th>
-                                    Status
+                                    {% trans "Status" %}
                                 </th>
                                 {% if system_settings.enable_jira %}
                                     {% if jira_project and product_tab or not product_tab %}
                                         <th>
-                                            Jira
+                                            {% trans "Jira" %}
                                         </th>
                                         <th>
-                                            JIRA Age
+                                            {% trans "JIRA Age" %}
                                         </th>
                                         <th>
-                                            JIRA Change
+                                            {% trans "JIRA Change" %}
                                         </th>
                                     {% endif %}
                                 {% endif %}
                                 {% if 'is_finding_groups_enabled'|system_setting_enabled %}
                                     <th>
-                                        Group
+                                        {% trans "Group" %}
                                     </th>
                                 {% endif %}
                                 {% if show_product_column and product_tab is None %}
                                     <th class="nowrap">
+                                        {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                         {% dojo_sort request 'Product' 'test__engagement__product__name' %}
                                     </th>
                                 {% endif %}
                                 <th>
-                                    Service
+                                    {% trans "Service" %}
                                 </th>
                                 <th>
-                                    Planned Remediation
+                                    {% trans "Planned Remediation" %}
                                 </th>
                             </tr>
                         </thead>
@@ -379,18 +384,18 @@
                                                 <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
                                                     <li>
                                                         <a class="" href="{% url 'view_finding' finding.id %}">
-                                                            <i class="fa-solid fa-circle-right"></i> View
+                                                            <i class="fa-solid fa-circle-right"></i> {% trans "View" %}
                                                         </a>
                                                     </li>
                                                     {% if finding|has_object_permission:"Finding_Edit" %}
                                                         <li>
                                                             <a class="" href="{% url 'edit_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                                                                <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}
                                                             </a>
                                                         </li>
                                                         <li>
                                                             <a class="" href="{% url 'copy_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}"/>
-                                                                <i class="fa-solid fa-copy"></i> Copy
+                                                                <i class="fa-solid fa-copy"></i> {% trans "Copy" %}
                                                             </a>
                                                         </li>
                                                     {% endif %}
@@ -399,13 +404,13 @@
                                                         {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by and finding.under_review %}
                                                             <li role="presentation">
                                                                 <a href="{% url 'clear_finding_review' finding.id %}">
-                                                                    <i class="icon-user-check"></i> Clear Review
+                                                                    <i class="icon-user-check"></i> {% trans "Clear Review" %}
                                                                 </a>
                                                             </li>
                                                         {% elif not finding.under_review %}
                                                             <li role="presentation">
                                                                 <a href="{% url 'request_finding_review' finding.id %}">
-                                                                    <i class="icon-user-check"></i> Request Peer Review
+                                                                    <i class="icon-user-check"></i> {% trans "Request Peer Review" %}
                                                                 </a>
                                                             </li>
                                                         {% endif %}
@@ -413,21 +418,21 @@
                                                     {% if finding|has_object_permission:"Finding_Edit" %}
                                                         <li role="presentation">
                                                             <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                                <i class="fa-solid fa-clock"></i> Touch Finding
+                                                                <i class="fa-solid fa-clock"></i> {% trans "Touch Finding" %}
                                                             </a>
                                                         </li>
                                                     {% endif %}
                                                     {% if finding|has_object_permission:"Finding_Add" %}
                                                         <li role="presentation">
                                                             <a href="{% url 'mktemplate' finding.id %}">
-                                                                <i class="fa-solid fa-copy"></i> Make Finding a Template
+                                                                <i class="fa-solid fa-copy"></i> {% trans "Make Finding a Template" %}
                                                             </a>
                                                         </li>
                                                     {% endif %}
                                                     {% if finding|has_object_permission:"Finding_Edit" %}
                                                         <li role="presentation">
                                                             <a href="{% url 'find_template_to_apply' finding.id %}">
-                                                                <i class="fa-solid fa-copy"></i> Apply Template to Finding
+                                                                <i class="fa-solid fa-copy"></i> {% trans "Apply Template to Finding" %}
                                                             </a>
                                                         </li>
                                                     {% endif %}
@@ -435,13 +440,13 @@
                                                         {% if finding.active %}
                                                             <li role="presentation">
                                                                 <a href="{% url 'close_finding' finding.id %}">
-                                                                    <i class="fa-solid fa-fire-extinguisher"></i> Close Finding
+                                                                    <i class="fa-solid fa-fire-extinguisher"></i> {% trans "Close Finding" %}
                                                                 </a>
                                                             </li>
                                                         {% else %}
                                                             <li role="presentation">
                                                                 <a href="{% url 'reopen_finding' finding.id %}">
-                                                                    <i class="fa-solid fa-bug"></i> Open Finding
+                                                                    <i class="fa-solid fa-bug"></i> {% trans "Open Finding" %}
                                                                 </a>
                                                             </li>
                                                         {% endif %}
@@ -451,7 +456,7 @@
                                                         {% if finding.risk_accepted %}
                                                             <li role="presentation">
                                                                 <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                                    <i class="fa-solid fa-circle-exclamation"></i> Unaccept Risk
+                                                                    <i class="fa-solid fa-circle-exclamation"></i> {% trans "Unaccept Risk" %}
                                                                 </a>
                                                             </li>
                                                         {% else %}
@@ -459,14 +464,14 @@
                                                                 {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
                                                                     <li role="presentation">
                                                                         <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                                            <i class="fa-solid fa-circle-exclamation"></i> Accept Risk
+                                                                            <i class="fa-solid fa-circle-exclamation"></i> {% trans "Accept Risk" %}
                                                                         </a>
                                                                     </li>
                                                                 {% endif %}
                                                                 {% if finding.test.engagement.product.enable_full_risk_acceptance %}
                                                                     <li role="presentation">
                                                                         <a href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
-                                                                            <i class="fa-solid fa-circle-exclamation"></i> Add Risk Acceptance...
+                                                                            <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Risk Acceptance..." %}
                                                                         </a>
                                                                     </li>
                                                                 {% endif %}
@@ -475,7 +480,7 @@
                                                     {% endif %}
                                                     <li role="presentation">
                                                         <a href="{% url 'action_history' finding|content_type finding.id %}">
-                                                            <i class="fa-solid fa-clock-rotate-left"></i> View History
+                                                            <i class="fa-solid fa-clock-rotate-left"></i> {% trans "View History" %}
                                                         </a>
                                                     </li>
                                                     {% if finding|has_object_permission:"Finding_Delete" %}
@@ -487,7 +492,7 @@
                                                                 <input type="hidden" label="id" aria-label="id" name="id" value="{{ finding.id }}"/>
                                                             </form>
                                                             <a class="text-danger delete-finding" id="delete-finding-menu-{{ finding.id }}" href="#">
-                                                                <i class="fa-solid fa-trash"></i> Delete
+                                                                <i class="fa-solid fa-trash"></i> {% trans "Delete" %}
                                                             </a>
                                                         </li>
                                                     {% endif %}
@@ -669,7 +674,7 @@
             {% else %}
                 <div id="no_findings">
                     <p class="text-center">
-                        No findings found.
+                        {% trans "No findings found." %}
                     </p>
                 </div>
             {% endif %}
