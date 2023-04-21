@@ -1,12 +1,14 @@
 # Django settings for DefectDojo
 import os
+import json
+import boto3
+import environ
+from email.utils import getaddresses
 from datetime import timedelta
 from celery.schedules import crontab
 from dojo import __version__
-import environ
 from netaddr import IPNetwork, IPSet
-from email.utils import getaddresses
-import json
+from botocore.exceptions import ClientError
 
 # See https://documentation.defectdojo.com/getting_started/configuration/ for options
 # how to tune the configuration to your needs.
@@ -336,7 +338,7 @@ def generate_url(
     if len(user) > 0 or len(password) > 0:
         result_list.append("@")
     result_list.append(host)
-    if port >= 0:
+    if int(port) >= 0:
         result_list.append(":")
         result_list.append(str(port))
     if len(path) > 0 and path[0] != "/":
@@ -346,6 +348,28 @@ def generate_url(
         result_list.append("?")
     result_list.append(params)
     return "".join(result_list)
+
+
+def get_secret(secret_name):
+    region_name = env("AWS_REGION")
+
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(
+        service_name="secretsmanager", region_name=region_name
+    )
+
+    try:
+        get_secret_value_response = client.get_secret_value(
+            SecretId=secret_name
+        )
+    except ClientError as e:
+        print("An error occurred on requested secret " + secret_name, e)
+        raise e
+
+    # Decrypts secret using the associated KMS key.
+    secret = get_secret_value_response["SecretString"]
+    return json.loads(secret)
 
 
 # Read .env file as default or from the command line, DD_ENV_PATH
@@ -409,22 +433,38 @@ TAG_PREFETCHING = env("DD_TAG_PREFETCHING")
 # ------------------------------------------------------------------------------
 
 # Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db
-if os.getenv("DD_DATABASE_URL") is not None:
-    DATABASES = {"default": env.db("DD_DATABASE_URL")}
-else:
+if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
+    secret_database = get_secret(env("DD_SECRET_DATABASE"))
     DATABASES = {
         "default": {
             "ENGINE": env("DD_DATABASE_ENGINE"),
-            "NAME": env("DD_DATABASE_NAME"),
+            "NAME": secret_database["dbname"],
             "TEST": {
                 "NAME": env("DD_TEST_DATABASE_NAME"),
             },
-            "USER": env("DD_DATABASE_USER"),
-            "PASSWORD": env("DD_DATABASE_PASSWORD"),
-            "HOST": env("DD_DATABASE_HOST"),
-            "PORT": env("DD_DATABASE_PORT"),
+            "USER": secret_database["username"],
+            "PASSWORD": secret_database["password"],
+            "HOST": secret_database["host"],
+            "PORT": secret_database["port"],
         }
     }
+else:
+    if os.getenv("DD_DATABASE_URL") is not None:
+        DATABASES = {"default": env.db("DD_DATABASE_URL")}
+    else:
+        DATABASES = {
+            "default": {
+                "ENGINE": env("DD_DATABASE_ENGINE"),
+                "NAME": env("DD_DATABASE_NAME"),
+                "TEST": {
+                    "NAME": env("DD_TEST_DATABASE_NAME"),
+                },
+                "USER": env("DD_DATABASE_USER"),
+                "PASSWORD": env("DD_DATABASE_PASSWORD"),
+                "HOST": env("DD_DATABASE_HOST"),
+                "PORT": env("DD_DATABASE_PORT"),
+            }
+        }
 
 # Track migrations through source control rather than making migrations locally
 if env("DD_TRACK_MIGRATIONS"):
