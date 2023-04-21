@@ -132,7 +132,7 @@ def get_severities_by_week(findings, today):
         week = week - timedelta(days=7)
 
     for ds in severities_by_day:
-        week = ds['created'] + timedelta(days=6-ds['created'].weekday())
+        week = ds['created'] + timedelta(days=6 - ds['created'].weekday())
         key = f"{week.year}-{week.month:02}-{week.day:02}"
         weekly_stats = results.setdefault(key, {'key': key, 'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, None: 0})
         weekly_stats[SEVERITY_MAP.get(ds.get('severity'))] += ds.get('count', 0)

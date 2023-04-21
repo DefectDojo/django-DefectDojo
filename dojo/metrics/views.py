@@ -12,7 +12,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
-from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
+from django.db.models import Q, Sum, Case, When, IntegerField, Value
 from django.db.models.query import QuerySet
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404

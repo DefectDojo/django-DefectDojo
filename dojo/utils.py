@@ -18,7 +18,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
-from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
+from django.db.models import Q, Count
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.dispatch import receiver
