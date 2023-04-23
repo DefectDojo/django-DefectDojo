@@ -716,6 +716,8 @@ def copy_finding(request, fid):
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def edit_finding(request, fid):
+    system_settings = System_Settings.objects.get()
+
     finding = get_object_or_404(Finding, id=fid)
     # finding = finding._detag_to_serializable()
     # finding = finding._retag_to_original()
@@ -819,6 +821,29 @@ def edit_finding(request, fid):
                         status.mitigated = True
                         status.last_modified = timezone.now()
                         status.save()
+
+            if system_settings.false_positive_history:
+                # If the finding is being marked as a false positive we dont need to call the
+                # fp history function because it will be called by the save function
+
+                # If finding was a false positive and is being reativated
+                if old_finding.false_p and not new_finding.false_p:
+                    logger.debug('FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s', new_finding)
+
+                    existing_fp_findings = match_finding_to_existing_findings(
+                        new_finding, product=new_finding.test.engagement.product
+                    ).filter(false_p=True)
+
+                    for fp in existing_fp_findings:
+                        logger.debug('FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s', fp.id, fp)
+                        fp.active = new_finding.active
+                        fp.verified = new_finding.verified
+                        fp.false_p = False
+                        fp.out_of_scope = new_finding.out_of_scope
+                        fp.is_mitigated = new_finding.is_mitigated
+                        fp.last_reviewed = timezone.now()
+                        fp.last_reviewed_by = request.user
+                        fp.save_no_options()
 
             if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
                 burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
