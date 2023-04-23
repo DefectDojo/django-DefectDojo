@@ -353,7 +353,9 @@ def post_process_finding_save(finding, dedupe_option=True, rules_option=True, pr
 
     if system_settings.false_positive_history:
         # Only perform false positive history if deduplication is disabled
-        if not system_settings.enable_deduplication:
+        if system_settings.enable_deduplication:
+            deduplicationLogger.warning("skipping false positive history because deduplication is also enabled")
+        else:
             from dojo.utils import do_false_positive_history
             do_false_positive_history(finding, *args, **kwargs)
     else:
