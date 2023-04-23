@@ -219,6 +219,14 @@ else
         fail $test
     fi
 
+    test="False Positive History tests"
+    echo "Running: $test"
+    if python3 tests/false_positive_history_test.py ; then
+        success $test
+    else
+        fail $test
+    fi
+
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
 
