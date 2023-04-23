@@ -335,7 +335,7 @@ def add_findings_to_auto_group(name, findings, group_by, create_finding_groups_f
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def post_process_finding_save(finding, dedupe_option=True, false_history=True, rules_option=True, product_grading_option=True,
+def post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True,
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
 
     system_settings = System_Settings.objects.get()
