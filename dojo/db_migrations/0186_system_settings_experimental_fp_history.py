@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0173_alter_risk_acceptance_name'),
+        ('dojo', '0185_product_disable_sla_breach_notifications_and_more'),
     ]
 
     operations = [
