@@ -22,7 +22,9 @@ from django.views.decorators.http import require_POST
 from itertools import chain
 from imagekit import ImageSpec
 from imagekit.processors import ResizeToFill
-from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, close_external_issue, redirect, reopen_external_issue
+from dojo.utils import add_error_message_to_response, add_field_errors_to_response, \
+    add_success_message_to_response, close_external_issue, redirect, reopen_external_issue, \
+    do_false_positive_history, match_finding_to_existing_findings
 import copy
 from dojo.filters import TemplateFindingFilter, SimilarFindingFilter, FindingFilter, AcceptedFindingFilter
 from dojo.forms import EditPlannedRemediationDateFindingForm, NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, \
@@ -31,8 +33,8 @@ from dojo.forms import EditPlannedRemediationDateFindingForm, NoteForm, TypedNot
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings, CopyFindingForm
 from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Notes, NoteHistory, Note_Type, \
-    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, Endpoint_Status, \
-    FileAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, Test_Import_Finding_Action, User, Engagement, Vulnerability_Id_Template
+    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, Endpoint_Status, System_Settings, \
+    FileAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, Test_Import_Finding_Action, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, \
     redirect_to_return_url_or_else, get_return_url, add_external_issue, update_external_issue, \
@@ -1859,6 +1861,8 @@ def merge_finding_product(request, pid):
 
 # bulk update and delete are combined, so we can't have the nice user_is_authorized decorator
 def finding_bulk_update_all(request, pid=None):
+    system_settings = System_Settings.objects.get()
+
     logger.debug('bulk 10')
     form = FindingBulkUpdateForm(request.POST)
     now = timezone.now()
@@ -1916,6 +1920,8 @@ def finding_bulk_update_all(request, pid=None):
                 finds = prefetch_for_findings(finds)
                 if form.cleaned_data['severity'] or form.cleaned_data['status']:
                     for find in finds:
+                        old_find = copy.deepcopy(find)
+
                         if form.cleaned_data['severity']:
                             find.severity = form.cleaned_data['severity']
                             find.numerical_severity = Finding.get_numerical_severity(form.cleaned_data['severity'])
@@ -1935,6 +1941,30 @@ def finding_bulk_update_all(request, pid=None):
                         # use super to avoid all custom logic in our overriden save method
                         # it will trigger the pre_save signal
                         find.save_no_options()
+
+                        if system_settings.false_positive_history:
+                            # If finding is being marked as false positive
+                            if find.false_p:
+                                do_false_positive_history(find)
+
+                            # If finding was a false positive and is being reativated
+                            elif old_find.false_p and not find.false_p:
+                                logger.debug('FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s', find)
+
+                                existing_fp_findings = match_finding_to_existing_findings(
+                                    find, product=find.test.engagement.product
+                                ).filter(false_p=True)
+
+                                for fp in existing_fp_findings:
+                                    logger.debug('FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s', fp.id, fp)
+                                    fp.active = find.active
+                                    fp.verified = find.verified
+                                    fp.false_p = False
+                                    fp.out_of_scope = find.out_of_scope
+                                    fp.is_mitigated = find.is_mitigated
+                                    fp.last_reviewed = timezone.now()
+                                    fp.last_reviewed_by = request.user
+                                    fp.save_no_options()
 
                     for prod in prods:
                         calculate_grade(prod)

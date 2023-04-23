@@ -91,7 +91,8 @@ def do_false_positive_history(finding, *args, **kwargs):
 
     # Remove the async user kwarg because save() really does not like it
     # Would rather not add anything to Finding.save()
-    kwargs.pop('async_user')
+    if 'async_user' in kwargs:
+        kwargs.pop('async_user')
 
     for find in to_mark_as_fp:
         deduplicationLogger.debug(
