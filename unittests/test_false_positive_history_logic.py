@@ -126,6 +126,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         self.disable_dedupe()
         logger.debug('enabling false positive history')
         self.enable_false_positive_history()
+        self.enable_retroactive_false_positive_history()
         self.log_summary()
 
     def tearDown(self):
@@ -153,6 +154,26 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         find_created_after_mark.save()
         # Assert that both findings belongs to the same test and are marked as fp
         self.assert_finding(find_created_before_mark, false_p=True, not_pk=2, test_id=3, hash_code=find_2.hash_code)
+        self.assert_finding(find_created_after_mark, false_p=True, not_pk=2, test_id=3, hash_code=find_2.hash_code)
+
+    # Finding 2 in Product 2, Engagement 1, Test 3
+    def test_fp_history_equal_hash_code_same_test_non_retroactive(self):
+        # Disable retroactive FP history
+        self.disable_retroactive_false_positive_history()
+        # Copy finding 2 and store it in the same test (to test disabled retroactive replication)
+        find_created_before_mark, find_2 = self.copy_and_reset_finding(id=2)
+        find_created_before_mark.save()
+        # Makes sure that the copy is not a false positive
+        self.assert_finding(find_created_before_mark, false_p=False)
+        # Mark finding 2 as fp
+        find_2 = Finding.objects.get(id=2)
+        find_2.false_p = True
+        find_2.save()
+        # Copy finding 2 and store it in the same test
+        find_created_after_mark, find_2 = self.copy_and_reset_finding(id=2)
+        find_created_after_mark.save()
+        # Assert that both findings belongs to the same test and only one of them is marked as fp
+        self.assert_finding(find_created_before_mark, false_p=False, not_pk=2, test_id=3, hash_code=find_2.hash_code)
         self.assert_finding(find_created_after_mark, false_p=True, not_pk=2, test_id=3, hash_code=find_2.hash_code)
 
     # Finding 2 in Product 2, Engagement 1, Test 3
@@ -211,6 +232,28 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         self.assert_finding(find_created_after_mark, false_p=True, not_pk=2, engagement_id=1, not_test_id=3, hash_code=find_2.hash_code)
 
     # Finding 2 in Product 2, Engagement 1, Test 3
+    def test_fp_history_equal_hash_code_same_engagement_different_test_non_retroactive(self):
+        # Disable retroactive FP history
+        self.disable_retroactive_false_positive_history()
+        # Copy finding 2 and store it at Product 2, Engagement 1, Test 14 (to test disabled retroactive replication)
+        find_created_before_mark, find_2 = self.copy_and_reset_finding(id=2)
+        find_created_before_mark.test = Test.objects.get(id=14)
+        find_created_before_mark.save()
+        # Makes sure that the copy is not a false positive
+        self.assert_finding(find_created_before_mark, false_p=False)
+        # Mark as fp
+        find_2 = Finding.objects.get(id=2)
+        find_2.false_p = True
+        find_2.save()
+        # Copy finding 2 and store it at Product 2, Engagement 1, Test 14
+        find_created_after_mark, find_2 = self.copy_and_reset_finding(id=2)
+        find_created_after_mark.test = Test.objects.get(id=14)
+        find_created_after_mark.save()
+        # Assert that both findings belongs to the same engagement but in a different test and only one of them is marked as fp
+        self.assert_finding(find_created_before_mark, false_p=False, not_pk=2, engagement_id=1, not_test_id=3, hash_code=find_2.hash_code)
+        self.assert_finding(find_created_after_mark, false_p=True, not_pk=2, engagement_id=1, not_test_id=3, hash_code=find_2.hash_code)
+
+    # Finding 2 in Product 2, Engagement 1, Test 3
     def test_fp_history_equal_hash_code_same_engagement_different_test_dedupe_enabled(self):
         # Enable deduplication
         self.enable_dedupe()
@@ -266,6 +309,28 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         find_created_after_mark.save()
         # Assert that both findings belongs to the same engagement but in a different test and are marked as fp
         self.assert_finding(find_created_before_mark, false_p=True, not_pk=2, product_id=2, not_engagement_id=1, hash_code=find_2.hash_code)
+        self.assert_finding(find_created_after_mark, false_p=True, not_pk=2, product_id=2, not_engagement_id=1, hash_code=find_2.hash_code)
+
+    # Finding 2 in Product 2, Engagement 1, Test 3
+    def test_fp_history_equal_hash_code_same_product_different_engagement_non_retroactive(self):
+        # Disable retroactive FP history
+        self.disable_retroactive_false_positive_history()
+        # Copy finding 2 and store it at Product 2, Engagement 4, Test 4 (to test disabled retroactive replication)
+        find_created_before_mark, find_2 = self.copy_and_reset_finding(id=2)
+        find_created_before_mark.test = Test.objects.get(id=4)
+        find_created_before_mark.save()
+        # Makes sure that the copy is not a false positive
+        self.assert_finding(find_created_before_mark, false_p=False)
+        # Mark finding 2 as fp
+        find_2 = Finding.objects.get(id=2)
+        find_2.false_p = True
+        find_2.save()
+        # Copy finding 2 and store it at Product 2, Engagement 4, Test 4
+        find_created_after_mark, find_2 = self.copy_and_reset_finding(id=2)
+        find_created_after_mark.test = Test.objects.get(id=4)
+        find_created_after_mark.save()
+        # Assert that both findings belongs to the same engagement but in a different test and only one of them is marked as fp
+        self.assert_finding(find_created_before_mark, false_p=False, not_pk=2, product_id=2, not_engagement_id=1, hash_code=find_2.hash_code)
         self.assert_finding(find_created_after_mark, false_p=True, not_pk=2, product_id=2, not_engagement_id=1, hash_code=find_2.hash_code)
 
     # Finding 2 in Product 2, Engagement 1, Test 3
@@ -387,6 +452,26 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         self.assert_finding(find_created_after_mark, false_p=True, not_pk=124, test_id=55, unique_id_from_tool=find_124.unique_id_from_tool)
 
     # Finding 124 in Product 2, Engagement 5, Test 55
+    def test_fp_history_equal_unique_id_same_test_non_retroactive(self):
+        # Disable retroactive FP history
+        self.disable_retroactive_false_positive_history()
+        # Copy finding 124 and store it in the same test (to test disabled retroactive replication)
+        find_created_before_mark, find_124 = self.copy_and_reset_finding(id=124)
+        find_created_before_mark.save()
+        # Makes sure that the copy is not a false positive
+        self.assert_finding(find_created_before_mark, false_p=False)
+        # Mark finding 124 as fp
+        find_124 = Finding.objects.get(id=124)
+        find_124.false_p = True
+        find_124.save()
+        # Copy finding 124 and store it in the same test
+        find_created_after_mark, find_124 = self.copy_and_reset_finding(id=124)
+        find_created_after_mark.save()
+        # Assert that both findings belongs to the same test and only one of them is marked as fp
+        self.assert_finding(find_created_before_mark, false_p=False, not_pk=124, test_id=55, unique_id_from_tool=find_124.unique_id_from_tool)
+        self.assert_finding(find_created_after_mark, false_p=True, not_pk=124, test_id=55, unique_id_from_tool=find_124.unique_id_from_tool)
+
+    # Finding 124 in Product 2, Engagement 5, Test 55
     def test_fp_history_equal_unique_id_same_test_dedupe_enabled(self):
         # Enable deduplication
         self.enable_dedupe()
@@ -440,6 +525,28 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         find_created_after_mark.save()
         # Assert that both findings belongs to the same engagement but in a different test and are marked as fp
         self.assert_finding(find_created_before_mark, false_p=True, not_pk=124, engagement_id=5, not_test_id=55, unique_id_from_tool=find_124.unique_id_from_tool)
+        self.assert_finding(find_created_after_mark, false_p=True, not_pk=124, engagement_id=5, not_test_id=55, unique_id_from_tool=find_124.unique_id_from_tool)
+
+    # Finding 124 in Product 2, Engagement 5, Test 55
+    def test_fp_history_equal_unique_id_same_engagement_different_test_non_retroactive(self):
+        # Disable retroactive FP history
+        self.disable_retroactive_false_positive_history()
+        # Copy finding 124 and store it at Product 2, Engagement 5, Test 66 (to test disabled retroactive replication)
+        find_created_before_mark, find_124 = self.copy_and_reset_finding(id=124)
+        find_created_before_mark.test = Test.objects.get(id=66)
+        find_created_before_mark.save()
+        # Makes sure that the copy is not a false positive
+        self.assert_finding(find_created_before_mark, false_p=False)
+        # Mark finding 124 as fp
+        find_124 = Finding.objects.get(id=124)
+        find_124.false_p = True
+        find_124.save()
+        # Copy finding 124 and store it at Product 2, Engagement 5, Test 66
+        find_created_after_mark, find_124 = self.copy_and_reset_finding(id=124)
+        find_created_after_mark.test = Test.objects.get(id=66)
+        find_created_after_mark.save()
+        # Assert that both findings belongs to the same engagement but in a different test and only one of them is marked as fp
+        self.assert_finding(find_created_before_mark, false_p=False, not_pk=124, engagement_id=5, not_test_id=55, unique_id_from_tool=find_124.unique_id_from_tool)
         self.assert_finding(find_created_after_mark, false_p=True, not_pk=124, engagement_id=5, not_test_id=55, unique_id_from_tool=find_124.unique_id_from_tool)
 
     # Finding 124 in Product 2, Engagement 5, Test 55
@@ -501,6 +608,30 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         find_created_after_mark.save()
         # Assert that both findings belongs to the same product but in a different engagement and are marked as fp
         self.assert_finding(find_created_before_mark, false_p=True, not_pk=124, product_id=2, not_engagement_id=5, unique_id_from_tool=find_124.unique_id_from_tool)
+        self.assert_finding(find_created_after_mark, false_p=True, not_pk=124, product_id=2, not_engagement_id=5, unique_id_from_tool=find_124.unique_id_from_tool)
+
+    # Finding 124 in Product 2, Engagement 5, Test 55
+    def test_fp_history_equal_unique_id_same_product_different_engagement_non_retroactive(self):
+        # Disable retroactive FP history
+        self.disable_retroactive_false_positive_history()
+        # Create new test and new engagament in the same product
+        find_124 = Finding.objects.get(id=124)
+        test_new, eng_new = self.create_new_test_and_engagment_from_finding(find_124)
+        # Copy finding 124 and store it at Product 2, New Engagement, New Test (to test disabled retroactive replication)
+        find_created_before_mark, find_124 = self.copy_and_reset_finding(id=124)
+        find_created_before_mark.test = test_new
+        find_created_before_mark.save()
+        # Makes sure that the copy is not a false positive
+        self.assert_finding(find_created_before_mark, false_p=False)
+        # Mark finding 124 as fp
+        find_124.false_p = True
+        find_124.save()
+        # Copy finding 124 and store it at Product 2, New Engagement, New Test
+        find_created_after_mark, find_124 = self.copy_and_reset_finding(id=124)
+        find_created_after_mark.test = test_new
+        find_created_after_mark.save()
+        # Assert that both findings belongs to the same product but in a different engagement and only one of them is marked as fp
+        self.assert_finding(find_created_before_mark, false_p=False, not_pk=124, product_id=2, not_engagement_id=5, unique_id_from_tool=find_124.unique_id_from_tool)
         self.assert_finding(find_created_after_mark, false_p=True, not_pk=124, product_id=2, not_engagement_id=5, unique_id_from_tool=find_124.unique_id_from_tool)
 
     # Finding 124 in Product 2, Engagement 5, Test 55
@@ -651,6 +782,43 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         self.assert_finding(find_created_after_mark_diff_unique_id, false_p=True, not_pk=224, test_id=77, hash_code=find_224.hash_code, not_unique_id_from_tool=find_224.unique_id_from_tool)
 
     # Finding 224 in Product 2, Engagement 5, Test 77
+    def test_fp_history_equal_unique_id_or_hash_code_same_test_non_retroactive(self):
+        # Disable retroactive FP history
+        self.disable_retroactive_false_positive_history()
+        # Copy finding 224, change hash_code, and store it in the same test (to test disabled retroactive replication)
+        find_created_before_mark_diff_hash_code, find_224 = self.copy_and_reset_finding(id=224)
+        find_created_before_mark_diff_hash_code = self.change_finding_hash_code(find_created_before_mark_diff_hash_code)
+        find_created_before_mark_diff_hash_code.save()
+        # Makes sure that the copy is not a false positive
+        self.assert_finding(find_created_before_mark_diff_hash_code, false_p=False)
+        # Copy finding 224, change unique_id, and store it in the same test (to test disabled retroactive replication)
+        find_created_before_mark_diff_unique_id, find_224 = self.copy_and_reset_finding(id=224)
+        find_created_before_mark_diff_unique_id = self.change_finding_unique_id(find_created_before_mark_diff_unique_id)
+        find_created_before_mark_diff_unique_id.save()
+        # Makes sure that the copy is not a false positive
+        self.assert_finding(find_created_before_mark_diff_unique_id, false_p=False)
+        # Mark finding 224 as fp
+        find_224 = Finding.objects.get(id=224)
+        find_224.false_p = True
+        find_224.save()
+        # Copy finding 224, change hash_code, and store it in the same test
+        find_created_after_mark_diff_hash_code, find_224 = self.copy_and_reset_finding(id=224)
+        find_created_after_mark_diff_hash_code = self.change_finding_hash_code(find_created_after_mark_diff_hash_code)
+        find_created_after_mark_diff_hash_code.save()
+        # Copy finding 224, change unique_id, and store it in the same test
+        find_created_after_mark_diff_unique_id, find_224 = self.copy_and_reset_finding(id=224)
+        find_created_after_mark_diff_unique_id = self.change_finding_unique_id(find_created_after_mark_diff_unique_id)
+        find_created_after_mark_diff_unique_id.save()
+        # Assert that both findings has a different hash_code, an equal unique_id,
+        # belongs to the same test and only one of them is marked as fp
+        self.assert_finding(find_created_before_mark_diff_hash_code, false_p=False, not_pk=224, test_id=77, not_hash_code=find_224.hash_code, unique_id_from_tool=find_224.unique_id_from_tool)
+        self.assert_finding(find_created_after_mark_diff_hash_code, false_p=True, not_pk=224, test_id=77, not_hash_code=find_224.hash_code, unique_id_from_tool=find_224.unique_id_from_tool)
+        # Assert that both findings has an equal hash_code, a different unique_id,
+        # belongs to the same test and only one of them is marked as fp
+        self.assert_finding(find_created_before_mark_diff_unique_id, false_p=False, not_pk=224, test_id=77, hash_code=find_224.hash_code, not_unique_id_from_tool=find_224.unique_id_from_tool)
+        self.assert_finding(find_created_after_mark_diff_unique_id, false_p=True, not_pk=224, test_id=77, hash_code=find_224.hash_code, not_unique_id_from_tool=find_224.unique_id_from_tool)
+
+    # Finding 224 in Product 2, Engagement 5, Test 77
     def test_fp_history_equal_unique_id_or_hash_code_same_test_dedupe_enabled(self):
         # Enable deduplication
         self.enable_dedupe()
@@ -735,6 +903,47 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         # Assert that both findings has an equal hash_code, a different unique_id,
         # belongs to the same engagement but in a different test and are marked as fp
         self.assert_finding(find_created_before_mark_diff_unique_id, false_p=True, not_pk=224, engagement_id=5, not_test_id=77, hash_code=find_224.hash_code, not_unique_id_from_tool=find_224.unique_id_from_tool)
+        self.assert_finding(find_created_after_mark_diff_unique_id, false_p=True, not_pk=224, engagement_id=5, not_test_id=77, hash_code=find_224.hash_code, not_unique_id_from_tool=find_224.unique_id_from_tool)
+
+    # Finding 224 in Product 2, Engagement 5, Test 77
+    def test_fp_history_equal_unique_id_or_hash_code_same_engagement_different_test_non_retroactive(self):
+        # Disable retroactive FP history
+        self.disable_retroactive_false_positive_history()
+        # Copy finding 224, change hash_code, and store it at Product 2, Engagement 5, Test 88 (to test disabled retroactive replication)
+        find_created_before_mark_diff_hash_code, find_224 = self.copy_and_reset_finding(id=224)
+        find_created_before_mark_diff_hash_code = self.change_finding_hash_code(find_created_before_mark_diff_hash_code)
+        find_created_before_mark_diff_hash_code.test = Test.objects.get(id=88)
+        find_created_before_mark_diff_hash_code.save()
+        # Makes sure that the copy is not a false positive
+        self.assert_finding(find_created_before_mark_diff_hash_code, false_p=False)
+        # Copy finding 224, change unique_id, and store it at Product 2, Engagement 5, Test 88 (to test disabled retroactive replication)
+        find_created_before_mark_diff_unique_id, find_224 = self.copy_and_reset_finding(id=224)
+        find_created_before_mark_diff_unique_id = self.change_finding_unique_id(find_created_before_mark_diff_unique_id)
+        find_created_before_mark_diff_unique_id.test = Test.objects.get(id=88)
+        find_created_before_mark_diff_unique_id.save()
+        # Makes sure that the copy is not a false positive
+        self.assert_finding(find_created_before_mark_diff_unique_id, false_p=False)
+        # Mark finding 224 as fp
+        find_224 = Finding.objects.get(id=224)
+        find_224.false_p = True
+        find_224.save()
+        # Copy finding 224, change hash_code, and store it at Product 2, Engagement 5, Test 88
+        find_created_after_mark_diff_hash_code, find_224 = self.copy_and_reset_finding(id=224)
+        find_created_after_mark_diff_hash_code = self.change_finding_hash_code(find_created_after_mark_diff_hash_code)
+        find_created_after_mark_diff_hash_code.test = Test.objects.get(id=88)
+        find_created_after_mark_diff_hash_code.save()
+        # Copy finding 224, change unique_id, and store it at Product 2, Engagement 5, Test 88
+        find_created_after_mark_diff_unique_id, find_224 = self.copy_and_reset_finding(id=224)
+        find_created_after_mark_diff_unique_id = self.change_finding_unique_id(find_created_after_mark_diff_unique_id)
+        find_created_after_mark_diff_unique_id.test = Test.objects.get(id=88)
+        find_created_after_mark_diff_unique_id.save()
+        # Assert that both findings has a different hash_code, an equal unique_id,
+        # belongs to the same engagement but in a different test and only one of them is marked as fp
+        self.assert_finding(find_created_before_mark_diff_hash_code, false_p=False, not_pk=224, engagement_id=5, not_test_id=77, not_hash_code=find_224.hash_code, unique_id_from_tool=find_224.unique_id_from_tool)
+        self.assert_finding(find_created_after_mark_diff_hash_code, false_p=True, not_pk=224, engagement_id=5, not_test_id=77, not_hash_code=find_224.hash_code, unique_id_from_tool=find_224.unique_id_from_tool)
+        # Assert that both findings has an equal hash_code, a different unique_id,
+        # belongs to the same engagement but in a different test and only one of them is marked as fp
+        self.assert_finding(find_created_before_mark_diff_unique_id, false_p=False, not_pk=224, engagement_id=5, not_test_id=77, hash_code=find_224.hash_code, not_unique_id_from_tool=find_224.unique_id_from_tool)
         self.assert_finding(find_created_after_mark_diff_unique_id, false_p=True, not_pk=224, engagement_id=5, not_test_id=77, hash_code=find_224.hash_code, not_unique_id_from_tool=find_224.unique_id_from_tool)
 
     # Finding 224 in Product 2, Engagement 5, Test 77
@@ -829,6 +1038,50 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         # Assert that both findings has an equal hash_code, a different unique_id,
         # belongs to the same product but in a different engagement and are marked as fp
         self.assert_finding(find_created_before_mark_diff_unique_id, false_p=True, not_pk=224, product_id=2, not_engagement_id=5, hash_code=find_224.hash_code, not_unique_id_from_tool=find_224.unique_id_from_tool)
+        self.assert_finding(find_created_after_mark_diff_unique_id, false_p=True, not_pk=224, product_id=2, not_engagement_id=5, hash_code=find_224.hash_code, not_unique_id_from_tool=find_224.unique_id_from_tool)
+
+    # Finding 224 in Product 2, Engagement 5, Test 77
+    def test_fp_history_equal_unique_id_or_hash_code_same_product_different_engagement_non_retroactive(self):
+        # Disable retroactive FP history
+        self.disable_retroactive_false_positive_history()
+        # Create new test and new engagament in the same product
+        find_224 = Finding.objects.get(id=224)
+        test_new, eng_new = self.create_new_test_and_engagment_from_finding(find_224)
+        # Copy finding 224, change hash_code, and store it at Product 2, New Engagement, New Test (to test disabled retroactive replication)
+        find_created_before_mark_diff_hash_code, find_224 = self.copy_and_reset_finding(id=224)
+        find_created_before_mark_diff_hash_code = self.change_finding_hash_code(find_created_before_mark_diff_hash_code)
+        find_created_before_mark_diff_hash_code.test = test_new
+        find_created_before_mark_diff_hash_code.save()
+        # Makes sure that the copy is not a false positive
+        self.assert_finding(find_created_before_mark_diff_hash_code, false_p=False)
+        # Copy finding 224, change unique_id, and store it at Product 2, New Engagement, New Test (to test disabled retroactive replication)
+        find_created_before_mark_diff_unique_id, find_224 = self.copy_and_reset_finding(id=224)
+        find_created_before_mark_diff_unique_id = self.change_finding_unique_id(find_created_before_mark_diff_unique_id)
+        find_created_before_mark_diff_unique_id.test = test_new
+        find_created_before_mark_diff_unique_id.save()
+        # Makes sure that the copy is not a false positive
+        self.assert_finding(find_created_before_mark_diff_unique_id, false_p=False)
+        # Mark finding 224 as fp
+        find_224 = Finding.objects.get(id=224)
+        find_224.false_p = True
+        find_224.save()
+        # Copy finding 224, change hash_code, and store it at Product 2, New Engagement, New Test
+        find_created_after_mark_diff_hash_code, find_224 = self.copy_and_reset_finding(id=224)
+        find_created_after_mark_diff_hash_code = self.change_finding_hash_code(find_created_after_mark_diff_hash_code)
+        find_created_after_mark_diff_hash_code.test = test_new
+        find_created_after_mark_diff_hash_code.save()
+        # Copy finding 224, change unique_id, and store it at Product 2, New Engagement, New Test
+        find_created_after_mark_diff_unique_id, find_224 = self.copy_and_reset_finding(id=224)
+        find_created_after_mark_diff_unique_id = self.change_finding_unique_id(find_created_after_mark_diff_unique_id)
+        find_created_after_mark_diff_unique_id.test = test_new
+        find_created_after_mark_diff_unique_id.save()
+        # Assert that both findings has a different hash_code, an equal unique_id,
+        # belongs to the same product but in a different engagement and only one of them is marked as fp
+        self.assert_finding(find_created_before_mark_diff_hash_code, false_p=False, not_pk=224, product_id=2, not_engagement_id=5, not_hash_code=find_224.hash_code, unique_id_from_tool=find_224.unique_id_from_tool)
+        self.assert_finding(find_created_after_mark_diff_hash_code, false_p=True, not_pk=224, product_id=2, not_engagement_id=5, not_hash_code=find_224.hash_code, unique_id_from_tool=find_224.unique_id_from_tool)
+        # Assert that both findings has an equal hash_code, a different unique_id,
+        # belongs to the same product but in a different engagement and only one of them is marked as fp
+        self.assert_finding(find_created_before_mark_diff_unique_id, false_p=False, not_pk=224, product_id=2, not_engagement_id=5, hash_code=find_224.hash_code, not_unique_id_from_tool=find_224.unique_id_from_tool)
         self.assert_finding(find_created_after_mark_diff_unique_id, false_p=True, not_pk=224, product_id=2, not_engagement_id=5, hash_code=find_224.hash_code, not_unique_id_from_tool=find_224.unique_id_from_tool)
 
     # Finding 224 in Product 2, Engagement 5, Test 77
@@ -1012,6 +1265,26 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         self.assert_finding(find_created_after_mark, false_p=True, not_pk=22, test_id=33, title=find_22.title, severity=find_22.severity)
 
     # Finding 22 in Product 2, Engagement 3, Test 33
+    def test_fp_history_equal_legacy_same_test_non_retroactive(self):
+        # Disable retroactive FP history
+        self.disable_retroactive_false_positive_history()
+        # Copy finding 22 and store it in the same test (to test disabled retroactive replication)
+        find_created_before_mark, find_22 = self.copy_and_reset_finding(id=22)
+        find_created_before_mark.save()
+        # Makes sure that the copy is not a false positive
+        self.assert_finding(find_created_before_mark, false_p=False)
+        # Mark finding 22 as fp
+        find_22 = Finding.objects.get(id=22)
+        find_22.false_p = True
+        find_22.save()
+        # Copy finding 22 and store it in the same test
+        find_created_after_mark, find_22 = self.copy_and_reset_finding(id=22)
+        find_created_after_mark.save()
+        # Assert that both findings belongs to the same test and only one of them is marked as fp
+        self.assert_finding(find_created_before_mark, false_p=False, not_pk=22, test_id=33, title=find_22.title, severity=find_22.severity)
+        self.assert_finding(find_created_after_mark, false_p=True, not_pk=22, test_id=33, title=find_22.title, severity=find_22.severity)
+
+    # Finding 22 in Product 2, Engagement 3, Test 33
     def test_fp_history_equal_legacy_same_test_dedupe_enabled(self):
         # Enable deduplication
         self.enable_dedupe()
@@ -1083,6 +1356,31 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         find_created_after_mark.save()
         # Assert that both findings belongs to the same engagement but in a different test and are marked as fp
         self.assert_finding(find_created_before_mark, false_p=True, not_pk=22, engagement_id=3, not_test_id=33, title=find_22.title, severity=find_22.severity)
+        self.assert_finding(find_created_after_mark, false_p=True, not_pk=22, engagement_id=3, not_test_id=33, title=find_22.title, severity=find_22.severity)
+
+    # Finding 22 in Product 2, Engagement 3, Test 33
+    def test_fp_history_equal_legacy_same_engagement_different_test_non_retroactive(self):
+        # Disable retroactive FP history
+        self.disable_retroactive_false_positive_history()
+        # Create new test
+        find_22 = Finding.objects.get(id=22)
+        test_new = self.create_new_test_from_finding(find_22)
+        # Copy finding 22 and store it at Produt 2, Engagement 3, New Test (to test disabled retroactive replication)
+        find_created_before_mark, find_22 = self.copy_and_reset_finding(id=22)
+        find_created_before_mark.test = test_new
+        find_created_before_mark.save()
+        # Makes sure that the copy is not a false positive
+        self.assert_finding(find_created_before_mark, false_p=False)
+        # Mark finding 22 as fp
+        find_22 = Finding.objects.get(id=22)
+        find_22.false_p = True
+        find_22.save()
+        # Copy finding 22 and store it at Produt 2, Engagement 3, New Test
+        find_created_after_mark, find_22 = self.copy_and_reset_finding(id=22)
+        find_created_after_mark.test = test_new
+        find_created_after_mark.save()
+        # Assert that both findings belongs to the same engagement but in a different test and only one of them is marked as fp
+        self.assert_finding(find_created_before_mark, false_p=False, not_pk=22, engagement_id=3, not_test_id=33, title=find_22.title, severity=find_22.severity)
         self.assert_finding(find_created_after_mark, false_p=True, not_pk=22, engagement_id=3, not_test_id=33, title=find_22.title, severity=find_22.severity)
 
     # Finding 22 in Product 2, Engagement 3, Test 33
@@ -1168,6 +1466,31 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         find_created_after_mark.save()
         # Assert that both findings belongs to the same product but in a different engagement and are marked as fp
         self.assert_finding(find_created_before_mark, false_p=True, not_pk=22, product_id=2, not_engagement_id=3, title=find_22.title, severity=find_22.severity)
+        self.assert_finding(find_created_after_mark, false_p=True, not_pk=22, product_id=2, not_engagement_id=3, title=find_22.title, severity=find_22.severity)
+
+    # Finding 22 in Product 2, Engagement 3, Test 33
+    def test_fp_history_equal_legacy_same_product_different_engagement_non_retroactive(self):
+        # Disable retroactive FP history
+        self.disable_retroactive_false_positive_history()
+        # Create new test and new engagement
+        find_22 = Finding.objects.get(id=22)
+        test_new, eng_new = self.create_new_test_and_engagment_from_finding(find_22)
+        # Copy finding 22 and store it at Produt 2, New Engagement, New Test (to test disabled retroactive replication)
+        find_created_before_mark, find_22 = self.copy_and_reset_finding(id=22)
+        find_created_before_mark.test = test_new
+        find_created_before_mark.save()
+        # Makes sure that the copy is not a false positive
+        self.assert_finding(find_created_before_mark, false_p=False)
+        # Mark finding 22 as fp
+        find_22 = Finding.objects.get(id=22)
+        find_22.false_p = True
+        find_22.save()
+        # Copy finding 22 and store it at Produt 2, New Engagement, New Test
+        find_created_after_mark, find_22 = self.copy_and_reset_finding(id=22)
+        find_created_after_mark.test = test_new
+        find_created_after_mark.save()
+        # Assert that both findings belongs to the same product but in a different engagement and only one of them is marked as fp
+        self.assert_finding(find_created_before_mark, false_p=False, not_pk=22, product_id=2, not_engagement_id=3, title=find_22.title, severity=find_22.severity)
         self.assert_finding(find_created_after_mark, false_p=True, not_pk=22, product_id=2, not_engagement_id=3, title=find_22.title, severity=find_22.severity)
 
     # Finding 22 in Product 2, Engagement 3, Test 33
@@ -1524,6 +1847,16 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
     def enable_false_positive_history(self):
         system_settings = System_Settings.objects.get()
         system_settings.false_positive_history = True
+        system_settings.save()
+
+    def enable_retroactive_false_positive_history(self):
+        system_settings = System_Settings.objects.get()
+        system_settings.retroactive_false_positive_history = True
+        system_settings.save()
+
+    def disable_retroactive_false_positive_history(self):
+        system_settings = System_Settings.objects.get()
+        system_settings.retroactive_false_positive_history = False
         system_settings.save()
 
     def enable_dedupe(self):

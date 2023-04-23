@@ -826,24 +826,25 @@ def edit_finding(request, fid):
                 # If the finding is being marked as a false positive we dont need to call the
                 # fp history function because it will be called by the save function
 
-                # If finding was a false positive and is being reativated
+                # If finding was a false positive and is being reactivated: retroactively reactivates all equal findings
                 if old_finding.false_p and not new_finding.false_p:
-                    logger.debug('FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s', new_finding)
+                    if system_settings.retroactive_false_positive_history:
+                        logger.debug('FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s', new_finding)
 
-                    existing_fp_findings = match_finding_to_existing_findings(
-                        new_finding, product=new_finding.test.engagement.product
-                    ).filter(false_p=True)
+                        existing_fp_findings = match_finding_to_existing_findings(
+                            new_finding, product=new_finding.test.engagement.product
+                        ).filter(false_p=True)
 
-                    for fp in existing_fp_findings:
-                        logger.debug('FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s', fp.id, fp)
-                        fp.active = new_finding.active
-                        fp.verified = new_finding.verified
-                        fp.false_p = False
-                        fp.out_of_scope = new_finding.out_of_scope
-                        fp.is_mitigated = new_finding.is_mitigated
-                        fp.last_reviewed = timezone.now()
-                        fp.last_reviewed_by = request.user
-                        fp.save_no_options()
+                        for fp in existing_fp_findings:
+                            logger.debug('FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s', fp.id, fp)
+                            fp.active = new_finding.active
+                            fp.verified = new_finding.verified
+                            fp.false_p = False
+                            fp.out_of_scope = new_finding.out_of_scope
+                            fp.is_mitigated = new_finding.is_mitigated
+                            fp.last_reviewed = timezone.now()
+                            fp.last_reviewed_by = request.user
+                            fp.save_no_options()
 
             if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
                 burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
@@ -1972,24 +1973,25 @@ def finding_bulk_update_all(request, pid=None):
                             if find.false_p:
                                 do_false_positive_history(find)
 
-                            # If finding was a false positive and is being reativated
+                            # If finding was a false positive and is being reactivated: retroactively reactivates all equal findings
                             elif old_find.false_p and not find.false_p:
-                                logger.debug('FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s', find)
+                                if system_settings.retroactive_false_positive_history:
+                                    logger.debug('FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s', find)
 
-                                existing_fp_findings = match_finding_to_existing_findings(
-                                    find, product=find.test.engagement.product
-                                ).filter(false_p=True)
+                                    existing_fp_findings = match_finding_to_existing_findings(
+                                        find, product=find.test.engagement.product
+                                    ).filter(false_p=True)
 
-                                for fp in existing_fp_findings:
-                                    logger.debug('FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s', fp.id, fp)
-                                    fp.active = find.active
-                                    fp.verified = find.verified
-                                    fp.false_p = False
-                                    fp.out_of_scope = find.out_of_scope
-                                    fp.is_mitigated = find.is_mitigated
-                                    fp.last_reviewed = timezone.now()
-                                    fp.last_reviewed_by = request.user
-                                    fp.save_no_options()
+                                    for fp in existing_fp_findings:
+                                        logger.debug('FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s', fp.id, fp)
+                                        fp.active = find.active
+                                        fp.verified = find.verified
+                                        fp.false_p = False
+                                        fp.out_of_scope = find.out_of_scope
+                                        fp.is_mitigated = find.is_mitigated
+                                        fp.last_reviewed = timezone.now()
+                                        fp.last_reviewed_by = request.user
+                                        fp.save_no_options()
 
                     for prod in prods:
                         calculate_grade(prod)

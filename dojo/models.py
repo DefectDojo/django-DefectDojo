@@ -357,7 +357,25 @@ class System_Settings(models.Model):
     enable_mail_notifications = models.BooleanField(default=False, blank=False)
     mail_notifications_to = models.CharField(max_length=200, default='',
                                              blank=True)
-    false_positive_history = models.BooleanField(default=False, help_text=_("DefectDojo will automatically mark the finding as a false positive if the finding has been previously marked as a false positive. Not needed when using deduplication, advised to not combine these two."))
+
+    false_positive_history = models.BooleanField(
+        default=False, help_text=_(
+            "(EXPERIMENTAL) DefectDojo will automatically mark the finding as a "
+            "false positive if an equal finding (according to its dedup algorithm) "
+            "has been previously marked as a false positive on the same product. "
+            "ATTENTION: Although the deduplication algorithm is used to determine "
+            "if a finding should be marked as a false positive, this feature will "
+            "not work if deduplication is enabled since it doesn't make sense to use both."
+        )
+    )
+
+    retroactive_false_positive_history = models.BooleanField(
+        default=False, help_text=_(
+            "(EXPERIMENTAL) FP History will also retroactively mark/unmark all "
+            "existing equal findings in the same product as a false positives. "
+            "Only works if the False Positive History feature is also enabled."
+        )
+    )
 
     url_prefix = models.CharField(max_length=300, default='', blank=True, help_text=_("URL prefix if DefectDojo is installed in it's own virtual subdirectory."))
     team_name = models.CharField(max_length=100, default='', blank=True)

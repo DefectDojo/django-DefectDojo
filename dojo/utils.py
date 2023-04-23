@@ -83,11 +83,13 @@ def do_false_positive_history(finding, *args, **kwargs):
         finding.false_p = True
         to_mark_as_fp.add(finding)
 
-    # Retroactively mark all active existing findings as false positive if this one
-    # is being (or already was) marked as a false positive
-    if finding.false_p:
-        existing_non_fp_findings = existing_findings.filter(active=True).exclude(false_p=True)
-        to_mark_as_fp.update(set(existing_non_fp_findings))
+    system_settings = System_Settings.objects.get()
+    if system_settings.retroactive_false_positive_history:
+        # Retroactively mark all active existing findings as false positive if this one
+        # is being (or already was) marked as a false positive
+        if finding.false_p:
+            existing_non_fp_findings = existing_findings.filter(active=True).exclude(false_p=True)
+            to_mark_as_fp.update(set(existing_non_fp_findings))
 
     # Remove the async user kwarg because save() really does not like it
     # Would rather not add anything to Finding.save()
