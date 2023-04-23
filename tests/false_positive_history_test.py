@@ -163,6 +163,7 @@ def suite():
     suite = unittest.TestSuite()
     suite.addTest(BaseTestCase('test_login'))
     suite.addTest(BaseTestCase('enable_block_execution'))
+    suite.addTest(BaseTestCase('disable_deduplication'))
     suite.addTest(BaseTestCase('enable_false_positive_history'))
     suite.addTest(BaseTestCase('enable_retroactive_false_positive_history'))
     # Add each test the the suite to be run
