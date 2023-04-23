@@ -69,12 +69,34 @@ class FalsePositiveHistoryTest(BaseTestCase):
 
     def edit_toggle_false_positive(self, finding_url):
         driver = self.driver
+        # Go to finding page
         driver.get(finding_url)
+        # Click on dropdown
         driver.find_element(By.ID, "dropdownMenu1").click()
+        # Click on 'Edit Finding'
         driver.find_element(By.LINK_TEXT, "Edit Finding").click()
+        # Click on Active checkbox
         driver.find_element(By.ID, "id_active").click()
+        # Click on False Positive checkbox
         driver.find_element(By.ID, "id_false_p").click()
+        # Send
         driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
+
+
+    def bulk_edit(self, finding_url, status_id):
+        driver = self.driver
+        # Go to finding page
+        driver.get(finding_url)
+        # Go to test page
+        driver.find_element(By.CSS_SELECTOR, "a[title='Test']").click()
+        # Bulk edit dropdown menu
+        driver.find_element(By.ID, "select_all").click()
+        driver.find_element(By.ID, "dropdownMenu2").click()
+        # Select Status
+        driver.find_element(By.ID, "id_bulk_status").click()
+        driver.find_element(By.ID, status_id).click()
+        # Submit
+        driver.find_element(By.CSS_SELECTOR, "input[type='submit']").click()
 
 
     def test_retroactive_edit_finding(self):
@@ -83,14 +105,14 @@ class FalsePositiveHistoryTest(BaseTestCase):
         finding_1 = self.create_finding(
             product_name='QA Test',
             engagement_name='FP History Eng 1',
-            test_name='FP History Test 1',
-            finding_name='Fake Vulnerability'
+            test_name='FP History Test',
+            finding_name='Fake Vulnerability for Edit Test'
         )
         finding_2 = self.create_finding(
             product_name='QA Test',
             engagement_name='FP History Eng 2',
-            test_name='FP History Test 2',
-            finding_name='Fake Vulnerability'
+            test_name='FP History Test',
+            finding_name='Fake Vulnerability for Edit Test'
         )
         # Assert that both findings are active
         self.assert_is_active(finding_1)
@@ -107,6 +129,36 @@ class FalsePositiveHistoryTest(BaseTestCase):
         self.assert_is_active(finding_2)
 
 
+    def test_retroactive_bulk_edit_finding(self):
+        driver = self.driver
+        # Create two equal findings on different engagements
+        finding_1 = self.create_finding(
+            product_name='QA Test',
+            engagement_name='FP History Eng 1',
+            test_name='FP History Test',
+            finding_name='Fake Vulnerability for Bulk Edit Test'
+        )
+        finding_2 = self.create_finding(
+            product_name='QA Test',
+            engagement_name='FP History Eng 2',
+            test_name='FP History Test',
+            finding_name='Fake Vulnerability for Bulk Edit Test'
+        )
+        # Assert that both findings are active
+        self.assert_is_active(finding_1)
+        self.assert_is_active(finding_2)
+        # Bulk edit first finding to be a false positive
+        self.bulk_edit(finding_1, status_id='id_bulk_false_p')
+        # Assert that both findings are false positives
+        self.assert_is_false_positive(finding_1)
+        self.assert_is_false_positive(finding_2)
+        # Reactivate second finding
+        self.bulk_edit(finding_2, status_id='id_bulk_active')
+        # Assert that both findings are active again
+        self.assert_is_active(finding_1)
+        self.assert_is_active(finding_2)
+
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(BaseTestCase('test_login'))
@@ -117,6 +169,8 @@ def suite():
     # success and failure is output by the test
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(FalsePositiveHistoryTest('test_retroactive_edit_finding'))
+    suite.addTest(ProductTest('test_create_product'))
+    suite.addTest(FalsePositiveHistoryTest('test_retroactive_bulk_edit_finding'))
     suite.addTest(ProductTest('test_delete_product'))
     return suite
 
