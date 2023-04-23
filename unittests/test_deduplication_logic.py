@@ -25,11 +25,6 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 #    -> that is an insteresting improvment to consider
 #   - If the unique_id does NOT match, the finding is still considered for dedupe if the hash_code matches. We may need to forbid as the unique_id should be leading for the same test_type
 
-# false positive history observations:
-# - doesn't respect dedupe_on_engagement
-# - if endpoints are mismatching, it falls back to comparing just the title + test_type or cwe + test_type. this leads to false positive false positives (pung intended)
-# - I think this feature should be resdesigned and use the dedupe algo to find "identical/similar findings" to copy false_p status from
-
 # test data summary
 # product 1: Python How-to
 #       engagement 2: April monthly engagement (dedupe_inside: True)
@@ -1280,9 +1275,4 @@ class TestDuplicationLogic(DojoTestCase):
     def enable_dedupe(self, enable=True):
         system_settings = System_Settings.objects.get()
         system_settings.enable_deduplication = enable
-        system_settings.save()
-
-    def enable_false_positive_history(self, enable=True):
-        system_settings = System_Settings.objects.get()
-        system_settings.false_positive_history = enable
         system_settings.save()
