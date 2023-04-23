@@ -74,8 +74,8 @@ def do_false_positive_history(finding, *args, **kwargs):
 
     existing_fp_findings = existing_findings.filter(false_p=True)
     deduplicationLogger.debug(
-        "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product "
-        + "that were previously marked as false positive",
+        "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product " +
+        "that were previously marked as false positive",
         len(existing_fp_findings)
     )
 
@@ -134,7 +134,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         custom_filter = {'test': test}
 
     else:
-        raise ValueError ('No product, engagement or test provided as argument.')
+        raise ValueError('No product, engagement or test provided as argument.')
 
     deduplication_algorithm = finding.test.deduplication_algorithm
 
@@ -167,8 +167,8 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         query = Finding.objects.filter(
             Q(**custom_filter),
             (
-                (Q(hash_code__isnull=False) & Q(hash_code=finding.hash_code))
-                | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=finding.unique_id_from_tool))
+                (Q(hash_code__isnull=False) & Q(hash_code=finding.hash_code)) |
+                (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=finding.unique_id_from_tool))
             )
         ).exclude(id=finding.id).order_by('id')
         deduplicationLogger.debug(query.query)
