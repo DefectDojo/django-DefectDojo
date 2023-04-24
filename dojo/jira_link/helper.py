@@ -531,11 +531,11 @@ def get_tags(obj):
     # Update Label with system setttings label
     tags = []
     if isinstance(obj, Finding) or isinstance(obj, Engagement):
-         obj_tags = obj.tags.all()
-         if obj_tags:
-             for tag in obj_tags:
-                 tags.append(str(tag.name.replace(' ', '-')))
-     return tags
+        obj_tags = obj.tags.all()
+        if obj_tags:
+            for tag in obj_tags:
+                tags.append(str(tag.name.replace(' ', '-')))
+    return tags
 
 
 def jira_summary(obj):
