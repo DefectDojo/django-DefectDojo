@@ -528,13 +528,16 @@ def get_labels(obj):
 
 
 def get_tags(obj):
+    # Set an invalid characeter list
+    invalid_characters = [':', ';', ',', '.', ' ', '?', '&', '[', ']', '(', ')', '#', '^', '*', '@', '!']
     # Update Label with system setttings label
     tags = []
     if isinstance(obj, Finding) or isinstance(obj, Engagement):
         obj_tags = obj.tags.all()
         if obj_tags:
             for tag in obj_tags:
-                tags.append(str(tag.name.replace(' ', '-')))
+                cleaned_tag = '-'.join([invalid_character for invalid_character in tag if invalid_character not in invalid_characters])
+                tags.append(str(cleaned_tag))
     return tags
 
 
