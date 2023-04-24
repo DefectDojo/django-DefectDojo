@@ -319,7 +319,7 @@
                                                         {% trans "Risk Accepted Findings" %}
                                                     </a>
                                                 </li>
-                                                {% if "dojo.view_finding_template"|has_configuration_permission:request %}
+                                                {% if "Finding_View"|has_global_permission %}
                                                     <li>
                                                         <a href="{% url 'templates' %}">
                                                             {% trans "Finding Templates" %}

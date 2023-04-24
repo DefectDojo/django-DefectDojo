@@ -52,13 +52,19 @@
                             {% block users_table_header_row %}
                                 <tr>
                                     <th></th>
+                                    {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                     <th class="nowrap">{% dojo_sort request first_name 'first_name' %}</th>
+                                    {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                     <th class="nowrap">{% dojo_sort request last_name 'last_name' %}</th>
+                                    {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                     <th class="nowrap">{% dojo_sort request user_name 'username' 'asc' %}</th>
+                                    {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                     <th class="nowrap">{% dojo_sort request email 'email' %}</th>
                                     <th class="nowrap">{% trans "Title" %}</th>
                                     <th class="nowrap">{% trans "Phone Number(s)" %}</th>
+                                    {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                     <th class="nowrap, text-center">{% dojo_sort request active 'is_active' %}</th>
+                                    {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                     <th class="nowrap, text-center">{% dojo_sort request superuser 'is_superuser' %}</th>
                                     <th class="nowrap">{% trans "Global Role" %}</th>
                                     <th class="nowrap">{% trans "Last Login" %}</th>

@@ -44,6 +44,7 @@
                            class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th>{% dojo_sort request 'Note Type' 'name' 'asc' %}</th>
                             <th> Description</th>
                             <th> Single/Multiple</th>
