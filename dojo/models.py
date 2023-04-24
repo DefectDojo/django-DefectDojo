@@ -1,4 +1,3 @@
-from dojo.utils import calculate_grade, get_system_setting, to_str_typed
 import base64
 import hashlib
 import logging
@@ -6283,6 +6282,7 @@ def enable_disable_auditlog(enable=True):
         auditlog.unregister(Cred_User)
 
 
+from dojo.utils import calculate_grade, get_system_setting, to_str_typed
 enable_disable_auditlog(
     enable=get_system_setting("enable_auditlog")
 )  # on startup choose safe to retrieve system settiung)
