@@ -50,6 +50,7 @@
                         <thead>
                         <tr>
                             <th></th> <!-- Action 3-dots hamburger menu button -->
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th>{% dojo_sort request 'Product' 'name' 'asc' %}</th>
                             <th>Tags</th>
                             <th> Criticality</th>
@@ -64,6 +65,7 @@
                             <th class="text-center"> Active (Verified) Findings</th>
                             <th class="text-center"> Vulnerable Hosts / Endpoints</th>
                             <th> Contact</th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th>{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
                         </tr>
                         </thead>

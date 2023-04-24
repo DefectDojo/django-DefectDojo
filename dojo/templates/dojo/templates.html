@@ -17,7 +17,7 @@
                         {% endif %}
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
-                            {% if "dojo.add_finding_template"|has_configuration_permission:request and not add_from_template and not apply_template %}
+                            {% if "Finding_Add"|has_global_permission and not add_from_template and not apply_template %}
                                 <a href="{% url 'add_template' %}" class="btn btn-primary"
                                    title="Add Finding Template">
                                     <i class="fa-solid fa-plus"></i>
@@ -55,9 +55,12 @@
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <thead>
                         <tr>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th nowrap="nowrap">{% dojo_sort request 'CWE' 'cwe' 'asc' %}</th>
                             <th nowrap="nowrap">Match Enabled</th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th nowrap="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th nowrap="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' %}</th>
                             <th nowrap="nowrap">Actions</th>
                         </tr>
@@ -121,11 +124,11 @@
                                     </td>
                                 {% else %}
                                     <td nowrap="nowrap">
-                                        {% if "dojo.change_finding_template"|has_configuration_permission:request %}
+                                        {% if "Finding_Edit"|has_global_permission %}
                                         <a href="{% url 'edit_template' finding.id %}"
                                             class="btn btn-sm btn-secondary">Edit</a>
                                         {% endif %}
-                                        {% if "dojo.delete_finding_template"|has_configuration_permission:request %}
+                                        {% if "Finding_Delete"|has_global_permission %}
                                         <form method="post" action="{% url 'delete_template' finding.id %}"
                                               style="display: inline" class="form-inline form">
                                             {% csrf_token %}
