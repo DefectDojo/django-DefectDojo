@@ -170,7 +170,8 @@ env = environ.Env(
     DD_SAML2_LOGIN_BUTTON_TEXT=(str, "Login with SAML"),
     # Optional: display the idp SAML Logout URL in DefectDojo
     DD_SAML2_LOGOUT_URL=(str, ""),
-    # Metadata is required for SAML, choose either remote url or local file path
+    # Metadata is required for SAML, choose either remote url or local file
+    # path
     DD_SAML2_METADATA_AUTO_CONF_URL=(str, ""),
     DD_SAML2_METADATA_LOCAL_FILE_PATH=(
         str,
@@ -192,7 +193,8 @@ env = environ.Env(
         },
     ),
     DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE=(bool, False),
-    # Authentication via HTTP Proxy which put username to HTTP Header REMOTE_USER
+    # Authentication via HTTP Proxy which put username to HTTP Header
+    # REMOTE_USER
     DD_AUTH_REMOTEUSER_ENABLED=(bool, False),
     # Names of headers which will be used for processing user data.
     # WARNING: Possible spoofing of headers. Read Warning in \
@@ -208,7 +210,8 @@ env = environ.Env(
     # REMOTE_USER will be processed only on login page. Check \
     # https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#using-remote-user-on-login-pages-only
     DD_AUTH_REMOTEUSER_LOGIN_ONLY=(bool, False),
-    # if somebody is using own documentation how to use DefectDojo in his own company
+    # if somebody is using own documentation how to use DefectDojo in his own
+    # company
     DD_DOCUMENTATION_URL=(str, "https://documentation.defectdojo.com"),
     # merging findings doesn't always work well with dedupe and reimport etc.
     # disable it if you see any issues (and report them on github)
@@ -216,7 +219,8 @@ env = environ.Env(
     # SLA Notifications via alerts and JIRA comments
     # enable either DD_SLA_NOTIFY_ACTIVE or DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY to enable the feature.
     # If desired you can enable to only notify for Findings that are linked to JIRA issues.
-    # All three flags are moved to system_settings, will be removed from settings file
+    # All three flags are moved to system_settings, will be removed from
+    # settings file
     DD_SLA_NOTIFY_ACTIVE=(bool, False),
     DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, False),
     DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
@@ -225,16 +229,20 @@ env = environ.Env(
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
     # Use business day's to calculate SLA's and age instead of calendar days
     DD_SLA_BUSINESS_DAYS=(bool, False),
-    # maximum number of result in search as search can be an expensive operation
+    # maximum number of result in search as search can be an expensive
+    # operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
     DD_SIMILAR_FINDINGS_MAX_RESULTS=(int, 25),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
     DD_JIRA_SSL_VERIFY=(bool, True),
-    # You can set extra Jira issue types via a simple env var that supports a csv format, like "Work Item,Vulnerability"
+    # You can set extra Jira issue types via a simple env var that supports a
+    # csv format, like "Work Item,Vulnerability"
     DD_JIRA_EXTRA_ISSUE_TYPES=(str, ""),
-    # if you want to keep logging to the console but in json format, change this here to 'json_console'
+    # if you want to keep logging to the console but in json format, change
+    # this here to 'json_console'
     DD_LOGGING_HANDLER=(str, "console"),
-    # If true, drf-spectacular will load CSS & JS from default CDN, otherwise from static resources
+    # If true, drf-spectacular will load CSS & JS from default CDN, otherwise
+    # from static resources
     DD_DEFAULT_SWAGGER_UI=(bool, True),
     DD_ALERT_REFRESH=(bool, True),
     DD_DISABLE_ALERT_COUNTER=(bool, False),
@@ -244,28 +252,34 @@ env = environ.Env(
     DD_QUALYS_WAS_WEAKNESS_IS_VULN=(bool, False),
     # regular expression to exclude one or more parsers
     # could be usefull to limit parser allowed
-    # AWS Scout2 Scan Parser is deprecated (see https://github.com/DefectDojo/django-DefectDojo/pull/5268)
+    # AWS Scout2 Scan Parser is deprecated (see
+    # https://github.com/DefectDojo/django-DefectDojo/pull/5268)
     DD_PARSER_EXCLUDE=(str, "AWS Scout2 Scan"),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
-    # when enabled 'mitigated date' and 'mitigated by' of a finding become editable
+    # when enabled 'mitigated date' and 'mitigated by' of a finding become
+    # editable
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
-    # new feature that tracks history across multiple reimports for the same test
+    # new feature that tracks history across multiple reimports for the same
+    # test
     DD_TRACK_IMPORT_HISTORY=(bool, True),
     # Allow grouping of findings in the same test, for example to group findings per dependency
-    # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
+    # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be
+    # removed from settings file
     DD_FEATURE_FINDING_GROUPS=(bool, True),
     DD_JIRA_TEMPLATE_ROOT=(str, "dojo/templates/issue-trackers"),
     DD_TEMPLATE_DIR_PREFIX=(str, "dojo/templates/"),
     # Initial behaviour in Defect Dojo was to delete all duplicates when an original was deleted
     # New behaviour is to leave the duplicates in place, but set the oldest of duplicates as new original
-    # Set to True to revert to the old behaviour where all duplicates are deleted
+    # Set to True to revert to the old behaviour where all duplicates are
+    # deleted
     DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(str, False),
     # Enable Rate Limiting for the login page
     DD_RATE_LIMITER_ENABLED=(bool, False),
-    # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
+    # Examples include 5/m 100/h and more
+    # https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
     DD_RATE_LIMITER_RATE=(str, "5/m"),
     # Block the requests after rate limit is exceeded
     DD_RATE_LIMITER_BLOCK=(bool, False),
@@ -278,14 +292,16 @@ env = environ.Env(
     # The number of findings to be processed per celeryworker
     DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE=(int, 100),
     # When enabled, deleting objects will be occur from the bottom up. In the example of deleting an engagement
-    # The objects will be deleted as follows Endpoints -> Findings -> Tests -> Engagement
+    # The objects will be deleted as follows Endpoints -> Findings -> Tests ->
+    # Engagement
     DD_ASYNC_OBJECT_DELETE=(bool, False),
     # The number of objects to be deleted per celeryworker
     DD_ASYNC_OBEJECT_DELETE_CHUNK_SIZE=(int, 100),
     # When enabled, display the preview of objects to be deleted. This can take a long time to render
     # for very large objects
     DD_DELETE_PREVIEW=(bool, True),
-    # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
+    # List of acceptable file types that can be uploaded to a given object via
+    # arbitrary file upload
     DD_FILE_UPLOAD_TYPES=(
         list,
         [
@@ -312,7 +328,8 @@ env = environ.Env(
     # possible to create new and it will not be possible to use exising.
     DD_API_TOKENS_ENABLED=(bool, True),
     # You can set extra Jira headers by suppling a dictionary in header: \
-    # value format (pass as env var like "headr_name=value,another_header=anohter_value")
+    # value format (pass as env var like
+    # "headr_name=value,another_header=anohter_value")
     DD_ADDITIONAL_HEADERS=(dict, {}),
     # Set fields used by the hashcode generator for deduplication, \
     # via en env variable that contains a JSON string
@@ -394,7 +411,8 @@ ALLOWED_HOSTS = tuple(
     env.list("DD_ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 )
 
-# Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
+# Raises django's ImproperlyConfigured exception if SECRET_KEY not in
+# os.environ
 SECRET_KEY = env("DD_SECRET_KEY")
 
 # Local time zone for this installation. Choices can be found here:
@@ -471,7 +489,8 @@ if env("DD_TRACK_MIGRATIONS"):
     MIGRATION_MODULES = {"dojo": "dojo.db_migrations"}
 
 # Default for automatically created id fields,
-# see https://docs.djangoproject.com/en/3.2/releases/3.2/#customizing-type-of-auto-created-primary-keys
+# see
+# https://docs.djangoproject.com/en/3.2/releases/3.2/#customizing-type-of-auto-created-primary-keys
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # ------------------------------------------------------------------------------
@@ -599,7 +618,8 @@ CLASSIC_AUTH_ENABLED = True
 FORGOT_PASSWORD = env("DD_FORGOT_PASSWORD")
 FORGOT_USERNAME = env("DD_FORGOT_USERNAME")
 PASSWORD_RESET_TIMEOUT = env("DD_PASSWORD_RESET_TIMEOUT")
-# Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
+# Showing login form (form is not needed for external auth: OKTA, Google
+# Auth, etc.)
 SHOW_LOGIN_FORM = env("DD_SOCIAL_AUTH_SHOW_LOGIN_FORM")
 SOCIAL_LOGIN_AUTO_REDIRECT = env("DD_SOCIAL_LOGIN_AUTO_REDIRECT")
 SOCIAL_AUTH_CREATE_USER = env("DD_SOCIAL_AUTH_CREATE_USER")
@@ -784,7 +804,8 @@ SECURE_SSL_REDIRECT = env("DD_SECURE_SSL_REDIRECT")
 SECURE_CONTENT_TYPE_NOSNIFF = env("DD_SECURE_CONTENT_TYPE_NOSNIFF")
 
 # Whether to use HTTPOnly flag on the session cookie.
-# If this is set to True, client-side JavaScript will not to be able to access the session cookie.
+# If this is set to True, client-side JavaScript will not to be able to
+# access the session cookie.
 SESSION_COOKIE_HTTPONLY = env("DD_SESSION_COOKIE_HTTPONLY")
 
 # Whether to use HttpOnly flag on the CSRF cookie. If this is set to True,
@@ -910,7 +931,8 @@ SPECTACULAR_SETTINGS = {
     "POSTPROCESSING_HOOKS": [
         "dojo.api_v2.prefetch.schema.prefetch_postprocessing_hook"
     ],
-    # show file selection dialogue, see https://github.com/tfranzel/drf-spectacular/issues/455
+    # show file selection dialogue, see
+    # https://github.com/tfranzel/drf-spectacular/issues/455
     "COMPONENT_SPLIT_REQUEST": True,
     "SWAGGER_UI_SETTINGS": {"docExpansion": "none"},
 }
@@ -967,7 +989,9 @@ INSTALLED_APPS = (
     "auditlog",
     "dojo",
     "watson",
-    "tagging",  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
+    # not used, but still needed for migration 0065_django_tagulous.py
+    # (v1.10.0)
+    "tagging",
     "imagekit",
     "multiselectfield",
     "rest_framework",
@@ -1006,7 +1030,8 @@ DJANGO_MIDDLEWARE_CLASSES = [
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
 
 # WhiteNoise allows your web app to serve its own static files,
-# making it a self-contained unit that can be deployed anywhere without relying on nginx
+# making it a self-contained unit that can be deployed anywhere without
+# relying on nginx
 if env("DD_WHITENOISE"):
     WHITE_NOISE = [
         # Simplified static file serving.
@@ -1078,7 +1103,8 @@ if SAML2_ENABLED:
     SAML_CONFIG = {
         # full path to the xmlsec1 binary programm
         "xmlsec_binary": "/usr/bin/xmlsec1",
-        # your entity id, usually your subdomain plus the url to the metadata view
+        # your entity id, usually your subdomain plus the url to the metadata
+        # view
         "entityid": "%s" % SAML2_ENTITY_ID,
         # directory with attribute mapping
         "attribute_map_dir": path.join(BASEDIR, "attribute-maps"),
@@ -1105,7 +1131,8 @@ if SAML2_ENABLED:
                     # url and binding to the single logout service view
                     # do not change the binding or service name
                     "single_logout_service": [
-                        # Disable next two lines for HTTP_REDIRECT for IDP's that only support HTTP_POST. Ex. Okta:
+                        # Disable next two lines for HTTP_REDIRECT for IDP's
+                        # that only support HTTP_POST. Ex. Okta:
                         (
                             "%s/saml2/ls/" % SITE_URL,
                             saml2.BINDING_HTTP_REDIRECT,
@@ -1230,20 +1257,33 @@ if AUTH_REMOTEUSER_ENABLED:
 # ------------------------------------------------------------------------------
 
 # Celery settings
-CELERY_BROKER_URL = (
-    env("DD_CELERY_BROKER_URL")
-    if len(env("DD_CELERY_BROKER_URL")) > 0
-    else generate_url(
+if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
+    secret_broker = get_secret(env("DD_SECRET_BROKER"))
+    CELERY_BROKER_URL = generate_url(
         env("DD_CELERY_BROKER_SCHEME"),
         True,
-        env("DD_CELERY_BROKER_USER"),
-        env("DD_CELERY_BROKER_PASSWORD"),
-        env("DD_CELERY_BROKER_HOST"),
-        env("DD_CELERY_BROKER_PORT"),
-        env("DD_CELERY_BROKER_PATH"),
+        secret_broker["username"],
+        secret_broker["password"],
+        secret_broker["hostname"],
+        secret_broker["port"],
+        secret_broker["virtualhost"],
         env("DD_CELERY_BROKER_PARAMS"),
     )
-)
+else:
+    CELERY_BROKER_URL = (
+        env("DD_CELERY_BROKER_URL")
+        if len(env("DD_CELERY_BROKER_URL")) > 0
+        else generate_url(
+            env("DD_CELERY_BROKER_SCHEME"),
+            True,
+            env("DD_CELERY_BROKER_USER"),
+            env("DD_CELERY_BROKER_PASSWORD"),
+            env("DD_CELERY_BROKER_HOST"),
+            env("DD_CELERY_BROKER_PORT"),
+            env("DD_CELERY_BROKER_PATH"),
+            env("DD_CELERY_BROKER_PARAMS"),
+        )
+    )
 CELERY_TASK_IGNORE_RESULT = env("DD_CELERY_TASK_IGNORE_RESULT")
 CELERY_RESULT_BACKEND = env("DD_CELERY_RESULT_BACKEND")
 CELERY_TIMEZONE = TIME_ZONE
@@ -1338,7 +1378,8 @@ if env("DD_DJANGO_METRICS_ENABLED"):
 HASHCODE_FIELDS_PER_SCANNER = {
     # In checkmarx, same CWE may appear with different severities: example "sql injection" \
     # (high) and "blind sql injection" (low).
-    # Including the severity in the hash_code keeps those findings not duplicate
+    # Including the severity in the hash_code keeps those findings not
+    # duplicate
     "Anchore Engine Scan": [
         "title",
         "severity",
@@ -1400,7 +1441,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Mobsfscan Scan": ["title", "severity", "cwe"],
     "Nessus Scan": ["title", "severity", "vulnerability_ids", "cwe"],
     "Nexpose Scan": ["title", "severity", "vulnerability_ids", "cwe"],
-    # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
+    # possible improvement: in the scanner put the library name into
+    # file_path, then dedup on cwe + file_path + severity
     "NPM Audit Scan": [
         "title",
         "severity",
@@ -1408,7 +1450,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
         "vulnerability_ids",
         "cwe",
     ],
-    # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
+    # possible improvement: in the scanner put the library name into
+    # file_path, then dedup on cwe + file_path + severity
     "Yarn Audit Scan": [
         "title",
         "severity",
@@ -1425,7 +1468,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "PHP Symfony Security Check": ["title", "vulnerability_ids"],
     "Clair Scan": ["title", "vulnerability_ids", "description", "severity"],
     "Clair Klar Scan": ["title", "description", "severity"],
-    # for backwards compatibility because someone decided to rename this scanner:
+    # for backwards compatibility because someone decided to rename this
+    # scanner:
     "Symfony Security Check": ["title", "vulnerability_ids"],
     "DSOP Scan": ["vulnerability_ids"],
     "Acunetix Scan": ["title", "description"],
@@ -1629,7 +1673,8 @@ HASHCODE_ALLOWED_FIELDS = [
     "vuln_id_from_tool",
 ]
 
-# Adding fields to the hash_code calculation regardless of the previous settings
+# Adding fields to the hash_code calculation regardless of the previous
+# settings
 HASH_CODE_FIELDS_ALWAYS = ["service"]
 
 # ------------------------------------
@@ -1638,7 +1683,8 @@ HASH_CODE_FIELDS_ALWAYS = ["service"]
 # List of algorithms
 # legacy one with multiple conditions (default mode)
 DEDUPE_ALGO_LEGACY = "legacy"
-# based on dojo_finding.unique_id_from_tool only (for checkmarx detailed, or sonarQube detailed for example)
+# based on dojo_finding.unique_id_from_tool only (for checkmarx detailed,
+# or sonarQube detailed for example)
 DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL = "unique_id_from_tool"
 # based on dojo_finding.hash_code only
 DEDUPE_ALGO_HASH_CODE = "hash_code"
@@ -1659,7 +1705,8 @@ DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = (
 # - Host (['host']) means: B is marked as duplicate of A because the host (defectdojo.com) is the same.
 # - Host and path (['host', 'path']) means: A and B stay untouched because the path is different.
 #
-# If a finding has more than one endpoint, only one endpoint pair must match to mark the finding as duplicate.
+# If a finding has more than one endpoint, only one endpoint pair must
+# match to mark the finding as duplicate.
 DEDUPE_ALGO_ENDPOINT_FIELDS = ["host", "path"]
 
 # Choice of deduplication algorithm per parser
@@ -1707,7 +1754,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # # Must also uncomment qualys webapp line in hashcode fields per scanner
     "Veracode Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Veracode SourceClear Scan": DEDUPE_ALGO_HASH_CODE,
-    # for backwards compatibility because someone decided to rename this scanner:
+    # for backwards compatibility because someone decided to rename this
+    # scanner:
     "Symfony Security Check": DEDUPE_ALGO_HASH_CODE,
     "DSOP Scan": DEDUPE_ALGO_HASH_CODE,
     "Terrascan Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1885,13 +1933,15 @@ LOGGING = {
             "propagate": False,
         },
         "MARKDOWN": {
-            # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
+            # The markdown library is too verbose in it's logging, reducing the
+            # verbosity in our logs.
             "handlers": [r"%s" % LOGGING_HANDLER],
             "level": "%s" % LOG_LEVEL,
             "propagate": False,
         },
         "titlecase": {
-            # The titlecase library is too verbose in it's logging, reducing the verbosity in our logs.
+            # The titlecase library is too verbose in it's logging, reducing
+            # the verbosity in our logs.
             "handlers": [r"%s" % LOGGING_HANDLER],
             "level": "%s" % LOG_LEVEL,
             "propagate": False,
@@ -1899,7 +1949,8 @@ LOGGING = {
     },
 }
 
-# override filter to ensure sensitive variables are also hidden when DEBUG = True
+# override filter to ensure sensitive variables are also hidden when DEBUG
+# = True
 DEFAULT_EXCEPTION_REPORTER_FILTER = (
     "dojo.settings.exception_filter.CustomExceptionReporterFilter"
 )
@@ -1908,7 +1959,8 @@ DEFAULT_EXCEPTION_REPORTER_FILTER = (
 # warning about large varchar with unique indices.
 SILENCED_SYSTEM_CHECKS = ["mysql.E001"]
 
-# Issue on benchmark : "The number of GET/POST parameters exceeded settings.DATA_UPLOAD_MAX_NUMBER_FIELD S"
+# Issue on benchmark : "The number of GET/POST parameters exceeded
+# settings.DATA_UPLOAD_MAX_NUMBER_FIELD S"
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 # Maximum size of a scan file in MB
@@ -1918,7 +1970,8 @@ SCAN_FILE_MAX_SIZE = env("DD_SCAN_FILE_MAX_SIZE")
 QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 
 # Create a unique finding for all findings in qualys WAS parser
-# If using this, lines for Qualys WAS deduplication functions must be un-commented
+# If using this, lines for Qualys WAS deduplication functions must be
+# un-commented
 QUALYS_WAS_UNIQUE_ID = False
 
 # exclusion list for parsers
@@ -1940,7 +1993,8 @@ TAGULOUS_AUTOCOMPLETE_JS = (
     "tagulous/adaptor/select2-4.js",
 )
 
-# using 'element' for width should take width from css defined in template, but it doesn't. So set to 70% here.
+# using 'element' for width should take width from css defined in
+# template, but it doesn't. So set to 70% here.
 TAGULOUS_AUTOCOMPLETE_SETTINGS = {
     "placeholder": "Enter some tags (comma separated, use enter to select / create a new tag)",
     "width": "70%",
@@ -1950,7 +2004,8 @@ EDITABLE_MITIGATED_DATA = env("DD_EDITABLE_MITIGATED_DATA")
 
 USE_L10N = True
 
-# FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
+# FEATURE_FINDING_GROUPS feature is moved to system_settings, will be
+# removed from settings file
 FEATURE_FINDING_GROUPS = env("DD_FEATURE_FINDING_GROUPS")
 JIRA_TEMPLATE_ROOT = env("DD_JIRA_TEMPLATE_ROOT")
 TEMPLATE_DIR_PREFIX = env("DD_TEMPLATE_DIR_PREFIX")
@@ -1965,7 +2020,8 @@ ASYNC_FINDING_IMPORT = env("DD_ASYNC_FINDING_IMPORT")
 # The number of findings to be processed per celeryworker
 ASYNC_FINDING_IMPORT_CHUNK_SIZE = env("DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE")
 # When enabled, deleting objects will be occur from the bottom up. In the example of deleting an engagement
-# The objects will be deleted as follows Endpoints -> Findings -> Tests -> Engagement
+# The objects will be deleted as follows Endpoints -> Findings -> Tests ->
+# Engagement
 ASYNC_OBJECT_DELETE = env("DD_ASYNC_OBJECT_DELETE")
 # The number of objects to be deleted per celeryworker
 ASYNC_OBEJECT_DELETE_CHUNK_SIZE = env("DD_ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
@@ -1986,7 +2042,8 @@ VULNERABILITY_URLS = {
     "RUSTSEC": "https://rustsec.org/advisories/",
     "VNS": "https://vulners.com/",
 }
-# List of acceptable file types that can be uploaded to a given object via arbitrary file upload
+# List of acceptable file types that can be uploaded to a given object via
+# arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
 # Fixes error
 # AttributeError: Problem installing fixture '/app/dojo/fixtures/defect_dojo_sample_data.json': \
