@@ -23,7 +23,6 @@ repos:
           - --aggressive
           - --max-line-length=79
           - --verbose
-        line_range: 79:120
 
   - repo: https://github.com/PyCQA/bandit
     rev: 1.7.5
