@@ -28,7 +28,7 @@ import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Product, \
     Test, User, Dojo_User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule, Dojo_Group_Member, NOTIFICATION_CHOICES
+    Language_Type, Languages, Dojo_Group_Member, NOTIFICATION_CHOICES
 from asteval import Interpreter
 from dojo.notifications.helper import create_notification
 import logging
@@ -429,56 +429,6 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.notes.create(author=existing_finding.reporter,
                                     entry="This finding has been automatically re-opened as it was found in recent scans.")
     existing_finding.save()
-
-
-def do_apply_rules(new_finding, *args, **kwargs):
-    rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
-    for rule in rules:
-        child_val = True
-        child_list = [val for val in rule.child_rules.all()]
-        while (len(child_list) != 0):
-            child_val = child_val and child_rule(child_list.pop(), new_finding)
-        if child_val:
-            if rule.operator == 'Matches':
-                if getattr(new_finding, rule.match_field) == rule.match_text:
-                    if rule.application == 'Append':
-                        set_attribute_rule(new_finding, rule, (getattr(
-                            new_finding, rule.applied_field) + rule.text))
-                    else:
-                        set_attribute_rule(new_finding, rule, rule.text)
-                        new_finding.save(dedupe_option=False,
-                                         rules_option=False)
-            else:
-                if rule.match_text in getattr(new_finding, rule.match_field):
-                    if rule.application == 'Append':
-                        set_attribute_rule(new_finding, rule, (getattr(
-                            new_finding, rule.applied_field) + rule.text))
-                    else:
-                        set_attribute_rule(new_finding, rule, rule.text)
-                        new_finding.save(dedupe_option=False,
-                                         rules_option=False)
-
-
-def set_attribute_rule(new_finding, rule, value):
-    if rule.text == "True":
-        setattr(new_finding, rule.applied_field, True)
-    elif rule.text == "False":
-        setattr(new_finding, rule.applied_field, False)
-    else:
-        setattr(new_finding, rule.applied_field, value)
-
-
-def child_rule(rule, new_finding):
-    if rule.operator == 'Matches':
-        if getattr(new_finding, rule.match_field) == rule.match_text:
-            return True
-        else:
-            return False
-    else:
-        if rule.match_text in getattr(new_finding, rule.match_field):
-            return True
-        else:
-            return False
 
 
 def count_findings(findings):
@@ -1820,17 +1770,18 @@ def sla_compute_and_notify(*args, **kwargs):
     import dojo.jira_link.helper as jira_helper
 
     def _notify(finding, title):
-        create_notification(
-            event='sla_breach',
-            title=title,
-            finding=finding,
-            url=reverse('view_finding', args=(finding.id,)),
-            sla_age=sla_age
-        )
+        if not finding.test.engagement.product.disable_sla_breach_notifications:
+            create_notification(
+                event='sla_breach',
+                title=title,
+                finding=finding,
+                url=reverse('view_finding', args=(finding.id,)),
+                sla_age=sla_age
+            )
 
-        if do_jira_sla_comment:
-            logger.info("Creating JIRA comment to notify of SLA breach information.")
-            jira_helper.add_simple_jira_comment(jira_instance, jira_issue, title)
+            if do_jira_sla_comment:
+                logger.info("Creating JIRA comment to notify of SLA breach information.")
+                jira_helper.add_simple_jira_comment(jira_instance, jira_issue, title)
 
     # exit early on flags
     system_settings = System_Settings.objects.get()
@@ -1852,10 +1803,10 @@ def sla_compute_and_notify(*args, **kwargs):
             ))
 
             query = None
-            if system_settings.enable_notify_sla_active:
-                query = Q(active=True, is_mitigated=False, duplicate=False)
             if system_settings.enable_notify_sla_active_verified:
                 query = Q(active=True, verified=True, is_mitigated=False, duplicate=False)
+            elif system_settings.enable_notify_sla_active:
+                query = Q(active=True, is_mitigated=False, duplicate=False)
             logger.debug("My query: {}".format(query))
 
             no_jira_findings = {}

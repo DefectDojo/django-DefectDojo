@@ -319,7 +319,7 @@
                                                         {% trans "Risk Accepted Findings" %}
                                                     </a>
                                                 </li>
-                                                {% if "dojo.view_finding_template"|has_configuration_permission:request %}
+                                                {% if "Finding_View"|has_global_permission %}
                                                     <li>
                                                         <a href="{% url 'templates' %}">
                                                             {% trans "Finding Templates" %}
@@ -514,13 +514,6 @@
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if system_settings.enable_google_sheets and "dojo.change_google_sheet"|has_configuration_permission:request %}
-                                                    <li>
-                                                        <a href="{% url 'configure_google_sheets' %}">
-                                                            {% trans "Google Sheets Sync" %}
-                                                        </a>
-                                                    </li>
-                                                {% endif %}
                                                 {% if system_settings.enable_jira and "dojo.view_jira_instance"|has_configuration_permission:request %}
                                                     <li>
                                                         <a href="{% url 'jira' %}">
@@ -552,13 +545,6 @@
                                                         {% trans "Regulations" %}
                                                     </a>
                                                 </li>
-                                                {% if system_settings.enable_rules_framework and "dojo.view_rule"|has_configuration_permission:request %}
-                                                    <li>
-                                                        <a href="{% url 'rules' %}">
-                                                            {% trans "Rules Framework" %}
-                                                        </a>
-                                                    </li>
-                                                {% endif %}
                                                 {% if system_settings.enable_finding_sla and "dojo.view_sla_configuration"|has_configuration_permission:request %}
                                                     <li>
                                                         <a href="{% url 'sla_config' %}">

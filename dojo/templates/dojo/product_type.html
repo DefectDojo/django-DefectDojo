@@ -48,6 +48,7 @@
                         <thead>
                         <tr>
                             <th></th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th>{% dojo_sort request 'Product Type' 'name' 'asc' %}</th>
                             <th>{% trans "Product count" %}</th>
                             <th>{% trans "Active (Verified) findings" %}</th>
