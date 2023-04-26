@@ -23,6 +23,9 @@ RUN \
     curl-dev \
     openssl \
     libffi-dev \
+    libldap2-dev \
+    libsasl2-dev \
+    ldap-utils \
     && \
     rm -rf /var/cache/apk/* && \
   true

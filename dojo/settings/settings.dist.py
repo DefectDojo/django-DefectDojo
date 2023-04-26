@@ -6,6 +6,8 @@ from dojo import __version__
 import environ
 from netaddr import IPNetwork, IPSet
 import json
+import ldap
+from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
 
 # See https://documentation.defectdojo.com/getting_started/configuration/ for options
 # how to tune the configuration to your needs.
@@ -265,8 +267,24 @@ env = environ.Env(
     DD_HASHCODE_FIELDS_PER_SCANNER=(str, ''),
     # Set deduplication algorithms per parser, via en env variable that contains a JSON string
     DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, '')
+    # LDAP
+    DD_LDAP_SERVER_URI=(str, 'ldap://ldap.example.com'),
+    DD_LDAP_BIND_DN=(str, ''),
+    DD_LDAP_BIND_PASSWORD=(str, ''),
 )
 
+AUTH_LDAP_SERVER_URI = env('DD_LDAP_SERVER_URI')
+AUTH_LDAP_BIND_DN = env('DD_LDAP_BIND_DN')
+AUTH_LDAP_BIND_PASSWORD = env('DD_LDAP_BIND_PASSWORD')
+AUTH_LDAP_USER_SEARCH = LDAPSearch(
+    "DC=wuh-intern,DC=de", ldap.SCOPE_SUBTREE, "(sAMAccountName=%(user)s)"
+)
+
+AUTH_LDAP_USER_ATTR_MAP = {
+    "first_name": "givenName",
+    "last_name": "sn",
+    "email": "mail",
+}
 
 def generate_url(scheme, double_slashes, user, password, host, port, path, params):
     result_list = []
@@ -462,6 +480,7 @@ AUTHENTICATION_BACKENDS = (
     'dojo.remote_user.RemoteUserBackend',
     'django.contrib.auth.backends.RemoteUserBackend',
     'django.contrib.auth.backends.ModelBackend',
+    'django_auth_ldap.backend.LDAPBackend',
 )
 
 # Make Argon2 the default password hasher by listing it first

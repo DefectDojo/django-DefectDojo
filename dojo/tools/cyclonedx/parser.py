@@ -213,7 +213,7 @@ class CycloneDXParser(object):
         findings = []
         for target in vulnerability.findall("b:affects/b:target", namespaces=ns):
             ref = target.find("b:ref", namespaces=ns)
-            component_name, component_version = self._get_component(bom_refs, ref.text)
+            component_name, component_version, component_group = self._get_component(bom_refs, ref.text)
 
             finding = Finding(
                 title=f"{component_name}:{component_version} | {vuln_id}",
@@ -223,6 +223,7 @@ class CycloneDXParser(object):
                 references=references,
                 component_name=component_name,
                 component_version=component_version,
+                service=component_group,  # map group to service
                 static_finding=True,
                 dynamic_finding=False,
                 vuln_id_from_tool=vuln_id,
@@ -338,7 +339,7 @@ class CycloneDXParser(object):
             # for each component affected we create a finding if the "affects" node is here
             for affect in vulnerability.get("affects", []):
                 reference = affect["ref"]  # required by the specification
-                component_name, component_version = self._get_component(components, reference)
+                component_name, component_version, component_group = self._get_component(components, reference)
                 finding = Finding(
                     title=f"{component_name}:{component_version} | {vulnerability.get('id')}",
                     test=test,
@@ -347,6 +348,7 @@ class CycloneDXParser(object):
                     mitigation=vulnerability.get("recommendation"),
                     component_name=component_name,
                     component_version=component_version,
+                    service=component_group,  # map group to service
                     references=references,
                     static_finding=True,
                     dynamic_finding=False,
@@ -421,10 +423,12 @@ class CycloneDXParser(object):
     def _get_component(self, components, reference):
         if reference not in components:
             LOGGER.warning(f"reference:{reference} not found in the BOM")
-            return (None, None)
+            return (None, None, None)
         if "version" not in components[reference]:
-            return (components[reference]["name"], None)
-        return (components[reference]["name"], components[reference]["version"])
+            return (components[reference]["name"], None, None)
+        if "group" not in components[reference]:
+            return (components[reference]["name"], components[reference]["version"], None)
+        return (components[reference]["name"], components[reference]["version"], components[reference]["group"])
 
     def fix_severity(self, severity):
         severity = severity.capitalize()
