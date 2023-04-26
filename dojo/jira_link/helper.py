@@ -542,7 +542,7 @@ def get_tags(obj):
                 for tag in obj_tags:
                     if tag not in tags:
                         tags.append(str(tag.name.replace(' ', '-')))
-     
+
     return tags
 
 
