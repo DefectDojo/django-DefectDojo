@@ -204,7 +204,9 @@ def get_codeFlowsDescription(codeFlows):
             for location in threadFlow['locations']:
                 physicalLocation = location['location']['physicalLocation']
                 region = physicalLocation['region']
-                description += '\t' + physicalLocation['artifactLocation']['uri'] + ':' + str(region['startLine'])
+                description += '\t' + physicalLocation['artifactLocation'][
+                    'uri'] if 'byteOffset' in region else '\t' + physicalLocation['artifactLocation']['uri'] + ':' + str(
+                    region['startLine'])
                 if 'startColumn' in region:
                     description += ':' + str(region['startColumn'])
                 if 'snippet' in region:
@@ -296,7 +298,6 @@ def get_severity(result, rule):
 
 
 def get_item(result, rules, artifacts, run_date):
-
     # see https://docs.oasis-open.org/sarif/sarif/v2.1.0/csprd01/sarif-v2.1.0-csprd01.html / 3.27.9
     kind = result.get('kind', 'fail')
     if kind != 'fail':
@@ -315,9 +316,15 @@ def get_item(result, rules, artifacts, run_date):
         location = result['locations'][0]
         if 'physicalLocation' in location:
             file_path = location['physicalLocation']['artifactLocation']['uri']
+
             # 'region' attribute is optionnal
             if 'region' in location['physicalLocation']:
-                line = location['physicalLocation']['region']['startLine']
+                # https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html / 3.30.1
+                # need to check whether it is byteOffset
+                if 'byteOffset' in location['physicalLocation']['region']:
+                    pass
+                else:
+                    line = location['physicalLocation']['region']['startLine']
 
     # test rule link
     rule = rules.get(result.get('ruleId'))
