@@ -51,7 +51,7 @@ vobject==0.9.6.1
 whitenoise==5.2.0
 titlecase==2.3
 social-auth-app-django==5.2.0
-social-auth-core==4.4.1
+social-auth-core==4.4.2
 Python-jose==3.3.0
 gitpython==3.1.31
 debugpy==1.6.7
@@ -78,7 +78,7 @@ django-ratelimit==4.0.0
 argon2-cffi==21.3.0
 blackduck==1.1.0
 pycurl==7.45.2  # Required for Celery Broker AWS (SQS) support
-boto3==1.26.115  # Required for Celery Broker AWS (SQS) support
+boto3==1.26.118  # Required for Celery Broker AWS (SQS) support
 netaddr==0.8.0
 vulners==2.0.9
 fontawesomefree==6.4.0

@@ -134,79 +134,135 @@ class Permissions(IntEnum):
 
     @classmethod
     def get_engagement_permissions(cls):
-        return {Permissions.Engagement_View, Permissions.Engagement_Edit,
-            Permissions.Engagement_Delete, Permissions.Risk_Acceptance,
-            Permissions.Test_Add, Permissions.Import_Scan_Result, Permissions.Note_Add,
-            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History} \
+        return {
+            Permissions.Engagement_View,
+            Permissions.Engagement_Edit,
+            Permissions.Engagement_Delete,
+            Permissions.Risk_Acceptance,
+            Permissions.Test_Add,
+            Permissions.Import_Scan_Result,
+            Permissions.Note_Add,
+            Permissions.Note_Delete,
+            Permissions.Note_Edit,
+            Permissions.Note_View_History} \
             .union(cls.get_test_permissions())
 
     @classmethod
     def get_test_permissions(cls):
-        return {Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Delete,
-            Permissions.Finding_Add, Permissions.Import_Scan_Result, Permissions.Note_Add,
-            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History} \
+        return {
+            Permissions.Test_View,
+            Permissions.Test_Edit,
+            Permissions.Test_Delete,
+            Permissions.Finding_Add,
+            Permissions.Import_Scan_Result,
+            Permissions.Note_Add,
+            Permissions.Note_Delete,
+            Permissions.Note_Edit,
+            Permissions.Note_View_History} \
             .union(cls.get_finding_permissions())
 
     @classmethod
     def get_finding_permissions(cls):
-        return {Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Import_Scan_Result,
-            Permissions.Finding_Delete, Permissions.Risk_Acceptance, Permissions.Note_Add,
-            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History} \
+        return {
+            Permissions.Finding_View,
+            Permissions.Finding_Edit,
+            Permissions.Finding_Add,
+            Permissions.Import_Scan_Result,
+            Permissions.Finding_Delete,
+            Permissions.Note_Add,
+            Permissions.Risk_Acceptance,
+            Permissions.Note_Delete,
+            Permissions.Note_Edit,
+            Permissions.Note_View_History} \
             .union(cls.get_finding_group_permissions())
 
     @classmethod
     def get_finding_group_permissions(cls):
-        return {Permissions.Finding_Group_View, Permissions.Finding_Group_Edit,
+        return {
+            Permissions.Finding_Group_View,
+            Permissions.Finding_Group_Edit,
             Permissions.Finding_Group_Delete}
 
     @classmethod
     def get_endpoint_permissions(cls):
-        return {Permissions.Endpoint_View, Permissions.Endpoint_Edit, Permissions.Endpoint_Delete}
+        return {
+            Permissions.Endpoint_View,
+            Permissions.Endpoint_Edit,
+            Permissions.Endpoint_Delete}
 
     @classmethod
     def get_product_member_permissions(cls):
-        return {Permissions.Product_View, Permissions.Product_Manage_Members,
+        return {
+            Permissions.Product_View,
+            Permissions.Product_Manage_Members,
             Permissions.Product_Member_Delete}
 
     @classmethod
     def get_product_type_member_permissions(cls):
-        return {Permissions.Product_Type_View, Permissions.Product_Type_Manage_Members,
+        return {
+            Permissions.Product_Type_View,
+            Permissions.Product_Type_Manage_Members,
             Permissions.Product_Type_Member_Delete}
 
     @classmethod
     def get_product_group_permissions(cls):
-        return {Permissions.Product_Group_View, Permissions.Product_Group_Edit,
+        return {
+            Permissions.Product_Group_View,
+            Permissions.Product_Group_Edit,
             Permissions.Product_Group_Delete}
 
     @classmethod
     def get_product_type_group_permissions(cls):
-        return {Permissions.Product_Type_Group_View, Permissions.Product_Type_Group_Edit,
+        return {
+            Permissions.Product_Type_Group_View,
+            Permissions.Product_Type_Group_Edit,
             Permissions.Product_Type_Group_Delete}
 
     @classmethod
     def get_group_permissions(cls):
-        return {Permissions.Group_View, Permissions.Group_Member_Delete, Permissions.Group_Manage_Members,
-            Permissions.Group_Add_Owner, Permissions.Group_Edit, Permissions.Group_Delete}
+        return {
+            Permissions.Group_View,
+            Permissions.Group_Member_Delete,
+            Permissions.Group_Manage_Members,
+            Permissions.Group_Add_Owner,
+            Permissions.Group_Edit,
+            Permissions.Group_Delete}
 
     @classmethod
     def get_group_member_permissions(cls):
-        return {Permissions.Group_View, Permissions.Group_Manage_Members, Permissions.Group_Member_Delete}
+        return {
+            Permissions.Group_View,
+            Permissions.Group_Manage_Members,
+            Permissions.Group_Member_Delete}
 
     @classmethod
     def get_language_permissions(cls):
-        return {Permissions.Language_View, Permissions.Language_Edit, Permissions.Language_Delete}
+        return {
+            Permissions.Language_View,
+            Permissions.Language_Edit,
+            Permissions.Language_Delete}
 
     @classmethod
     def get_technology_permissions(cls):
-        return {Permissions.Technology_View, Permissions.Technology_Edit, Permissions.Technology_Delete}
+        return {
+            Permissions.Technology_View,
+            Permissions.Technology_Edit,
+            Permissions.Technology_Delete}
 
     @classmethod
     def get_product_api_scan_configuration_permissions(cls):
-        return {Permissions.Product_API_Scan_Configuration_View, Permissions.Product_API_Scan_Configuration_Edit, Permissions.Product_API_Scan_Configuration_Delete}
+        return {
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_API_Scan_Configuration_Edit,
+            Permissions.Product_API_Scan_Configuration_Delete}
 
     @classmethod
     def get_credential_permissions(cls):
-        return {Permissions.Credential_View, Permissions.Credential_Add, Permissions.Credential_Edit, Permissions.Credential_Delete}
+        return {
+            Permissions.Credential_View,
+            Permissions.Credential_Add,
+            Permissions.Credential_Edit,
+            Permissions.Credential_Delete}
 
 
 def get_roles_with_permissions():
