@@ -50,11 +50,16 @@
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <tr>
                             <th></th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th>{% dojo_sort request 'Engagement' 'name' 'asc' %}</th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th>{% dojo_sort request 'Period' 'target_start' 'asc' %}</th>
                             <th>Status</th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th class="prod_name">{% dojo_sort request 'Product' 'product__name' 'asc' %}</th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th class="prod_name">{% dojo_sort request 'Product Type' 'product__prod_type__name' %}</th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th>{% dojo_sort request 'Lead' 'lead__first_name' %}</th>
                             <th>Tests</th>
                             {% if system_settings.enable_jira %}

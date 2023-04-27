@@ -27,12 +27,19 @@
                     <table id="users"
                         class="tablesorter-bootstrap table table-condensed table-striped">
                         <tr>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th class="nowrap">{% dojo_sort request 'First Name' 'first_name' %}</th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th class="nowrap">{% dojo_sort request 'Last Name' 'last_name' %}</th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th class="nowrap">{% dojo_sort request 'User Name' 'username' 'asc' %}</th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th class="nowrap">{% dojo_sort request 'Email' 'email' %}</th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th class="nowrap">{% dojo_sort request 'Last Login' 'last_login'%}</th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th class="nowrap, text-center">{% dojo_sort request 'Active' 'is_active' %}</th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th class="nowrap, text-center">{% dojo_sort request 'Superuser' 'is_superuser' %}</th>
                         </tr>
                         {% for u in users %}
