@@ -11,7 +11,7 @@
                         {{ name }}
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
-                            {% if "auth.add_group"|has_configuration_permission %}
+                            {% if "auth.add_group"|has_configuration_permission:request %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa-solid fa-screwdriver-wrench"></span>
@@ -41,8 +41,11 @@
                     <table id="groups" class="tablesorter-bootstrap table table-condensed table-striped">
                         <tr>
                             <th></th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th class="nowrap">{% dojo_sort request 'Group Name' 'name' %}</th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th class="nowrap">{% dojo_sort request 'Group Description' 'description' %}</th>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th class="nowrap">{% dojo_sort request 'Number of Users' 'users|length' %}</th>
                             <th class="nowrap">Global Role</th>
                         </tr>

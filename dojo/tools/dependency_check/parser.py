@@ -180,7 +180,7 @@ class DependencyCheckParser(object):
         # default to 'Medium' and produce warnings in logs
         if severity:
             if severity.strip().lower() not in self.SEVERITY_MAPPING:
-                logger.warn(f"Warning: Unknow severity value detected '{severity}'. Bypass to 'Medium' value")
+                logger.warning(f"Warning: Unknow severity value detected '{severity}'. Bypass to 'Medium' value")
                 severity = "Medium"
             else:
                 severity = self.SEVERITY_MAPPING[severity.strip().lower()]

@@ -28,7 +28,7 @@ import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Product, \
     Test, User, Dojo_User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule, Dojo_Group_Member, NOTIFICATION_CHOICES
+    Language_Type, Languages, Dojo_Group_Member, NOTIFICATION_CHOICES
 from asteval import Interpreter
 from dojo.notifications.helper import create_notification
 import logging
@@ -43,7 +43,7 @@ from django.contrib.auth.signals import user_logged_in, user_logged_out, user_lo
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
-
+WEEKDAY_FRIDAY = 4  # date.weekday() starts with 0
 
 """
 Helper functions for DefectDojo
@@ -429,56 +429,6 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.notes.create(author=existing_finding.reporter,
                                     entry="This finding has been automatically re-opened as it was found in recent scans.")
     existing_finding.save()
-
-
-def do_apply_rules(new_finding, *args, **kwargs):
-    rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
-    for rule in rules:
-        child_val = True
-        child_list = [val for val in rule.child_rules.all()]
-        while (len(child_list) != 0):
-            child_val = child_val and child_rule(child_list.pop(), new_finding)
-        if child_val:
-            if rule.operator == 'Matches':
-                if getattr(new_finding, rule.match_field) == rule.match_text:
-                    if rule.application == 'Append':
-                        set_attribute_rule(new_finding, rule, (getattr(
-                            new_finding, rule.applied_field) + rule.text))
-                    else:
-                        set_attribute_rule(new_finding, rule, rule.text)
-                        new_finding.save(dedupe_option=False,
-                                         rules_option=False)
-            else:
-                if rule.match_text in getattr(new_finding, rule.match_field):
-                    if rule.application == 'Append':
-                        set_attribute_rule(new_finding, rule, (getattr(
-                            new_finding, rule.applied_field) + rule.text))
-                    else:
-                        set_attribute_rule(new_finding, rule, rule.text)
-                        new_finding.save(dedupe_option=False,
-                                         rules_option=False)
-
-
-def set_attribute_rule(new_finding, rule, value):
-    if rule.text == "True":
-        setattr(new_finding, rule.applied_field, True)
-    elif rule.text == "False":
-        setattr(new_finding, rule.applied_field, False)
-    else:
-        setattr(new_finding, rule.applied_field, value)
-
-
-def child_rule(rule, new_finding):
-    if rule.operator == 'Matches':
-        if getattr(new_finding, rule.match_field) == rule.match_text:
-            return True
-        else:
-            return False
-    else:
-        if rule.match_text in getattr(new_finding, rule.match_field):
-            return True
-        else:
-            return False
 
 
 def count_findings(findings):
@@ -1520,6 +1470,37 @@ def get_celery_worker_status():
         return False
 
 
+def get_work_days(start: date, end: date):
+    """
+    Math function to get workdays between 2 dates.
+    Can be used only as fallback as it doesn't know
+    about specific country holidays or extra working days.
+    https://stackoverflow.com/questions/3615375/number-of-days-between-2-dates-excluding-weekends/71977946#71977946
+    """
+    from datetime import timedelta
+
+    # if the start date is on a weekend, forward the date to next Monday
+    if start.weekday() > WEEKDAY_FRIDAY:
+        start = start + timedelta(days=7 - start.weekday())
+
+    # if the end date is on a weekend, rewind the date to the previous Friday
+    if end.weekday() > WEEKDAY_FRIDAY:
+        end = end - timedelta(days=end.weekday() - WEEKDAY_FRIDAY)
+
+    if start > end:
+        return 0
+    # that makes the difference easy, no remainders etc
+    diff_days = (end - start).days + 1
+    weeks = int(diff_days / 7)
+
+    remainder = end.weekday() - start.weekday() + 1
+
+    if remainder != 0 and end.weekday() < start.weekday():
+        remainder = 5 + remainder
+
+    return weeks * 5 + remainder
+
+
 # Used to display the counts and enabled tabs in the product view
 class Product_Tab():
     def __init__(self, product, title=None, tab=None):
@@ -1649,7 +1630,7 @@ def get_full_url(relative_url):
     if settings.SITE_URL:
         return settings.SITE_URL + relative_url
     else:
-        logger.warn('SITE URL undefined in settings, full_url cannot be created')
+        logger.warning('SITE URL undefined in settings, full_url cannot be created')
         return "settings.SITE_URL" + relative_url
 
 
@@ -1657,7 +1638,7 @@ def get_site_url():
     if settings.SITE_URL:
         return settings.SITE_URL
     else:
-        logger.warn('SITE URL undefined in settings, full_url cannot be created')
+        logger.warning('SITE URL undefined in settings, full_url cannot be created')
         return "settings.SITE_URL"
 
 
@@ -1895,7 +1876,14 @@ def sla_compute_and_notify(*args, **kwargs):
                 if (sla_age < 0):
                     post_breach_count += 1
                     logger.info("Finding {} has breached by {} days.".format(finding.id, abs(sla_age)))
-                    _notify(finding, 'Finding {} - SLA breached by {} day(s)! Overdue notice'.format(finding.id, abs(sla_age)))
+                    abs_sla_age = abs(sla_age)
+                    if not system_settings.enable_notify_sla_exponential_backoff or abs_sla_age == 1 or (abs_sla_age & (abs_sla_age - 1) == 0):
+                        period = "day"
+                        if abs_sla_age > 1:
+                            period = "days"
+                        _notify(finding, 'Finding {} - SLA breached by {} {}! Overdue notice'.format(finding.id, abs_sla_age, period))
+                    else:
+                        logger.info("Skipping notification as exponential backoff is enabled and the SLA is not a power of two")
                 # The finding is within the pre-breach period
                 elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
                     pre_breach_count += 1
@@ -2290,6 +2278,8 @@ def get_password_requirements_string():
         password_requirements_string = s.rsplit(', ', 1)[0] + ' and ' + s.rsplit(', ', 1)[1]
     elif s.count(', ') > 1:
         password_requirements_string = s.rsplit(', ', 1)[0] + ', and ' + s.rsplit(', ', 1)[1]
+    else:
+        password_requirements_string = s
 
     return password_requirements_string + '.'
 

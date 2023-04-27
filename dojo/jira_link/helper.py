@@ -534,7 +534,7 @@ def get_tags(obj):
         obj_tags = obj.tags.all()
         if obj_tags:
             for tag in obj_tags:
-                tags.append(str(tag.name))
+                tags.append(str(tag.name.replace(' ', '-')))
     return tags
 
 
@@ -698,9 +698,12 @@ def add_jira_issue(obj, *args, **kwargs):
 
     obj_can_be_pushed_to_jira, error_message, error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
-        log_jira_alert(error_message, obj)
-        logger.warn("%s cannot be pushed to JIRA: %s.", to_str_typed(obj), error_message)
-        logger.warn("The JIRA issue will NOT be created.")
+        if type(obj) == Finding and obj.duplicate and not obj.active:
+            logger.warning("%s will not be pushed to JIRA as it's a duplicate finding", to_str_typed(obj))
+        else:
+            log_jira_alert(error_message, obj)
+            logger.warning("%s cannot be pushed to JIRA: %s.", to_str_typed(obj), error_message)
+            logger.warning("The JIRA issue will NOT be created.")
         return False
     logger.debug('Trying to create a new JIRA issue for %s...', to_str_typed(obj))
     try:
@@ -733,7 +736,7 @@ def add_jira_issue(obj, *args, **kwargs):
         logger.debug('sending fields to JIRA: %s', fields)
         new_issue = jira.create_issue(fields)
         if jira_project.default_assignee:
-            new_issue.update(assignee={'name': jira_project.default_assignee})
+            jira.assign_issue(new_issue.key, jira_project.default_assignee)
 
         # Upload dojo finding screenshots to Jira
         findings = [obj]
@@ -1039,7 +1042,7 @@ def get_issuetype_fields(
 
     except JIRAError as e:
         e.text = f"Failed retrieving field metadata from Jira version: {jira._version}, project: {project_key}, issue type: {issuetype_name}. {e.text}"
-        logger.warn(e.text)
+        logger.warning(e.text)
         add_error_message_to_response(e.text)
 
         raise e
@@ -1113,7 +1116,7 @@ def close_epic(eng, push_to_jira, **kwargs):
             try:
                 jissue = get_jira_issue(eng)
                 if jissue is None:
-                    logger.warn("JIRA close epic failed: no issue found")
+                    logger.warning("JIRA close epic failed: no issue found")
                     return False
 
                 req_url = jira_instance.url + '/rest/api/latest/issue/' + \
@@ -1124,7 +1127,7 @@ def close_epic(eng, push_to_jira, **kwargs):
                     auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
                     json=json_data)
                 if r.status_code != 204:
-                    logger.warn("JIRA close epic failed with error: {}".format(r.text))
+                    logger.warning("JIRA close epic failed with error: {}".format(r.text))
                     return False
                 return True
             except JIRAError as e:
@@ -1318,6 +1321,38 @@ def finding_link_jira(request, finding, new_jira_issue_key):
     finding.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
     jira_issue_url = get_jira_url(finding)
+
+    return True
+
+
+def finding_group_link_jira(request, finding_group, new_jira_issue_key):
+    logger.debug('linking existing jira issue %s for finding group %i', new_jira_issue_key, finding_group.id)
+
+    existing_jira_issue = jira_get_issue(get_jira_project(finding_group), new_jira_issue_key)
+
+    jira_project = get_jira_project(finding_group)
+
+    if not existing_jira_issue:
+        raise ValueError('JIRA issue not found or cannot be retrieved: ' + new_jira_issue_key)
+
+    jira_issue = JIRA_Issue(
+        jira_id=existing_jira_issue.id,
+        jira_key=existing_jira_issue.key,
+        finding_group=finding_group,
+        jira_project=jira_project)
+
+    jira_issue.jira_key = new_jira_issue_key
+    # jira timestampe are in iso format: 'updated': '2020-07-17T09:49:51.447+0200'
+    # seems to be a pain to parse these in python < 3.7, so for now just record the curent time as
+    # as the timestamp the jira link was created / updated in DD
+    jira_issue.jira_creation = timezone.now()
+    jira_issue.jira_change = timezone.now()
+
+    jira_issue.save()
+
+    finding_group.save()
+
+    jira_issue_url = get_jira_url(finding_group)
 
     return True
 

@@ -3,6 +3,7 @@ from django.db.models.signals import post_delete, pre_delete
 from django.dispatch.dispatcher import receiver
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
+import dojo.jira_link.helper as jira_helper
 import logging
 from time import strftime
 from django.utils import timezone
@@ -178,6 +179,11 @@ def add_to_finding_group(finding_group, finds):
     available_findings = [find for find in finds if not find.finding_group_set.all()]
     finding_group.findings.add(*available_findings)
 
+    # Now update the JIRA to add the finding to the finding group
+    if finding_group.has_jira_issue and jira_helper.get_jira_instance(finding_group).finding_jira_sync:
+        logger.debug('pushing to jira from finding.finding_bulk_update_all()')
+        jira_helper.push_to_jira(finding_group)
+
     added = len(available_findings)
     skipped = len(finds) - added
     return finding_group, added, skipped
@@ -198,6 +204,12 @@ def remove_from_finding_group(finds):
             affected_groups.add(group)
 
         removed += 1
+
+    # Now update the JIRA to remove the finding from the finding group
+    for group in affected_groups:
+        if group.has_jira_issue and jira_helper.get_jira_instance(group).finding_jira_sync:
+            logger.debug('pushing to jira from finding.finding_bulk_update_all()')
+            jira_helper.push_to_jira(group)
 
     return affected_groups, removed, skipped
 
@@ -256,7 +268,7 @@ def group_findings_by(finds, finding_group_by_option):
             skipped += 1
             continue
 
-        finding_group = Finding_Group.objects.filter(name=group_name).first()
+        finding_group = Finding_Group.objects.filter(test=find.test, name=group_name).first()
         if not finding_group:
             finding_group, added, skipped = create_finding_group([find], group_name)
             groups_created += 1
@@ -269,20 +281,54 @@ def group_findings_by(finds, finding_group_by_option):
 
         affected_groups.add(finding_group)
 
+    # Now update the JIRA to add the finding to the finding group
+    for group in affected_groups:
+        if group.has_jira_issue and jira_helper.get_jira_instance(group).finding_jira_sync:
+            logger.debug('pushing to jira from finding.finding_bulk_update_all()')
+            jira_helper.push_to_jira(group)
+
     return affected_groups, grouped, skipped, groups_created
 
 
-def add_finding_to_auto_group(finding, group_by, **kwargs):
-    test = finding.test
-    name = get_group_by_group_name(finding, group_by)
-    if name is not None:
+def add_findings_to_auto_group(name, findings, group_by, create_finding_groups_for_all_findings=True, **kwargs):
+    if name is not None and findings is not None and len(findings) > 0:
         creator = get_current_user()
         if not creator:
             creator = kwargs.get('async_user', None)
-        finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name)
-        if created:
-            logger.debug('Created Finding Group %d:%s for test %d:%s', finding_group.id, finding_group, test.id, test)
-        finding_group.findings.add(finding)
+        test = findings[0].test
+
+        if create_finding_groups_for_all_findings or len(findings) > 1:
+            # Only create a finding group if we have more than one finding for a given finding group, unless configured otherwise
+            finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name)
+            if created:
+                logger.debug('Created Finding Group %d:%s for test %d:%s', finding_group.id, finding_group, test.id, test)
+                # See if we have old findings in the same test that were created without a finding group
+                # that should be added to this new group
+                old_findings = Finding.objects.filter(test=test)
+                for f in old_findings:
+                    f_group_name = get_group_by_group_name(f, group_by)
+                    if f_group_name == name and f not in findings:
+                        finding_group.findings.add(f)
+
+            finding_group.findings.add(*findings)
+        else:
+            # Otherwise add to an existing finding group if it exists only
+            try:
+                finding_group = Finding_Group.objects.get(test=test, name=name)
+                if finding_group:
+                    finding_group.findings.add(*findings)
+            except:
+                # See if we have old findings in the same test that were created without a finding group
+                # that match this new finding - then we can create a finding group
+                old_findings = Finding.objects.filter(test=test)
+                created = False
+                for f in old_findings:
+                    f_group_name = get_group_by_group_name(f, group_by)
+                    if f_group_name == name and f not in findings:
+                        finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name)
+                        finding_group.findings.add(f)
+                if created:
+                    finding_group.findings.add(*findings)
 
 
 @dojo_model_to_id
@@ -435,7 +481,7 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
 def prepare_duplicates_for_delete(test=None, engagement=None):
     logger.debug('prepare duplicates for delete, test: %s, engagement: %s', test.id if test else None, engagement.id if engagement else None)
     if test is None and engagement is None:
-        logger.warn('nothing to prepare as test and engagement are None')
+        logger.warning('nothing to prepare as test and engagement are None')
 
     fix_loop_duplicates()
 

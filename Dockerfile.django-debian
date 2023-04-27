@@ -21,6 +21,9 @@ RUN \
     xmlsec1 \
     git \
     uuid-runtime \
+    libldap2-dev \
+    libsasl2-dev \
+    ldap-utils \
     # libcurl4-openssl-dev is required for installing pycurl python package
     libcurl4-openssl-dev \
     && \
@@ -109,7 +112,8 @@ RUN \
     chmod -R 775 /app/dojo/settings && \
     mkdir /var/run/${appuser} && \
     chown ${appuser} /var/run/${appuser} && \
-	  chmod g=u /var/run/${appuser} && \
+    chmod g=u /var/run/${appuser} && \
+    chmod 775 /*.sh && \
     mkdir -p media/threat && chown -R ${uid} media
 USER ${uid}
 ENV \

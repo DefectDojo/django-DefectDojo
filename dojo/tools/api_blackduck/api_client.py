@@ -10,7 +10,7 @@ class BlackduckAPI:
         if tool_config.authentication_type == "API":
             self.api_token = tool_config.api_key
             self.base_url = tool_config.url
-            self.client = Client(base_url=tool_config.url, token=tool_config.api_key)
+            self.client = Client(base_url=tool_config.url, token=tool_config.api_key, timeout=120)
         else:
             raise ValueError(
                 "Authentication type {} not supported".format(
@@ -18,12 +18,18 @@ class BlackduckAPI:
                 )
             )
 
-    def test_product_connection(self, api_scan_configuration):
-        asset = self.get_asset(api_scan_configuration.service_key_1)
-        asset_name = asset["resource"]["title"]
-        api_scan_configuration.service_key_2 = asset_name
-        api_scan_configuration.save()
-        return f'You have access to asset "{asset_name}"'
+    # TODO
+    # def test_connection(self):
+    #     response = ...
+    #     if not response.ok:
+    #         raise Exception(f'Unable to connect and search in BlackDuck due to ...')
+    #     return f'You have access to ... projects'
+    #
+    # def test_product_connection(self, api_scan_configuration):
+    #     response = ...
+    #     if not response.ok:
+    #         raise Exception(f'Unable to connect and search in BlackDuck due to ...')
+    #     return f'You have access to project "..."'
 
     def get_project_by_name(self, project_name):
         for project in self.client.get_resource("projects"):

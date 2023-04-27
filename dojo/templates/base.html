@@ -27,7 +27,7 @@
         <!-- jQuery -->
         <script src="{% static "jquery/dist/jquery.js" %}"></script>
         <!--  jQuery UI -->
-        <script src="{% static "components-jqueryui/jquery-ui.min.js" %}"></script>
+        <script src="{% static "jquery-ui/dist/jquery-ui.min.js" %}"></script>
         <!-- Bootstrap Core JavaScript -->
         <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
         <!-- Bootstrap Select -->
@@ -80,7 +80,7 @@
 
         {% block add_css %}
         {% endblock %}
-        <link rel="stylesheet" href="{% static "components-jqueryui/themes/flick/jquery-ui.min.css" %}">
+        <link rel="stylesheet" href="{% static "jquery-ui/dist/themes/flick/jquery-ui.min.css" %}">
         <link rel="shortcut icon" href="{% static "dojo/img/favicon.ico" %}"/>
         <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
         <link rel="stylesheet" href="{% static "fullcalendar/dist/fullcalendar.min.css" %}">
@@ -319,7 +319,7 @@
                                                         {% trans "Risk Accepted Findings" %}
                                                     </a>
                                                 </li>
-                                                {% if "dojo.view_finding_template"|has_configuration_permission %}
+                                                {% if "Finding_View"|has_global_permission %}
                                                     <li>
                                                         <a href="{% url 'templates' %}">
                                                             {% trans "Finding Templates" %}
@@ -426,7 +426,7 @@
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
-                                        {% if "auth.view_user"|has_configuration_permission or "auth.view_group"|has_configuration_permission %}
+                                        {% if "auth.view_user"|has_configuration_permission:request or "auth.view_group"|has_configuration_permission:request %}
                                             <li>
                                                 <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users" id="id_user_menu">
                                                     <i class="fa-solid fa-user fa-fw"></i>
@@ -434,14 +434,14 @@
                                                     <span class="glyphicon arrow"></span>
                                                 </a>
                                                 <ul class="nav nav-second-level">
-                                                    {% if "auth.view_user"|has_configuration_permission %}
+                                                    {% if "auth.view_user"|has_configuration_permission:request %}
                                                         <li>    
                                                             <a href="{% url 'users' %}">
                                                                 {% trans "Users" %}
                                                             </a>
                                                         </li>
                                                     {% endif %}
-                                                    {% if "auth.view_group"|has_configuration_permission %}
+                                                    {% if "auth.view_group"|has_configuration_permission:request %}
                                                         <li>
                                                             <a href="{% url 'groups' %}"  id="id_group_menu">
                                                                 {% trans "Groups" %}
@@ -460,7 +460,7 @@
                                         </li>
                                         {% endif %}
                                         {% if system_settings.enable_questionnaires %}
-                                            {% if "dojo.view_engagement_survey"|has_configuration_permission or "dojo.view_question"|has_configuration_permission %}
+                                            {% if "dojo.view_engagement_survey"|has_configuration_permission:request or "dojo.view_question"|has_configuration_permission:request %}
                                                 <li>
                                                     <a href="#">
                                                         <i class="fa-solid fa-house-medical-flag fa-fw"></i>
@@ -468,14 +468,14 @@
                                                         <span class="glyphicon arrow"></span>
                                                     </a>
                                                     <ul class="nav nav-second-level">
-                                                        {% if "dojo.view_engagement_survey"|has_configuration_permission  %}
+                                                        {% if "dojo.view_engagement_survey"|has_configuration_permission:request  %}
                                                             <li>
                                                                 <a href="{% url 'questionnaire' %}">
                                                                     {% trans "All Questionnaires" %}
                                                                 </a>
                                                             </li>
                                                         {% endif %}
-                                                        {% if "dojo.view_question"|has_configuration_permission %}
+                                                        {% if "dojo.view_question"|has_configuration_permission:request %}
                                                             <li>
                                                                 <a href="{% url 'questions' %}">
                                                                     {% trans "All Questions" %}
@@ -493,49 +493,42 @@
                                                 <span>{% trans "Configuration" %}</span>
                                             </a>
                                             <ul class="nav nav-second-level">
-                                                {% if "dojo.change_announcement"|has_configuration_permission %}
+                                                {% if "dojo.change_announcement"|has_configuration_permission:request %}
                                                     <li>
                                                         <a href="{% url 'configure_announcement' %}">
                                                             {% trans "Announcement" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if system_settings.enable_credentials and "dojo.view_cred_user"|has_configuration_permission %}
+                                                {% if system_settings.enable_credentials and "dojo.view_cred_user"|has_configuration_permission:request %}
                                                     <li>
                                                         <a href="{% url 'cred' %}">
                                                             {% trans "Credential Manager" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if system_settings.enable_github  and "dojo.view_github_conf"|has_configuration_permission%}
+                                                {% if system_settings.enable_github  and "dojo.view_github_conf"|has_configuration_permission:request%}
                                                     <li>
                                                         <a href="{% url 'github' %}">
                                                             {% trans "GitHub" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if system_settings.enable_google_sheets and "dojo.change_google_sheet"|has_configuration_permission %}
-                                                    <li>
-                                                        <a href="{% url 'configure_google_sheets' %}">
-                                                            {% trans "Google Sheets Sync" %}
-                                                        </a>
-                                                    </li>
-                                                {% endif %}
-                                                {% if system_settings.enable_jira and "dojo.view_jira_instance"|has_configuration_permission %}
+                                                {% if system_settings.enable_jira and "dojo.view_jira_instance"|has_configuration_permission:request %}
                                                     <li>
                                                         <a href="{% url 'jira' %}">
                                                             {% trans "JIRA" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if "dojo.change_bannerconf"|has_configuration_permission %}
+                                                {% if "dojo.change_bannerconf"|has_configuration_permission:request %}
                                                     <li>
                                                         <a href="{% url 'configure_banner' %}">
                                                             {% trans "Login Banner" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if "dojo.view_note_type"|has_configuration_permission %}
+                                                {% if "dojo.view_note_type"|has_configuration_permission:request %}
                                                     <li>
                                                         <a href="{% url 'note_type' %}">
                                                             {% trans "Note Types" %}
@@ -552,14 +545,7 @@
                                                         {% trans "Regulations" %}
                                                     </a>
                                                 </li>
-                                                {% if system_settings.enable_rules_framework and "dojo.view_rule"|has_configuration_permission %}
-                                                    <li>
-                                                        <a href="{% url 'rules' %}">
-                                                            {% trans "Rules Framework" %}
-                                                        </a>
-                                                    </li>
-                                                {% endif %}
-                                                {% if system_settings.enable_finding_sla and "dojo.view_sla_configuration"|has_configuration_permission %}
+                                                {% if system_settings.enable_finding_sla and "dojo.view_sla_configuration"|has_configuration_permission:request %}
                                                     <li>
                                                         <a href="{% url 'sla_config' %}">
                                                             {% trans "SLA Configuration" %}
@@ -573,14 +559,14 @@
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if "dojo.view_tool_configuration"|has_configuration_permission %}
+                                                {% if "dojo.view_tool_configuration"|has_configuration_permission:request %}
                                                     <li>
                                                         <a href="{% url 'tool_config' %}">
                                                             {% trans "Tool Configuration" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if "dojo.view_tool_type"|has_configuration_permission %}
+                                                {% if "dojo.view_tool_type"|has_configuration_permission:request %}
                                                     <li>
                                                         <a href="{% url 'tool_type' %}">
                                                             {% trans "Tool Type" %}
@@ -1063,7 +1049,7 @@
                             License</a>. | <a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/NOTICE"> Dependencies Notice.</a>
                                 </p>
                                 <p>
-                                    &copy; 2015-{% now "Y" %} DefectDojo, Inc. All rights reserved.
+                                    &copy; 2015-{% now "Y" %} DefectDojo, Inc. All rights reserved. DefectDojo is trademark of DefectDojo, Inc.
                                 </p>
                             </div>
                         </div>

@@ -228,7 +228,7 @@ class CycloneDXParser(object):
                 references=references,
                 component_name=component_name,
                 component_version=component_version,
-                service=component_group,
+                service=component_group,  # map group to service
                 static_finding=True,
                 dynamic_finding=False,
                 vuln_id_from_tool=vuln_id,
@@ -353,7 +353,7 @@ class CycloneDXParser(object):
                     mitigation=vulnerability.get("recommendation"),
                     component_name=component_name,
                     component_version=component_version,
-                    service=component_group,
+                    service=component_group,  # map group to service
                     references=references,
                     static_finding=True,
                     dynamic_finding=False,

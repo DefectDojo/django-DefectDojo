@@ -11,18 +11,19 @@ from django.http import HttpResponse
 from dojo import views
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
-    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
+    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, CredentialsViewSet, CredentialsMappingViewSet, \
     SLAConfigurationViewset, StubFindingsViewSet, TestImportViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
     AppAnalysisViewSet, EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
-    RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
+    RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, RiskAcceptanceViewSet, \
     DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet, RoleViewSet, GlobalRoleViewSet, \
     DojoGroupMemberViewSet, ImportLanguagesView, LanguageTypeViewSet, LanguageViewSet, \
     NotificationsViewSet, EngagementPresetsViewset, NetworkLocationsViewset, UserContactInfoViewSet, \
     ProductAPIScanConfigurationViewSet, UserProfileView, EndpointMetaImporterView, \
-    ConfigurationPermissionViewSet
+    ConfigurationPermissionViewSet, QuestionnaireQuestionViewSet, QuestionnaireAnswerViewSet, \
+    QuestionnaireGeneralSurveyViewSet, QuestionnaireEngagementSurveyViewSet, QuestionnaireAnsweredSurveyViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -51,10 +52,8 @@ from dojo.system_settings.urls import urlpatterns as system_settings_urls
 from dojo.notifications.urls import urlpatterns as notifications_urls
 from dojo.object.urls import urlpatterns as object_urls
 from dojo.benchmark.urls import urlpatterns as benchmark_urls
-from dojo.rules.urls import urlpatterns as rule_urls
 from dojo.notes.urls import urlpatterns as notes_urls
 from dojo.note_type.urls import urlpatterns as note_type_urls
-from dojo.google_sheet.urls import urlpatterns as google_sheets_urls
 from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.survey.urls import urlpatterns as survey_urls
 from dojo.components.urls import urlpatterns as component_urls
@@ -75,6 +74,8 @@ handler400 = 'dojo.views.custom_bad_request_view'
 v2_api = DefaultRouter()
 v2_api.register(r'technologies', AppAnalysisViewSet)
 v2_api.register(r'configuration_permissions', ConfigurationPermissionViewSet)
+v2_api.register(r'credentials', CredentialsViewSet)
+v2_api.register(r'credential_mappings', CredentialsMappingViewSet)
 v2_api.register(r'endpoints', EndPointViewSet)
 v2_api.register(r'endpoint_meta_import', EndpointMetaImporterView, basename='endpointmetaimport')
 v2_api.register(r'endpoint_status', EndpointStatusViewSet)
@@ -117,12 +118,18 @@ v2_api.register(r'notes', NotesViewSet)
 v2_api.register(r'note_type', NoteTypeViewSet)
 v2_api.register(r'system_settings', SystemSettingsViewSet)
 v2_api.register(r'regulations', RegulationsViewSet)
+v2_api.register(r'risk_acceptance', RiskAcceptanceViewSet)
 v2_api.register(r'language_types', LanguageTypeViewSet)
 v2_api.register(r'languages', LanguageViewSet)
 v2_api.register(r'import-languages', ImportLanguagesView, basename='importlanguages')
 v2_api.register(r'notifications', NotificationsViewSet, basename='notifications')
 v2_api.register(r'engagement_presets', EngagementPresetsViewset)
 v2_api.register(r'network_locations', NetworkLocationsViewset)
+v2_api.register(r'questionnaire_answers', QuestionnaireAnswerViewSet)
+v2_api.register(r'questionnaire_answered_questionnaires', QuestionnaireAnsweredSurveyViewSet)
+v2_api.register(r'questionnaire_engagement_questionnaires', QuestionnaireEngagementSurveyViewSet)
+v2_api.register(r'questionnaire_general_questionnaires', QuestionnaireGeneralSurveyViewSet)
+v2_api.register(r'questionnaire_questions', QuestionnaireQuestionViewSet)
 ur = []
 ur += dev_env_urls
 ur += endpoint_urls
@@ -150,14 +157,18 @@ ur += system_settings_urls
 ur += notifications_urls
 ur += object_urls
 ur += benchmark_urls
-ur += rule_urls
 ur += notes_urls
 ur += note_type_urls
-ur += google_sheets_urls
 ur += banner_urls
 ur += component_urls
 ur += regulations
 ur += announcement_urls
+
+api_v2_urls = [
+    #  Django Rest Framework API v2
+    re_path(r'^%sapi/v2/' % get_system_setting('url_prefix'), include(v2_api.urls)),
+    re_path(r'^%sapi/v2/user_profile/' % get_system_setting('url_prefix'), UserProfileView.as_view(), name='user_profile'),
+]
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -169,15 +180,14 @@ schema_view = get_schema_view(
     public=True,
     # The API of a OpenSource project should be public accessible
     permission_classes=[permissions.AllowAny],
+    # url pattersns specific to the API
+    patterns=api_v2_urls,
 )
 
 urlpatterns = [
-    #  Django Rest Framework API v2
-    re_path(r'^%sapi/v2/' % get_system_setting('url_prefix'), include(v2_api.urls)),
     # action history
     re_path(r'^%shistory/(?P<cid>\d+)/(?P<oid>\d+)$' % get_system_setting('url_prefix'), views.action_history, name='action_history'),
     re_path(r'^%s' % get_system_setting('url_prefix'), include(ur)),
-    re_path(r'^%sapi/v2/user_profile/' % get_system_setting('url_prefix'), UserProfileView.as_view(), name='user_profile'),
 
     # drf-yasg = OpenAPI2
     re_path(r'^%sapi/v2/doc/' % get_system_setting('url_prefix'), schema_view.with_ui('swagger', cache_timeout=0), name='api_v2_schema'),
@@ -192,6 +202,7 @@ urlpatterns = [
     re_path(r'^%s/(?P<path>.*)$' % settings.MEDIA_URL.strip('/'), views.protected_serve, {'document_root': settings.MEDIA_ROOT})
 ]
 
+urlpatterns += api_v2_urls
 urlpatterns += survey_urls
 
 if hasattr(settings, 'DJANGO_METRICS_ENABLED'):
