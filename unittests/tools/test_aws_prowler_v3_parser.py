@@ -3,7 +3,7 @@ from dojo.tools.aws_prowler_v3.parser import AWSProwlerJsonV3Parser
 from dojo.models import Test
 
 
-class TestAwsProwlerParser(DojoTestCase):
+class TestAwsProwlerV3Parser(DojoTestCase):
     def setup(self, testfile):
         parser = AWSProwlerJsonV3Parser()
         findings = parser.get_findings(testfile, Test())
