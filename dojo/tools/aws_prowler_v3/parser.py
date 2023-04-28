@@ -24,13 +24,13 @@ class AWSProwlerJsonV3Parser(object):
             return self.process_json(file, test)
         else:
             raise ValueError('Unknown file format')
-    
+
     def process_json(self, file, test):
         dupes = dict()
 
         data = json.load(file)
         for deserialized in data:
-            
+
             status = deserialized.get('Status')
             if status.upper() != 'FAIL':
                 continue
@@ -59,14 +59,14 @@ class AWSProwlerJsonV3Parser(object):
             else:
                 component_name = resource_arn
             unique_id_from_tool = deserialized.get('FindingUniqueId')
-            
+
             description = "**Issue:** " + str(result_extended) + \
                 "\n**Description:** " + str(general_description) + \
                 "\n**AWS Account:** " + str(account) + " | **Region:** " + str(region) + \
                 "\n**Compliance:** " + str(compliance) + \
                 "\n**AWS Service:** " + str(aws_service_name) + \
                 "\n**ASFF Compliance Type:** " + str(asff_compliance_type) + \
-                "\n**Security Domain:** " + str(security_domain) 
+                "\n**Security Domain:** " + str(security_domain)
 
             # improving key to get duplicates
             dupe_key = hashlib.sha256(
