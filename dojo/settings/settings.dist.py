@@ -1245,6 +1245,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'NeuVector (compliance)': ['title', 'vuln_id_from_tool', 'description'],
     'Wpscan': ['title', 'description', 'severity'],
     'Codechecker Report native': ['unique_id_from_tool'],
+    'Wazuh Scan': ['title'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1299,6 +1300,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Wpscan': True,
     'Rusty Hog Scan': True,
     'Codechecker Report native': True,
+    'Wazuh': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
