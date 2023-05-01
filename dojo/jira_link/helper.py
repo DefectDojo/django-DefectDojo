@@ -711,6 +711,7 @@ def add_jira_issue(obj, *args, **kwargs):
             logger.warning("The JIRA issue will NOT be created.")
         return False
     logger.debug('Trying to create a new JIRA issue for %s...', to_str_typed(obj))
+    meta = None
     try:
         JIRAError.log_to_tempfile = False
         jira = get_jira_connection(jira_instance)
@@ -833,6 +834,7 @@ def update_jira_issue(obj, *args, **kwargs):
         return False
 
     j_issue = obj.jira_issue
+    meta = None
     try:
         JIRAError.log_to_tempfile = False
         jira = get_jira_connection(jira_instance)
