@@ -116,6 +116,8 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.queries import get_authorized_findings
 from dojo.test.queries import get_authorized_tests
 
+JFORM_PUSH_TO_JIRA_MESSAGE = "jform.push_to_jira: %s"
+
 logger = logging.getLogger(__name__)
 
 
@@ -523,10 +525,14 @@ def view_finding(request, fid):
         reqres = BurpRawRequestResponse.objects.get(finding=finding)
         burp_request = base64.b64decode(reqres.burpRequestBase64)
         burp_response = base64.b64decode(reqres.burpResponseBase64)
-    except:
+
+    except BurpRawRequestResponse.DoesNotExist:
         reqres = None
         burp_request = None
         burp_response = None
+
+    except Exception as e:
+        logger.debug(f"unespect error: {e}")
 
     # add related actions for non-similar and non-duplicate cluster members
     finding.related_actions = calculate_possible_related_actions_for_similar_finding(
@@ -1011,11 +1017,8 @@ def edit_finding(request, fid):
         )
 
         if finding.active:
-            if (
-                form["active"].value() is False
-                or form["false_p"].value()
-                or form["out_of_scope"].value()
-            ) and form["duplicate"].value() is False:
+            if (form["active"].value() is False or form["false_p"].value()
+                    or form["out_of_scope"].value()) and form["duplicate"].value() is False:
                 note_type_activation = Note_Type.objects.filter(is_active=True).count()
                 closing_disabled = 0
                 if note_type_activation:
@@ -1063,7 +1066,7 @@ def edit_finding(request, fid):
                     "jform.jira_issue: %s", jform.cleaned_data.get("jira_issue")
                 )
                 logger.debug(
-                    "jform.push_to_jira: %s", jform.cleaned_data.get("push_to_jira")
+                    JFORM_PUSH_TO_JIRA_MESSAGE, jform.cleaned_data.get("push_to_jira")
                 )
 
             new_finding = form.save(commit=False)
@@ -1137,7 +1140,7 @@ def edit_finding(request, fid):
                 # Push to Jira?
 
                 logger.debug(
-                    "jform.push_to_jira: %s", jform.cleaned_data.get("push_to_jira")
+                    JFORM_PUSH_TO_JIRA_MESSAGE, jform.cleaned_data.get("push_to_jira")
                 )
                 # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
                 # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
@@ -1254,9 +1257,8 @@ def edit_finding(request, fid):
             )
 
         if get_system_setting("enable_github"):
-            if GITHUB_PKey.objects.filter(
-                product=finding.test.engagement.product
-            ).exclude(git_conf_id=None):
+            if GITHUB_PKey.objects.filter(product=finding.test.engagement.product
+                                          ).exclude(git_conf_id=None):
                 gform = GITHUBFindingForm(enabled=github_enabled, prefix="githubform")
 
     product_tab = Product_Tab(
@@ -1786,7 +1788,7 @@ def promote_to_finding(request, fid):
                     "jform.jira_issue: %s", jform.cleaned_data.get("jira_issue")
                 )
                 logger.debug(
-                    "jform.push_to_jira: %s", jform.cleaned_data.get("push_to_jira")
+                    JFORM_PUSH_TO_JIRA_MESSAGE, jform.cleaned_data.get("push_to_jira")
                 )
 
             new_finding = form.save(commit=False)
@@ -1846,8 +1848,7 @@ def promote_to_finding(request, fid):
                     logger.debug("finding has no jira issue yet")
                     if new_jira_issue_key:
                         logger.debug(
-                            "finding has no jira issue yet, but jira issue specified in request. trying to link."
-                        )
+                            "finding has no jira issue yet, but jira issue specified in request. trying to link.")
                         jira_helper.finding_link_jira(
                             request, new_finding, new_jira_issue_key
                         )
@@ -2206,7 +2207,7 @@ def download_finding_pic(token):
             access_token.delete()
         else:
             raise PermissionDenied
-    except:
+    except Exception:
         raise PermissionDenied
 
     with open(access_token.file.file.file.name, "rb") as file:
