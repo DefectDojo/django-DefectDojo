@@ -413,9 +413,14 @@ def jira_transition(jira, issue, transition_id):
             jira.transition_issue(issue, transition_id)
             return True
     except JIRAError as jira_error:
-        logger.debug('error transisioning jira issue ' + issue.key + ' ' + str(jira_error))
+        logger.debug('error transitioning jira issue ' + issue.key + ' ' + str(jira_error))
         logger.exception(jira_error)
-        log_jira_generic_alert('error transitioning jira issue ' + issue.key, str(jira_error))
+        alert_text = "JiraError HTTP %s" % jira_error.status_code
+        if jira_error.url:
+            alert_text += " url: %s" % jira_error.url
+        if jira_error.text:
+            alert_text += "\ntext: %s" % jira_error.text
+        log_jira_generic_alert('error transitioning jira issue ' + issue.key, alert_text)
         return None
 
 
