@@ -1896,7 +1896,7 @@ def sla_compute_and_notify(*args, **kwargs):
                     logger.info("Security SLA breach warning. Finding ID {} breaching today ({})".format(finding.id, sla_age))
                     _notify(finding, "Finding {} - SLA is breaching today".format(finding.id))
 
-            logger.info("SLA run results: Pre-breach: {}, at-breach: {}, post-breach: {} post-breach-no-notify: {}, with-jira: {}, TOTAL: {}".format(
+            logger.info("SLA run results: Pre-breach: {}, at-breach: {}, post-breach: {}, post-breach-no-notify: {}, with-jira: {}, TOTAL: {}".format(
                 pre_breach_count,
                 at_breach_count,
                 post_breach_count,
