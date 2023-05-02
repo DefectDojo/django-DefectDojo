@@ -12,6 +12,10 @@ import unittest
 import unittest.mock
 from unittest.mock import patch
 from unittest.mock import MagicMock
+from unittest.mock import Mock
+
+from django.urls import reverse
+
 
 
 
@@ -20,8 +24,15 @@ django.setup()
 
 
 class TestReportsViews(unittest.TestCase):
+    @classmethod
+   
+
     def setUp(self):
         self.factory = RequestFactory()
+        self.request = self.factory.get(reverse('report_builder'))
+        self.user = User.objects.get(username='testuser') # retrieve the existing user
+        self.request.user = self.user
+
 
     def test_down_view(self):
         request = self.factory.get('/dojo/reports/views/down/')
@@ -45,3 +56,11 @@ class TestReportsViews(unittest.TestCase):
         url = report_url_resolver(request)
 
         self.assertEqual(url, 'https://192.0.2.1:8000')
+
+    def test_report_builder(self):
+        self.request.session = {}
+        self.request.user = self.user
+        self.request.GET = QueryDict('')
+        response = report_builder(self.request)
+        self.assertEqual(response.status_code, 200)
+        
