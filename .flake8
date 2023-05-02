@@ -1,5 +1,8 @@
 [flake8]
 # Documentation for flake8 http://flake8.pycqa.org/en/3.1.1/user/index.html
+
+# we should not ignore these mistakes !!!!!!!!
+
 ignore =
     # Suppress - line too long (> 79 characters)
     E501
@@ -41,3 +44,4 @@ exclude =
     # This contains of branch that we don't want to check
     # dev
 max-complexity = 10
+max-line-length = 120
