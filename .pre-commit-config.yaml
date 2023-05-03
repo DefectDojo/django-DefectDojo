@@ -1,0 +1,40 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-json
+      - id: name-tests-test
+      - id: no-commit-to-branch
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+        args:
+          - --line-length=79
+  - repo: https://github.com/pre-commit/mirrors-autopep8
+    rev: v1.5
+    hooks:
+      - id: autopep8
+        args:
+          - --in-place
+          - --aggressive
+          - --max-line-length=79
+          - --verbose
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+  - repo: https://github.com/PyCQA/autoflake
+    rev: v2.0.2
+    hooks:
+      - id: autoflake
+  - repo: https://github.com/PyCQA/flake8
+    rev: 6.0.0
+    hooks:
+      - id: flake8
+        args:
+          - --ignore=E203,W503,C901,E731,W605,E402
+          - --max-line-length=120
