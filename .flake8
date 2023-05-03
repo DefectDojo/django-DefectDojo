@@ -44,4 +44,3 @@ exclude =
     # This contains of branch that we don't want to check
     # dev
 max-complexity = 10
-max-line-length = 120
