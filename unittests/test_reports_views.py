@@ -17,9 +17,6 @@ from unittest.mock import Mock
 from django.urls import reverse
 
 
-
-
-
 django.setup()
 
 
@@ -57,10 +54,24 @@ class TestReportsViews(unittest.TestCase):
 
         self.assertEqual(url, 'https://192.0.2.1:8000')
 
+    def test_except_report_url_resolver(self):
+        request = MagicMock()
+        request.META = {
+            'HTTP_HOST': 'example.com:8000',
+            'SERVER_PORT': '8000',
+        }
+        request.scheme = 'http'
+
+        url = report_url_resolver(request)
+
+        self.assertEqual(url, 'http://example.com:8000')
+
+
+    
+
     def test_report_builder(self):
         self.request.session = {}
         self.request.user = self.user
         self.request.GET = QueryDict('')
         response = report_builder(self.request)
         self.assertEqual(response.status_code, 200)
-        
