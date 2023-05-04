@@ -21,7 +21,7 @@ repos:
         args:
           - --in-place
           - --aggressive
-          - --max-line-length=79
+          - --max-line-length=120
           - --verbose
   - repo: https://github.com/PyCQA/bandit
     rev: 1.7.5
