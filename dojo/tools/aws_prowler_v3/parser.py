@@ -42,7 +42,7 @@ class AWSProwlerJsonV3Parser(object):
             result_extended = deserialized.get('StatusExtended')
             general_description = deserialized.get('Description')
             asff_compliance_type = " / ".join(deserialized.get('CheckType'))
-            severity = deserialized.get('Severity', '').capitalize()
+            severity = deserialized.get('Severity', 'Info').capitalize()
             aws_service_name = deserialized.get('ServiceName')
             impact = deserialized.get('Risk')
             mitigation = deserialized.get('Remediation', {}).get('Recommendation', {}).get("Text")
