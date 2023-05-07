@@ -36,7 +36,6 @@ class AcunetixParser(object):
                 report_date = dateutil.parser.parse(scan.findtext("StartTime")).date()
 
             for item in scan.findall("ReportItems/ReportItem"):
-
                 finding = Finding(
                     test=test,
                     title=item.findtext("Name"),
@@ -90,25 +89,31 @@ class AcunetixParser(object):
                 # manage the endpoint
                 url = hyperlink.parse(start_url)
                 endpoint = Endpoint(
-                        host=url.host,
-                        port=url.port,
-                        path=item.findtext("Affects"),
+                    host=url.host,
+                    port=url.port,
+                    path=item.findtext("Affects"),
                 )
                 if url.scheme is not None and "" != url.scheme:
                     endpoint.protocol = url.scheme
                 finding.unsaved_endpoints = [endpoint]
 
-                dupe_key = hashlib.sha256("|".join([
-                    finding.title,
-                    str(finding.impact),
-                    str(finding.mitigation),
-                ]).encode("utf-8")).hexdigest()
+                dupe_key = hashlib.sha256(
+                    "|".join(
+                        [
+                            finding.title,
+                            str(finding.impact),
+                            str(finding.mitigation),
+                        ]
+                    ).encode("utf-8")
+                ).hexdigest()
 
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
                     # add details for the duplicate finding
                     if item.findtext("Details") and len(item.findtext("Details").strip()) > 0:
-                        find.description += "\n-----\n\n**Details:**\n{}".format(html2text.html2text(item.findtext("Details")))
+                        find.description += "\n-----\n\n**Details:**\n{}".format(
+                            html2text.html2text(item.findtext("Details"))
+                        )
                     find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                     find.unsaved_req_resp.extend(finding.unsaved_req_resp)
                     find.nb_occurences += finding.nb_occurences
