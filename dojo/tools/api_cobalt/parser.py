@@ -20,8 +20,10 @@ class ApiCobaltParser(object):
         return SCAN_COBALTIO_API
 
     def get_description_for_scan_types(self, scan_type):
-        return "Cobalt.io findings can be directly imported using the Cobalt.io API. An API Scan Configuration has " \
-               "to be setup in the Product."
+        return (
+            "Cobalt.io findings can be directly imported using the Cobalt.io API. An API Scan Configuration has "
+            "to be setup in the Product."
+        )
 
     def requires_file(self, scan_type):
         return False
@@ -30,8 +32,10 @@ class ApiCobaltParser(object):
         return "Cobalt.io"
 
     def api_scan_configuration_hint(self):
-        return "the field <b>Service key 1</b> has to be set with the Cobalt.io asset id. <b>Service key 2</b> will " \
-               "be populated with the asset name while saving the configuration."
+        return (
+            "the field <b>Service key 1</b> has to be set with the Cobalt.io asset id. <b>Service key 2</b> will "
+            "be populated with the asset name while saving the configuration."
+        )
 
     def get_findings(self, file, test):
         if file is None:

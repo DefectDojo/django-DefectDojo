@@ -5,7 +5,7 @@ from dojo.models import Endpoint, Finding
 from .importer import EdgescanImporter
 
 ES_SEVERITIES = {1: "Info", 2: "Low", 3: "Medium", 4: "High", 5: "Critical"}
-SCANTYPE_EDGESCAN = 'Edgescan Scan'
+SCANTYPE_EDGESCAN = "Edgescan Scan"
 
 
 class ApiEdgescanParser(object):
@@ -29,7 +29,7 @@ class ApiEdgescanParser(object):
         return "Edgescan"
 
     def api_scan_configuration_hint(self):
-        return 'the field <b>Service key 1</b> has to be set with the Edgescan asset id.'
+        return "the field <b>Service key 1</b> has to be set with the Edgescan asset id."
 
     def get_findings(self, file, test):
         if file:
@@ -69,8 +69,10 @@ class ApiEdgescanParser(object):
             finding.tags = vulnerability["asset_tags"].split(",")
         finding.unique_id_from_tool = vulnerability["id"]
 
-        finding.unsaved_endpoints = [Endpoint.from_uri(vulnerability["location"])
-                                    if '://' in vulnerability["location"] else
-                                    Endpoint.from_uri("//" + vulnerability["location"])]
+        finding.unsaved_endpoints = [
+            Endpoint.from_uri(vulnerability["location"])
+            if "://" in vulnerability["location"]
+            else Endpoint.from_uri("//" + vulnerability["location"])
+        ]
 
         return finding
