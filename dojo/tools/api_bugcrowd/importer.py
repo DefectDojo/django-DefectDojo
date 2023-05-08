@@ -14,9 +14,7 @@ class BugcrowdApiImporter(object):
     def get_findings(self, test):
         client, config = self.prepare_client(test)
         logger.debug(
-            "Fetching submissions program {} and target {}".format(
-                str(config.service_key_1), str(config.service_key_2)
-            )
+            "Fetching submissions program {} and target {}".format(str(config.service_key_1), str(config.service_key_2))
         )
 
         submissions_paged = client.get_findings(
@@ -39,9 +37,7 @@ class BugcrowdApiImporter(object):
             config = test.api_scan_configuration
             # Double check of config
             if config.product != product:
-                raise ValidationError(
-                    "API Scan Configuration for Bugcrowd API and Product do not match."
-                )
+                raise ValidationError("API Scan Configuration for Bugcrowd API and Product do not match.")
         else:
             configs = Product_API_Scan_Configuration.objects.filter(
                 product=product, tool_configuration__tool_type__name="Bugcrowd API"
@@ -50,8 +46,8 @@ class BugcrowdApiImporter(object):
                 config = configs.first()
             elif configs.count() > 1:
                 raise ValidationError(
-                    "More than one Product API Scan Configuration has been configured, but none of them has been chosen.\
-                        Please specify at Test which one should be used."
+                    "More than one Product API Scan Configuration has been configured, but none of them has been "
+                    "chosen. Please specify at Test which one should be used."
                 )
             else:
                 raise ValidationError(

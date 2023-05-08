@@ -28,7 +28,10 @@ class ApiBugcrowdParser(object):
         return SCAN_BUGCROWD_API
 
     def get_description_for_scan_types(self, scan_type):
-        return "Bugcrowd submissions can be directly imported using the Bugcrowd API. An API Scan Configuration has to be setup in the Product."
+        return (
+            "Bugcrowd submissions can be directly imported using the Bugcrowd API. An API Scan Configuration has "
+            "to be setup in the Product."
+        )
 
     def requires_file(self, scan_type):
         return False
@@ -37,7 +40,11 @@ class ApiBugcrowdParser(object):
         return "Bugcrowd API"
 
     def api_scan_configuration_hint(self):
-        return 'the field <b>Service key 1</b> has to be set with the Bugcrowd program code. <b>Service key 2</b> can be set with the target in the Bugcrowd program (will be url encoded for the api call), if not supplied, will fetch all submissions in the program'
+        return (
+            "the field <b>Service key 1</b> has to be set with the Bugcrowd program code. <b>Service key 2</b> "
+            "can be set with the target in the Bugcrowd program (will be url encoded for the api call), "
+            "if not supplied, will fetch all submissions in the program"
+        )
 
     def get_findings(self, file, test):
         api_scan_config = None
@@ -52,9 +59,7 @@ class ApiBugcrowdParser(object):
                 continue
             if test.api_scan_configuration:
                 config = test.api_scan_configuration
-                links = "https://tracker.bugcrowd.com/{}{}".format(
-                    str(config.service_key_1), entry["links"]["self"]
-                )
+                links = "https://tracker.bugcrowd.com/{}{}".format(str(config.service_key_1), entry["links"]["self"])
             if api_scan_config is not None:
                 links = "https://tracker.bugcrowd.com/{}{}".format(
                     str(api_scan_config.service_key_1), entry["links"]["self"]
@@ -65,7 +70,7 @@ class ApiBugcrowdParser(object):
                     links = entry["links"]["self"]
 
             bugcrowd_state = entry["attributes"]["state"]
-            bugcrowd_duplicate = entry["attributes"]["duplicate"]
+            entry["attributes"]["duplicate"]
             bugcrowd_severity = entry["attributes"]["severity"]
 
             title = entry["attributes"]["title"]
@@ -82,21 +87,13 @@ class ApiBugcrowdParser(object):
             if entry["attributes"]["bug_url"]:
                 try:
                     if "://" in entry["attributes"]["bug_url"]:  # is the host full uri?
-                        bug_endpoint = Endpoint.from_uri(
-                            entry["attributes"]["bug_url"].strip()
-                        )
+                        bug_endpoint = Endpoint.from_uri(entry["attributes"]["bug_url"].strip())
                         # can raise exception if the host is not valid URL
                     else:
-                        bug_endpoint = Endpoint.from_uri(
-                            "//" + entry["attributes"]["bug_url"].strip()
-                        )
+                        bug_endpoint = Endpoint.from_uri("//" + entry["attributes"]["bug_url"].strip())
                         # can raise exception if there is no way to parse the host
                 except ValidationError:  # We don't want to fail the whole import just for 1 error in the bug_url
-                    logger.error(
-                        "Error parsing bugcrowd bug_url : {}".format(
-                            entry["attributes"]["bug_url"].strip()
-                        )
-                    )
+                    logger.error("Error parsing bugcrowd bug_url : {}".format(entry["attributes"]["bug_url"].strip()))
                 bug_url = entry["attributes"]["bug_url"]
 
             description = "\n".join(
@@ -145,11 +142,7 @@ class ApiBugcrowdParser(object):
                             )
                         )
                 except ValidationError:
-                    logger.error(
-                        "Broken Bugcrowd endpoint {} was skipped.".format(
-                            bug_endpoint.host
-                        )
-                    )
+                    logger.error("Broken Bugcrowd endpoint {} was skipped.".format(bug_endpoint.host))
 
             findings.append(finding)
 
@@ -184,11 +177,7 @@ class ApiBugcrowdParser(object):
         if entry["attributes"]["state"] in allowed_states:
             return True
         else:
-            raise ValueError(
-                "{} not in allowed bugcrowd submission states".format(
-                    entry["attributes"]["state"]
-                )
-            )
+            raise ValueError("{} not in allowed bugcrowd submission states".format(entry["attributes"]["state"]))
 
     def convert_log_timestamp(self, timestamp):
         """Convert a log entry's timestamp to a DefectDojo date"""
@@ -236,6 +225,4 @@ class ApiBugcrowdParser(object):
         return bugcrowd_state == "not_applicable"
 
     def is_verified(self, bugcrowd_state):
-        return bugcrowd_state == "triaged" or (
-            bugcrowd_state != "new" and bugcrowd_state != "triaging"
-        )
+        return bugcrowd_state == "triaged" or (bugcrowd_state != "new" and bugcrowd_state != "triaging")
