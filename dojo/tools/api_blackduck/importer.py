@@ -1,4 +1,3 @@
-
 from django.core.exceptions import ValidationError
 from dojo.models import Product_API_Scan_Configuration
 
@@ -9,6 +8,7 @@ class BlackduckApiImporter(object):
     """
     Import from BlackDuck API
     """
+
     config_id = "BlackDuck API"
 
     def get_findings(self, test):
@@ -25,16 +25,20 @@ class BlackduckApiImporter(object):
             if config.product != product:
                 raise ValidationError(f'API Scan Configuration for "{self.config_id}" and Product do not match.')
         else:
-            configs = Product_API_Scan_Configuration.objects.filter(product=product, tool_configuration__tool_type__name=self.config_id)
+            configs = Product_API_Scan_Configuration.objects.filter(
+                product=product, tool_configuration__tool_type__name=self.config_id
+            )
             if configs.count() == 1:
                 config = configs.first()
             elif configs.count() > 1:
                 raise ValidationError(
-                    'More than one Product API Scan Configuration has been configured, but none of them has been chosen. Please specify at Test which one should be used.'
+                    "More than one Product API Scan Configuration has been configured, but none of them has been "
+                    "chosen. Please specify at Test which one should be used."
                 )
             else:
                 raise ValidationError(
-                    f'There are no API Scan Configurations for this Product. Please add at least one API Scan Configuration for "{self.config_id}" to this Product.'
+                    f"There are no API Scan Configurations for this Product. Please add at least one API Scan "
+                    f'Configuration for "{self.config_id}" to this Product.'
                 )
 
         tool_config = config.tool_configuration
