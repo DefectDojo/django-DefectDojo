@@ -15,7 +15,7 @@ from dojo import __version__ as dd_version
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
-from dojo.models import Alerts, Dojo_User, Notifications, System_Settings, UserContactInfo, Webhook_Endpoints, get_current_datetime
+from dojo.models import Alerts, Dojo_User, Notifications, System_Settings, UserContactInfo, Notification_Webhooks, get_current_datetime
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
 
 logger = logging.getLogger(__name__)
@@ -355,8 +355,8 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
 @app.task
 def send_webhooks_notification(event, user=None, *args, **kwargs):
     # TODO check sending notifications (in general) to inactive users
-    for endpoint in Webhook_Endpoints.objects.filter(owner=user):
-        if endpoint.status.startswith(Webhook_Endpoints._STATUS_ACTIVE):
+    for endpoint in Notification_Webhooks.objects.filter(owner=user):
+        if endpoint.status.startswith(Notification_Webhooks._STATUS_ACTIVE):
             try:
                 if endpoint.url is not None:
                     logger.debug(f"sending webhook message to endpoint {endpoint.name}")
@@ -377,7 +377,7 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
 
                         # There is no reason to keep endpoint active if it is returning 4xx errors
                         if 400 <= res.status_code < 500:
-                            endpoint.status = Webhook_Endpoints.STATUS_INACTIVE_400
+                            endpoint.status = Notification_Webhooks.STATUS_INACTIVE_400
                             endpoint.first_error = now
 
                         # 5xx is also not OK
@@ -386,7 +386,7 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
 
                             # First detection
                             if endpoint.last_error is None or (now - endpoint.last_error).minutes > 60:
-                                endpoint.status = Webhook_Endpoints.STATUS_ACTIVE_500
+                                endpoint.status = Notification_Webhooks.STATUS_ACTIVE_500
                                 endpoint.first_error = now  # Yes, if last fail happen before more then hour, we are considering it as a new error
 
                             # Repleated detection
@@ -394,17 +394,17 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
 
                                 # Error is repeating over more then hour
                                 if (now - endpoint.first_error).minutes > 60:
-                                    endpoint.status = Webhook_Endpoints.STATUS_INACTIVE_500
+                                    endpoint.status = Notification_Webhooks.STATUS_INACTIVE_500
 
                                 # This situation shouldn't happen - only if somebody was cleaning status and didn't clean first/last_error
                                 # But we should handle it
                                 else:
-                                    endpoint.status = Webhook_Endpoints.STATUS_ACTIVE_500
+                                    endpoint.status = Notification_Webhooks.STATUS_ACTIVE_500
                                     endpoint.first_error = now
 
                         # Well, we really accepts only 200 and 201
                         else:
-                            endpoint.status = Webhook_Endpoints.STATUS_INACTIVE_OTHERS
+                            endpoint.status = Notification_Webhooks.STATUS_INACTIVE_OTHERS
                             endpoint.first_error = now
 
                         endpoint.last_error = now
@@ -425,7 +425,7 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
         if user:
             logger.info(f"URLs for Webhooks not configured for user '{user}': skipping user notification")
         else:
-            logger.info(f"URLs for Webhooks not configured: skipping system notification")
+            logger.info("URLs for Webhooks not configured: skipping system notification")
 
 
 def send_alert_notification(event, user=None, *args, **kwargs):

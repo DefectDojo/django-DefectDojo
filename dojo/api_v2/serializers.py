@@ -108,7 +108,7 @@ from dojo.models import (
     UserContactInfo,
     Vulnerability_Id,
     Vulnerability_Id_Template,
-    Webhook_Endpoints,
+    Notification_Webhooks,
     get_current_date,
 )
 from dojo.risk_acceptance.helper import add_findings_to_risk_acceptance, remove_finding_from_risk_acceptance
@@ -3178,7 +3178,7 @@ class AnnouncementSerializer(serializers.ModelSerializer):
 
 class WebhookEndpointsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Webhook_Endpoints
+        model = Notification_Webhooks
         fields = "__all__"
 
     def __init__(self, *args, **kwargs):
