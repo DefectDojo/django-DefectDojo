@@ -78,7 +78,7 @@ from dojo.models import (
     General_Survey,
     Check_List,
     Announcement,
-    Webhook_Endpoints,
+    Notification_Webhooks,
 )
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import (
@@ -3333,13 +3333,19 @@ class AnnouncementViewSet(
     permission_classes = (permissions.UserHasConfigurationPermissionStaff,)
 
 
-class WebhookEndpointsViewset(
+class NotificationWebhooksViewset(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
     DojoModelViewSet
 ):
-    serializer_class = serializers.WebhookEndpointsSerializer
-    queryset = Webhook_Endpoints.objects.all()
+    serializer_class = serializers.NotificationWebhooksSerializer
+    queryset = Notification_Webhooks.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('__all__')
     permission_classes = (IsAuthenticated, DjangoModelPermissions)  # TODO
+    swagger_schema = prefetch.get_prefetch_schema(
+        [
+            "notification_webhooks_list", 
+            "notification_webhooks_read",
+        ], serializers.NotificationWebhooksSerializer,
+    ).to_schema()
