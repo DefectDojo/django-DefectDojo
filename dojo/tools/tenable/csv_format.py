@@ -30,7 +30,8 @@ class TenableCSVParser(object):
     def _format_cpe(self, val):
         if val is None or val == "":
             return None
-        return cpe_match if (cpe_match := re.findall(r"cpe:/[^\n\ ]+", val)) else None
+        cpe_match = re.findall(r"cpe:/[^\n\ ]+", val)
+        return cpe_match if cpe_match else None
 
     def get_findings(self, filename: str, test: Test):
         # Read the CSV
