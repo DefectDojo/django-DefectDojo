@@ -156,7 +156,7 @@ def benchmark_view(request, pid, type, cat=None):
 
     benchmark_summary_form = Benchmark_Product_SummaryForm(instance=benchmark_product_summary)
 
-    noted_benchmarks = benchmarks.filter(notes__isnull=False).order_by('id').distinct('id')
+    noted_benchmarks = benchmarks.filter(notes__isnull=False).order_by('id').distinct()
     for bench in benchmarks:
         if bench.id in [b.id for b in noted_benchmarks]:
             bench.noted = True
