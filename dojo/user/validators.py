@@ -6,9 +6,8 @@ from dojo.models import System_Settings
 
 
 class MinLengthValidator(object):
-    settings = System_Settings.objects.get()
-
     def validate(self, password, user=None):
+        self.settings = System_Settings.objects.get()
         if len(password) < self.settings.minimum_password_length:
             raise ValidationError(
                 gettext('Password must be at least {minimum_length} characters long.'.format(
@@ -23,9 +22,8 @@ class MinLengthValidator(object):
 
 
 class MaxLengthValidator(object):
-    settings = System_Settings.objects.get()
-
     def validate(self, password, user=None):
+        self.settings = System_Settings.objects.get()
         if len(password) > self.settings.maximum_password_length:
             raise ValidationError(
                 gettext('Password must be less than {maximum_length} characters long.'.format(
@@ -40,9 +38,8 @@ class MaxLengthValidator(object):
 
 
 class NumberValidator(object):
-    settings = System_Settings.objects.get()
-
     def validate(self, password, user=None):
+        self.settings = System_Settings.objects.get()
         if not re.findall('\d', password) and self.settings.number_character_required:  # noqa W605
             raise ValidationError(
                 gettext('Password must contain at least 1 digit, 0-9.'),
@@ -55,9 +52,8 @@ class NumberValidator(object):
 
 
 class UppercaseValidator(object):
-    settings = System_Settings.objects.get()
-
     def validate(self, password, user=None):
+        self.settings = System_Settings.objects.get()
         if not re.findall('[A-Z]', password) and self.settings.uppercase_character_required:
             raise ValidationError(
                 gettext('Password must contain at least 1 uppercase letter, A-Z.'),
@@ -70,9 +66,8 @@ class UppercaseValidator(object):
 
 
 class LowercaseValidator(object):
-    settings = System_Settings.objects.get()
-
     def validate(self, password, user=None):
+        self.settings = System_Settings.objects.get()
         if not re.findall('[a-z]', password) and self.settings.lowercase_character_required:
             raise ValidationError(
                 gettext('Password must contain at least 1 lowercase letter, a-z.'),
@@ -85,9 +80,8 @@ class LowercaseValidator(object):
 
 
 class SymbolValidator(object):
-    settings = System_Settings.objects.get()
-
     def validate(self, password, user=None):
+        self.settings = System_Settings.objects.get()
         contains_special_character = re.findall('[()[\]{}|\\`~!@#$%^&*_\-+=;:\'\",<>./?]', password)  # noqa W605
         if not contains_special_character and self.settings.special_character_required:
             raise ValidationError(
