@@ -20,11 +20,13 @@ class CoverityApiParser(object):
         tree = json.load(file)
 
         if "viewContentsV1" not in tree:
-            raise ValueError("Report file is not a well-formed Coverity REST view report", file.name)
+            raise ValueError(
+                "Report file is not a well-formed Coverity REST view report",
+                file.name,
+            )
 
         items = list()
         for issue in tree["viewContentsV1"]["rows"]:
-
             # get only security findings
             if "Security" != issue.get("displayIssueKind"):
                 continue
@@ -41,16 +43,20 @@ class CoverityApiParser(object):
             finding = Finding()
             finding.test = test
             finding.title = issue["displayType"]
-            finding.severity = self.convert_displayImpact(issue.get("displayImpact"))
+            finding.severity = self.convert_displayImpact(
+                issue.get("displayImpact")
+            )
             finding.description = description_formated
             finding.static_finding = True
             finding.dynamic_finding = False
             finding.unique_id_from_tool = issue.get("cid")
 
             if "firstDetected" in issue:
-                finding.date = datetime.strptime(issue["firstDetected"], "%m/%d/%y").date()
+                finding.date = datetime.strptime(
+                    issue["firstDetected"], "%m/%d/%y"
+                ).date()
 
-            if "cwe" in issue and type(issue["cwe"]) == int:
+            if "cwe" in issue and isinstance(issue["cwe"], int):
                 finding.cwe = issue["cwe"]
 
             if "displayFile" in issue:
