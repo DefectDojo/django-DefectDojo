@@ -269,8 +269,6 @@ def findings(
         if len(endpoints) == 1:
             endpoint = endpoints[0]
             endpoint = get_object_or_404(Endpoint, id=endpoint)
-            # variable 'pid' no used
-            # pid = endpoint.product.id
             filter_name = "Vulnerable Endpoints"
             custom_breadcrumb = OrderedDict(
                 [
@@ -623,8 +621,7 @@ def close_finding(request, fid):
         missing_note_types = get_missing_mandatory_notetypes(finding)
     else:
         missing_note_types = note_type_activation
-    # Unused assignments
-    # form = CloseFindingForm(missing_note_types=missing_note_types)
+    form = CloseFindingForm(missing_note_types=missing_note_types)
     if request.method == "POST":
         form = CloseFindingForm(request.POST, missing_note_types=missing_note_types)
 
@@ -694,9 +691,6 @@ def close_finding(request, fid):
                     reverse("close_finding", args=(finding.id,))
                 )
 
-    else:
-        form = CloseFindingForm(missing_note_types=missing_note_types)
-
     product_tab = Product_Tab(
         finding.test.engagement.product, title="Close", tab="findings"
     )
@@ -722,7 +716,6 @@ def defect_finding_review(request, fid):
     # we can do this with a Note
     if request.method == "POST":
         form = DefectFindingForm(request.POST)
-
         if form.is_valid():
             now = timezone.now()
             new_note = form.save(commit=False)
@@ -852,10 +845,6 @@ def reopen_finding(request, fid):
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def apply_template_cwe(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-
-    # Unused assignments
-    # form = FindingFormID(instance=finding)
-
     if request.method == "POST":
         form = FindingFormID(request.POST, instance=finding)
         if form.is_valid():
@@ -982,7 +971,6 @@ def copy_finding(request, fid):
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-    # delete comment
     old_status = finding.status()
     old_finding = copy.copy(finding)
     burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
@@ -997,8 +985,6 @@ def edit_finding(request, fid):
         can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user),
         initial={"vulnerability_ids": "\n".join(finding.vulnerability_ids)},
     )
-    # Unused local variable
-    # form_error = False
     jform = None
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
     gform = None
@@ -1244,8 +1230,6 @@ def edit_finding(request, fid):
             )
             add_field_errors_to_response(jform)
             add_field_errors_to_response(form)
-            # Unsed local variable
-            # form_error = True
     else:
         if use_jira:
             jform = JIRAFindingForm(
@@ -1442,13 +1426,6 @@ def clear_finding_review(request, fid):
     # in order to clear a review for a finding, we need to capture why and how it was reviewed
     # we can do this with a Note
 
-    "Logic line 1440 not implementdd"
-    # if user == finding.review_requested_by or user in finding.reviewers.all():
-    #     pass
-    # else:
-    #     return HttpResponseForbidden()
-
-    # simple alternative
     if user != finding.review_requested_by or user not in finding.reviewers.all():
         return HttpResponseForbidden()
 
@@ -1544,8 +1521,6 @@ def mktemplate(request, fid):
 def find_template_to_apply(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     test = get_object_or_404(Test, id=finding.test.id)
-    # this local variable "templates_by_CVE"
-    # to match the regular expression ^[_a-z][a-z0-9_]*$
     templates_by_cve = (
         Finding_Template.objects.annotate(
             cve_len=Length("cve"), order=models.Value(1, models.IntegerField())
@@ -1662,8 +1637,6 @@ def apply_template_to_finding(request, fid, tid):
                 "There appears to be errors on the form, please correct below.",
                 extra_tags="alert-danger",
             )
-            # code not used
-            # form_error = True
             product_tab = Product_Tab(
                 finding.test.engagement.product,
                 title="Apply Finding Template",
@@ -1688,8 +1661,6 @@ def apply_template_to_finding(request, fid, tid):
 @user_is_authorized(Test, Permissions.Finding_Add, "tid")
 def add_stub_finding(request, tid):
     test = get_object_or_404(Test, id=tid)
-    # variable form no used
-    # form = StubFindingForm()
     if request.method == "POST":
         form = StubFindingForm(request.POST)
         if form.is_valid():
@@ -1731,8 +1702,6 @@ def add_stub_finding(request, tid):
 @user_is_authorized(Stub_Finding, Permissions.Finding_Delete, "fid")
 def delete_stub_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
-    # variable "form" not used
-    # form = DeleteStubFindingForm(instance=finding)
 
     if request.method == "POST":
         form = DeleteStubFindingForm(request.POST, instance=finding)
@@ -1762,8 +1731,6 @@ def promote_to_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
     test = finding.test
     form_error = False
-    # variable jira_avaialbe no used
-    # jira_available = False
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
     jform = None
     use_jira = jira_helper.get_jira_project(finding) is not None
@@ -1810,8 +1777,6 @@ def promote_to_finding(request, fid):
             finding_helper.add_endpoints(new_finding, form)
 
             push_to_jira = False
-            # vaiable jira no used
-            # jira_message = None
             if jform and jform.is_valid():
                 # Push to Jira?
                 logger.debug("jira form valid")
@@ -1834,16 +1799,12 @@ def promote_to_finding(request, fid):
 
                     if not new_jira_issue_key:
                         jira_helper.finding_unlink_jira(request, new_finding)
-                        # vaiable "jira_message" no used
-                        # jira_message = "Link to JIRA issue removed successfully."
 
                     elif new_jira_issue_key != new_finding.jira_issue.jira_key:
                         jira_helper.finding_unlink_jira(request, new_finding)
                         jira_helper.finding_link_jira(
                             request, new_finding, new_jira_issue_key
                         )
-                        # vaiable "jira_message" no used
-                        # jira_message = "Changed JIRA link successfully."
                 else:
                     logger.debug("finding has no jira issue yet")
                     if new_jira_issue_key:
@@ -1852,17 +1813,13 @@ def promote_to_finding(request, fid):
                         jira_helper.finding_link_jira(
                             request, new_finding, new_jira_issue_key
                         )
-                        # vaiable "jira_message" no used
-                        # jira_message = "Linked a JIRA issue successfully."
 
             finding_helper.save_vulnerability_ids(
                 new_finding, form.cleaned_data["vulnerability_ids"].split()
             )
 
-            # Save it and push it to JIRA
             new_finding.save(push_to_jira=push_to_jira)
 
-            # Delete potential finding
             finding.delete()
             if "githubform" in request.POST:
                 gform = GITHUBFindingForm(
@@ -2132,9 +2089,6 @@ def edit_template(request, tid):
 @user_has_global_permission(Permissions.Finding_Delete)
 def delete_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
-    # Remove this assignment to local variable 'form'; the value is never used
-    # form = DeleteFindingTemplateForm(instance=template)
-
     if request.method == "POST":
         form = DeleteFindingTemplateForm(request.POST, instance=template)
         if form.is_valid():
@@ -2157,8 +2111,6 @@ def delete_template(request, tid):
         return HttpResponseForbidden()
 
 
-# Remove the unused function parameter "request"
-# TODO : REVISAR
 def download_finding_pic(token):
     class Thumbnail(ImageSpec):
         processors = [ResizeToFill(100, 100)]
@@ -2265,15 +2217,6 @@ def merge_finding_product(request, pid):
                         if finding.dynamic_finding:
                             dynamic = finding.dynamic_finding
 
-                        # "line" is not accessedPylance
-                        # if finding.line:
-                        # line = finding.line
-                        # ------------------
-                        # "file_path is no accesedpylance"
-                        # if finding.file_path:
-                        #     file_path = finding.file_path
-
-                        # If checked merge the descriptions
                         if form.cleaned_data["append_description"]:
                             finding_descriptions = "{}\n{}".format(
                                 finding_descriptions, finding.description
@@ -2337,12 +2280,6 @@ def merge_finding_product(request, pid):
 
                     if finding_to_merge_into.dynamic_finding:
                         dynamic = finding.dynamic_finding
-
-                    # code no used
-                    # if finding_to_merge_into.line is None:
-                    #     line = finding_to_merge_into.line
-                    # if finding_to_merge_into.file_path is None:
-                    #     file_path = finding_to_merge_into.file_path
 
                     if finding_references != "":
                         finding_to_merge_into.references = "{}\n{}".format(
@@ -2464,9 +2401,6 @@ def finding_bulk_update_all(request, pid=None):
 
                 for find in finds:
                     find.delete()
-
-                # for prod in prods:
-                # calculate_grade(prod)
 
                 if skipped_find_count > 0:
                     add_error_message_to_response(
