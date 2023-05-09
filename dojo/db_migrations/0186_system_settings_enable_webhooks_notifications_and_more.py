@@ -8,7 +8,7 @@ import multiselectfield.db.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0182_alter_jira_instance_default_issue_type'),
+        ('dojo', '0185_product_disable_sla_breach_notifications_and_more'),
     ]
 
     operations = [
