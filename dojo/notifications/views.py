@@ -143,11 +143,11 @@ class TemplateNotificationsView(SystemNotificationsView):
 
 @user_is_configuration_authorized('dojo.view_notification_webhooks')
 def notification_webhooks(request):
-    
+
     if not get_system_setting('enable_webhooks_notifications'):
         raise Http404()
-    
-    nwhs = Webhook_Endpoints.objects.all().order_by('name')
+
+    nwhs = Notification_Webhooks.objects.all().order_by('name')
     # name_words = initial_queryset.values_list('name', flat=True)
     # ntl = NoteTypesFilter(request.GET, queryset=initial_queryset)
     # nwhs = get_page_items(request, initial_queryset.qs, 25)
@@ -198,7 +198,7 @@ def edit_notification_webhook(request, nwhid):
     if not get_system_setting('enable_webhooks_notifications'):
         raise Http404()
 
-    nwh = get_object_or_404(Webhook_Endpoints, pk=nwhid)
+    nwh = get_object_or_404(Notification_Webhooks, pk=nwhid)
     nwh_form = NotificationsWebhookForm(instance=nwh)
     if request.method == "POST": # TODO do we need this:? and request.POST.get('edit_note_type'):
         nwh_form = NotificationsWebhookForm(request.POST, instance=nwh)
@@ -229,7 +229,7 @@ def delete_notification_webhook(request, nwhid):
     if not get_system_setting('enable_webhooks_notifications'):
         raise Http404()
 
-    nwh = get_object_or_404(Webhook_Endpoints, id=nwhid)
+    nwh = get_object_or_404(Notification_Webhooks, id=nwhid)
     form = DeleteNotificationsWebhookForm(instance=nwh)
 
     if request.method == 'POST':
@@ -254,4 +254,3 @@ def delete_notification_webhook(request, nwhid):
                    'form': form,
                    'nwh': nwh,
                    })
-

@@ -4120,7 +4120,7 @@ class NotificationsAdmin(admin.ModelAdmin):
         return list_fields
 
 
-class Webhook_Endpoints(models.Model):  # TODO rename to Notification_Webhooks
+class Notification_Webhooks(models.Model):
     _STATUS_ACTIVE = "active"
     _STATUS_INACTIVE = "inactive"
     STATUS_ACTIVE = f"{_STATUS_ACTIVE}"
@@ -4686,7 +4686,7 @@ admin.site.register(GITHUB_Clone)
 admin.site.register(GITHUB_Details_Cache)
 admin.site.register(GITHUB_PKey)
 admin.site.register(Tool_Configuration, Tool_Configuration_Admin)
-admin.site.register(Webhook_Endpoints)
+admin.site.register(Notification_Webhooks)
 admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
 admin.site.register(Cred_User)
