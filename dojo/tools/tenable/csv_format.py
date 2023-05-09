@@ -22,9 +22,8 @@ class TenableCSVParser(object):
     def _format_cve(self, val):
         if val is None or val == "":
             return None
-        if cve_match := re.findall(
-            r"CVE-[0-9]+-[0-9]+", val.upper(), re.IGNORECASE
-        ):
+        cve_match = re.findall(r"CVE-[0-9]+-[0-9]+", val.upper(), re.IGNORECASE)
+        if cve_match:
             return cve_match
         return None
 
@@ -128,8 +127,6 @@ class TenableCSVParser(object):
                     find.unsaved_vulnerability_ids += detected_cve
                 else:
                     find.unsaved_vulnerability_ids.append(detected_cve)
-
-
 
             # Update the endpoints
             if '://' in host:
