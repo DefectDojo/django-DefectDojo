@@ -3,6 +3,7 @@ import re
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext
 from dojo.models import System_Settings
+from django.contrib.auth.password_validation import CommonPasswordValidator
 
 
 class MinLengthValidator(object):
@@ -91,3 +92,12 @@ class SymbolValidator(object):
     def get_help_text(self):
         return gettext('The password must contain at least 1 special character, ' +
             '()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?.'),  # noqa W605
+
+
+class DojoCommonPasswordValidator(CommonPasswordValidator):
+    def validate(self, password, user=None):
+        self.settings = System_Settings.objects.get()
+        if self.settings.non_common_password_required:
+            return super().validate(password, user)
+        else:
+            return None

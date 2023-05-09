@@ -516,6 +516,11 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("Password must contain one uppercase letter"),
         help_text=_("Requires user passwords to contain at least one uppercase letter (A-Z)."))
+    non_common_password_required = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Password must not be common"),
+        help_text=_("Requires user passwords to not be part of list of common passwords."))
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
