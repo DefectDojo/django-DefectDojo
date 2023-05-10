@@ -47,7 +47,7 @@ spec:
       - name: cert-mount
         configMap:
           name: {{ .Values.django.uwsgi.certificates.configName }}
-      {{- end }}  
+      {{- end }}
       {{- range .Values.celery.extraVolumes }}
       - name: userconfig-{{ .name }}
         {{ .type }}:
@@ -94,6 +94,10 @@ spec:
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo
+        {{- if  .Values.django.uwsgi.certificates.enabled }}
+        - name: cert-mount
+          mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
+        {{- end }}  
         {{- range .Values.celery.extraVolumes }}
         - name: userconfig-{{ .name }}
           readOnly: true
