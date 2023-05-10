@@ -36,8 +36,8 @@ Users can be assigned as members to Products and Product Types, giving them one 
 | Delete Product              |        |        |            | x     |              |
 |                             |        |        |            |       |              |
 | View Engagement             | x      | x      | x          | x     |  x           |
-| Add Engagement              |        | x      | x          | x     |              |
-| Edit Engagement             |        | x      | x          | x     |              |
+| Add Engagement              |        | x      | x          | x     |  x           |
+| Edit Engagement             |        | x      | x          | x     |  x           |
 | Risk Acceptance             |        | x      | x          | x     |              |
 | Delete Engagement           |        |        | x          | x     |              |
 |                             |        |        |            |       |              |
