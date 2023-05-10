@@ -32,6 +32,7 @@ from django import forms
 from django.utils.translation import gettext as _
 from dateutil.relativedelta import relativedelta
 from tagulous.models import TagField
+from tagulous.models.managers import FakeTagRelatedManager
 import tagulous.admin
 from django.db.models import JSONField
 import hyperlink
@@ -94,6 +95,25 @@ def _get_statistics_for_queryset(qs, annotation_factory):
     values_total = values_total.aggregate(**annotation_factory())
     stats['total'] = values_total
     return stats
+
+
+def _manage_inherited_tags(obj, incoming_inherited_tags):
+    # get copies of the current tag lists
+    current_inherited_tags = [] if isinstance(obj.inherited_tags, FakeTagRelatedManager) else [tag.name for tag in obj.inherited_tags.all()]
+    tag_list = [] if isinstance(obj.tags, FakeTagRelatedManager) else [tag.name for tag in obj.tags.all()]
+    # Clean existing tag list from the old inherited tags. This represents the tags on the object and not the product
+    cleaned_tag_list = [tag for tag in tag_list if tag not in current_inherited_tags]
+    # Add the incoming inherited tag list
+    if incoming_inherited_tags:
+        for tag in incoming_inherited_tags:
+            if tag not in cleaned_tag_list:
+                cleaned_tag_list.append(tag)
+    # Update the current list of inherited tags. iteratively do this because of tagulous object restraints
+    obj.inherited_tags = incoming_inherited_tags
+    if incoming_inherited_tags:
+        obj.tags = cleaned_tag_list
+    # Return the object without saving
+    return obj
 
 
 @deconstructible
@@ -363,6 +383,12 @@ class System_Settings(models.Model):
                                           verbose_name=_('Grade F'),
                                           help_text=_("Percentage score for an "
                                                     "'F' <="))
+    enable_product_tag_inheritance = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_('Enable Product Tag Inheritance'),
+        help_text=_("Enables product tag inheritance globally for all products. Any tags added on a product will automatically be added to all Engagements, Tests, and Findings"))
+
     enable_benchmark = models.BooleanField(
         default=True,
         blank=False,
@@ -941,7 +967,11 @@ class Product(models.Model):
     regulations = models.ManyToManyField(Regulation, blank=True)
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add."))
-
+    enable_product_tag_inheritance = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_('Enable Product Tag Inheritance'),
+        help_text=_("Enables product tag inheritance. Any tags added on a product will automatically be added to all Engagements, Tests, and Findings"))
     enable_simple_risk_acceptance = models.BooleanField(default=False, help_text=_('Allows simple risk acceptance by checking/unchecking a checkbox.'))
     enable_full_risk_acceptance = models.BooleanField(default=True, help_text=_('Allows full risk acceptance using a risk acceptance form, expiration date, uploaded proof, etc.'))
 
@@ -1282,6 +1312,7 @@ class Engagement(models.Model):
     deduplication_on_engagement = models.BooleanField(default=False, verbose_name=_('Deduplication within this engagement only'), help_text=_("If enabled deduplication will only mark a finding in this engagement as duplicate of another finding if both findings are in this engagement. If disabled, deduplication is on the product level."))
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this engagement. Choose from the list or add new tags. Press Enter key to add."))
+    inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))
 
     class Meta:
         ordering = ['-target_start']
@@ -1370,6 +1401,11 @@ class Engagement(models.Model):
         helper.prepare_duplicates_for_delete(engagement=self)
         super().delete(*args, **kwargs)
         calculate_grade(self.product)
+
+    def inherit_tags(self):
+        # get a copy of the tags to be inherited
+        incoming_inherited_tags = [tag.name for tag in self.product.tags.all()]
+        return _manage_inherited_tags(self, incoming_inherited_tags)
 
 
 class CWE(models.Model):
@@ -1460,6 +1496,7 @@ class Endpoint(models.Model):
                                       through=Endpoint_Status)
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add."))
+    inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))
 
     class Meta:
         ordering = ['product', 'host', 'protocol', 'port', 'userinfo', 'path', 'query', 'fragment']
@@ -1735,6 +1772,11 @@ class Endpoint(models.Model):
         from django.urls import reverse
         return reverse('view_endpoint', args=[str(self.id)])
 
+    def inherit_tags(self):
+        # get a copy of the tags to be inherited
+        incoming_inherited_tags = [tag.name for tag in self.product.tags.all()]
+        return _manage_inherited_tags(self, incoming_inherited_tags)
+
 
 class Development_Environment(models.Model):
     name = models.CharField(max_length=200)
@@ -1790,6 +1832,7 @@ class Test(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=True)
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this test. Choose from the list or add new tags. Press Enter key to add."))
+    inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))
 
     version = models.CharField(max_length=100, null=True, blank=True)
 
@@ -1920,6 +1963,11 @@ class Test(models.Model):
     def statistics(self):
         """ Queries the database, no prefetching, so could be slow for lists of model instances """
         return _get_statistics_for_queryset(Finding.objects.filter(test=self), _get_annotations_for_statistics)
+
+    def inherit_tags(self):
+        # get a copy of the tags to be inherited
+        incoming_inherited_tags = [tag.name for tag in self.engagement.product.tags.all()]
+        return _manage_inherited_tags(self, incoming_inherited_tags)
 
 
 class Test_Import(TimeStampedModel):
@@ -2282,6 +2330,7 @@ class Finding(models.Model):
                                                 help_text=_("The date the flaw is expected to be remediated."))
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add."))
+    inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -2919,6 +2968,11 @@ class Finding(models.Model):
         vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
 
         return vulnerability_ids
+
+    def inherit_tags(self):
+        # get a copy of the tags to be inherited
+        incoming_inherited_tags = [tag.name for tag in self.test.engagement.product.tags.all()]
+        return _manage_inherited_tags(self, incoming_inherited_tags)
 
 
 class FindingAdmin(admin.ModelAdmin):
