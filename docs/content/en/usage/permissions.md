@@ -43,7 +43,7 @@ Users can be assigned as members to Products and Product Types, giving them one 
 |                             |        |        |            |       |              |
 | View Test                   | x      | x      | x          | x     | x            |
 | Add Test                    |        | x      | x          | x     |              |
-| Edit Test                   |        | x      | x          | x     |              |
+| Edit Test                   |        | x      | x          | x     | x            |
 | Delete Test                 |        |        | x          | x     |              |
 |                             |        |        |            |       |              |
 | View Finding                | x      | x      | x          | x     | x            |
