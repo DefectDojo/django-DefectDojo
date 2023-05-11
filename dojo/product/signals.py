@@ -53,7 +53,7 @@ def inherit_product_tags(instance) -> bool:
     return get_system_setting('enable_product_tag_inheritance')
 
 
-def get_product(instance): 
+def get_product(instance):
     if isinstance(instance, Product):
         return instance
     if isinstance(instance, Endpoint):

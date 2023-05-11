@@ -1,4 +1,4 @@
-from dojo.models import Test, Finding, UserContactInfo
+from dojo.models import Test, Finding
 from .dojo_test_case import DojoAPITestCase
 from dojo.product.helpers import propagate_tags_on_product_sync
 import logging
