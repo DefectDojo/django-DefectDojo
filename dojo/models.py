@@ -4185,9 +4185,13 @@ enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on star
 
 tagulous.admin.register(Product.tags)
 tagulous.admin.register(Test.tags)
+tagulous.admin.register(Test.inherited_tags)
 tagulous.admin.register(Finding.tags)
+tagulous.admin.register(Finding.inherited_tags)
 tagulous.admin.register(Engagement.tags)
+tagulous.admin.register(Engagement.inherited_tags)
 tagulous.admin.register(Endpoint.tags)
+tagulous.admin.register(Endpoint.inherited_tags)
 tagulous.admin.register(Finding_Template.tags)
 tagulous.admin.register(App_Analysis.tags)
 tagulous.admin.register(Objects_Product.tags)

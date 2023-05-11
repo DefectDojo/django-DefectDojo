@@ -47,7 +47,7 @@ def propagate_inheritance(instance, tag_list=[]):
 def inherit_product_tags(instance) -> bool:
     product = get_product(instance)
     # Save a read in the db
-    if product.enable_product_tag_inheritance:
+    if product and product.enable_product_tag_inheritance:
         return True
 
     return get_system_setting('enable_product_tag_inheritance')
