@@ -414,7 +414,6 @@ def prefetch_for_similar_findings(findings):
         """
         prefetched_findings = prefetched_findings.prefetch_related("notes")
         prefetched_findings = prefetched_findings.prefetch_related("tags")
-        # Delete comments"
         prefetched_findings = prefetched_findings.prefetch_related(
             "vulnerability_id_set"
         )
@@ -1145,8 +1144,6 @@ def edit_finding(request, fid):
                 # we only support linking / changing if there is no group issue
                 if not new_finding.has_jira_group_issue:
                     if new_finding.has_jira_issue:
-                        # Unsed local variable
-                        # jira_issue = new_finding.jira_issue
                         """
                         everything in DD around JIRA integration is based on the internal id
                         of the issue in JIRA instead of on the public jira issue key.
@@ -2111,7 +2108,7 @@ def delete_template(request, tid):
         return HttpResponseForbidden()
 
 
-def download_finding_pic(token):
+def download_finding_pic(request, token):
     class Thumbnail(ImageSpec):
         processors = [ResizeToFill(100, 100)]
         format = "JPEG"
