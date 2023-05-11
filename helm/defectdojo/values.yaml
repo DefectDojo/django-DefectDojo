@@ -67,6 +67,9 @@ tag: latest
 #   key: value
 podLabels: {}
 
+# Allow overriding of revisionHistoryLimit across all deployments.
+# revisionHistoryLimit: 10
+
 securityContext:
   enabled: true
   djangoSecurityContext:
