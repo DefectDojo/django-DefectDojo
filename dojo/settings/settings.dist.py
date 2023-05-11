@@ -605,7 +605,7 @@ LOGIN_EXEMPT_URLS = (
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'dojo.user.validators.DojoCommonPasswordValidator',
     },
     {
         'NAME': 'dojo.user.validators.MinLengthValidator'
