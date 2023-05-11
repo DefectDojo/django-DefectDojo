@@ -117,8 +117,6 @@ def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_ta
         obj.inherited_tags.set(incoming_inherited_tags)
         if incoming_inherited_tags:
             obj.tags.set(cleaned_tag_list)
-    # Return the object without saving
-    return obj
 
 
 @deconstructible
@@ -1410,7 +1408,7 @@ class Engagement(models.Model):
     def inherit_tags(self, potentially_existing_tags):
         # get a copy of the tags to be inherited
         incoming_inherited_tags = [tag.name for tag in self.product.tags.all()]
-        return _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
+        _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
 
 
 class CWE(models.Model):
@@ -1780,7 +1778,7 @@ class Endpoint(models.Model):
     def inherit_tags(self, potentially_existing_tags):
         # get a copy of the tags to be inherited
         incoming_inherited_tags = [tag.name for tag in self.product.tags.all()]
-        return _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
+        _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
 
 
 class Development_Environment(models.Model):
@@ -1972,7 +1970,7 @@ class Test(models.Model):
     def inherit_tags(self, potentially_existing_tags):
         # get a copy of the tags to be inherited
         incoming_inherited_tags = [tag.name for tag in self.engagement.product.tags.all()]
-        return _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
+        _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
 
 
 class Test_Import(TimeStampedModel):
@@ -2977,7 +2975,7 @@ class Finding(models.Model):
     def inherit_tags(self, potentially_existing_tags):
         # get a copy of the tags to be inherited
         incoming_inherited_tags = [tag.name for tag in self.test.engagement.product.tags.all()]
-        return _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
+        _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
 
 
 class FindingAdmin(admin.ModelAdmin):

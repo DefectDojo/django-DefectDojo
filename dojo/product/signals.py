@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 @receiver(signals.m2m_changed, sender=Product.tags.through)
 def product_tags_post_add_remove(sender, instance, action, **kwargs):
     if action in ["post_add", "post_remove"]:
-        # Get the tags from the presave signal
         running_async_process = False
         with contextlib.suppress(AttributeError):
             running_async_process = instance.running_async_process
@@ -20,6 +19,18 @@ def product_tags_post_add_remove(sender, instance, action, **kwargs):
         if not running_async_process and inherit_product_tags(instance):
             async_product_funcs.propagate_tags_on_product(instance.id, countdown=5)
             instance.running_async_process = True
+
+
+@receiver(signals.m2m_changed, sender=Endpoint.tags.through)
+@receiver(signals.m2m_changed, sender=Engagement.tags.through)
+@receiver(signals.m2m_changed, sender=Test.tags.through)
+@receiver(signals.m2m_changed, sender=Finding.tags.through)
+def make_inherited_tags_sticky(sender, instance, action, **kwargs):
+    if action in ["post_add", "post_remove"]:
+        if inherit_product_tags(instance):
+            tag_list = [tag.name for tag in instance.tags.all()]
+            if propagate_inheritance(instance, tag_list=tag_list):
+                instance.inherit_tags(tag_list)
 
 
 @receiver(signals.post_save, sender=Endpoint)
@@ -30,7 +41,7 @@ def inherit_tags_on_instance(sender, instance, created, **kwargs):
     if inherit_product_tags(instance):
         tag_list = instance._tags_tagulous.get_tag_list()
         if propagate_inheritance(instance, tag_list=tag_list):
-            instance = instance.inherit_tags(tag_list)
+            instance.inherit_tags(tag_list)
 
 
 def propagate_inheritance(instance, tag_list=[]):

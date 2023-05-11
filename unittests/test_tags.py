@@ -311,7 +311,7 @@ class InheritedTagsTests(DojoAPITestCase):
         product_tags_plus_reimport_tag.insert(1, "reimport_tag")
         self.assertEqual(product_tags_plus_reimport_tag, self._convert_instance_tags_to_list(objects.get("test")))
 
-    def test_new_engagement_test_then_add_tag_to_engagement(self):
+    def test_new_engagement_then_add_tag_to_engagement_then_remove_tag_to_engagement(self):
         # Create the engagement
         engagement = self.create_engagement("Inherited Tags Engagement", self.product)
         test = self.create_test(engagement=engagement, scan_type="ZAP Scan")
@@ -319,15 +319,35 @@ class InheritedTagsTests(DojoAPITestCase):
         product_tags = self._convert_instance_tags_to_list(self.product)
         self.assertEqual(product_tags, self._convert_instance_tags_to_list(engagement))
         self.assertEqual(product_tags, self._convert_instance_tags_to_list(test))
-        # update the tags on the engagement)
+        # Add a tag on the engagement)
         engagement_tags_before_addition = self._convert_instance_tags_to_list(engagement)
         engagement.tags.add("engagement_only_tag")
         # Check to see that the update was successful
         self.assertEqual(["engagement_only_tag"] + engagement_tags_before_addition, self._convert_instance_tags_to_list(engagement))
         # Check to see that tests were not impacted
         self.assertEqual(product_tags, self._convert_instance_tags_to_list(test))
+        # remove a tag on the engagement
+        engagement_tags_before_removal = self._convert_instance_tags_to_list(engagement)
+        engagement.tags.remove("engagement_only_tag")
+        # Check to see that the update was successful
+        engagement_tags_before_removal.remove("engagement_only_tag")
+        self.assertEqual(engagement_tags_before_removal, self._convert_instance_tags_to_list(engagement))
+        # Check to see that tests were not impacted
+        self.assertEqual(product_tags, self._convert_instance_tags_to_list(test))
 
-    def test_remove_tag_from_product(self):
+    def test_new_engagement_then_remove_inherited_tag(self):
+        # Create the engagement
+        engagement = self.create_engagement("Inherited Tags Engagement", self.product)
+        # Check to see if tags match the product
+        product_tags = self._convert_instance_tags_to_list(self.product)
+        self.assertEqual(product_tags, self._convert_instance_tags_to_list(engagement))
+        # Remove an inherited tag
+        engagement_tags_before_removal = self._convert_instance_tags_to_list(engagement)
+        engagement.tags.remove("inherit")
+        # Check to see that the inherited tag could not be removed
+        self.assertEqual(engagement_tags_before_removal, self._convert_instance_tags_to_list(engagement))
+
+    def test_remove_tag_from_product_then_add_tag_to_product(self):
         # Import some findings to create all objects
         objects = self._import_and_return_objects()
         # Check that the tags all match what the product has
@@ -347,16 +367,6 @@ class InheritedTagsTests(DojoAPITestCase):
         self.assertEqual(product_tags_post_removal, self._convert_instance_tags_to_list(objects.get("endpoint")))
         self.assertEqual(product_tags_post_removal, self._convert_instance_tags_to_list(objects.get("test")))
         self.assertEqual(product_tags_post_removal, self._convert_instance_tags_to_list(objects.get("finding")))
-
-    def test_add_tag_from_product(self):
-        # Import some findings to create all objects
-        objects = self._import_and_return_objects()
-        # Check that the tags all match what the product has
-        product_tags = self._convert_instance_tags_to_list(self.product)
-        self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("engagement")))
-        self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("endpoint")))
-        self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("test")))
-        self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("finding")))
         # Add a tag from the product
         self.product.tags.add("more", "tags" "!")
         # This triggers an async function with celery that will fail, so run it manually here
