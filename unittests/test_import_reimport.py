@@ -65,7 +65,7 @@ class ImportReimportMixin(object):
         self.acunetix_file_name = self.scans_path + 'acunetix/one_finding.xml'
         self.scan_type_acunetix = 'Acunetix Scan'
 
-        self.gitlab_dep_scan_components_filename = self.scans_path + 'gitlab_dep_scan/gl-dependency-scanning-report-many-vuln.json'
+        self.gitlab_dep_scan_components_filename = f'{self.scans_path}gitlab_dep_scan/gl-dependency-scanning-report-many-vuln_v15.json'
         self.scan_type_gtlab_dep_scan = 'GitLab Dependency Scanning Report'
 
         self.sonarqube_file_name1 = self.scans_path + 'sonarqube/sonar-6-findings.html'
@@ -91,7 +91,7 @@ class ImportReimportMixin(object):
 
         self.nuclei_empty = self.scans_path + 'nuclei/empty.jsonl'
 
-        self.gitlab_dast_file_name = self.scans_path + 'gitlab_dast/gitlab_dast_one_vul.json'
+        self.gitlab_dast_file_name = f'{self.scans_path}gitlab_dast/gitlab_dast_one_vul_v15.json'
         self.scan_type_gitlab_dast = 'GitLab DAST Report'
 
         self.anchore_grype_file_name = self.scans_path + 'anchore_grype/check_all_fields.json'
