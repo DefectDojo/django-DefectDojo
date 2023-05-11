@@ -22,12 +22,12 @@ class GitlabContainerScanParser(object):
 
     def _get_dependency_version(self, dependency):
         return dependency["version"] if "version" in dependency else ""
-    
+
     def _get_dependency_name(self, dependency):
         if "package" in dependency and "name" in dependency["package"]:
             return dependency["package"]["name"]
         return ""
-    
+
     def _get_identifier_cve(self, identifier):
         return identifier["value"] if identifier.get("type", "no-type") == "cve" else None
 
