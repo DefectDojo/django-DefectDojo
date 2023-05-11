@@ -45,7 +45,7 @@ class AWSProwlerJsonV3Parser(object):
             severity = deserialized.get('Severity', 'Info').capitalize()
             aws_service_name = deserialized.get('ServiceName')
             impact = deserialized.get('Risk')
-            mitigation = deserialized.get('Remediation', {}).get('Recommendation', {}).get("Text")
+            mitigation = deserialized.get('Remediation', {}).get('Recommendation', {}).get("Text", '')
             mitigation = str(mitigation) + "\n" + str(deserialized.get('Remediation', {}).get('Code'))
             documentation = deserialized.get('Remediation', {}).get('Recommendation', {}).get("Url")
             documentation = str(documentation) + "\n" + str(deserialized.get('RelatedUrl'))

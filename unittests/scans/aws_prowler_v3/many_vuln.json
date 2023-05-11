@@ -1,5 +1,4 @@
-[
-{
+[{
     "AssessmentStartTime": "2023-04-25T23:49:42.744599",
     "FindingUniqueId": "prowler-aws-acm_certificates_expiration_check-999999999999-us-east-1-api.teste.teste.com",
     "Provider": "aws",
@@ -90,8 +89,7 @@
     "ResourceId": "api.teste.teste.com",
     "ResourceArn": "arn:aws:acm:us-east-1:999999999999:certificate/ffffffff-0000-0000-0000-000000000000",
     "ResourceTags": {}
-},
-{
+},{
     "AssessmentStartTime": "2023-04-25T23:49:42.744599",
     "FindingUniqueId": "prowler-aws-accessanalyzer_enabled-999999999999-us-east-1-999999999999",
     "Provider": "aws",
@@ -141,52 +139,7 @@
     "ResourceId": "999999999999",
     "ResourceArn": "",
     "ResourceTags": {}
-},
-{
-    "AssessmentStartTime": "2023-04-25T23:49:42.744599",
-    "FindingUniqueId": "prowler-aws-accessanalyzer_enabled_without_findings-999999999999-us-east-1-999999999999",
-    "Provider": "aws",
-    "CheckID": "accessanalyzer_enabled_without_findings",
-    "CheckTitle": "Check if IAM Access Analyzer is enabled without findings",
-    "CheckType": [
-        "IAM"
-    ],
-    "ServiceName": "accessanalyzer",
-    "SubServiceName": "",
-    "Status": "FAIL",
-    "StatusExtended": "IAM Access Analyzer in account 999999999999 is not enabled",
-    "Severity": "low",
-    "ResourceType": "Other",
-    "ResourceDetails": "",
-    "Description": "Check if IAM Access Analyzer is enabled without findings",
-    "Risk": "AWS IAM Access Analyzer helps you identify the resources in your organization and accounts, such as Amazon S3 buckets or IAM roles, that are shared with an external entity. This lets you identify unintended access to your resources and data, which is a security risk. IAM Access Analyzer uses a form of mathematical analysis called automated reasoning, which applies logic and mathematical inference to determine all possible access paths allowed by a resource policy.",
-    "RelatedUrl": "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html",
-    "Remediation": {
-        "Code": {
-            "NativeIaC": "",
-            "Terraform": "",
-            "CLI": "aws accessanalyzer create-analyzer --analyzer-name <NAME> --type <ACCOUNT|ORGANIZATION>",
-            "Other": ""
-        },
-        "Recommendation": {
-            "Text": "Enable IAM Access Analyzer for all accounts, create analyzer and take action over it is recommendations (IAM Access Analyzer is available at no additional cost).",
-            "Url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html"
-        }
-    },
-    "Compliance": {},
-    "Categories": [],
-    "DependsOn": [],
-    "RelatedTo": [],
-    "Notes": "",
-    "Profile": null,
-    "AccountId": "999999999999",
-    "OrganizationsInfo": null,
-    "Region": "us-east-1",
-    "ResourceId": "999999999999",
-    "ResourceArn": "",
-    "ResourceTags": {}
-},
-{
+},{
     "AssessmentStartTime": "2023-04-25T23:49:42.744599",
     "FindingUniqueId": "prowler-aws-account_maintain_current_contact_details-999999999999-us-east-1-999999999999",
     "Provider": "aws",
@@ -197,7 +150,7 @@
     ],
     "ServiceName": "account",
     "SubServiceName": "",
-    "Status": "INFO",
+    "Status": "FAIL",
     "StatusExtended": "Manual check: Login to the AWS Console. Choose your account name on the top right of the window -> My Account -> Contact Information.",
     "Severity": "medium",
     "ResourceType": "Other",
