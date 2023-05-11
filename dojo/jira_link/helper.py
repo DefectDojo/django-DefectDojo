@@ -900,7 +900,9 @@ def update_jira_issue(obj, *args, **kwargs):
     except JIRAError as e:
         logger.exception(e)
         logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
-        log_jira_alert(e.text, obj)
+        if issue_from_jira_is_active(issue):
+            # Only alert if the upstream JIRA is active, we don't care about closed issues
+            log_jira_alert(e.text, obj)
         return False
 
 
