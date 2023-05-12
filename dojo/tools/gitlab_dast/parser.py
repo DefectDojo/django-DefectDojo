@@ -28,10 +28,10 @@ class GitlabDastParser(object):
 
     def get_items(self, tree, test):
         items = {}
-
+        scanner = tree.get("scan", {}).get("scanner", {})
         # iterating through each vulnerability
         for node in tree["vulnerabilities"]:
-            item = get_item(node, test)
+            item = self.get_item(node, test, scanner)
 
             item_key = hashlib.sha256(
                 "|".join([item.severity, item.title, item.description]).encode()
@@ -45,96 +45,73 @@ class GitlabDastParser(object):
 
         return list(items.values())
 
-    def convert_severity(self, num_severity):
-        """Convert severity value"""
-        if num_severity >= -10:
-            return "Low"
-        elif -11 >= num_severity > -26:
-            return "Medium"
-        elif num_severity <= -26:
-            return "High"
-        else:
-            return "Info"
+    def get_confidence_numeric(self, confidence):
+        switcher = {
+            "Confirmed": 1,  # Certain
+            "High": 3,  # Firm
+            "Medium": 4,  # Firm
+            "Low": 6,  # Tentative
+            "Experimental": 7,  # Tentative
+            "Unknown": 8,  # Tentative
+            "Ignore": 10,  # Tentative
+        }
+        return switcher.get(confidence, None)
 
+    # iterating through properties of each vulnerability
+    def get_item(self, vuln, test, scanner):
+        # scanner_confidence
+        scanner_confidence = self.get_confidence_numeric(vuln.get('confidence', 'Could not be determined'))
 
-# iterating through properties of each vulnerability
-def get_item(vuln, test):
-    if vuln["category"] != "dast":
-        return None
+        # description
+        description = f"Scanner: {scanner.get('name', 'Could not be determined')}\n"
+        if "message" in vuln:
+            description += f"{vuln['message']}\n"
+        elif "description" in vuln:
+            description += f"{vuln['description']}\n"
 
-    # scanner_confidence
-    scanner_confidence = get_confidence_numeric(vuln["confidence"])
+        finding = Finding(
+            test=test,  # Test
+            nb_occurences=1,  # int
+            scanner_confidence=scanner_confidence,  # int
+            description=description,  # str
+            static_finding=False,
+            dynamic_finding=True,
+        )
 
-    # description
-    description = f"Scanner: {vuln['scanner']['name']}\n"
-    if "message" in vuln:
-        description += f"{vuln['message']}\n"
-    elif "description" in vuln:
-        description += f"{vuln['description']}\n"
+        # date
+        if "discovered_at" in vuln:
+            finding.date = datetime.strptime(vuln["discovered_at"], "%Y-%m-%dT%H:%M:%S.%f")
 
-    finding = Finding(
-        test=test,  # Test
-        nb_occurences=1,  # int
-        scanner_confidence=scanner_confidence,  # int
-        description=description,  # str
-        static_finding=False,
-        dynamic_finding=True,
-    )
+        # id
+        if "id" in vuln:
+            finding.unique_id_from_tool = vuln["id"]
 
-    # date
-    if "discovered_at" in vuln:
-        finding.date = datetime.strptime(vuln["discovered_at"], "%Y-%m-%dT%H:%M:%S.%f")
+        # title
+        finding.title = vuln["name"] if "name" in vuln else finding.unique_id_from_tool
+        # cwe
+        for identifier in vuln["identifiers"]:
+            if identifier["type"].lower() == "cwe":
+                finding.cwe = int(identifier["value"])
+                break
 
-    # id
-    if "id" in vuln:
-        finding.unique_id_from_tool = vuln["id"]
+        # references
+        if vuln["links"]:
+            ref = "".join(f"{link['url']}\n" for link in vuln["links"])
+            ref = ref[:-1]
+            finding.references = ref
 
-    # title
-    if "name" in vuln:
-        finding.title = vuln["name"]
-    # fallback to using id as a title
-    else:
-        finding.title = finding.unique_id_from_tool
+        # severity
+        if "severity" in vuln:
+            finding.severity = vuln["severity"]
 
-    # cwe
-    for identifier in vuln["identifiers"]:
-        if "cwe" == identifier["type"].lower():
-            finding.cwe = int(identifier["value"])
-            break
+        # endpoint
+        location = vuln.get("location", {})
+        if "hostname" in location and "path" in location:
+            url_str = f"{location['hostname']}{location['path']}"
+            finding.unsaved_endpoints = [Endpoint.from_uri(url_str)]
 
-    # references
-    if vuln["links"]:
-        ref = ""
-        for link in vuln["links"]:
-            ref += f"{link['url']}\n"
-        ref = ref[:-1]
-        finding.references = ref
+        # mitigation
+        if "solution" in vuln:
+            finding.mitigation = vuln["solution"]
 
-    # severity
-    if "severity" in vuln:
-        finding.severity = vuln["severity"]
-
-    # endpoint
-    location = vuln.get("location", {})
-    if "hostname" in location and "path" in location:
-        url_str = f"{location['hostname']}{location['path']}"
-        finding.unsaved_endpoints = [Endpoint.from_uri(url_str)]
-
-    # mitigation
-    if "solution" in vuln:
-        finding.mitigation = vuln["solution"]
-
-    return finding
-
-
-def get_confidence_numeric(confidence):
-    switcher = {
-        "Confirmed": 1,  # Certain
-        "High": 3,  # Firm
-        "Medium": 4,  # Firm
-        "Low": 6,  # Tentative
-        "Experimental": 7,  # Tentative
-        "Unknown": 8,  # Tentative
-        "Ignore": 10,  # Tentative
-    }
-    return switcher.get(confidence, None)
+        return finding
