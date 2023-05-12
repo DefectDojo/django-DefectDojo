@@ -15,7 +15,7 @@ def update_test(test, tenable_test_type) -> None:
         test.save()
 
 
-# Update the found_by field to remove nessues/WAS and add tenable
+# Update the found_by field to remove nessus/WAS and add tenable
 def update_finding(finding, tenable_test_type, nessus_test_type, nessus_was_test_type) -> None:
     # Check if nessus is in found by list and remove
     if nessus_test_type in finding.found_by.all():

@@ -71,11 +71,11 @@ If you have installed DefectDojo on "iron" and wish to upgrade the installation,
 
 There is a migration from the legacy Nessus and Nessus WAS parsers to a single Tenable parser. The updated Tenable parser simply merges existing support for Nessus and Nessus WAS without introducing new functionality that could create instability
 
-There is a migration process built into the upgrade that will automatically convert exiting Nessus and Nessus WAS findings and tests into Tenables findings and tests
+There is a migration process built into the upgrade that will automatically convert exiting Nessus and Nessus WAS findings and tests into Tenable findings and tests
 
 **Breaking Change**
 
-If there is any use of the Nessus or Nessus WAS in automated fashion via the import and reimport API endpoints, the `scan-type` parameter needs to be udpated to `Tenable Scan`
+If there is any use of the Nessus or Nessus WAS in automated fashion via the import and reimport API endpoints, the `scan-type` parameter needs to be updated to `Tenable Scan`
 
 For all other changes, check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.23.0) for the contents of the release.
 
