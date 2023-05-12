@@ -8,7 +8,7 @@ import tagulous.models.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0186_system_settings_non_common_password_required'),
+        ('dojo', '0187_nessus_to_tenable'),
     ]
 
     operations = [

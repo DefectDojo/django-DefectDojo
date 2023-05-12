@@ -8,9 +8,9 @@ weight: 2
 ## Tags
 
 In DefectDojo, tags are a first class citizen and are recognized as the facilitators
-of organizination within each level of the [data model](../models.md). Tags are
-ideal for grouping objets in a manner that can be filtered out into smaller, more
-digestable chunks.
+of organization within each level of the [data model](../models.md). Tags are
+ideal for grouping objects in a manner that can be filtered out into smaller, more
+digestible chunks.
 
 Here is an example with a product with two tags and four findings each with a single tag
 
@@ -23,7 +23,7 @@ Tags can be managed in the following ways
 1. Creating or Editing new objects
    
    When a new object is created or edited through the UI or API, there is a field for specifying
-   the tags the be set on a given object. This field is a multiselect field that also hase
+   the tags to be set on a given object. This field is a multiselect field that also has
    auto completion to make searching and adding existing tags a breeze. Here is what the field 
    looks like on the product from the screenshot in the previous section:
    
@@ -32,15 +32,15 @@ Tags can be managed in the following ways
 2. Import and Reimport
 
     Tags can also be applied to a given test at the time of import or reimport. This is a very
-    handy use case when importing via the API with automation as it provides an oppurtunity to
-    append automation run details and tool information that may not be capturable in the test
+    handy use case when importing via the API with automation as it provides an opportunity to
+    append automation run details and tool information that may not be captured in the test
     or finding object directly. 
 
     The field looks and behaves exactly as it does on a given object
 
 3. Bulk Edit Menu (Findings only)
 
-    When needed to update many findings with the same set of tags, the bulk edit menu can be
+    When needing to update many findings with the same set of tags, the bulk edit menu can be
     used to ease the burden.
 
     In the following example, lets say I want to update the tags of the two findings with the tag "tag-group-alpha" to be a new tag list like this ["tag-group-charlie", "tag-group-delta"]. 
@@ -54,7 +54,7 @@ Tags can be managed in the following ways
 
     ![Apply changes for bulk edit tag update](../../images/tags-bulk-edit-submit.png)
 
-    The tags on the selected Findings will be udpated to whatever was specified in the tags field
+    The tags on the selected Findings will be updated to whatever was specified in the tags field
     within the bulk edit menu
 
     ![Completed bulk edit tag update](../../images/tags-bulk-edit-complete.png)
@@ -69,7 +69,7 @@ of the Finding filters:
 There are ten fields related to tags:
 
  - Tags: filter on any tags that are attached to a given Finding
-   - Exmaples:
+   - Examples:
      - Finding will be returned
        - Finding Tags: ["A", "B", "C"]
        - Filter Query: "B"
@@ -77,39 +77,39 @@ There are ten fields related to tags:
        - Finding Tags: ["A", "B", "C"]
        - Filter Query: "F"
  - Not Tags: filter on any tags that are *not* attached to a given Finding
-   - Exmaples:
+   - Examples:
      - Finding will be returned
        - Finding Tags: ["A", "B", "C"]
        - Filter Query: "F"
      - Finding Will *not* be returned
        - Finding Tags: ["A", "B", "C"]
        - Filter Query: "B"
- - Tag Name Contains: filter on any tags conatin part or all of the query in the given Finding
-   - Exmaples:
+ - Tag Name Contains: filter on any tags that contain part or all of the query in the given Finding
+   - Examples:
      - Finding will be returned
        - Finding Tags: ["Alpha", "Beta", "Charlie"]
        - Filter Query: "et" (part of "Beta")
      - Finding Will *not* be returned
-       -  Finding Tags: ["Alpha", "Beta", "Charlie"]
+       - Finding Tags: ["Alpha", "Beta", "Charlie"]
        - Filter Query: "meg" (part of "Omega")
- - Not Tags: filter on any tags that do *not* conatin part or all of the query in the given Finding
-   - Exmaples:
+ - Not Tags: filter on any tags that do *not* contain part or all of the query in the given Finding
+   - Examples:
      - Finding will be returned
-       -  Finding Tags: ["Alpha", "Beta", "Charlie"]
-        Filter Query: "meg" (part of "Omega")
+       - Finding Tags: ["Alpha", "Beta", "Charlie"]
+       - Filter Query: "meg" (part of "Omega")
      - Finding Will *not* be returned
-       -  Finding Tags: ["Alpha", "Beta", "Charlie"]
+       - Finding Tags: ["Alpha", "Beta", "Charlie"]
        - Filter Query: "et" (part of "Beta")
 
 For the other six tag filters, they follow the same rules as "Tags" and "Not Tags" as above,
 but at different levels in the data model:
 
- - Tags (Test): filter on any tags that are attached to the Test of a given Finding is apart of
- - Not Tags (Test): filter on any tags that are *not* attached to the Test of a given Finding is apart  of
- - Tags (Engagement): filter on any tags that are attached to the Engagement of a given Finding is apart of
- - Not Tags (Engagement): filter on any tags that are *not* attached to the Engagement of a given Finding is apart  of
- - Tags (Product): filter on any tags that are attached to the Product of a given Finding is apart of
- - Not Tags (Product): filter on any tags that are *not* attached to the Product of a given Finding is apart  of
+ - Tags (Test): filter on any tags that are attached to the Test of a given Finding is part of
+ - Not Tags (Test): filter on any tags that are *not* attached to the Test of a given Finding is part  of
+ - Tags (Engagement): filter on any tags that are attached to the Engagement of a given Finding is part of
+ - Not Tags (Engagement): filter on any tags that are *not* attached to the Engagement of a given Finding is part  of
+ - Tags (Product): filter on any tags that are attached to the Product of a given Finding is part of
+ - Not Tags (Product): filter on any tags that are *not* attached to the Product of a given Finding is part  of
 
 ### Tag Inheritance
 
@@ -131,15 +131,15 @@ Tag Inheritance can be enabled at the following scope levels:
 Tags can be added and removed to other objects the same as when tag inheritance
 is disabled. The only exception to that rule being inherited tags as they cannot
 be removed from an object. See the following example of adding a tag "test_only_tag"
-to the Test obejct and a tag "engagement_only_tag" to the Engagement.
+to the Test object and a tag "engagement_only_tag" to the Engagement.
 
 ![Example of inherited tags](../../images/tags-inherit-exmaple.png)
 
 When updates are made to the tag list on a product, the same changes are made to all
-objects within the product asyncronously. The duration of this task directly correlates
+objects within the product asynchronously. The duration of this task directly correlates
 to the number the objects contained within a finding. If the results are not observed
-within a reasonable amount, consult to the celery worker logs to identify where any problems
-may have arised.
+within a reasonable time period, consult the celery worker logs to identify where any
+problems might have arisen.
 
 ## Risk Acceptance
 
