@@ -33,12 +33,7 @@ class NucleiParser(object):
         dupes = {}
         for item in data:
             logger.debug('Item %s.', str(item))
-            if item.get('templateID'):
-                template_id = item.get('templateID')
-            elif item.get('template-id'):
-                template_id = item.get('template-id')
-            else:
-                template_id = ''
+            template_id = item.get('templateID', item.get('template-id', ''))
             info = item.get('info')
             name = info.get('name')
             severity = info.get('severity').title()
@@ -49,9 +44,7 @@ class NucleiParser(object):
             item_type = item.get('type')
             if item_type is None:
                 item_type = ''
-            matched = item.get('matched')
-            if matched is None:
-                matched = item.get('matched-at')
+            matched = item.get('matched', item.get('matched-at', ''))
             if '://' in matched:
                 endpoint = Endpoint.from_uri(matched)
             else:
@@ -98,20 +91,16 @@ class NucleiParser(object):
                 if 'cvss-score' in classification and classification['cvss-score']:
                     finding.cvssv3_score = classification['cvss-score']
 
-            if item.get('matcher-name'):
-                matcher = item.get('matcher-name')
-                finding.component_name = matcher
-            elif item.get('matcher_name'):
-                matcher = item.get('matcher_name')
+            matcher = item.get('matcher-name', item.get('matcher_name'))
+            if matcher:
                 finding.component_name = matcher
             else:
                 matcher = ''
+
             if info.get('remediation'):
                 finding.mitigation = info.get('remediation')
 
-            host = item.get('host')
-            if host is None:
-                host = ''
+            host = item.get('host', '')
 
             if item.get('curl-command'):
                 finding.steps_to_reproduce = 'curl command to reproduce the request:\n`' + \
