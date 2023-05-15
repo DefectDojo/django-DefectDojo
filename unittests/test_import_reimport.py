@@ -385,7 +385,7 @@ class ImportReimportMixin(object):
         notes_count_before = self.db_notes_count()
 
         # reimport exact same report
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, created=0, closed=0, reactivated=0, untouched=1):
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=0, closed=1, reactivated=0, untouched=0):
             reimport_veracode_mitigated_findings = self.reimport_scan_with_params(test_id, self.veracode_mitigated_findings, scan_type=self.scan_type_veracode)
 
         test_id = reimport_veracode_mitigated_findings['test']
@@ -395,16 +395,15 @@ class ImportReimportMixin(object):
         self.log_finding_summary_json_api(findings)
 
         # reimported count must match count in veracode report
-        # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(0, findings)
+        self.assert_finding_count_json(1, findings)
 
         # inversely, we should see no findings with verified=False
         findings = self.get_test_findings_api(test_id, verified=False)
-        self.assert_finding_count_json(1, findings)
+        self.assert_finding_count_json(0, findings)
 
-        # reimporting the exact same scan shouldn't create any notes
-        self.assertEqual(notes_count_before, self.db_notes_count())
+        # reimporting the exact same scan shouldn't create any notes, but there will be a new mitigated note
+        self.assertEqual(notes_count_before, self.db_notes_count() - 1)
         mitigated_findings = self.get_test_findings_api(test_id, is_mitigated=True)
         self.assert_finding_count_json(1, mitigated_findings)
 
