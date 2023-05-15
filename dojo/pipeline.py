@@ -83,6 +83,7 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
                 if is_group_id(group_from_response):
                     logger.debug("detected " + group_from_response + " as groupID and will fetch the displayName from microsoft graph")
                     group_name_request = requests.get((str(soc.extra_data['resource']) + '/v1.0/groups/' + str(group_from_response) + '?$select=displayName'), headers=request_headers)
+                    group_name_request.raise_for_status()
                     group_name_request_json = group_name_request.json()
                     group_name = group_name_request_json['displayName']
                 else:

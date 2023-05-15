@@ -28,12 +28,11 @@ def update_timestamps(test, version, branch_tag, build_id, commit_hash, now, sca
 
     if branch_tag:
         test.branch_tag = branch_tag
-        test.engagement.version = version
 
     if build_id:
         test.build_id = build_id
 
-    if branch_tag:
+    if commit_hash:
         test.commit_hash = commit_hash
 
     test.save()

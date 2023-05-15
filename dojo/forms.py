@@ -264,8 +264,8 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'sla_configuration', 'regulations',
-                'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
-                'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
+                'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience', 'enable_product_tag_inheritance',
+                'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance', 'disable_sla_breach_notifications']
 
 
 class DeleteProductForm(forms.ModelForm):
@@ -454,10 +454,21 @@ class ImportScanForm(forms.Form):
         allow_empty_file=True,
         required=False)
 
-    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
+    # Close Old Findings has changed. The default is engagement only, and it requires a second flag to expand to the product scope.
+    # Exposing the choice as two different check boxes.
+    # If 'close_old_findings_product_scope' is selected, the backend will ensure that both flags are set.
+    close_old_findings = forms.BooleanField(help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
                                                         "If service has been set, only the findings for this service will be closed. "
-                                                        "This affects the whole engagement/product depending on your deduplication scope.",
-                                            required=False, initial=False)
+                                                        "This only affects findings within the same engagement.",
+                                            label="Close old findings within this engagement",
+                                            required=False,
+                                            initial=False)
+    close_old_findings_product_scope = forms.BooleanField(help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
+                                                        "If service has been set, only the findings for this service will be closed. "
+                                                        "This only affects findings within the same product.",
+                                            label="Close old findings within this product",
+                                            required=False,
+                                            initial=False)
 
     if is_finding_groups_enabled():
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
@@ -857,7 +868,7 @@ class EngForm(forms.ModelForm):
 
     class Meta:
         model = Engagement
-        exclude = ('first_contacted', 'real_start', 'engagement_type',
+        exclude = ('first_contacted', 'real_start', 'engagement_type', 'inherited_tags',
                    'real_end', 'requester', 'reason', 'updated', 'report_type',
                    'product', 'threat_model', 'api_test', 'pen_test', 'check_list')
 
@@ -1003,7 +1014,7 @@ class AddFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve',
+        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve', 'inherited_tags',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoints', 'sla_start_date')
 
 
@@ -1075,7 +1086,7 @@ class AdHocFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve',
+        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve', 'inherited_tags',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
@@ -1132,7 +1143,7 @@ class PromoteFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'active', 'false_p', 'verified', 'endpoint_status', 'cve',
+        exclude = ('reporter', 'url', 'numerical_severity', 'active', 'false_p', 'verified', 'endpoint_status', 'cve', 'inherited_tags',
                    'duplicate', 'out_of_scope', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'planned_remediation_date')
 
 
@@ -1259,7 +1270,7 @@ class FindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve',
+        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve', 'inherited_tags',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'endpoint_status')
 
 
@@ -1407,7 +1418,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 class EditEndpointForm(forms.ModelForm):
     class Meta:
         model = Endpoint
-        exclude = ['product']
+        exclude = ['product', 'inherited_tags']
 
     def __init__(self, *args, **kwargs):
         self.product = None

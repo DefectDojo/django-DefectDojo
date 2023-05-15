@@ -198,7 +198,7 @@ def asvs_calc_level(benchmark_score):
         elif benchmark_score.desired_level == "Level 3":
             benchmarks = benchmarks.filter(control__level_3=True)
 
-        noted_benchmarks = benchmarks.filter(notes__isnull=False).order_by('id').distinct('id')
+        noted_benchmarks = benchmarks.filter(notes__isnull=False).order_by('id').distinct()
         noted_benchmarks_ids = [b.id for b in noted_benchmarks]
 
         total = len(benchmarks)
