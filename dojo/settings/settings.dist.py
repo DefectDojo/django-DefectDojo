@@ -1247,6 +1247,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Wpscan': ['title', 'description', 'severity'],
     'Codechecker Report native': ['unique_id_from_tool'],
     'Wazuh Scan': ['title'],
+    'Nuclei Scan': ['title', 'cwe', 'severity'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1302,6 +1303,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Rusty Hog Scan': True,
     'Codechecker Report native': True,
     'Wazuh': True,
+    'Nuclei Scan': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1435,6 +1437,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'NeuVector (REST)': DEDUPE_ALGO_HASH_CODE,
     'NeuVector (compliance)': DEDUPE_ALGO_HASH_CODE,
     'Wpscan': DEDUPE_ALGO_HASH_CODE,
+    'Nuclei Scan': DEDUPE_ALGO_HASH_CODE,
 
 }
 
