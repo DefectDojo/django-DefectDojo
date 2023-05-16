@@ -75,7 +75,13 @@ There is a migration process built into the upgrade that will automatically conv
 
 **Breaking Change**
 
-If there is any use of the Nessus or Nessus WAS in automated fashion via the import and reimport API endpoints, the `scan-type` parameter needs to be updated to `Tenable Scan`
+ - If there is any use of the Nessus or Nessus WAS in automated fashion via the import and reimport API endpoints, the `scan-type` parameter needs to be updated to `Tenable Scan`
+ - The default containerized database will now be [PostgreSQL](https://www.postgresql.org/) rather than [MySQL](https://dev.mysql.com/) due to the use of case insensitivity on fields by default
+   - It is recommended to update the [database character set and collation](https://dev.mysql.com/doc/refman/5.7/en/charset-database.html) to use UTF encoding 
+   - If your deployment uses the MySQL containerized database, please see the following updates to run DefectDojo:
+     - Use of the helper script "dc-up": `./dc-up.sh mysql-rabbitmq` or `./dc-up.sh mysql-redis`
+     - Use of the helper script "dc-up-d": `./dc-up-d.sh mysql-rabbitmq` or `./dc-up-d.sh mysql-redis`
+     - Use of Docker Compose directly: `docker-compose --profile mysql-rabbitmq --env-file ./docker/environments/mysql-rabbitmq.env up` or `docker-compose --profile mysql-redis --env-file ./docker/environments/mysql-redis.env up`
 
 For all other changes, check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.23.0) for the contents of the release.
 

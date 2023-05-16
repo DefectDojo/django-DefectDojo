@@ -9,15 +9,15 @@ if [ $# -eq 0 ]
 then
     if [ -z $DD_PROFILE ]
     then
-        echo "No profile supplied, running default: mysql-rabbitmq"
-        PROFILE="mysql-rabbitmq"
+        echo "No profile supplied, running default: postgres-redis"
+        PROFILE="postgres-redis"
         echo "Other supported profiles:
-          mysql-rabbitmq*
-          mysql-redis
+          postgres-redis*
           postgres-rabbitmq
-          postgres-redis
+          mysql-redis
+          mysql-rabbitmq
 
-        Usage example: ./dc-up-d.sh mysql-redis
+        Usage example: ./dc-up-d.sh mysql-rabbitmq
         "
     else
         PROFILE=$DD_PROFILE
