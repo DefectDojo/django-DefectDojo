@@ -955,7 +955,7 @@ def delete_product(request, pid):
                                     product_type=product_type,
                                     description=_('The product "%(name)s" was deleted by %(user)s') % {
                                         'name': product.name, 'user': request.user},
-                                    url=request.build_absolute_uri(reverse('product')),
+                                    url=reverse('product'),
                                     icon="exclamation-triangle")
                 logger.debug('delete_product: POST RETURN')
                 return HttpResponseRedirect(reverse('product'))

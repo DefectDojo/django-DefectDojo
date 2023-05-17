@@ -131,8 +131,7 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITLAB_KEY=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
-    DD_SOCIAL_AUTH_GITLAB_SCOPE=(
-        list, ['api', 'read_user', 'openid', 'profile', 'email']),
+    DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['read_user', 'openid']),
     DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_KEYCLOAK_KEY=(str, ''),
     DD_SOCIAL_AUTH_KEYCLOAK_SECRET=(str, ''),
@@ -609,6 +608,10 @@ SOCIAL_AUTH_GITLAB_KEY = env('DD_SOCIAL_AUTH_GITLAB_KEY')
 SOCIAL_AUTH_GITLAB_SECRET = env('DD_SOCIAL_AUTH_GITLAB_SECRET')
 SOCIAL_AUTH_GITLAB_API_URL = env('DD_SOCIAL_AUTH_GITLAB_API_URL')
 SOCIAL_AUTH_GITLAB_SCOPE = env('DD_SOCIAL_AUTH_GITLAB_SCOPE')
+
+# Add required scope if auto import is enabled
+if GITLAB_PROJECT_AUTO_IMPORT:
+    SOCIAL_AUTH_GITLAB_SCOPE += ['read_repository']
 
 AUTH0_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED')
 SOCIAL_AUTH_AUTH0_KEY = env('DD_SOCIAL_AUTH_AUTH0_KEY')
@@ -1343,6 +1346,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'NeuVector (compliance)': ['title', 'vuln_id_from_tool', 'description'],
     'Wpscan': ['title', 'description', 'severity'],
     'Codechecker Report native': ['unique_id_from_tool'],
+    'Wazuh Scan': ['title'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1399,6 +1403,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Wpscan': True,
     'Rusty Hog Scan': True,
     'Codechecker Report native': True,
+    'Wazuh': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
