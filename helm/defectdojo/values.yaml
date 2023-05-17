@@ -233,6 +233,7 @@ django:
     certificates:
     # includes additional CA certificate as volume, it refrences REQUESTS_CA_BUNDLE env varible
     # to create configMap `kubectl create  cm defectdojo-ca-certs --from-file=ca.crt`
+    # NOTE: it reflects REQUESTS_CA_BUNDLE for celery workers, beats as well
       enabled: false
       configName: defectdojo-ca-certs
       certMountPath: /certs/

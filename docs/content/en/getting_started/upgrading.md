@@ -79,6 +79,10 @@ If there is any use of the Nessus or Nessus WAS in automated fashion via the imp
 
 For all other changes, check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.23.0) for the contents of the release.
 
+## Upgrading to DefectDojo Version 2.22.x.
+
+There are no special instruction for upgrading to 2.22.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.22.0) for the contents of the release.
+
 ## Upgrading to DefectDojo Version 2.21.x.
 
 There are no special instruction for upgrading to 2.21.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.21.0) for the contents of the release.
