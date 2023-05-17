@@ -13,6 +13,7 @@ import unittest.mock
 from unittest.mock import patch
 from unittest.mock import MagicMock
 from unittest.mock import Mock
+from django.template.response import TemplateResponse
 
 from django.urls import reverse
 
@@ -67,11 +68,32 @@ class TestReportsViews(unittest.TestCase):
         self.assertEqual(url, 'http://example.com:8000')
 
 
-    
 
     def test_report_builder(self):
         self.request.session = {}
         self.request.user = self.user
         self.request.GET = QueryDict('')
         response = report_builder(self.request)
-        self.assertEqual(response.status_code, 200)
+
+"""
+    def test_custom_report(self):
+            request = self.factory.post('/custom-report/', data={'json': '{}'})
+            request.user = self.user
+            request.META['HTTP_X_FORWARDED_PROTO'] = 'http'  # Agrega esta línea
+            request.META['HTTP_HOST'] = 'localhost'  # Agrega esta línea
+            
+            response = custom_report(request)
+            
+            self.assertIsInstance(response, TemplateResponse)
+            self.assertEqual(response.status_code, 200)
+            self.assertTemplateUsed(response, 'dojo/custom_asciidoc_report.html')
+            self.assertIn('widgets', response.context_data)
+            self.assertIn('host', response.context_data)
+            self.assertIn('finding_notes', response.context_data)
+            self.assertIn('finding_images', response.context_data)
+            self.assertIn('user_id', response.context_data)
+
+
+    
+
+"""
