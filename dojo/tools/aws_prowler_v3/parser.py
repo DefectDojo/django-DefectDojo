@@ -70,7 +70,7 @@ class AWSProwlerJsonV3Parser(object):
 
             # improving key to get duplicates
             dupe_key = hashlib.sha256(
-                (severity + '|' + region + '|' + result_extended).encode('utf-8')).hexdigest()
+                (severity + '|' + region + '|' + result_extended + '|' + component_name).encode('utf-8')).hexdigest()
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 if description is not None:

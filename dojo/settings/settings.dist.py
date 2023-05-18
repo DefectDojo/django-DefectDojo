@@ -1173,7 +1173,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Anchore Enterprise Policy Check': ['title', 'severity', 'component_name', 'file_path'],
     'Anchore Grype': ['title', 'severity', 'component_name', 'component_version'],
     'Aqua Scan': ['severity', 'vulnerability_ids', 'component_name', 'component_version'],
-    'AWS Prowler V3': ['title', 'severity', 'component_name'],
+    'AWS Prowler V3': ['title', 'severity', 'component_name', 'description'],
     'Bandit Scan': ['file_path', 'line', 'vuln_id_from_tool'],
     'CargoAudit Scan': ['vulnerability_ids', 'severity', 'component_name', 'component_version', 'vuln_id_from_tool'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
