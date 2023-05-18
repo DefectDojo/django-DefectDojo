@@ -21,14 +21,6 @@ DockerHub to update.
 
 
 The generic upgrade method for docker-compose are as follows:
--   Pull the latest DefectDojo changes
-
-    ``` {.sourceCode .bash}
-    git fetch
-    git pull
-    git merge origin/master
-    ```    
-
 -   Pull the latest version
 
     ``` {.sourceCode .bash}
@@ -64,10 +56,16 @@ The generic upgrade method for docker-compose are as follows:
 
 If you build your images locally and do not use the ones from DockerHub,
 the instructions are the same, with the caveat that you must build your images
-first. (Of course, if you're doing this, then you know you have to
-update the source code first)
+first. 
+-   Pull the latest DefectDojo changes
 
-Replace the first step above with: `docker-compose build`
+    ``` {.sourceCode .bash}
+    git fetch
+    git pull
+    git merge origin/master
+    ```    
+
+Then replace the first step of the above generic upgrade method for docker-compose with: `docker-compose build`
 
 godojo installations
 --------------------
