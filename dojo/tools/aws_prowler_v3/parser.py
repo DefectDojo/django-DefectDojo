@@ -7,14 +7,14 @@ from datetime import date
 from dojo.models import Finding
 
 
-class AWSProwlerJsonV3Parser(object):
+class AWSProwlerV3Parser(object):
     SCAN_TYPE = ["AWS Prowler V3"]
 
     def get_scan_types(self):
-        return AWSProwlerJsonV3Parser.SCAN_TYPE
+        return AWSProwlerV3Parser.SCAN_TYPE
 
     def get_label_for_scan_types(self, scan_type):
-        return AWSProwlerJsonV3Parser.SCAN_TYPE[0]
+        return AWSProwlerV3Parser.SCAN_TYPE[0]
 
     def get_description_for_scan_types(self, scan_type):
         return "Export of AWS Prowler JSON V3 format."
