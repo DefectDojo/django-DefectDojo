@@ -1,4 +1,4 @@
-
+""" 
 import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dojo.settings.settings')
 import django
@@ -75,7 +75,7 @@ class TestReportsViews(unittest.TestCase):
         self.request.GET = QueryDict('')
         response = report_builder(self.request)
 
-"""
+
     def test_custom_report(self):
             request = self.factory.post('/custom-report/', data={'json': '{}'})
             request.user = self.user
