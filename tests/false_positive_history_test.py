@@ -1,6 +1,5 @@
 import unittest
 import sys
-import time
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -52,20 +51,17 @@ class FalsePositiveHistoryTest(BaseTestCase):
         # Return finding URL
         return driver.current_url
 
-
     def assert_is_active(self, finding_url):
         driver = self.driver
         driver.get(finding_url)
         self.assertTrue(self.is_element_by_css_selector_present(selector='#notes', text='Active'))
         self.assertFalse(self.is_element_by_css_selector_present(selector='#notes', text='False Positive'))
 
-
     def assert_is_false_positive(self, finding_url):
         driver = self.driver
         driver.get(finding_url)
         self.assertFalse(self.is_element_by_css_selector_present(selector='#notes', text='Active'))
         self.assertTrue(self.is_element_by_css_selector_present(selector='#notes', text='False Positive'))
-
 
     def edit_toggle_false_positive(self, finding_url):
         driver = self.driver
@@ -82,7 +78,6 @@ class FalsePositiveHistoryTest(BaseTestCase):
         # Send
         driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
 
-
     def bulk_edit(self, finding_url, status_id):
         driver = self.driver
         # Go to finding page
@@ -97,7 +92,6 @@ class FalsePositiveHistoryTest(BaseTestCase):
         driver.find_element(By.ID, status_id).click()
         # Submit
         driver.find_element(By.CSS_SELECTOR, "input[type='submit']").click()
-
 
     def test_retroactive_edit_finding(self):
         driver = self.driver
@@ -127,7 +121,6 @@ class FalsePositiveHistoryTest(BaseTestCase):
         # Assert that both findings are active again
         self.assert_is_active(finding_1)
         self.assert_is_active(finding_2)
-
 
     def test_retroactive_bulk_edit_finding(self):
         driver = self.driver
