@@ -5,7 +5,7 @@ django.setup()
 import unittest
 from django.test import RequestFactory
 from django.contrib.auth.models import User
-from dojo.models import Notes, Engagement, Test, Finding, Test_Type, Product
+from dojo.models import Notes, Engagement, Test, Finding, Test_Type, Product, Product_Type
 from dojo.notes.views import delete_note
 from datetime import datetime
 from django.contrib import messages
@@ -34,7 +34,10 @@ class DeleteNoteTestCase(TestCase):
         target_start = datetime.strptime('2023-05-11', '%Y-%m-%d')
 
         # Obtener o crear el producto
-        product, _ = Product.objects.get_or_create(id=1)  # Asegúrate de importar el modelo Product
+        #product_type, _ = Product_Type.objects.get_or_create(id=1, defaults={'name': 'Default Product Type'})
+        product_type, _ = Product_Type.objects.get_or_create(id=3, name= 'Default Product Type')
+        product, _ = Product.objects.get_or_create(id=3, prod_type=product_type)
+
 
         self.engagement = Engagement.objects.create(name='Engagement', target_start=target_start, target_end=target_start, product=product)
         test_type_instance, _ = Test_Type.objects.get_or_create(name='Your Test Type')
@@ -68,9 +71,10 @@ class DeleteNoteTestCase(TestCase):
         # Crear una solicitud DELETE para eliminar una nota de un compromiso
         request = self.factory.delete('/delete_note/1/engagement/1/')
         request.user = self.user
-"""
-        # Ejecutar la vista de eliminación de nota
+
+        """# Ejecutar la vista de eliminación de nota
         response = delete_note(request, self.note.id, 'engagement', self.engagement.id)
+
 
         # Verificar que la respuesta sea una redirección
         self.assertEqual(response.status_code, 302)
