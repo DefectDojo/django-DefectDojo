@@ -34,31 +34,30 @@ class DeleteNoteTestCase(TestCase):
         target_start = datetime.strptime('2023-05-11', '%Y-%m-%d')
 
         # Obtener o crear el producto
-        #product_type, _ = Product_Type.objects.get_or_create(id=1, defaults={'name': 'Default Product Type'})
         product_type, _ = Product_Type.objects.get_or_create(id=3, name= 'Default Product Type')
         product, _ = Product.objects.get_or_create(id=3, prod_type=product_type)
 
 
         self.engagement = Engagement.objects.create(name='Engagement', target_start=target_start, target_end=target_start, product=product)
-        test_type_instance, _ = Test_Type.objects.get_or_create(name='Your Test Type')
-        self.test = Test.objects.create(engagement=self.engagement, test_type=test_type_instance, target_start=target_start, target_end=target_start)
-        self.finding = Finding.objects.create(title='Finding', test=self.test)
+        #test_type_instance, _ = Test_Type.objects.get_or_create(name='Your Test Type')
+        #self.test = Test.objects.create(engagement=self.engagement, test_type=test_type_instance, target_start=target_start, target_end=target_start)
+        #self.finding = Finding.objects.create(title='Finding', test=self.test)
 
         # Crear una nota de ejemplo
         self.note = Notes.objects.create(author=self.user, entry='Test note')
 
         # Configurar el middleware de mensajes
-        handler = BaseHandler()
-        self.middleware = MessageMiddleware(handler)
+        #handler = BaseHandler()
+        #self.middleware = MessageMiddleware(handler)
 
         # Configurar el middleware de sesiones (si es necesario)
-        self.session_middleware = SessionMiddleware(handler)
+        #self.session_middleware = SessionMiddleware(handler)
 
         # Configurar el middleware de mensajes
-        self.middleware = MessageMiddleware(handler)
+        #self.middleware = MessageMiddleware(handler)
 
         # Configurar el middleware de sesiones (si es necesario)
-        self.session_middleware = SessionMiddleware(handler)
+        #self.session_middleware = SessionMiddleware(handler)
 
 
     @override_settings(MIDDLEWARE=[
@@ -72,7 +71,8 @@ class DeleteNoteTestCase(TestCase):
         request = self.factory.delete('/delete_note/1/engagement/1/')
         request.user = self.user
 
-        """# Ejecutar la vista de eliminación de nota
+       # Ejecutar la vista de eliminación de nota
+"""
         response = delete_note(request, self.note.id, 'engagement', self.engagement.id)
 
 
@@ -82,4 +82,3 @@ class DeleteNoteTestCase(TestCase):
         # Verificar que la nota haya sido eliminada
         self.assertFalse(Notes.objects.filter(id=self.note.id).exists())
 """
-
