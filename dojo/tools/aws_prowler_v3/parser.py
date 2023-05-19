@@ -54,11 +54,11 @@ class AWSProwlerV3Parser(object):
             resource_arn = deserialized.get('ResourceArn')
             account_id = deserialized.get('AccountId')
             resource_id = deserialized.get('ResourceId')
+            unique_id_from_tool = deserialized.get('FindingUniqueId')
             if not resource_arn or resource_arn == "":
                 component_name = str(provider) + "-" + str(account_id) + "-" + str(region) + "-" + str(resource_id)
             else:
                 component_name = resource_arn
-            unique_id_from_tool = deserialized.get('FindingUniqueId')
 
             description = "**Issue:** " + str(result_extended) + \
                 "\n**Description:** " + str(general_description) + \
@@ -69,8 +69,7 @@ class AWSProwlerV3Parser(object):
                 "\n**Security Domain:** " + str(security_domain)
 
             # improving key to get duplicates
-            dupe_key = hashlib.sha256(
-                (severity + '|' + region + '|' + result_extended + '|' + component_name).encode('utf-8')).hexdigest()
+            dupe_key = hashlib.sha256(unique_id_from_tool.encode('utf-8')).hexdigest()
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 if description is not None:
