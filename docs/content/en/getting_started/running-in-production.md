@@ -88,7 +88,7 @@ configurable amount. Each batch will be be processed in seperate celery tasks.
 The following variables impact async imports.
 
 -   `DD_ASYNC_FINDING_IMPORT` defaults to False
--   `DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE` deafults to 100
+-   `DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE` defaults to 100
 
 When using asynchronous imports with dynamic scanners, Endpoints will continue to "trickle" in
 even after the import has returned a successful respsonse. This is becasue processing continues 
