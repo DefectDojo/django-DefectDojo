@@ -21,7 +21,6 @@ DockerHub to update.
 
 
 The generic upgrade method for docker-compose are as follows:
-
 -   Pull the latest version
 
     ``` {.sourceCode .bash}
@@ -51,16 +50,22 @@ The generic upgrade method for docker-compose are as follows:
     Check the output via `docker-compose logs initializer` or relevant k8s command
 -   If you have the initializer disabled (or if you want to be on the
     safe side), run the migration command:
-    `docker-compose exec uwsgi /bin/bash -c 'python manage.py migrate`
+    `docker-compose exec uwsgi /bin/bash -c "python manage.py migrate"`
 
 ### Building your local images
 
 If you build your images locally and do not use the ones from DockerHub,
 the instructions are the same, with the caveat that you must build your images
-first. (Of course, if you're doing this, then you know you have to
-update the source code first)
+first. 
+-   Pull the latest DefectDojo changes
 
-Replace the first step above with: `docker-compose build`
+    ``` {.sourceCode .bash}
+    git fetch
+    git pull
+    git merge origin/master
+    ```    
+
+Then replace the first step of the above generic upgrade method for docker-compose with: `docker-compose build`
 
 godojo installations
 --------------------
