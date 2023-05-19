@@ -1,5 +1,6 @@
 import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dojo.settings.settings')
+
 import django
 django.setup()
 import unittest
@@ -18,6 +19,9 @@ from django.test import TestCase, override_settings
 from django.test.utils import modify_settings
 from django.core.handlers.base import BaseHandler
 from django.test import TestCase, override_settings
+
+from django.contrib.messages.storage.fallback import FallbackStorage
+
 
 
 
@@ -67,18 +71,34 @@ class DeleteNoteTestCase(TestCase):
         # ...
     ])
     def test_delete_note(self):
-        # Crear una solicitud DELETE para eliminar una nota de un compromiso
-        request = self.factory.delete('/delete_note/1/engagement/1/')
+        request = self.factory.delete('/notes/{}/delete/{}/{}'.format(self.note.id, 'engagement', self.engagement.id))
         request.user = self.user
+        request.POST = {'id': self.note.id}
+        print(request)
 
-       # Ejecutar la vista de eliminación de nota
-"""
+        # Ejecutar la vista de eliminación de nota
+        setattr(request, 'session', 'session')
+        messages = FallbackStorage(request)
+        setattr(request, '_messages', messages)
+
+
         response = delete_note(request, self.note.id, 'engagement', self.engagement.id)
 
+        # Agregar mensajes de depuración
+        print('Response:', response)
+        print('Note exists in database:', Notes.objects.filter(id=self.note.id).exists())
 
         # Verificar que la respuesta sea una redirección
         self.assertEqual(response.status_code, 302)
 
         # Verificar que la nota haya sido eliminada
         self.assertFalse(Notes.objects.filter(id=self.note.id).exists())
+
+        
+
+
+    
+
+
+"""
 """
