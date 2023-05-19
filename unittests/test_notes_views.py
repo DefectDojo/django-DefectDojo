@@ -5,7 +5,7 @@ django.setup()
 import unittest
 from django.test import RequestFactory
 from django.contrib.auth.models import User
-from dojo.models import Notes, Engagement, Test, Finding, Test_Type
+from dojo.models import Notes, Engagement, Test, Finding, Test_Type, Product
 from dojo.notes.views import delete_note
 from datetime import datetime
 from django.contrib import messages
@@ -20,6 +20,7 @@ from django.core.handlers.base import BaseHandler
 from django.test import TestCase, override_settings
 
 
+
 class DeleteNoteTestCase(TestCase):
     
     def setUp(self):
@@ -31,7 +32,11 @@ class DeleteNoteTestCase(TestCase):
 
         # Crear un objeto de ejemplo para cada página
         target_start = datetime.strptime('2023-05-11', '%Y-%m-%d')
-        self.engagement = Engagement.objects.create(name='Engagement', target_start=target_start, target_end=target_start, product_id=1)
+
+        # Obtener o crear el producto
+        product, _ = Product.objects.get_or_create(id=1)  # Asegúrate de importar el modelo Product
+
+        self.engagement = Engagement.objects.create(name='Engagement', target_start=target_start, target_end=target_start, product=product)
         test_type_instance, _ = Test_Type.objects.get_or_create(name='Your Test Type')
         self.test = Test.objects.create(engagement=self.engagement, test_type=test_type_instance, target_start=target_start, target_end=target_start)
         self.finding = Finding.objects.create(title='Finding', test=self.test)
@@ -39,7 +44,7 @@ class DeleteNoteTestCase(TestCase):
         # Crear una nota de ejemplo
         self.note = Notes.objects.create(author=self.user, entry='Test note')
 
-         # Configurar el middleware de mensajes
+        # Configurar el middleware de mensajes
         handler = BaseHandler()
         self.middleware = MessageMiddleware(handler)
 
@@ -51,6 +56,7 @@ class DeleteNoteTestCase(TestCase):
 
         # Configurar el middleware de sesiones (si es necesario)
         self.session_middleware = SessionMiddleware(handler)
+
 
     @override_settings(MIDDLEWARE=[
          # ...
