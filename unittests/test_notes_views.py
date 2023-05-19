@@ -1,28 +1,16 @@
 import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dojo.settings.settings')
-
 import django
 django.setup()
-import unittest
 from django.test import RequestFactory
 from django.contrib.auth.models import User
 from dojo.models import Notes, Engagement, Test, Finding, Test_Type, Product, Product_Type
 from dojo.notes.views import delete_note
 from datetime import datetime
-from django.contrib import messages
-from django.core.exceptions import PermissionDenied
-from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory
-from django.contrib.messages.middleware import MessageMiddleware
-from django.contrib.sessions.middleware import SessionMiddleware
 from django.test import TestCase, override_settings
-from django.test.utils import modify_settings
-from django.core.handlers.base import BaseHandler
 from django.test import TestCase, override_settings
-
 from django.contrib.messages.storage.fallback import FallbackStorage
-
-
 
 
 class DeleteNoteTestCase(TestCase):
@@ -38,43 +26,27 @@ class DeleteNoteTestCase(TestCase):
         target_start = datetime.strptime('2023-05-11', '%Y-%m-%d')
 
         # Obtener o crear el producto
-        product_type, _ = Product_Type.objects.get_or_create(id=3, name= 'Default Product Type')
+        product_type, _ = Product_Type.objects.get_or_create(id=3, name='Default Product Type')
         product, _ = Product.objects.get_or_create(id=3, prod_type=product_type)
 
-
         self.engagement = Engagement.objects.create(name='Engagement', target_start=target_start, target_end=target_start, product=product)
-        #test_type_instance, _ = Test_Type.objects.get_or_create(name='Your Test Type')
-        #self.test = Test.objects.create(engagement=self.engagement, test_type=test_type_instance, target_start=target_start, target_end=target_start)
-        #self.finding = Finding.objects.create(title='Finding', test=self.test)
+
+        # Crear un test de ejemplo
+        test_type, _ = Test_Type.objects.get_or_create(name='Default Test Type')
+        self.test = Test.objects.create(engagement=self.engagement, test_type=test_type, target_start=target_start, target_end=target_start)
 
         # Crear una nota de ejemplo
         self.note = Notes.objects.create(author=self.user, entry='Test note')
 
-        # Configurar el middleware de mensajes
-        #handler = BaseHandler()
-        #self.middleware = MessageMiddleware(handler)
-
-        # Configurar el middleware de sesiones (si es necesario)
-        #self.session_middleware = SessionMiddleware(handler)
-
-        # Configurar el middleware de mensajes
-        #self.middleware = MessageMiddleware(handler)
-
-        # Configurar el middleware de sesiones (si es necesario)
-        #self.session_middleware = SessionMiddleware(handler)
+        # Crear un finding de ejemplo
+        self.finding = Finding.objects.create(test=self.test)
 
 
-    @override_settings(MIDDLEWARE=[
-         # ...
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.contrib.messages.middleware.MessageMiddleware',
-        # ...
-    ])
+
     def test_delete_note(self):
         request = self.factory.delete('/notes/{}/delete/{}/{}'.format(self.note.id, 'engagement', self.engagement.id))
         request.user = self.user
         request.POST = {'id': self.note.id}
-        print(request)
 
         # Ejecutar la vista de eliminación de nota
         setattr(request, 'session', 'session')
@@ -85,7 +57,6 @@ class DeleteNoteTestCase(TestCase):
         response = delete_note(request, self.note.id, 'engagement', self.engagement.id)
 
         # Agregar mensajes de depuración
-        print('Response:', response)
         print('Note exists in database:', Notes.objects.filter(id=self.note.id).exists())
 
         # Verificar que la respuesta sea una redirección
@@ -94,11 +65,52 @@ class DeleteNoteTestCase(TestCase):
         # Verificar que la nota haya sido eliminada
         self.assertFalse(Notes.objects.filter(id=self.note.id).exists())
 
+    def test_delete_note_page_test(self):
+        request = self.factory.delete('/notes/{}/delete/{}/{}'.format(self.note.id, 'test', self.test.id))
+        request.user = self.user
+        request.POST = {'id': self.note.id}
+
+        # Ejecutar la vista de eliminación de nota
+        setattr(request, 'session', 'session')
+        messages = FallbackStorage(request)
+        setattr(request, '_messages', messages)
+
+        response = delete_note(request, self.note.id, 'test', self.test.id)
+
+        # Agregar mensajes de depuración
+        print('Note exists in database:', Notes.objects.filter(id=self.note.id).exists())
+
+        # Verificar que la respuesta sea una redirección
+        self.assertEqual(response.status_code, 302)
+
+        # Verificar que la nota haya sido eliminada
+        self.assertFalse(Notes.objects.filter(id=self.note.id).exists())
+
+    def test_delete_note_finding(self):
+        request = self.factory.delete('/notes/{}/delete/{}/{}'.format(self.note.id, 'finding', self.finding.id))
+        request.user = self.user
+        request.POST = {'id': self.note.id}
+
+        # Crear un objeto de ejemplo para la prueba de finding
+        self.finding = Finding.objects.create(test=self.test)
+
+        # Ejecutar la vista de eliminación de nota
+        setattr(request, 'session', 'session')
+        messages = FallbackStorage(request)
+        setattr(request, '_messages', messages)
+
+        response = delete_note(request, self.note.id, 'finding', self.finding.id)
+
+        # Agregar mensajes de depuración
+        print('Note exists in database:', Notes.objects.filter(id=self.note.id).exists())
+
+        # Verificar que la respuesta sea una redirección
+        self.assertEqual(response.status_code, 302)
+
+        # Verificar que la nota haya sido eliminada
+        self.assertFalse(Notes.objects.filter(id=self.note.id).exists())
+
+
+
         
 
-
-    
-
-
-"""
-"""
