@@ -38,9 +38,7 @@ class DeleteNoteTestCase(TestCase):
         self.note = Notes.objects.create(author=self.user, entry='Test note')
 
         # Crear un finding de ejemplo
-        self.finding = Finding.objects.create(test=self.test)
-        self.finding.reporter = self.user
-        self.finding.save()
+        self.finding = Finding.objects.create(test=self.test, reporter=self.user)
 
 
 
