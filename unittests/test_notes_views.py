@@ -92,7 +92,7 @@ class DeleteNoteTestCase(TestCase):
         request.POST = {'id': self.note.id}
 
         # Crear un objeto de ejemplo para la prueba de finding
-        self.finding = Finding.objects.create(test=self.test)
+        #self.finding = Finding.objects.create(test=self.test)
 
         # Ejecutar la vista de eliminación de nota
         setattr(request, 'session', 'session')
