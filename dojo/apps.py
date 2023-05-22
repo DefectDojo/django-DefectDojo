@@ -72,6 +72,7 @@ class DojoAppConfig(AppConfig):
         # Load any signals here that will be ready for runtime
         # Importing the signals file is good enough if using the reciever decorator
         import dojo.announcement.signals  # noqa
+        import dojo.product.signals  # noqa
 
 
 def get_model_fields_with_extra(model, extra_fields=()):
