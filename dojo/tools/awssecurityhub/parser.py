@@ -35,13 +35,21 @@ class AwsSecurityHubParser(object):
 
 
 def get_item(finding, test):
+    aws_scanner_type = finding.get('ProductFields', {}).get('aws/securityhub/ProductName', "")
     finding_id = finding.get('Id', "")
     title = finding.get('Title', "")
     severity = finding.get('Severity', {}).get('Label', 'INFORMATIONAL').title()
-    description = finding.get('Description', "")
+    if aws_scanner_type == "Inspector":
+        vulnerabilities = finding.get('Vulnerabilities', "")
+        cve = vulnerabilities[0]['Id']
+        vulnerablepackages = vulnerabilities[0].get('VulnerablePackages', "")
+        mitigation = vulnerablepackages[0]['Remediation']
+        description = "This is a Inspector Finding \n" + cve + "\n" + finding.get('Description', "")
+    else:
+        mitigation = finding.get('Remediation', {}).get('Recommendation', {}).get('Text', "")
+        description = "This is a Security Hub Finding \n" + finding.get('Description', "")
     resources = finding.get('Resources', "")
     resource_id = resources[0]['Id'].split(':')[-1]
-    mitigation = finding.get('Remediation', {}).get('Recommendation', {}).get('Text', "")
     references = finding.get('Remediation', {}).get('Recommendation', {}).get('Url')
     false_p = False
 
@@ -59,7 +67,6 @@ def get_item(finding, test):
         mitigated = None
         is_Mitigated = False
         active = True
-
     finding = Finding(title=f"Resource: {resource_id} - {title}",
                       test=test,
                       description=description,
@@ -73,5 +80,4 @@ def get_item(finding, test):
                       mitigated=mitigated,
                       is_mitigated=is_Mitigated,
                       )
-
     return finding
