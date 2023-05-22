@@ -1071,7 +1071,10 @@
         <script src="{% static "dojo/js/cvss_calculator.js" %}"></script>
         <script type="application/javascript">
             $(document).ready(function() {
-                $('.has-popover').popover({'trigger':'hover'});
+                $('.has-popover').hover(
+                    function() { $(this).popover('show'); }, // hover
+                    function() { $(this).popover('hide'); } // unhover
+                );
                 {% if request.user.is_authenticated and not 'DISABLE_ALERT_COUNTER'|setting_enabled %}
                     function get_alerts() {
                         $('.dropdown-alerts').html('<div class="text-center"><i class="fa-solid fa-spinner fa-spin"></i></div>');
