@@ -549,7 +549,6 @@ def add_temp_finding(request, tid, fid):
                         jira_helper.push_to_jira(new_finding)
                 else:
                     add_error_message_to_response('jira form validation failed: %s' % jform.errors)
-
             if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
                 burp_rr = BurpRawRequestResponse(
                     finding=new_finding,
@@ -558,7 +557,6 @@ def add_temp_finding(request, tid, fid):
                 )
                 burp_rr.clean()
                 burp_rr.save()
-                    
             messages.add_message(request,
                                  messages.SUCCESS,
                                  _('Finding from template added successfully.'),
