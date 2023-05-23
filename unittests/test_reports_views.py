@@ -1,35 +1,25 @@
-""" 
 import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dojo.settings.settings')
 import django
 django.setup()
 
-
 from dojo.reports.views import *
-from django.test import RequestFactory
+from django.test import RequestFactory, TestCase, Client
 from django.contrib.auth.models import User
-import unittest
-import unittest.mock
-from unittest.mock import patch
 from unittest.mock import MagicMock
-from unittest.mock import Mock
-from django.template.response import TemplateResponse
-
 from django.urls import reverse
 
 
-django.setup()
 
-
-class TestReportsViews(unittest.TestCase):
+class TestReportsViews(TestCase):
     @classmethod
    
 
     def setUp(self):
         self.factory = RequestFactory()
+        self.client = Client()
         self.request = self.factory.get(reverse('report_builder'))
         self.user = User.objects.get(username='testuser') # retrieve the existing user
-        self.request.user = self.user
 
 
     def test_down_view(self):
@@ -75,25 +65,15 @@ class TestReportsViews(unittest.TestCase):
         self.request.GET = QueryDict('')
         response = report_builder(self.request)
 
+  
+    def test_report_findings(self):
+        url = reverse('report_findings')  # Asegúrate de que el nombre de la URL sea correcto
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'dojo/report_findings.html')
 
-    def test_custom_report(self):
-            request = self.factory.post('/custom-report/', data={'json': '{}'})
-            request.user = self.user
-            request.META['HTTP_X_FORWARDED_PROTO'] = 'http'  # Agrega esta línea
-            request.META['HTTP_HOST'] = 'localhost'  # Agrega esta línea
-            
-            response = custom_report(request)
-            
-            self.assertIsInstance(response, TemplateResponse)
-            self.assertEqual(response.status_code, 200)
-            self.assertTemplateUsed(response, 'dojo/custom_asciidoc_report.html')
-            self.assertIn('widgets', response.context_data)
-            self.assertIn('host', response.context_data)
-            self.assertIn('finding_notes', response.context_data)
-            self.assertIn('finding_images', response.context_data)
-            self.assertIn('user_id', response.context_data)
-
-
-    
-
-"""
+    """def test_report_endpoints(self):
+        url = reverse('report_endpoints')  # Asegúrate de que el nombre de la URL sea correcto
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'dojo/report_endpoints.html')"""
