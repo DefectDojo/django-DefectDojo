@@ -7,7 +7,6 @@ from dojo.models import Finding, Endpoint
 
 
 class Acunetix360Parser(object):
-
     def get_scan_types(self):
         return ["Acunetix360 Scan"]
 
@@ -29,19 +28,22 @@ class Acunetix360Parser(object):
             findingdetail = text_maker.handle(item.get("Description", ""))
             if "Cwe" in item["Classification"]:
                 try:
-                    cwe = int(item["Classification"]["Cwe"].split(',')[0])
-                except:
+                    cwe = int(item["Classification"]["Cwe"].split(",")[0])
+                except BaseException:
                     cwe = None
             else:
                 cwe = None
             sev = item["Severity"]
-            if sev not in ['Info', 'Low', 'Medium', 'High', 'Critical']:
-                sev = 'Info'
+            if sev not in ["Info", "Low", "Medium", "High", "Critical"]:
+                sev = "Info"
             mitigation = text_maker.handle(item.get("RemedialProcedure", ""))
             references = text_maker.handle(item.get("RemedyReferences", ""))
             if "LookupId" in item:
                 lookupId = item["LookupId"]
-                references = f"https://online.acunetix360.com/issues/detail/{lookupId}\n" + references
+                references = (
+                    f"https://online.acunetix360.com/issues/detail/{lookupId}\n"
+                    + references
+                )
             url = item["Url"]
             impact = text_maker.handle(item.get("Impact", ""))
             dupe_key = title
@@ -52,24 +54,32 @@ class Acunetix360Parser(object):
             if response is None or len(response) <= 0:
                 response = "Response Not Found"
 
-            finding = Finding(title=title,
-                              test=test,
-                              description=findingdetail,
-                              severity=sev.title(),
-                              mitigation=mitigation,
-                              impact=impact,
-                              date=scan_date,
-                              references=references,
-                              cwe=cwe,
-                              static_finding=True)
+            finding = Finding(
+                title=title,
+                test=test,
+                description=findingdetail,
+                severity=sev.title(),
+                mitigation=mitigation,
+                impact=impact,
+                date=scan_date,
+                references=references,
+                cwe=cwe,
+                static_finding=True,
+            )
 
-            if (item["Classification"] is not None) and (item["Classification"]["Cvss"] is not None) and (item["Classification"]["Cvss"]["Vector"] is not None):
-                cvss_objects = cvss_parser.parse_cvss_from_text(item["Classification"]["Cvss"]["Vector"])
+            if (
+                (item["Classification"] is not None)
+                and (item["Classification"]["Cvss"] is not None)
+                and (item["Classification"]["Cvss"]["Vector"] is not None)
+            ):
+                cvss_objects = cvss_parser.parse_cvss_from_text(
+                    item["Classification"]["Cvss"]["Vector"]
+                )
                 if len(cvss_objects) > 0:
                     finding.cvssv3 = cvss_objects[0].clean_vector()
 
             if item["State"] is not None:
-                state = [x.strip() for x in item["State"].split(',')]
+                state = [x.strip() for x in item["State"].split(",")]
                 if "AcceptedRisk" in state:
                     finding.risk_accepted = True
                     finding.active = False
