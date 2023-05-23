@@ -32,7 +32,7 @@ class WazuhParser(object):
             return list()
 
         for item in vulnerability:
-            if item['condition'] != "Package unfixed":
+            if item['condition'] != "Package unfixed" and item['severity'] != "Untriaged":
                 id = item.get('cve')
                 package_name = item.get('name')
                 package_version = item.get('version')
