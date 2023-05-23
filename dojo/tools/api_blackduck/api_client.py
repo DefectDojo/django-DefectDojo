@@ -10,7 +10,11 @@ class BlackduckAPI:
         if tool_config.authentication_type == "API":
             self.api_token = tool_config.api_key
             self.base_url = tool_config.url
-            self.client = Client(base_url=tool_config.url, token=tool_config.api_key, timeout=120)
+            self.client = Client(
+                base_url=tool_config.url,
+                token=tool_config.api_key,
+                timeout=120,
+            )
         else:
             raise ValueError(
                 "Authentication type {} not supported".format(
