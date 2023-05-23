@@ -842,8 +842,6 @@ def edit_finding(request, fid):
                             fp.false_p = False
                             fp.out_of_scope = new_finding.out_of_scope
                             fp.is_mitigated = new_finding.is_mitigated
-                            fp.last_reviewed = timezone.now()
-                            fp.last_reviewed_by = request.user
                             fp.save_no_options()
 
             if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
@@ -1989,8 +1987,6 @@ def finding_bulk_update_all(request, pid=None):
                                         fp.false_p = False
                                         fp.out_of_scope = find.out_of_scope
                                         fp.is_mitigated = find.is_mitigated
-                                        fp.last_reviewed = timezone.now()
-                                        fp.last_reviewed_by = request.user
                                         fp.save_no_options()
 
                     for prod in prods:
