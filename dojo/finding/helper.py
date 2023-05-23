@@ -358,8 +358,6 @@ def post_process_finding_save(finding, dedupe_option=True, rules_option=True, pr
         else:
             from dojo.utils import do_false_positive_history
             do_false_positive_history(finding, *args, **kwargs)
-    else:
-        deduplicationLogger.debug("skipping false positive history because it's disabled in system settings")
 
     # STEP 2 run all non-status changing tasks as celery tasks in the background
     if issue_updater_option:

@@ -182,7 +182,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         # doesn't match the legacy algorithm for deduplication, this is left as is for simplicity.
         # Re-writing the legacy deduplication here would be complicated and counter-productive.
         # If you have use cases going through this section, you're advised to create a deduplication configuration for your parser
-        logger.debug("Legacy dedup. In case of issue, you're advised to create a deduplication configuration in order not to go through this section")
+        logger.debug("Legacy dedupe. In case of issue, you're advised to create a deduplication configuration in order not to go through this section")
         return (
             Finding.objects.filter(
                 **custom_filter,

@@ -18,6 +18,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='system_settings',
             name='false_positive_history',
-            field=models.BooleanField(default=False, help_text="(EXPERIMENTAL) DefectDojo will automatically mark the finding as a false positive if an equal finding (according to its dedup algorithm) has been previously marked as a false positive on the same product. ATTENTION: Although the deduplication algorithm is used to determine if a finding should be marked as a false positive, this feature will not work if deduplication is enabled since it doesn't make sense to use both."),
+            field=models.BooleanField(default=False, help_text="(EXPERIMENTAL) DefectDojo will automatically mark the finding as a false positive if an equal finding (according to its dedupe algorithm) has been previously marked as a false positive on the same product. ATTENTION: Although the deduplication algorithm is used to determine if a finding should be marked as a false positive, this feature will not work if deduplication is enabled since it doesn't make sense to use both."),
         ),
     ]

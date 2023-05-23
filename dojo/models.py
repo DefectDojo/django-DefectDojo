@@ -361,7 +361,7 @@ class System_Settings(models.Model):
     false_positive_history = models.BooleanField(
         default=False, help_text=_(
             "(EXPERIMENTAL) DefectDojo will automatically mark the finding as a "
-            "false positive if an equal finding (according to its dedup algorithm) "
+            "false positive if an equal finding (according to its dedupe algorithm) "
             "has been previously marked as a false positive on the same product. "
             "ATTENTION: Although the deduplication algorithm is used to determine "
             "if a finding should be marked as a false positive, this feature will "
