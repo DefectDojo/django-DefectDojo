@@ -124,6 +124,8 @@ class SonarQubeApiImporter(object):
                 f'Found {len(issues)} issues for component {component["key"]}'
             )
 
+            sonarUrl = self.sonar_api_url.replace("api","")
+
             for issue in issues:
                 status = issue["status"]
                 from_hotspot = issue.get("fromHotspot", False)
@@ -141,17 +143,22 @@ class SonarQubeApiImporter(object):
                 rule_id = issue["rule"]
                 rule = client.get_rule(rule_id)
                 severity = self.convert_sonar_severity(issue["severity"])
+                try:
+                    sonarqube_permalink = f"Issue permalink: {sonarUrl}project/issues?issues={issue['key']}&open={issue['key']}&resolved={issue['status']}&id={issue['project']} \n"
+                except:
+                    sonarqube_permalink = "No permalink \n"
+
                 # custom (user defined) SQ rules may not have 'htmlDesc'
                 if "htmlDesc" in rule:
                     description = self.clean_rule_description_html(
                         rule["htmlDesc"]
                     )
                     cwe = self.clean_cwe(rule["htmlDesc"])
-                    references = self.get_references(rule["htmlDesc"])
+                    references = sonarqube_permalink + self.get_references(rule["htmlDesc"])
                 else:
                     description = ""
                     cwe = None
-                    references = ""
+                    references = sonarqube_permalink
 
                 sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
                     key=issue["key"],
@@ -235,6 +242,7 @@ class SonarQubeApiImporter(object):
             logging.info(
                 f'Found {len(hotspots)} hotspots for project {component["key"]}'
             )
+            sonarUrl = self.sonar_api_url.replace("api","")
 
             for hotspot in hotspots:
                 status = hotspot["status"]
@@ -243,7 +251,16 @@ class SonarQubeApiImporter(object):
                     continue
 
                 issue_type = "SECURITY_HOTSPOT"
-                severity = "Info"
+                if hotspot["vulnerabilityProbability"] == "CRITICAL":
+                    severity = "Medium"
+                elif hotspot["vulnerabilityProbability"] == "HIGH":
+                    severity = "High"
+                elif hotspot["vulnerabilityProbability"] == "MEDIUM":
+                    severity = "Medium"
+                elif hotspot["vulnerabilityProbability"] == "LOW":
+                    severity = "Low"
+                else:
+                    severity = "Info"
                 title = textwrap.shorten(
                     text=hotspot.get("message", ""), width=500
                 )
@@ -260,7 +277,11 @@ class SonarQubeApiImporter(object):
                     )
                 )
                 cwe = self.clean_cwe(rule.get("fixRecommendations", ""))
-                references = self.get_references(
+                try:
+                    sonarqube_permalink = f"Hotspot permalink: {sonarUrl}security_hotspots?id={hotspot['project']}&hotspots={hotspot['key']} \n"
+                except:
+                    sonarqube_permalink = "No permalink \n"
+                references = sonarqube_permalink + self.get_references(
                     rule.get("riskDescription", "")
                 ) + self.get_references(rule.get("fixRecommendations", ""))
 
