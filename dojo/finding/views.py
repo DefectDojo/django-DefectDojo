@@ -449,12 +449,18 @@ def close_finding(request, fid):
                     status.last_modified = timezone.now()
                     status.save()
 
-                # only push to JIRA if there is an issue, to prevent a new one from being created
-                if jira_helper.is_push_all_issues(finding) and finding.has_jira_issue:
+                push_to_jira = False
+                # Check if there is a jira issue that needs to be updated and that
+                # the finding is not in a group
+                if finding.has_jira_issue and not finding.has_finding_group:
+                    # Determine if any automatic sync should occur
+                    push_to_jira = jira_helper.is_push_all_issues(finding) \
+                        or jira_helper.get_jira_instance(finding).finding_jira_sync
+                # Add the closing note
+                if push_to_jira:
                     jira_helper.add_comment(finding, new_note, force_push=True)
-                    finding.save(push_to_jira=True)
-                else:
-                    finding.save()
+                # Save the finding
+                finding.save(push_to_jira=push_to_jira)
 
                 messages.add_message(
                     request,
@@ -585,11 +591,14 @@ def reopen_finding(request, fid):
         status.last_modified = timezone.now()
         status.save()
 
-    # only push to JIRA if there is an issue, otherwise a new one is created
-    if jira_helper.is_push_all_issues(finding) and finding.has_jira_issue:
-        finding.save(push_to_jira=True)
-    else:
-        finding.save()
+    push_to_jira = False
+    # Check if there is a jira issue that needs to be updated and that
+    # the finding is not in a group
+    if finding.has_jira_issue and not finding.has_finding_group:
+        # Determine if any automatic sync should occur
+        push_to_jira = jira_helper.is_push_all_issues(finding) \
+            or jira_helper.get_jira_instance(finding).finding_jira_sync
+    finding.save(push_to_jira=push_to_jira)
 
     reopen_external_issue(finding, 're-opened by defectdojo', 'github')
 
