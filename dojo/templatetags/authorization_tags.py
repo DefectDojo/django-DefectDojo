@@ -57,6 +57,6 @@ def group_has_configuration_permission(group, codename):
 @register.simple_tag
 def user_can_clear_peer_review(finding, user):
     finding_under_review = finding.under_review
-    user_that_request_review = user == finding.review_requested_by
+    user_requesting_review = user == finding.review_requested_by
     user_is_reviewer = user in finding.reviewers.all()
-    return finding_under_review and (user_that_request_review or user_is_reviewer)
+    return finding_under_review and (user_requesting_review or user_is_reviewer)
