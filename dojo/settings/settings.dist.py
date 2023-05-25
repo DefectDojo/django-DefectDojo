@@ -131,8 +131,7 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITLAB_KEY=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
-    DD_SOCIAL_AUTH_GITLAB_SCOPE=(
-        list, ['api', 'read_user', 'openid', 'profile', 'email']),
+    DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['read_user', 'openid']),
     DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_KEYCLOAK_KEY=(str, ''),
     DD_SOCIAL_AUTH_KEYCLOAK_SECRET=(str, ''),
@@ -345,7 +344,7 @@ TEMPLATE_DEBUG = env('DD_TEMPLATE_DEBUG')
 # See https://docs.djangoproject.com/en/2.0/ref/settings/#allowed-hosts
 SITE_URL = env('DD_SITE_URL')
 ALLOWED_HOSTS = tuple(
-    env.list('DD_ALLOWED_HOSTS', default=['localhost', '127.0.0.1', 'testserver']))
+    env.list('DD_ALLOWED_HOSTS', default=['localhost', '127.0.0.1']))
 
 # Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
 SECRET_KEY = env('DD_SECRET_KEY')
@@ -389,15 +388,18 @@ TAG_PREFETCHING = env('DD_TAG_PREFETCHING')
 if os.getenv('DD_USE_SECRETS_MANAGER') == "true":
     secret_database = get_secret(env('DD_SECRET_DATABASE'))
     DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'defectdojo',
-        'USER': 'santiago',
-        'PASSWORD': '123456',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'default': {
+            'ENGINE': env('DD_DATABASE_ENGINE'),
+            'NAME': secret_database['dbname'],
+            'TEST': {
+                'NAME': env('DD_TEST_DATABASE_NAME'),
+            },
+            'USER': secret_database['username'],
+            'PASSWORD': secret_database['password'],
+            'HOST': secret_database['host'],
+            'PORT': secret_database['port'],
+        }
     }
-}
 else:
     if os.getenv('DD_DATABASE_URL') is not None:
         DATABASES = {
@@ -405,15 +407,18 @@ else:
         }
     else:
         DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'defectdojo',
-            'USER': 'santiago',
-            'PASSWORD': '123456',
-            'HOST': 'localhost',
-            'PORT': '3306',
+            'default': {
+                'ENGINE': env('DD_DATABASE_ENGINE'),
+                'NAME': env('DD_DATABASE_NAME'),
+                'TEST': {
+                    'NAME': env('DD_TEST_DATABASE_NAME'),
+                },
+                'USER': env('DD_DATABASE_USER'),
+                'PASSWORD': env('DD_DATABASE_PASSWORD'),
+                'HOST': env('DD_DATABASE_HOST'),
+                'PORT': env('DD_DATABASE_PORT'),
+            }
         }
-    }
 
 # Track migrations through source control rather than making migrations locally
 if env('DD_TRACK_MIGRATIONS'):
@@ -603,6 +608,10 @@ SOCIAL_AUTH_GITLAB_KEY = env('DD_SOCIAL_AUTH_GITLAB_KEY')
 SOCIAL_AUTH_GITLAB_SECRET = env('DD_SOCIAL_AUTH_GITLAB_SECRET')
 SOCIAL_AUTH_GITLAB_API_URL = env('DD_SOCIAL_AUTH_GITLAB_API_URL')
 SOCIAL_AUTH_GITLAB_SCOPE = env('DD_SOCIAL_AUTH_GITLAB_SCOPE')
+
+# Add required scope if auto import is enabled
+if GITLAB_PROJECT_AUTO_IMPORT:
+    SOCIAL_AUTH_GITLAB_SCOPE += ['read_repository']
 
 AUTH0_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED')
 SOCIAL_AUTH_AUTH0_KEY = env('DD_SOCIAL_AUTH_AUTH0_KEY')
@@ -1337,6 +1346,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'NeuVector (compliance)': ['title', 'vuln_id_from_tool', 'description'],
     'Wpscan': ['title', 'description', 'severity'],
     'Codechecker Report native': ['unique_id_from_tool'],
+    'Wazuh Scan': ['title'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1393,6 +1403,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Wpscan': True,
     'Rusty Hog Scan': True,
     'Codechecker Report native': True,
+    'Wazuh': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
