@@ -454,7 +454,7 @@ def close_finding(request, fid):
                 # Determine if the finding is in a group. if so, not push to jira
                 finding_in_group = finding.has_finding_group
                 # Check if there is a jira issue that needs to be updated
-                jira_issue_exists = finding.has_jira_issue or finding.finding_group.has_jira_issue
+                jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
                 # Only push if the finding is not in a group
                 if jira_issue_exists:
                     # Determine if any automatic sync should occur
@@ -544,7 +544,7 @@ def defect_finding_review(request, fid):
             # Determine if the finding is in a group. if so, not push to jira
             finding_in_group = finding.has_finding_group
             # Check if there is a jira issue that needs to be updated
-            jira_issue_exists = finding.has_jira_issue or finding.finding_group.has_jira_issue
+            jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
@@ -608,7 +608,7 @@ def reopen_finding(request, fid):
     # Determine if the finding is in a group. if so, not push to jira
     finding_in_group = finding.has_finding_group
     # Check if there is a jira issue that needs to be updated
-    jira_issue_exists = finding.has_jira_issue or finding.finding_group.has_jira_issue
+    jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
     # Only push if the finding is not in a group
     if jira_issue_exists:
         # Determine if any automatic sync should occur
@@ -1070,7 +1070,7 @@ def request_finding_review(request, fid):
             # Determine if the finding is in a group. if so, not push to jira
             finding_in_group = finding.has_finding_group
             # Check if there is a jira issue that needs to be updated
-            jira_issue_exists = finding.has_jira_issue or finding.finding_group.has_jira_issue
+            jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
@@ -1089,11 +1089,11 @@ def request_finding_review(request, fid):
 
             reviewers = ""
             reviewers_short = []
-            for suser in form.cleaned_data['reviewers']:
-                full_user = Dojo_User.generate_full_name(Dojo_User.objects.get(id=suser))
+            for user in form.cleaned_data['reviewers']:
+                full_user = Dojo_User.generate_full_name(Dojo_User.objects.get(id=user))
                 logger.debug("Asking %s for review", full_user)
                 reviewers += str(full_user) + ", "
-                reviewers_short.append(Dojo_User.objects.get(id=suser).username)
+                reviewers_short.append(Dojo_User.objects.get(id=user).username)
             reviewers = reviewers[:-2]
 
             create_notification(event='review_requested',
@@ -1162,7 +1162,7 @@ def clear_finding_review(request, fid):
             # Determine if the finding is in a group. if so, not push to jira
             finding_in_group = finding.has_finding_group
             # Check if there is a jira issue that needs to be updated
-            jira_issue_exists = finding.has_jira_issue or finding.finding_group.has_jira_issue
+            jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
