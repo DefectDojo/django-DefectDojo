@@ -80,6 +80,7 @@ def custom_report(request):
     form = CustomReportJsonForm(request.POST)
     host = report_url_resolver(request)
     if form.is_valid():
+        
         selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
                                                  finding_notes=False, finding_images=False, host=host)
         report_format = 'AsciiDoc'
@@ -116,6 +117,7 @@ def custom_report(request):
         else:
             return HttpResponseForbidden()
     else:
+        print ("Entra")
         return HttpResponseForbidden()
 
 

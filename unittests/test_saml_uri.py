@@ -1,23 +1,16 @@
 import unittest
 
-# Importamos los valores de los atributos desde el módulo saml_uri.
-# En este caso, importamos el mapa de atributos, junto con varios OIDs
-# específicos para diferentes universidades e instituciones.
 from dojo.settings.attribute_maps.saml_uri import MAP, EDUPERSON_OID, NOREDUPERSON_OID, NETSCAPE_LDAP, UCL_DIR_PILOT, PKCS_9, X500ATTR_OID, UMICH, SCHAC
 
-# Definimos una clase de prueba que hereda de unittest.TestCase
 
 
 class TestSamlUriMap(unittest.TestCase):
 
-    # Definimos una prueba que verifica que el mapa de atributos existe
     def test_map_exists(self):
         self.assertIsNotNone(MAP)
 
-    # Definimos una prueba que verifica que los valores del mapa de atributos son correctos
     def test_map_values(self):
 
-        # Creamos un diccionario con los valores de los atributos que esperamos encontrar en el mapa
         expected_values = {
             EDUPERSON_OID + '2': 'eduPersonNickname',
             EDUPERSON_OID + '9': 'eduPersonScopedAffiliation',

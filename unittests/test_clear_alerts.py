@@ -21,23 +21,4 @@ class RemoveAlertsTest(TestCase):
 
 
 
-    """
-    def test_handle_with_all_argument(self):
-        with patch('dojo.management.commands.remove_alerts.call_command') as mock_call_command:
-            self.cmd.handle(all=True, system=False, users=None)
-            mock_call_command.assert_called_with('delete_alerts', all=True)
-
-    def test_handle_with_system_argument(self):
-        with patch('dojo.management.commands.remove_alerts.call_command') as mock_call_command:
-            self.cmd.handle(all=False, system=True, users=None)
-            mock_call_command.assert_called_with('delete_alerts', system=True)
-
-    def test_handle_with_users_argument(self):
-        with patch('dojo.management.commands.remove_alerts.call_command') as mock_call_command:
-            self.cmd.handle(all=False, system=False, users=['user1', 'user2'])
-            mock_call_command.assert_called_with('delete_alerts', users=['user1', 'user2'])
-
-    def test_handle_with_no_arguments(self):
-        with self.assertRaises(CommandError):
-            self.cmd.handle(all=False, system=False, users=None)
-            """
+   

@@ -51,7 +51,6 @@ class TestSonarQubeApiUpdaterFromSource(unittest.TestCase):
         def test_get_findings_to_update(self):
             self.assertEqual(len(self.updater.get_findings_to_update()), 1)
 
-            # Ensure that findings without a Sonarqube issue aren't included
             finding_no_issue = Finding(
                 test=self.test,
                 active=True,
@@ -67,7 +66,6 @@ class TestSonarQubeApiUpdaterFromSource(unittest.TestCase):
 
             finding_no_issue.delete()
 
-            # Ensure that inactive findings aren't included
             self.finding.active = False
             self.finding.save()
 
