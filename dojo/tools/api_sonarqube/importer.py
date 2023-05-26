@@ -124,7 +124,7 @@ class SonarQubeApiImporter(object):
                 f'Found {len(issues)} issues for component {component["key"]}'
             )
 
-            sonarUrl = client.sonar_api_url[:-3] # [:-3] removes the /api part of the sonarqube/cloud URL
+            sonarUrl = client.sonar_api_url[:-3]  # [:-3] removes the /api part of the sonarqube/cloud URL
 
             for issue in issues:
                 status = issue["status"]
@@ -242,7 +242,7 @@ class SonarQubeApiImporter(object):
             logging.info(
                 f'Found {len(hotspots)} hotspots for project {component["key"]}'
             )
-            sonarUrl = client.sonar_api_url[:-3] # [:-3] removes the /api part of the sonarqube/cloud URL
+            sonarUrl = client.sonar_api_url[:-3]  # [:-3] removes the /api part of the sonarqube/cloud URL
 
             for hotspot in hotspots:
                 status = hotspot["status"]
