@@ -18,7 +18,8 @@ class EdgescanImporter(object):
             config = test.api_scan_configuration
             if config.product != product:
                 raise Exception(
-                    "API Scan Configuration for Edgescan and Product do not match."
+                    "API Scan Configuration for Edgescan and Product do not match. "
+                    f"Product: '{product.name}' ({product.id}), Config-product: '{config.product.name}' ({config.product.id})"
                 )
         else:
             configs = Product_API_Scan_Configuration.objects.filter(
@@ -29,12 +30,14 @@ class EdgescanImporter(object):
             elif configs.count() > 1:
                 raise Exception(
                     "More than one Product API Scan Configuration has been configured, but none of them has been "
-                    "chosen.\nPlease specify at Test which one should be used."
+                    "chosen.\nPlease specify at Test which one should be used. "
+                    f'Product: "{product.name}" ({product.id})'
                 )
             else:
                 raise Exception(
                     "There are no API Scan Configurations for this Product.\n"
-                    "Please add at least one API Scan Configuration for Edgescan to this Product."
+                    "Please add at least one API Scan Configuration for Edgescan to this Product. "
+                    f'Product: "{product.name}" ({product.id})'
                 )
 
         tool_config = config.tool_configuration

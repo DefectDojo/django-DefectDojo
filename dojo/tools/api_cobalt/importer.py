@@ -23,7 +23,8 @@ class CobaltApiImporter(object):
             # Double check of config
             if config.product != product:
                 raise ValidationError(
-                    "API Scan Configuration for Cobalt.io and Product do not match."
+                    "API Scan Configuration for Cobalt.io and Product do not match. "
+                    f"Product: '{product.name}' ({product.id}), Config-product: '{config.product.name}' ({config.product.id})"
                 )
         else:
             configs = Product_API_Scan_Configuration.objects.filter(
@@ -35,12 +36,14 @@ class CobaltApiImporter(object):
             elif configs.count() > 1:
                 raise ValidationError(
                     "More than one Product API Scan Configuration has been configured, but none of them has been "
-                    "chosen. Please specify at Test which one should be used."
+                    "chosen. Please specify at Test which one should be used. "
+                    f'Product: "{product.name}" ({product.id})'
                 )
             else:
                 raise ValidationError(
                     "There are no API Scan Configurations for this Product. Please add at least one API Scan "
-                    "Configuration for Cobalt.io to this Product."
+                    "Configuration for Cobalt.io to this Product. "
+                    f'Product: "{product.name}" ({product.id})'
                 )
 
         tool_config = config.tool_configuration
