@@ -61,6 +61,10 @@ spec:
         resources: 
           {{- toYaml .Values.cloudsql.resources | nindent 10 }}
         {{- end }}
+        ports:
+        - containerPort: 9091
+          name: http
+          protocol: TCP
       {{- end }}
       - name: initializer
         image: "{{ template "initializer.repository" . }}:{{ .Values.tag }}"
