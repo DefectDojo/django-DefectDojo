@@ -18,7 +18,7 @@ data:
   DD_CELERY_BROKER_SCHEME: {{ if eq .Values.celery.broker "rabbitmq" }}amqp{{ end }}{{ if eq .Values.celery.broker "redis" }}{{ template "redis.scheme" . }}{{ end }}
   DD_CELERY_BROKER_USER: '{{ if eq .Values.celery.broker "rabbitmq" }}user{{ end }}'
   DD_CELERY_BROKER_HOST: {{ if eq .Values.celery.broker "rabbitmq" }}{{ template "rabbitmq.hostname" . }}{{ else if eq .Values.celery.broker "redis" }}{{ template "redis.hostname" . }}{{ end }}
-  DD_CELERY_BROKER_PORT: '{{ if eq .Values.celery.broker "rabbitmq" }}5672{{ end }}{{ if eq .Values.celery.broker "redis" }}6379{{ end }}'
+  DD_CELERY_BROKER_PORT: '{{ if eq .Values.celery.broker "rabbitmq" }}{{ .Values.celery.brokerPort | default 5672 }}{{ end }}{{ if eq .Values.celery.broker "redis" }}{{ .Values.celery.brokerPort | default 6379 }}{{ end }}'
   DD_CELERY_BROKER_PARAMS: '{{ if eq .Values.celery.broker "redis" }}{{- if .Values.redis.transportEncryption.enabled -}}{{ .Values.redis.transportEncryption.params | default "ssl_cert_reqs=optional" }}{{ end }}{{ end }}'
   DD_CELERY_BROKER_PATH: '{{ .Values.celery.path | default "//" }}'
   DD_CELERY_LOG_LEVEL: {{ .Values.celery.logLevel }}

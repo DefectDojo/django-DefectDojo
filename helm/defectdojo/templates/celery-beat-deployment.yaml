@@ -70,20 +70,23 @@ spec:
         imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
         securityContext:
           runAsNonRoot: true
-        command: ["/cloud_sql_proxy"]
-        args:
-        - "-verbose={{ .Values.cloudsql.verbose }}"
+        args: 
+          - "--structured-logs"
         {{- if eq .Values.database "postgresql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
+          - "--port={{ .Values.postgresql.primary.service.ports.postgresql }}"
         {{- else if eq .Values.database "mysql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.primary.service.ports.mysql }}"
+          - "--port={{ .Values.mysql.primary.service.ports.mysql }}"
         {{- end }}
         {{- if .Values.cloudsql.enable_iam_login }}
-        - "-enable_iam_login"
+          - "--auto-iam-authn"
         {{- end }}
         {{- if .Values.cloudsql.use_private_ip }}
-        - "-ip_address_types=PRIVATE"
+          - "--private-ip"
         {{- end }}
+          - "{{ .Values.cloudsql.instance }}"
+        {{- toYaml .Values.cloudsql.extraArgs | nindent 10 }}
+        resources: 
+          {{- toYaml .Values.cloudsql.resources | nindent 10 }}
       {{- end }}
       - command:
         - /entrypoint-celery-beat.sh

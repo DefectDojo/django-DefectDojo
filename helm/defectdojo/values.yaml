@@ -114,6 +114,8 @@ celery:
   broker: rabbitmq
   # To use an external celery broker, set the hostname here
   brokerHost: ""
+  # To update use a non-default port value, set the port here.
+  brokerPort: ""
   logLevel: INFO
   beat:
     annotations: {}
@@ -416,15 +418,17 @@ postgresqlha:
 cloudsql:
   # To use CloudSQL in GKE set 'enable: true'
   enabled: false
-  # By default, the proxy has verbose logging. Set this to false to make it less verbose
-  verbose: true
   image:
     # set repo and image tag of gce-proxy
-    repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.33.7
+    repository: eu.gcr.io/cloud-sql-connectors/cloud-sql-proxy #gcr.io/cloudsql-docker/gce-proxy
+    tag: 2.3.0
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
+  # Additional arguments to pass to the cloudsql proxy
+  extraArgs: []
+  # CloudSQL proxy resources
+  resources: {}
   # use IAM database authentication
   enable_iam_login: false
   # whether to use a private IP to connect to the database
