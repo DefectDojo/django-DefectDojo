@@ -252,7 +252,7 @@ class SonarQubeApiImporter(object):
 
                 issue_type = "SECURITY_HOTSPOT"
                 if hotspot["vulnerabilityProbability"] == "CRITICAL":
-                    severity = "Medium"
+                    severity = "Critical"
                 elif hotspot["vulnerabilityProbability"] == "HIGH":
                     severity = "High"
                 elif hotspot["vulnerabilityProbability"] == "MEDIUM":
