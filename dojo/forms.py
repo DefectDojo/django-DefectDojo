@@ -30,7 +30,7 @@ from dojo.models import Announcement, Finding, Finding_Group, Product_Type, Prod
     App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Engagement_Presets, DojoMeta, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
-    ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
+    ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, EFFORT_FOR_FIXING_CHOICES, Product_Type_Member, \
     Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, \
     Product_API_Scan_Configuration
 
@@ -66,6 +66,7 @@ vulnerability_ids_field = forms.CharField(max_length=5000,
                 "You may enter one vulnerability id per line.",
     widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
 
+EFFORT_FOR_FIXING_INVALID_CHOICE = _('Select valid choice: Low,Medium,High')
 
 class MultipleSelectWithPop(forms.SelectMultiple):
     def render(self, name, *args, **kwargs):
@@ -955,7 +956,7 @@ class AddFindingForm(forms.ModelForm):
         choices=SEVERITY_CHOICES,
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
-            'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
+            'invalid_choice': EFFORT_FOR_FIXING_INVALID_CHOICE})
     mitigation = forms.CharField(widget=forms.Textarea, required=False)
     impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
@@ -968,6 +969,12 @@ class AddFindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
     planned_remediation_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
+    planned_remediation_version = forms.CharField(max_length=99, required=False)
+    effort_for_fixing = forms.ChoiceField(
+        required=False,
+        choices=EFFORT_FOR_FIXING_CHOICES,
+        error_messages={
+            'invalid_choice': EFFORT_FOR_FIXING_INVALID_CHOICE})
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
@@ -1030,7 +1037,7 @@ class AdHocFindingForm(forms.ModelForm):
         choices=SEVERITY_CHOICES,
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
-            'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
+            'invalid_choice': EFFORT_FOR_FIXING_INVALID_CHOICE})
     mitigation = forms.CharField(widget=forms.Textarea, required=False)
     impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
@@ -1043,6 +1050,12 @@ class AdHocFindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
     planned_remediation_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
+    planned_remediation_version = forms.CharField(max_length=99, required=False)
+    effort_for_fixing = forms.ChoiceField(
+        required=False,
+        choices=EFFORT_FOR_FIXING_CHOICES,
+        error_messages={
+            'invalid_choice': EFFORT_FOR_FIXING_INVALID_CHOICE})
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
@@ -1144,7 +1157,7 @@ class PromoteFindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ('reporter', 'url', 'numerical_severity', 'active', 'false_p', 'verified', 'endpoint_status', 'cve', 'inherited_tags',
-                   'duplicate', 'out_of_scope', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'planned_remediation_date')
+                   'duplicate', 'out_of_scope', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'planned_remediation_date', 'planned_remediation_version', 'effort_for_fixing')
 
 
 class FindingForm(forms.ModelForm):
@@ -1177,8 +1190,14 @@ class FindingForm(forms.ModelForm):
 
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
     planned_remediation_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
+    planned_remediation_version = forms.CharField(max_length=99, required=False)
+    effort_for_fixing = forms.ChoiceField(
+        required=False,
+        choices=EFFORT_FOR_FIXING_CHOICES,
+        error_messages={
+            'invalid_choice': EFFORT_FOR_FIXING_INVALID_CHOICE})
 
-    # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
+    # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
                    'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'endpoints_to_add', 'references',
                    'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
@@ -1377,6 +1396,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
     date = forms.DateField(required=False, widget=forms.DateInput(attrs={'class': 'datepicker'}))
     planned_remediation_date = forms.DateField(required=False, widget=forms.DateInput(attrs={'class': 'datepicker'}))
+    planned_remediation_version = forms.CharField(required=False, max_length=99, widget=forms.TextInput(attrs={'class': 'form-control'}))
     finding_group = forms.BooleanField(required=False)
     finding_group_create = forms.BooleanField(required=False)
     finding_group_create_name = forms.CharField(required=False)
