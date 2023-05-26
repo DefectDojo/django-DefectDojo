@@ -124,7 +124,7 @@ class SonarQubeApiImporter(object):
                 f'Found {len(issues)} issues for component {component["key"]}'
             )
 
-            sonarUrl = client.sonar_api_url.replace("api","")
+            sonarUrl = client.sonar_api_url.replace("api", "")
 
             for issue in issues:
                 status = issue["status"]
@@ -242,7 +242,7 @@ class SonarQubeApiImporter(object):
             logging.info(
                 f'Found {len(hotspots)} hotspots for project {component["key"]}'
             )
-            sonarUrl = client.sonar_api_url.replace("api","")
+            sonarUrl = client.sonar_api_url.replace("api", "")
 
             for hotspot in hotspots:
                 status = hotspot["status"]
