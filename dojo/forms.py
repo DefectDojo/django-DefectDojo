@@ -68,6 +68,7 @@ vulnerability_ids_field = forms.CharField(max_length=5000,
 
 EFFORT_FOR_FIXING_INVALID_CHOICE = _('Select valid choice: Low,Medium,High')
 
+
 class MultipleSelectWithPop(forms.SelectMultiple):
     def render(self, name, *args, **kwargs):
         html = super(MultipleSelectWithPop, self).render(name, *args, **kwargs)
