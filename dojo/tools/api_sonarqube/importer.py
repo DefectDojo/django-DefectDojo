@@ -124,7 +124,7 @@ class SonarQubeApiImporter(object):
                 f'Found {len(issues)} issues for component {component["key"]}'
             )
 
-            sonarUrl = self.sonar_api_url.replace("api","")
+            sonarUrl = client.sonar_api_url.replace("api","")
 
             for issue in issues:
                 status = issue["status"]
@@ -144,7 +144,7 @@ class SonarQubeApiImporter(object):
                 rule = client.get_rule(rule_id)
                 severity = self.convert_sonar_severity(issue["severity"])
                 try:
-                    sonarqube_permalink = f"Issue permalink: {sonarUrl}project/issues?issues={issue['key']}&open={issue['key']}&resolved={issue['status']}&id={issue['project']} \n"
+                    sonarqube_permalink = f"[Issue permalink]({sonarUrl}project/issues?issues={issue['key']}&open={issue['key']}&resolved={issue['status']}&id={issue['project']}) \n"
                 except:
                     sonarqube_permalink = "No permalink \n"
 
@@ -242,7 +242,7 @@ class SonarQubeApiImporter(object):
             logging.info(
                 f'Found {len(hotspots)} hotspots for project {component["key"]}'
             )
-            sonarUrl = self.sonar_api_url.replace("api","")
+            sonarUrl = client.sonar_api_url.replace("api","")
 
             for hotspot in hotspots:
                 status = hotspot["status"]
@@ -278,7 +278,7 @@ class SonarQubeApiImporter(object):
                 )
                 cwe = self.clean_cwe(rule.get("fixRecommendations", ""))
                 try:
-                    sonarqube_permalink = f"Hotspot permalink: {sonarUrl}security_hotspots?id={hotspot['project']}&hotspots={hotspot['key']} \n"
+                    sonarqube_permalink = f"[Hotspot permalink]({sonarUrl}security_hotspots?id={hotspot['project']}&hotspots={hotspot['key']}) \n"
                 except:
                     sonarqube_permalink = "No permalink \n"
                 references = sonarqube_permalink + self.get_references(
