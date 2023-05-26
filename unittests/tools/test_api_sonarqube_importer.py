@@ -437,7 +437,7 @@ class TestSonarqubeImporterValidateHotspotData(DojoTestCase):
             '\n\n',
             findings[0].description
         )
-        self.assertEqual(str(findings[0].severity), 'Info')
+        self.assertEqual(str(findings[0].severity), 'High')
         self.assertMultiLineEqual(
             '[CVE-2019-13466](http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-13466)'
             '\n'
@@ -506,7 +506,7 @@ class TestSonarqubeImporterHotspotRule_WO_Risk_Description(DojoTestCase):
             '\n\n',
             findings[0].description
         )
-        self.assertEqual(str(findings[0].severity), 'Info')
+        self.assertEqual(str(findings[0].severity), 'High')
         self.assertEqual(findings[0].references, '')
         self.assertEqual(str(findings[0].file_path), 'internal.dummy.project:spec/support/user_fixture.rb')
         self.assertEqual(findings[0].line, 9)
