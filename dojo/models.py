@@ -48,6 +48,8 @@ SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
 
 SEVERITIES = [s[0] for s in SEVERITY_CHOICES]
 
+EFFORT_FOR_FIXING_CHOICES = (('', ''), ('Low', 'Low'), ('Medium', 'Medium'), ('High', 'High'))
+
 # fields returned in statistics, typically all status fields
 STATS_FIELDS = ['active', 'verified', 'duplicate', 'false_p', 'out_of_scope', 'is_mitigated', 'risk_accepted', 'total']
 # default template with all values set to 0
@@ -2336,6 +2338,18 @@ class Finding(models.Model):
                                                 editable=True,
                                                 verbose_name=_('Planned Remediation Date'),
                                                 help_text=_("The date the flaw is expected to be remediated."))
+
+    planned_remediation_version = models.CharField(null=True,
+                                        blank=True,
+                                        max_length=99,
+                                        verbose_name=_('Planned remediation version'),
+                                        help_text=_('The target version when the vulnerability should be fixed / remediated'))
+
+    effort_for_fixing = models.CharField(null=True,
+                                blank=True,
+                                max_length=99,
+                                verbose_name=_('Effort for fixing'),
+                                help_text=_('Effort for fixing / remediating the vulnerability (Low, Medium, High)'))
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add."))
     inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))

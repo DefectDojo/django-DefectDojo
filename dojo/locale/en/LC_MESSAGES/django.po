@@ -175,6 +175,10 @@ msgstr ""
 msgid "Ticking this box allows users to dismiss the current announcement"
 msgstr ""
 
+#: dojo/forms.py
+msgid "Select valid choice: Low,Medium,High"
+msgstr ""
+
 #: dojo/metrics/views.py dojo/templates/base.html
 msgid "Critical Product Metrics"
 msgstr ""
@@ -188,6 +192,17 @@ msgstr ""
 #: dojo/templates/dojo/view_product_details.html
 #: dojo/templates/dojo/view_product_type.html
 msgid "Metrics"
+msgstr ""
+
+#: dojo/templates/dojo/view_finding.html
+#: dojo/templates/dojo/view_test.html
+#: dojo/templates/dojo/findings_list_snippet.html
+#: dojo/filters.py
+msgid "Planned Remediation version"
+msgstr ""
+
+#: dojo/templates/dojo/view_finding.html
+msgid "Effort for fixing"
 msgstr ""
 
 #: dojo/metrics/views.py
@@ -1623,6 +1638,10 @@ msgstr ""
 
 #: dojo/models.py
 msgid "Planned Remediation Date"
+msgstr ""
+
+#: dojo/models.py
+msgid "Planned remediation version"
 msgstr ""
 
 #: dojo/models.py

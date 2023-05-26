@@ -85,7 +85,7 @@ class GenericParser(object):
                 'component_name', 'component_version', 'static_finding', 'dynamic_finding',
                 'scanner_confidence', 'unique_id_from_tool', 'vuln_id_from_tool', 'sast_source_object',
                 'sast_sink_object', 'sast_source_line', 'sast_source_file_path', 'nb_occurences',
-                'publish_date', 'service', 'planned_remediation_date', 'tags']
+                'publish_date', 'service', 'planned_remediation_date', 'planned_remediation_version', 'effort_for_fixing', 'tags']
             not_allowed = []
             for field in item.keys():
                 if field not in allowed:
