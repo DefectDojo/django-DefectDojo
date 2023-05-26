@@ -124,7 +124,7 @@ class SonarQubeApiImporter(object):
                 f'Found {len(issues)} issues for component {component["key"]}'
             )
 
-            sonarUrl = client.sonar_api_url.replace("api", "")
+            sonarUrl = client.sonar_api_url[:-3] # [:-3] removes the /api part of the sonarqube/cloud URL
 
             for issue in issues:
                 status = issue["status"]
@@ -145,7 +145,7 @@ class SonarQubeApiImporter(object):
                 severity = self.convert_sonar_severity(issue["severity"])
                 try:
                     sonarqube_permalink = f"[Issue permalink]({sonarUrl}project/issues?issues={issue['key']}&open={issue['key']}&resolved={issue['status']}&id={issue['project']}) \n"
-                except:
+                except KeyError:
                     sonarqube_permalink = "No permalink \n"
 
                 # custom (user defined) SQ rules may not have 'htmlDesc'
@@ -242,7 +242,7 @@ class SonarQubeApiImporter(object):
             logging.info(
                 f'Found {len(hotspots)} hotspots for project {component["key"]}'
             )
-            sonarUrl = client.sonar_api_url.replace("api", "")
+            sonarUrl = client.sonar_api_url[:-3] # [:-3] removes the /api part of the sonarqube/cloud URL
 
             for hotspot in hotspots:
                 status = hotspot["status"]
@@ -279,7 +279,7 @@ class SonarQubeApiImporter(object):
                 cwe = self.clean_cwe(rule.get("fixRecommendations", ""))
                 try:
                     sonarqube_permalink = f"[Hotspot permalink]({sonarUrl}security_hotspots?id={hotspot['project']}&hotspots={hotspot['key']}) \n"
-                except:
+                except KeyError:
                     sonarqube_permalink = "No permalink \n"
                 references = sonarqube_permalink + self.get_references(
                     rule.get("riskDescription", "")
