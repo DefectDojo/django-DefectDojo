@@ -103,9 +103,13 @@ spec:
           - "--private-ip"
         {{- end }}
           - "{{ .Values.cloudsql.instance }}"
+        {{- with .Values.cloudsql.extraArgs }}
         {{- toYaml .Values.cloudsql.extraArgs | nindent 10 }}
+        {{- end }}
+        {{- with .Values.cloudsql.resources }}
         resources: 
           {{- toYaml .Values.cloudsql.resources | nindent 10 }}
+        {{- end }}
       {{- end }}
       {{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
       - name: metrics

@@ -82,9 +82,13 @@ spec:
           - "--private-ip"
         {{- end }}
           - "{{ .Values.cloudsql.instance }}"
+        {{- with .Values.cloudsql.extraArgs }}
         {{- toYaml .Values.cloudsql.extraArgs | nindent 10 }}
+        {{- end }}
+        {{- with .Values.cloudsql.resources }}
         resources: 
           {{- toYaml .Values.cloudsql.resources | nindent 10 }}
+        {{- end }}
       {{- end }}
       - name: celery
         image: "{{ template "celery.repository" . }}:{{ .Values.tag }}"
