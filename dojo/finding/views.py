@@ -2478,6 +2478,13 @@ def finding_bulk_update_all(request, pid=None):
                         ]
                         finding.save_no_options()
 
+                if form.cleaned_data["planned_remediation_version"]:
+                    for finding in finds:
+                        finding.planned_remediation_version = form.cleaned_data[
+                            "planned_remediation_version"
+                        ]
+                        finding.save_no_options()
+
                 skipped_risk_accept_count = 0
                 if form.cleaned_data["risk_acceptance"]:
                     for finding in finds:
