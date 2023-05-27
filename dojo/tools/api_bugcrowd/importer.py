@@ -41,7 +41,7 @@ class BugcrowdApiImporter(object):
             if config.product != product:
                 raise ValidationError(
                     "API Scan Configuration for Bugcrowd API and Product do not match. "
-                    f"Product: '{product.name}' ({product.id}), Config-product: '{config.product.name}' ({config.product.id})"
+                    f'Product: "{product.name}" ({product.id}), config.product: "{config.product.name}" ({config.product.id})'
                 )
         else:
             configs = Product_API_Scan_Configuration.objects.filter(

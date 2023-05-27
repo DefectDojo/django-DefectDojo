@@ -25,7 +25,7 @@ class BlackduckApiImporter(object):
             if config.product != product:
                 raise ValidationError(
                     f'API Scan Configuration for "{self.config_id}" and Product do not match. '
-                    f"Product: '{product.name}' ({product.id}), Config-product: '{config.product.name}' ({config.product.id})"
+                    f'Product: "{product.name}" ({product.id}), config.product: "{config.product.name}" ({config.product.id})'
                 )
         else:
             configs = Product_API_Scan_Configuration.objects.filter(
