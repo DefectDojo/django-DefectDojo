@@ -2309,7 +2309,7 @@ class ImportScanView(mixins.CreateModelMixin,
 class EndpointMetaImporterView(mixins.CreateModelMixin,
                      viewsets.GenericViewSet):
     """
-    Imports a CSV file into a product to propogate arbitrary meta and tags on endpoints.
+    Imports a CSV file into a product to propagate arbitrary meta and tags on endpoints.
 
     By Names:
     - Provide `product_name` of existing product

@@ -30,14 +30,20 @@ class ArachniParser(object):
     def get_items(self, tree, test):
         items = {}
         report_date = None
-        if 'finish_datetime' in tree:
-            report_date = datetime.strptime(tree.get('finish_datetime'), '%Y-%m-%d %H:%M:%S %z')
-        for node in tree['issues']:
+        if "finish_datetime" in tree:
+            report_date = datetime.strptime(
+                tree.get("finish_datetime"), "%Y-%m-%d %H:%M:%S %z"
+            )
+        for node in tree["issues"]:
             item = self.get_item(node, report_date)
             dupe_key = item.severity + item.title
             if dupe_key in items:
-                items[dupe_key].unsaved_endpoints = items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
-                items[dupe_key].unsaved_req_resp = items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
+                items[dupe_key].unsaved_endpoints = (
+                    items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
+                )
+                items[dupe_key].unsaved_req_resp = (
+                    items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
+                )
                 items[dupe_key].nb_occurences += 1
             else:
                 items[dupe_key] = item
@@ -47,27 +53,27 @@ class ArachniParser(object):
 
     def get_item(self, item_node, report_date):
         # url management
-        if 'vector' in item_node and 'action' in item_node['vector']:
-            url = item_node['vector']['action']
+        if "vector" in item_node and "action" in item_node["vector"]:
+            url = item_node["vector"]["action"]
         else:
-            url = item_node['response']['url']
+            url = item_node["response"]["url"]
 
-        request = item_node['request']
+        request = item_node["request"]
         #
-        req = ''
+        req = ""
         #
         for key, value in request.items():
             req += str(key) + ": " + str(value) + "\n\n"
         #
-        respz = item_node['response']
+        respz = item_node["response"]
 
-        resp = ''
+        resp = ""
 
         for key, value in respz.items():
-            if key != 'body':
+            if key != "body":
                 resp += str(key) + ": " + str(value) + "\n\n"
 
-        resp += "\n\n\n" + force_str(respz['body'])
+        resp += "\n\n\n" + force_str(respz["body"])
         unsaved_req_resp = list()
 
         if request is not None and respz is not None:
@@ -75,36 +81,46 @@ class ArachniParser(object):
 
         endpoint = Endpoint.from_uri(url)
 
-        description = item_node.get('description', 'N/A')
+        description = item_node.get("description", "N/A")
         description = html2text.html2text(description)
 
-        remediation = item_node['remedy_guidance'] if 'remedy_guidance' in item_node else 'n/a'
+        remediation = (
+            item_node["remedy_guidance"]
+            if "remedy_guidance" in item_node
+            else "n/a"
+        )
         if remediation:
             remediation = html2text.html2text(remediation)
 
-        references = list(item_node['references'].values()) if 'references' in item_node else None
-        references = '<br/><br/>'.join(reference for reference in references)
+        references = (
+            list(item_node["references"].values())
+            if "references" in item_node
+            else None
+        )
+        references = "<br/><br/>".join(reference for reference in references)
 
         if references:
             references = html2text.html2text(references)
 
-        severity = item_node.get('severity', 'Info').capitalize()
-        if 'Informational' == severity:
-            severity = 'Info'
+        severity = item_node.get("severity", "Info").capitalize()
+        if "Informational" == severity:
+            severity = "Info"
 
-        # Finding and Endpoint objects returned have not been saved to the database
-        finding = Finding(title=item_node['name'],
-                            date=report_date,
-                            severity=severity,
-                            description=description,
-                            mitigation=remediation,
-                            references=references,
-                            impact="No impact provided",
-                            cwe=item_node.get('cwe'),
-                            vuln_id_from_tool=item_node.get('digest'),
-                          )
+        # Finding and Endpoint objects returned have not been saved to the
+        # database
+        finding = Finding(
+            title=item_node["name"],
+            date=report_date,
+            severity=severity,
+            description=description,
+            mitigation=remediation,
+            references=references,
+            impact="No impact provided",
+            cwe=item_node.get("cwe"),
+            vuln_id_from_tool=item_node.get("digest"),
+        )
         finding.unsaved_endpoints = [endpoint]
         finding.unsaved_req_resp = unsaved_req_resp
-        finding.unsaved_tags = item_node.get('tags')
+        finding.unsaved_tags = item_node.get("tags")
 
         return finding

@@ -36,102 +36,98 @@ class GitlabDepScanParser(object):
 
     def get_items(self, tree, test):
         items = {}
-
+        scanner = tree.get("scan", {}).get("scanner", {})
         for node in tree['vulnerabilities']:
-            item = get_item(node, test)
+            item = self.get_item(node, test, scanner)
             if item:
                 items[item.unique_id_from_tool] = item
 
         return list(items.values())
 
+    def get_item(self, vuln, test, scan):
+        if 'id' in vuln:
+            unique_id_from_tool = vuln['id']
+        else:
+            # If the new unique id is not provided, fall back to deprecated "cve" fingerprint (old version)
+            unique_id_from_tool = vuln['cve']
 
-def get_item(vuln, test):
-    if vuln['category'] != 'dependency_scanning':
-        # For Dependency Scanning reports, value must always be "dependency_scanning"
-        return None
+        title = ''
+        if 'name' in vuln:
+            title = vuln['name']
+        elif 'message' in vuln:
+            title = vuln['message']
+        elif 'description' in vuln:
+            title = vuln['description']
+        else:
+            # All other fields are optional, if none of them has a value, fall back on the unique id
+            title = unique_id_from_tool
 
-    unique_id_from_tool = None
-    if 'id' in vuln:
-        unique_id_from_tool = vuln['id']
-    else:
-        # If the new unique id is not provided, fall back to deprecated "cve" fingerprint (old version)
-        unique_id_from_tool = vuln['cve']
+        description = f'Scanner: {scan.get("name", "could not be determined")}\n'
+        if 'message' in vuln:
+            description += f"{vuln['message']}\n"
+        if 'description' in vuln:
+            description += f"{vuln['description']}\n"
 
-    title = ''
-    if 'name' in vuln:
-        title = vuln['name']
-    elif 'message' in vuln:
-        title = vuln['message']
-    elif 'description' in vuln:
-        title = vuln['description']
-    else:
-        # All other fields are optional, if none of them has a value, fall back on the unique id
-        title = unique_id_from_tool
+        location = vuln['location']
+        file_path = location['file'] if 'file' in location else None
 
-    description = 'Scanner: {}\n'.format(vuln['scanner']['name'])
-    if 'message' in vuln:
-        description += '{}\n'.format(vuln['message'])
-    if 'description' in vuln:
-        description += '{}\n'.format(vuln['description'])
+        component_name = None
+        component_version = None
+        if 'dependency' in location:
+            component_version = location['dependency']['version'] if 'version' in location['dependency'] else None
+            if 'package' in location['dependency']:
+                component_name = location['dependency']['package']['name'] if 'name' in location['dependency']['package'] else None
 
-    location = vuln['location']
-    file_path = location['file'] if 'file' in location else None
+        severity = vuln['severity']
+        if severity in ['Undefined', 'Unknown']:
+            # Severity can be "Undefined" or "Unknown" in report
+            # In that case we set it as Info and specify the initial severity in the title
+            title = f'[{severity} severity] {title}'
+            severity = 'Info'
 
-    component_name = None
-    component_version = None
-    if 'dependency' in location:
-        component_version = location['dependency']['version'] if 'version' in location['dependency'] else None
-        if 'package' in location['dependency']:
-            component_name = location['dependency']['package']['name'] if 'name' in location['dependency']['package'] else None
+        # Dependency Scanning analyzers doesn't provide confidence property
+        # See https://docs.gitlab.com/ee/user/application_security/dependency_scanning/analyzers.html#analyzers-data
+        scanner_confidence = False
 
-    severity = vuln['severity']
-    if severity == 'Undefined' or severity == 'Unknown':
-        # Severity can be "Undefined" or "Unknown" in report
-        # In that case we set it as Info and specify the initial severity in the title
-        title = '[{} severity] {}'.format(severity, title)
-        severity = 'Info'
+        mitigation = ''
+        if 'solution' in vuln:
+            mitigation = vuln['solution']
 
-    # Dependency Scanning analyzers doesn't provide confidence property
-    # See https://docs.gitlab.com/ee/user/application_security/dependency_scanning/analyzers.html#analyzers-data
-    scanner_confidence = False
+        cwe = None
+        vulnerability_id = None
+        references = ''
+        if 'identifiers' in vuln:
+            for identifier in vuln['identifiers']:
+                if identifier['type'].lower() == 'cwe':
+                    cwe = identifier['value']
+                elif identifier['type'].lower() == 'cve':
+                    vulnerability_id = identifier['value']
+                else:
+                    references += f"Identifier type: {identifier['type']}\n"
+                    references += f"Name: {identifier['name']}\n"
+                    references += f"Value: {identifier['value']}\n"
+                    if 'url' in identifier:
+                        references += f"URL: {identifier['url']}\n"
+                    references += '\n'
 
-    mitigation = ''
-    if 'solution' in vuln:
-        mitigation = vuln['solution']
+        finding = Finding(
+            title=f"{vulnerability_id}: {title}" if vulnerability_id else title,
+            test=test,
+            description=description,
+            severity=severity,
+            scanner_confidence=scanner_confidence,
+            mitigation=mitigation,
+            unique_id_from_tool=unique_id_from_tool,
+            references=references,
+            file_path=file_path,
+            component_name=component_name,
+            component_version=component_version,
+            cwe=cwe,
+            static_finding=True,
+            dynamic_finding=False,
+        )
 
-    cwe = None
-    vulnerability_id = None
-    references = ''
-    if 'identifiers' in vuln:
-        for identifier in vuln['identifiers']:
-            if identifier['type'].lower() == 'cwe':
-                cwe = identifier['value']
-            elif identifier['type'].lower() == 'cve':
-                vulnerability_id = identifier['value']
-            else:
-                references += 'Identifier type: {}\n'.format(identifier['type'])
-                references += 'Name: {}\n'.format(identifier['name'])
-                references += 'Value: {}\n'.format(identifier['value'])
-                if 'url' in identifier:
-                    references += 'URL: {}\n'.format(identifier['url'])
-                references += '\n'
+        if vulnerability_id:
+            finding.unsaved_vulnerability_ids = [vulnerability_id]
 
-    finding = Finding(title=vulnerability_id + ": " + title if vulnerability_id else title,
-                      test=test,
-                      description=description,
-                      severity=severity,
-                      scanner_confidence=scanner_confidence,
-                      mitigation=mitigation,
-                      unique_id_from_tool=unique_id_from_tool,
-                      references=references,
-                      file_path=file_path,
-                      component_name=component_name,
-                      component_version=component_version,
-                      cwe=cwe,
-                      static_finding=True,
-                      dynamic_finding=False)
-
-    if vulnerability_id:
-        finding.unsaved_vulnerability_ids = [vulnerability_id]
-
-    return finding
+        return finding
