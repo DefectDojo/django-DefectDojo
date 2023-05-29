@@ -44,19 +44,20 @@ class BugcrowdApiImporter(object):
                 )
         else:
             configs = Product_API_Scan_Configuration.objects.filter(
-                product=product, tool_configuration__tool_type__name="Bugcrowd API"
+                product=product,
+                tool_configuration__tool_type__name="Bugcrowd API",
             )
             if configs.count() == 1:
                 config = configs.first()
             elif configs.count() > 1:
                 raise ValidationError(
-                    "More than one Product API Scan Configuration has been configured, but none of them has been chosen.\
-                        Please specify at Test which one should be used."
+                    "More than one Product API Scan Configuration has been configured, but none of them has been "
+                    "chosen. Please specify at Test which one should be used."
                 )
             else:
                 raise ValidationError(
-                    "There are no API Scan Configurations for this Product. \
-                        Please add at least one API Scan Configuration for bugcrowd to this Product."
+                    "There are no API Scan Configurations for this Product. "
+                    "Please add at least one API Scan Configuration for bugcrowd to this Product."
                 )
 
         tool_config = config.tool_configuration
