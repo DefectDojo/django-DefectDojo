@@ -661,12 +661,27 @@ def close_finding(request, fid):
                     status.last_modified = timezone.now()
                     status.save()
 
-                # only push to JIRA if there is an issue, to prevent a new one from being created
-                if jira_helper.is_push_all_issues(finding) and finding.has_jira_issue:
+                # Manage the jira status changes
+                push_to_jira = False
+                # Determine if the finding is in a group. if so, not push to jira
+                finding_in_group = finding.has_finding_group
+                # Check if there is a jira issue that needs to be updated
+                jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
+                # Only push if the finding is not in a group
+                if jira_issue_exists:
+                    # Determine if any automatic sync should occur
+                    push_to_jira = jira_helper.is_push_all_issues(finding) \
+                        or jira_helper.get_jira_instance(finding).finding_jira_sync
+                # Add the closing note
+                if push_to_jira and not finding_in_group:
                     jira_helper.add_comment(finding, new_note, force_push=True)
-                    finding.save(push_to_jira=True)
-                else:
-                    finding.save()
+                # Save the finding
+                finding.save(push_to_jira=(push_to_jira and not finding_in_group))
+
+                # we only push the group after saving the finding to make sure
+                # the updated data of the finding is pushed as part of the group
+                if push_to_jira and finding_in_group:
+                    jira_helper.push_to_jira(finding.finding_group)
 
                 messages.add_message(
                     request,
@@ -727,52 +742,47 @@ def defect_finding_review(request, fid):
 
             if defect_choice == "Close Finding":
                 finding.active = False
+                finding.verified = True
                 finding.mitigated = now
                 finding.mitigated_by = request.user
                 finding.is_mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.endpoints.clear()
+            else:
+                finding.active = True
+                finding.verified = True
+                finding.mitigated = None
+                finding.mitigated_by = None
+                finding.is_mitigated = False
+                finding.last_reviewed = now
+                finding.last_reviewed_by = request.user
 
-            # TODO: JIRA: Code below should move to jira_helper.
-            # But I have no idea what it is doin so don't want move/break it
-
-            jira = jira_helper.get_jira_connection(finding)
-            if jira and finding.has_jira_issue:
-                j_issue = finding.jira_issue
-                issue = jira.issue(j_issue.jira_id)
-
+            # Manage the jira status changes
+            push_to_jira = False
+            # Determine if the finding is in a group. if so, not push to jira
+            finding_in_group = finding.has_finding_group
+            # Check if there is a jira issue that needs to be updated
+            jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
+            # Only push if the finding is not in a group
+            if jira_issue_exists:
+                # Determine if any automatic sync should occur
+                push_to_jira = jira_helper.is_push_all_issues(finding) \
+                    or jira_helper.get_jira_instance(finding).finding_jira_sync
+            # Add the closing note
+            if push_to_jira and not finding_in_group:
                 if defect_choice == "Close Finding":
-                    # If the issue id is closed jira will return Reopen Issue
-                    resolution_id = jira_helper.jira_get_resolution_id(
-                        jira, issue, "Reopen Issue"
-                    )
-                    if resolution_id is None:
-                        resolution_id = jira_helper.jira_get_resolution_id(
-                            jira, issue, "Resolve Issue"
-                        )
-                        jira_helper.jira_transition(jira, issue, resolution_id)
-                        new_note.entry = (
-                            new_note.entry + "\nJira issue set to resolved."
-                        )
+                    new_note.entry = new_note.entry + "\nJira issue set to resolved."
                 else:
-                    # Re-open finding with notes stating why re-open
-                    resolution_id = jira_helper.jira_get_resolution_id(
-                        jira, issue, "Resolve Issue"
-                    )
-                    if resolution_id is not None:
-                        jira_helper.jira_transition(jira, issue, resolution_id)
-                        new_note.entry = new_note.entry + "\nJira issue re-opened."
-
-            # Update Dojo and Jira with a notes
-            if finding.has_jira_issue:
+                    new_note.entry = new_note.entry + "\nJira issue re-opened."
                 jira_helper.add_comment(finding, new_note, force_push=True)
-            elif finding.has_jira_group_issue:
-                jira_helper.add_comment(
-                    finding.finding_group, new_note, force_push=True
-                )
+            # Save the finding
+            finding.save(push_to_jira=(push_to_jira and not finding_in_group))
 
-            finding.save()
+            # we only push the group after saving the finding to make sure
+            # the updated data of the finding is pushed as part of the group
+            if push_to_jira and finding_in_group:
+                jira_helper.push_to_jira(finding.finding_group)
 
             messages.add_message(
                 request, messages.SUCCESS, "Defect Reviewed", extra_tags="alert-success"
@@ -819,11 +829,24 @@ def reopen_finding(request, fid):
         status.last_modified = timezone.now()
         status.save()
 
-    # only push to JIRA if there is an issue, otherwise a new one is created
-    if jira_helper.is_push_all_issues(finding) and finding.has_jira_issue:
-        finding.save(push_to_jira=True)
-    else:
-        finding.save()
+    # Manage the jira status changes
+    push_to_jira = False
+    # Determine if the finding is in a group. if so, not push to jira
+    finding_in_group = finding.has_finding_group
+    # Check if there is a jira issue that needs to be updated
+    jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
+    # Only push if the finding is not in a group
+    if jira_issue_exists:
+        # Determine if any automatic sync should occur
+        push_to_jira = jira_helper.is_push_all_issues(finding) \
+            or jira_helper.get_jira_instance(finding).finding_jira_sync
+    # Save the finding
+    finding.save(push_to_jira=(push_to_jira and not finding_in_group))
+
+    # we only push the group after saving the finding to make sure
+    # the updated data of the finding is pushed as part of the group
+    if push_to_jira and finding_in_group:
+        jira_helper.push_to_jira(finding.finding_group)
 
     reopen_external_issue(finding, "re-opened by defectdojo", "github")
 
@@ -1361,7 +1384,7 @@ def request_finding_review(request, fid):
             new_note.date = now
             new_note.save()
             finding.notes.add(new_note)
-            finding.active = False
+            finding.active = True
             finding.verified = False
             finding.is_mitigated = False
             finding.under_review = True
@@ -1371,16 +1394,38 @@ def request_finding_review(request, fid):
 
             users = form.cleaned_data["reviewers"]
             finding.reviewers.set(users)
-            finding.save()
+
+            # Manage the jira status changes
+            push_to_jira = False
+            # Determine if the finding is in a group. if so, not push to jira
+            finding_in_group = finding.has_finding_group
+            # Check if there is a jira issue that needs to be updated
+            jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
+            # Only push if the finding is not in a group
+            if jira_issue_exists:
+                # Determine if any automatic sync should occur
+                push_to_jira = jira_helper.is_push_all_issues(finding) \
+                    or jira_helper.get_jira_instance(finding).finding_jira_sync
+            # Add the closing note
+            if push_to_jira and not finding_in_group:
+                jira_helper.add_comment(finding, new_note, force_push=True)
+            # Save the finding
+            finding.save(push_to_jira=(push_to_jira and not finding_in_group))
+
+            # we only push the group after saving the finding to make sure
+            # the updated data of the finding is pushed as part of the group
+            if push_to_jira and finding_in_group:
+                jira_helper.push_to_jira(finding.finding_group)
+
             reviewers = ""
             reviewers_short = []
-            for suser in form.cleaned_data["reviewers"]:
+            for user in form.cleaned_data["reviewers"]:
                 full_user = Dojo_User.generate_full_name(
-                    Dojo_User.objects.get(id=suser)
+                    Dojo_User.objects.get(id=user)
                 )
                 logger.debug("Asking %s for review", full_user)
                 reviewers += str(full_user) + ", "
-                reviewers_short.append(Dojo_User.objects.get(id=suser).username)
+                reviewers_short.append(Dojo_User.objects.get(id=user).username)
             reviewers = reviewers[:-2]
 
             create_notification(
@@ -1444,9 +1489,29 @@ def clear_finding_review(request, fid):
             finding.last_reviewed_by = request.user
 
             finding.reviewers.set([])
-            finding.save()
-
             finding.notes.add(new_note)
+
+            # Manage the jira status changes
+            push_to_jira = False
+            # Determine if the finding is in a group. if so, not push to jira
+            finding_in_group = finding.has_finding_group
+            # Check if there is a jira issue that needs to be updated
+            jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
+            # Only push if the finding is not in a group
+            if jira_issue_exists:
+                # Determine if any automatic sync should occur
+                push_to_jira = jira_helper.is_push_all_issues(finding) \
+                    or jira_helper.get_jira_instance(finding).finding_jira_sync
+            # Add the closing note
+            if push_to_jira and not finding_in_group:
+                jira_helper.add_comment(finding, new_note, force_push=True)
+            # Save the finding
+            finding.save(push_to_jira=(push_to_jira and not finding_in_group))
+
+            # we only push the group after saving the finding to make sure
+            # the updated data of the finding is pushed as part of the group
+            if push_to_jira and finding_in_group:
+                jira_helper.push_to_jira(finding.finding_group)
 
             messages.add_message(
                 request,
