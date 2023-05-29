@@ -552,8 +552,8 @@ def add_temp_finding(request, tid, fid):
             if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
                 burp_rr = BurpRawRequestResponse(
                     finding=new_finding,
-                    burpRequestBase64=base64.b64encode(form.cleaned_data.get('request').encode("utf-8")),
-                    burpResponseBase64=base64.b64encode(form.cleaned_data.get('response').encode("utf-8")),
+                    burpRequestBase64=base64.b64encode(form.cleaned_data.get('request','').encode("utf-8")),
+                    burpResponseBase64=base64.b64encode(form.cleaned_data.get('response','').encode("utf-8")),
                 )
                 burp_rr.clean()
                 burp_rr.save()
