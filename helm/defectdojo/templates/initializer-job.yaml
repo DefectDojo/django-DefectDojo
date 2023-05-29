@@ -74,11 +74,14 @@ spec:
           {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
         {{- end }}          
         command:
+          - /bin/sh
+        args:
+          - '-c'
+          {{- if .Values.cloudsql.enabled  }}
+          - /entrypoint-initializer.sh && curl -X 'POST' localhost:9091/quitquitquit
+          {{- else }}
           - /entrypoint-initializer.sh
-        lifecycle:
-          preStop:
-            exec:
-              command: ["/bin/sh","-c","curl --X POST localhost:9091/quitquitquit"]
+          {{- end }}
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
