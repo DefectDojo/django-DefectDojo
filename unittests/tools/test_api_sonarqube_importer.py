@@ -1,5 +1,6 @@
 import json
 from unittest import mock
+from django.core.exceptions import ValidationError
 
 from dojo.tools.api_sonarqube.importer import SonarQubeApiImporter
 from ..dojo_test_case import DojoTestCase, get_unit_tests_path
@@ -77,7 +78,7 @@ class TestSonarqubeImporterNoSQToolConfig(DojoTestCase):
         self.test = Test(engagement=engagement)
 
     def test_parser(self):
-        with self.assertRaisesRegex(Exception, 'There are no API Scan Configurations for this Product.'):
+        with self.assertRaisesRegex(ValidationError, r'There are no API Scan Configurations for this Product\.\\nPlease add at least one API Scan Configuration for SonarQube to this Product\. Product: "product" \(1\)'):
             SonarQubeApiImporter.prepare_client(self.test)
 
 
@@ -95,7 +96,7 @@ class TestSonarqubeImporterOneSQToolConfig(DojoTestCase):
         self.test = Test(engagement=engagement)
 
     def test_parser(self):
-        with self.assertRaisesRegex(Exception, 'There are no API Scan Configurations for this Product.'):
+        with self.assertRaisesRegex(ValidationError, r'There are no API Scan Configurations for this Product\.\\nPlease add at least one API Scan Configuration for SonarQube to this Product\. Product: "product" \(1\)'):
             SonarQubeApiImporter.prepare_client(self.test)
 
 
@@ -114,7 +115,7 @@ class TestSonarqubeImporterMultipleSQToolConfig(DojoTestCase):
         self.test = Test(engagement=engagement)
 
     def test_parser(self):
-        with self.assertRaisesRegex(Exception, 'There are no API Scan Configurations for this Product'):
+        with self.assertRaisesRegex(ValidationError, r'There are no API Scan Configurations for this Product\.\\nPlease add at least one API Scan Configuration for SonarQube to this Product\. Product: "product" \(1\)'):
             SonarQubeApiImporter.prepare_client(self.test)
 
 
@@ -187,7 +188,7 @@ class TestSonarqubeImporterMultipleSQConfigs(DojoTestCase):
         self.test = Test(engagement=engagement)
 
     def test_parser(self):
-        with self.assertRaisesRegex(Exception, 'More than one Product API Scan Configuration has been configured, but none of them has been chosen.'):
+        with self.assertRaisesRegex(ValidationError, r'More than one Product API Scan Configuration has been configured, but none of them has been chosen\. Please specify which one should be used\. Product: "product" \(1\)'):
             SonarQubeApiImporter.prepare_client(self.test)
 
 
@@ -257,7 +258,7 @@ class TestSonarqubeImporterSelectedSQConfigsWithKey(DojoTestCase):
         self.assertEqual(2, len(findings))
 
     def test_product_mismatch(self):
-        with self.assertRaisesRegex(Exception, 'Product API Scan Configuration and Product do not match.'):
+        with self.assertRaisesRegex(ValidationError, r'Product API Scan Configuration and Product do not match\. Product: "other product" \(None\), config.product: "product" \(1\)'):
             SonarQubeApiImporter.prepare_client(self.other_test)
 
 
