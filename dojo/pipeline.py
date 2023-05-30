@@ -100,7 +100,6 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
 
 def search_azure_groups(kwargs, token, soc):
     group_names = []
-    print(kwargs)
     if "groups" not in kwargs["response"] or kwargs["response"]["groups"] == "":
         logger.warning("No groups in response. Stopping to update product type of user based on azureAD")
         return
@@ -160,7 +159,7 @@ def assign_user_to_groups(user, group_names, social_provider):
     for group_name in group_names:
         group, created_group = Dojo_Group.objects.get_or_create(name=group_name, social_provider=social_provider)
         if created_group:
-            print("Group %s for social provider %s was created", str(group), social_provider)
+            logger.debug("Group %s for social provider %s was created", str(group), social_provider)
         group_member, is_member_created = Dojo_Group_Member.objects.get_or_create(
             group=group, user=user, defaults={"role": Role.objects.get(id=Roles.Maintainer)}
         )
@@ -187,7 +186,7 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
         group_names = search_azure_groups(kwargs, token, soc)
         logger.debug("detected groups " + str(group_names))
         if len(group_names) > 0:
-            user_login = kwargs["response"]["email"]
+            user_login = kwargs["response"]["mail"]
             request_headers = {"Authorization": "Bearer " + token}
             graph_user_request = requests.get(
                 (str(soc.extra_data["resource"]) + "/v1.0/users/" + user_login), headers=request_headers
