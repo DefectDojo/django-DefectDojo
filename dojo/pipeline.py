@@ -186,7 +186,7 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
         group_names = search_azure_groups(kwargs, token, soc)
         logger.debug("detected groups " + str(group_names))
         if len(group_names) > 0:
-            user_login = kwargs["response"]["mail"]
+            user_login = kwargs["details"]["email"]
             request_headers = {"Authorization": "Bearer " + token}
             graph_user_request = requests.get(
                 (str(soc.extra_data["resource"]) + "/v1.0/users/" + user_login), headers=request_headers
