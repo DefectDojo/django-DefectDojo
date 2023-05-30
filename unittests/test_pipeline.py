@@ -89,7 +89,10 @@ class PipelineTest(DojoTestCase):
             extra_data={"access_token": "test", "resource": "https://graph.microsoft.com"},
         )
         self.client.login(username="test", password="pwd")
-        kwargs = {"response": {"groups": ["b3febafa-3330-4205-b40d-59cc508ef097"], "email": "test@email.com"}}
+        kwargs = {
+            "response": {"groups": ["b3febafa-3330-4205-b40d-59cc508ef097"]},
+            "details": {"email": "test@email.com"},
+        }
 
         mock_resp = self._mock_response(json_data={"jobTitle": "testjobTitle", "officeLocation": "testofficeLocation"})
         mock_get.return_value = mock_resp
