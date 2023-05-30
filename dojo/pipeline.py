@@ -158,7 +158,7 @@ def is_group_id(group):
 
 def assign_user_to_groups(user, group_names, social_provider):
     for group_name in group_names:
-        group, created_group = Dojo_Group.objects.create(name=group_name, social_provider=social_provider)
+        group, created_group = Dojo_Group.objects.get_or_create(name=group_name, social_provider=social_provider)
         if created_group:
             print("Group %s for social provider %s was created", str(group), social_provider)
         group_member, is_member_created = Dojo_Group_Member.objects.get_or_create(

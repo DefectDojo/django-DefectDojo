@@ -6,6 +6,7 @@ from social_django.models import UserSocialAuth
 from unittest import mock
 from dojo.pipeline import update_product_type_azure_devops
 from azure.devops.v7_1.graph.models import GraphSubject, GraphGroup
+from dojo.models import Product_Type_Member
 import logging
 from io import StringIO
 
@@ -64,7 +65,17 @@ class PipelineTest(DojoTestCase):
         )
         self.client.login(username="test", password="pwd")
         kwargs = {"response": {"groups": ["b3febafa-3330-4205-b40d-59cc508ef097"]}}
+
+        capture = StringIO()
+        logger = logging.getLogger("dojo.pipeline")
+        handler = logging.StreamHandler(capture)
+        logger.addHandler(handler)
+
         update_product_type_azure_devops(AzureADTenantOAuth2(), None, user, None, None, **kwargs)
+        self.assertEqual(
+            capture.getvalue().strip().split("\n"),
+            ["Could not call microsoft graph API or save groups to member"],
+        )
 
     @mock.patch("dojo.pipeline.search_azure_groups", dummy_search_azure_groups)
     @mock.patch("requests.get")
@@ -83,17 +94,8 @@ class PipelineTest(DojoTestCase):
         mock_resp = self._mock_response(json_data={"jobTitle": "testjobTitle", "officeLocation": "testofficeLocation"})
         mock_get.return_value = mock_resp
 
-        captura = StringIO()
-        logger = logging.getLogger("dojo.pipeline")
-        handler = logging.StreamHandler(captura)
-        logger.addHandler(handler)
-
         update_product_type_azure_devops(AzureADTenantOAuth2(), None, user, None, None, **kwargs)
-        self.assertEqual(
-            captura.getvalue().strip().split("\n"),
-            [
-                "detected groups ['dummy_group_name']",
-                "detected jobTitle testjobTitle and officeLocation testofficeLocation",
-                "User test become member of product type CDE - test",
-            ],
-        )
+        user_product_types_names = [
+            prod.product_type.name for prod in Product_Type_Member.objects.select_related("user").filter(user=user)
+        ]
+        self.assertEqual(user_product_types_names, ["CDE - test"])
