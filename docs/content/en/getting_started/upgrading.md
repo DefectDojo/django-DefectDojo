@@ -21,7 +21,6 @@ DockerHub to update.
 
 
 The generic upgrade method for docker-compose are as follows:
-
 -   Pull the latest version
 
     ``` {.sourceCode .bash}
@@ -51,16 +50,22 @@ The generic upgrade method for docker-compose are as follows:
     Check the output via `docker-compose logs initializer` or relevant k8s command
 -   If you have the initializer disabled (or if you want to be on the
     safe side), run the migration command:
-    `docker-compose exec uwsgi /bin/bash -c 'python manage.py migrate`
+    `docker-compose exec uwsgi /bin/bash -c "python manage.py migrate"`
 
 ### Building your local images
 
 If you build your images locally and do not use the ones from DockerHub,
 the instructions are the same, with the caveat that you must build your images
-first. (Of course, if you're doing this, then you know you have to
-update the source code first)
+first. 
+-   Pull the latest DefectDojo changes
 
-Replace the first step above with: `docker-compose build`
+    ``` {.sourceCode .bash}
+    git fetch
+    git pull
+    git merge origin/master
+    ```    
+
+Then replace the first step of the above generic upgrade method for docker-compose with: `docker-compose build`
 
 godojo installations
 --------------------
@@ -75,7 +80,13 @@ There is a migration process built into the upgrade that will automatically conv
 
 **Breaking Change**
 
-If there is any use of the Nessus or Nessus WAS in automated fashion via the import and reimport API endpoints, the `scan-type` parameter needs to be updated to `Tenable Scan`
+ - If there is any use of the Nessus or Nessus WAS in automated fashion via the import and reimport API endpoints, the `scan-type` parameter needs to be updated to `Tenable Scan`
+ - The default containerized database will now be [PostgreSQL](https://www.postgresql.org/) rather than [MySQL](https://dev.mysql.com/) due to the use of case insensitivity on fields by default
+   - It is recommended to update the [database character set and collation](https://dev.mysql.com/doc/refman/5.7/en/charset-database.html) to use UTF encoding 
+   - If your deployment uses the MySQL containerized database, please see the following updates to run DefectDojo:
+     - Use of the helper script "dc-up": `./dc-up.sh mysql-rabbitmq` or `./dc-up.sh mysql-redis`
+     - Use of the helper script "dc-up-d": `./dc-up-d.sh mysql-rabbitmq` or `./dc-up-d.sh mysql-redis`
+     - Use of Docker Compose directly: `docker-compose --profile mysql-rabbitmq --env-file ./docker/environments/mysql-rabbitmq.env up` or `docker-compose --profile mysql-redis --env-file ./docker/environments/mysql-redis.env up`
 
 For all other changes, check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.23.0) for the contents of the release.
 

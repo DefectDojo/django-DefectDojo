@@ -28,7 +28,10 @@ class ApiBugcrowdParser(object):
         return SCAN_BUGCROWD_API
 
     def get_description_for_scan_types(self, scan_type):
-        return "Bugcrowd submissions can be directly imported using the Bugcrowd API. An API Scan Configuration has to be setup in the Product."
+        return (
+            "Bugcrowd submissions can be directly imported using the Bugcrowd API. An API Scan Configuration has "
+            "to be setup in the Product."
+        )
 
     def requires_file(self, scan_type):
         return False
@@ -37,7 +40,11 @@ class ApiBugcrowdParser(object):
         return "Bugcrowd API"
 
     def api_scan_configuration_hint(self):
-        return 'the field <b>Service key 1</b> has to be set with the Bugcrowd program code. <b>Service key 2</b> can be set with the target in the Bugcrowd program (will be url encoded for the api call), if not supplied, will fetch all submissions in the program'
+        return (
+            "the field <b>Service key 1</b> has to be set with the Bugcrowd program code. <b>Service key 2</b> "
+            "can be set with the target in the Bugcrowd program (will be url encoded for the api call), "
+            "if not supplied, will fetch all submissions in the program"
+        )
 
     def get_findings(self, file, test):
         api_scan_config = None
@@ -65,7 +72,7 @@ class ApiBugcrowdParser(object):
                     links = entry["links"]["self"]
 
             bugcrowd_state = entry["attributes"]["state"]
-            bugcrowd_duplicate = entry["attributes"]["duplicate"]
+            entry["attributes"]["duplicate"]
             bugcrowd_severity = entry["attributes"]["severity"]
 
             title = entry["attributes"]["title"]
@@ -81,7 +88,9 @@ class ApiBugcrowdParser(object):
             bug_endpoint = None
             if entry["attributes"]["bug_url"]:
                 try:
-                    if "://" in entry["attributes"]["bug_url"]:  # is the host full uri?
+                    if (
+                        "://" in entry["attributes"]["bug_url"]
+                    ):  # is the host full uri?
                         bug_endpoint = Endpoint.from_uri(
                             entry["attributes"]["bug_url"].strip()
                         )
@@ -90,8 +99,11 @@ class ApiBugcrowdParser(object):
                         bug_endpoint = Endpoint.from_uri(
                             "//" + entry["attributes"]["bug_url"].strip()
                         )
-                        # can raise exception if there is no way to parse the host
-                except ValidationError:  # We don't want to fail the whole import just for 1 error in the bug_url
+                        # can raise exception if there is no way to parse the
+                        # host
+                except (
+                    ValidationError
+                ):  # We don't want to fail the whole import just for 1 error in the bug_url
                     logger.error(
                         "Error parsing bugcrowd bug_url : {}".format(
                             entry["attributes"]["bug_url"].strip()

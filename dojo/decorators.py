@@ -5,7 +5,7 @@ from django.conf import settings
 
 from django_ratelimit.exceptions import Ratelimited
 from django_ratelimit.core import is_ratelimited
-from django_ratelimit import ALL
+from django_ratelimit import UNSAFE
 
 import logging
 
@@ -164,7 +164,7 @@ def on_exception_log_kwarg(func):
     return wrapper
 
 
-def dojo_ratelimit(key='ip', rate=None, method=ALL, block=False):
+def dojo_ratelimit(key='ip', rate=None, method=UNSAFE, block=False):
     def decorator(fn):
         @wraps(fn)
         def _wrapped(request, *args, **kw):

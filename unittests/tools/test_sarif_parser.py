@@ -559,3 +559,10 @@ class TestSarifParser(DojoTestCase):
             {"stableResultHash": {"version": 2, "value": "234567900abcd"}},
             get_fingerprints_hashes(data2["fingerprints"]),
         )
+
+    def test_tags_from_result_properties(self):
+        testfile = open(path.join(path.dirname(__file__), "../scans/sarif/taint-python-report.sarif"))
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, Test())
+        item = findings[0]
+        self.assertEqual(["Scan"], item.tags)
