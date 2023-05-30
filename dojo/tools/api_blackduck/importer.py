@@ -24,7 +24,8 @@ class BlackduckApiImporter(object):
             # Double check of config
             if config.product != product:
                 raise ValidationError(
-                    f'API Scan Configuration for "{self.config_id}" and Product do not match.'
+                    f'API Scan Configuration for "{self.config_id}" and Product do not match. '
+                    f'Product: "{product.name}" ({product.id}), config.product: "{config.product.name}" ({config.product.id})'
                 )
         else:
             configs = Product_API_Scan_Configuration.objects.filter(
@@ -36,12 +37,14 @@ class BlackduckApiImporter(object):
             elif configs.count() > 1:
                 raise ValidationError(
                     "More than one Product API Scan Configuration has been configured, but none of them has been "
-                    "chosen. Please specify at Test which one should be used."
+                    "chosen. Please specify at Test which one should be used. "
+                    f'Product: "{product.name}" ({product.id})'
                 )
             else:
                 raise ValidationError(
-                    f"There are no API Scan Configurations for this Product. Please add at least one API Scan "
-                    f'Configuration for "{self.config_id}" to this Product.'
+                    "There are no API Scan Configurations for this Product. Please add at least one API Scan "
+                    f'Configuration for "{self.config_id}" to this Product. '
+                    f'Product: "{product.name}" ({product.id})'
                 )
 
         tool_config = config.tool_configuration
