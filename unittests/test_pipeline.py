@@ -5,8 +5,7 @@ from django.contrib.auth import get_user_model
 from social_django.models import UserSocialAuth
 from unittest import mock
 from dojo.pipeline import update_product_type_azure_devops
-from azure.devops.v7_1.graph.models import GraphSubject
-from azure.devops.v7_1.graph.models import GraphGroup
+from azure.devops.v7_1.graph.models import GraphSubject, GraphGroup
 import logging
 from io import StringIO
 
@@ -90,7 +89,7 @@ class PipelineTest(DojoTestCase):
         logger.addHandler(handler)
 
         update_product_type_azure_devops(AzureADTenantOAuth2(), None, user, None, None, **kwargs)
-        self.assertEquals(
+        self.assertEqual(
             captura.getvalue().strip().split("\n"),
             [
                 "detected groups ['dummy_group_name']",
