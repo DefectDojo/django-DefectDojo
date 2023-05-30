@@ -439,7 +439,7 @@ class TestSonarqubeImporterValidateHotspotData(DojoTestCase):
         )
         self.assertEqual(str(findings[0].severity), 'High')
         self.assertMultiLineEqual(
-            '[Hotspot permalink](http://localhosecurity_hotspots?id=internal.dummy.project&hotspots=AXgm6Z-ophPPY0C1qhRq)'
+            '[Hotspot permalink](http://localhosecurity_hotspots?id=internal.dummy.project&hotspots=AXgm6Z-ophPPY0C1qhRq) '
             '\n'
             '[CVE-2019-13466](http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-13466)'
             '\n'
