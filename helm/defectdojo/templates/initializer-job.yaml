@@ -74,14 +74,7 @@ spec:
           {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
         {{- end }}          
         command:
-          - /bin/sh
-        args:
-          - '-c'
-          {{- if .Values.cloudsql.enabled  }}
-          - /entrypoint-initializer.sh && curl -X 'POST' localhost:9091/quitquitquit
-          {{- else }}
           - /entrypoint-initializer.sh
-          {{- end }}
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
@@ -103,6 +96,10 @@ spec:
               {{- end }}
         {{- if .Values.extraEnv }}
         {{- toYaml .Values.extraEnv | nindent 8 }}
+        {{- end }}
+        {{- if .Values.cloudsql.enabled  }}
+        - name: CLOUD_SQL_PROXY
+          value: 'true'
         {{- end }}
         resources:
           {{- toYaml .Values.initializer.resources | nindent 10 }}

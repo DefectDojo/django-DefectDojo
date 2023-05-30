@@ -36,6 +36,28 @@ EOD
 fi
 }
 
+quitquitquit(){
+# Terminate the cloudsql proxy pod before exit.
+if [ "${CLOUD_SQL_PROXY}" = 'true' ]; then
+echo "Attempting to terminate CloudSQL proxy sidecar"
+cat <<EOD | python3 manage.py shell
+import os
+import requests
+proxy_host = os.getenv('DD_DATABASE_HOST')
+url = 'http://localhost:9091/quitquitquit'
+if proxy_host not in ['127.0.0.1', 'localhost'] :
+  url = proxy_host + ':9091/quitquitquit'
+try:
+  resp = requests.post(url)
+  print(resp.text)
+except Exception:
+  pass
+EOD
+fi
+}
+
+trap quitquitquit EXIT
+
 # Allow for bind-mount multiple settings.py overrides
 FILES=$(ls /app/docker/extra_settings/* 2>/dev/null)
 NUM_FILES=$(echo "$FILES" | wc -w)
