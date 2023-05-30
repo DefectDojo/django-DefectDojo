@@ -100,15 +100,16 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
 
 def search_azure_groups(kwargs, token, soc):
     group_names = []
+    print(kwargs)
     if "groups" not in kwargs["response"] or kwargs["response"]["groups"] == "":
         logger.warning("No groups in response. Stopping to update product type of user based on azureAD")
         return
-    group_IDs = kwargs["response"]["groups"]
+    group_ids = kwargs["response"]["groups"]
     try:
-        for group_from_response in group_IDs:
+        for group_from_response in group_ids:
             logger.debug("Analysing Group_ID " + group_from_response)
             request_headers = {"Authorization": "Bearer " + token}
-            if is_group_id(group_from_response) and group_from_response != "b3febafa-3330-4205-b40d-59cc508ef097":
+            if is_group_id(group_from_response) and group_from_response:
                 logger.debug(
                     "detected "
                     + group_from_response
