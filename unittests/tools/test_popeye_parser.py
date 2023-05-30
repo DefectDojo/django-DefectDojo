@@ -22,11 +22,13 @@ class TestPopeyeParser(DojoTestCase):
                             "**Group** : test-group" + "\n\n" + \
                             "**Severity** : Warning" + "\n\n" + \
                             "**Message** : [POP-106] No resources requests/limits defined"
+        finding_vuln_id_from_tool = 'POP-106'
         testfile.close()
         self.assertEqual(1, len(findings))
         self.assertEqual("Low", findings[0].severity)
         self.assertEqual(finding_title, findings[0].title)
         self.assertEqual(finding_description, findings[0].description)
+        self.assertEqual(finding_vuln_id_from_tool, findings[0].vuln_id_from_tool)
 
     def test_popeye_parser_with_many_vuln_has_many_findings(self):
         testfile = open("unittests/scans/popeye/popeye_many_vul.json")
