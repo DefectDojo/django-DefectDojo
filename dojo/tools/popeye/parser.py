@@ -1,5 +1,6 @@
 import hashlib
 import json
+import re
 from dojo.models import Finding
 
 
@@ -34,14 +35,15 @@ class PopeyeParser(object):
                                         "**Group** : " + issue['group'] + "\n\n" + \
                                         "**Severity** : " + self.get_popeye_level_string(issue['level']) + "\n\n" + \
                                         "**Message** : " + issue['message']
-
+                            vuln_id_from_tool = re.search(r'\[(POP-\d+)\].+', issue['message']).group(1)
                             finding = Finding(
                                 title=title,
                                 test=test,
                                 description=description,
                                 severity=severity,
                                 static_finding=False,
-                                dynamic_finding=True
+                                dynamic_finding=True,
+                                vuln_id_from_tool=vuln_id_from_tool,
                             )
                             # internal de-duplication
                             dupe_key = hashlib.sha256(str(description + title).encode('utf-8')).hexdigest()
