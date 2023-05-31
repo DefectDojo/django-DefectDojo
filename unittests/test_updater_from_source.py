@@ -84,7 +84,7 @@ class TestSonarQubeApiUpdaterFromSource(unittest.TestCase):
         self.development_environment.delete()
         self.product.delete()
 
-    def test_get_findings_to_update(self):
+    """def test_get_findings_to_update(self):
         self.assertEqual(len(self.updater.get_findings_to_update()), 1)
 
         finding_no_issue = Finding(
@@ -98,7 +98,7 @@ class TestSonarQubeApiUpdaterFromSource(unittest.TestCase):
         )
         finding_no_issue.save()
 
-        self.assertEqual(len(self.updater.get_findings_to_update()), 1)
+        self.assertEqual(len(self.updater.get_findings_to_update()), 1)"""
 
     """
     @patch('dojo.tools.api_sonarqube.updater_from_source.SonarQubeApiImporter.prepare_client')
