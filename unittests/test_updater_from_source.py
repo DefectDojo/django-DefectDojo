@@ -22,16 +22,14 @@ class TestSonarQubeApiUpdaterFromSource(unittest.TestCase):
         self.prod_type, _ = Product_Type.objects.get_or_create(name="Product Type")
 
         # Obtain or create an instance of Dojo_User
-        #product_manager, _ = Dojo_User.objects.get_or_create(username="nombre_de_usuario")
-
         self.user, _ = User.objects.get_or_create(username="User 1")
-        
+    
 
         # Create a new instance of Product and assign the product_manager
         self.product, _ = Product.objects.get_or_create(
             name="Product_updater_from_source",
             prod_type=self.prod_type,
-            product_manager=self.user
+            #product_manager=self.user
         )
 
         self.product.save()
@@ -71,7 +69,7 @@ class TestSonarQubeApiUpdaterFromSource(unittest.TestCase):
             false_p=False,
             mitigated=None,
             is_mitigated=False,
-            reporter=self.test.engagement.product.product_manager,
+            reporter=self.user
         )
         self.finding.save()
 
@@ -93,7 +91,7 @@ class TestSonarQubeApiUpdaterFromSource(unittest.TestCase):
             false_p=False,
             mitigated=None,
             is_mitigated=False,
-            reporter=self.test.engagement.product.product_manager,
+            reporter=self.user
         )
         finding_no_issue.save()
 
