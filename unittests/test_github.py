@@ -18,7 +18,11 @@ class TestGitHub(unittest.TestCase):
 
     def setUp(self):
         prod_type, _ = Product_Type.objects.get_or_create(name="product_type")
-        self.prod, _ = Product.objects.get_or_create(name='Test Product', prod_type=prod_type)
+        self.prod, created = Product.objects.get_or_create(
+            name="ProductTestGithub",
+            prod_type=prod_type,
+        )
+        
         self.engagement = Engagement.objects.create(product=self.prod, target_start=datetime.datetime.now(), target_end=datetime.datetime.now())
         github_conf = GITHUB_Conf.objects.create(api_key='dummy_api_key')
         self.github_pkey = GITHUB_PKey.objects.create(product=self.prod, git_conf=github_conf, git_project='dummy_project')
