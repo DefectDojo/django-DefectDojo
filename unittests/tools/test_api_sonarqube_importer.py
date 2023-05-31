@@ -295,7 +295,7 @@ class TestSonarqubeImporterExternalRule(DojoTestCase):
         self.assertEqual('Remove this useless assignment to local variable "currentValue".', finding.title)
         self.assertEqual(None, finding.cwe)
         self.assertEqual('', finding.description)
-        self.assertEqual('', finding.references)
+        self.assertEqual('[Issue permalink](http://localhoproject/issues?issues=AWKWIl8pZpu0CyehMfc4&open=AWKWIl8pZpu0CyehMfc4&resolved=CONFIRMED&id=internal.dummy.project) \n', finding.references)
         self.assertEqual('Medium', finding.severity)
         self.assertEqual(242, finding.line)
         self.assertEqual('internal.dummy.project:src/main/javascript/TranslateDirective.ts', finding.file_path)
@@ -438,8 +438,10 @@ class TestSonarqubeImporterValidateHotspotData(DojoTestCase):
             '\n\n',
             findings[0].description
         )
-        self.assertEqual(str(findings[0].severity), 'Info')
+        self.assertEqual(str(findings[0].severity), 'High')
         self.assertMultiLineEqual(
+            '[Hotspot permalink](http://localhosecurity_hotspots?id=internal.dummy.project&hotspots=AXgm6Z-ophPPY0C1qhRq) '
+            '\n'
             '[CVE-2019-13466](http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-13466)'
             '\n'
             '[CVE-2018-15389](http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15389)'
@@ -507,8 +509,8 @@ class TestSonarqubeImporterHotspotRule_WO_Risk_Description(DojoTestCase):
             '\n\n',
             findings[0].description
         )
-        self.assertEqual(str(findings[0].severity), 'Info')
-        self.assertEqual(findings[0].references, '')
+        self.assertEqual(str(findings[0].severity), 'High')
+        self.assertEqual(findings[0].references, '[Hotspot permalink](http://localhosecurity_hotspots?id=internal.dummy.project&hotspots=AXgm6Z-ophPPY0C1qhRq) \n')
         self.assertEqual(str(findings[0].file_path), 'internal.dummy.project:spec/support/user_fixture.rb')
         self.assertEqual(findings[0].line, 9)
         self.assertEqual(findings[0].active, True)
