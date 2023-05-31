@@ -5,7 +5,7 @@ django.setup()
 
 from dojo.tools.api_sonarqube.updater_from_source import *
 from dojo.risk_acceptance.helper import remove_finding_from_risk_acceptance
-from dojo.models import Finding, Test, Sonarqube_Issue, Development_Environment, Engagement, Product, Product_Type, Test_Type, Dojo_User
+from dojo.models import User, Finding, Test, Sonarqube_Issue, Development_Environment, Engagement, Product, Product_Type, Test_Type, Dojo_User
 from django.utils import timezone
 from unittest.mock import MagicMock
 import unittest
@@ -22,13 +22,16 @@ class TestSonarQubeApiUpdaterFromSource(unittest.TestCase):
         self.prod_type, _ = Product_Type.objects.get_or_create(name="Product Type")
 
         # Obtain or create an instance of Dojo_User
-        product_manager, _ = Dojo_User.objects.get_or_create(username="nombre_de_usuario")
+        #product_manager, _ = Dojo_User.objects.get_or_create(username="nombre_de_usuario")
+
+        self.user, _ = User.objects.get_or_create(username="User 1")
+        
 
         # Create a new instance of Product and assign the product_manager
         self.product, _ = Product.objects.get_or_create(
             name="Product_updater_from_source",
             prod_type=self.prod_type,
-            product_manager=product_manager
+            product_manager=self.user
         )
 
         self.product.save()
