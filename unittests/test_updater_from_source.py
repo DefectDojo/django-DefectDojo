@@ -11,6 +11,8 @@ from unittest.mock import MagicMock
 import unittest
 from unittest.mock import patch
 
+PRODUCT_NAME_DEFAULT = 'Product A'
+
 
 class TestSonarQubeApiUpdaterFromSource(unittest.TestCase):
 
@@ -22,17 +24,20 @@ class TestSonarQubeApiUpdaterFromSource(unittest.TestCase):
         self.prod_type, _ = Product_Type.objects.get_or_create(name="Product Type")
 
         # Obtain or create an instance of Dojo_User
+        
         self.user, _ = User.objects.get_or_create(username="User 1")
     
 
         # Create a new instance of Product and assign the product_manager
-        self.product, _ = Product.objects.get_or_create(
+        """self.product, _ = Product.objects.get_or_create(
             name="Product_updater_from_source",
             prod_type=self.prod_type,
             #product_manager=self.user
-        )
+        )"""
 
-        self.product.save()
+        self.product = self.create_product(PRODUCT_NAME_DEFAULT)
+
+        #self.product.save()
 
         self.engagement = Engagement(
             name="Engagement 1",
@@ -72,6 +77,13 @@ class TestSonarQubeApiUpdaterFromSource(unittest.TestCase):
             reporter=self.user
         )
         self.finding.save()
+    
+    def create_product(self, name, *args, description='dummy description', prod_type=None, **kwargs):
+        if not prod_type:
+            prod_type = Product_Type.objects.first()
+        product = Product(name=name, description=description, prod_type=prod_type)
+        product.save()
+        return product
 
     def tearDown(self):
         self.finding.delete()
