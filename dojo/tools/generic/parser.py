@@ -84,7 +84,7 @@ class GenericParser(object):
                 'scanner_confidence', 'unique_id_from_tool', 'vuln_id_from_tool', 'sast_source_object',
                 'sast_sink_object', 'sast_source_line', 'sast_source_file_path', 'nb_occurences',
                 'publish_date', 'service', 'planned_remediation_date', 'planned_remediation_version',
-                'effort_for_fixing', 'tags'
+                'effort_for_fixing', 'tags', 'hash_code',
             }.union(required)
             not_allowed = sorted(set(item).difference(allowed))
             if not_allowed:
