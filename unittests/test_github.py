@@ -9,7 +9,7 @@ import unittest
 from unittest.mock import patch, Mock
 import unittest.mock as mock
 from dojo.github import *
-from dojo.models import Engagement, Product, GITHUB_PKey, GITHUB_Issue, Product_Type, GITHUB_Conf, Finding, Test, Test_Type, User
+from dojo.models import Engagement, Product, GITHUB_PKey, GITHUB_Issue, Product_Type, GITHUB_Conf, Finding, Test, Test_Type, User, SLA_Configuration
 import datetime
 
 from unittest.mock import MagicMock
@@ -18,9 +18,12 @@ class TestGitHub(unittest.TestCase):
 
     def setUp(self):
         prod_type, _ = Product_Type.objects.get_or_create(name="product_type")
+        sla_conf, _ = SLA_Configuration.objects.get_or_create(name="SLA Configuration")
+        Product.objects.filter(name="ProductTestGithub").delete()
         self.prod, _ = Product.objects.get_or_create(
             name="ProductTestGithub",
             prod_type=prod_type,
+            sla_configuration = sla_conf
         )
         
         self.engagement = Engagement.objects.create(product=self.prod, target_start=datetime.datetime.now(), target_end=datetime.datetime.now())
