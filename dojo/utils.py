@@ -1770,17 +1770,18 @@ def sla_compute_and_notify(*args, **kwargs):
     import dojo.jira_link.helper as jira_helper
 
     def _notify(finding, title):
-        create_notification(
-            event='sla_breach',
-            title=title,
-            finding=finding,
-            url=reverse('view_finding', args=(finding.id,)),
-            sla_age=sla_age
-        )
+        if not finding.test.engagement.product.disable_sla_breach_notifications:
+            create_notification(
+                event='sla_breach',
+                title=title,
+                finding=finding,
+                url=reverse('view_finding', args=(finding.id,)),
+                sla_age=sla_age
+            )
 
-        if do_jira_sla_comment:
-            logger.info("Creating JIRA comment to notify of SLA breach information.")
-            jira_helper.add_simple_jira_comment(jira_instance, jira_issue, title)
+            if do_jira_sla_comment:
+                logger.info("Creating JIRA comment to notify of SLA breach information.")
+                jira_helper.add_simple_jira_comment(jira_instance, jira_issue, title)
 
     # exit early on flags
     system_settings = System_Settings.objects.get()
@@ -1802,10 +1803,10 @@ def sla_compute_and_notify(*args, **kwargs):
             ))
 
             query = None
-            if system_settings.enable_notify_sla_active:
-                query = Q(active=True, is_mitigated=False, duplicate=False)
             if system_settings.enable_notify_sla_active_verified:
                 query = Q(active=True, verified=True, is_mitigated=False, duplicate=False)
+            elif system_settings.enable_notify_sla_active:
+                query = Q(active=True, is_mitigated=False, duplicate=False)
             logger.debug("My query: {}".format(query))
 
             no_jira_findings = {}
@@ -1846,7 +1847,7 @@ def sla_compute_and_notify(*args, **kwargs):
                 jira_issue = None
                 if finding.has_jira_issue:
                     jira_issue = finding.jira_issue
-                elif finding.has_finding_group:
+                elif finding.has_jira_group_issue:
                     jira_issue = finding.finding_group.jira_issue
 
                 if jira_issue:
@@ -1895,7 +1896,7 @@ def sla_compute_and_notify(*args, **kwargs):
                     logger.info("Security SLA breach warning. Finding ID {} breaching today ({})".format(finding.id, sla_age))
                     _notify(finding, "Finding {} - SLA is breaching today".format(finding.id))
 
-            logger.info("SLA run results: Pre-breach: {}, at-breach: {}, post-breach: {} post-breach-no-notify: {}, with-jira: {}, TOTAL: {}".format(
+            logger.info("SLA run results: Pre-breach: {}, at-breach: {}, post-breach: {}, post-breach-no-notify: {}, with-jira: {}, TOTAL: {}".format(
                 pre_breach_count,
                 at_breach_count,
                 post_breach_count,

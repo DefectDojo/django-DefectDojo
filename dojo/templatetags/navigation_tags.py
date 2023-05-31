@@ -2,6 +2,7 @@ from django import template
 from django.utils.safestring import mark_safe as safe
 from django.utils.html import escape
 from urllib.parse import urlencode
+from django.utils.translation import gettext as _
 
 from dojo.authorization.roles_permissions import Permissions
 from dojo.product_type.queries import get_authorized_product_types
@@ -20,9 +21,9 @@ def query_string_as_hidden(context):
         for param in parameters:
             parts = param.split('=')
             if len(parts) == 2:
-                inputs += "<input type='hidden' name='" + escape(parts[0]) + "' value='" + escape(parts[1]) + "'/>"
+                inputs += f"<input type='hidden' name='{escape(parts[0])}' value='{escape(parts[1])}'/>"
             else:
-                inputs += "<input type='hidden' name='" + escape(parts[0]) + "' value=''/>"
+                inputs += f"<input type='hidden' name='{escape(parts[0])}' value=''/>"
     return safe(inputs)
 
 
@@ -46,15 +47,15 @@ def dojo_sort(request, display='Name', value='title', default=None):
                 icon += '-desc'
                 title += 'ascending'
             else:
-                value = '-' + value
+                value = f'-{value}'
                 icon += '-asc'
                 title += 'descending'
         else:
             title += 'ascending'
     elif default:
-        icon += '-' + default
+        icon += f'-{default}'
         if default == 'asc':
-            value = '-' + value
+            value = f'-{value}'
             title += 'descending'
         else:
             title += 'ascending'
@@ -64,7 +65,7 @@ def dojo_sort(request, display='Name', value='title', default=None):
     icon += ' dd-sort"></i>'
     dict_ = request.GET.copy()
     dict_[field] = value
-    link = '<a title="' + title + '" href="?' + escape(urlencode(dict_)) + '">' + display + '&nbsp;' + icon + '</a>'
+    link = f'<a title="{title}" href="?{escape(urlencode(dict_))}">{_(display)}&nbsp;{icon}</a>'
     return safe(link)
 
 

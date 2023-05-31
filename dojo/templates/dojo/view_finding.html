@@ -17,6 +17,7 @@
 {% endblock %}
 {% block content %}
     {{ block.super }}
+{% user_can_clear_peer_review finding dojo_user as clear_peer_review %}
 <div id="test">
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -67,7 +68,9 @@
                                     </a>
                                 </li>
                                 <li role="separator" class="divider"></li>
-                                {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by and finding.under_review %}
+                            {% endif %}
+                            {% if finding|has_object_permission:"Finding_View" %}
+                                {% if finding|has_object_permission:"Finding_Edit" and clear_peer_review %}
                                     <li role="presentation">
                                         <a href="{% url 'clear_finding_review' finding.id %}">
                                             <i class="icon-user-check"></i> Clear Review
@@ -89,7 +92,7 @@
                                 </li>
                             {% endif %}
                             <li role="separator" class="divider"></li>
-                            {% if "dojo.add_finding_template"|has_configuration_permission:request %}
+                            {% if "Finding_Add"|has_global_permission %}
                                 <li role="presentation">
                                     <a href="{% url 'mktemplate' finding.id %}">
                                         <i class="fa-solid fa-copy"></i> Make Finding a Template
@@ -107,14 +110,14 @@
                                         <input type="hidden" label="apply_template" aria-label="apply_template" name="id" value="{{ finding.id }}"/>
                                     </form>
                             {% endif %}
-                            {% if not cwe_template.cwe and "dojo.add_finding_template"|has_configuration_permission:request %}
+                            {% if not cwe_template.cwe and "Finding_Add"|has_global_permission %}
                                     <li role="presentation">
                                         <a href="{% url 'add_template' %}">
                                             <i class="fa-solid fa-copy"></i> Create a CWE Remediation Template
                                         </a>
                                     </li>
                             {% endif %}
-                            {% if finding|has_object_permission:"Finding_Edit" and "dojo.view_finding_template"|has_configuration_permission:request %}
+                            {% if finding|has_object_permission:"Finding_Edit" %}
                                 <li role="presentation">
                                     <a href="{% url 'find_template_to_apply' finding.id %}">
                                         <i class="fa-solid fa-copy"></i> Apply Template to Finding
@@ -202,7 +205,7 @@
                                 <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
                                 Alert: This Finding is under review and may not be 100% accurate.
                             </span>
-                            {% if dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by %}
+                            {% if finding|has_object_permission:"Finding_Edit" and clear_peer_review %}
                                 [<a title="Clear Review" class="text-primary" style="display: inline !important;"
                                     href="{% url 'clear_finding_review' finding.id %}">Clear Review</a>]
                             {% endif %}
