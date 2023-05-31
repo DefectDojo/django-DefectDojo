@@ -28,8 +28,8 @@ class TestSonarQubeApiUpdaterFromSource(unittest.TestCase):
     
 
         # Create a new instance of Product and assign the product_manager
-        self.product, created = Product.objects.get_or_create(
-            name="TestDojoDefaultImporter",
+        self.product = Product.objects.create(
+            name="Product_",
             prod_type=product_type,
         )
 
