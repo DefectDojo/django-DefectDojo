@@ -18,7 +18,7 @@ class TestGitHub(unittest.TestCase):
 
     def setUp(self):
         prod_type, _ = Product_Type.objects.get_or_create(name="product_type")
-        self.prod, created = Product.objects.get_or_create(
+        self.prod, _ = Product.objects.get_or_create(
             name="ProductTestGithub",
             prod_type=prod_type,
         )
@@ -27,6 +27,7 @@ class TestGitHub(unittest.TestCase):
         github_conf = GITHUB_Conf.objects.create(api_key='dummy_api_key')
         self.github_pkey = GITHUB_PKey.objects.create(product=self.prod, git_conf=github_conf, git_project='dummy_project')
         self.test_type, _ = Test_Type.objects.get_or_create(name="test type")
+
 
     @patch('dojo.github.GITHUB_PKey.objects.filter')
     def test_reopen_external_issue_github_no_github_info(self, mock_pkey_filter):
