@@ -420,7 +420,7 @@ cloudsql:
   enabled: false
   image:
     # set repo and image tag of gce-proxy
-    repository: eu.gcr.io/cloud-sql-connectors/cloud-sql-proxy #gcr.io/cloudsql-docker/gce-proxy
+    repository: eu.gcr.io/cloud-sql-connectors/cloud-sql-proxy
     tag: 2.3.0
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
