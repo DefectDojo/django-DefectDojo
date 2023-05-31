@@ -42,7 +42,7 @@ cryptography==40.0.2
 python-dateutil==2.8.2
 pytz==2023.3
 redis==4.5.4
-requests==2.29.0
+requests==2.31.0
 sqlalchemy==1.4.46  # Required by Celery broker transport
 supervisor==4.2.5
 urllib3==1.26.11

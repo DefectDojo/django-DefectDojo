@@ -103,9 +103,8 @@ def api_v2_key(request):
                    'form': form,
                    })
 
+
 # #  user specific
-
-
 @dojo_ratelimit(key='post:username')
 @dojo_ratelimit(key='post:password')
 def login_view(request):

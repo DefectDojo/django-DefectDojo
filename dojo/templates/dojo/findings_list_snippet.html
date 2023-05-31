@@ -398,10 +398,11 @@
                                                                 <i class="fa-solid fa-copy"></i> {% trans "Copy" %}
                                                             </a>
                                                         </li>
-                                                    {% endif %}
-                                                    {% if finding|has_object_permission:"Finding_Edit" %}
                                                         <li class="divider"></li>
-                                                        {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by and finding.under_review %}
+                                                    {% endif %}
+                                                    {% if finding|has_object_permission:"Finding_View" %}
+                                                        {% user_can_clear_peer_review finding request.user as clear_peer_review %}
+                                                        {% if finding|has_object_permission:"Finding_Edit" and clear_peer_review %}
                                                             <li role="presentation">
                                                                 <a href="{% url 'clear_finding_review' finding.id %}">
                                                                     <i class="icon-user-check"></i> {% trans "Clear Review" %}

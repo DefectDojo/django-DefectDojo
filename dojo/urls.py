@@ -170,6 +170,16 @@ api_v2_urls = [
     re_path(r'^%sapi/v2/user_profile/' % get_system_setting('url_prefix'), UserProfileView.as_view(), name='user_profile'),
 ]
 
+if hasattr(settings, 'API_TOKENS_ENABLED'):
+    if settings.API_TOKENS_ENABLED:
+        api_v2_urls += [
+            re_path(
+                f"^{get_system_setting('url_prefix')}api/v2/api-token-auth/",
+                tokenviews.obtain_auth_token,
+                name='api-token-auth',
+            )
+        ]
+
 schema_view = get_schema_view(
     openapi.Info(
         title="Defect Dojo API",
@@ -218,10 +228,6 @@ if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
     if settings.DJANGO_ADMIN_ENABLED:
         #  django admin
         urlpatterns += [re_path(r'^%sadmin/' % get_system_setting('url_prefix'), admin.site.urls)]
-
-if hasattr(settings, 'API_TOKENS_ENABLED'):
-    if settings.API_TOKENS_ENABLED:
-        urlpatterns += [re_path(r'^%sapi/v2/api-token-auth/' % get_system_setting('url_prefix'), tokenviews.obtain_auth_token, name='api-token-auth')]
 
 # sometimes urlpatterns needed be added from local_settings.py to avoid having to modify core defect dojo files
 if hasattr(settings, 'EXTRA_URL_PATTERNS'):
