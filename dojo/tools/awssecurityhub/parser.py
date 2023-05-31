@@ -39,45 +39,69 @@ def get_item(finding, test):
     finding_id = finding.get('Id', "")
     title = finding.get('Title', "")
     severity = finding.get('Severity', {}).get('Label', 'INFORMATIONAL').title()
+    cve = ""
     if aws_scanner_type == "Inspector":
         vulnerabilities = finding.get('Vulnerabilities', "")
         cve = vulnerabilities[0]['Id']
         vulnerablepackages = vulnerabilities[0].get('VulnerablePackages', "")
-        mitigation = vulnerablepackages[0]['Remediation']
+        try:
+            mitigation = vulnerablepackages[0]['Remediation']
+        except KeyError:
+            mitigation = "None Provided"
         description = "This is a Inspector Finding \n" + cve + "\n" + finding.get('Description', "")
+
+        if finding.get('ProductFields', {}).get('aws/inspector/FindingStatus', "ACTIVE") == "ACTIVE":
+            mitigated = None
+            is_Mitigated = False
+            active = True
+        else:
+            is_Mitigated = True
+            active = False
+            if finding.get('LastObservedAt', None):
+                try:
+                    mitigated = datetime.strptime(finding.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%S.%fZ")
+                except:
+                    mitigated = datetime.strptime(finding.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%fZ")
+            else:
+                mitigated = datetime.utcnow()
+
     else:
         mitigation = finding.get('Remediation', {}).get('Recommendation', {}).get('Text', "")
         description = "This is a Security Hub Finding \n" + finding.get('Description', "")
+
+        if finding.get('Compliance', {}).get('Status', "PASSED") == 'PASSED':
+            is_Mitigated = True
+            active = False
+            if finding.get('LastObservedAt', None):
+                try:
+                    mitigated = datetime.strptime(finding.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%S.%fZ")
+                except:
+                    mitigated = datetime.strptime(finding.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%fZ")
+            else:
+                mitigated = datetime.utcnow()
+        else:
+            mitigated = None
+            is_Mitigated = False
+            active = True
+
     resources = finding.get('Resources', "")
     resource_id = resources[0]['Id'].split(':')[-1]
     references = finding.get('Remediation', {}).get('Recommendation', {}).get('Url')
     false_p = False
 
-    if finding.get('Compliance', {}).get('Status', "PASSED") == 'PASSED':
-        is_Mitigated = True
-        active = False
-        if finding.get('LastObservedAt', None):
-            try:
-                mitigated = datetime.strptime(finding.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%S.%fZ")
-            except:
-                mitigated = datetime.strptime(finding.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%fZ")
-        else:
-            mitigated = datetime.utcnow()
-    else:
-        mitigated = None
-        is_Mitigated = False
-        active = True
-    finding = Finding(title=f"Resource: {resource_id} - {title}",
+    finding = Finding(title=f"{title} - Resource: {resource_id}",
                       test=test,
                       description=description,
                       mitigation=mitigation,
                       references=references,
                       severity=severity,
+                      impact=f"Resource: {resource_id}",
                       active=active,
                       verified=False,
                       false_p=false_p,
                       unique_id_from_tool=finding_id,
                       mitigated=mitigated,
                       is_mitigated=is_Mitigated,
+                      cve=cve,
                       )
     return finding
