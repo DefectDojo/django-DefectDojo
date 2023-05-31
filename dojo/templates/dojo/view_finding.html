@@ -3,6 +3,7 @@
 {% load authorization_tags %}
 {% load humanize %}
 {% load static %}
+{% load i18n %}
 {% load get_endpoint_status %}
 {% block add_styles %}
     {{ block.super }}
@@ -17,6 +18,7 @@
 {% endblock %}
 {% block content %}
     {{ block.super }}
+{% user_can_clear_peer_review finding dojo_user as clear_peer_review %}
 <div id="test">
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -67,7 +69,9 @@
                                     </a>
                                 </li>
                                 <li role="separator" class="divider"></li>
-                                {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by and finding.under_review %}
+                            {% endif %}
+                            {% if finding|has_object_permission:"Finding_View" %}
+                                {% if finding|has_object_permission:"Finding_Edit" and clear_peer_review %}
                                     <li role="presentation">
                                         <a href="{% url 'clear_finding_review' finding.id %}">
                                             <i class="icon-user-check"></i> Clear Review
@@ -202,7 +206,7 @@
                                 <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
                                 Alert: This Finding is under review and may not be 100% accurate.
                             </span>
-                            {% if dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by %}
+                            {% if finding|has_object_permission:"Finding_Edit" and clear_peer_review %}
                                 [<a title="Clear Review" class="text-primary" style="display: inline !important;"
                                     href="{% url 'clear_finding_review' finding.id %}">Clear Review</a>]
                             {% endif %}
@@ -252,6 +256,9 @@
                     {% if finding.planned_remediation_date %}
                         <th>Planned Remediation</th>
                     {% endif%}
+                    {% if finding.planned_remediation_version %}
+                        <th>{% trans "Planned Remediation version" %}</th>
+                    {% endif %}
                     <th>Reporter</th>
                     {% if finding.mitigated %}
                         <th>Date Mitigated</th>
@@ -377,6 +384,9 @@
                     {% endif %}
                     {% if finding.planned_remediation_date %}
                         <td>{{ finding.planned_remediation_date }}</td>
+                    {% endif %}
+                    {% if finding.planned_remediation_version %}
+                        <td>{{ finding.planned_remediation_version }}</td>
                     {% endif %}
                     <td>{{ finding.reporter }}</td>
                     {% if finding.mitigated %}
@@ -526,6 +536,9 @@
                 {% if 'is_finding_groups_enabled'|system_setting_enabled and finding.finding_group %}
                 <th>Group</th>
                 {% endif %}
+                {% if finding.effort_for_fixing %}
+                <th>{% trans "Effort for fixing" %}</th>
+                {% endif %}
             </tr>
             <tr>
                 {% if finding.service %}
@@ -620,6 +633,13 @@
                         <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">{{ finding.finding_group.name }}</a>
                         <i id="push_group_to_jira_{{ finding.finding_group.group.id }}" data-group-id="{{ finding.finding_group.id }}" class="fa-solid fa-share-from-square push_group_to_jira" title="Update JIRA issue with current data from this group of findings."></i>
                     </td>
+                {% endif %}
+                {% if finding.effort_for_fixing %}
+                <td>
+                    <span>
+                        {{ finding.effort_for_fixing }}
+                    </span>
+                </td>
                 {% endif %}
             </tr>
         </table>
