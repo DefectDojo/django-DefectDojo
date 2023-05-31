@@ -37,7 +37,7 @@ class TestGitHub(unittest.TestCase):
     @patch('dojo.github.GITHUB_PKey.objects.filter')
     def test_reopen_external_issue_github_no_github_info(self, mock_pkey_filter):
         mock_pkey_filter.return_value.count.return_value = Mock()
-        mock_pkey_filter.return_value.count.return_value.return_value = 0
+       # mock_pkey_filter.return_value.count.return_value.return_value = 0
         prod = Mock()
         find = Mock()
         eng = Mock()
@@ -55,7 +55,7 @@ class TestGitHub(unittest.TestCase):
                                                 mock_pkey_filter, mock_get_system_setting):
         mock_get_system_setting.return_value = True
         mock_pkey_filter.return_value.count.return_value = Mock()
-        mock_pkey_filter.return_value.count.return_value.return_value = 1
+        #mock_pkey_filter.return_value.count.return_value.return_value = 1
         mock_pkey_get.return_value = Mock(git_conf=Mock(api_key='dummy_api_key'), git_project='dummy_project')
         mock_issue_get.return_value = Mock(issue_id='1')
         mock_issue = Mock(state='closed')
@@ -92,7 +92,7 @@ class TestGitHub(unittest.TestCase):
                                                 mock_pkey_filter, mock_get_system_setting):
         mock_get_system_setting.return_value = True
         mock_pkey_filter.return_value.count.return_value = Mock()
-        mock_pkey_filter.return_value.count.return_value.return_value = 1
+        #mock_pkey_filter.return_value.count.return_value.return_value = 1
         mock_pkey_get.return_value = Mock(git_conf=Mock(api_key='dummy_api_key'), git_project='dummy_project')
         mock_issue_get.return_value = Mock(issue_id='1')
         mock_issue = Mock(state='open')
