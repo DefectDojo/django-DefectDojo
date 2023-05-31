@@ -3,6 +3,12 @@ from django.core.wsgi import get_wsgi_application
 import dojo.wsgi as wsgi
 from unittest.mock import patch, MagicMock
 
+import logging
+import os
+import socket
+
+
+
 class TestWSGI(unittest.TestCase):
     def test_environ_set_default(self):
         self.assertEqual(wsgi.os.environ.get('DJANGO_SETTINGS_MODULE'), 'dojo.settings.settings')
@@ -37,6 +43,7 @@ class TestWSGI(unittest.TestCase):
         with self.assertRaises(AttributeError):
             wsgi.debugpy.wait_for_client()
 
+  
 
 if __name__ == '__main__':
     unittest.main()

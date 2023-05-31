@@ -344,7 +344,7 @@ TEMPLATE_DEBUG = env('DD_TEMPLATE_DEBUG')
 # See https://docs.djangoproject.com/en/2.0/ref/settings/#allowed-hosts
 SITE_URL = env('DD_SITE_URL')
 ALLOWED_HOSTS = tuple(
-    env.list('DD_ALLOWED_HOSTS', default=['localhost', '127.0.0.1']))
+    env.list('DD_ALLOWED_HOSTS', default=['localhost', '127.0.0.1', 'testserver']))
 
 # Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
 SECRET_KEY = env('DD_SECRET_KEY')
@@ -407,18 +407,16 @@ else:
         }
     else:
         DATABASES = {
-            'default': {
-                'ENGINE': env('DD_DATABASE_ENGINE'),
-                'NAME': env('DD_DATABASE_NAME'),
-                'TEST': {
-                    'NAME': env('DD_TEST_DATABASE_NAME'),
-                },
-                'USER': env('DD_DATABASE_USER'),
-                'PASSWORD': env('DD_DATABASE_PASSWORD'),
-                'HOST': env('DD_DATABASE_HOST'),
-                'PORT': env('DD_DATABASE_PORT'),
-            }
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'defectdojo',
+        'USER': 'santiago',
+        'PASSWORD': '123456',
+        'HOST': 'localhost',
+        'PORT': '3306',
         }
+    }
+
 
 # Track migrations through source control rather than making migrations locally
 if env('DD_TRACK_MIGRATIONS'):
