@@ -1,4 +1,5 @@
 # Django settings for DefectDojo
+from email.utils import getaddresses
 import os
 from datetime import timedelta
 from celery.schedules import crontab
@@ -6,6 +7,8 @@ from dojo import __version__
 import environ
 from netaddr import IPNetwork, IPSet
 import json
+import boto3
+from botocore.exceptions import ClientError
 
 # See https://documentation.defectdojo.com/getting_started/configuration/ for options
 # how to tune the configuration to your needs.
@@ -84,12 +87,17 @@ env = environ.Env(
     DD_SECRET_KEY=(str, ''),
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
-    DD_FORGOT_PASSWORD=(bool, True),  # do we show link "I forgot my password" on login screen
-    DD_PASSWORD_RESET_TIMEOUT=(int, 259200),  # 3 days, in seconds (the deafult)
-    DD_FORGOT_USERNAME=(bool, True),  # do we show link "I forgot my username" on login screen
+    # do we show link "I forgot my password" on login screen
+    DD_FORGOT_PASSWORD=(bool, True),
+    # 3 days, in seconds (the deafult)
+    DD_PASSWORD_RESET_TIMEOUT=(int, 259200),
+    # do we show link "I forgot my username" on login screen
+    DD_FORGOT_USERNAME=(bool, True),
     DD_SOCIAL_AUTH_SHOW_LOGIN_FORM=(bool, True),  # do we show user/pass input
-    DD_SOCIAL_AUTH_CREATE_USER=(bool, True),  # if True creates user at first login
-    DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),  # auto-redirect if there is only one social login method
+    # if True creates user at first login
+    DD_SOCIAL_AUTH_CREATE_USER=(bool, True),
+    # auto-redirect if there is only one social login method
+    DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),
     DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
     DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_AUTH0_KEY=(str, ''),
@@ -105,14 +113,23 @@ env = environ.Env(
     DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://{your-org-url}/oauth2'),
+    DD_SOCIAL_AUTH_REDIRECT_IS_HTTPS=(bool, False),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, ''),
-    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(
+        str, 'https://graph.microsoft.com/'),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS=(bool, False),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS=(bool, True),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_PERMISSION_AUTO_IMPORT=(bool, False),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_TOKEN=(str, ''),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_ORGANIZATION_URL=(str, ''),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_MAIN_SECURITY_GROUP=(str, ''),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_OFFICES_LOCATION=(str, ''),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_GROUP_TEAM_FILTERS=(str, ''),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_JOBS_TITLE=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_TAGS=(bool, False),
@@ -136,7 +153,8 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, ''),
     DD_SAML2_ENABLED=(bool, False),
     # Allows to override default SAML authentication backend. Check https://djangosaml2.readthedocs.io/contents/setup.html#custom-user-attributes-processing
-    DD_SAML2_AUTHENTICATION_BACKENDS=(str, 'djangosaml2.backends.Saml2Backend'),
+    DD_SAML2_AUTHENTICATION_BACKENDS=(
+        str, 'djangosaml2.backends.Saml2Backend'),
     # Force Authentication to make SSO possible with SAML2
     DD_SAML2_FORCE_AUTH=(bool, True),
     DD_SAML2_LOGIN_BUTTON_TEXT=(str, 'Login with SAML'),
@@ -144,7 +162,8 @@ env = environ.Env(
     DD_SAML2_LOGOUT_URL=(str, ''),
     # Metadata is required for SAML, choose either remote url or local file path
     DD_SAML2_METADATA_AUTO_CONF_URL=(str, ''),
-    DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, ''),  # ex. '/public/share/idp_metadata.xml'
+    # ex. '/public/share/idp_metadata.xml'
+    DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, ''),
     # Optional, default is SITE_URL + /saml2/metadata/
     DD_SAML2_ENTITY_ID=(str, ''),
     # Allow to create user that are not already in the Django database
@@ -281,7 +300,7 @@ def generate_url(scheme, double_slashes, user, password, host, port, path, param
     if len(user) > 0 or len(password) > 0:
         result_list.append('@')
     result_list.append(host)
-    if port >= 0:
+    if int(port) >= 0:
         result_list.append(':')
         result_list.append(str(port))
     if len(path) > 0 and path[0] != '/':
@@ -291,6 +310,29 @@ def generate_url(scheme, double_slashes, user, password, host, port, path, param
         result_list.append('?')
     result_list.append(params)
     return ''.join(result_list)
+
+def get_secret(secret_name):
+
+    region_name = env('AWS_REGION')
+
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(
+        service_name='secretsmanager',
+        region_name=region_name
+    )
+
+    try:
+        get_secret_value_response = client.get_secret_value(
+            SecretId=secret_name
+        )
+    except ClientError as e:
+        print("An error occurred on requested secret " + secret_name, e)
+        raise e
+
+    # Decrypts secret using the associated KMS key.
+    secret = get_secret_value_response['SecretString']
+    return json.loads(secret)
 
 
 # Read .env file as default or from the command line, DD_ENV_PATH
@@ -308,7 +350,8 @@ TEMPLATE_DEBUG = env('DD_TEMPLATE_DEBUG')
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/2.0/ref/settings/#allowed-hosts
 SITE_URL = env('DD_SITE_URL')
-ALLOWED_HOSTS = tuple(env.list('DD_ALLOWED_HOSTS', default=['localhost', '127.0.0.1']))
+ALLOWED_HOSTS = tuple(
+    env.list('DD_ALLOWED_HOSTS', default=['localhost', '127.0.0.1']))
 
 # Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
 SECRET_KEY = env('DD_SECRET_KEY')
@@ -349,24 +392,40 @@ TAG_PREFETCHING = env('DD_TAG_PREFETCHING')
 # ------------------------------------------------------------------------------
 
 # Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db
-if os.getenv('DD_DATABASE_URL') is not None:
-    DATABASES = {
-        'default': env.db('DD_DATABASE_URL')
-    }
-else:
+if os.getenv('DD_USE_SECRETS_MANAGER') == "true":
+    secret_database = get_secret(env('DD_SECRET_DATABASE'))
     DATABASES = {
         'default': {
             'ENGINE': env('DD_DATABASE_ENGINE'),
-            'NAME': env('DD_DATABASE_NAME'),
+            'NAME': secret_database['dbname'],
             'TEST': {
                 'NAME': env('DD_TEST_DATABASE_NAME'),
             },
-            'USER': env('DD_DATABASE_USER'),
-            'PASSWORD': env('DD_DATABASE_PASSWORD'),
-            'HOST': env('DD_DATABASE_HOST'),
-            'PORT': env('DD_DATABASE_PORT'),
+            'USER': secret_database['username'],
+            'PASSWORD': secret_database['password'],
+            'HOST': secret_database['host'],
+            'PORT': secret_database['port'],
         }
     }
+else:
+    if os.getenv('DD_DATABASE_URL') is not None:
+        DATABASES = {
+            'default': env.db('DD_DATABASE_URL')
+        }
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': env('DD_DATABASE_ENGINE'),
+                'NAME': env('DD_DATABASE_NAME'),
+                'TEST': {
+                    'NAME': env('DD_TEST_DATABASE_NAME'),
+                },
+                'USER': env('DD_DATABASE_USER'),
+                'PASSWORD': env('DD_DATABASE_PASSWORD'),
+                'HOST': env('DD_DATABASE_HOST'),
+                'PORT': env('DD_DATABASE_PORT'),
+            }
+        }
 
 # Track migrations through source control rather than making migrations locally
 if env('DD_TRACK_MIGRATIONS'):
@@ -495,6 +554,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.user_details',
     'dojo.pipeline.update_azure_groups',
     'dojo.pipeline.update_product_access',
+    'dojo.pipeline.update_product_type_azure_devops',
 )
 
 CLASSIC_AUTH_ENABLED = True
@@ -508,14 +568,17 @@ SOCIAL_AUTH_CREATE_USER = env('DD_SOCIAL_AUTH_CREATE_USER')
 
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
-SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ['username', 'first_name', 'last_name', 'email']
+SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = [
+    'username', 'first_name', 'last_name', 'email']
 SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = True
 
 GOOGLE_OAUTH_ENABLED = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLED')
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
-SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS')
-SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS')
+SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = env(
+    'DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS')
+SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = env(
+    'DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS')
 SOCIAL_AUTH_LOGIN_ERROR_URL = '/login'
 SOCIAL_AUTH_BACKEND_ERROR_URL = '/login'
 
@@ -524,20 +587,39 @@ SOCIAL_AUTH_OKTA_OAUTH2_KEY = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY')
 SOCIAL_AUTH_OKTA_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET')
 SOCIAL_AUTH_OKTA_OAUTH2_API_URL = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL')
 
-AZUREAD_TENANT_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED')
-SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY')
-SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET')
-SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID')
-SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE')
-AZUREAD_TENANT_OAUTH2_GET_GROUPS = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS')
-AZUREAD_TENANT_OAUTH2_GROUPS_FILTER = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER')
-AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS')
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = env('DD_SOCIAL_AUTH_REDIRECT_IS_HTTPS')
+
+AZUREAD_TENANT_OAUTH2_ENABLED = env(
+    'DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED')
+SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY = env(
+    'DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY')
+SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET = env(
+    'DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET')
+SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID = env(
+    'DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID')
+SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE = env(
+    'DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE')
+AZUREAD_TENANT_OAUTH2_GET_GROUPS = env(
+    'DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS')
+AZUREAD_TENANT_OAUTH2_GROUPS_FILTER = env(
+    'DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER')
+AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS = env(
+    'DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS')
+
+AZURE_DEVOPS_PERMISSION_AUTO_IMPORT = env('DD_SOCIAL_AUTH_AZURE_DEVOPS_PERMISSION_AUTO_IMPORT')
+AZURE_DEVOPS_ORGANIZATION_URL = env('DD_SOCIAL_AUTH_AZURE_DEVOPS_ORGANIZATION_URL')
+AZURE_DEVOPS_TOKEN = env('DD_SOCIAL_AUTH_AZURE_DEVOPS_TOKEN')
+AZURE_DEVOPS_MAIN_SECURITY_GROUP = env('DD_SOCIAL_AUTH_AZURE_DEVOPS_MAIN_SECURITY_GROUP')
+AZURE_DEVOPS_OFFICES_LOCATION = env('DD_SOCIAL_AUTH_AZURE_DEVOPS_OFFICES_LOCATION')
+AZURE_DEVOPS_JOBS_TITLE = env('DD_SOCIAL_AUTH_AZURE_DEVOPS_JOBS_TITLE')
+AZURE_DEVOPS_GROUP_TEAM_FILTERS = env('DD_SOCIAL_AUTH_AZURE_DEVOPS_GROUP_TEAM_FILTERS')
 
 GITLAB_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED')
 GITLAB_PROJECT_AUTO_IMPORT = env('DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT')
 GITLAB_PROJECT_IMPORT_TAGS = env('DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_TAGS')
 GITLAB_PROJECT_IMPORT_URL = env('DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_URL')
-GITLAB_PROJECT_MIN_ACCESS_LEVEL = env('DD_SOCIAL_AUTH_GITLAB_PROJECT_MIN_ACCESS_LEVEL')
+GITLAB_PROJECT_MIN_ACCESS_LEVEL = env(
+    'DD_SOCIAL_AUTH_GITLAB_PROJECT_MIN_ACCESS_LEVEL')
 SOCIAL_AUTH_GITLAB_KEY = env('DD_SOCIAL_AUTH_GITLAB_KEY')
 SOCIAL_AUTH_GITLAB_SECRET = env('DD_SOCIAL_AUTH_GITLAB_SECRET')
 SOCIAL_AUTH_GITLAB_API_URL = env('DD_SOCIAL_AUTH_GITLAB_API_URL')
@@ -558,15 +640,21 @@ KEYCLOAK_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED')
 SOCIAL_AUTH_KEYCLOAK_KEY = env('DD_SOCIAL_AUTH_KEYCLOAK_KEY')
 SOCIAL_AUTH_KEYCLOAK_SECRET = env('DD_SOCIAL_AUTH_KEYCLOAK_SECRET')
 SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY = env('DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY')
-SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL = env('DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL')
-SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL = env('DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL')
-SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT = env('DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT')
+SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL = env(
+    'DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL')
+SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL = env(
+    'DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL')
+SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT = env(
+    'DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT')
 
-GITHUB_ENTERPRISE_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_OAUTH2_ENABLED')
+GITHUB_ENTERPRISE_OAUTH2_ENABLED = env(
+    'DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_OAUTH2_ENABLED')
 SOCIAL_AUTH_GITHUB_ENTERPRISE_URL = env('DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_URL')
-SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL = env('DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL')
+SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL = env(
+    'DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL')
 SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY = env('DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY')
-SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET = env('DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET')
+SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET = env(
+    'DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET')
 
 DOCUMENTATION_URL = env('DD_DOCUMENTATION_URL')
 
@@ -575,12 +663,17 @@ DOCUMENTATION_URL = env('DD_DOCUMENTATION_URL')
 # and make the choice of enabling SLA notifications for non-verified findings,
 # be mindful of performance.
 # 'SLA_NOTIFY_ACTIVE', 'SLA_NOTIFY_ACTIVE_VERIFIED_ONLY' and 'SLA_NOTIFY_WITH_JIRA_ONLY' are moved to system settings, will be removed here
-SLA_NOTIFY_ACTIVE = env('DD_SLA_NOTIFY_ACTIVE')  # this will include 'verified' findings as well as non-verified.
+# this will include 'verified' findings as well as non-verified.
+SLA_NOTIFY_ACTIVE = env('DD_SLA_NOTIFY_ACTIVE')
 SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = env('DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY')
-SLA_NOTIFY_WITH_JIRA_ONLY = env('DD_SLA_NOTIFY_WITH_JIRA_ONLY')  # Based on the 2 above, but only with a JIRA link
-SLA_NOTIFY_PRE_BREACH = env('DD_SLA_NOTIFY_PRE_BREACH')  # in days, notify between dayofbreach minus this number until dayofbreach
-SLA_NOTIFY_POST_BREACH = env('DD_SLA_NOTIFY_POST_BREACH')  # in days, skip notifications for findings that go past dayofbreach plus this number
-SLA_BUSINESS_DAYS = env('DD_SLA_BUSINESS_DAYS')  # Use business days to calculate SLA's and age of a finding instead of calendar days
+# Based on the 2 above, but only with a JIRA link
+SLA_NOTIFY_WITH_JIRA_ONLY = env('DD_SLA_NOTIFY_WITH_JIRA_ONLY')
+# in days, notify between dayofbreach minus this number until dayofbreach
+SLA_NOTIFY_PRE_BREACH = env('DD_SLA_NOTIFY_PRE_BREACH')
+# in days, skip notifications for findings that go past dayofbreach plus this number
+SLA_NOTIFY_POST_BREACH = env('DD_SLA_NOTIFY_POST_BREACH')
+# Use business days to calculate SLA's and age of a finding instead of calendar days
+SLA_BUSINESS_DAYS = env('DD_SLA_BUSINESS_DAYS')
 
 
 SEARCH_MAX_RESULTS = env('DD_SEARCH_MAX_RESULTS')
@@ -629,9 +722,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # https://django-ratelimit.readthedocs.io/en/stable/index.html
 RATE_LIMITER_ENABLED = env('DD_RATE_LIMITER_ENABLED')
-RATE_LIMITER_RATE = env('DD_RATE_LIMITER_RATE')  # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
-RATE_LIMITER_BLOCK = env('DD_RATE_LIMITER_BLOCK')  # Block the requests after rate limit is exceeded
-RATE_LIMITER_ACCOUNT_LOCKOUT = env('DD_RATE_LIMITER_ACCOUNT_LOCKOUT')  # Forces the user to change password on next login.
+# Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
+RATE_LIMITER_RATE = env('DD_RATE_LIMITER_RATE')
+# Block the requests after rate limit is exceeded
+RATE_LIMITER_BLOCK = env('DD_RATE_LIMITER_BLOCK')
+# Forces the user to change password on next login.
+RATE_LIMITER_ACCOUNT_LOCKOUT = env('DD_RATE_LIMITER_ACCOUNT_LOCKOUT')
 
 # ------------------------------------------------------------------------------
 # SECURITY DIRECTIVES
@@ -668,7 +764,8 @@ if env('DD_CSRF_TRUSTED_ORIGINS') != ['[]']:
 
 # Unless set to None, the SecurityMiddleware sets the Cross-Origin Opener Policy
 # header on all responses that do not already have it to the value provided.
-SECURE_CROSS_ORIGIN_OPENER_POLICY = env('DD_SECURE_CROSS_ORIGIN_OPENER_POLICY') if env('DD_SECURE_CROSS_ORIGIN_OPENER_POLICY') != 'None' else None
+SECURE_CROSS_ORIGIN_OPENER_POLICY = env('DD_SECURE_CROSS_ORIGIN_OPENER_POLICY') if env(
+    'DD_SECURE_CROSS_ORIGIN_OPENER_POLICY') != 'None' else None
 
 if env('DD_SECURE_PROXY_SSL_HEADER'):
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -702,7 +799,6 @@ MAX_TAG_LENGTH = env('DD_MAX_TAG_LENGTH')
 # ------------------------------------------------------------------------------
 # ADMIN
 # ------------------------------------------------------------------------------
-from email.utils import getaddresses
 ADMINS = getaddresses([env('DD_ADMINS')])
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#managers
@@ -735,7 +831,8 @@ REST_FRAMEWORK = {
 }
 
 if API_TOKENS_ENABLED:
-    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += ('rest_framework.authentication.TokenAuthentication',)
+    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += (
+        'rest_framework.authentication.TokenAuthentication',)
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
@@ -823,7 +920,8 @@ INSTALLED_APPS = (
     'auditlog',
     'dojo',
     'watson',
-    'tagging',  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
+    # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
+    'tagging',
     'imagekit',
     'multiselectfield',
     'rest_framework',
@@ -903,7 +1001,8 @@ if SAML2_ENABLED:
     # SSO_URL = env('DD_SSO_URL')
     SAML_METADATA = {}
     if len(env('DD_SAML2_METADATA_AUTO_CONF_URL')) > 0:
-        SAML_METADATA['remote'] = [{"url": env('DD_SAML2_METADATA_AUTO_CONF_URL')}]
+        SAML_METADATA['remote'] = [
+            {"url": env('DD_SAML2_METADATA_AUTO_CONF_URL')}]
     if len(env('DD_SAML2_METADATA_LOCAL_FILE_PATH')) > 0:
         SAML_METADATA['local'] = [env('DD_SAML2_METADATA_LOCAL_FILE_PATH')]
     INSTALLED_APPS += ('djangosaml2',)
@@ -916,7 +1015,8 @@ if SAML2_ENABLED:
 #    SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP = '__iexact'
     SAML_USE_NAME_ID_AS_USERNAME = True
     SAML_CREATE_UNKNOWN_USER = env('DD_SAML2_CREATE_USER')
-    SAML_ATTRIBUTE_MAPPING = saml2_attrib_map_format(env('DD_SAML2_ATTRIBUTES_MAP'))
+    SAML_ATTRIBUTE_MAPPING = saml2_attrib_map_format(
+        env('DD_SAML2_ATTRIBUTES_MAP'))
     SAML_FORCE_AUTH = env('DD_SAML2_FORCE_AUTH')
     SAML_ALLOW_UNKNOWN_ATTRIBUTES = env('DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE')
     BASEDIR = path.dirname(path.abspath(__file__))
@@ -955,16 +1055,16 @@ if SAML2_ENABLED:
                     # do not change the binding or service name
                     'assertion_consumer_service': [
                         ('%s/saml2/acs/' % SITE_URL,
-                        saml2.BINDING_HTTP_POST),
+                         saml2.BINDING_HTTP_POST),
                     ],
                     # url and binding to the single logout service view
                     # do not change the binding or service name
                     'single_logout_service': [
                         # Disable next two lines for HTTP_REDIRECT for IDP's that only support HTTP_POST. Ex. Okta:
                         ('%s/saml2/ls/' % SITE_URL,
-                        saml2.BINDING_HTTP_REDIRECT),
+                         saml2.BINDING_HTTP_REDIRECT),
                         ('%s/saml2/ls/post' % SITE_URL,
-                        saml2.BINDING_HTTP_POST),
+                         saml2.BINDING_HTTP_POST),
                     ],
                 },
 
@@ -1014,15 +1114,15 @@ if SAML2_ENABLED:
         # own metadata settings
         'contact_person': [
             {'given_name': 'Lorenzo',
-            'sur_name': 'Gil',
-            'company': 'Yaco Sistemas',
-            'email_address': 'lgs@yaco.es',
-            'contact_type': 'technical'},
+             'sur_name': 'Gil',
+             'company': 'Yaco Sistemas',
+             'email_address': 'lgs@yaco.es',
+             'contact_type': 'technical'},
             {'given_name': 'Angel',
-            'sur_name': 'Fernandez',
-            'company': 'Yaco Sistemas',
-            'email_address': 'angel@yaco.es',
-            'contact_type': 'administrative'},
+             'sur_name': 'Fernandez',
+             'company': 'Yaco Sistemas',
+             'email_address': 'angel@yaco.es',
+             'contact_type': 'administrative'},
         ],
         # you can set multilanguage information here
         'organization': {
@@ -1041,7 +1141,8 @@ AUTH_REMOTEUSER_ENABLED = env('DD_AUTH_REMOTEUSER_ENABLED')
 if AUTH_REMOTEUSER_ENABLED:
     AUTH_REMOTEUSER_USERNAME_HEADER = env('DD_AUTH_REMOTEUSER_USERNAME_HEADER')
     AUTH_REMOTEUSER_EMAIL_HEADER = env('DD_AUTH_REMOTEUSER_EMAIL_HEADER')
-    AUTH_REMOTEUSER_FIRSTNAME_HEADER = env('DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER')
+    AUTH_REMOTEUSER_FIRSTNAME_HEADER = env(
+        'DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER')
     AUTH_REMOTEUSER_LASTNAME_HEADER = env('DD_AUTH_REMOTEUSER_LASTNAME_HEADER')
     AUTH_REMOTEUSER_GROUPS_HEADER = env('DD_AUTH_REMOTEUSER_GROUPS_HEADER')
     AUTH_REMOTEUSER_GROUPS_CLEANUP = env('DD_AUTH_REMOTEUSER_GROUPS_CLEANUP')
@@ -1074,17 +1175,30 @@ if AUTH_REMOTEUSER_ENABLED:
 # ------------------------------------------------------------------------------
 
 # Celery settings
-CELERY_BROKER_URL = env('DD_CELERY_BROKER_URL') \
-    if len(env('DD_CELERY_BROKER_URL')) > 0 else generate_url(
-    env('DD_CELERY_BROKER_SCHEME'),
-    True,
-    env('DD_CELERY_BROKER_USER'),
-    env('DD_CELERY_BROKER_PASSWORD'),
-    env('DD_CELERY_BROKER_HOST'),
-    env('DD_CELERY_BROKER_PORT'),
-    env('DD_CELERY_BROKER_PATH'),
-    env('DD_CELERY_BROKER_PARAMS')
-)
+if os.getenv('DD_USE_SECRETS_MANAGER') == "true":
+    secret_broker = get_secret(env('DD_SECRET_BROKER'))
+    CELERY_BROKER_URL = generate_url(
+        env('DD_CELERY_BROKER_SCHEME'),
+        True,
+        secret_broker['username'],
+        secret_broker['password'],
+        secret_broker['hostname'],
+        secret_broker['port'],
+        secret_broker['virtualhost'],
+        env('DD_CELERY_BROKER_PARAMS')
+    )
+else:
+    CELERY_BROKER_URL = env('DD_CELERY_BROKER_URL') \
+        if len(env('DD_CELERY_BROKER_URL')) > 0 else generate_url(
+        env('DD_CELERY_BROKER_SCHEME'),
+        True,
+        env('DD_CELERY_BROKER_USER'),
+        env('DD_CELERY_BROKER_PASSWORD'),
+        env('DD_CELERY_BROKER_HOST'),
+        env('DD_CELERY_BROKER_PORT'),
+        env('DD_CELERY_BROKER_PATH'),
+        env('DD_CELERY_BROKER_PARAMS')
+    )
 CELERY_TASK_IGNORE_RESULT = env('DD_CELERY_TASK_IGNORE_RESULT')
 CELERY_RESULT_BACKEND = env('DD_CELERY_RESULT_BACKEND')
 CELERY_TIMEZONE = TIME_ZONE
@@ -1095,7 +1209,8 @@ CELERY_TASK_SERIALIZER = env('DD_CELERY_TASK_SERIALIZER')
 CELERY_PASS_MODEL_BY_ID = env('DD_CELERY_PASS_MODEL_BY_ID')
 
 if len(env('DD_CELERY_BROKER_TRANSPORT_OPTIONS')) > 0:
-    CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env('DD_CELERY_BROKER_TRANSPORT_OPTIONS'))
+    CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(
+        env('DD_CELERY_BROKER_TRANSPORT_OPTIONS'))
 
 CELERY_IMPORTS = ('dojo.tools.tool_issue_updater', )
 
@@ -1154,7 +1269,8 @@ if env('DD_DJANGO_METRICS_ENABLED'):
         MIDDLEWARE + \
         ['django_prometheus.middleware.PrometheusAfterMiddleware', ]
     database_engine = DATABASES.get('default').get('ENGINE')
-    DATABASES['default']['ENGINE'] = database_engine.replace('django.', 'django_prometheus.', 1)
+    DATABASES['default']['ENGINE'] = database_engine.replace(
+        'django.', 'django_prometheus.', 1)
     # CELERY_RESULT_BACKEND.replace('django.core','django_prometheus.', 1)
     LOGIN_EXEMPT_URLS += (r'^%sdjango_metrics/' % URL_PREFIX,)
 
@@ -1215,7 +1331,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'GitLab Dependency Scanning Report': ['title', 'vulnerability_ids', 'file_path', 'component_name', 'component_version'],
     'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
     'JFrog Xray Unified Scan': ['vulnerability_ids', 'file_path', 'component_name', 'component_version'],
-    'Scout Suite Scan': ['file_path', 'vuln_id_from_tool'],  # for now we use file_path as there is no attribute for "service"
+    # for now we use file_path as there is no attribute for "service"
+    'Scout Suite Scan': ['file_path', 'vuln_id_from_tool'],
     'AWS Security Hub Scan': ['unique_id_from_tool'],
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
     'Github Vulnerability Scan': ['title', 'severity', 'component_name', 'vulnerability_ids', 'file_path'],
@@ -1250,10 +1367,12 @@ HASHCODE_FIELDS_PER_SCANNER = {
 
 # Override the hardcoded settings here via the env var
 if len(env('DD_HASHCODE_FIELDS_PER_SCANNER')) > 0:
-    env_hashcode_fields_per_scanner = json.loads(env('DD_HASHCODE_FIELDS_PER_SCANNER'))
+    env_hashcode_fields_per_scanner = json.loads(
+        env('DD_HASHCODE_FIELDS_PER_SCANNER'))
     for key, value in env_hashcode_fields_per_scanner.items():
         if key in HASHCODE_FIELDS_PER_SCANNER:
-            print("Replacing {} with value {} from env var DD_HASHCODE_FIELDS_PER_SCANNER".format(key, value))
+            print("Replacing {} with value {} from env var DD_HASHCODE_FIELDS_PER_SCANNER".format(
+                key, value))
             HASHCODE_FIELDS_PER_SCANNER[key] = value
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1306,7 +1425,8 @@ HASHCODE_ALLOWS_NULL_CWE = {
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
-HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'vulnerability_ids', 'line', 'file_path', 'payload', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
+HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'vulnerability_ids', 'line', 'file_path', 'payload', 'component_name',
+                           'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
 
 # Adding fields to the hash_code calculation regardless of the previous settings
 HASH_CODE_FIELDS_ALWAYS = ['service']
@@ -1438,10 +1558,12 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
 
 # Override the hardcoded settings here via the env var
 if len(env('DD_DEDUPLICATION_ALGORITHM_PER_PARSER')) > 0:
-    env_dedup_algorithm_per_parser = json.loads(env('DD_DEDUPLICATION_ALGORITHM_PER_PARSER'))
+    env_dedup_algorithm_per_parser = json.loads(
+        env('DD_DEDUPLICATION_ALGORITHM_PER_PARSER'))
     for key, value in env_dedup_algorithm_per_parser.items():
         if key in DEDUPLICATION_ALGORITHM_PER_PARSER:
-            print("Replacing {} with value {} from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER".format(key, value))
+            print("Replacing {} with value {} from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER".format(
+                key, value))
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -1468,7 +1590,8 @@ if env('DD_JIRA_EXTRA_ISSUE_TYPES') != '':
         for extra_type in env('DD_JIRA_EXTRA_ISSUE_TYPES').split(','):
             JIRA_ISSUE_TYPE_CHOICES_CONFIG += (extra_type, extra_type),
     else:
-        JIRA_ISSUE_TYPE_CHOICES_CONFIG += (env('DD_JIRA_EXTRA_ISSUE_TYPES'), env('DD_JIRA_EXTRA_ISSUE_TYPES')),
+        JIRA_ISSUE_TYPE_CHOICES_CONFIG += (
+            env('DD_JIRA_EXTRA_ISSUE_TYPES'), env('DD_JIRA_EXTRA_ISSUE_TYPES')),
 
 JIRA_SSL_VERIFY = env('DD_JIRA_SSL_VERIFY')
 
@@ -1609,7 +1732,8 @@ TAGULOUS_AUTOCOMPLETE_JS = (
 )
 
 # using 'element' for width should take width from css defined in template, but it doesn't. So set to 70% here.
-TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
+TAGULOUS_AUTOCOMPLETE_SETTINGS = {
+    'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
 
 EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 
