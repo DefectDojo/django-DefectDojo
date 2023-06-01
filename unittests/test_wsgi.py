@@ -3,9 +3,6 @@ from django.core.wsgi import get_wsgi_application
 import dojo.wsgi as wsgi
 from unittest.mock import patch, MagicMock
 
-import logging
-import os
-import socket
 
 
 

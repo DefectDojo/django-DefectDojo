@@ -2,14 +2,11 @@ import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dojo.settings.settings')
 import django
 django.setup()
-from django.conf import settings
-from django.core import management
-
 import unittest
 from unittest.mock import patch, Mock
 import unittest.mock as mock
 from dojo.github import *
-from dojo.models import Engagement, Product, GITHUB_PKey, GITHUB_Issue, Product_Type, GITHUB_Conf, Finding, Test, Test_Type, User, SLA_Configuration
+from dojo.models import Engagement, Product, GITHUB_PKey, Product_Type, GITHUB_Conf, Test_Type,  SLA_Configuration
 import datetime
 
 from unittest.mock import MagicMock
