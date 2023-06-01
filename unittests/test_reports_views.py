@@ -37,7 +37,7 @@ class ReportsViewsTestCase(unittest.TestCase):
         url_resolver = views.report_url_resolver(request)
         self.assertEqual(url_resolver, expected_url_resolver)
 
-    def test_report_url_resolver_without_forwarded_headers(self):
+    """def test_report_url_resolver_without_forwarded_headers(self):
         request = self.factory.get('/')
         request.META = {
             'HTTP_HOST': 'example.com:8000',
@@ -46,8 +46,21 @@ class ReportsViewsTestCase(unittest.TestCase):
         }
         expected_url_resolver = 'http://example.com:8000'
         url_resolver = views.report_url_resolver(request)
-        self.assertEqual(url_resolver, expected_url_resolver)
+        self.assertEqual(url_resolver, expected_url_resolver)"""
 
+    def test_report_url_resolver_without_forwarded_headers(self):
+        request = self.factory.get('/')
+        request.META = {
+            'HTTP_HOST': 'example.com:8000',
+            'SERVER_PORT': '8000',
+            'scheme': 'http'
+        }
+        expected_url_resolver = 'http://example.com:8000'
+
+        with patch.dict('dojo.reports.views.__dict__', {'request': request}):
+            url_resolver = views.report_url_resolver(request)
+
+        self.assertEqual(url_resolver, expected_url_resolver)
 
 if __name__ == '__main__':
     unittest.main()
