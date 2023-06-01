@@ -135,8 +135,3 @@ docs/public
 docs/node_modules
 docs/resources
 
-#Sonar
-sonar-project.properties
-sonar-scanner-cli-4.6.2.2472-linux.zip
--Dsonar.projectKey=defectDojo
-./scannerwork
