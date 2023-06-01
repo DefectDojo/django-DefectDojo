@@ -14,6 +14,7 @@ from django.utils import timezone
 class ViewsTestCase(unittest.TestCase):
     def setUp(self):
         self.factory = RequestFactory()
+        self.user, _ = User.objects.get_or_create(username="Test user")
 
     def test_get_filtered_findings(self):
         # Crear un producto, un engagement y una prueba para la prueba
@@ -66,18 +67,28 @@ class ViewsTestCase(unittest.TestCase):
     
     
     def test_open_findings(self):
-        user, _ = User.objects.get_or_create(username="Test user")
+        
         # Crear una solicitud GET para la vista
         request = self.factory.get('/open-findings')
         request.session = {}
-        request.user = user
-
+        request.user = self.user
         response = open_findings(request)
-        
-        # Agrega aquí tus afirmaciones y verifica el resultado esperado
-        # ...
+        self.assertEqual(response.status_code, 200)
 
-        # Ejemplo de afirmación de estado HTTP 200 OK
+    def test_verified_findings(self):
+        user, _ = User.objects.get_or_create(username="Test user")
+        request = self.factory.get('/verified-findings')
+        request.session = {}
+        request.user = user
+        response = verified_findings(request)
+        self.assertEqual(response.status_code, 200)
+
+    def test_out_of_scope_findings(self):
+        user, _ = User.objects.get_or_create(username="Test user")
+        request = self.factory.get('/out-of-scope-findings')
+        request.session = {}
+        request.user = user
+        response = out_of_scope_findings(request)
         self.assertEqual(response.status_code, 200)
 
 
