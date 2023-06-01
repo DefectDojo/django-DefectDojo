@@ -19,8 +19,8 @@ class PipelineTest(DojoTestCase):
         settings.AZURE_DEVOPS_TOKEN = "test"
         settings.AZURE_DEVOPS_MAIN_SECURITY_GROUP = "dummy_group_name"
         settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS = "[A-Za-z0-9]+.\\s-\\s.+//^(CDE|EVC)\\s.*"
-        settings.AZURE_DEVOPS_OFFICES_LOCATION = "office1,office2"
-        settings.AZURE_DEVOPS_JOBS_TITLE = "test job"
+        settings.AZURE_DEVOPS_OFFICES_LOCATION = "office1,office2,office3"
+        settings.AZURE_DEVOPS_JOBS_TITLE = "job1,job2-job3-job4"
 
     def dummy_search_azure_groups(self, *args, **kwargs):
         return ["dummy_group_name"]
@@ -36,8 +36,12 @@ class PipelineTest(DojoTestCase):
         mock_membership.additional_properties = {"value": [{"containerDescriptor": "test"}]}
         mock_graph_client.get_membership.return_value = mock_membership
         mock_graph_client.get_group = mock.Mock()
-        mock_graph_client.get_group.return_value = GraphGroup(display_name="test - test", descriptor="test")
-        mock_graph_client.get_group.return_value = GraphGroup(display_name="CDE - test", descriptor="test")
+        mock_graph_client.get_group.return_value = GraphGroup(
+            display_name="test - test", principal_name="office1", descriptor="test"
+        )
+        mock_graph_client.get_group.return_value = GraphGroup(
+            display_name="CDE - test", principal_name="office1", descriptor="test"
+        )
         return mock_graph_client
 
     def _mock_response(

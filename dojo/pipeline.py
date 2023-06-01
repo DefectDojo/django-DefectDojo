@@ -108,7 +108,7 @@ def search_azure_groups(kwargs, token, soc):
         for group_from_response in group_ids:
             logger.debug("Analysing Group_ID " + group_from_response)
             request_headers = {"Authorization": "Bearer " + token}
-            if is_group_id(group_from_response) and group_from_response:
+            if is_group_id(group_from_response):
                 logger.debug(
                     "detected "
                     + group_from_response
@@ -185,7 +185,7 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
         token = soc.extra_data["access_token"]
         group_names = search_azure_groups(kwargs, token, soc)
         logger.debug("detected groups " + str(group_names))
-        if len(group_names) > 0:
+        if len(group_names) > 0 and settings.AZURE_DEVOPS_MAIN_SECURITY_GROUP in group_names:
             user_login = kwargs["details"]["email"]
             request_headers = {"Authorization": "Bearer " + token}
             graph_user_request = requests.get(
@@ -196,6 +196,17 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
             job_title = graph_user_request_json["jobTitle"]
             office_location = graph_user_request_json["officeLocation"]
             logger.debug("detected jobTitle " + job_title + " and officeLocation " + office_location)
+
+            # Assign global role
+            if office_location in settings.AZURE_DEVOPS_OFFICES_LOCATION.split(",")[1]:
+                Global_Role.objects.get_or_create(user=user, role=Role.objects.get(id=Roles.Maintainer))
+            elif (
+                office_location in settings.AZURE_DEVOPS_OFFICES_LOCATION.split(",")[2]
+                or job_title in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[1]
+            ):
+                Global_Role.objects.get_or_create(user=user, role=Role.objects.get(id=Roles.Reader))
+
+            # Assign specific role
             organization_url = settings.AZURE_DEVOPS_ORGANIZATION_URL
             token = settings.AZURE_DEVOPS_TOKEN
 
@@ -205,56 +216,57 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
             graph_client = connection.clients.get_graph_client()
             result_query_subjects = graph_client.query_subjects({"query": user_login, "subjectKind": ["User"]})
 
-            if result_query_subjects is not None and settings.AZURE_DEVOPS_MAIN_SECURITY_GROUP in group_names:
+            if result_query_subjects is not None:
+                role_assigned = {"role": Role.objects.get(id=Roles.Developer)}
                 if (
-                    office_location in settings.AZURE_DEVOPS_OFFICES_LOCATION.split(",")[0]
-                    and job_title != settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[0]
+                    job_title in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[0]
+                    or job_title in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[1]
                 ):
-                    Global_Role.objects.get_or_create(user=user, role=Role.objects.get(id=Roles.Maintainer))
-                elif office_location in settings.AZURE_DEVOPS_OFFICES_LOCATION.split(",")[1]:
-                    Global_Role.objects.get_or_create(user=user, role=Role.objects.get(id=Roles.Reader))
-                else:
-                    role_assigned = {"role": Role.objects.get(id=Roles.Developer)}
-                    if job_title in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[0]:
-                        role_assigned = {"role": Role.objects.get(id=Roles.Leader)}
+                    role_assigned = {"role": Role.objects.get(id=Roles.Leader)}
 
-                    # Get user's product type
-                    result_memberships = graph_client.get_membership(result_query_subjects[0].descriptor, None)
+                # Get user's current product types names
+                user_product_types_names = [
+                    prod.product_type.name
+                    for prod in Product_Type_Member.objects.select_related("user").filter(user=user)
+                ]
 
-                    group_team_leve1 = custom_filter_group(
-                        result_memberships.additional_properties["value"],
-                        graph_client,
-                        settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[0],
-                    )
+                # Get user's product type for become member
+                result_memberships = graph_client.get_membership(result_query_subjects[0].descriptor, None)
 
+                group_team_leve1 = custom_filter_group(
+                    result_memberships.additional_properties["value"],
+                    graph_client,
+                    settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[0],
+                )
+
+                if group_team_leve1 is not None:
                     group_team_leve2 = custom_filter_group(
                         graph_client.get_membership(group_team_leve1.descriptor, None).additional_properties["value"],
                         graph_client,
                         settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[1],
                     )
 
-                    # Get user's product types names
-                    user_product_types_names = [
-                        prod.product_type.name
-                        for prod in Product_Type_Member.objects.select_related("user").filter(user=user)
-                    ]
-
                     # create a new product type or update product's type authorized_users
-                    if group_team_leve2 not in user_product_types_names:
-                        try:
-                            # Check if there is a product type with the name
-                            product_type = Product_Type.objects.get(name=group_team_leve2.display_name)
-                        except Product_Type.DoesNotExist:
-                            # If not, create a product type with that name
-                            product_type = Product_Type(name=group_team_leve2.display_name)
-                            product_type.save()
-                        Product_Type_Member.objects.get_or_create(
-                            product_type=product_type, user=user, defaults=role_assigned
-                        )
-                        logger.debug("User %s become member of product type %s", user, product_type.name)
+                    if group_team_leve2 is not None:
+                        if group_team_leve2.display_name not in user_product_types_names:
+                            try:
+                                # Check if there is a product type with the name
+                                product_type = Product_Type.objects.get(name=group_team_leve2.display_name)
+                            except Product_Type.DoesNotExist:
+                                # If not, create a product type with that name
+                                product_type = Product_Type(name=group_team_leve2.display_name)
+                                product_type.save()
+                            Product_Type_Member.objects.get_or_create(
+                                product_type=product_type, user=user, defaults=role_assigned
+                            )
+                            logger.debug(
+                                "User %s become member of product type %s with the role %s",
+                                user,
+                                product_type.name,
+                                role_assigned["role"],
+                            )
 
-                    # if user is not project type member any more, remove him from list of product type members
-                    if settings.AZURE_DEVOPS_MAIN_SECURITY_GROUP in group_names:
+                        # if user is not project type member any more, remove him from list of product type members
                         for product_type_name in user_product_types_names:
                             if product_type_name != group_team_leve2.display_name:
                                 product_type = Product_Type.objects.get(name=product_type_name)
@@ -262,12 +274,26 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
                                 logger.debug(
                                     "Deleting membership of user %s from product type %s", user, product_type_name
                                 )
+                    else:
+                        clean_project_type_user(user_product_types_names, user)
+                else:
+                    clean_project_type_user(user_product_types_names, user)
+
+
+def clean_project_type_user(user_product_types_names, user):
+    for product_type_name in user_product_types_names:
+        product_type = Product_Type.objects.get(name=product_type_name)
+        Product_Type_Member.objects.filter(product_type=product_type, user=user).delete()
+        logger.debug("Deleting membership of user %s from product type %s", user, product_type_name)
 
 
 def custom_filter_group(result, graph_client, regex):
     for member in result:
         result_get_group = graph_client.get_group(member["containerDescriptor"])
-        if re.match(r"" + regex, result_get_group.display_name):
+        if (
+            re.match(r"" + regex, result_get_group.display_name)
+            and settings.AZURE_DEVOPS_OFFICES_LOCATION.split(",")[0] in result_get_group.principal_name
+        ):
             return result_get_group
 
 
