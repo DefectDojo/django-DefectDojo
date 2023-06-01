@@ -8,7 +8,6 @@ from django.test import RequestFactory
 from dojo.models import Product, Engagement, Test, Finding, Product_Type, SLA_Configuration, Test_Type, User
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.views import *
-import datetime
 from django.utils import timezone
 
 class ViewsTestCase(unittest.TestCase):
@@ -17,7 +16,6 @@ class ViewsTestCase(unittest.TestCase):
         self.user, _ = User.objects.get_or_create(username="Test user")
 
     def test_get_filtered_findings(self):
-        # Crear un producto, un engagement y una prueba para la prueba
         prod_type, _ = Product_Type.objects.get_or_create(name="product_type")
         sla_conf, _ = SLA_Configuration.objects.get_or_create(name="SLA Configuration")
         Product.objects.filter(name="ProductTestGithub").delete()
@@ -31,44 +29,27 @@ class ViewsTestCase(unittest.TestCase):
         test_type, _ = Test_Type.objects.get_or_create(name="Test type")
         test = Test.objects.create(engagement=engagement, test_type=test_type, target_start=timezone.now(), target_end=timezone.now())
 
-        user, _ = User.objects.get_or_create(username="User test")
-
-        """# Crear algunos hallazgos para la prueba
-        finding1 = Finding.objects.create(test=test, title="Finding 1", severity="High", reporter=user)
-        finding2 = Finding.objects.create(test=test, title="Finding 2", severity="Medium", reporter=user)
-        finding3 = Finding.objects.create(test=test, title="Finding 3", severity="Low", reporter=user)"""
-
-        # Crear una solicitud GET para la vista
         request = self.factory.get('/get-filtered-findings')
-        request.user = user
+        request.user = self.user
         request.session = {}
 
         filtered_findings = get_filtered_findings(request, tid=test.id ,filter_name='Open')
-        #self.assertEqual(filtered_findings.qs.count(), 3)
 
         filtered_findings = get_filtered_findings(request, filter_name='Verified')
-        #self.assertEqual(filtered_findings.qs.count(), 2)
 
         filtered_findings = get_filtered_findings(request, filter_name='Out of Scope')
-        #self.assertEqual(filtered_findings.qs.count(), 1)
 
         filtered_findings = get_filtered_findings(request, filter_name='False Positive')
-        #self.assertEqual(filtered_findings.qs.count(), 1)
 
         filtered_findings = get_filtered_findings(request, filter_name='Inactive')
-        #self.assertEqual(filtered_findings.qs.count(), 1)
 
         filtered_findings = get_filtered_findings(request, filter_name='Accepted')
-        #self.assertEqual(filtered_findings.qs.count(), 1)
 
         filtered_findings = get_filtered_findings(request, filter_name='Closed')
-        #self.assertEqual(filtered_findings.qs.count(), 0)
 
     
     
     def test_open_findings(self):
-        
-        # Crear una solicitud GET para la vista
         request = self.factory.get('/open-findings')
         request.session = {}
         request.user = self.user
@@ -76,19 +57,45 @@ class ViewsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_verified_findings(self):
-        user, _ = User.objects.get_or_create(username="Test user")
         request = self.factory.get('/verified-findings')
         request.session = {}
-        request.user = user
+        request.user = self.user
         response = verified_findings(request)
         self.assertEqual(response.status_code, 200)
 
     def test_out_of_scope_findings(self):
-        user, _ = User.objects.get_or_create(username="Test user")
         request = self.factory.get('/out-of-scope-findings')
         request.session = {}
-        request.user = user
+        request.user = self.user
         response = out_of_scope_findings(request)
+        self.assertEqual(response.status_code, 200)
+
+    def test_inactive_findings(self):
+        request = self.factory.get('/inactive_findings')
+        request.session = {}
+        request.user = self.user
+        response = inactive_findings(request)
+        self.assertEqual(response.status_code, 200)
+
+    def test_false_positive_findings(self):
+        request = self.factory.get('/false_positive_findings')
+        request.session = {}
+        request.user = self.user
+        response = false_positive_findings(request)
+        self.assertEqual(response.status_code, 200)
+
+    def test_accepted_findings(self):
+        request = self.factory.get('/accepted_findings')
+        request.session = {}
+        request.user = self.user
+        response = accepted_findings(request)
+        self.assertEqual(response.status_code, 200)
+
+    def test_closed_findings(self):
+        request = self.factory.get('/closed_findings')
+        request.session = {}
+        request.user = self.user
+        response = closed_findings(request)
         self.assertEqual(response.status_code, 200)
 
 
