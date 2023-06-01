@@ -4,7 +4,7 @@ import django
 django.setup()
 from django.test import RequestFactory
 from django.contrib.auth.models import User
-from dojo.models import Notes, Engagement, Test, Finding, Test_Type, Product, Product_Type
+from dojo.models import Notes, Engagement, Test, Finding, Test_Type, Product, Product_Type, SLA_Configuration
 from dojo.notes.views import delete_note
 from datetime import datetime
 from django.test import RequestFactory
@@ -21,8 +21,16 @@ class DeleteNoteTestCase(TestCase):
 
         target_start = datetime.strptime('2023-05-11', '%Y-%m-%d')
 
-        product_type, _ = Product_Type.objects.get_or_create(id=3, name='Default Product Type')
-        product, _ = Product.objects.get_or_create(id=3, prod_type=product_type)
+        prod_type, _ = Product_Type.objects.get_or_create(id=3, name='Default Product Type')
+
+        sla_conf, _ = SLA_Configuration.objects.get_or_create(name="SLA Configuration")
+        Product.objects.filter(name="ProductTestGithub").delete()
+        product, _ = Product.objects.get_or_create(
+            name="ProductTestGithub",
+            prod_type=prod_type,
+            sla_configuration=sla_conf
+        )
+
 
         self.engagement = Engagement.objects.create(name='Engagement', target_start=target_start, target_end=target_start, product=product)
 
