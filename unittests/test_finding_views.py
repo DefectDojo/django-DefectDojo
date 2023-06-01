@@ -63,6 +63,23 @@ class ViewsTestCase(unittest.TestCase):
         filtered_findings = get_filtered_findings(request, filter_name='Closed')
         #self.assertEqual(filtered_findings.qs.count(), 0)
 
+    
+    
+    def test_open_findings(self):
+        user, _ = User.objects.get_or_create(username="Test user")
+        # Crear una solicitud GET para la vista
+        request = self.factory.get('/open-findings')
+        request.session = {}
+        request.user = user
+
+        response = open_findings(request)
+        
+        # Agrega aquí tus afirmaciones y verifica el resultado esperado
+        # ...
+
+        # Ejemplo de afirmación de estado HTTP 200 OK
+        self.assertEqual(response.status_code, 200)
+
 
 if __name__ == '__main__':
     unittest.main()
