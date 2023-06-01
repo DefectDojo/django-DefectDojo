@@ -53,6 +53,7 @@ class TestGitHub(unittest.TestCase):
                                                 mock_pkey_filter, mock_get_system_setting):
         mock_get_system_setting.return_value = True
         mock_pkey_get.return_value = Mock(git_conf=Mock(api_key='dummy_api_key'), git_project='dummy_project')
+        mock_pkey_filter.return_value.count.return_value = 1
         mock_issue_get.return_value = Mock(issue_id='1')
         mock_issue = Mock(state='closed')
         mock_issue.edit.return_value = None

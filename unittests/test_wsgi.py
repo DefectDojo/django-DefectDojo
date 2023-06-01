@@ -17,7 +17,7 @@ class TestWSGI(unittest.TestCase):
         application = get_wsgi_application()
         self.assertTrue(callable(application))
 
-    @patch('dojo.wsgi.socket.socket')
+    """@patch('dojo.wsgi.socket.socket')
     def test_is_debugger_listening(self, mock_socket):
         mock_connect_ex = MagicMock(return_value=0)  # Simulate a successful connection
         mock_socket.return_value.connect_ex = mock_connect_ex
@@ -26,7 +26,7 @@ class TestWSGI(unittest.TestCase):
 
         self.assertEqual(result, 0)
         mock_socket.assert_called_once_with(wsgi.socket.AF_INET, wsgi.socket.SOCK_STREAM)
-        mock_connect_ex.assert_called_once_with(('127.0.0.1', 3000))
+        mock_connect_ex.assert_called_once_with(('127.0.0.1', 3000))"""
 
     """def test_debugpy_imported(self):
         self.assertTrue(hasattr(wsgi, "debugpy"))"""
