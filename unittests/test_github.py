@@ -94,6 +94,7 @@ class TestGitHub(unittest.TestCase):
         mock_issue.create_comment.return_value = None
         mock_repo = Mock()
         mock_repo.get_issue.return_value = mock_issue
+        mock_github.return_value = Mock()
         mock_github.return_value.get_repo.return_value = mock_repo
 
         prod = Mock()
