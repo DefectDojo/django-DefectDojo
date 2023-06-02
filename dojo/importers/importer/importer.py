@@ -174,10 +174,12 @@ class DojoDefaultImporter(object):
 
     def close_old_findings(self, test, scan_date_time, user, push_to_jira=None, service=None, close_old_findings_product_scope=False):
         # Close old active findings that are not reported by this scan.
-        new_hash_codes = test.finding_set.values('hash_code')
+        # Refactoring this to only call test.finding_set.values() once.
+        findings = test.finding_set.values()
         mitigated_hash_codes = []
-        new_hash_codes = list(new_hash_codes)
-        for finding in test.finding_set.values():
+        new_hash_codes = []
+        for finding in findings:
+            new_hash_codes.append(finding["hash_code"])
             if finding["is_mitigated"]:
                 mitigated_hash_codes.append(finding["hash_code"])
                 for hash_code in new_hash_codes:
