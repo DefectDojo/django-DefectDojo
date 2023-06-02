@@ -78,6 +78,9 @@ securityContext:
 
 tests:
   unitTests:
+    affinity: {}
+    nodeSelector: {}
+    tolerations: []
     resources:
       requests:
         cpu: 100m
@@ -302,6 +305,7 @@ initializer:
   keepSeconds: 60
   affinity: {}
   nodeSelector: {}
+  tolerations: []
   resources:
     requests:
       cpu: 100m

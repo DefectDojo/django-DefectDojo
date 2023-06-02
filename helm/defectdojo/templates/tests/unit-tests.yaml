@@ -70,4 +70,16 @@ spec:
               key: DD_CREDENTIAL_AES_256_KEY
       resources:
         {{- toYaml .Values.tests.unitTests.resources | nindent 8 }}
+      {{- with .Values.initializer.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initializer.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initializer.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
   restartPolicy: Never
