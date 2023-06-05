@@ -69,7 +69,9 @@ def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
 
 def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
     if settings.AZUREAD_TENANT_OAUTH2_ENABLED and settings.AZUREAD_TENANT_OAUTH2_GET_GROUPS and isinstance(backend, AzureADTenantOAuth2):
-        soc = user.social_auth.get()
+        # In some wild cases, there could be two social auth users
+        # connected to the same DefectDojo user. Grab the newest one
+        soc = user.social_auth.order_by("-created").first()
         token = soc.extra_data['access_token']
         group_names = []
         if 'groups' not in kwargs['response'] or kwargs['response']['groups'] == "":
