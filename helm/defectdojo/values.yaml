@@ -67,6 +67,9 @@ tag: latest
 #   key: value
 podLabels: {}
 
+# Allow overriding of revisionHistoryLimit across all deployments.
+# revisionHistoryLimit: 10
+
 securityContext:
   enabled: true
   djangoSecurityContext:
@@ -418,7 +421,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.33.6
+    tag: 1.33.7
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
