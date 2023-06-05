@@ -76,8 +76,8 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
             logger.warning("No groups in response. Stopping to update groups of user based on azureAD")
             return
         group_IDs = kwargs['response']['groups']
-        try:
-            for group_from_response in group_IDs:
+        for group_from_response in group_IDs:
+            try:
                 logger.debug("Analysing Group_ID " + group_from_response)
                 request_headers = {'Authorization': 'Bearer ' + token}
                 if is_group_id(group_from_response):
@@ -95,10 +95,10 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
                 else:
                     logger.debug("Skipping group " + group_name + " due to AZUREAD_TENANT_OAUTH2_GROUPS_FILTER " + settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER)
                     continue
+            except Exception as e:
+                logger.error(f"Could not call microsoft graph API or save groups to member: {e}")
+        if len(group_names) > 0:
             assign_user_to_groups(user, group_names, 'AzureAD')
-        except:
-            logger.error("Could not call microsoft graph API or save groups to member")
-            traceback.print_exc()
         if settings.AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS:
             cleanup_old_groups_for_user(user, group_names)
 
