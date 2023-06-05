@@ -2,8 +2,6 @@ import gitlab
 import re
 import logging
 import requests
-import traceback
-
 
 import social_core.pipeline.user
 from django.conf import settings
