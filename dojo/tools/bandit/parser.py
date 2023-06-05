@@ -22,7 +22,6 @@ class BanditParser(object):
             find_date = dateutil.parser.parse(data["generated_at"])
 
         for item in data["results"]:
-
             findingdetail = "\n".join(
                 [
                     "**Test Name:** `" + item["test_name"] + "`",
@@ -47,7 +46,9 @@ class BanditParser(object):
                 date=find_date,
                 static_finding=True,
                 dynamic_finding=False,
-                vuln_id_from_tool=":".join([item["test_name"], item["test_id"]]),
+                vuln_id_from_tool=":".join(
+                    [item["test_name"], item["test_id"]]
+                ),
                 nb_occurences=1,
             )
             # manage confidence

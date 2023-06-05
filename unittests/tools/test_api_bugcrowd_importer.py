@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from unittest.mock import patch
 
@@ -63,8 +64,8 @@ class TestBugcrowdApiImporter(TestCase):
         test_3.api_scan_configuration = api_scan_configuration_3
 
         with self.assertRaisesRegex(
-            Exception,
-            "API Scan Configuration for Bugcrowd API and Product do not match.",
+            ValidationError,
+            r'API Scan Configuration for Bugcrowd API and Product do not match. Product: "" \(None\), config\.product: "Product" \(None\)',
         ):
             bugrcrowd_api_importer = BugcrowdApiImporter()
             bugrcrowd_api_importer.prepare_client(test_3)
@@ -75,8 +76,8 @@ class TestBugcrowdApiImporter(TestCase):
         mock_foo.count.return_value = 2
 
         with self.assertRaisesRegex(
-            Exception,
-            "More than one Product API Scan Configuration has been configured, but none of them has been chosen.",
+            ValidationError,
+            r'More than one Product API Scan Configuration has been configured, but none of them has been chosen\. Please specify at Test which one should be used\. Product: "Product" \(None\)',
         ):
             bugrcrowd_api_importer = BugcrowdApiImporter()
             bugrcrowd_api_importer.prepare_client(self.test)
@@ -89,7 +90,7 @@ class TestBugcrowdApiImporter(TestCase):
         mock_foo.count.return_value = 0
 
         with self.assertRaisesRegex(
-            Exception, "There are no API Scan Configurations for this Product."
+            ValidationError, r'There are no API Scan Configurations for this Product\. Please add at least one API Scan Configuration for bugcrowd to this Product\. Product: "Product" \(None\)'
         ):
             bugrcrowd_api_importer = BugcrowdApiImporter()
             bugrcrowd_api_importer.prepare_client(self.test)

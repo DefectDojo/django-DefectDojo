@@ -10,7 +10,8 @@ SEVERITY_MAPPING = {
     "LOW": "Low",  # The issue does not require action on its own.
     "MEDIUM": "Medium",  # The issue must be addressed but not urgently.
     "HIGH": "High",  # The issue must be addressed as a priority.
-    "CRITICAL": "Critical",  # The issue must be remediated immediately to avoid it escalating.
+    # The issue must be remediated immediately to avoid it escalating.
+    "CRITICAL": "Critical",
 }
 
 
@@ -22,7 +23,8 @@ class AsffParser(object):
         return "AWS Security Finding Format (ASFF)"
 
     def get_description_for_scan_types(self, scan_type):
-        return """AWS Security Finding Format (ASFF). https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-findings-format-syntax.html"""
+        return """AWS Security Finding Format (ASFF).
+        https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-findings-format-syntax.html"""
 
     def get_findings(self, file, test):
         data = json.load(file)
