@@ -331,7 +331,10 @@
             // Mapping of table columns to objects for proper cleanup and data formatting
             var dojoTable = $('#products').DataTable({
                 drawCallback: function(){
-                     $('.has-popover').popover({'trigger':'hover'});
+                    $('#products .has-popover').hover(
+                        function() { $(this).popover('show'); }, // hover
+                        function() { $(this).popover('hide'); } // unhover
+                    );
                  },
                  colReorder: true,
                  "columns": [
