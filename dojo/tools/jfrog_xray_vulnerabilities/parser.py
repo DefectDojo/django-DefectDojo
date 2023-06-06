@@ -6,11 +6,11 @@ from cvss import CVSS3
 from dojo.models import Finding
 
 
-class JFrogXrayParser(object):
+class JFrogXrayVulnerabilitiesParser(object):
     """jfrog_xray_scan JSON reports"""
 
     def get_scan_types(self):
-        return ["JFrog Xray"]
+        return ["JFrog Xray Vulnerabilities"]
 
     def get_label_for_scan_types(self, scan_type):
         return scan_type

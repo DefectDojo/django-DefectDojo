@@ -1,13 +1,14 @@
 from ..dojo_test_case import DojoTestCase
 from dojo.models import Test, Finding
-from dojo.tools.jfrog_xray.parser import JFrogXrayParser, decode_cwe_number
+from dojo.tools.jfrog_xray_vulnerabilities.parser import \
+    JFrogXrayVulnerabilitiesParser, decode_cwe_number
 
 
-class TestJfrogJFrogXrayParser(DojoTestCase):
+class TestJfrogJFrogXrayVulnerabilitiesParser(DojoTestCase):
 
     def test_parse_file_with_one_vuln(self):
-        testfile = open("unittests/scans/jfrog_xray/one_vuln.json")
-        parser = JFrogXrayParser()
+        testfile = open("unittests/scans/jfrog_xray_vulnerabilities/one_vuln.json")
+        parser = JFrogXrayVulnerabilitiesParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
@@ -17,8 +18,8 @@ class TestJfrogJFrogXrayParser(DojoTestCase):
         self.assertEqual("High", item.severity)
 
     def test_parse_file_with_many_vulns(self):
-        testfile = open("unittests/scans/jfrog_xray/many_vulns.json")
-        parser = JFrogXrayParser()
+        testfile = open("unittests/scans/jfrog_xray_vulnerabilities/many_vulns.json")
+        parser = JFrogXrayVulnerabilitiesParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(3, len(findings))
