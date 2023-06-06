@@ -1246,6 +1246,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'NeuVector (compliance)': ['title', 'vuln_id_from_tool', 'description'],
     'Wpscan': ['title', 'description', 'severity'],
     'Codechecker Report native': ['unique_id_from_tool'],
+    'Popeye Scan': ['title', 'description'],
     'Wazuh Scan': ['title'],
     'Nuclei Scan': ['title', 'cwe', 'severity'],
 }
@@ -1439,8 +1440,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'NeuVector (REST)': DEDUPE_ALGO_HASH_CODE,
     'NeuVector (compliance)': DEDUPE_ALGO_HASH_CODE,
     'Wpscan': DEDUPE_ALGO_HASH_CODE,
+    'Popeye Scan': DEDUPE_ALGO_HASH_CODE,
     'Nuclei Scan': DEDUPE_ALGO_HASH_CODE,
-
 }
 
 # Override the hardcoded settings here via the env var
