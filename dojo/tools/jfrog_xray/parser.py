@@ -107,7 +107,6 @@ def get_component(vulnerability):
     if "components" in vulnerability:
         components = vulnerability["components"]
         gav = next(iter(components))
-        print("***key***", gav)
         component = components[gav]
         fixed_versions = component.get("fixed_versions")
         if fixed_versions:
