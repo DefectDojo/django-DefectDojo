@@ -43,7 +43,10 @@ coverage.xml
 
 # Translations
 *.mo
-
+# Sonar
+.pre-commit-config.yaml
+.scannerwork/
+sonar-project.properties
 # Mr Developer
 .mr.developer.cfg
 .project
