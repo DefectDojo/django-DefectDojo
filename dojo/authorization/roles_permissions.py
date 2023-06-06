@@ -294,6 +294,7 @@ def get_roles_with_permissions():
             Permissions.Product_Type_View,
             Permissions.Product_View,
             Permissions.Engagement_View,
+            Permissions.Engagement_Add,
             Permissions.Engagement_Edit,
             Permissions.Test_View,
             Permissions.Test_Edit,

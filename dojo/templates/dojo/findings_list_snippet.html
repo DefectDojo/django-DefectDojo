@@ -138,6 +138,11 @@
                                             type="date"
                                             alt="Select the date the Finding will be remediated"/>
                                         <br />
+                                        <label style="display: block" for="id_bulk_planned_remediation_version">{% trans "Planned remediation version" %}</label>
+                                        <input id="id_bulk_planned_remediation_version"
+                                            name="planned_remediation_version"
+                                            style="font-size: 100%; border: 1px solid #ccc;"/><br/>
+                                        <br />
                                         <label>
                                             <b>{% trans "Status" %}</b>
                                             <input id="id_bulk_status"
@@ -770,7 +775,10 @@
             // Mapping of table columns to objects for proper cleanup and data formatting
             var dojoTable = $('#open_findings').DataTable({
                 drawCallback: function(){
-                      $('.has-popover').popover({'trigger':'hover'});
+                    $('#open_findings .has-popover').hover(
+                        function() { $(this).popover('show'); }, // hover
+                        function() { $(this).popover('hide'); } // unhover
+                    );
                 },
                 colReorder: true,
                 "columns": columns,

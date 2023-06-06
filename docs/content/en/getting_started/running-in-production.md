@@ -15,9 +15,9 @@ See [Running with Docker Compose](https://github.com/DefectDojo/django-DefectDoj
 
 ### Database performance and backup
 
-It is recommended to use a dedicated database server and not the preconfigured MySQL database. This will improve the performance of DefectDojo.
+It is recommended to use a dedicated database server and not the preconfigured PostgreSQL database. This will improve the performance of DefectDojo.
 
-In both cases (dedicated DB or containerized, if you are self-hosting, it is recommended that you implement and create periodic backups of your data.
+In both cases (dedicated DB or containerized), if you are self-hosting, it is recommended that you implement and create periodic backups of your data.
 
 ### Backup of Media files
 
@@ -30,7 +30,7 @@ Please read the paragraphs below about key processes tweaks.
 {{% /alert %}}
 
 
-With a seperate database, the minimum recommendations
+With a separate database, the minimum recommendations
 are:
 
 -   2 vCPUs
@@ -83,15 +83,15 @@ and see what is in effect.
 
 Import and Re-Import can also be configured to handle uploads asynchronously to aid in 
 processing especially large scans. It works by batching Findings and Endpoints by a 
-configurable amount. Each batch will be be processed in seperate celery tasks.
+configurable amount. Each batch will be be processed in separate celery tasks.
 
 The following variables impact async imports.
 
 -   `DD_ASYNC_FINDING_IMPORT` defaults to False
--   `DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE` deafults to 100
+-   `DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE` defaults to 100
 
 When using asynchronous imports with dynamic scanners, Endpoints will continue to "trickle" in
-even after the import has returned a successful respsonse. This is becasue processing continues 
+even after the import has returned a successful response. This is because processing continues 
 to occur after the Findings have already been imported.
 
 To determine if an import has been fully completed, please see the progress bar in the appropriate test.
