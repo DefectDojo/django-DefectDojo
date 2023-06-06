@@ -682,7 +682,7 @@ LOGIN_EXEMPT_URLS = (
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'dojo.user.validators.DojoCommonPasswordValidator',
     },
     {
         'NAME': 'dojo.user.validators.MinLengthValidator'
@@ -1319,6 +1319,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Scout Suite Scan': ['file_path', 'vuln_id_from_tool'],
     'AWS Security Hub Scan': ['unique_id_from_tool'],
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
+    'Govulncheck Scanner': ['unique_id_from_tool'],
     'Github Vulnerability Scan': ['title', 'severity', 'component_name', 'vulnerability_ids', 'file_path'],
     'Azure Security Center Recommendations Scan': ['unique_id_from_tool'],
     'Solar Appscreener Scan': ['title', 'file_path', 'line', 'severity'],
@@ -1347,6 +1348,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Wpscan': ['title', 'description', 'severity'],
     'Codechecker Report native': ['unique_id_from_tool'],
     'Wazuh Scan': ['title'],
+    'Nuclei Scan': ['title', 'cwe', 'severity'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1369,6 +1371,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Anchore Enterprise Policy Check': True,
     'Anchore Grype': True,
     'AWS Prowler Scan': True,
+    'AWS Prowler V3': True,
     'Checkmarx Scan': False,
     'Checkmarx OSA': True,
     'Cloudsploit Scan': True,
@@ -1404,6 +1407,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Rusty Hog Scan': True,
     'Codechecker Report native': True,
     'Wazuh': True,
+    'Nuclei Scan': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1452,6 +1456,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Aqua Scan': DEDUPE_ALGO_HASH_CODE,
     'AuditJS Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'AWS Prowler Scan': DEDUPE_ALGO_HASH_CODE,
+    'AWS Prowler V3': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "AWS Security Finding Format (ASFF) Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Burp REST API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Bandit Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1495,6 +1500,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Snyk Scan': DEDUPE_ALGO_HASH_CODE,
     'GitLab Dependency Scanning Report': DEDUPE_ALGO_HASH_CODE,
     'GitLab SAST Report': DEDUPE_ALGO_HASH_CODE,
+    'Govulncheck Scanner': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'GitLab Container Scan': DEDUPE_ALGO_HASH_CODE,
     'GitLab Secret Detection Report': DEDUPE_ALGO_HASH_CODE,
     'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1537,6 +1543,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'NeuVector (REST)': DEDUPE_ALGO_HASH_CODE,
     'NeuVector (compliance)': DEDUPE_ALGO_HASH_CODE,
     'Wpscan': DEDUPE_ALGO_HASH_CODE,
+    'Nuclei Scan': DEDUPE_ALGO_HASH_CODE,
 
 }
 

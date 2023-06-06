@@ -27,28 +27,37 @@ class CloudsploitParser(object):
         find_date = datetime.now()
         dupes = dict()
         for item in data:
-            title = item['title']
-            if type(item['region']) is str:
-                region = item['region']
-            elif type(item['region']) is list:
-                region = ','.join(item['region'])
-            description = "**Finding** : " + item['message'] + "\n" + \
-                "**Resource** : " + item['resource'] + "\n" + \
-                "**Region** : " + region
-            severity = self.convert_severity(item['status'])
+            title = item["title"]
+            if isinstance(item["region"], str):
+                region = item["region"]
+            elif isinstance(item["region"], list):
+                region = ",".join(item["region"])
+            description = (
+                "**Finding** : "
+                + item["message"]
+                + "\n"
+                + "**Resource** : "
+                + item["resource"]
+                + "\n"
+                + "**Region** : "
+                + region
+            )
+            severity = self.convert_severity(item["status"])
             finding = Finding(
                 title=title,
                 test=test,
                 description=description,
-                component_name=item['resource'],
+                component_name=item["resource"],
                 severity=severity,
-                impact=item['description'],
+                impact=item["description"],
                 date=find_date,
                 dynamic_finding=True,
             )
 
             # internal de-duplication
-            dupe_key = hashlib.sha256(str(description + title).encode('utf-8')).hexdigest()
+            dupe_key = hashlib.sha256(
+                str(description + title).encode("utf-8")
+            ).hexdigest()
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]

@@ -17,9 +17,9 @@ class TestFactory(DojoTestCase):
             parser = get_parser(scan_type)
             findings = parser.get_findings(testfile, Test())
             testfile.close()
-        with self.subTest(scan_type="Nessus Scan"):
-            scan_type = "Nessus Scan"
-            testfile = open(get_unit_tests_path() + "/scans/nessus/nessus_v_unknown.xml")
+        with self.subTest(scan_type="Tenable Scan"):
+            scan_type = "Tenable Scan"
+            testfile = open(get_unit_tests_path() + "/scans/tenable/nessus/nessus_v_unknown.xml")
             parser = get_parser(scan_type)
             findings = parser.get_findings(testfile, Test())
             testfile.close()

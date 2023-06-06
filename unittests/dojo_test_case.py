@@ -32,12 +32,20 @@ class DojoTestUtilsMixin(object):
     def get_test_admin(self, *args, **kwargs):
         return User.objects.get(username='admin')
 
-    def system_settings(self, enable_jira=False, enable_jira_web_hook=False, disable_jira_webhook_secret=False, jira_webhook_secret=None):
+    def system_settings(
+        self,
+        enable_jira=False,
+        enable_jira_web_hook=False,
+        disable_jira_webhook_secret=False,
+        jira_webhook_secret=None,
+        enable_product_tag_inehritance=False,
+    ):
         ss = System_Settings.objects.get()
         ss.enable_jira = enable_jira
         ss.enable_jira_web_hook = enable_jira_web_hook
         ss.disable_jira_webhook_secret = disable_jira_webhook_secret
         ss.jira_webhook_secret = jira_webhook_secret
+        ss.enable_product_tag_inheritance = enable_product_tag_inehritance
         ss.save()
 
     def create_product_type(self, name, *args, description='dummy description', **kwargs):
@@ -45,10 +53,10 @@ class DojoTestUtilsMixin(object):
         product_type.save()
         return product_type
 
-    def create_product(self, name, *args, description='dummy description', prod_type=None, **kwargs):
+    def create_product(self, name, *args, description='dummy description', prod_type=None, tags=[], **kwargs):
         if not prod_type:
             prod_type = Product_Type.objects.first()
-        product = Product(name=name, description=description, prod_type=prod_type)
+        product = Product(name=name, description=description, prod_type=prod_type, tags=tags)
         product.save()
         return product
 
