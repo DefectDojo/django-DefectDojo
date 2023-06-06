@@ -7,6 +7,10 @@ class Roles(IntEnum):
     Writer = 2
     Maintainer = 3
     Owner = 4
+    Developer = 6
+    Leader = 7
+    Cibersecurity = 8
+    Risk = 9
 
     @classmethod
     def has_value(cls, value):
@@ -548,6 +552,110 @@ def get_roles_with_permissions():
             Permissions.Credential_Add,
             Permissions.Credential_Edit,
             Permissions.Credential_Delete,
+        },
+        Roles.Developer: {
+            Permissions.Product_Type_View,
+            Permissions.Product_View,
+            Permissions.Engagement_View,
+            Permissions.Test_View,
+            Permissions.Finding_View,
+            Permissions.Finding_Group_View,
+            Permissions.Endpoint_View,
+            Permissions.Component_View,
+            Permissions.Note_Add,
+            Permissions.Product_Group_View,
+            Permissions.Product_Type_Group_View,
+            Permissions.Group_View,
+            Permissions.Language_View,
+            Permissions.Technology_View,
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_Tracking_Files_View,
+            Permissions.Credential_View,
+            Permissions.Risk_Acceptance
+        },
+        Roles.Leader: {
+            Permissions.Product_Type_View,
+
+            Permissions.Product_View,
+            Permissions.Product_Configure_Notifications,
+            Permissions.Product_Edit,
+
+            Permissions.Engagement_View,
+            Permissions.Risk_Acceptance,
+
+            Permissions.Test_View,
+
+            Permissions.Finding_View,
+
+            Permissions.Finding_Group_View,
+
+            Permissions.Endpoint_View,
+
+            Permissions.Benchmark_Edit,
+
+            Permissions.Component_View,
+
+            Permissions.Note_View_History,
+
+            Permissions.Product_Group_View,
+
+            Permissions.Product_Type_Group_View,
+
+            Permissions.Group_View,
+
+            Permissions.Language_View,
+            Permissions.Language_Add,
+            Permissions.Language_Edit,
+
+            Permissions.Technology_View,
+            Permissions.Technology_Add,
+            Permissions.Technology_Edit,
+
+            Permissions.Product_API_Scan_Configuration_View,
+
+            Permissions.Product_Tracking_Files_View,
+
+            Permissions.Credential_View
+        },
+        Roles.Cibersecurity: {
+            Permissions.Product_Type_View,
+            Permissions.Product_View,
+            Permissions.Engagement_View,
+            Permissions.Test_View,
+            Permissions.Finding_View,
+            Permissions.Finding_Group_View,
+            Permissions.Endpoint_View,
+            Permissions.Component_View,
+            Permissions.Note_Add,
+            Permissions.Product_Group_View,
+            Permissions.Product_Type_Group_View,
+            Permissions.Group_View,
+            Permissions.Language_View,
+            Permissions.Technology_View,
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_Tracking_Files_View,
+            Permissions.Credential_View,
+            Permissions.Risk_Acceptance
+        },
+        Roles.Risk: {
+            Permissions.Product_Type_View,
+            Permissions.Product_View,
+            Permissions.Engagement_View,
+            Permissions.Test_View,
+            Permissions.Finding_View,
+            Permissions.Finding_Group_View,
+            Permissions.Endpoint_View,
+            Permissions.Component_View,
+            Permissions.Note_Add,
+            Permissions.Product_Group_View,
+            Permissions.Product_Type_Group_View,
+            Permissions.Group_View,
+            Permissions.Language_View,
+            Permissions.Technology_View,
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_Tracking_Files_View,
+            Permissions.Credential_View,
+            Permissions.Risk_Acceptance
         }
     }
 
