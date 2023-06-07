@@ -22,7 +22,7 @@ usage() {
   echo "You must specify a test case (arg) and profile (arg or env var)!"
   echo
   echo "Example command:"
-  echo "./dc-unittest.sh --profile mysql-rabbitmq --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser"
+  echo "./dc-unittest.sh --profile postgres-redis --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser"
 }
 
 while [[ $# -gt 0 ]]; do

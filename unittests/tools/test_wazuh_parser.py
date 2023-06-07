@@ -29,4 +29,4 @@ class TestWazuhParser(DojoTestCase):
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        self.assertEqual(7, len(findings))
+        self.assertEqual(6, len(findings))

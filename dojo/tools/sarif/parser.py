@@ -80,13 +80,11 @@ def get_rules(run):
     return rules
 
 
-def get_rule_tags(rule):
-    if 'properties' not in rule:
+# Rules and results have de sames scheme for tags
+def get_properties_tags(value):
+    if not value:
         return []
-    if 'tags' not in rule['properties']:
-        return []
-    else:
-        return rule['properties']['tags']
+    return value.get('properties', {}).get('tags', [])
 
 
 def search_cwe(value, cwes):
@@ -104,7 +102,7 @@ def get_rule_cwes(rule):
             search_cwe(value, cwes)
         return cwes
 
-    for tag in get_rule_tags(rule):
+    for tag in get_properties_tags(rule):
         search_cwe(tag, cwes)
     return cwes
 
@@ -371,6 +369,10 @@ def get_item(result, rules, artifacts, run_date):
 
     if run_date:
         finding.date = run_date
+
+    # manage tags provided in the report and rule and remove duplicated
+    tags = list(set(get_properties_tags(rule) + get_properties_tags(result)))
+    finding.tags = tags
 
     # manage fingerprints
     # fingerprinting in SARIF is more complete than in current implementation

@@ -468,7 +468,7 @@ class DojoGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Dojo_Group
-        exclude = ['auth_group']
+        exclude = ('auth_group', )
 
     def to_representation(self, instance):
         if not instance.auth_group:
@@ -763,7 +763,7 @@ class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Engagement
-        fields = '__all__'
+        exclude = ('inherited_tags', )
 
     def validate(self, data):
         if self.context['request'].method == 'POST':
@@ -892,7 +892,7 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Endpoint
-        fields = '__all__'
+        exclude = ('inherited_tags', )
 
     def validate(self, data):
         # print('EndpointSerialize.validate')
@@ -1069,7 +1069,7 @@ class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Test
-        fields = '__all__'
+        exclude = ('inherited_tags', )
 
     def build_relational_field(self, field_name, relation_info):
         if field_name == 'notes':
@@ -1091,7 +1091,7 @@ class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Test
-        fields = '__all__'
+        exclude = ('inherited_tags', )
 
 
 class TestTypeSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -1272,7 +1272,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Finding
-        exclude = ['cve']
+        exclude = ('cve', 'inherited_tags', )
 
     @extend_schema_field(serializers.DateTimeField())
     @swagger_serializer_method(serializers.DateTimeField())
@@ -1401,7 +1401,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Finding
-        exclude = ['cve']
+        exclude = ('cve', 'inherited_tags', )
         extra_kwargs = {
             'active': {'required': True},
             'verified': {'required': True},
@@ -1478,7 +1478,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Finding_Template
-        exclude = ['cve']
+        exclude = ('cve', )
 
     def create(self, validated_data):
         # Save vulnerability ids and pop them
@@ -1515,7 +1515,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
 class CredentialSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cred_User
-        exclude = ['password']
+        exclude = ('password', )
 
 
 class CredentialMappingSerializer(serializers.ModelSerializer):
@@ -1551,7 +1551,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        exclude = ['tid', 'updated']
+        exclude = ('tid', 'updated', )
 
     def get_findings_count(self, obj) -> int:
         return obj.findings_count
@@ -2242,7 +2242,7 @@ class DeletePreviewSerializer(serializers.Serializer):
 class ConfigurationPermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Permission
-        exclude = ['content_type']
+        exclude = ('content_type', )
 
 
 class QuestionnaireQuestionSerializer(serializers.ModelSerializer):
@@ -2256,19 +2256,19 @@ class QuestionnaireQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        exclude = ['polymorphic_ctype']
+        exclude = ('polymorphic_ctype', )
 
 
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        exclude = ['polymorphic_ctype']
+        exclude = ('polymorphic_ctype', )
 
 
 class TextQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TextQuestion
-        exclude = ['polymorphic_ctype']
+        exclude = ('polymorphic_ctype', )
 
 
 class ChoiceQuestionSerializer(serializers.ModelSerializer):
@@ -2276,7 +2276,7 @@ class ChoiceQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ChoiceQuestion
-        exclude = ['polymorphic_ctype']
+        exclude = ('polymorphic_ctype', )
 
 
 class QuestionnaireAnsweredSurveySerializer(serializers.ModelSerializer):
@@ -2297,7 +2297,7 @@ class QuestionnaireAnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Answer
-        exclude = ['polymorphic_ctype']
+        exclude = ('polymorphic_ctype', )
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -2306,7 +2306,7 @@ class AnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Answer
-        exclude = ['polymorphic_ctype']
+        exclude = ('polymorphic_ctype', )
 
 
 class TextAnswerSerializer(serializers.ModelSerializer):
@@ -2315,7 +2315,7 @@ class TextAnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TextAnswer
-        exclude = ['polymorphic_ctype']
+        exclude = ('polymorphic_ctype', )
 
 
 class ChoiceAnswerSerializer(serializers.ModelSerializer):
@@ -2325,7 +2325,7 @@ class ChoiceAnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ChoiceAnswer
-        exclude = ['polymorphic_ctype']
+        exclude = ('polymorphic_ctype', )
 
 
 class QuestionnaireEngagementSurveySerializer(serializers.ModelSerializer):

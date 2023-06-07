@@ -20,34 +20,50 @@ class CargoAuditParser(object):
     def get_findings(self, filename, test):
         data = json.load(filename)
         dupes = {}
-        if data.get('vulnerabilities'):
-            for item in data.get('vulnerabilities').get('list'):
-                advisory = item.get('advisory')
-                vuln_id = advisory.get('id')
-                vulnerability_ids = [advisory.get('id')]
+        if data.get("vulnerabilities"):
+            for item in data.get("vulnerabilities").get("list"):
+                advisory = item.get("advisory")
+                vuln_id = advisory.get("id")
+                vulnerability_ids = [advisory.get("id")]
                 if "categories" in advisory:
-                    categories = f"**Categories:** {', '.join(advisory['categories'])}"
+                    categories = (
+                        f"**Categories:** {', '.join(advisory['categories'])}"
+                    )
                 else:
-                    categories = ''
-                description = categories + f"\n**Description:** `{advisory.get('description')}`"
+                    categories = ""
+                description = (
+                    categories
+                    + f"\n**Description:** `{advisory.get('description')}`"
+                )
 
-                if item["affected"] is not None and "functions" in item["affected"]:
-                    affected_func = [f'{func}: {", ".join(versions)}'
-                                     for func, versions in item["affected"]["functions"].items()]
-                    description += f"\n**Affected functions**: {', '.join(affected_func)}"
+                if (
+                    item["affected"] is not None
+                    and "functions" in item["affected"]
+                ):
+                    affected_func = [
+                        f'{func}: {", ".join(versions)}'
+                        for func, versions in item["affected"][
+                            "functions"
+                        ].items()
+                    ]
+                    description += (
+                        f"\n**Affected functions**: {', '.join(affected_func)}"
+                    )
 
-                references = f"{advisory.get('url')}\n" + '\n'.join(advisory['references'])
-                date = advisory.get('date')
+                references = f"{advisory.get('url')}\n" + "\n".join(
+                    advisory["references"]
+                )
+                date = advisory.get("date")
 
-                for alias in advisory.get('aliases', []):
+                for alias in advisory.get("aliases", []):
                     vulnerability_ids.append(alias)
 
-                package_name = item.get('package').get('name')
-                package_version = item.get('package').get('version')
+                package_name = item.get("package").get("name")
+                package_version = item.get("package").get("version")
                 title = f"[{package_name} {package_version}] {advisory.get('title')}"
                 severity = "High"
-                if 'keywords' in advisory:
-                    tags = advisory.get('keywords')
+                if "keywords" in advisory:
+                    tags = advisory.get("keywords")
                 else:
                     tags = []
                 try:
@@ -55,7 +71,9 @@ class CargoAuditParser(object):
                 except KeyError:
                     mitigation = "No information about patched version"
                 dupe_key = hashlib.sha256(
-                    (vuln_id + date + package_name + package_version).encode('utf-8')
+                    (vuln_id + date + package_name + package_version).encode(
+                        "utf-8"
+                    )
                 ).hexdigest()
 
                 if dupe_key in dupes:
@@ -74,7 +92,7 @@ class CargoAuditParser(object):
                         publish_date=date,
                         nb_occurences=1,
                         references=references,
-                        mitigation=mitigation
+                        mitigation=mitigation,
                     )
                     finding.unsaved_vulnerability_ids = vulnerability_ids
                     dupes[dupe_key] = finding
