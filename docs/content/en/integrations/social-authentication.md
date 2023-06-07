@@ -198,7 +198,23 @@ To import groups from Azure AD users, the following environment variable needs t
     {{< /highlight >}}
 
 This will ensure the user is added to all the groups found in the Azure AD Token. Any missing groups will be created in DefectDojo (unless filtered). This group synchronization allows for product access via groups to limit the products a user can interact with.
-Do not activate `Emit groups as role claims` within the Azure AD "Token configuration".
+
+The Azure AD token returned by Azure will also need to be configured to include group IDs. Without this step, the
+token will not contain any notion of a group, and the mapping process will report that the current user is not a member of any 
+groups. To update the the format of the token, add a group claim that applies to whatever group type you are using.
+If unsure of what type that is, select `All Groups`. Do not activate `Emit groups as role claims` within the Azure AD 
+"Token configuration" page.
+
+Application API permissions need to be updated with the `Group.Read.All` permission so that groups can be read on behalf
+of the user that has successfully signed in.
+
+To limit the amount of groups imported from Azure AD, a regular expression can be used as the following:
+    
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER='^team-.*' # or 'teamA|teamB|groupC'
+    {{< /highlight >}}
+
+### Automatic Cleanup of User-Groups
 
 To prevent authorization creep, old Azure AD groups a user is not having anymore can be deleted with the following environment parameter:
 
@@ -206,11 +222,8 @@ To prevent authorization creep, old Azure AD groups a user is not having anymore
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS=True
     {{< /highlight >}}
 
- To limit the amount of groups imported from Azure AD, a regular expression can be used as the following:
-    
-    {{< highlight python >}}
-    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER='^team-.*' # or 'teamA|teamB|groupC'
-    {{< /highlight >}}
+When a user is removed from a given group in Azure AD, they will also be removed from the corresponding group in DefectDojo.
+If there is a group in DefectDojo, that no longer has any members, it will be left as is for record purposes.
 
 ## Gitlab
 
