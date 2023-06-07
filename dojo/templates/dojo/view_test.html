@@ -168,7 +168,7 @@
                             {% endif %}
                         </td>
                     {% endif %}
-                </tr>       
+                </tr>
             </table>
         </div>
     </div>
@@ -711,6 +711,13 @@
                                         disabled/>
                                     <span>{% trans "Mitigated" %}</span>
                                 </label>
+                                <label style="font-size: 80%; font-weight: normal; display: block">
+                                    <input id="id_bulk_under_review"
+                                        name="under_review"
+                                        type="checkbox"
+                                        disabled/>
+                                    <span>{% trans "Under Review" %}</span>
+                                </label>
                                 <label>
                                     <b>{% trans "Risk Acceptance" %}</b>
                                     <input id="id_bulk_risk_acceptance"
@@ -1111,7 +1118,7 @@
                                         title=""></i>
                                     {% endif %}
                                     {% if finding.endpoints.all %}
-                                        <i class="fa-solid fa-sitemap has-popover dojo-sup" data-html="true" data-trigger="hover" data-content=" 
+                                        <i class="fa-solid fa-sitemap has-popover dojo-sup" data-html="true" data-trigger="hover" data-content="
                                         {% for endpoint_status in finding.status_finding.all %}
                                             {% if endpoint_status.mitigated %} &#10003; {{ endpoint_status.endpoint }}
                                                 <br/>
@@ -1146,7 +1153,7 @@
                                         </a>
                                     {% endif %}
                                     {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
-                                </td>                  
+                                </td>
                                 <td class="nowrap">
                                     {% if finding.cwe > 0 %}
                                         <a target="_blank"
@@ -1315,7 +1322,7 @@
                                 <span class="text-error">
                             {% else %}
                                 <span>{{ finding.severity }}</span>
-                            {% endif %}  
+                            {% endif %}
                         </td>
                         <td>
                             {% if finding.reporter.get_full_name and finding.reporter.get_full_name.strip %}
@@ -1565,7 +1572,7 @@
                 }
             });
         };
-        
+
         $(document).ready(function(){
             date =  new Date().toISOString().slice(0, 10);
             var fileDated = 'Findings_List_' + date;
@@ -1582,7 +1589,7 @@
                 { "data": "cve" },
                 { "data": "date" },
                 { "data": "age" },
-                {% if system_settings.enable_finding_sla %} 
+                {% if system_settings.enable_finding_sla %}
                     { "data": "sla" },
                 {% endif %}
                 { "data": "reporter" },
@@ -1636,7 +1643,7 @@
                         "orderable": false,
                         "targets": [0]
                     },
-                    { 
+                    {
                         targets: 'severity-sort',
                         orderDataType: 'severity-asc'
                     },
@@ -1730,45 +1737,59 @@
                 $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_is_mitigated').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_under_review').prop('disabled', !checked);
             })
 
             $('#bulk_edit_menu #id_bulk_active').on("click", function (e){
                 var checked = this.checked;
-                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
-                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('disabled', checked);
                 $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
                 $('#bulk_edit_menu #id_bulk_is_mitigated').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_verified').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_under_review').prop('checked', false);
             })
 
             $('#bulk_edit_menu #id_bulk_is_mitigated').on("click", function (e){
                 var checked = this.checked;
-                $('#bulk_edit_menu #id_bulk_active').prop('disabled', checked);
                 $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_under_review').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
             })
 
             $('#bulk_edit_menu #id_bulk_false_p').on("click", function (e){
                 var checked = this.checked;
-                $('#bulk_edit_menu #id_bulk_active').prop('disabled', checked);
-                $('#bulk_edit_menu #id_bulk_risk_accepted').prop('disabled', checked);
-                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', checked);
                 $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
-                $('#bulk_edit_menu #id_bulk_risk_accepted').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_verified').prop('checked', false);
                 $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
                 $('#bulk_edit_menu #id_bulk_is_mitigated').prop('checked', checked);
-            })
-
-            $('#bulk_edit_menu #id_bulk_risk_accepted').on("click", function (e){
-                var checked = this.checked;
-                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
-                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', checked);
-                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
-                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_under_review').prop('checked', false);
             })
 
             $('#bulk_edit_menu #id_bulk_out_of_scope').on("click", function (e){
                 var checked = this.checked;
-                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_verified').prop('checked', false);
                 $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_under_review').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('checked', checked);
+            })
+
+            $('#bulk_edit_menu #id_bulk_under_review').on("click", function (e){
+                var checked = this.checked;
+                if (checked) {
+                    $('#bulk_edit_menu #id_bulk_active').prop('checked', checked);
+                }
+                $('#bulk_edit_menu #id_bulk_verified').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_risk_accept').prop('checked', false);
             })
 
             $('#bulk_edit_menu #id_bulk_risk_acceptance').on('click', function (e) {
@@ -1779,13 +1800,12 @@
 
             $('#bulk_edit_menu #id_bulk_risk_accept').on('click', function (e) {
                 var checked = this.checked;
-                $('#bulk_edit_menu #id_bulk_risk_unaccept').prop('disabled', checked);
                 $('#bulk_edit_menu #id_bulk_risk_unaccept').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_under_review').prop('checked', false);
             })
 
             $('#bulk_edit_menu #id_bulk_risk_unaccept').on('click', function (e) {
                 var checked = this.checked;
-                $('#bulk_edit_menu #id_bulk_risk_accept').prop('disabled', checked);
                 $('#bulk_edit_menu #id_bulk_risk_accept').prop('checked', false);
             })
 
