@@ -27,7 +27,7 @@
 			<Text>The Issues Category section provides Fortify recommendations for addressing issues at a generic level.  The recommendations for specific fixes can be extrapolated from those generic recommendations by the development group.</Text>
 		</SubSection>
 	</ReportSection>
-	
+
 	<ReportSection enabled="true" optionalSubsections="true">
 		<Title>Project Summary</Title>
 		<SubSection enabled="true">
@@ -162,8 +162,8 @@ $LIBDIR_LISTING$</Text>
 			</IssueListing>
 		</SubSection>
 	</ReportSection>
-	
-	
+
+
 	<ReportSection enabled="false" optionalSubsections="false">
 		<Title>New Issues</Title>
 
@@ -181,4 +181,3 @@ $LIBDIR_LISTING$</Text>
 	</ReportSection>
 
 </ReportDefinition>
-

@@ -6,7 +6,7 @@ from dojo.models import Finding
 class GitlabSecretDetectionReportParser(object):
     """
     GitLab's secret detection report
-    See more: https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/secret-detection-report-format.json
+    See more: https://t.ly/FhTHP
     """
 
     def get_scan_types(self):
@@ -29,7 +29,9 @@ class GitlabSecretDetectionReportParser(object):
 
         # Vulnerabilities is stored on vulnerabilities key
         vulnerabilities = data["vulnerabilities"]
-        detection_string = "detected; please remove and revoke it if this is a leak."
+        detection_string = (
+            "detected; please remove and revoke it if this is a leak."
+        )
         for vulnerability in vulnerabilities:
             title = vulnerability.get("message", vulnerability.get("name"))
             if detection_string not in title:
@@ -53,7 +55,9 @@ class GitlabSecretDetectionReportParser(object):
             if "start_line" in location:
                 finding.line = int(location["start_line"])
             if "raw_source_code_extract" in vulnerability:
-                finding.description += "\n" + vulnerability["raw_source_code_extract"]
+                finding.description += (
+                    "\n" + vulnerability["raw_source_code_extract"]
+                )
 
             findings.append(finding)
         return findings

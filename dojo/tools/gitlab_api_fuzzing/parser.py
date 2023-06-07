@@ -6,8 +6,7 @@ from dojo.models import Finding
 class GitlabAPIFuzzingParser(object):
     """
     GitLab API Fuzzing Report
-
-    Ref: https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/coverage-fuzzing-report-format.json
+    Ref: https://t.ly/bMBV
     """
 
     def get_scan_types(self):
@@ -31,7 +30,7 @@ class GitlabAPIFuzzingParser(object):
                 location = vulnerability["location"]
                 description += "\n" + location["crash_type"]
                 description += "\n" + location["crash_state"]
-            except:
+            except BaseException:
                 pass
             findings.append(
                 Finding(

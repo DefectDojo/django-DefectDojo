@@ -4,11 +4,10 @@ from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
 
-__author__ = 'properam'
+__author__ = "properam"
 
 
 class ImmuniwebParser(object):
-
     def get_scan_types(self):
         return ["Immuniweb Scan"]
 
@@ -19,43 +18,49 @@ class ImmuniwebParser(object):
         return "XML Scan Result File from Imuniweb Scan."
 
     def get_findings(self, file, test):
-
         ImmuniScanTree = ElementTree.parse(file)
         root = ImmuniScanTree.getroot()
         # validate XML file
-        if 'Vulnerabilities' not in root.tag:
-            raise ValueError("This does not look like a valid expected Immuniweb XML file.")
+        if "Vulnerabilities" not in root.tag:
+            raise ValueError(
+                "This does not look like a valid expected Immuniweb XML file."
+            )
 
         dupes = dict()
 
         for vulnerability in root.iter("Vulnerability"):
             """
-                The Tags available in XML File are:
-                ID, Name, Date, Status,
-                Type, CWE_ID, CVE_ID, CVSSv3,
-                Risk, URL, Description, PoC
+            The Tags available in XML File are:
+            ID, Name, Date, Status,
+            Type, CWE_ID, CVE_ID, CVSSv3,
+            Risk, URL, Description, PoC
             """
             mitigation = "N/A"
             impact = "N/A"
-            title = vulnerability.find('Name').text
-            reference = vulnerability.find('ID').text
-            cwe = ''.join(i for i in vulnerability.find('CWE-ID').text if i.isdigit())
+            title = vulnerability.find("Name").text
+            reference = vulnerability.find("ID").text
+            cwe = "".join(
+                i for i in vulnerability.find("CWE-ID").text if i.isdigit()
+            )
             if cwe:
                 cwe = cwe
             else:
                 cwe = None
-            vulnerability_id = vulnerability.find('CVE-ID').text
-            steps_to_reproduce = vulnerability.find('PoC').text
-            # just to make sure severity is in the recognised sentence casing form
-            severity = vulnerability.find('Risk').text.capitalize()
+            vulnerability_id = vulnerability.find("CVE-ID").text
+            steps_to_reproduce = vulnerability.find("PoC").text
+            # just to make sure severity is in the recognised sentence casing
+            # form
+            severity = vulnerability.find("Risk").text.capitalize()
             # Set 'Warning' severity === 'Informational'
-            if severity == 'Warning':
+            if severity == "Warning":
                 severity = "Informational"
 
-            description = (vulnerability.find('Description').text)
+            description = vulnerability.find("Description").text
             url = vulnerability.find("URL").text
 
-            dupe_key = hashlib.md5(str(description + title + severity).encode('utf-8')).hexdigest()
+            dupe_key = hashlib.md5(
+                str(description + title + severity).encode("utf-8")
+            ).hexdigest()
 
             # check if finding is a duplicate
             if dupe_key in dupes:
@@ -64,7 +69,8 @@ class ImmuniwebParser(object):
                     finding.description += description
             else:  # finding is not a duplicate
                 # create finding
-                finding = Finding(title=title,
+                finding = Finding(
+                    title=title,
                     test=test,
                     description=description,
                     severity=severity,
@@ -73,7 +79,8 @@ class ImmuniwebParser(object):
                     mitigation=mitigation,
                     impact=impact,
                     references=reference,
-                    dynamic_finding=True)
+                    dynamic_finding=True,
+                )
                 if vulnerability_id:
                     finding.unsaved_vulnerability_ids = [vulnerability_id]
                 finding.unsaved_endpoints = list()
