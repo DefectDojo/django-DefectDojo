@@ -2,7 +2,7 @@
 asteval==0.9.29
 bleach==6.0.0
 bleach[css]
-celery==5.2.7
+celery==5.3.0
 coverage==7.2.7
 defusedxml==0.7.1
 django_celery_results==2.5.1
