@@ -1,7 +1,6 @@
 import logging
 import os
 import sys
-import time
 import unittest
 
 from selenium.common.exceptions import TimeoutException
@@ -18,55 +17,14 @@ logger = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-class CloseOldDedupeTest(BaseTestCase):
+class CloseOldTest(BaseTestCase):
     # --------------------------------------------------------------------------------------------------------
-    # Taken from dedupe_test.py
-    # This set of tests is very similar and relies on deduplication
-    # Testing that on a new scan import of same type old findings are closed, and existing findings are not.
+    # This set of tests is similar to close_old_findings_dedupe_test.py, but does not rely on deduplication
+    # Testing that two different scans of the same type will properly close the old findings on the second import.
     # --------------------------------------------------------------------------------------------------------
     def setUp(self):
         super().setUp()
         self.relative_path = dir_path = os.path.dirname(os.path.realpath(__file__))
-
-    def check_nb_duplicates(self, expected_number_of_duplicates):
-        logger.debug("checking duplicates...")
-        driver = self.driver
-        retries = 0
-        for i in range(0, 18):
-            time.sleep(5)  # wait bit for celery dedupe task which can be slow on travis
-            self.goto_all_findings_list(driver)
-            dupe_count = 0
-            # iterate over the rows of the findings table and concatenates all columns into td.text
-            trs = driver.find_elements(By.XPATH, '//*[@id="open_findings"]/tbody/tr')
-            for row in trs:
-                concatRow = ' '.join([td.text for td in row.find_elements(By.XPATH, ".//td")])
-                # print(concatRow)
-                if '(DUPE)' and 'Duplicate' in concatRow:
-                    dupe_count += 1
-
-            if (dupe_count != expected_number_of_duplicates):
-                logger.debug("duplicate count mismatch, let's wait a bit for the celery dedupe task to finish and try again (5s)")
-            else:
-                break
-
-        if (dupe_count != expected_number_of_duplicates):
-            findings_table = driver.find_element(By.ID, 'open_findings')
-            print(findings_table.get_attribute('innerHTML'))
-
-        self.assertEqual(dupe_count, expected_number_of_duplicates)
-
-    @on_exception_html_source_logger
-    def test_enable_deduplication(self):
-        logger.debug("enabling deduplication...")
-        driver = self.driver
-        driver.get(self.base_url + 'system_settings')
-        if not driver.find_element(By.ID, 'id_enable_deduplication').is_selected():
-            driver.find_element(By.XPATH, '//*[@id="id_enable_deduplication"]').click()
-            # save settings
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
-            # check if it's enabled after reload
-            driver.get(self.base_url + 'system_settings')
-            self.assertTrue(driver.find_element(By.ID, 'id_enable_deduplication').is_selected())
 
     @on_exception_html_source_logger
     def test_delete_findings(self):
@@ -99,20 +57,18 @@ class CloseOldDedupeTest(BaseTestCase):
         self.assertTrue(driver.current_url.endswith('page=1'))
 
 # --------------------------------------------------------------------------------------------------------
-# Same scanner deduplication - Deduplication on engagement
-#   Test deduplication and close for Immuniweb dynamic scanner
+# Same scanner import - Close Old Findings on engagement
 # --------------------------------------------------------------------------------------------------------
     @on_exception_html_source_logger
     def test_add_same_engagement_engagement(self):
-        logger.debug("Same scanner deduplication - Close Old Findings Same Engagement - dynamic. Creating tests...")
+        logger.debug("Same scanner deduplication - Close Old Findings No Dedupe, Same Engagement - dynamic. Creating tests...")
         # Create engagement
 
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.pull-left").click()
         driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
-        driver.find_element(By.ID, "id_name").send_keys("Close Same Engagement Test")
-        driver.find_element(By.XPATH, '//*[@id="id_deduplication_on_engagement"]').click()
+        driver.find_element(By.ID, "id_name").send_keys("Close Same Engagement No Dedupe")
         driver.find_elements(By.CLASS_NAME, "btn-primary")[3].click()
 
         self.assertTrue(self.is_success_message_present(text='Engagement added successfully.'))
@@ -132,7 +88,7 @@ class CloseOldDedupeTest(BaseTestCase):
 
         driver = self.driver
         self.goto_active_engagements_overview(driver)
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Engagement Test").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Engagement No Dedupe").click()
         driver.find_elements(By.CLASS_NAME, "btn-primary")[3].click()
         driver.find_element(By.LINK_TEXT, "Import Scan Results").click()
         scan_type = Select(driver.find_element(By.ID, "id_scan_type"))
@@ -141,7 +97,7 @@ class CloseOldDedupeTest(BaseTestCase):
         scan_environment = Select(driver.find_element(By.ID, "id_environment"))
         scan_environment.select_by_visible_text("Development")
         driver.find_element(By.ID, "id_close_old_findings").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
+        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/close_old_scans/closeold_nodedupe_1.xml")
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text='3 findings and closed 0 findings'))
@@ -149,7 +105,7 @@ class CloseOldDedupeTest(BaseTestCase):
         # Second upload. Immuniweb again.
         # Same report.
         self.goto_active_engagements_overview(driver)
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Engagement Test").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Engagement No Dedupe").click()
         driver.find_elements(By.CLASS_NAME, "btn-primary")[3].click()
         driver.find_element(By.LINK_TEXT, "Import Scan Results").click()
         scan_type = Select(driver.find_element(By.ID, "id_scan_type"))
@@ -158,10 +114,10 @@ class CloseOldDedupeTest(BaseTestCase):
         scan_environment = Select(driver.find_element(By.ID, "id_environment"))
         scan_environment.select_by_visible_text("Development")
         driver.find_element(By.ID, "id_close_old_findings").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
+        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/close_old_scans/closeold_nodedupe_2.xml")
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='3 findings and closed 0 findings'))
+        self.assertTrue(self.is_success_message_present(text='3 findings and closed 3 findings'))
 
     @on_exception_html_source_logger
     def test_close_same_engagement_tests(self):
@@ -171,7 +127,7 @@ class CloseOldDedupeTest(BaseTestCase):
 
         driver = self.driver
         self.goto_active_engagements_overview(driver)
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Engagement Test").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Engagement No Dedupe").click()
         driver.find_elements(By.CLASS_NAME, "btn-primary")[3].click()
         driver.find_element(By.LINK_TEXT, "Import Scan Results").click()
         scan_type = Select(driver.find_element(By.ID, "id_scan_type"))
@@ -183,11 +139,7 @@ class CloseOldDedupeTest(BaseTestCase):
         driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/dedupe_scans/dedupe_and_close_1.xml")
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='1 findings and closed 2 findings'))
-
-    @on_exception_html_source_logger
-    def test_check_endpoint_status(self):
-        self.check_nb_duplicates(4)
+        self.assertTrue(self.is_success_message_present(text='1 findings and closed 3 findings'))
 
 # --------------------------------------------------------------------------------------------------------
 # Same scanner deduplication - Deduplication on product
@@ -196,14 +148,14 @@ class CloseOldDedupeTest(BaseTestCase):
 
     @on_exception_html_source_logger
     def test_add_same_product_engagement(self):
-        logger.debug("Same scanner deduplication - Close Old Findings Same Product - dynamic. Creating tests...")
+        logger.debug("Same scanner no deduplication - Close Old Findings Same Product - dynamic. Creating tests...")
         # Create engagement
 
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.pull-left").click()
         driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
-        driver.find_element(By.ID, "id_name").send_keys("Close Same Product Test 1")
+        driver.find_element(By.ID, "id_name").send_keys("Close Same Product No Dedupe Test 1")
         driver.find_elements(By.CLASS_NAME, "btn-primary")[3].click()
 
         self.assertTrue(self.is_success_message_present(text='Engagement added successfully.'))
@@ -211,7 +163,7 @@ class CloseOldDedupeTest(BaseTestCase):
         self.goto_product_overview(driver)
         driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.pull-left").click()
         driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
-        driver.find_element(By.ID, "id_name").send_keys("Close Same Product Test 2")
+        driver.find_element(By.ID, "id_name").send_keys("Close Same Product No Dedupe Test 2")
         driver.find_elements(By.CLASS_NAME, "btn-primary")[3].click()
 
         self.assertTrue(self.is_success_message_present(text='Engagement added successfully.'))
@@ -219,7 +171,7 @@ class CloseOldDedupeTest(BaseTestCase):
         self.goto_product_overview(driver)
         driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.pull-left").click()
         driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
-        driver.find_element(By.ID, "id_name").send_keys("Close Same Product Test 3")
+        driver.find_element(By.ID, "id_name").send_keys("Close Same Product No Dedupe Test 3")
         driver.find_elements(By.CLASS_NAME, "btn-primary")[3].click()
 
         self.assertTrue(self.is_success_message_present(text='Engagement added successfully.'))
@@ -239,7 +191,7 @@ class CloseOldDedupeTest(BaseTestCase):
 
         driver = self.driver
         self.goto_active_engagements_overview(driver)
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Product Test 1").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Product No Dedupe Test 1").click()
         driver.find_elements(By.CLASS_NAME, "btn-primary")[3].click()
         driver.find_element(By.LINK_TEXT, "Import Scan Results").click()
         scan_type = Select(driver.find_element(By.ID, "id_scan_type"))
@@ -248,7 +200,7 @@ class CloseOldDedupeTest(BaseTestCase):
         scan_environment = Select(driver.find_element(By.ID, "id_environment"))
         scan_environment.select_by_visible_text("Development")
         driver.find_element(By.ID, "id_close_old_findings_product_scope").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
+        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/close_old_scans/closeold_nodedupe_1.xml")
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text='3 findings and closed 0 findings'))
@@ -256,7 +208,7 @@ class CloseOldDedupeTest(BaseTestCase):
         # Second upload. Immuniweb again.
         # Same report.
         self.goto_active_engagements_overview(driver)
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Product Test 2").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Product No Dedupe Test 2").click()
         driver.find_elements(By.CLASS_NAME, "btn-primary")[3].click()
         driver.find_element(By.LINK_TEXT, "Import Scan Results").click()
         scan_type = Select(driver.find_element(By.ID, "id_scan_type"))
@@ -265,10 +217,10 @@ class CloseOldDedupeTest(BaseTestCase):
         scan_environment = Select(driver.find_element(By.ID, "id_environment"))
         scan_environment.select_by_visible_text("Development")
         driver.find_element(By.ID, "id_close_old_findings_product_scope").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
+        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/close_old_scans/closeold_nodedupe_2.xml")
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='3 findings and closed 0 findings'))
+        self.assertTrue(self.is_success_message_present(text='3 findings and closed 3 findings'))
 
     @on_exception_html_source_logger
     def test_close_same_product_tests(self):
@@ -278,7 +230,7 @@ class CloseOldDedupeTest(BaseTestCase):
 
         driver = self.driver
         self.goto_active_engagements_overview(driver)
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Product Test 3").click()
+        driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Product No Dedupe Test 3").click()
         driver.find_elements(By.CLASS_NAME, "btn-primary")[3].click()
         driver.find_element(By.LINK_TEXT, "Import Scan Results").click()
         scan_type = Select(driver.find_element(By.ID, "id_scan_type"))
@@ -290,11 +242,7 @@ class CloseOldDedupeTest(BaseTestCase):
         driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/dedupe_scans/dedupe_and_close_1.xml")
         driver.find_elements(By.CLASS_NAME, "btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='1 findings and closed 2 findings'))
-
-    @on_exception_html_source_logger
-    def test_check_same_product_status(self):
-        self.check_nb_duplicates(4)
+        self.assertTrue(self.is_success_message_present(text='1 findings and closed 3 findings'))
 
 
 def add_close_old_tests_to_suite(suite, jira=False, github=False, block_execution=False):
@@ -315,19 +263,16 @@ def add_close_old_tests_to_suite(suite, jira=False, github=False, block_executio
         suite.addTest(BaseTestCase('disable_block_execution'))
 
     suite.addTest(ProductTest('test_create_product'))
-    suite.addTest(CloseOldDedupeTest('test_enable_deduplication'))
     # Test same scanners - same engagement - dynamic - dedupe
-    suite.addTest(CloseOldDedupeTest('test_delete_findings'))
-    suite.addTest(CloseOldDedupeTest('test_add_same_engagement_engagement'))
-    suite.addTest(CloseOldDedupeTest('test_import_same_engagement_tests'))
-    suite.addTest(CloseOldDedupeTest('test_close_same_engagement_tests'))
-    suite.addTest(CloseOldDedupeTest('test_check_endpoint_status'))
+    suite.addTest(CloseOldTest('test_delete_findings'))
+    suite.addTest(CloseOldTest('test_add_same_engagement_engagement'))
+    suite.addTest(CloseOldTest('test_import_same_engagement_tests'))
+    suite.addTest(CloseOldTest('test_close_same_engagement_tests'))
     # Test same scanners - same product - dynamic - dedupe
-    suite.addTest(CloseOldDedupeTest('test_delete_findings'))
-    suite.addTest(CloseOldDedupeTest('test_add_same_product_engagement'))
-    suite.addTest(CloseOldDedupeTest('test_import_same_product_tests'))
-    suite.addTest(CloseOldDedupeTest('test_close_same_product_tests'))
-    suite.addTest(CloseOldDedupeTest('test_check_same_product_status'))
+    suite.addTest(CloseOldTest('test_delete_findings'))
+    suite.addTest(CloseOldTest('test_add_same_product_engagement'))
+    suite.addTest(CloseOldTest('test_import_same_product_tests'))
+    suite.addTest(CloseOldTest('test_close_same_product_tests'))
     # Clean up
     suite.addTest(ProductTest('test_delete_product'))
     return suite
