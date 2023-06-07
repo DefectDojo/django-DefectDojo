@@ -20,8 +20,8 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class CloseOldDedupeTest(BaseTestCase):
     # --------------------------------------------------------------------------------------------------------
-    # Taken from dedupe_test.py 
-    # This set of tests is very similar and relies on deduplication 
+    # Taken from dedupe_test.py
+    # This set of tests is very similar and relies on deduplication
     # Testing that on a new scan import of same type old findings are closed, and existing findings are not.
     # --------------------------------------------------------------------------------------------------------
     def setUp(self):
@@ -98,7 +98,6 @@ class CloseOldDedupeTest(BaseTestCase):
         # check that user was redirect back to url where it came from based on return_url
         self.assertTrue(driver.current_url.endswith('page=1'))
 
-
 # --------------------------------------------------------------------------------------------------------
 # Same scanner deduplication - Deduplication on engagement
 #   Test deduplication and close for Immuniweb dynamic scanner
@@ -118,8 +117,6 @@ class CloseOldDedupeTest(BaseTestCase):
 
         self.assertTrue(self.is_success_message_present(text='Engagement added successfully.'))
 
-
-
 # --------------------------------------------------------------------------------------------------------
 # Same scanner deduplication - Deduplication on engagement
 #   Test deduplication for Immuniweb dynamic scanner
@@ -127,11 +124,10 @@ class CloseOldDedupeTest(BaseTestCase):
 #   Second test contains only one of the original findings.
 #   Uses the import feature
 # --------------------------------------------------------------------------------------------------------
-
     @on_exception_html_source_logger
     def test_import_same_engagement_tests(self):
         logger.debug("Importing reports...")
-        # Imports into 
+        # Imports into
         # First test : Immuniweb Scan (dynamic)
 
         driver = self.driver
@@ -139,7 +135,6 @@ class CloseOldDedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Engagement Test").click()
         driver.find_elements(By.CLASS_NAME, "btn-primary")[3].click()
         driver.find_element(By.LINK_TEXT, "Import Scan Results").click()
-        
         scan_type = Select(driver.find_element(By.ID, "id_scan_type"))
         scan_type.select_by_visible_text("Immuniweb Scan")
 
@@ -157,7 +152,6 @@ class CloseOldDedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Engagement Test").click()
         driver.find_elements(By.CLASS_NAME, "btn-primary")[3].click()
         driver.find_element(By.LINK_TEXT, "Import Scan Results").click()
-        
         scan_type = Select(driver.find_element(By.ID, "id_scan_type"))
         scan_type.select_by_visible_text("Immuniweb Scan")
 
@@ -180,7 +174,6 @@ class CloseOldDedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Engagement Test").click()
         driver.find_elements(By.CLASS_NAME, "btn-primary")[3].click()
         driver.find_element(By.LINK_TEXT, "Import Scan Results").click()
-        
         scan_type = Select(driver.find_element(By.ID, "id_scan_type"))
         scan_type.select_by_visible_text("Immuniweb Scan")
 
@@ -192,16 +185,15 @@ class CloseOldDedupeTest(BaseTestCase):
 
         self.assertTrue(self.is_success_message_present(text='1 findings and closed 2 findings'))
 
-
     @on_exception_html_source_logger
     def test_check_endpoint_status(self):
         self.check_nb_duplicates(4)
-
 
 # --------------------------------------------------------------------------------------------------------
 # Same scanner deduplication - Deduplication on product
 #   Test deduplication for Immuniweb dynamic scanner
 # --------------------------------------------------------------------------------------------------------
+
     @on_exception_html_source_logger
     def test_add_same_product_engagement(self):
         logger.debug("Same scanner deduplication - Close Old Findings Same Product - dynamic. Creating tests...")
@@ -250,7 +242,6 @@ class CloseOldDedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Product Test 1").click()
         driver.find_elements(By.CLASS_NAME, "btn-primary")[3].click()
         driver.find_element(By.LINK_TEXT, "Import Scan Results").click()
-        
         scan_type = Select(driver.find_element(By.ID, "id_scan_type"))
         scan_type.select_by_visible_text("Immuniweb Scan")
 
@@ -268,7 +259,6 @@ class CloseOldDedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Product Test 2").click()
         driver.find_elements(By.CLASS_NAME, "btn-primary")[3].click()
         driver.find_element(By.LINK_TEXT, "Import Scan Results").click()
-        
         scan_type = Select(driver.find_element(By.ID, "id_scan_type"))
         scan_type.select_by_visible_text("Immuniweb Scan")
 
@@ -291,7 +281,6 @@ class CloseOldDedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Close Same Product Test 3").click()
         driver.find_elements(By.CLASS_NAME, "btn-primary")[3].click()
         driver.find_element(By.LINK_TEXT, "Import Scan Results").click()
-        
         scan_type = Select(driver.find_element(By.ID, "id_scan_type"))
         scan_type.select_by_visible_text("Immuniweb Scan")
 
@@ -303,9 +292,8 @@ class CloseOldDedupeTest(BaseTestCase):
 
         self.assertTrue(self.is_success_message_present(text='1 findings and closed 2 findings'))
 
-
     @on_exception_html_source_logger
-    def test_check_endpoint_status(self):
+    def test_check_same_product_status(self):
         self.check_nb_duplicates(4)
 
 
@@ -339,7 +327,7 @@ def add_close_old_tests_to_suite(suite, jira=False, github=False, block_executio
     suite.addTest(CloseOldTest('test_add_same_product_engagement'))
     suite.addTest(CloseOldTest('test_import_same_product_tests'))
     suite.addTest(CloseOldTest('test_close_same_product_tests'))
-    suite.addTest(CloseOldTest('test_check_endpoint_status'))
+    suite.addTest(CloseOldTest('test_check_same_product_status'))
     # Clean up
     suite.addTest(ProductTest('test_delete_product'))
     return suite
