@@ -28,7 +28,7 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 
-RUN pip install --no-cache-dir selenium requests chromedriver-autoinstaller
+RUN pip install --no-cache-dir selenium==4.9.0 requests chromedriver-autoinstaller
 
 # Installing Chromedriver
 WORKDIR /opt/chrome-driver
