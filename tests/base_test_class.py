@@ -92,7 +92,7 @@ class BaseTestCase(unittest.TestCase):
             )
             dd_driver = webdriver.Chrome(
                 os.environ["CHROMEDRIVER"],
-                chrome_options=dd_driver_options,
+                options=dd_driver_options,
                 desired_capabilities=desired,
             )
             # best practice is only use explicit waits
