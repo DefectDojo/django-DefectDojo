@@ -7,7 +7,7 @@ from dojo.tools.jfrog_xray_on_demand_binary_scan.parser import \
 class TestJfrogXrayOnDemandBinaryScanParser(DojoTestCase):
 
     def test_parse_file_with_one_vuln(self):
-        testfile = open("unittests/scans/frog_xray_on_demand_binary_scan/one_vuln.json")
+        testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/one_vuln.json")
         parser = JfrogXrayOnDemandBinaryScan()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -18,7 +18,7 @@ class TestJfrogXrayOnDemandBinaryScanParser(DojoTestCase):
         self.assertEqual("High", item.severity)
 
     def test_parse_file_with_many_vulns(self):
-        testfile = open("unittests/scans/frog_xray_on_demand_binary_scan/many_vulns.json")
+        testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/many_vulns.json")
         parser = JfrogXrayOnDemandBinaryScan()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
