@@ -20,7 +20,7 @@ env = environ.Env(
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ''),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
-    DD_LOGIN_REDIRECT_URL=(str, '/'),
+    DD_LOGIN_REDIRECT_URL=(str, '/dashboard'),
     DD_LOGIN_URL=(str, '/login'),
     DD_DJANGO_ADMIN_ENABLED=(bool, True),
     DD_SESSION_COOKIE_HTTPONLY=(bool, True),
@@ -101,10 +101,10 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS=(list, ['']),
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS=(list, ['']),
-    DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=(bool, False),
+    DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=(bool, True),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET=(str, ''),
-    DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://{your-org-url}/oauth2'),
+    DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://airslate.okta.com/oauth2'),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, ''),
@@ -301,6 +301,8 @@ if os.path.isfile(root('dojo/settings/.env.prod')) or 'DD_ENV_PATH' in os.enviro
 
 # False if not in os.environ
 DEBUG = env('DD_DEBUG')
+SOCIAL_AUTH_OKTA_OAUTH2_KEY = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY')
+SOCIAL_AUTH_OKTA_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET')
 TEMPLATE_DEBUG = env('DD_TEMPLATE_DEBUG')
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
@@ -429,9 +431,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = env('DD_DATA_UPLOAD_MAX_MEMORY_SIZE')
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
 
-# AUTHENTICATION_BACKENDS = [
-# 'axes.backends.AxesModelBackend',
-# ]
+AUTHENTICATION_BACKENDS = ['dojo.okta.OktaOAuth2']
 
 ROOT_URLCONF = 'dojo.urls'
 
