@@ -1,14 +1,14 @@
 from ..dojo_test_case import DojoTestCase
 from dojo.models import Test, Finding
 from dojo.tools.jfrog_xray_on_demand_binary_scan.parser import \
-    JfrogXrayOnDemandBinaryScan, decode_cwe_number
+    JfrogXrayOnDemandBinaryScanParser, decode_cwe_number
 
 
 class TestJfrogXrayOnDemandBinaryScanParser(DojoTestCase):
 
     def test_parse_file_with_one_vuln(self):
         testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/one_vuln.json")
-        parser = JfrogXrayOnDemandBinaryScan()
+        parser = JfrogXrayOnDemandBinaryScanParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
@@ -19,7 +19,7 @@ class TestJfrogXrayOnDemandBinaryScanParser(DojoTestCase):
 
     def test_parse_file_with_many_vulns(self):
         testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/many_vulns.json")
-        parser = JfrogXrayOnDemandBinaryScan()
+        parser = JfrogXrayOnDemandBinaryScanParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(3, len(findings))
