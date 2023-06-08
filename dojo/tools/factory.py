@@ -99,8 +99,6 @@ from importlib.util import find_spec
 package_dir = str(Path(__file__).resolve().parent)
 lis  = os.listdir(package_dir)
 for module_name in lis:
-    if "jfrog_xray_on_demand_binary_scan" in module_name:
-        print("esta")
     # check if it's dir
     if os.path.isdir(os.path.join(package_dir, module_name)):
         try:
