@@ -97,8 +97,7 @@ from importlib.util import find_spec
 
 # iterate through the modules in the current package
 package_dir = str(Path(__file__).resolve().parent)
-lis  = os.listdir(package_dir)
-for module_name in lis:
+for module_name in os.listdir(package_dir):
     # check if it's dir
     if os.path.isdir(os.path.join(package_dir, module_name)):
         try:
