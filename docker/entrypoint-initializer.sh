@@ -16,7 +16,7 @@ initialize_data()
 create_announcement_banner() 
 {
 # Load the announcement banner
-if [ -z "$CREATE_INITIAL_BANNER" ]; then
+if [ -z "$DD_CREATE_INITIAL_BANNER" ]; then
 echo "Creating Announcement Banner"
 cat <<EOD | python3 manage.py shell
 from dojo.models import Announcement, UserAnnouncement, Dojo_User
