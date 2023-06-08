@@ -519,7 +519,7 @@ def view_finding(request, fid):
             form = NoteForm()
 
     try:
-        reqres = BurpRawRequestResponse.objects.get(finding=finding)
+        reqres = BurpRawRequestResponse.objects.filter(finding=finding).first()
         burp_request = base64.b64decode(reqres.burpRequestBase64)
         burp_response = base64.b64decode(reqres.burpResponseBase64)
 
