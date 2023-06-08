@@ -6,11 +6,12 @@ from django.conf import settings
 
 @receiver(post_save, sender=Dojo_User)
 def add_announcement_to_new_user(sender, instance, **kwargs):
-    if settings.CREATE_INITIAL_BANNER:
-        announcements = Announcement.objects.all()
-        if announcements.count() > 0:
-            dojo_user = Dojo_User.objects.get(id=instance.id)
-            announcement = announcements.first()
+    announcements = Announcement.objects.all()
+    if announcements.count() > 0:
+        dojo_user = Dojo_User.objects.get(id=instance.id)
+        announcement = announcements.first()
+        cloud_announcement = "Cloud and On-Premise Subscriptions Now Available!" in announcement.message
+        if not cloud_announcement or settings.CREATE_CLOUD_BANNER:
             user_announcements = UserAnnouncement.objects.filter(
                 user=dojo_user,
                 announcement=announcement)
