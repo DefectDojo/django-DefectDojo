@@ -5,7 +5,7 @@ toc_hide: true
 ---
 All parsers which using API have common basic configuration step but with different values. Please, [read these steps](../) at first.
 
-In `Tool Configuration`, select `Tool Type` to "Cobalt.io API" and `Authentication Type` "API Key".
+In `Tool Configuration`, select `Tool Type` to "Cobalt.io" and `Authentication Type` "API Key".
 Paste your Cobalt.io API token in the `API Key` field and the desired org token in the `Extras` field.
 
 In `Add API Scan Configuration` provide the ID
