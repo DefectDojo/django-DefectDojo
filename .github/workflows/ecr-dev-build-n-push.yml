@@ -1,0 +1,45 @@
+name: Build & push Gitleaks 🐳 to DEV ECR
+
+on: [workflow_dispatch]
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
+      - name: Get tag
+        id: repository
+        run: |
+          tag=$(git describe --tags HEAD)
+          #regex='^(release\.)[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$'
+          #(echo $tag | grep -Eq $regex) && tag='latest'
+          #echo "tag=$tag"
+          echo "tag=$tag" > $GITHUB_ENV
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.COMMON_DEV_ECR_ROLE_TO_ASSUME }}
+          aws-region: us-east-1
+          
+      - name: Login to Amazon ECR Private
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        
+      - name: Build, tag, and push docker image to Amazon ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: pdffiller/defect_dojo
+          IMAGE_TAG: ${{ env.tag }}
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG Dockerfile.django-alpine
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
