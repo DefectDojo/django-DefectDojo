@@ -239,7 +239,7 @@
                                 </td>
                                 {% endif %}
 
-                                <td class="text-center">
+                                <td class="text-center" data-order="{{ prod.findings_count }}">
                                     {% if prod.findings_count %}
                                         <a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>
                                         &nbsp;(<a href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}">{{ prod.findings_active_verified_count }}</a>)
@@ -247,7 +247,7 @@
                                         0
                                     {% endif %}
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center" data-order="{{ prod.endpoint_count }}">
                                   {% if prod.endpoint_count %}
                                     <a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><b>{{ prod.endpoint_host_count }}</b></a> /
                                     <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
@@ -341,8 +341,13 @@
                     { "data": "action" },
                     { "data": "product" },
                     { "data": "tags" },
-                    { "data": "criticality" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                    { "data": "criticality", render: function (data, type, row) {
+                            if(type === 'sort') {
+                              data = $($.parseHTML(data)).find('.fa-solid').length;
+                            } else if(type === 'export') {
+                              data = getDojoExportValueFromTag(data, 'i', 'data-content');
+                            }
+                            return data;
                     }},
                     { "data": "metadata", render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
@@ -360,8 +365,8 @@
                             return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
                     {% endif %}
-                    { "data": "findings" },
-                    { "data": "endpoints" },
+                    null,
+                    null,
                     { "data": "contacts" },
                     { "data": "product_type" },
                 ],
