@@ -24,6 +24,12 @@ spec:
     port: 80
     targetPort: 8080
     {{- end }}
+  {{- if .Values.monitoring.prometheus.serviceMonitor.enabled }}
+  - name: http-metrics
+    protocol: TCP
+    port: 9113
+    targetPort: http-metrics
+  {{- end }}
 {{- if .Values.django.serviceType }}
   type: {{ .Values.django.serviceType }}
 {{- end }}

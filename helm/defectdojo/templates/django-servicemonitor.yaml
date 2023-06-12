@@ -1,0 +1,42 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled .Values.monitoring.prometheus.serviceMonitor.enabled }}
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ $fullName }}-django
+  labels:
+    defectdojo.org/component: django
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+spec:
+  endpoints:
+    - port: http-metrics
+      path: /metrics
+      {{- with .Values.monitoring.prometheus.serviceMonitor.interval }}
+      interval: {{ . }}
+      {{- end }}
+      {{- with .Values.monitoring.prometheus.serviceMonitor.scrapeTimeout }}
+      scrapeTimeout: {{ . }}
+      {{- end }}
+      {{- if .Values.monitoring.prometheus.serviceMonitor.honorLabels }}
+      honorLabels: {{ .Values.monitoring.prometheus.serviceMonitor.honorLabels }}
+      {{- end }}
+      {{- if .Values.monitoring.prometheus.serviceMonitor.metricRelabelings }}
+      metricRelabelings: {{- toYaml .Values.monitoring.prometheus.serviceMonitor.metricRelabelings | nindent 6 }}
+      {{- end }}
+      {{- if .Values.monitoring.prometheus.serviceMonitor.relabelings }}
+      relabelings: {{ toYaml .Values.monitoring.prometheus.serviceMonitor.relabelings | nindent 6 }}
+      {{- end }}
+  {{- if .Values.monitoring.prometheus.serviceMonitor.jobLabel }}
+  jobLabel: {{ .Values.monitoring.prometheus.serviceMonitor.jobLabel }}
+  {{- end }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    defectdojo.org/component: django
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
