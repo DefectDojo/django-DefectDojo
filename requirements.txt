@@ -2,7 +2,7 @@
 asteval==0.9.29
 bleach==6.0.0
 bleach[css]
-celery==5.2.7
+celery==5.3.0
 coverage==7.2.7
 defusedxml==0.7.1
 django_celery_results==2.5.1
@@ -16,7 +16,7 @@ django-imagekit==4.1.0
 git+https://github.com/DefectDojo/django-multiselectfield@master#egg=django-multiselectfield
 django-polymorphic==3.1.0
 django-crispy-forms==2.0
-django_extensions==3.2.1
+django_extensions==3.2.3
 django-slack==5.19.0
 # This library is very outdated and not directly. It is used solely for migration
 # purposes to django-tagulous, so it must stay
@@ -55,7 +55,7 @@ social-auth-core==4.4.2
 Python-jose==3.3.0
 gitpython==3.1.31
 debugpy==1.6.7
-python-gitlab==3.14.0
+python-gitlab==3.15.0
 drf_yasg==1.21.5
 cpe==1.2.1
 packageurl-python==0.11.1
@@ -78,7 +78,7 @@ django-ratelimit==4.0.0
 argon2-cffi==21.3.0
 blackduck==1.1.0
 pycurl==7.45.2  # Required for Celery Broker AWS (SQS) support
-boto3==1.26.144  # Required for Celery Broker AWS (SQS) support
+boto3==1.26.150  # Required for Celery Broker AWS (SQS) support
 netaddr==0.8.0
 vulners==2.0.10
 fontawesomefree==6.4.0
