@@ -114,8 +114,6 @@ celery:
   broker: rabbitmq
   # To use an external celery broker, set the hostname here
   brokerHost: ""
-  # To update use a non-default port value, set the port here.
-  brokerPort: ""
   logLevel: INFO
   beat:
     annotations: {}
