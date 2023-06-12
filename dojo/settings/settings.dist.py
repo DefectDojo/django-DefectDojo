@@ -264,7 +264,9 @@ env = environ.Env(
     # Set fields used by the hashcode generator for deduplication, via en env variable that contains a JSON string
     DD_HASHCODE_FIELDS_PER_SCANNER=(str, ''),
     # Set deduplication algorithms per parser, via en env variable that contains a JSON string
-    DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, '')
+    DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, ''),
+    # Dictates whether cloud banner is created or not
+    DD_CREATE_CLOUD_BANNER=(bool, True)
 )
 
 
@@ -1666,3 +1668,5 @@ FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
 AUDITLOG_DISABLE_ON_RAW_SAVE = False
 #  You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
 ADDITIONAL_HEADERS = env('DD_ADDITIONAL_HEADERS')
+# Dictates whether cloud banner is created or not
+CREATE_CLOUD_BANNER = env('DD_CREATE_CLOUD_BANNER')

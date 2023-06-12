@@ -28,6 +28,14 @@ class TenableXMLParser(object):
         # Read the XML
         nscan = ElementTree.parse(filename)
         root = nscan.getroot()
+
+        if 'NessusClientData_v2' not in root.tag:
+            raise ValueError(
+                'This version of Nessus report is not supported. '
+                'Please make sure the export is '
+                'formatted using the NessusClientData_v2 schema.'
+            )
+
         dupes = {}
         for report in root.iter("Report"):
             for host in report.iter("ReportHost"):
@@ -124,12 +132,11 @@ class TenableXMLParser(object):
                     else:
                         find = dupes[dupe_key]
                         if plugin_output is not None:
-                            find.description += plugin_output
+                            find.description += f"\n\n{plugin_output}"
 
                     # Update existing vulnerability IDs
                     if vulnerability_id:
                         find.unsaved_vulnerability_ids.append(vulnerability_id)
-
                     # Create a new endpoint object
                     if fqdn and "://" in fqdn:
                         endpoint = Endpoint.from_uri(fqdn)

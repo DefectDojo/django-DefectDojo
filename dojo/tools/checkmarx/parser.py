@@ -402,7 +402,7 @@ class CheckmarxParser(object):
         results = data.get("scanResults", [])
         for result_type in results:
             # manage sca part
-            if result_type == "sast":
+            if result_type == "sast" and results.get(result_type) is not None:
                 for language in results[result_type].get("languages", []):
                     for query in language.get("queries", []):
                         descriptiondetails = query.get("description", "")
@@ -443,7 +443,7 @@ class CheckmarxParser(object):
                                 finding.line = last_node.get("line")
                             finding.unsaved_tags = [result_type]
                             findings.append(finding)
-            if result_type == "sca":
+            if result_type == "sca" and results.get(result_type) is not None:
                 for package in results[result_type].get("packages", []):
                     component_name = package.get("name").split("-")[-2]
                     component_version = package.get("name").split("-")[-1]
@@ -483,7 +483,7 @@ class CheckmarxParser(object):
                             )
                         finding.unsaved_tags = [result_type]
                         findings.append(finding)
-            if result_type == "kics":
+            if result_type == "kics" and results.get(result_type) is not None:
                 for kics_type in results[result_type].get("results", []):
                     name = kics_type.get("name")
                     for vulnerability in kics_type.get("vulnerabilities", []):
