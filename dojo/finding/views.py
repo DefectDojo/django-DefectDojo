@@ -526,7 +526,6 @@ def view_finding(request, fid):
         if reqres is not None:
             burp_request = base64.b64decode(reqres.burpRequestBase64)
             burp_response = base64.b64decode(reqres.burpResponseBase64)
-  
     except Exception as e:
         logger.debug(f"unespect error: {e}")
 
