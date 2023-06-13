@@ -15,9 +15,13 @@ LOGGER = logging.getLogger(__name__)
 class TenableCSVParser(object):
 
     def _convert_severity(self, val):
-        if val == "None":
+        if val is None or len(val) == 0:
             return "Info"
-        return "Info" if val is None else val.title()
+        severity = val.title()
+        # Ensure the severity is a valid choice. Fall back to info otherwise
+        if severity not in Finding.SEVERITIES.keys():
+            severity = "Info"
+        return severity
 
     def _format_cve(self, val):
         if val is None or val == "":
@@ -44,25 +48,17 @@ class TenableCSVParser(object):
         # Iterate over each line and create findings
         for row in reader:
             # title: Could come from "Name" or "Plugin Name"
-            title = row.get("Name")
-            if title is None and "Plugin Name" in row:
-                title = row.get("Plugin Name")
-            # skip entries with empty titles
-            if not title:
+            title = row.get("Name", row.get("Plugin Name"))
+            if title is None or title == "":
                 continue
             # Severity: Could come from "Severity" or "Risk"
-            if "Severity" in row:
-                severity = self._convert_severity(row.get("Severity"))
-            elif "Risk" in row:
-                severity = self._convert_severity(row.get("Risk"))
-            else:
-                severity = "Info"
+            raw_severity = row.get("Severity", row.get("Risk", "Info"))
+            severity = self._convert_severity(raw_severity)
             # Other text fields
-            description = row.get("Synopsis")
-            mitigation = str(row.get("Solution"))
+            description = row.get("Synopsis", "")
+            mitigation = str(row.get("Solution", "N/A"))
             impact = row.get("Description", "N/A")
             references = row.get("See Also", "N/A")
-
             # Determine if the current row has already been processed
             dupe_key = severity + title + row.get('Host', 'No host') + str(row.get('Port', 'No port')) + row.get('Synopsis', 'No synopsis')
 
@@ -80,15 +76,16 @@ class TenableCSVParser(object):
                 )
 
                 # manage CVSS vector (only v3.x for now)
-                if "CVSS V3 Vector" in row and row.get("CVSS V3 Vector") != "":
-                    find.cvssv3 = CVSS3("CVSS:3.0/" + str(row.get("CVSS V3 Vector"))).clean_vector(output_prefix=True)
+                cvss_vector = row.get("CVSS V3 Vector", "")
+                if cvss_vector != "":
+                    find.cvssv3 = CVSS3("CVSS:3.0/" + str(cvss_vector)).clean_vector(output_prefix=True)
 
                 # Add CVSS score if present
-                cvssv3 = row.get('CVSSv3', None)
-                if cvssv3:
+                cvssv3 = row.get('CVSSv3', "")
+                if cvssv3 != "":
                     find.cvssv3_score = cvssv3
                 # manage CPE data
-                detected_cpe = self._format_cpe(str(row.get("CPE")))
+                detected_cpe = self._format_cpe(str(row.get("CPE", "")))
                 if detected_cpe:
                     # FIXME support more than one CPE in Nessus CSV parser
                     if len(detected_cpe) > 1:
@@ -105,10 +102,11 @@ class TenableCSVParser(object):
                 find = dupes[dupe_key]
 
             # Determine if there is more details to be included in the description
-            if "Plugin Output" in row:
-                find.description += f"\n\n{str(row.get('Plugin Output'))}"
+            plugin_output = str(row.get("Plugin Output", ""))
+            if plugin_output != "":
+                find.description += f"\n\n{plugin_output}"
             # Process any CVEs
-            detected_cve = self._format_cve(str(row.get("CVE")))
+            detected_cve = self._format_cve(str(row.get("CVE", "")))
             if detected_cve:
                 if isinstance(detected_cve, list):
                     find.unsaved_vulnerability_ids += detected_cve
@@ -116,12 +114,14 @@ class TenableCSVParser(object):
                     find.unsaved_vulnerability_ids.append(detected_cve)
             # Endpont related fields
             host = row.get("Host", "")
-            if len(host) == 0:
+            if host == "":
                 host = row.get("DNS Name", "")
-            if len(host) == 0:
+            if host == "":
                 host = row.get("IP Address", "localhost")
-            protocol = row.get("Protocol").lower() if "Protocol" in row else None
-            port = row.get("Port")
+
+            protocol = row.get("Protocol", "")
+            protocol = protocol.lower() if protocol != "" else None
+            port = row.get("Port", "")
             if isinstance(port, str) and port == "":
                 port = None
             # Update the endpoints
