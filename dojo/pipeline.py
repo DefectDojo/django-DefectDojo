@@ -89,7 +89,9 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
         and settings.AZUREAD_TENANT_OAUTH2_GET_GROUPS
         and isinstance(backend, AzureADTenantOAuth2)
     ):
-        soc = user.social_auth.get()
+        # In some wild cases, there could be two social auth users
+        # connected to the same DefectDojo user. Grab the newest one
+        soc = user.social_auth.order_by("-created").first()
         token = soc.extra_data["access_token"]
         group_names = search_azure_groups(kwargs, token, soc)
         if len(group_names) > 0:
@@ -104,8 +106,8 @@ def search_azure_groups(kwargs, token, soc):
         logger.warning("No groups in response. Stopping to update product type of user based on azureAD")
         return
     group_ids = kwargs["response"]["groups"]
-    try:
-        for group_from_response in group_ids:
+    for group_from_response in group_ids:
+        try:
             logger.debug("Analysing Group_ID " + group_from_response)
             request_headers = {"Authorization": "Bearer " + token}
             if is_group_id(group_from_response):
@@ -142,9 +144,8 @@ def search_azure_groups(kwargs, token, soc):
                     + settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER
                 )
                 continue
-    except:
-        logger.error("Could not call microsoft graph API or save groups to member")
-        traceback.print_exc()
+        except Exception as e:
+            logger.error(f"Could not call microsoft graph API or save groups to member: {e}")
     return group_names
 
 

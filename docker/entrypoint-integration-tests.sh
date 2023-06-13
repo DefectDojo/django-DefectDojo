@@ -219,6 +219,22 @@ else
         fail $test
     fi
 
+    test="Close Old Findings with dedupe integration tests"
+    echo "Running: $test"
+    if python3 tests/close_old_findings_dedupe_test.py ; then
+        success $test
+    else
+        fail $test
+    fi
+
+    test="Close Old Findings without dedupe integration tests"
+    echo "Running: $test"
+    if python3 tests/close_old_findings_test.py ; then
+        success $test
+    else
+        fail $test
+    fi
+
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
 
