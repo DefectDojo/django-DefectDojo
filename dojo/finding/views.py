@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core import serializers
 from django.urls import reverse
 from django.http import Http404, HttpResponse, JsonResponse
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseRedirect
 from django.http import StreamingHttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import formats
@@ -887,7 +887,7 @@ def apply_template_cwe(request, fid):
                 extra_tags="alert-danger",
             )
     else:
-        return HttpResponseForbidden()
+        raise PermissionDenied()
 
 
 @user_is_authorized(Finding, Permissions.Finding_Delete, "fid")
@@ -928,7 +928,7 @@ def delete_finding(request, fid):
                 extra_tags="alert-danger",
             )
     else:
-        return HttpResponseForbidden()
+        raise PermissionDenied()
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
@@ -1469,7 +1469,7 @@ def clear_finding_review(request, fid):
     # we can do this with a Note
 
     if user != finding.review_requested_by or user not in finding.reviewers.all():
-        return HttpResponseForbidden()
+        raise PermissionDenied()
 
     if request.method == "POST":
         form = ClearFindingReviewForm(request.POST, instance=finding)
@@ -1785,7 +1785,7 @@ def delete_stub_finding(request, fid):
                 extra_tags="alert-danger",
             )
     else:
-        return HttpResponseForbidden()
+        raise PermissionDenied()
 
 
 @user_is_authorized(Stub_Finding, Permissions.Finding_Edit, "fid")
@@ -2170,7 +2170,7 @@ def delete_template(request, tid):
                 extra_tags="alert-danger",
             )
     else:
-        return HttpResponseForbidden()
+        raise PermissionDenied()
 
 
 def download_finding_pic(request, token):
