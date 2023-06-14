@@ -11,7 +11,8 @@ RUN \
     curl \
     unzip \
     gpg \
-    jq \ 
+    maven \
+    jq \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
@@ -42,6 +43,12 @@ RUN \
   rm -rf chromedriver-linux64.zip && \
   chmod -R 0755 .
 WORKDIR /app
+
+# install openapi-generator-cli
+RUN \
+  curl https://raw.githubusercontent.com/OpenAPITools/openapi-generator/master/bin/utils/openapi-generator-cli.sh > /usr/local/bin/openapi-generator-cli && \
+  chmod +x /usr/local/bin/openapi-generator-cli && \
+  openapi-generator-cli version
 
 COPY docker/wait-for-it.sh \
   docker/entrypoint-integration-tests.sh \

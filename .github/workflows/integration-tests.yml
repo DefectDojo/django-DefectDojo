@@ -34,6 +34,7 @@ jobs:
           "tests/check_various_pages.py",
           "tests/notifications_test.py",
           "tests/tool_config.py",
+          "openapi-validatator",
         ]
         profile: ["mysql-rabbitmq", "postgres-redis"]
         os: [alpine, debian]
