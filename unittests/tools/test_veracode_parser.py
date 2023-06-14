@@ -110,6 +110,7 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.assertTrue(finding.is_mitigated)
         self.assertEqual(datetime.datetime(2020, 6, 1, 10, 2, 1), finding.mitigated)
         self.assertEqual("app-1234_issue-1", finding.unique_id_from_tool)
+        self.assertEqual(0, finding.sla_age)
 
     def test_parse_file_with_mitigated_fixed_finding(self):
         testfile = open("unittests/scans/veracode/mitigated_fixed_finding.xml")
