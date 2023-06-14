@@ -50,32 +50,21 @@ class TenableCSVParser(object):
             # skip entries with empty titles
             if not title:
                 continue
-
             # Severity: Could come from "Severity" or "Risk"
             if "Severity" in row:
                 severity = self._convert_severity(row.get("Severity"))
             elif "Risk" in row:
                 severity = self._convert_severity(row.get("Risk"))
-
+            else:
+                severity = "Info"
             # Other text fields
             description = row.get("Synopsis")
             mitigation = str(row.get("Solution"))
             impact = row.get("Description", "N/A")
             references = row.get("See Also", "N/A")
 
-            # Endpont related fields
-            host = row.get("Host", row.get("DNS Name", row.get("IP Address", "localhost")))
-            if len(host) == 0:
-                host = row.get("DNS Name", row.get("IP Address", "localhost"))
-            if len(host) == 0:
-                host = row.get("IP Address", "localhost")
-            protocol = row.get("Protocol").lower() if "Protocol" in row else None
-            port = row.get("Port") if "Port" in row else None
-            if isinstance(port, str) and port == "":
-                port = None
-
             # Determine if the current row has already been processed
-            dupe_key = severity + title + host + str(port) + description
+            dupe_key = severity + title + row.get('Host', 'No host') + str(row.get('Port', 'No port')) + row.get('Synopsis', 'No synopsis')
 
             # Finding has not been detected in the current report. Proceed with parsing
             if dupe_key not in dupes:
@@ -89,10 +78,6 @@ class TenableCSVParser(object):
                     impact=impact,
                     references=references
                 )
-
-                # Deteremine if there is more details to be included in the description
-                if "Plugin Output" in row:
-                    description += str(row.get("Plugin Output"))
 
                 # manage CVSS vector (only v3.x for now)
                 if "CVSS V3 Vector" in row and row.get("CVSS V3 Vector") != "":
@@ -118,9 +103,10 @@ class TenableCSVParser(object):
             else:
                 # This is a duplicate. Update the description of the original finding
                 find = dupes[dupe_key]
-                if "Plugin Output" in row:
-                    find.description += row.get("Plugin Output")
 
+            # Determine if there is more details to be included in the description
+            if "Plugin Output" in row:
+                find.description += f"\n\n{str(row.get('Plugin Output'))}"
             # Process any CVEs
             detected_cve = self._format_cve(str(row.get("CVE")))
             if detected_cve:
@@ -128,7 +114,16 @@ class TenableCSVParser(object):
                     find.unsaved_vulnerability_ids += detected_cve
                 else:
                     find.unsaved_vulnerability_ids.append(detected_cve)
-
+            # Endpont related fields
+            host = row.get("Host", "")
+            if len(host) == 0:
+                host = row.get("DNS Name", "")
+            if len(host) == 0:
+                host = row.get("IP Address", "localhost")
+            protocol = row.get("Protocol").lower() if "Protocol" in row else None
+            port = row.get("Port")
+            if isinstance(port, str) and port == "":
+                port = None
             # Update the endpoints
             if '://' in host:
                 endpoint = Endpoint.from_uri(host)

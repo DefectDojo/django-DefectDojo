@@ -76,9 +76,9 @@ class PipelineTest(DojoTestCase):
         logger.addHandler(handler)
 
         update_product_type_azure_devops(AzureADTenantOAuth2(), None, user, None, None, **kwargs)
-        self.assertEqual(
-            capture.getvalue().strip().split("\n"),
-            ["Could not call microsoft graph API or save groups to member"],
+        self.assertIn(
+            "Could not call microsoft graph API or save groups to member: Invalid URL ",
+            capture.getvalue().strip().split("\n")[0],
         )
 
     @mock.patch("dojo.pipeline.search_azure_groups", dummy_search_azure_groups)
