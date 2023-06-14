@@ -518,16 +518,14 @@ def view_finding(request, fid):
         else:
             form = NoteForm()
 
+    reqres = None
+    burp_request = None
+    burp_response = None
     try:
-        reqres = BurpRawRequestResponse.objects.get(finding=finding)
-        burp_request = base64.b64decode(reqres.burpRequestBase64)
-        burp_response = base64.b64decode(reqres.burpResponseBase64)
-
-    except BurpRawRequestResponse.DoesNotExist:
-        reqres = None
-        burp_request = None
-        burp_response = None
-
+        reqres = BurpRawRequestResponse.objects.filter(finding=finding).first()
+        if reqres is not None:
+            burp_request = base64.b64decode(reqres.burpRequestBase64)
+            burp_response = base64.b64decode(reqres.burpResponseBase64)
     except Exception as e:
         logger.debug(f"unespect error: {e}")
 
