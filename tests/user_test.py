@@ -151,7 +151,7 @@ class UserTest(BaseTestCase):
 
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='User and relationships removed.'))
-    
+
     def test_user_with_writer_role_delete(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
