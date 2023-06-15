@@ -1372,7 +1372,7 @@ def request_finding_review(request, fid):
     # in order to review a finding, we need to capture why a review is needed
     # we can do this with a Note
     if request.method == "POST":
-        form = ReviewFindingForm(request.POST)
+        form = ReviewFindingForm(request.POST, finding=finding, user=user)
 
         if form.is_valid():
             now = timezone.now()

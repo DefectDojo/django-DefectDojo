@@ -1679,10 +1679,11 @@ class ClearFindingReviewForm(forms.ModelForm):
 
 
 class ReviewFindingForm(forms.Form):
-
     reviewers = forms.MultipleChoiceField(
-        help_text=("Select all users who can review Finding. Only users with "
-                   "at least write permission to this finding can be selected")
+        help_text=(
+            "Select all users who can review Finding. Only users with "
+            "at least write permission to this finding can be selected"),
+        required=False,
     )
     entry = forms.CharField(
         required=True, max_length=2400,
@@ -1721,7 +1722,9 @@ class ReviewFindingForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         if cleaned_data.get("allow_all_reviewers", False):
-            cleaned_data["reviewers"] = self.reviewer_queryset
+            cleaned_data["reviewers"] = [user.id for user in self.reviewer_queryset]
+        if len(cleaned_data.get("reviewers", [])) == 0:
+            raise ValidationError("Please select at least one user from the reviewers list")
         return cleaned_data
 
     class Meta:
