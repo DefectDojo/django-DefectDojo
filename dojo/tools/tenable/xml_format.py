@@ -150,9 +150,11 @@ class TenableXMLParser(object):
                     cvssv3 = None
                     cvssv3_element_text = self.safely_get_element_text(item.find("cvss3_vector"))
                     if cvssv3_element_text is not None:
+                        if "CVSS:3.0/" not in cvssv3_element_text:
+                            cvssv3_element_text = f"CVSS:3.0/{cvssv3_element_text}"
                         cvssv3 = CVSS3(cvssv3_element_text).clean_vector(output_prefix=True)
 
-                    cvssv3 = None
+                    cvssv3_score = None
                     cvssv3_score_element_text = self.safely_get_element_text(item.find("cvssv3"))
                     if cvssv3_score_element_text is not None:
                         cvssv3_score = cvssv3_score_element_text

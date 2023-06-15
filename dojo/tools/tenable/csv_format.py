@@ -1,3 +1,4 @@
+import contextlib
 import csv
 import io
 import logging
@@ -13,15 +14,38 @@ LOGGER = logging.getLogger(__name__)
 
 
 class TenableCSVParser(object):
-
-    def _convert_severity(self, val):
-        if val is None or len(val) == 0:
-            return "Info"
-        severity = val.title()
-        # Ensure the severity is a valid choice. Fall back to info otherwise
+    def _validated_severity(self, severity):
         if severity not in Finding.SEVERITIES.keys():
             severity = "Info"
         return severity
+
+    def _int_severity_conversion(self, severity_value):
+        """Convert data of the report into severity"""
+        severity = "Info"
+        if severity_value == 4:
+            severity = "Critical"
+        elif severity_value == 3:
+            severity = "High"
+        elif severity_value == 2:
+            severity = "Medium"
+        elif severity_value == 1:
+            severity = "Low"
+        # Ensure the severity is a valid choice. Fall back to info otherwise
+        return self._validated_severity(severity)
+
+    def _string_severity_conversion(self, severity_value):
+        """Convert data of the report into severity"""
+        if severity_value is None or len(severity_value) == 0:
+            return "Info"
+        severity = severity_value.title()
+        return self._validated_severity(severity)
+
+    def _convert_severity(self, severity_value):
+        if isinstance(severity_value, int):
+            return self._int_severity_conversion(severity_value)
+        if isinstance(severity_value, str):
+            return self._string_severity_conversion(severity_value)
+        return "Info"
 
     def _format_cve(self, val):
         if val is None or val == "":
@@ -51,8 +75,16 @@ class TenableCSVParser(object):
             title = row.get("Name", row.get("Plugin Name"))
             if title is None or title == "":
                 continue
-            # Severity: Could come from "Severity" or "Risk"
-            raw_severity = row.get("Severity", row.get("Risk", "Info"))
+            # severity: Could come from "Severity" or "Risk"
+            raw_severity = row.get("Risk", "")
+            if raw_severity == "":
+                raw_severity = row.get("Severity", "Info")
+            # this could actually be a int, so try to convert
+            # and swallow the exception if it's a string a move on
+            with contextlib.suppress(ValueError):
+                int_severity = int(raw_severity)
+                raw_severity = int_severity
+            # convert the severity to something dojo likes
             severity = self._convert_severity(raw_severity)
             # Other text fields
             description = row.get("Synopsis", "")
@@ -61,7 +93,6 @@ class TenableCSVParser(object):
             references = row.get("See Also", "N/A")
             # Determine if the current row has already been processed
             dupe_key = severity + title + row.get('Host', 'No host') + str(row.get('Port', 'No port')) + row.get('Synopsis', 'No synopsis')
-
             # Finding has not been detected in the current report. Proceed with parsing
             if dupe_key not in dupes:
                 # Create the finding object
@@ -112,7 +143,7 @@ class TenableCSVParser(object):
                     find.unsaved_vulnerability_ids += detected_cve
                 else:
                     find.unsaved_vulnerability_ids.append(detected_cve)
-            # Endpont related fields
+            # Endpoint related fields
             host = row.get("Host", "")
             if host == "":
                 host = row.get("DNS Name", "")
@@ -122,7 +153,7 @@ class TenableCSVParser(object):
             protocol = row.get("Protocol", "")
             protocol = protocol.lower() if protocol != "" else None
             port = row.get("Port", "")
-            if isinstance(port, str) and port == "":
+            if isinstance(port, str) and port in ["", "0"]:
                 port = None
             # Update the endpoints
             if '://' in host:

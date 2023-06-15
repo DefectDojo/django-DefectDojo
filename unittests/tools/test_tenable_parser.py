@@ -248,3 +248,26 @@ class TestTenableParser(DojoTestCase):
         parser = TenableParser()
         findings = parser.get_findings(testfile, self.create_test())
         self.assertEqual(0, len(findings))
+
+    def test_parse_many_tenable_vulns(self):
+        testfile = open("unittests/scans/tenable/tenable_many_vuln.csv")
+        parser = TenableParser()
+        findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        for i in range(len(findings)):
+            print(f"{i} - {findings[i].title} - {findings[i].severity}")
+        self.assertEqual(9, len(findings))
+        # High severity finding
+        finding = findings[0]
+        self.assertIn(finding.severity, Finding.SEVERITIES)
+        self.assertEqual('High', finding.severity)
+        self.assertEqual('ip-127-0-0-1.us-west-2.compute.internal', finding.unsaved_endpoints[0].host)
+        self.assertEqual('Amazon Linux 2 : kernel (ALAS-2023-2050)', finding.title)
+        self.assertEqual('tcp', finding.unsaved_endpoints[0].protocol)
+        self.assertEqual(None, finding.unsaved_endpoints[0].port)
+        self.assertIn('https://alas.aws.amazon.com/AL2/ALAS-2023-2050.html', finding.references)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        for vulnerability_id in finding.unsaved_vulnerability_ids:
+            self.assertEqual('CVE-2023-32233', vulnerability_id)
