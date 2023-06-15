@@ -256,10 +256,7 @@ class TestTenableParser(DojoTestCase):
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        for i in range(len(findings)):
-            print(f"{i} - {findings[i].title} - {findings[i].severity}")
         self.assertEqual(9, len(findings))
-        # High severity finding
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual('High', finding.severity)
