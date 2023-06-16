@@ -1368,10 +1368,11 @@ def risk_unaccept(request, fid):
 def request_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
+    form = ReviewFindingForm(finding=finding, user=user)
     # in order to review a finding, we need to capture why a review is needed
     # we can do this with a Note
     if request.method == "POST":
-        form = ReviewFindingForm(request.POST)
+        form = ReviewFindingForm(request.POST, finding=finding, user=user)
 
         if form.is_valid():
             now = timezone.now()
@@ -1445,9 +1446,6 @@ def request_finding_review(request, fid):
             )
             return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
 
-    else:
-        form = ReviewFindingForm(finding=finding)
-
     product_tab = Product_Tab(
         finding.test.engagement.product, title="Review Finding", tab="findings"
     )
@@ -1463,12 +1461,14 @@ def request_finding_review(request, fid):
 def clear_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
-    # in order to clear a review for a finding, we need to capture why and how it was reviewed
-    # we can do this with a Note
-
-    if user != finding.review_requested_by or user not in finding.reviewers.all():
+    # If the user wanting to clear the review is not the user who requested
+    # the review or one of the users requested to provide the review, then
+    # do not allow the user to clear the review.
+    if user != finding.review_requested_by and user not in finding.reviewers.all():
         raise PermissionDenied()
 
+    # in order to clear a review for a finding, we need to capture why and how it was reviewed
+    # we can do this with a Note
     if request.method == "POST":
         form = ClearFindingReviewForm(request.POST, instance=finding)
 

@@ -3,6 +3,7 @@ import sys
 
 from base_test_class import BaseTestCase
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 
 
@@ -40,6 +41,39 @@ class UserTest(BaseTestCase):
         # Query the site to determine if the user has been created
 
         # Assert ot the query to dtermine status of failure
+        self.assertTrue(self.is_success_message_present(text='User added successfully.') or
+            self.is_help_message_present(text='A user with that username already exists.'))
+
+    def test_create_user_with_writer_global_role(self):
+        # Login to the site.
+        driver = self.driver
+        # Navigate to the User managegement page
+        driver.get(f"{self.base_url}user")
+        # "Click" the dropdown button to see options
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        # "Click" the add prodcut button
+        driver.find_element(By.LINK_TEXT, "New User").click()
+        # Fill in the Necessary User Details
+        # username, first name, last name, email, and permissions
+        # Don't forget to clear before inserting
+        # username
+        driver.find_element(By.ID, "id_username").clear()
+        driver.find_element(By.ID, "id_username").send_keys("userWriter")
+        # First Name
+        driver.find_element(By.ID, "id_first_name").clear()
+        driver.find_element(By.ID, "id_first_name").send_keys("Writer")
+        # Last Name
+        driver.find_element(By.ID, "id_last_name").clear()
+        driver.find_element(By.ID, "id_last_name").send_keys("Permission")
+        # Email Address
+        driver.find_element(By.ID, "id_email").clear()
+        driver.find_element(By.ID, "id_email").send_keys("permissionTest@defectdojo.local")
+        # Select the role 'Reader'
+        Select(driver.find_element(By.ID, "id_role")).select_by_visible_text("Writer")
+        # "Click" the submit button to complete the transaction
+        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        # Query the site to determine if the user has been created
+        # Assert ot the query to determine status of failure
         self.assertTrue(self.is_success_message_present(text='User added successfully.') or
             self.is_help_message_present(text='A user with that username already exists.'))
 
@@ -103,6 +137,34 @@ class UserTest(BaseTestCase):
         # Insert username to filter by into user name box
         driver.find_element(By.ID, "id_username").clear()
         driver.find_element(By.ID, "id_username").send_keys("propersahm")
+        # click on 'apply filter' button
+        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-sm.btn-secondary").click()
+        # only the needed user is now available, proceed with clicking 'View' button
+        driver.find_element(By.ID, "dropdownMenuUser").click()
+        driver.find_element(By.ID, "viewUser").click()
+        # in View User dialog open the menu to click the delete entry
+        driver.find_element(By.ID, "dropdownMenu1").click()
+        driver.find_element(By.ID, "deleteUser").click()
+        # confirm deletion, by clicking delete a second time
+        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-danger").click()
+        # Query the site to determine if the User has been deleted
+
+        # Assert ot the query to dtermine status of failure
+        self.assertTrue(self.is_success_message_present(text='User and relationships removed.'))
+
+    def test_user_with_writer_role_delete(self):
+        # Login to the site. Password will have to be modified
+        # to match an admin password in your own container
+        driver = self.driver
+        # Navigate to the product page
+        driver.get(self.base_url + "user")
+        # Select A user to edit
+        # The User name is not clickable
+        # so we would have to select specific user by filtering list of users
+        driver.find_element(By.ID, "show-filters").click()  # open d filters
+        # Insert username to filter by into user name box
+        driver.find_element(By.ID, "id_username").clear()
+        driver.find_element(By.ID, "id_username").send_keys("userWriter")
         # click on 'apply filter' button
         driver.find_element(By.CSS_SELECTOR, "button.btn.btn-sm.btn-secondary").click()
         # only the needed user is now available, proceed with clicking 'View' button
@@ -205,6 +267,7 @@ def suite():
     # success and failure is output by the test
     suite.addTest(BaseTestCase('test_login'))
     suite.addTest(UserTest('test_create_user'))
+    suite.addTest(UserTest('test_create_user_with_writer_global_role'))
     suite.addTest(UserTest('test_admin_profile_form'))
     suite.addTest(UserTest('test_standard_user_login'))
     suite.addTest(UserTest('test_user_profile_form_disabled'))
@@ -214,6 +277,7 @@ def suite():
     suite.addTest(BaseTestCase('test_login'))
     suite.addTest(UserTest('test_user_edit_permissions'))
     suite.addTest(UserTest('test_user_delete'))
+    suite.addTest(UserTest('test_user_with_writer_role_delete'))
 
     return suite
 
