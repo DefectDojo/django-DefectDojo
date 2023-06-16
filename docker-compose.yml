@@ -143,7 +143,7 @@ services:
     volumes:
       - defectdojo_data:/var/lib/mysql
   postgres:
-    image: postgres:15.3-alpine@sha256:8b3baafb208cefc63c27d2486f71c46e028bdf8212716e6ccc66ff35ba90fb9b
+    image: postgres:15.3-alpine@sha256:48d8422c6ae570a5bda52f07548b8e65dd055ac0b661f25b44b20e8cff2f75f0
     profiles: 
       - postgres-rabbitmq
       - postgres-redis
