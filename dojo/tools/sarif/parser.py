@@ -191,6 +191,7 @@ def get_snippet(result):
 
 
 def get_codeFlowsDescription(codeFlows):
+    description = ''
     for codeFlow in codeFlows:
         if 'threadFlows' not in codeFlow:
             continue
@@ -235,7 +236,7 @@ def get_description(result, rule):
             if fullDescription != message and fullDescription != shortDescription:
                 description += '**Rule full description:** {}\n'.format(fullDescription)
 
-    if 'codeFlows' in result:
+    if len(result.get('codeFlows', [])) > 0:
         description += get_codeFlowsDescription(result['codeFlows'])
 
     if description.endswith('\n'):
