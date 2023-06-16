@@ -28,9 +28,9 @@ from dojo.models import Announcement, Finding, Finding_Group, Product_Type, Prod
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
     App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
-    Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, \
+    Benchmark_Product_Summary, Engagement_Presets, DojoMeta, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
-    ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
+    ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, EFFORT_FOR_FIXING_CHOICES, Product_Type_Member, \
     Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, \
     Product_API_Scan_Configuration
 
@@ -65,6 +65,8 @@ vulnerability_ids_field = forms.CharField(max_length=5000,
     help_text="Ids of vulnerabilities in security advisories associated with this finding. Can be Common Vulnerabilities and Exposures (CVE) or from other sources."
                 "You may enter one vulnerability id per line.",
     widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
+
+EFFORT_FOR_FIXING_INVALID_CHOICE = _('Select valid choice: Low,Medium,High')
 
 
 class MultipleSelectWithPop(forms.SelectMultiple):
@@ -264,8 +266,8 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'sla_configuration', 'regulations',
-                'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
-                'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
+                'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience', 'enable_product_tag_inheritance',
+                'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance', 'disable_sla_breach_notifications']
 
 
 class DeleteProductForm(forms.ModelForm):
@@ -279,6 +281,23 @@ class DeleteProductForm(forms.ModelForm):
 
 class EditFindingGroupForm(forms.ModelForm):
     name = forms.CharField(max_length=255, required=True, label='Finding Group Name')
+    jira_issue = forms.CharField(max_length=255, required=False, label='Linked JIRA Issue',
+                                 help_text='Leave empty and check push to jira to create a new JIRA issue for this finding group.')
+
+    def __init__(self, *args, **kwargs):
+        super(EditFindingGroupForm, self).__init__(*args, **kwargs)
+        import dojo.jira_link.helper as jira_helper
+
+        self.fields['push_to_jira'] = forms.BooleanField()
+        self.fields['push_to_jira'].required = False
+        self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one."
+
+        self.fields['push_to_jira'].label = "Push to JIRA"
+
+        if hasattr(self.instance, 'has_jira_issue') and self.instance.has_jira_issue:
+            jira_url = jira_helper.get_jira_url(self.instance)
+            self.fields['jira_issue'].initial = jira_url
+            self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
 
     class Meta:
         model = Finding_Group
@@ -437,10 +456,21 @@ class ImportScanForm(forms.Form):
         allow_empty_file=True,
         required=False)
 
-    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
+    # Close Old Findings has changed. The default is engagement only, and it requires a second flag to expand to the product scope.
+    # Exposing the choice as two different check boxes.
+    # If 'close_old_findings_product_scope' is selected, the backend will ensure that both flags are set.
+    close_old_findings = forms.BooleanField(help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
                                                         "If service has been set, only the findings for this service will be closed. "
-                                                        "This affects the whole engagement/product depending on your deduplication scope.",
-                                            required=False, initial=False)
+                                                        "This only affects findings within the same engagement.",
+                                            label="Close old findings within this engagement",
+                                            required=False,
+                                            initial=False)
+    close_old_findings_product_scope = forms.BooleanField(help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
+                                                        "If service has been set, only the findings for this service will be closed. "
+                                                        "This only affects findings within the same product.",
+                                            label="Close old findings within this product",
+                                            required=False,
+                                            initial=False)
 
     if is_finding_groups_enabled():
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
@@ -840,7 +870,7 @@ class EngForm(forms.ModelForm):
 
     class Meta:
         model = Engagement
-        exclude = ('first_contacted', 'real_start', 'engagement_type',
+        exclude = ('first_contacted', 'real_start', 'engagement_type', 'inherited_tags',
                    'real_end', 'requester', 'reason', 'updated', 'report_type',
                    'product', 'threat_model', 'api_test', 'pen_test', 'check_list')
 
@@ -927,7 +957,7 @@ class AddFindingForm(forms.ModelForm):
         choices=SEVERITY_CHOICES,
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
-            'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
+            'invalid_choice': EFFORT_FOR_FIXING_INVALID_CHOICE})
     mitigation = forms.CharField(widget=forms.Textarea, required=False)
     impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
@@ -940,6 +970,12 @@ class AddFindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
     planned_remediation_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
+    planned_remediation_version = forms.CharField(max_length=99, required=False)
+    effort_for_fixing = forms.ChoiceField(
+        required=False,
+        choices=EFFORT_FOR_FIXING_CHOICES,
+        error_messages={
+            'invalid_choice': EFFORT_FOR_FIXING_INVALID_CHOICE})
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
@@ -986,7 +1022,7 @@ class AddFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve',
+        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve', 'inherited_tags',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoints', 'sla_start_date')
 
 
@@ -1002,7 +1038,7 @@ class AdHocFindingForm(forms.ModelForm):
         choices=SEVERITY_CHOICES,
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
-            'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
+            'invalid_choice': EFFORT_FOR_FIXING_INVALID_CHOICE})
     mitigation = forms.CharField(widget=forms.Textarea, required=False)
     impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
@@ -1015,6 +1051,12 @@ class AdHocFindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
     planned_remediation_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
+    planned_remediation_version = forms.CharField(max_length=99, required=False)
+    effort_for_fixing = forms.ChoiceField(
+        required=False,
+        choices=EFFORT_FOR_FIXING_CHOICES,
+        error_messages={
+            'invalid_choice': EFFORT_FOR_FIXING_INVALID_CHOICE})
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
@@ -1058,7 +1100,7 @@ class AdHocFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve',
+        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve', 'inherited_tags',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
@@ -1115,8 +1157,8 @@ class PromoteFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'active', 'false_p', 'verified', 'endpoint_status', 'cve',
-                   'duplicate', 'out_of_scope', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'planned_remediation_date')
+        exclude = ('reporter', 'url', 'numerical_severity', 'active', 'false_p', 'verified', 'endpoint_status', 'cve', 'inherited_tags',
+                   'duplicate', 'out_of_scope', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'planned_remediation_date', 'planned_remediation_version', 'effort_for_fixing')
 
 
 class FindingForm(forms.ModelForm):
@@ -1149,8 +1191,14 @@ class FindingForm(forms.ModelForm):
 
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
     planned_remediation_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
+    planned_remediation_version = forms.CharField(max_length=99, required=False)
+    effort_for_fixing = forms.ChoiceField(
+        required=False,
+        choices=EFFORT_FOR_FIXING_CHOICES,
+        error_messages={
+            'invalid_choice': EFFORT_FOR_FIXING_INVALID_CHOICE})
 
-    # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
+    # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
                    'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'endpoints_to_add', 'references',
                    'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
@@ -1242,7 +1290,7 @@ class FindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve',
+        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve', 'inherited_tags',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'endpoint_status')
 
 
@@ -1349,6 +1397,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
     date = forms.DateField(required=False, widget=forms.DateInput(attrs={'class': 'datepicker'}))
     planned_remediation_date = forms.DateField(required=False, widget=forms.DateInput(attrs={'class': 'datepicker'}))
+    planned_remediation_version = forms.CharField(required=False, max_length=99, widget=forms.TextInput(attrs={'class': 'form-control'}))
     finding_group = forms.BooleanField(required=False)
     finding_group_create = forms.BooleanField(required=False)
     finding_group_create_name = forms.CharField(required=False)
@@ -1390,7 +1439,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 class EditEndpointForm(forms.ModelForm):
     class Meta:
         model = Endpoint
-        exclude = ['product']
+        exclude = ['product', 'inherited_tags']
 
     def __init__(self, *args, **kwargs):
         self.product = None
@@ -2476,7 +2525,7 @@ class SystemSettingsForm(forms.ModelForm):
 
     class Meta:
         model = System_Settings
-        exclude = ['product_grade', 'credentials', 'column_widths', 'drive_folder_ID']
+        exclude = ['product_grade']
 
 
 class BenchmarkForm(forms.ModelForm):
@@ -2520,32 +2569,6 @@ class ProductNotificationsForm(forms.ModelForm):
 class AjaxChoiceField(forms.ChoiceField):
     def valid_value(self, value):
         return True
-
-
-class RuleForm(forms.ModelForm):
-
-    class Meta:
-        model = Rule
-        exclude = ['key_product']
-
-
-class ChildRuleForm(forms.ModelForm):
-
-    class Meta:
-        model = Child_Rule
-        exclude = ['key_product']
-
-
-RuleFormSet = modelformset_factory(Child_Rule, extra=2, max_num=10, exclude=[''], can_delete=True)
-
-
-class DeleteRuleForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = Rule
-        fields = ['id']
 
 
 class CredUserForm(forms.ModelForm):
@@ -2857,43 +2880,6 @@ class JIRAEngagementForm(forms.Form):
     epic_priority = forms.CharField(max_length=200, required=False, help_text="EPIC priority. If not specified, the JIRA default priority will be used")
 
 
-class GoogleSheetFieldsForm(forms.Form):
-    cred_file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".json"}),
-        label="Google credentials file",
-        required=True,
-        allow_empty_file=False,
-        help_text="Upload the credentials file downloaded from the Google Developer Console")
-    drive_folder_ID = forms.CharField(
-        required=True,
-        label="Google Drive folder ID",
-        help_text="Extract the Drive folder ID from the URL and provide it here")
-    email_address = forms.EmailField(
-        required=True,
-        label="Email Address",
-        help_text="Enter the same email Address used to create the Service Account")
-    enable_service = forms.BooleanField(
-        initial=False,
-        required=False,
-        help_text='Tick this check box to enable Google Sheets Sync feature')
-
-    def __init__(self, *args, **kwargs):
-        self.credentials_required = kwargs.pop('credentials_required')
-        options = ((0, 'Hide'), (100, 'Small'), (200, 'Medium'), (400, 'Large'))
-        protect = ['reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue']
-        self.all_fields = kwargs.pop('all_fields')
-        super(GoogleSheetFieldsForm, self).__init__(*args, **kwargs)
-        if not self.credentials_required:
-            self.fields['cred_file'].required = False
-        for i in self.all_fields:
-            self.fields[i.name] = forms.ChoiceField(choices=options)
-            if i.name == 'id' or i.editable is False or i.many_to_one or i.name in protect:
-                self.fields['Protect ' + i.name] = forms.BooleanField(initial=True, required=True, disabled=True)
-            else:
-                self.fields['Protect ' + i.name] = forms.BooleanField(initial=False, required=False)
-
-
 class LoginBanner(forms.Form):
     banner_enable = forms.BooleanField(
         label="Enable login banner",
@@ -3037,8 +3023,7 @@ class ChoiceQuestionForm(QuestionForm):
         # we have ChoiceAnswer instance
         if choice_answer:
             choice_answer = choice_answer[0]
-            initial_choices = choice_answer.answer.all().values_list('id',
-                                                                     flat=True)
+            initial_choices = list(choice_answer.answer.all().values_list('id', flat=True))
             if self.question.multichoice is False:
                 initial_choices = initial_choices[0]
 

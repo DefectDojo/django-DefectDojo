@@ -16,7 +16,7 @@ initialize_data()
 create_announcement_banner() 
 {
 # Load the announcement banner
-if [ -z "$CREATE_INITIAL_BANNER" ]; then
+if [ -z "$DD_CREATE_CLOUD_BANNER" ]; then
 echo "Creating Announcement Banner"
 cat <<EOD | python3 manage.py shell
 from dojo.models import Announcement, UserAnnouncement, Dojo_User
@@ -24,9 +24,14 @@ announcement, created = Announcement.objects.get_or_create(id=1)
 announcement.message = '<a href="https://www.defectdojo.com/pricing" target="_blank">Cloud and On-Premise Subscriptions Now Available! Click here for more details</a>'
 announcement.dismissable = True
 announcement.save()
-UserAnnouncement.objects.bulk_create([
-    UserAnnouncement(user=user_id, announcement=announcement) for user_id in Dojo_User.objects.all()
-])
+for dojo_user in Dojo_User.objects.all():
+    user_announcments = UserAnnouncement.objects.filter(
+        user=dojo_user,
+        announcement=announcement)
+    if user_announcments.count() == 0:
+        UserAnnouncement.objects.get_or_create(
+            user=dojo_user,
+            announcement=announcement)
 EOD
 fi
 }

@@ -4,7 +4,7 @@ toc_hide: true
 ---
 All parsers which using API have common basic configuration step but with different values. Please, [read these steps](../) at first.
 
-In `Tool Configuration`, select `Tool Type` to "SonarQube API" and `Authentication Type` "API Key".
+In `Tool Configuration`, select `Tool Type` to "SonarQube" and `Authentication Type` "API Key".
 Note the url must be in the format of `https://<sonarqube_host>/api`
 Paste your SonarQube API token in the "API Key" field.
 By default the tool will import vulnerabilities issues

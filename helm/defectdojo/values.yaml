@@ -67,6 +67,9 @@ tag: latest
 #   key: value
 podLabels: {}
 
+# Allow overriding of revisionHistoryLimit across all deployments.
+# revisionHistoryLimit: 10
+
 securityContext:
   enabled: true
   djangoSecurityContext:
@@ -233,6 +236,7 @@ django:
     certificates:
     # includes additional CA certificate as volume, it refrences REQUESTS_CA_BUNDLE env varible
     # to create configMap `kubectl create  cm defectdojo-ca-certs --from-file=ca.crt`
+    # NOTE: it reflects REQUESTS_CA_BUNDLE for celery workers, beats as well
       enabled: false
       configName: defectdojo-ca-certs
       certMountPath: /certs/
@@ -417,7 +421,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.33.4
+    tag: 1.33.7
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""

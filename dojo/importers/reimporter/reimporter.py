@@ -144,6 +144,8 @@ class DojoDefaultReImporter(object):
                 elif finding.is_mitigated:
                     # if the reimported item has a mitigation time, we can compare
                     if item.is_mitigated:
+                        unchanged_items.append(finding)
+                        unchanged_count += 1
                         if item.mitigated:
                             logger.debug(
                                 "item mitigated time: "
@@ -285,6 +287,10 @@ class DojoDefaultReImporter(object):
                             finding.active = False
                             if verified is not None:
                                 finding.verified = verified
+                        else:
+                            # if finding is the same but list of affected was changed, finding is marked as unchanged. This is a known issue
+                            unchanged_items.append(finding)
+                            unchanged_count += 1
 
                     if (component_name is not None and not finding.component_name) or (
                         component_version is not None and not finding.component_version
@@ -301,9 +307,6 @@ class DojoDefaultReImporter(object):
                         )
                         finding.save(dedupe_option=False)
 
-                    # if finding is the same but list of affected was changed, finding is marked as unchanged. This is a known issue
-                    unchanged_items.append(finding)
-                    unchanged_count += 1
                 if finding.dynamic_finding:
                     logger.debug(
                         "Re-import found an existing dynamic finding for this new finding. Checking the status of endpoints"
@@ -451,7 +454,7 @@ class DojoDefaultReImporter(object):
                 [
                     finding.finding_group
                     for finding in reactivated_items + unchanged_items
-                    if finding.finding_group is not None
+                    if finding.finding_group is not None and not finding.is_mitigated
                 ]
             ):
                 jira_helper.push_to_jira(finding_group)

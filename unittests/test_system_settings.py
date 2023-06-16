@@ -25,8 +25,3 @@ class TestSystemSettings(DojoTestCase):
         system_settings.save()
         system_settings = System_Settings.objects.get(no_cache=True)
         self.assertEqual(system_settings.enable_jira, True)
-
-        system_settings.enable_google_sheets = True
-        system_settings.save()
-        system_settings = System_Settings.objects.get(no_cache=True)
-        self.assertEqual(system_settings.enable_google_sheets, True)

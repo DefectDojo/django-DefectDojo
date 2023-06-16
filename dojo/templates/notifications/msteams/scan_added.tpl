@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load display_tags %}
 {% url 'view_test' test.id as test_url %}
 {
     "@context": "https://schema.org/extensions",

@@ -66,6 +66,23 @@ def view_finding_group(request, fgid):
         edit_finding_group_form = EditFindingGroupForm(request.POST, instance=finding_group)
         if edit_finding_group_form.is_valid():
             finding_group.name = edit_finding_group_form.cleaned_data.get('name', '')
+            push_to_jira = edit_finding_group_form.cleaned_data.get('push_to_jira')
+            jira_issue = edit_finding_group_form.cleaned_data.get('jira_issue')
+
+            if jira_issue:
+                # See if the submitted issue was a issue key or the full URL
+                jira_instance = jira_helper.get_jira_project(finding_group).jira_instance
+                if jira_issue.startswith(jira_instance.url + '/browse/'):
+                    jira_issue = jira_issue[len(jira_instance.url + '/browse/'):]
+
+                if finding_group.has_jira_issue and not jira_issue == jira_helper.get_jira_key(finding_group):
+                    jira_helper.unlink_jira(request, finding_group)
+                    jira_helper.finding_group_link_jira(request, finding_group, jira_issue)
+                elif not finding_group.has_jira_issue:
+                    jira_helper.finding_group_link_jira(request, finding_group, jira_issue)
+            elif push_to_jira:
+                jira_helper.push_to_jira(finding_group, sync=True)
+
             finding_group.save()
             return HttpResponseRedirect(reverse('view_test', args=(finding_group.test.id,)))
 

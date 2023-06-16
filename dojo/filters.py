@@ -22,7 +22,7 @@ from django.db.models import Q
 from dojo.models import Dojo_User, Finding_Group, Product_API_Scan_Configuration, Product_Type, Finding, Product, Test_Import, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Note_Type, Risk_Acceptance, Cred_Mapping, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
-    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, Dojo_Group, Vulnerability_Id
+    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, EFFORT_FOR_FIXING_CHOICES, Dojo_Group, Vulnerability_Id
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 import tagulous
@@ -1221,6 +1221,7 @@ class FindingFilter(FindingFilterWithTags):
     mitigated = DateRangeFilter(label="Mitigated Date")
 
     planned_remediation_date = DateRangeOmniFilter()
+    planned_remediation_version = CharFilter(lookup_expr='icontains', label=_('Planned remediation version'))
 
     file_path = CharFilter(lookup_expr='icontains')
     param = CharFilter(lookup_expr='icontains')
@@ -1268,6 +1269,8 @@ class FindingFilter(FindingFilterWithTags):
 
     risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
+
+    effort_for_fixing = MultipleChoiceFilter(choices=EFFORT_FOR_FIXING_CHOICES)
 
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
 

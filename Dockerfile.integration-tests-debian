@@ -1,7 +1,7 @@
 
 # code: language=Dockerfile
 
-FROM python:3.11.1-slim-bullseye@sha256:3d260508893319ee271989fe16c0ddf13c710ec5ce1d0708cda7bc30da8389e7 as build
+FROM python:3.11.3-slim-bullseye@sha256:eaee5f73efa9ae962d2077756292bc4878c04fcbc13dc168bb00cc365f35647e as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -28,7 +28,7 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 
-RUN pip install --no-cache-dir selenium requests chromedriver-autoinstaller
+RUN pip install --no-cache-dir selenium==4.9.0 requests chromedriver-autoinstaller
 
 # Installing Chromedriver
 WORKDIR /opt/chrome-driver
