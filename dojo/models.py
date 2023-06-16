@@ -2873,15 +2873,9 @@ class Finding(models.Model):
         self.found_by.add(self.test.test_type)
 
         # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
-<<<<<<< HEAD
-        if dedupe_option or false_history or issue_updater_option or product_grading_option or push_to_jira:
-            transaction.on_commit(lambda: finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, false_history=false_history, rules_option=rules_option, product_grading_option=product_grading_option,
-                issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs))
-=======
         if dedupe_option or issue_updater_option or product_grading_option or push_to_jira:
-            finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
-                issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
->>>>>>> dev
+            transaction.on_commit(lambda: finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
+                issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs))
         else:
             logger.debug('no options selected that require finding post processing')
 
