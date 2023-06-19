@@ -101,7 +101,7 @@ class TestTestsslParser(DojoTestCase):
                 endpoint.clean()
         self.assertEqual(145, len(findings))
 
-    def test_parse_file_with_one_vuln_has_overall_critical(self):
+    def test_parse_file_with_one_vuln_has_failed_target(self):
         testfile = open("unittests/scans/testssl/failed_target.csv")
         parser = TestsslParser()
         findings = parser.get_findings(testfile, Test())
