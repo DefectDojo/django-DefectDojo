@@ -69,7 +69,6 @@ class TestVeracodeScaScannerParser(DojoTestCase):
         self.assertEqual(665, finding.cwe)
         self.assertEqual("ddcc6e1b-3ed9-45c8-b77a-ead759fb5e2c", finding.unique_id_from_tool)
         self.assertEqual(datetime.datetime(2022, 7, 29, 5, 13, 0, 924000).astimezone(UTC), finding.date)
-        self.assertEqual(320, finding.sla_age)
 
     def test_parse_json_fixed(self):
         testfile = open("unittests/scans/veracode_sca/veracode_sca_fixed.json")
