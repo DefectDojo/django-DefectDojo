@@ -1,8 +1,8 @@
 apiVersion: v2
-appVersion: "2.24.0-dev"
+appVersion: "2.23.2"
 description: A Helm chart for Kubernetes to install DefectDojo
 name: defectdojo
-version: 1.6.72-dev
+version: 1.6.72
 icon: https://www.defectdojo.org/img/favicon.ico
 maintainers:
   - name: madchap
