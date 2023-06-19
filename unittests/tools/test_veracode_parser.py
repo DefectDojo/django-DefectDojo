@@ -2,10 +2,17 @@ import datetime
 
 from ..dojo_test_case import DojoTestCase
 from dojo.tools.veracode.parser import VeracodeParser
-from dojo.models import Test
+from dojo.models import Test, Product_Type, Product, Engagement
 
 
 class TestVeracodeScannerParser(DojoTestCase):
+
+    def setUp(self):
+        product_type, _ = Product_Type.objects.get_or_create(name="Fake unit tests")
+        product, _ = Product.objects.get_or_create(name="product", prod_type=product_type)
+        engagement = Engagement(product=product)
+
+        self.test = Test(engagement=engagement)
 
     def test_parse_file_with_one_finding(self):
         testfile = open("unittests/scans/veracode/one_finding.xml")
@@ -103,13 +110,16 @@ class TestVeracodeScannerParser(DojoTestCase):
     def test_parse_file_with_mitigated_finding(self):
         testfile = open("unittests/scans/veracode/mitigated_finding.xml")
         parser = VeracodeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = parser.get_findings(testfile, self.test)
         self.assertEqual(1, len(findings))
         finding = findings[0]
         self.assertEqual("Medium", finding.severity)
         self.assertTrue(finding.is_mitigated)
         self.assertEqual(datetime.datetime(2020, 6, 1, 10, 2, 1), finding.mitigated)
         self.assertEqual("app-1234_issue-1", finding.unique_id_from_tool)
+        self.assertEqual(0, finding.sla_age)
+        self.assertEqual(90, finding.sla_days_remaining())
+        self.assertEqual((datetime.datetime(2020, 6, 1, 10, 2, 1) + datetime.timedelta(days=90)).date(), finding.sla_deadline())
 
     def test_parse_file_with_mitigated_fixed_finding(self):
         testfile = open("unittests/scans/veracode/mitigated_fixed_finding.xml")

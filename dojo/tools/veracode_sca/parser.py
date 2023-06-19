@@ -5,6 +5,9 @@ import io
 from cvss import parser as cvss_parser
 from dateutil import parser
 from datetime import datetime
+
+from django.utils import timezone
+
 from dojo.models import Finding
 
 
@@ -108,6 +111,7 @@ class VeracodeScaParser(object):
             if (issue.get('Ignored') and issue.get('Ignored').capitalize() == 'True' or
                     status and (status.capitalize() == 'Resolved' or status.capitalize() == 'Fixed')):
                 finding.is_mitigated = True
+                finding.mitigated = timezone.now()
                 finding.active = False
 
             findings.append(finding)
@@ -170,6 +174,7 @@ class VeracodeScaParser(object):
             if (row.get('Ignored') and row.get('Ignored').capitalize() == 'True' or
                     row.get('Status') and row.get('Status').capitalize() == 'Resolved'):
                 finding.is_mitigated = True
+                finding.mitigated = timezone.now()
                 finding.active = False
 
             findings.append(finding)
