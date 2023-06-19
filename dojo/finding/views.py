@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core import serializers
 from django.urls import reverse
 from django.http import Http404, HttpResponse, JsonResponse
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseRedirect
 from django.http import StreamingHttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import formats
@@ -521,16 +521,14 @@ def view_finding(request, fid):
         else:
             form = NoteForm()
 
+    reqres = None
+    burp_request = None
+    burp_response = None
     try:
-        reqres = BurpRawRequestResponse.objects.get(finding=finding)
-        burp_request = base64.b64decode(reqres.burpRequestBase64)
-        burp_response = base64.b64decode(reqres.burpResponseBase64)
-
-    except BurpRawRequestResponse.DoesNotExist:
-        reqres = None
-        burp_request = None
-        burp_response = None
-
+        reqres = BurpRawRequestResponse.objects.filter(finding=finding).first()
+        if reqres is not None:
+            burp_request = base64.b64decode(reqres.burpRequestBase64)
+            burp_response = base64.b64decode(reqres.burpResponseBase64)
     except Exception as e:
         logger.debug(f"unespect error: {e}")
 
@@ -890,7 +888,7 @@ def apply_template_cwe(request, fid):
                 extra_tags="alert-danger",
             )
     else:
-        return HttpResponseForbidden()
+        raise PermissionDenied()
 
 
 @user_is_authorized(Finding, Permissions.Finding_Delete, "fid")
@@ -931,7 +929,7 @@ def delete_finding(request, fid):
                 extra_tags="alert-danger",
             )
     else:
-        return HttpResponseForbidden()
+        raise PermissionDenied()
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
@@ -1397,10 +1395,11 @@ def risk_unaccept(request, fid):
 def request_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
+    form = ReviewFindingForm(finding=finding, user=user)
     # in order to review a finding, we need to capture why a review is needed
     # we can do this with a Note
     if request.method == "POST":
-        form = ReviewFindingForm(request.POST)
+        form = ReviewFindingForm(request.POST, finding=finding, user=user)
 
         if form.is_valid():
             now = timezone.now()
@@ -1474,9 +1473,6 @@ def request_finding_review(request, fid):
             )
             return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
 
-    else:
-        form = ReviewFindingForm(finding=finding)
-
     product_tab = Product_Tab(
         finding.test.engagement.product, title="Review Finding", tab="findings"
     )
@@ -1492,12 +1488,14 @@ def request_finding_review(request, fid):
 def clear_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
+    # If the user wanting to clear the review is not the user who requested
+    # the review or one of the users requested to provide the review, then
+    # do not allow the user to clear the review.
+    if user != finding.review_requested_by and user not in finding.reviewers.all():
+        raise PermissionDenied()
+
     # in order to clear a review for a finding, we need to capture why and how it was reviewed
     # we can do this with a Note
-
-    if user != finding.review_requested_by or user not in finding.reviewers.all():
-        return HttpResponseForbidden()
-
     if request.method == "POST":
         form = ClearFindingReviewForm(request.POST, instance=finding)
 
@@ -1812,7 +1810,7 @@ def delete_stub_finding(request, fid):
                 extra_tags="alert-danger",
             )
     else:
-        return HttpResponseForbidden()
+        raise PermissionDenied()
 
 
 @user_is_authorized(Stub_Finding, Permissions.Finding_Edit, "fid")
@@ -2197,7 +2195,7 @@ def delete_template(request, tid):
                 extra_tags="alert-danger",
             )
     else:
-        return HttpResponseForbidden()
+        raise PermissionDenied()
 
 
 def download_finding_pic(request, token):
