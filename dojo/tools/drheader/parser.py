@@ -15,8 +15,17 @@ class DrHeaderParser(object):
         return "Import result of DrHeader JSON output."
 
     def get_findings(self, filename, test):
-        data = json.load(filename)
         items = []
+        try:
+            data = json.load(filename)
+        except ValueError as err:
+            find = Finding(title="The uploaded file was empty.",
+                           test=test,
+                           description="The uploaded file was empty.",
+                           severity="Information",
+                           static_finding=False)
+            items.append(find)
+            data = {}
         for item in data:
             findingdetail = ''
             title = "Header : " + item["rule"]
