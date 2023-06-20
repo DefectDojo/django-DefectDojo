@@ -19,12 +19,6 @@ class DrHeaderParser(object):
         try:
             data = json.load(filename)
         except ValueError as err:
-            find = Finding(title="The uploaded file was empty.",
-                           test=test,
-                           description="The uploaded file was empty.",
-                           severity="Information",
-                           static_finding=False)
-            items.append(find)
             data = {}
         for item in data:
             findingdetail = ''
@@ -36,6 +30,5 @@ class DrHeaderParser(object):
                            description=message,
                            severity=severity,
                            static_finding=False)
-
             items.append(find)
         return items
