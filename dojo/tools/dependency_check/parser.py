@@ -50,8 +50,7 @@ class DependencyCheckParser(object):
             # without filename, it would be just a duplicate finding so we have to skip it. filename
             # is only present for relateddependencies since v6.0.0
             # logger.debug('related_dependency: %s',
-            # ElementTree.tostring(related_dependency, encoding='utf8',
-            # method='xml'))
+            # ElementTree.tostring(related_dependency, encoding='utf8', method='xml'))
             return None, None
 
     def get_component_name_and_version_from_dependency(
