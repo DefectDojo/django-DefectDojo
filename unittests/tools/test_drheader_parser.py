@@ -5,6 +5,13 @@ from dojo.models import Test
 
 class TestDrHeaderParser(DojoTestCase):
 
+    def test_parse_file_has_no_findings(self):
+        testfile = open("unittests/scans/drheader/no_vulns.json")
+        parser = DrHeaderParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(0, len(findings))
+
     def test_parse_file_has_many_finding_one_tool(self):
         testfile = open("unittests/scans/drheader/scan.json")
         parser = DrHeaderParser()
