@@ -39,7 +39,7 @@ class MaxLengthValidator(object):
 class NumberValidator(object):
     def validate(self, password, user=None):
         self.settings = System_Settings.objects.get()
-        if not re.findall('\d', password) and self.settings.number_character_required:  # noqa W605
+        if not re.findall(r'\d', password) and self.settings.number_character_required:
             raise ValidationError(
                 self.get_help_text(),
                 code='password_no_number')
@@ -81,7 +81,7 @@ class LowercaseValidator(object):
 class SymbolValidator(object):
     def validate(self, password, user=None):
         self.settings = System_Settings.objects.get()
-        contains_special_character = re.findall('[()[\]{}|\\`~!@#$%^&*_\-+=;:\'\",<>./?]', password)  # noqa W605
+        contains_special_character = re.findall(r'[()[\]{}|\\`~!@#$%^&*_\-+=;:\'\",<>./?]', password)
         if not contains_special_character and self.settings.special_character_required:
             raise ValidationError(
                 self.get_help_text(),
