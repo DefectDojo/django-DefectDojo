@@ -364,7 +364,7 @@ class FindingFilterWithTags(DojoFilter):
 
 class DateRangeFilter(ChoiceFilter):
     options = {
-        '': (_('Any date'), lambda qs, name: qs.all()),
+        None: (_('Any date'), lambda qs, name: qs.all()),
         1: (_('Today'), lambda qs, name: qs.filter(**{
             '%s__year' % name: now().year,
             '%s__month' % name: now().month,
@@ -404,7 +404,7 @@ class DateRangeFilter(ChoiceFilter):
         try:
             value = int(value)
         except (ValueError, TypeError):
-            value = ''
+            value = None
         return self.options[value][1](qs, self.field_name)
 
 
