@@ -20,13 +20,11 @@ class DrHeaderParser(object):
             title = "Header : " + item["rule"]
             message = item["message"]
             severity = item["severity"].title()
-            find = Finding(
-                title=title,
-                test=test,
-                description=message,
-                severity=severity,
-                static_finding=False,
-            )
+            find = Finding(title=title,
+                           test=test,
+                           description=message,
+                           severity=severity,
+                           static_finding=False)
 
             items.append(find)
         return items
