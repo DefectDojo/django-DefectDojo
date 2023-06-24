@@ -114,7 +114,7 @@ class H1Parser(object):
                     impact="No impact provided",
                     references=references,
                     cwe=cwe,
-                    dynamic_finding=False,
+                    dynamic_finding=False
                 )
                 finding.unsaved_endpoints = list()
                 dupes[dupe_key] = finding
