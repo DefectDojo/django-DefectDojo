@@ -82,7 +82,7 @@ COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
 RUN \
-  apk add --no-cache openssl nginx-mod-http-headers-more && \
+  apk add --no-cache openssl && \
   chmod -R g=u /var/cache/nginx && \
   mkdir /var/run/defectdojo && \
   chmod -R g=u /var/run/defectdojo && \
