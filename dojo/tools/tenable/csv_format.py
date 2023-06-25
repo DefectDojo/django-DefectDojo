@@ -93,6 +93,7 @@ class TenableCSVParser(object):
             mitigation = str(row.get("Solution", "N/A"))
             impact = row.get("Description", "N/A")
             references = row.get("See Also", "N/A")
+            vuln_id_from_tool = row.get("Plugin", "N/A")
             # Determine if the current row has already been processed
             dupe_key = (
                 severity
@@ -113,6 +114,7 @@ class TenableCSVParser(object):
                     mitigation=mitigation,
                     impact=impact,
                     references=references,
+                    vuln_id_from_tool=vuln_id_from_tool,
                 )
 
                 # manage CVSS vector (only v3.x for now)
