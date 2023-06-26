@@ -1679,37 +1679,56 @@ class ClearFindingReviewForm(forms.ModelForm):
 
 
 class ReviewFindingForm(forms.Form):
-
-    reviewers = forms.MultipleChoiceField(help_text="Select all users who can review Finding.")
+    reviewers = forms.MultipleChoiceField(
+        help_text=(
+            "Select all users who can review Finding. Only users with "
+            "at least write permission to this finding can be selected"),
+        required=False,
+    )
     entry = forms.CharField(
         required=True, max_length=2400,
-        help_text='Please provide a message for reviewers.',
-        widget=forms.Textarea, label='Notes:',
-        error_messages={'required': ('The reason for requesting a review is '
-                                     'required, please use the text area '
-                                     'below to provide documentation.')})
+        help_text="Please provide a message for reviewers.",
+        widget=forms.Textarea, label="Notes:",
+        error_messages={"required": ("The reason for requesting a review is "
+                                     "required, please use the text area "
+                                     "below to provide documentation.")})
+    allow_all_reviewers = forms.BooleanField(
+        required=False,
+        label="Allow All Eligible Reviewers",
+        help_text=("Checking this box will allow any user in the drop down "
+                   "above to provide a review for this finding"))
 
     def __init__(self, *args, **kwargs):
-        finding = None
-        if 'finding' in kwargs:
-            finding = kwargs.pop('finding')
-
+        finding = kwargs.pop("finding", None)
+        user = kwargs.pop("user", None)
         super(ReviewFindingForm, self).__init__(*args, **kwargs)
-        self.fields['reviewers'].choices = self._get_choices(get_authorized_users(Permissions.Finding_View).filter(is_active=True))
-
+        # Get the list of users
         if finding is not None:
-            queryset = get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, Permissions.Finding_Edit)
-            self.fields['reviewers'].choices = self._get_choices(queryset)
+            users = get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, Permissions.Finding_Edit)
+        else:
+            users = get_authorized_users(Permissions.Finding_Edit).filter(is_active=True)
+        # Remove the current user
+        if user is not None:
+            users = users.exclude(id=user.id)
+        # Save a copy of the original query to be used in the validator
+        self.reviewer_queryset = users
+        # Set the users in the form
+        self.fields["reviewers"].choices = self._get_choices(self.reviewer_queryset)
 
     @staticmethod
     def _get_choices(queryset):
-        l_choices = []
-        for item in queryset:
-            l_choices.append((item.pk, item.get_full_name()))
-        return l_choices
+        return [(item.pk, item.get_full_name()) for item in queryset]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get("allow_all_reviewers", False):
+            cleaned_data["reviewers"] = [user.id for user in self.reviewer_queryset]
+        if len(cleaned_data.get("reviewers", [])) == 0:
+            raise ValidationError("Please select at least one user from the reviewers list")
+        return cleaned_data
 
     class Meta:
-        fields = ['reviewers', 'entry']
+        fields = ["reviewers", "entry", "allow_all_reviewers"]
 
 
 class WeeklyMetricsForm(forms.Form):

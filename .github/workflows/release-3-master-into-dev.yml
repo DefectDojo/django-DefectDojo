@@ -143,7 +143,7 @@ jobs:
             github.rest.pulls.create({
               owner: '${{ env.REPO_ORG }}',
               repo: 'django-DefectDojo',
-              title: 'Release: Merge back ${{ github.event.inputs.release_number_new }} into dev from: ${{ env.NEW_BRANCH }}',
+              title: 'Release: Merge back ${{ github.event.inputs.release_number_new }} into bugfix from: ${{ env.NEW_BRANCH }}',
               body: `Release triggered by \`${ process.env.GITHUB_ACTOR }\``,
               head: '${{ env.NEW_BRANCH }}',
               base: 'bugfix'
