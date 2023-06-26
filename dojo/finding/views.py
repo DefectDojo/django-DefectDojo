@@ -29,6 +29,8 @@ from dojo.utils import (
     close_external_issue,
     redirect,
     reopen_external_issue,
+    do_false_positive_history,
+    match_finding_to_existing_findings,
 )
 import copy
 from dojo.filters import (
@@ -83,6 +85,7 @@ from dojo.models import (
     User,
     Engagement,
     Vulnerability_Id_Template,
+    System_Settings,
 )
 from dojo.utils import (
     get_page_items,
@@ -990,6 +993,8 @@ def copy_finding(request, fid):
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def edit_finding(request, fid):
+    system_settings = System_Settings.objects.get()
+
     finding = get_object_or_404(Finding, id=fid)
     old_status = finding.status()
     old_finding = copy.copy(finding)
@@ -1127,6 +1132,28 @@ def edit_finding(request, fid):
                         status.mitigated = True
                         status.last_modified = timezone.now()
                         status.save()
+
+            if system_settings.false_positive_history:
+                # If the finding is being marked as a false positive we dont need to call the
+                # fp history function because it will be called by the save function
+
+                # If finding was a false positive and is being reactivated: retroactively reactivates all equal findings
+                if old_finding.false_p and not new_finding.false_p:
+                    if system_settings.retroactive_false_positive_history:
+                        logger.debug('FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s', new_finding)
+
+                        existing_fp_findings = match_finding_to_existing_findings(
+                            new_finding, product=new_finding.test.engagement.product
+                        ).filter(false_p=True)
+
+                        for fp in existing_fp_findings:
+                            logger.debug('FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s', fp.id, fp)
+                            fp.active = new_finding.active
+                            fp.verified = new_finding.verified
+                            fp.false_p = False
+                            fp.out_of_scope = new_finding.out_of_scope
+                            fp.is_mitigated = new_finding.is_mitigated
+                            fp.save_no_options()
 
             if "request" in form.cleaned_data or "response" in form.cleaned_data:
                 burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
@@ -2432,6 +2459,8 @@ def merge_finding_product(request, pid):
 
 # bulk update and delete are combined, so we can't have the nice user_is_authorized decorator
 def finding_bulk_update_all(request, pid=None):
+    system_settings = System_Settings.objects.get()
+
     logger.debug("bulk 10")
     form = FindingBulkUpdateForm(request.POST)
     now = timezone.now()
@@ -2504,6 +2533,8 @@ def finding_bulk_update_all(request, pid=None):
                 finds = prefetch_for_findings(finds)
                 if form.cleaned_data["severity"] or form.cleaned_data["status"]:
                     for find in finds:
+                        old_find = copy.deepcopy(find)
+
                         if form.cleaned_data["severity"]:
                             find.severity = form.cleaned_data["severity"]
                             find.numerical_severity = Finding.get_numerical_severity(
@@ -2525,6 +2556,29 @@ def finding_bulk_update_all(request, pid=None):
                         # use super to avoid all custom logic in our overriden save method
                         # it will trigger the pre_save signal
                         find.save_no_options()
+
+                        if system_settings.false_positive_history:
+                            # If finding is being marked as false positive
+                            if find.false_p:
+                                do_false_positive_history(find)
+
+                            # If finding was a false positive and is being reactivated: retroactively reactivates all equal findings
+                            elif old_find.false_p and not find.false_p:
+                                if system_settings.retroactive_false_positive_history:
+                                    logger.debug('FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s', find)
+
+                                    existing_fp_findings = match_finding_to_existing_findings(
+                                        find, product=find.test.engagement.product
+                                    ).filter(false_p=True)
+
+                                    for fp in existing_fp_findings:
+                                        logger.debug('FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s', fp.id, fp)
+                                        fp.active = find.active
+                                        fp.verified = find.verified
+                                        fp.false_p = False
+                                        fp.out_of_scope = find.out_of_scope
+                                        fp.is_mitigated = find.is_mitigated
+                                        fp.save_no_options()
 
                     for prod in prods:
                         calculate_grade(prod)
