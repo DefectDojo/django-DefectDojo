@@ -1,4 +1,3 @@
-
 import json
 import textwrap
 from datetime import datetime
@@ -8,7 +7,7 @@ from dojo.tools.parser_test import ParserTest
 
 
 class ScoutSuiteParser(object):
-    """"ScoutSuite Wiki: https://github.com/nccgroup/ScoutSuite/wiki"""
+    """ "ScoutSuite Wiki: https://github.com/nccgroup/ScoutSuite/wiki"""
 
     ID = "Scout Suite"
 
@@ -26,8 +25,8 @@ class ScoutSuiteParser(object):
 
     def get_tests(self, scan_type, handle):
         content = handle.read()
-        if type(content) is bytes:
-            content = content.decode('utf-8')
+        if isinstance(content, bytes):
+            content = content.decode("utf-8")
         raw_data = content.replace("scoutsuite_results =", "")
         data = json.loads(raw_data)
 
@@ -35,30 +34,49 @@ class ScoutSuiteParser(object):
         last_run = data["last_run"]
 
         test_description = ""
-        test_description = "%s**Account:** `%s`\n" % (test_description, account_id)
-        test_description = "%s**Provider:** %s\n" % (test_description, data["provider_name"])
-        test_description = "%s**Ruleset:** `%s`\n" % (test_description, last_run["ruleset_name"])
-        test_description = "%s**Ruleset Description:** %s\n" % (test_description, last_run["ruleset_about"])
+        test_description = "%s**Account:** `%s`\n" % (
+            test_description,
+            account_id,
+        )
+        test_description = "%s**Provider:** %s\n" % (
+            test_description,
+            data["provider_name"],
+        )
+        test_description = "%s**Ruleset:** `%s`\n" % (
+            test_description,
+            last_run["ruleset_name"],
+        )
+        test_description = "%s**Ruleset Description:** %s\n" % (
+            test_description,
+            last_run["ruleset_about"],
+        )
 
         # Summary of Services
-        test_description = "%s\n\n Services | Checked Items | Flagged Items | Max Level | Resource Count | Rules Count" % (test_description)
-        test_description = "%s\n:---|---:|---:|---:|---:|---:" % (test_description)
+        test_description = (
+            "%s\n\n Services | Checked Items | Flagged Items | Max Level | Resource Count | Rules Count"
+            % (test_description)
+        )
+        test_description = "%s\n:---|---:|---:|---:|---:|---:" % (
+            test_description
+        )
         for service, items in list(last_run["summary"].items()):
             test_description += "\n"
-            test_description += "|".join([
-                service,
-                str(items["checked_items"]),
-                str(items["flagged_items"]),
-                str(items["max_level"]),
-                str(items["resources_count"]),
-                str(items["rules_count"])
-            ])
+            test_description += "|".join(
+                [
+                    service,
+                    str(items["checked_items"]),
+                    str(items["flagged_items"]),
+                    str(items["max_level"]),
+                    str(items["resources_count"]),
+                    str(items["rules_count"]),
+                ]
+            )
 
         tests = list()
         test = ParserTest(
             name=self.ID,
             type=data["provider_name"],
-            version=last_run.get('version'),
+            version=last_run.get("version"),
         )
         test.description = test_description
 
@@ -68,8 +86,8 @@ class ScoutSuiteParser(object):
 
     def get_findings(self, filename, test):
         content = filename.read()
-        if type(content) is bytes:
-            content = content.decode('utf-8')
+        if isinstance(content, bytes):
+            content = content.decode("utf-8")
         raw_data = content.replace("scoutsuite_results =", "")
         data = json.loads(raw_data)
         return self.__get_items(data)
@@ -79,7 +97,9 @@ class ScoutSuiteParser(object):
         # get the date of the run
         last_run_date = None
         if "time" in data.get("last_run", {}):
-            last_run_date = datetime.strptime(data["last_run"]["time"][0:10], "%Y-%m-%d").date()
+            last_run_date = datetime.strptime(
+                data["last_run"]["time"][0:10], "%Y-%m-%d"
+            ).date()
 
         # Configured Services
         for service_name in data["services"]:
@@ -87,15 +107,23 @@ class ScoutSuiteParser(object):
             for finding_name in service_item.get("findings", []):
                 finding = service_item["findings"][finding_name]
                 for name in finding["items"]:
-                    description_text = finding.get("rationale", "") + "\n**Location:** " + name + "\n\n---\n"
-                    key = name.split('.')
+                    description_text = (
+                        finding.get("rationale", "")
+                        + "\n**Location:** "
+                        + name
+                        + "\n\n---\n"
+                    )
+                    key = name.split(".")
                     i = 1
                     lookup = service_item
                     while i < len(key):
                         if key[i] in lookup:
-                            if (type(lookup[key[i]]) is dict):
+                            if isinstance(lookup[key[i]], dict):
                                 lookup = lookup[key[i]]
-                                if (key[i - 1] == "security_groups" or key[i - 1] == "PolicyDocument"):
+                                if (
+                                    key[i - 1] == "security_groups"
+                                    or key[i - 1] == "PolicyDocument"
+                                ):
                                     break
                         i = i + 1
 
@@ -104,16 +132,20 @@ class ScoutSuiteParser(object):
                     self.item_data = ""
 
                     find = Finding(
-                        title=textwrap.shorten(finding['description'], 150),
+                        title=textwrap.shorten(finding["description"], 150),
                         date=last_run_date,
                         cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
                         description=description_text,
                         severity=self.getCriticalityRating(finding["level"]),
                         mitigation=finding.get("remediation"),
-                        file_path=name,  # we use file_path as a hack as there is no notion of "service" in finding today
+                        file_path=name,
+                        # we use file_path as a hack as there is no notion of
+                        # "service" in finding today
                         dynamic_finding=False,
                         static_finding=True,
-                        vuln_id_from_tool=":".join([data["provider_code"], finding_name]),
+                        vuln_id_from_tool=":".join(
+                            [data["provider_code"], finding_name]
+                        ),
                     )
                     if finding.get("references"):
                         find.references = "\n".join(finding["references"])
@@ -127,8 +159,8 @@ class ScoutSuiteParser(object):
         else:
             return ""
 
-    def recursive_print(self, src, depth=0, key=''):
-        tabs = lambda n: ' ' * n * 2
+    def recursive_print(self, src, depth=0, key=""):
+        def tabs(n): return " " * n * 2
         if isinstance(src, dict):
             for key, value in src.items():
                 if isinstance(src, str):
@@ -141,9 +173,15 @@ class ScoutSuiteParser(object):
             if self.pdepth != depth:
                 self.item_data = self.item_data + "\n"
             if key:
-                self.item_data = self.item_data + self.formatview(depth) + '**%s:** %s\n\n' % (key.title(), src)
+                self.item_data = (
+                    self.item_data
+                    + self.formatview(depth)
+                    + "**%s:** %s\n\n" % (key.title(), src)
+                )
             else:
-                self.item_data = self.item_data + self.formatview(depth) + '%s\n' % src
+                self.item_data = (
+                    self.item_data + self.formatview(depth) + "%s\n" % src
+                )
             self.pdepth = depth
 
     # Criticality rating
