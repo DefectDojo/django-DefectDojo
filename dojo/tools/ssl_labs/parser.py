@@ -20,7 +20,7 @@ class SslLabsParser(object):
         tree = filename.read()
         try:
             data = json.loads(str(tree, "utf-8"))
-        except BaseException:
+        except Exception:
             data = json.loads(tree)
 
         find_date = datetime.now()
@@ -115,7 +115,7 @@ class SslLabsParser(object):
                                 suite_info = suite_info + self.suite_data(
                                     suites
                                 )
-                except BaseException:
+                except Exception:
                     suite_info = "Not provided." + "\n\n"
 
                 description += suite_info
