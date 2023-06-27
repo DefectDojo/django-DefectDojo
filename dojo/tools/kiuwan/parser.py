@@ -100,7 +100,7 @@ class KiuwanParser(object):
             finding.static_finding = True
             try:
                 finding.cwe = int(row["CWE"])
-            except BaseException:
+            except Exception:
                 pass
 
             if finding is not None:
