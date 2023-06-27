@@ -30,7 +30,7 @@ class H1Parser(object):
         data = file.read()
         try:
             tree = json.loads(str(data, "utf-8"))
-        except BaseException:
+        except Exception:
             tree = json.loads(data)
         # Convert JSON  report to DefectDojo format
         dupes = dict()
@@ -56,7 +56,7 @@ class H1Parser(object):
                 references = "[{}]({})\n".format(
                     issue_tracker_id, issue_tracker_url
                 )
-            except BaseException:
+            except Exception:
                 references = ""
 
             # Build the severity of the Dojo finding
@@ -87,7 +87,7 @@ class H1Parser(object):
                         "external_id"
                     ][4:]
                 )
-            except BaseException:
+            except Exception:
                 cwe = 0
 
             dupe_key = hashlib.md5(
@@ -148,7 +148,7 @@ class H1Parser(object):
                 "score"
             ]
             description += "CVSS: {}\n".format(cvss)
-        except BaseException:
+        except Exception:
             pass
 
         # Build rest of description meat
@@ -167,7 +167,7 @@ class H1Parser(object):
             description += "\n##Weakness: {}\n{}".format(
                 weakness_title, weakness_desc
             )
-        except BaseException:
+        except Exception:
             pass
 
         return description
