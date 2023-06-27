@@ -20,7 +20,7 @@ class NetsparkerParser(object):
         tree = filename.read()
         try:
             data = json.loads(str(tree, "utf-8-sig"))
-        except BaseException:
+        except Exception:
             data = json.loads(tree)
         dupes = dict()
         scan_date = datetime.datetime.strptime(
@@ -33,7 +33,7 @@ class NetsparkerParser(object):
             if "Cwe" in item["Classification"]:
                 try:
                     cwe = int(item["Classification"]["Cwe"].split(",")[0])
-                except BaseException:
+                except Exception:
                     cwe = None
             else:
                 cwe = None
