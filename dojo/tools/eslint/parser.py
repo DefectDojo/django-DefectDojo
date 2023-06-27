@@ -25,7 +25,7 @@ class ESLintParser(object):
         tree = filename.read()
         try:
             data = json.loads(str(tree, "utf-8"))
-        except BaseException:
+        except Exception:
             data = json.loads(tree)
 
         items = list()

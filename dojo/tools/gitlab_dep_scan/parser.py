@@ -26,9 +26,9 @@ class GitlabDepScanParser(object):
             data = json_output.read()
             try:
                 tree = json.loads(str(data, "utf-8"))
-            except BaseException:
+            except Exception:
                 tree = json.loads(data)
-        except BaseException:
+        except Exception:
             raise ValueError("Invalid format")
 
         return tree
