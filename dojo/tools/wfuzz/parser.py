@@ -29,13 +29,12 @@ class WFuzzParser(object):
         return "Import WFuzz findings in JSON format."
 
     def get_findings(self, filename, test):
-
         data = json.load(filename)
 
         dupes = {}
         for item in data:
             url = hyperlink.parse(item["url"])
-            payload = item["payload"]
+            item["payload"]
             return_code = str(item["code"])
             severity = self.SEVERITY[return_code]
             description = f"The URL {url.to_text()} must not be exposed\n Please review your configuration\n"
