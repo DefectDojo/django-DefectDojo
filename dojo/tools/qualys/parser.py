@@ -231,7 +231,7 @@ def parse_finding(host, tree):
 
 
 def qualys_parser(qualys_xml_file):
-    parser = etree.XMLParser(no_network=True)
+    parser = etree.XMLParser()
     tree = etree.parse(qualys_xml_file, parser)
     host_list = tree.find('HOST_LIST')
     finding_list = []
