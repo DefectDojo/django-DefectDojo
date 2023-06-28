@@ -25,7 +25,8 @@ class RequestCache(LocMemCache):
 
     def __init__(self):
         # We explicitly do not call super() here, because while we want BaseCache.__init__() to run, we *don't*
-        # want LocMemCache.__init__() to run, because that would store our caches in its globals.
+        # want LocMemCache.__init__() to run, because that would store our
+        # caches in its globals.
         BaseCache.__init__(self, params={})
 
         self._cache = OrderedDict()
