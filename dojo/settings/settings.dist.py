@@ -690,7 +690,8 @@ DOCUMENTATION_URL = env("DD_DOCUMENTATION_URL")
 # If you import thousands of Active findings through your pipeline everyday,
 # and make the choice of enabling SLA notifications for non-verified findings,
 # be mindful of performance.
-# 'SLA_NOTIFY_ACTIVE', 'SLA_NOTIFY_ACTIVE_VERIFIED_ONLY' and 'SLA_NOTIFY_WITH_JIRA_ONLY' are moved to system settings, will be removed here
+# 'SLA_NOTIFY_ACTIVE', 'SLA_NOTIFY_ACTIVE_VERIFIED_ONLY' and 'SLA_NOTIFY_WITH_JIRA_ONLY' are moved to system settings,
+# will be removed here
 SLA_NOTIFY_ACTIVE = env(
     "DD_SLA_NOTIFY_ACTIVE"
 )  # this will include 'verified' findings as well as non-verified.
@@ -881,7 +882,8 @@ if API_TOKENS_ENABLED:
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Defect Dojo API v2",
-    "DESCRIPTION": "Defect Dojo - Open Source vulnerability Management made easy. Prefetch related parameters/responses not yet in the schema.",
+    "DESCRIPTION": "Defect Dojo - Open Source vulnerability Management made easy. "
+    "Prefetch related parameters/responses not yet in the schema.",
     "VERSION": __version__,
     # OTHER SETTINGS
     # the following set to False could help some client generators

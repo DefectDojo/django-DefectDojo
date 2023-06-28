@@ -117,7 +117,7 @@ class SymbolValidator(object):
         return (
             gettext(
                 "The password must contain at least 1 special character, "
-                + "()[]{}|\`~!@#$%^&*_-+=;:'\",<>./?."
+                + "()[]{}|\\`~!@#$%^&*_-+=;:'\",<>./?."
             ),
         )  # noqa W605
 
