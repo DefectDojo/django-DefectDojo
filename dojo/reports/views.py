@@ -10,9 +10,10 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.http import Http404, HttpResponseForbidden, HttpResponse, QueryDict
+from django.http import Http404, HttpResponse, QueryDict
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
+from django.core.exceptions import PermissionDenied
 
 from dojo.filters import ReportFindingFilter, EndpointReportFilter, \
     EndpointFilter
@@ -114,9 +115,9 @@ def custom_report(request):
                            "finding_images": finding_images,
                            "user_id": request.user.id})
         else:
-            return HttpResponseForbidden()
+            raise PermissionDenied()
     else:
-        return HttpResponseForbidden()
+        raise PermissionDenied()
 
 
 def report_findings(request):
@@ -743,7 +744,7 @@ def get_findings(request):
              'false_positive', 'inactive']
     # request.path = url
     obj_name = obj_id = view = query = None
-    path_items = list(filter(None, re.split('/|\?', url))) # noqa W605
+    path_items = list(filter(None, re.split(r'/|\?', url)))
 
     try:
         finding_index = path_items.index('finding')

@@ -102,7 +102,7 @@ class ApiBugcrowdParser(object):
                         # can raise exception if there is no way to parse the
                         # host
                 except (
-                    ValidationError
+                    ValueError
                 ):  # We don't want to fail the whole import just for 1 error in the bug_url
                     logger.error(
                         "Error parsing bugcrowd bug_url : {}".format(

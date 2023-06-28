@@ -2707,6 +2707,10 @@ class Finding(models.Model):
             else:
                 days = get_work_days(self.date, get_current_date())
         else:
+            from datetime import datetime
+            if isinstance(start_date, datetime):
+                start_date = start_date.date()
+
             if self.mitigated:
                 diff = self.mitigated.date() - start_date
             else:

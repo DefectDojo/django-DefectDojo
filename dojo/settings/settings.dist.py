@@ -35,6 +35,8 @@ env = environ.Env(
     DD_CSRF_COOKIE_SECURE=(bool, False),
     DD_CSRF_TRUSTED_ORIGINS=(list, []),
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
+    DD_CSRF_COOKIE_SAMESITE=(str, 'Lax'),
+    DD_SESSION_COOKIE_SAMESITE=(str, 'Lax'),
     DD_TIME_ZONE=(str, 'UTC'),
     DD_LANG=(str, 'en-us'),
     DD_TEAM_NAME=(str, 'Security Team'),
@@ -264,7 +266,9 @@ env = environ.Env(
     # Set fields used by the hashcode generator for deduplication, via en env variable that contains a JSON string
     DD_HASHCODE_FIELDS_PER_SCANNER=(str, ''),
     # Set deduplication algorithms per parser, via en env variable that contains a JSON string
-    DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, '')
+    DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, ''),
+    # Dictates whether cloud banner is created or not
+    DD_CREATE_CLOUD_BANNER=(bool, True)
 )
 
 
@@ -656,9 +660,11 @@ CSRF_COOKIE_HTTPONLY = env('DD_CSRF_COOKIE_HTTPONLY')
 # the cookie will be marked as secure, which means browsers may ensure that the
 # cookie is only sent with an HTTPS connection.
 SESSION_COOKIE_SECURE = env('DD_SESSION_COOKIE_SECURE')
+SESSION_COOKIE_SAMESITE = env('DD_SESSION_COOKIE_SAMESITE')
 
 # Whether to use a secure cookie for the CSRF cookie.
 CSRF_COOKIE_SECURE = env('DD_CSRF_COOKIE_SECURE')
+CSRF_COOKIE_SAMESITE = env('DD_CSRF_COOKIE_SAMESITE')
 
 # A list of trusted origins for unsafe requests (e.g. POST).
 # Use comma-separated list of domains, they will be split to list automatically
@@ -1666,3 +1672,5 @@ FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
 AUDITLOG_DISABLE_ON_RAW_SAVE = False
 #  You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
 ADDITIONAL_HEADERS = env('DD_ADDITIONAL_HEADERS')
+# Dictates whether cloud banner is created or not
+CREATE_CLOUD_BANNER = env('DD_CREATE_CLOUD_BANNER')
