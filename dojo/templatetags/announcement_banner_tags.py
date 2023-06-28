@@ -9,8 +9,13 @@ register = template.Library()
 @register.filter
 def bleach_announcement_message(message):
     allowed_attributes = bleach.ALLOWED_ATTRIBUTES
-    allowed_attributes['a'] = allowed_attributes['a'] + ['style', 'target']
-    return mark_safe(bleach.clean(
-        message,
-        attributes=allowed_attributes,
-        css_sanitizer=CSSSanitizer(allowed_css_properties=['color', 'font-weight'])))
+    allowed_attributes["a"] = allowed_attributes["a"] + ["style", "target"]
+    return mark_safe(
+        bleach.clean(
+            message,
+            attributes=allowed_attributes,
+            css_sanitizer=CSSSanitizer(
+                allowed_css_properties=["color", "font-weight"]
+            ),
+        )
+    )

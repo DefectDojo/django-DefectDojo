@@ -1,30 +1,33 @@
 from django import template
 from dojo.models import Endpoint_Status
 from django.db.models import Q
+
 register = template.Library()
 
 
-@register.filter(name='has_endpoints')
+@register.filter(name="has_endpoints")
 def has_endpoints(finding):
     return True if finding.endpoints.all() else False
 
 
-@register.filter(name='get_vulnerable_endpoints')
+@register.filter(name="get_vulnerable_endpoints")
 def get_vulnerable_endpoints(finding):
     return finding.endpoints.filter(
         status_endpoint__mitigated=False,
         status_endpoint__false_positive=False,
         status_endpoint__out_of_scope=False,
-        status_endpoint__risk_accepted=False)
+        status_endpoint__risk_accepted=False,
+    )
 
 
-@register.filter(name='get_mitigated_endpoints')
+@register.filter(name="get_mitigated_endpoints")
 def get_mitigated_endpoints(finding):
     return finding.endpoints.filter(
-        Q(status_endpoint__mitigated=True) |
-        Q(status_endpoint__false_positive=True) |
-        Q(status_endpoint__out_of_scope=True) |
-        Q(status_endpoint__risk_accepted=True))
+        Q(status_endpoint__mitigated=True)
+        | Q(status_endpoint__false_positive=True)
+        | Q(status_endpoint__out_of_scope=True)
+        | Q(status_endpoint__risk_accepted=True)
+    )
 
 
 @register.filter
@@ -40,7 +43,7 @@ def endpoint_display_status(endpoint, finding):
     if status.mitigated:
         statuses.append("Mitigated")
     if statuses:
-        return ', '.join(statuses)
+        return ", ".join(statuses)
     else:
         return "Active"
 
