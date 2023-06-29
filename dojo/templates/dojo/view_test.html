@@ -1183,7 +1183,7 @@
                                         {% endif %}
                                     {% endwith %}
                                 </td>
-                                <td class="nowrap">
+                                <td class="nowrap" data-order="{{ finding.date|date:"U" }}">
                                     {{ finding.date }}
                                 </td>
                                 <td>
@@ -1595,7 +1595,14 @@
                 }},
                 { "data": "cwe" },
                 { "data": "cve" },
-                { "data": "date" },
+                { "data": "date", render: function (data, type, row, meta) {
+                    if(type === 'sort') {
+                        var api = new $.fn.dataTable.Api(meta.settings);
+                        var td = api.cell({row: meta.row, column: meta.col}).node();
+                        var data = $(td).attr("data-order");
+                    }
+                    return data;
+                }},
                 { "data": "age" },
                 {% if system_settings.enable_finding_sla %}
                     { "data": "sla" },
