@@ -45,7 +45,7 @@
                     <th class="text-left">Date</th>
                     <th class="text-left">Length</th>
                     {% if system_settings.enable_jira %}
-                    <th class="text-center">JIRA</td>
+                    <th class="text-center">JIRA</th>
                     {% endif %}
                     <th class="text-center">Tests</th>
                     <th class="text-center">Active (Verified)</th>
@@ -172,7 +172,7 @@
                           {{ eng.lead |default_if_none:""}}
                       {% endif %}
                     </td>
-                    <td class="text-left" style="width: 200px;">
+                    <td class="text-left" style="width: 200px;" data-order={{ eng.target_start|date:"U" }}>
                       <a target="#" data-toggle="tooltip" data-placement="bottom" title="{{ eng.target_start|date:"l, jS F Y" }} - {{ eng.target_end|date:"l, jS F Y" }}">
                       {{ eng.target_start|date:"jS F" }} {% if eng.target_start|datediff_time:eng.target_end != "1 day" %} - {{ eng.target_end|date:"jS F" }}{% endif %}
                     </a>
@@ -207,7 +207,7 @@
                       {{ eng|jira_project_tag }}
                     </td>
                     {% endif %}
-                    <td class="text-center" class="nowrap">
+                    <td class="text-center" class="nowrap" data-order="{{ eng.count_tests }}">
                       <div class="align-top">
                       {% if eng.count_tests %}
                       <div class="dropdown">
@@ -244,7 +244,7 @@
                       {% endif %}
                       </div>
                     </td>
-                    <td class="text-center">{{ eng.count_findings_open }}&nbsp;({{ eng.count_findings_open_verified}})</td>
+                    <td class="text-center" data-order="{{ eng.count_findings_open }}">{{ eng.count_findings_open }}&nbsp;({{ eng.count_findings_open_verified}})</td>
                     <td class="text-center">{{ eng.count_findings_close }}</td>
                     <td class="text-center">{{ eng.count_findings_accepted }}</td>
                     <td class="text-center">{{ eng.count_findings_all }}</td>
@@ -302,13 +302,18 @@
                     { "data": "eng_name" },
                     { "data": "engagement_type" },
                     { "data": "lead" },
-                    { "data": "date" },
-                    { "data": "length" },
+                    null,
+                    { "data": "length", "type": "num", render: function(data, type, row) {
+                      if(type === 'sort') {
+                        data = data.split(' ')[0];
+                      }
+                      return data
+                    }},
                     {% if system_settings.enable_jira %}
                         { "data": "jira" },
                     {% endif %}
-                    { "data": "tests" },
-                    { "data": "open" },
+                    null,
+                    null,
                     { "data": "mitigated" },
                     { "data": "accepted" },
                     { "data": "all" },
