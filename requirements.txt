@@ -87,7 +87,7 @@ azure-devops==7.1.0b3
 
 #New Dependencies
 azure-core==1.26.4
-MarkupSafe==2.0
+MarkupSafe==2.1.2
 prompt-toolkit==3.0.20
 billiard==3.6.4.0
 inflection==0.5.1
