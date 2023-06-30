@@ -62,28 +62,7 @@ services:
   redis:
     image: busybox:1.36.1-musl
     entrypoint: ['echo', 'skipping', 'redis']
-
 volumes:
-  defectdojo_data_unit_tests:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/path/to/mysql/data'
-      read_only: true
-
-  defectdojo_postgres_unit_tests:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/path/to/postgres/data'
-      read_only: true
-
-  defectdojo_media_unit_tests:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/path/to/media'
-      read_only: true
+  defectdojo_data_unit_tests: {}
+  defectdojo_postgres_unit_tests: {}
+  defectdojo_media_unit_tests: {}
