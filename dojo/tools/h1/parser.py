@@ -66,7 +66,7 @@ class H1Parser(object):
                 ]["rating"].capitalize()
                 if severity not in ["Low", "Medium", "High", "Critical"]:
                     severity = "Info"
-            except BaseException:
+            except Exception:
                 severity = "Info"
             # Build the references of the Dojo finding
             ref_link = "https://hackerone.com/reports/{}".format(
