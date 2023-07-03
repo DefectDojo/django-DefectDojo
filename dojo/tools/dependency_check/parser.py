@@ -6,6 +6,7 @@ import dateutil
 from cpe import CPE
 from defusedxml import ElementTree
 from packageurl import PackageURL
+from datetime import datetime
 
 from dojo.models import Finding
 
@@ -122,6 +123,8 @@ class DependencyCheckParser(object):
             return None
 
         tags = []
+        mitigated = None
+        is_Mitigated = False
         name = vulnerability.findtext(f'{namespace}name')
         if vulnerability.find(f'{namespace}cwes'):
             cwe_field = vulnerability.find(f'{namespace}cwes').findtext(f'{namespace}cwe')
@@ -213,7 +216,8 @@ class DependencyCheckParser(object):
                 tags.append("no_suppression_document")
             mitigation = '**This vulnerability is mitigated and/or suppressed:** {}\n'.format(notes)
             mitigation = mitigation + 'Update {}:{} to at least the version recommended in the description'.format(component_name, component_version)
-
+            mitigated = datetime.utcnow()
+            is_Mitigated = True
             active = False
             tags.append("suppressed")
 
@@ -230,6 +234,8 @@ class DependencyCheckParser(object):
             description=description,
             severity=severity,
             mitigation=mitigation,
+            mitigated=mitigated,
+            is_mitigated=is_Mitigated,
             tags=tags,
             active=active,
             dynamic_finding=False,
