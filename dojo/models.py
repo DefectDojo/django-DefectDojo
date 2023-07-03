@@ -2747,6 +2747,8 @@ class Finding(models.Model):
     def sla_deadline(self):
         days_remaining = self.sla_days_remaining()
         if days_remaining:
+            if self.mitigated:
+                return self.mitigated.date() + relativedelta(days=days_remaining)
             return get_current_date() + relativedelta(days=days_remaining)
         return None
 
