@@ -353,7 +353,7 @@ class DependencyTrackParser(object):
         data = file.read()
         try:
             findings_export_dict = json.loads(str(data, "utf-8"))
-        except BaseException:
+        except Exception:
             findings_export_dict = json.loads(data)
 
         # Exit if file is an empty JSON dictionary
