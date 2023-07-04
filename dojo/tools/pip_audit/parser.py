@@ -4,7 +4,6 @@ from dojo.models import Finding
 
 
 class PipAuditParser:
-
     def get_scan_types(self):
         return ["pip-audit Scan"]
 
@@ -18,39 +17,40 @@ class PipAuditParser:
         return True
 
     def get_findings(self, scan_file, test):
-
         data = json.load(scan_file)
 
         findings = list()
         for item in data:
-            vulnerabilities = item.get('vulns', [])
+            vulnerabilities = item.get("vulns", [])
             if vulnerabilities:
-                component_name = item['name']
-                component_version = item.get('version')
+                component_name = item["name"]
+                component_version = item.get("version")
                 for vulnerability in vulnerabilities:
-                    vuln_id = vulnerability.get('id')
-                    vuln_fix_versions = vulnerability.get('fix_versions')
-                    vuln_description = vulnerability.get('description')
+                    vuln_id = vulnerability.get("id")
+                    vuln_fix_versions = vulnerability.get("fix_versions")
+                    vuln_description = vulnerability.get("description")
 
-                    title = f'{vuln_id} in {component_name}:{component_version}'
+                    title = (
+                        f"{vuln_id} in {component_name}:{component_version}"
+                    )
 
-                    description = ''
+                    description = ""
                     description += vuln_description
 
                     mitigation = None
                     if vuln_fix_versions:
-                        mitigation = 'Upgrade to version:'
+                        mitigation = "Upgrade to version:"
                         if len(vuln_fix_versions) == 1:
-                            mitigation += f' {vuln_fix_versions[0]}'
+                            mitigation += f" {vuln_fix_versions[0]}"
                         else:
                             for fix_version in vuln_fix_versions:
-                                mitigation += f'\n- {fix_version}'
+                                mitigation += f"\n- {fix_version}"
 
                     finding = Finding(
                         test=test,
                         title=title,
                         cwe=1352,
-                        severity='Medium',
+                        severity="Medium",
                         description=description,
                         mitigation=mitigation,
                         component_name=component_name,
