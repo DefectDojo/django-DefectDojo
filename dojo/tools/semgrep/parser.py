@@ -31,6 +31,7 @@ class SemgrepParser(object):
                 dynamic_finding=False,
                 vuln_id_from_tool=item["check_id"],
                 nb_occurences=1,
+                unique_id_from_tool=item["extra"]["fingerprint"],
             )
 
             # manage CWE
