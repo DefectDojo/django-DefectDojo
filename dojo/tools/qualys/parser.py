@@ -48,6 +48,12 @@ REPORT_HEADERS = [
     "category",
 ]
 
+TYPE_MAP = {
+    "Ig": "INFORMATION GATHERED",
+    "Practice": "POTENTIAL",
+    "Vuln": "CONFIRMED",
+}
+
 
 def htmltext(blob):
     h = html2text.HTML2Text()
@@ -148,10 +154,14 @@ def parse_finding(host, tree):
             # _temp['solution'] = re.sub('Workaround(s)?:.+\n', '', htmltext(vuln_item.findtext('SOLUTION')))
             _temp["solution"] = htmltext(vuln_item.findtext("SOLUTION"))
 
+            # type
+            _type = TYPE_MAP.get(vuln_details.findtext("TYPE"), "Unknown")
+
             # Vuln_description
             _temp["vuln_description"] = "\n".join(
                 [
                     htmltext(_description),
+                    htmltext("Type: " + _type),
                     htmltext("Category: " + _category),
                     htmltext("QID: " + str(_gid)),
                     htmltext("Port: " + str(_port)),
