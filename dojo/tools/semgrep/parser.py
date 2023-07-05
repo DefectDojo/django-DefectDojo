@@ -20,6 +20,10 @@ class SemgrepParser(object):
         dupes = dict()
 
         for item in data["results"]:
+            unique_id_from_tool = ""
+            if "extra" in item and "fingerprint" in item["extra"]:
+                unique_id_from_tool = item["extra"]["fingerprint"]
+            
             finding = Finding(
                 test=test,
                 title=item["check_id"],
@@ -31,7 +35,7 @@ class SemgrepParser(object):
                 dynamic_finding=False,
                 vuln_id_from_tool=item["check_id"],
                 nb_occurences=1,
-                unique_id_from_tool=item["extra"]["fingerprint"],
+                unique_id_from_tool=unique_id_from_tool,
             )
 
             # manage CWE
