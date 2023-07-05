@@ -86,5 +86,5 @@ def nice_title(title):
     try:
         ret = s[1]
         return ret
-    except BaseException:
+    except Exception:
         return title
