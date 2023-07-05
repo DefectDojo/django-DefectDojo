@@ -94,18 +94,23 @@ class GitlabSastParser(object):
         file_path = location['file'] if 'file' in location else None
 
         line = location['start_line'] if 'start_line' in location else None
-        if 'end_line' in location:
-            line = location['end_line']
-
-        sast_source_line = location['start_line'] if 'start_line' in location else None
 
         sast_object = None
+        sast_source_file_path = None
+        sast_source_line = None
         if 'class' in location and 'method' in location:
             sast_object = f"{location['class']}#{location['method']}"
         elif 'class' in location:
             sast_object = location['class']
         elif 'method' in location:
             sast_object = location['method']
+
+        if sast_object is not None:
+            sast_source_file_path = file_path
+            sast_source_line = line
+
+        if 'end_line' in location:
+            line = location['end_line']
 
         severity = vuln.get('severity')
         if severity is None or severity == 'Undefined' or severity == 'Unknown':
@@ -148,7 +153,7 @@ class GitlabSastParser(object):
             line=line,
             sast_source_object=sast_object,
             sast_sink_object=sast_object,
-            sast_source_file_path=file_path,
+            sast_source_file_path=sast_source_file_path,
             sast_source_line=sast_source_line,
             cwe=cwe,
             static_finding=True,

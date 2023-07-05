@@ -106,7 +106,10 @@ RUN \
     chown ${appuser} /var/run/${appuser} && \
     chmod g=u /var/run/${appuser} && \
     chmod 775 /*.sh && \
-    mkdir -p media/threat && chown -R ${uid} media
+    mkdir -p media/threat && chown -R ${uid} media && \
+    # To avoid warning: (staticfiles.W004) The directory '/app/components/node_modules' in the STATICFILES_DIRS setting does not exist.
+    mkdir -p components/node_modules && \
+    chown ${appuser} components/node_modules
 USER ${uid}
 ENV \
   # Only variables that are not defined in settings.dist.py

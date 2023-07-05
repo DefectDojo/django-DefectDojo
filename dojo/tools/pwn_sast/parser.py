@@ -19,17 +19,16 @@ class PWNSASTParser(object):
         return "Import pwn_sast Driver findings in JSON format."
 
     def get_findings(self, filename, test):
-
         results = json.load(filename)
 
         if results is not None:
-            report_name = results.get("report_name")
+            results.get("report_name")
             data_arr = results.get("data")
 
             findings = {}
 
             for data_hash in data_arr:
-                timestamp = data_hash.get("timestamp")
+                data_hash.get("timestamp")
 
                 security_references = data_hash.get("security_references")
                 if security_references is not None:
@@ -54,37 +53,45 @@ class PWNSASTParser(object):
                     offending_file = None
 
                 line_no_and_contents = data_hash.get("line_no_and_contents")
-                test_case_filter = data_hash.get("test_case_filter")
-                steps_to_reproduce = "\n".join([
-                    "Install pwn_sast Driver via: https://github.com/0dayinc/pwn#installation",
-                    "Execute the pwn_sast Driver via:",
-                    f"```pwn_sast --dir-path . --uri-source-root {git_repo_root_uri} -s```"
-                ])
+                data_hash.get("test_case_filter")
+                steps_to_reproduce = "\n".join(
+                    [
+                        "Install pwn_sast Driver via: https://github.com/0dayinc/pwn#installation",
+                        "Execute the pwn_sast Driver via:",
+                        f"```pwn_sast --dir-path . --uri-source-root {git_repo_root_uri} -s```",
+                    ]
+                )
 
                 for line in line_no_and_contents:
                     offending_uri = f"{git_repo_root_uri}/{offending_file}"
                     line_no = line.get("line_no")
                     contents = line.get("contents")
                     author = line.get("author")
-                    severity = 'Info'
-                    description = "\n".join([
-                        f"SAST Module: {sast_module}",
-                        f"Offending URI: {offending_uri}",
-                        f"Line: {line_no}",
-                        f"Committed By: {author}",
-                        "Line Contents:",
-                        f"```{contents}```"
-                    ])
+                    severity = "Info"
+                    description = "\n".join(
+                        [
+                            f"SAST Module: {sast_module}",
+                            f"Offending URI: {offending_uri}",
+                            f"Line: {line_no}",
+                            f"Committed By: {author}",
+                            "Line Contents:",
+                            f"```{contents}```",
+                        ]
+                    )
 
-                    impact = "\n".join([
-                        f"Security Control Impacted: {section}",
-                        f"NIST 800-53 Security Control Details: {nist_800_53_uri}",
-                        f"CWE Details: {cwe_uri}"
-                    ])
+                    impact = "\n".join(
+                        [
+                            f"Security Control Impacted: {section}",
+                            f"NIST 800-53 Security Control Details: {nist_800_53_uri}",
+                            f"CWE Details: {cwe_uri}",
+                        ]
+                    )
 
-                    mitigation = "\n".join([
-                        f"NIST 800-53 Security Control Details / Mitigation Strategy: {nist_800_53_uri}",
-                    ])
+                    mitigation = "\n".join(
+                        [
+                            f"NIST 800-53 Security Control Details / Mitigation Strategy: {nist_800_53_uri}",
+                        ]
+                    )
 
                     unique_finding_key = hashlib.sha256(
                         (offending_uri + contents).encode("utf-8")
@@ -106,7 +113,7 @@ class PWNSASTParser(object):
                             cwe=cwe_id,
                             nb_occurences=1,
                             steps_to_reproduce=steps_to_reproduce,
-                            file_path=offending_file
+                            file_path=offending_file,
                         )
                         findings[unique_finding_key] = finding
 
