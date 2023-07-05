@@ -39,7 +39,7 @@ def add_benchmark(queryset, product):
 
     try:
         Benchmark_Product.objects.bulk_create(requirements)
-    except BaseException:
+    except Exception:
         pass
 
 
