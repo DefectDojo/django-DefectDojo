@@ -3,278 +3,281 @@
 {% load display_tags %}
 {% load authorization_tags %}
 {% block content %}
-    {{ block.super }}
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading tight">
-                    <h3 class="has-filters">
-                        {{ name }}
-                        <div class="dropdown pull-right">
-                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
-                            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Add" %}
-                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                    data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa-solid fa-screwdriver-wrench"></span>
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-right" role="menu"
-                                aria-labelledby="dropdownMenu1">
-                                    <li role="presentation">
-                                      {% if product_tab %}
-                                        <a href="{% url 'add_endpoint' product_tab.product.id %}">
-                                      {% else %}
-                                        <a href="{% url 'add_product_endpoint' %}">
-                                      {% endif %}
-                                            <i class="fa-solid fa-plus"></i> New Endpoint
-                                        </a>
-                                    </li>
-                            </ul>
-                            {% endif %}
-                        </div>
-                    </h3>
-                </div>
-                <div id="the-filters" class="is-filters panel-body collapse">
-                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
-                </div>
-            </div>
-            {% if endpoints %}
-				<div class="hidden" style="padding-bottom: 5px;" id="bulk_remedy">
-                    {% if product_tab %}
-                        <form action="{% url 'endpoints_bulk_update_all_product' product_tab.product.id %}" method="post" id="bulk_change_form">
-                    {% else %}
-                        <form action="{% url 'endpoints_bulk_all' %}" method="post" id="bulk_change_form">
-                    {% endif %}
-                        {% csrf_token %}
-                        {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
-						<button class="btn btn-sm btn-primary" type="submit" id="remedy_endpoint" title="Mitigate Endpoints">
-                Bulk Mitigate
+{{ block.super }}
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-heading tight">
+        <h3 class="has-filters">
+          {{ name }}
+          <div class="dropdown pull-right">
+            <button id="show-filters" data-toggle="collapse" data-target="#the-filters"
+              class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Add" %}
+            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown"
+              aria-expanded="true">
+              <span class="fa-solid fa-screwdriver-wrench"></span>
+              <span class="caret"></span>
             </button>
-                        {% endif %}
-                        {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Delete" %}
-						<button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Endpoint">
-								<a class="white-color delete-bulk" href="#" alt="Delete Endpoints">
-								<i class="fa-solid fa-trash"></i>
-								</a>
-						</button>
-                        {% endif %}
-					</form>
-				</div>
-
-                <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=endpoints page_size=True %}
-                </div>
-                <div class="table-responsive panel panel-default">
-
-                    <table id="endpoints"
-                           class="tablesorter-bootstrap table table-condensed table-striped table-hover">
-                        <tr>
-                            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
-                            <th class="hidden-sm centered" title="Select all visible endpoint." id="bulk_edit">
-                                <form class="inline-form centered" action="#">
-                                    <input type="checkbox" title="Select All" name="select_all" id="select_all"></input>
-                                </form>
-                            </th>
-                            {% endif %}
-                            {% if host_view %}
-                                {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}    
-                                <th>{% dojo_sort request 'Host' 'host' %}</th>
-                            {% else %}
-                                {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}    
-                                <th>{% dojo_sort request 'Endpoint' 'endpoint' %}</th>
-                            {% endif %}
-                            {% if not product_tab %}
-                                {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}    
-                                <th>{% dojo_sort request 'Product' 'product' 'asc' %}</th>
-                            {% endif %}
-							<th class="text-center" nowrap="nowrap">Active Verified Findings</th>
-							<th>Status</th>
-                        </tr>
-
-                        {% for e in endpoints %}
-                            <tr>
-                                {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
-                                <td class="hidden-sm centered">
-                                    <form action="#">
-                                        <input type="checkbox" title= "Select_{{ e.id }}" name="select_{{ e.id }}"
-                                               id="{{ e.id }}"  class="select_one {{ e.id }}"></input>
-                                    </form>
-                                </td>
-                                {% endif %}
-                                {% if host_view %}
-                                  <td><a href="{% url 'view_endpoint_host' e.id %}">{{ e.host }}</a>
-                                {% else %}
-                                <td>
-                                  <a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
-                                {% endif %}
-                                  {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
-                                </td>
-                                {% if not product_tab %}
-                                  <td>
-                                    <a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a>
-                                    {% include "dojo/snippets/tags.html" with tags=e.product.tags.all %}
-                                  </td>
-                                {% endif %}
-                                <td class="text-center">
-                                  {% if host_view %}
-                                      {{ e.host_active_findings_count }}
-                                  {% else %}
-                                    {% if e.active_findings_count > 0 %}
-                                      <a href="{% url 'verified_findings' %}?endpoints={{ e.id }}">{{ e.active_findings_count }}</a>
-                                    {% else %}
-                                      0
-                                    {% endif %}
-                                  {% endif %}
-                                </td>
-                                <td>
-                                  {% if host_view %}
-                                    {{ e.host_mitigated_endpoints_count }} / {{ e.host_endpoints_count }} mitigated endpoints
-                                  {% else %}
-                                    {% if e.mitigated %}
-                                      Mitigated
-                                    {% else %}
-                                      {% if e.active_findings_count > 0 %}
-                                        Vulnerable
-                                      {% else %}
-                                        No active verified findings
-                                      {% endif %}
-                                    {% endif %}
-                                  {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                </div>
-                <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=endpoints page_size=True %}
-                </div>
-            {% else %}
-                {% if host_view %}
-                  <div id="no_hosts"><p class="text-center">No hosts found.</p></div>
-                {% else %}
-                  <div id="no_endpoints"><p class="text-center">No endpoints found.</p></div>
-                {% endif %}
+            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+              <li role="presentation">
+                {% if product_tab %}
+                <a href="{% url 'add_endpoint' product_tab.product.id %}">
+                  {% else %}
+                  <a href="{% url 'add_product_endpoint' %}">
+                    {% endif %}
+                    <i class="fa-solid fa-plus"></i> New Endpoint
+                  </a>
+              </li>
+            </ul>
             {% endif %}
-        </div>
+          </div>
+        </h3>
+      </div>
+      <div id="the-filters" class="is-filters panel-body collapse">
+        {% include "dojo/filter_snippet.html" with form=filtered.form %}
+      </div>
     </div>
+    {% if endpoints %}
+    <div class="hidden" style="padding-bottom: 5px;" id="bulk_remedy">
+      {% if product_tab %}
+      <form action="{% url 'endpoints_bulk_update_all_product' product_tab.product.id %}" method="post"
+        id="bulk_change_form">
+        {% else %}
+        <form action="{% url 'endpoints_bulk_all' %}" method="post" id="bulk_change_form">
+          {% endif %}
+          {% csrf_token %}
+          {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
+          <button class="btn btn-sm btn-primary" type="submit" id="remedy_endpoint" title="Mitigate Endpoints">
+            Bulk Mitigate
+          </button>
+          {% endif %}
+          {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Delete" %}
+          <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom"
+            title="Delete Endpoint">
+            <a class="white-color delete-bulk" href="#" alt="Delete Endpoints">
+              <i class="fa-solid fa-trash"></i>
+            </a>
+          </button>
+          {% endif %}
+        </form>
+    </div>
+
+    <div class="clearfix">
+      {% include "dojo/paging_snippet.html" with page=endpoints page_size=True %}
+    </div>
+    <div class="table-responsive panel panel-default">
+
+      <table id="endpoints" class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+        <tr>
+          {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
+          <th class="hidden-sm centered" title="Select all visible endpoint." id="bulk_edit">
+            <form class="inline-form centered" action="#">
+              <input type="checkbox" title="Select All" name="select_all" id="select_all"></input>
+            </form>
+          </th>
+          {% endif %}
+          {% if host_view %}
+          {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment
+          %}
+          <th>{% dojo_sort request 'Host' 'host' %}</th>
+          {% else %}
+          {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment
+          %}
+          <th>{% dojo_sort request 'Endpoint' 'endpoint' %}</th>
+          {% endif %}
+          {% if not product_tab %}
+          {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment
+          %}
+          <th>{% dojo_sort request 'Product' 'product' 'asc' %}</th>
+          {% endif %}
+          <th class="text-center" nowrap="nowrap">Active Verified Findings</th>
+          <th>Status</th>
+        </tr>
+
+        {% for e in endpoints %}
+        <tr>
+          {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
+          <td class="hidden-sm centered">
+            <form action="#">
+              <input type="checkbox" title="Select_{{ e.id }}" name="select_{{ e.id }}" id="{{ e.id }}"
+                class="select_one {{ e.id }}"></input>
+            </form>
+          </td>
+          {% endif %}
+          {% if host_view %}
+          <td><a href="{% url 'view_endpoint_host' e.id %}">{{ e.host }}</a>
+            {% else %}
+          <td>
+            <a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip"
+                title="Endpoint is broken. Check documentation to look for fix process">&#128681;</span>{% endif %}</a>
+            {% endif %}
+            {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
+          </td>
+          {% if not product_tab %}
+          <td>
+            <a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a>
+            {% include "dojo/snippets/tags.html" with tags=e.product.tags.all %}
+          </td>
+          {% endif %}
+          <td class="text-center">
+            {% if host_view %}
+            {{ e.host_active_findings_count }}
+            {% else %}
+            {% if e.active_findings_count > 0 %}
+            <a href="{% url 'verified_findings' %}?endpoints={{ e.id }}">{{ e.active_findings_count }}</a>
+            {% else %}
+            0
+            {% endif %}
+            {% endif %}
+          </td>
+          <td>
+            {% if host_view %}
+            {{ e.host_mitigated_endpoints_count }} / {{ e.host_endpoints_count }} mitigated endpoints
+            {% else %}
+            {% if e.mitigated %}
+            Mitigated
+            {% else %}
+            {% if e.active_findings_count > 0 %}
+            Vulnerable
+            {% else %}
+            No active verified findings
+            {% endif %}
+            {% endif %}
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    <div class="clearfix">
+      {% include "dojo/paging_snippet.html" with page=endpoints page_size=True %}
+    </div>
+    {% else %}
+    {% if host_view %}
+    <div id="no_hosts">
+      <p class="text-center">No hosts found.</p>
+    </div>
+    {% else %}
+    <div id="no_endpoints">
+      <p class="text-center">No endpoints found.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
 
 {% endblock %}
 {% block postscript %}
-    {{ block.super }}
+{{ block.super }}
 <script>
-        var checkbox_count = 0;
-        function check_checked_endpoint()
-        {
+  var checkbox_count = 0;
+  function check_checked_endpoint() {
+    var checkbox_values = $("input[type=checkbox][name^='select_']");
+
+    for (var i = 0; i < checkbox_values.length; i++) {
+      if ($(checkbox_values[i]).prop("checked")) {
+        if (checkbox_values[i].name != 'select_all') {
+          checkbox_count++;
+        }
+      }
+    }
+    if (checkbox_count > 0) {
+      $('div#bulk_remedy').removeClass('hidden');
+    }
+  }
+  $(function () {
+    check_checked_endpoint();
+
+    $('#id_status').on('click', function (e) {
+      var checked = this.checked;
+      // $('#bulk_remedy #id_active').prop('disabled', !checked);
+    })
+
+    $('.table-responsive').on('hide.bs.dropdown', function () {
+      $('.table-responsive').css("overflow", "auto");
+    })
+
+    $('[id^=delete-endpoint-menu-]').on('click', function () {
+      if (confirm('Are you sure you want to delete this endpoint?')) {
+        var form_element = "form#" + this.id + "-form";
+        $(form_element).submit();
+      }
+    });
+
+    $('input[type="checkbox"]').change(function () {
+      checkbox_count = 0;
+      endpoint = $(this).attr("name");
+      if (endpoint.indexOf("select_") >= 0) {
+        var checkbox_values = $("input[type=checkbox][name^='select_']");
+        for (var i = 0; i < checkbox_values.length; i++) {
+          if ($(checkbox_values[i]).prop("checked")) {
+            checkbox_count++;
+          }
+        }
+
+        if ($(this).prop("checked")) {
+          $('div#bulk_remedy').removeClass('hidden');
+        } else {
+          checkbox_count--;
           var checkbox_values = $("input[type=checkbox][name^='select_']");
+          var checked = false;
 
           for (var i = 0; i < checkbox_values.length; i++) {
             if ($(checkbox_values[i]).prop("checked")) {
-              if (checkbox_values[i].name != 'select_all') {
-                checkbox_count++;
-              }
+              checked = true;
             }
           }
-          if (checkbox_count > 0)
-          {
-              $('div#bulk_remedy').removeClass('hidden');
+          if (checked == false) {
+            $('div#bulk_remedy').addClass('hidden');
           }
         }
-        $(function () {
-            check_checked_endpoint();
 
-            $('#id_status').on('click', function (e) {
-                var checked = this.checked;
-                // $('#bulk_remedy #id_active').prop('disabled', !checked);
-            })
+      }
+    });
 
-            $('.table-responsive').on('hide.bs.dropdown', function () {
-              $('.table-responsive').css( "overflow", "auto" );
-            })
+    $('form#bulk_change_form').on('submit', function (e) {
+      $('input[type=checkbox].select_one:checked').each(function () {
+        var hidden_input = $('<input type="hidden" value="' + this.id + '" name="endpoints_to_update">')
+        $('form#bulk_change_form').append(hidden_input);
+      });
+    });
 
-            $('[id^=delete-endpoint-menu-]').on('click', function () {
-              if (confirm('Are you sure you want to delete this endpoint?'))
-              {
-                  var form_element = "form#" + this.id + "-form";
-                  $( form_element ).submit();
-              }
-            });
+    $('input#select_all').on('click', function (e) {
+      if ($(this).is(":checked")) {
+        $('input.select_one').prop('checked', true);
+        $('div#bulk_remedy').removeClass('hidden');
+      }
+      else {
+        $('input.select_one').prop('checked', false);
+        $('div#bulk_remedy').addClass('hidden');
+      }
+    });
 
-            $('input[type="checkbox"]').change(function () {
-              checkbox_count = 0;
-              endpoint = $(this).attr("name");
-              if (endpoint.indexOf("select_") >= 0)
-              {
-                var checkbox_values = $("input[type=checkbox][name^='select_']");
-                for (var i = 0; i < checkbox_values.length; i++) {
-                  if ($(checkbox_values[i]).prop("checked")) {
-                    checkbox_count++;
-                  }
-                }
+    $('a.delete-bulk').on('click', function (e) {
+      if (confirm('Are you sure you want to delete this endpoint?')) {
+        var hidden_input = $('<input type="hidden" value="delete_bulk_endpoints" name="delete_bulk_endpoints">')
+        $('form#bulk_change_form').append(hidden_input);
+        $("form#bulk_change_form").submit();
+      }
+    });
 
-                if ($(this).prop("checked")) {
-                  $('div#bulk_remedy').removeClass('hidden');
-                } else {
-                  checkbox_count--;
-                  var checkbox_values = $("input[type=checkbox][name^='select_']");
-                  var checked = false;
+    $(document).on("click", "button.delete-endpoints", function (e) {
+      return confirm('Are you sure you want to delete this endpoint(s)?')
+    });
 
-                  for (var i = 0; i < checkbox_values.length; i++) {
-                    if ($(checkbox_values[i]).prop("checked")) {
-                      checked = true;
-                    }
-                  }
-                  if (checked == false) {
-                    $('div#bulk_remedy').addClass('hidden');
-                  }
-                }
+    if (document.referrer.indexOf('simple_search') > 0) {
+      var terms = '';
+      if ($.cookie('highlight')) {
+        terms = $.cookie('highlight').split(' ');
 
-              }
-            });
-
-			      $('form#bulk_change_form').on('submit', function(e){
-                $('input[type=checkbox].select_one:checked').each(function(){
-                    var hidden_input = $('<input type="hidden" value="' + this.id + '" name="endpoints_to_update">')
-                    $('form#bulk_change_form').append(hidden_input);
-                });
-            });
-
-            $('input#select_all').on('click', function (e) {
-                if ($(this).is(":checked")) {
-                    $('input.select_one').prop('checked', true);
-                    console.log($('input.select_one').prop('checked', true));
-                    $('div#bulk_remedy').removeClass('hidden');
-                }
-                else {
-                    $('input.select_one').prop('checked', false);
-                    $('div#bulk_remedy').addClass('hidden');
-                }
-            });
-
-            $('a.delete-bulk').on('click', function (e) {
-                if (confirm('Are you sure you want to delete this endpoint?'))
-                {
-                    var hidden_input = $('<input type="hidden" value="delete_bulk_endpoints" name="delete_bulk_endpoints">')
-                    $('form#bulk_change_form').append(hidden_input);
-                    $( "form#bulk_change_form" ).submit();
-                }
-            });
-
-            $( document ).on( "click", "button.delete-endpoints", function (e) {
-                return confirm('Are you sure you want to delete this endpoint(s)?')
-            });
-
-            if (document.referrer.indexOf('simple_search') > 0) {
-                var terms = '';
-                if ($.cookie('highlight')) {
-                    terms = $.cookie('highlight').split(' ');
-
-                    for (var i = 0; i < terms.length; i++) {
-                        $('body').highlight(terms[i]);
-                    }
-                }
-                $('input#simple_search').val(terms);
-            };
-        });
-    </script>
-    {% include "dojo/filter_js_snippet.html" %}
+        for (var i = 0; i < terms.length; i++) {
+          $('body').highlight(terms[i]);
+        }
+      }
+      $('input#simple_search').val(terms);
+    };
+  });
+</script>
+{% include "dojo/filter_js_snippet.html" %}
 {% endblock %}
