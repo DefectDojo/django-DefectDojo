@@ -166,7 +166,7 @@ def view_product(request, pid):
         success_percent = round((float(total_pass) / float(total)) * 100, 2)
         waiting_percent = round((float(total_wait) / float(total)) * 100, 2)
         fail_percent = round(100 - success_percent - waiting_percent, 2)
-        print(fail_percent)
+        logger.debug(fail_percent)
         benchAndPercent.append({
             'id': benchmarks[i].benchmark_type.id,
             'name': benchmarks[i].benchmark_type,

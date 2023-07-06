@@ -7,6 +7,11 @@ from dojo.celery import app
 from functools import wraps
 from dojo.utils import test_valentijn
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 
 class Command(BaseCommand):
     help = "Command to do some tests with celery and decorators. Just committing it so 'we never forget'"
@@ -47,15 +52,15 @@ class Command(BaseCommand):
 
 def test2(clazz, id):
     model = clazz.objects.get(id=id)
-    print(model)
+    logger.debug(model)
 
 
 def my_decorator_outside(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        print("outside before")
+        logger.debug("outside before")
         func(*args, **kwargs)
-        print("outside after")
+        logger.debug("outside after")
 
     if getattr(func, 'delay', None):
         wrapper.delay = my_decorator_outside(func.delay)
@@ -66,9 +71,9 @@ def my_decorator_outside(func):
 def my_decorator_inside(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        print("inside before")
+        logger.debug("inside before")
         func(*args, **kwargs)
-        print("inside after")
+        logger.debug("inside after")
     return wrapper
 
 
@@ -76,7 +81,7 @@ def my_decorator_inside(func):
 @app.task
 @my_decorator_inside
 def my_test_task(new_finding, *args, **kwargs):
-    print('oh la la what a nice task')
+    logger.debug('oh la la what a nice task')
 
 
 # example working with multiple parameters...
