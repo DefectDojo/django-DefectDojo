@@ -7,7 +7,7 @@ from dojo.tools.parser_test import ParserTest
 
 
 class ScoutSuiteParser(object):
-    """ "ScoutSuite Wiki: https://github.com/nccgroup/ScoutSuite/wiki"""
+    """"ScoutSuite Wiki: https://github.com/nccgroup/ScoutSuite/wiki"""
 
     ID = "Scout Suite"
 
