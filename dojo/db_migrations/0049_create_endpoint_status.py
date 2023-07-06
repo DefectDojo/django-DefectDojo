@@ -1,5 +1,8 @@
 
 from django.db import migrations, models
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Migration(migrations.Migration):
@@ -40,7 +43,7 @@ class Migration(migrations.Migration):
                         finding.endpoint_status.add(status)
                 except Exception as e:
                     # Something wild happened
-                    print(e)
+                    logger.debug(e)
                     pass
 
     dependencies = [

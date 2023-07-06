@@ -2209,7 +2209,7 @@ class async_delete():
             logger.debug('ASYNC_DELETE: Deleting ' + str(len(objects_to_delete)) + ' ' + self.get_object_name(model) + 's in chunks')
             chunks = self.chunk_list(model, objects_to_delete)
             for chunk in chunks:
-                print('deleting', len(chunk), self.get_object_name(model))
+                logger.debug('deleting', len(chunk), self.get_object_name(model))
                 self.delete_chunk(chunk)
         self.delete_chunk([object])
         logger.debug('ASYNC_DELETE: Successfully deleted ' + self.get_object_name(object) + ': ' + str(object))

@@ -4,6 +4,7 @@ from pytz import timezone
 from dojo.models import Finding
 from dojo.utils import get_system_setting
 import dojo.jira_link.helper as jira_helper
+import logging
 
 locale = timezone(get_system_setting('time_zone'))
 
@@ -11,6 +12,9 @@ locale = timezone(get_system_setting('time_zone'))
 Author: Aaron Weaver
 This script will locate open, active findings and update them in Jira. Useful if you need to make bulk changes with Jira:
 """
+
+logger = logging.getLogger(__name__)
+
 
 
 class Command(BaseCommand):
@@ -22,6 +26,6 @@ class Command(BaseCommand):
         findings = findings.filter(verified=True, active=True)
 
         for finding in findings:
-            print("Checking issue:" + str(finding.id))
+            logger.debug("Checking issue:" + str(finding.id))
             jira_helper.update_jira_issue(finding, True)
-            print("########\n")
+            logger.debug("########\n")
