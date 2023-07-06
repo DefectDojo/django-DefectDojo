@@ -86,6 +86,7 @@ env = environ.Env(
     DD_DATABASE_USER=(str, "defectdojo"),
     DD_SECRET_KEY=(str, ""),
     DD_CREDENTIAL_AES_256_KEY=(str, "."),
+    DD_AUTHENTICATE_ADDITIONAL_DATA_KEY=(str, "."),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
     # do we show link "I forgot my password" on login screen
     DD_FORGOT_PASSWORD=(bool, True),
@@ -764,6 +765,7 @@ SESSION_COOKIE_AGE = env("DD_SESSION_COOKIE_AGE")
 # Credential Key
 CREDENTIAL_AES_256_KEY = env("DD_CREDENTIAL_AES_256_KEY")
 DB_KEY = env("DD_CREDENTIAL_AES_256_KEY")
+AAD_KEY = env("DD_AUTHENTICATE_ADDITIONAL_DATA_KEY")
 
 # Used in a few places to prefix page headings and in email salutations
 TEAM_NAME = env("DD_TEAM_NAME")

@@ -2,258 +2,257 @@
 {% load static %}
 {% load display_tags %}
 {% block content %}
-    {{ block.super }}
-    <link href="{% static "google-code-prettify/src/prettify.css" %}" rel="stylesheet"/>
-    <div class="row">
-        <div class="col-md-8">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <div class="clearfix">
-                        <h4 class="pull-left">Report Format</h4>
-                    </div>
+{{ block.super }}
+<link href="{% static " google-code-prettify/src/prettify.css" %}" rel="stylesheet" />
+<div class="row">
+    <div class="col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="clearfix">
+                    <h4 class="pull-left">Report Format</h4>
                 </div>
-                <div class="panel-body in-use-widgets">
-                    <ul id="sortable2">
-                        {% for widget in in_use_widgets %}
-                            <li class="{{ widget.title|slugify }}">
-                                {{ widget.get_option_form }}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                <div class="panel-footer">
-                    <div class="clearfix">
-                        <a class="btn btn-success disabled pull-right run_report" href="#">Run</a>
-                    </div>
+            </div>
+            <div class="panel-body in-use-widgets">
+                <ul id="sortable2">
+                    {% for widget in in_use_widgets %}
+                    <li class="{{ widget.title|slugify }}">
+                        {{ widget.get_option_form }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="panel-footer">
+                <div class="clearfix">
+                    <a class="btn btn-success disabled pull-right run_report" href="#">Run</a>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4>Available Widgets</h4>
-                </div>
-                <div class="panel-body available-widgets">
-                    <ul id="sortable1">
-                        {% for widget in available_widgets %}
-                            <li class="{{ widget.title|slugify }}">
-                                {{ widget.get_option_form }}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Available Widgets</h4>
+            </div>
+            <div class="panel-body available-widgets">
+                <ul id="sortable1">
+                    {% for widget in available_widgets %}
+                    <li class="{{ widget.title|slugify }}">
+                        {{ widget.get_option_form }}
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
-        <form id="custom_report" class="hidden" action="{% url 'custom_report' %}" method="post">
-            {% csrf_token %}
-            <textarea name="json" id="json">
+    </div>
+    <form id="custom_report" class="hidden" action="{% url 'custom_report' %}" method="post">
+        {% csrf_token %}
+        <textarea name="json" id="json">
 
             </textarea>
-        </form>
-    </div>
+    </form>
+</div>
 {% endblock %}
 {% block postscript %}
-    {{ block.super }}
-    <script src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
-    <script src="{% static "google-code-prettify/src/prettify.js" %}"></script>
-    <script src="{% static "bootstrap-wysiwyg/src/bootstrap-wysiwyg.js" %}"></script>
-    <script>
-        function setUpFindingFilters() {
-            $(".report-filter-set :input").not("button").addClass("form-control input-sm");
-            $(".report-filter-set label").css("display", "block");
+{{ block.super }}
+<script src="{% static " jquery.hotkeys/jquery.hotkeys.js" %}"></script>
+<script src="{% static " google-code-prettify/src/prettify.js" %}"></script>
+<script src="{% static " bootstrap-wysiwyg/src/bootstrap-wysiwyg.js" %}"></script>
+<script>
+    function setUpFindingFilters() {
+        $(".report-filter-set :input").not("button").addClass("form-control input-sm");
+        $(".report-filter-set label").css("display", "block");
 
-            $(".report-filter-set input[type=text]").each(function () {
-                var id = this.id;
-                if (id) {
-                    var label = $("label[for=" + id + "]");
-                    $(this).attr("placeholder", label.html().replace(':', "..."));
+        $(".report-filter-set input[type=text]").each(function () {
+            var id = this.id;
+            if (id) {
+                var label = $("label[for=" + id + "]");
+                $(this).attr("placeholder", label.html().replace(':', "..."));
+            }
+        });
+
+        $('.report-filter-set select[multiple=multiple]').each(function () {
+            var id = this.id;
+            if (id) {
+                var label = $("label[for=" + id + "]");
+                $(this).chosen({
+                    'placeholder_text_multiple': label.html().replace(':', "..."),
+                    'width': '200px !important'
+                });
+            }
+        });
+
+        if ($('.in-use-widgets ul#sortable2 li').length > 0) {
+            $('a.run_report').removeClass('disabled');
+        }
+    }
+    $(function () {
+        $(".available-widgets ul").sortable({
+            handle: "div.panel div.panel-heading",
+            connectWith: ".in-use-widgets ul",
+            placeholder: "ui-state-highlight",
+            cursor: 'default',
+            opacity: 0.65,
+            remove: function (event, ui) {
+                if (ui.item.children(":first").data("multiple")) {
+                    var newItem = ui.item.clone();
+                    newItem.prependTo('.available-widgets ul#sortable1');
                 }
-            });
+                ui.item.find('[data-toggle="tooltip"]').tooltip('hide');
+            },
+            receive: function (event, ui) {
+                ui.item.find(".icon").removeClass("icon-grab-reorder").addClass("fa-arrows");
+                ui.item.find('[data-toggle="tooltip"]').tooltip('destroy');
+                ui.item.find('[data-toggle="tooltip"]').attr('title', 'Click and drag to move')
+                ui.item.find('[data-toggle="tooltip"]').tooltip();
+                ui.item.find('[data-toggle="tooltip"]').tooltip('hide');
+            },
+            start: function (event, ui) {
+                ui.item.find('[data-toggle="tooltip"]').tooltip('destroy');
+            }
 
-            $('.report-filter-set select[multiple=multiple]').each(function () {
-                var id = this.id;
-                if (id) {
-                    var label = $("label[for=" + id + "]");
-                    $(this).chosen({
-                        'placeholder_text_multiple': label.html().replace(':', "..."),
-                        'width': '200px !important'
+        });
+
+        $(".in-use-widgets ul").sortable({
+            handle: "div.panel div.panel-heading",
+            connectWith: ".available-widgets ul",
+            placeholder: "ui-state-highlight",
+            cursor: 'default',
+            opacity: 0.65,
+            remove: function (event, ui) {
+                if (ui.item.children(":first").data("multiple")) {
+                    ui.item.fadeOut('slow', function () {
+                        $(this).remove()
                     });
                 }
-            });
+                ui.item.find('[data-toggle="tooltip"]').tooltip('hide');
 
-            if ($('.in-use-widgets ul#sortable2 li').length > 0) {
-                $('a.run_report').removeClass('disabled');
+                if ($('.in-use-widgets ul#sortable2 li').length > 0) {
+                    $('a.run_report').removeClass('disabled');
+                }
+                else {
+                    $('a.run_report').addClass('disabled');
+                }
+            },
+            receive: function (event, ui) {
+                ui.item.find(".icon").addClass("icon-grab-reorder").removeClass("fa-arrows");
+                ui.item.find('[data-toggle="tooltip"]').tooltip('destroy');
+
+                if (ui.item.find('[data-toggle="tooltip"]').next().length) {
+                    ui.item.find('[data-toggle="tooltip"]').attr('title', 'Click and drag to move, click to collapse.')
+                }
+                ui.item.find('[data-toggle="tooltip"]').tooltip();
+                ui.item.find('[data-toggle="tooltip"]').tooltip('hide');
+
+                if ($('.in-use-widgets ul#sortable2 li').length > 0) {
+                    $('a.run_report').removeClass('disabled');
+                }
+                else {
+                    $('a.run_report').addClass('disabled');
+                }
+
+                if (ui.item.attr('class') === 'wysiwyg-content') {
+                    $(ui.item.find(".editor").get(0)).removeAttr('id');
+                    $(ui.item.find(".editor").get(0)).uniqueId();
+                    $('#' + ui.item.find(".editor").get(0).id).wysiwyg();
+
+                }
+
+            },
+            start: function (event, ui) {
+                ui.item.find('[data-toggle="tooltip"]').tooltip('destroy');
             }
-        }
-        $(function () {
-            $(".available-widgets ul").sortable({
-                handle: "div.panel div.panel-heading",
-                connectWith: ".in-use-widgets ul",
-                placeholder: "ui-state-highlight",
-                cursor: 'default',
-                opacity: 0.65,
-                remove: function (event, ui) {
-                    if (ui.item.children(":first").data("multiple")) {
-                        var newItem = ui.item.clone();
-                        newItem.prependTo('.available-widgets ul#sortable1');
-                    }
-                    ui.item.find('[data-toggle="tooltip"]').tooltip('hide');
-                },
-                receive: function (event, ui) {
-                    ui.item.find(".icon").removeClass("icon-grab-reorder").addClass("fa-arrows");
-                    ui.item.find('[data-toggle="tooltip"]').tooltip('destroy');
-                    ui.item.find('[data-toggle="tooltip"]').attr('title', 'Click and drag to move')
-                    ui.item.find('[data-toggle="tooltip"]').tooltip();
-                    ui.item.find('[data-toggle="tooltip"]').tooltip('hide');
-                },
-                start: function (event, ui) {
-                    ui.item.find('[data-toggle="tooltip"]').tooltip('destroy');
-                }
 
+        });
+
+        setUpFindingFilters();
+
+        $(document).on('submit', 'form.finding-list', function (event) {
+            var form = this;
+            $.get("{% url 'report_findings' %}?" + $(this).serialize()).done(function (data) {
+                $(form).closest('li.finding-list').html(data);
+                setUpFindingFilters();
             });
 
-            $(".in-use-widgets ul").sortable({
-                handle: "div.panel div.panel-heading",
-                connectWith: ".available-widgets ul",
-                placeholder: "ui-state-highlight",
-                cursor: 'default',
-                opacity: 0.65,
-                remove: function (event, ui) {
-                    if (ui.item.children(":first").data("multiple")) {
-                        ui.item.fadeOut('slow', function () {
-                            $(this).remove()
-                        });
-                    }
-                    ui.item.find('[data-toggle="tooltip"]').tooltip('hide');
+            event.preventDefault();
+        });
 
-                    if ($('.in-use-widgets ul#sortable2 li').length > 0) {
-                        $('a.run_report').removeClass('disabled');
-                    }
-                    else {
-                        $('a.run_report').addClass('disabled');
-                    }
-                },
-                receive: function (event, ui) {
-                    ui.item.find(".icon").addClass("icon-grab-reorder").removeClass("fa-arrows");
-                    ui.item.find('[data-toggle="tooltip"]').tooltip('destroy');
-
-                    if (ui.item.find('[data-toggle="tooltip"]').next().length) {
-                        ui.item.find('[data-toggle="tooltip"]').attr('title', 'Click and drag to move, click to collapse.')
-                    }
-                    ui.item.find('[data-toggle="tooltip"]').tooltip();
-                    ui.item.find('[data-toggle="tooltip"]').tooltip('hide');
-
-                    if ($('.in-use-widgets ul#sortable2 li').length > 0) {
-                        $('a.run_report').removeClass('disabled');
-                    }
-                    else {
-                        $('a.run_report').addClass('disabled');
-                    }
-
-                    if (ui.item.attr('class') === 'wysiwyg-content') {
-                        $(ui.item.find(".editor").get(0)).removeAttr('id');
-                        $(ui.item.find(".editor").get(0)).uniqueId();
-                        $('#' + ui.item.find(".editor").get(0).id).wysiwyg();
-
-                    }
-
-                },
-                start: function (event, ui) {
-                    ui.item.find('[data-toggle="tooltip"]').tooltip('destroy');
-                }
-
+        $(document).on('click', 'form.finding-list a.clear.centered, div.finding-pagination a', function (event) {
+            var link_href = $(this).attr('href')
+            $.get("{% url 'report_findings' %}" + link_href).done(function (data) {
+                $('div.in-use-widgets li.finding-list').html(data);
+                setUpFindingFilters();
             });
 
-            setUpFindingFilters();
+            event.preventDefault();
+        });
 
-            $(document).on('submit', 'form.finding-list', function (event) {
-                var form = this;
-                $.get("{% url 'report_findings' %}?" + $(this).serialize()).done(function (data) {
-                    $(form).closest('li.finding-list').html(data);
-                    setUpFindingFilters();
-                });
-
-                event.preventDefault();
+        $(document).on('submit', 'form.endpoint-list', function (event) {
+            var form = this;
+            $.get("{% url 'report_endpoints' %}?" + $(this).serialize()).done(function (data) {
+                $(form).closest('li.endpoint-list').html(data);
+                setUpFindingFilters();
             });
 
-            $(document).on('click', 'form.finding-list a.clear.centered, div.finding-pagination a', function (event) {
-                var link_href = $(this).attr('href')
-                console.log(link_href);
-                $.get("{% url 'report_findings' %}"+link_href).done(function (data) {
-                    $('div.in-use-widgets li.finding-list').html(data);
-                    setUpFindingFilters();
-                });
+            event.preventDefault();
+        });
 
-                event.preventDefault();
+        $(document).on('click', 'form.endpoint-list a.clear.centered, div.endpoint-pagination a', function (event) {
+            $.get("{% url 'report_endpoints' %}").done(function (data) {
+                $('div.in-use-widgets li.endpoint-list').html(data);
+                setUpFindingFilters();
             });
 
-            $(document).on('submit', 'form.endpoint-list', function (event) {
-                var form = this;
-                $.get("{% url 'report_endpoints' %}?" + $(this).serialize()).done(function (data) {
-                    $(form).closest('li.endpoint-list').html(data);
-                    setUpFindingFilters();
-                });
+            event.preventDefault();
+        });
 
-                event.preventDefault();
-            });
+        $('[data-toggle="tooltip"]').tooltip()
 
-            $(document).on('click', 'form.endpoint-list a.clear.centered, div.endpoint-pagination a', function (event) {
-                $.get("{% url 'report_endpoints' %}").done(function (data) {
-                    $('div.in-use-widgets li.endpoint-list').html(data);
-                    setUpFindingFilters();
-                });
+        $(document).on('click', '.in-use-widgets .panel-available-widget .panel-heading', function (event) {
+            $(this).siblings('.panel-body').slideToggle();
+        });
 
-                event.preventDefault();
-            });
+        $('a.run_report').on('click', function (event) {
 
-            $('[data-toggle="tooltip"]').tooltip()
+            var valid = true;
 
-            $(document).on('click', '.in-use-widgets .panel-available-widget .panel-heading', function (event) {
-                $(this).siblings('.panel-body').slideToggle();
-            });
-
-            $('a.run_report').on('click', function (event) {
-
-                var valid = true;
-
-                $('.in-use-widgets .form-control').not('#finding-list .form-control')
-                        .not('#endpoint-list .form-control').not('#wysiwyg-content .form-control')
-                        .not('.bs-searchbox .form-control').not('div').each(function () {
+            $('.in-use-widgets .form-control').not('#finding-list .form-control')
+                .not('#endpoint-list .form-control').not('#wysiwyg-content .form-control')
+                .not('.bs-searchbox .form-control').not('div').each(function () {
                     if ($(this).val() === '')
                         valid = false;
                 });
 
-                if (valid) {
+            if (valid) {
 
-                    var result = [];
-                    $('.in-use-widgets form').each(function () {  // loop start for each form
+                var result = [];
+                $('.in-use-widgets form').each(function () {  // loop start for each form
 
-                        var _form = $(this);
+                    var _form = $(this);
 
-                        $(this).find('.editor').each(function () {
-                            _form.find('input[name="hidden_content"]').attr('value', $(this).html().replace( /(<br>|\s|<div><br><\/div>|&nbsp;)*$/, ""));                                                                                                
-                        });
-
-                        sr = $(this).serializeArray();
-
-                        var y = {};
-                        y[this.id] = sr;
-                        result.push(y);
+                    $(this).find('.editor').each(function () {
+                        _form.find('input[name="hidden_content"]').attr('value', $(this).html().replace(/(<br>|\s|<div><br><\/div>|&nbsp;)*$/, ""));
                     });
 
-                    var json_content = JSON.stringify(result);
+                    sr = $(this).serializeArray();
 
-                    $('form#custom_report textarea#json').val(json_content);
+                    var y = {};
+                    y[this.id] = sr;
+                    result.push(y);
+                });
 
-                    $('form#custom_report').removeClass('hidden').submit();
-                }
-                else {
-                    alert('Please complete all forms.')
-                }
+                var json_content = JSON.stringify(result);
 
-                event.preventDefault();
-            })
+                $('form#custom_report textarea#json').val(json_content);
 
+                $('form#custom_report').removeClass('hidden').submit();
+            }
+            else {
+                alert('Please complete all forms.')
+            }
+
+            event.preventDefault();
         })
-    </script>
+
+    })
+</script>
 {% endblock %}

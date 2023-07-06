@@ -7,556 +7,560 @@
 {% load get_notetype_availability %}
 {% load event_tags %}
 {% block content %}
-    {{ block.super }}
-    <div class="container">
-        <div class="row">
-          <div class="col-lg-12">
-              <h3 id="product">Test Security Report for {{ test }}</h3>
-              <p>
+{{ block.super }}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h3 id="product">Test Security Report for {{ test }}</h3>
+            <p>
                 <strong>Engagement:</strong> {{ test.engagement.name }}
                 <br><strong>Test:</strong> {{ test }}
                 <br><strong>Generated:</strong> {% display_date %}
-              </p>
-          </div>
+            </p>
         </div>
-        {% if include_table_of_contents%}
-			<div class="row">
-				<div class="col-lg-12" id="toc">
-					<h3 id="table_of_contents">Table of Contents for {{ test }}</h3>
-				</div>
-			</div>
+    </div>
+    {% if include_table_of_contents%}
+    <div class="row">
+        <div class="col-lg-12" id="toc">
+            <h3 id="table_of_contents">Table of Contents for {{ test }}</h3>
+        </div>
+    </div>
 
-			<div id="contents">
-		{% endif %}
+    <div id="contents">
+        {% endif %}
         {% if include_executive_summary %}
-            <div class="row">
-                <div class="col-lg-12">
-                    <h3 id="executive">Executive Summary</h3>
-                    <p>
-                        This report represents a security audit performed by the {{ team_name }} team.
-                        It contains confidential information about the state of your network and applications.
-                        Access to this information by unauthorized personnel may allow them to compromise your network.
-                    </p>
-                </div>
-                <div class="col-lg-12">
-                    <div class="panel panel-default">
-                        <div class="panel-heading finding-title">
-                            <div class="clearfix">
-                                <h5>
-                                    {{ test }}
-                                </h5>
-                            </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table id="notes" class="table-striped table table-condensed table-hover centered">
-                                <tr>
-                                    <th>Environment</th>
-                                    <th>Engagement</th>
-                                    <th>Start Date</th>
-                                    <th>End Date</th>
-                                    <th>Progress</th>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        {{ test.environment }}
-                                    </td>
-                                    <td>
-                                        {{ test.engagement }}
-                                    </td>
-                                    <td>
-                                        {{ test.target_start|date }}
-                                    </td>
-                                    <td>
-                                        {{ test.target_end|date }}
-                                    </td>
-                                    <td>
-                                        {{ test.percent_complete }}%
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-12">
-                    <p>
-                        A {{ test }} was conducted in the {{ test.environment.name }} environment
-                        {% if test.target_end %}
-                            from {{ test.target_start|date:"SHORT_DATE_FORMAT" }} to
-                            {{ test.target_end|date:"SHORT_DATE_FORMAT" }}
-                        {% else %}
-                            on {{ test.target_start|date:"SHORT_DATE_FORMAT" }}
-                        {% endif %}
-                        which yielded a total of {{ findings|length|apnumber }} finding{{ findings|length|pluralize }}
-                        of varying
-                        severity.
-                    </p>
-                    <p>
-                        The test was part of
-                        {% if test.engagement.name %}
-                            the {{ test.engagement.name }}
-                        {% else %}
-                            an
-                        {% endif %}
-                        engagement which ran from {{ test.engagement.target_start|date:"SHORT_DATE_FORMAT" }}
-                        {% if test.engagement.target_end %}
-                            to {{ test.engagement.target_end|date:"SHORT_DATE_FORMAT" }}.
-                        {% else %}
-                            and is ongoing.
-                        {% endif %}
-                    </p>
-                    {% if test.engagement.test_set %}
-                        <p>The engagement also included the following tests which are not reported here:</p>
-                        <ul>
-                            {% for t in test.engagement.test_set.all %}
-                                {% if test.id != t.id %}
-                                    <li>{{ t }}
-                                        ({{ t.environment.name|default:"unknown" }}):
-                                        {{ t.target_start|date:"SHORT_DATE_FORMAT" }}</li>
-                                {% endif %}
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-                <div class="col-md-6">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
+        <div class="row">
+            <div class="col-lg-12">
+                <h3 id="executive">Executive Summary</h3>
+                <p>
+                    This report represents a security audit performed by the {{ team_name }} team.
+                    It contains confidential information about the state of your network and applications.
+                    Access to this information by unauthorized personnel may allow them to compromise your network.
+                </p>
+            </div>
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading finding-title">
+                        <div class="clearfix">
                             <h5>
-                                Finding Age
+                                {{ test }}
                             </h5>
                         </div>
-                        <div class="panel-body">
-                            <div id="finding_age" class="graph"></div>
-                        </div>
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h5>
-                                Engagement Finding Count
-                            </h5>
-                        </div>
-                        <div class="panel-body">
-                            <div id="open_findings" class="graph"></div>
-                        </div>
+                    <div class="table-responsive">
+                        <table id="notes" class="table-striped table table-condensed table-hover centered">
+                            <tr>
+                                <th>Environment</th>
+                                <th>Engagement</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Progress</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {{ test.environment }}
+                                </td>
+                                <td>
+                                    {{ test.engagement }}
+                                </td>
+                                <td>
+                                    {{ test.target_start|date }}
+                                </td>
+                                <td>
+                                    {{ test.target_end|date }}
+                                </td>
+                                <td>
+                                    {{ test.percent_complete }}%
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </div>
+            <div class="col-lg-12">
+                <p>
+                    A {{ test }} was conducted in the {{ test.environment.name }} environment
+                    {% if test.target_end %}
+                    from {{ test.target_start|date:"SHORT_DATE_FORMAT" }} to
+                    {{ test.target_end|date:"SHORT_DATE_FORMAT" }}
+                    {% else %}
+                    on {{ test.target_start|date:"SHORT_DATE_FORMAT" }}
+                    {% endif %}
+                    which yielded a total of {{ findings|length|apnumber }} finding{{ findings|length|pluralize }}
+                    of varying
+                    severity.
+                </p>
+                <p>
+                    The test was part of
+                    {% if test.engagement.name %}
+                    the {{ test.engagement.name }}
+                    {% else %}
+                    an
+                    {% endif %}
+                    engagement which ran from {{ test.engagement.target_start|date:"SHORT_DATE_FORMAT" }}
+                    {% if test.engagement.target_end %}
+                    to {{ test.engagement.target_end|date:"SHORT_DATE_FORMAT" }}.
+                    {% else %}
+                    and is ongoing.
+                    {% endif %}
+                </p>
+                {% if test.engagement.test_set %}
+                <p>The engagement also included the following tests which are not reported here:</p>
+                <ul>
+                    {% for t in test.engagement.test_set.all %}
+                    {% if test.id != t.id %}
+                    <li>{{ t }}
+                        ({{ t.environment.name|default:"unknown" }}):
+                        {{ t.target_start|date:"SHORT_DATE_FORMAT" }}</li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h5>
+                            Finding Age
+                        </h5>
+                    </div>
+                    <div class="panel-body">
+                        <div id="finding_age" class="graph"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h5>
+                            Engagement Finding Count
+                        </h5>
+                    </div>
+                    <div class="panel-body">
+                        <div id="open_findings" class="graph"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
         {% endif %}
         {% if include_disclaimer%}
-            <div style="background-color:#DADCE2; border:1px #003333; padding:.8em; ">
-                <span style="font-size:16pt;  font-family: 'Cambria','times new roman','garamond',serif; color:#ff0000;">Disclaimer</span><br/>
-                <p style="font-size:11pt; line-height:10pt; font-family: 'Cambria','times roman',serif;">{{ disclaimer }}</p>
-            </div>
-		{% endif %}
+        <div style="background-color:#DADCE2; border:1px #003333; padding:.8em; ">
+            <span
+                style="font-size:16pt;  font-family: 'Cambria','times new roman','garamond',serif; color:#ff0000;">Disclaimer</span><br />
+            <p style="font-size:11pt; line-height:10pt; font-family: 'Cambria','times roman',serif;">{{ disclaimer }}
+            </p>
+        </div>
+        {% endif %}
         <div class="row">
             <div class="col-lg-12">
                 {% if include_finding_notes %}
-                    {% with notes=test.notes.all|get_public_notes %}
-                        {% if notes.count > 0 %}
-                            <h3> Test Notes </h3>
-                            <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
-                                <thead>
-                                <tr>
-                                    <th>User</th>
-                                    <th>Date</th>
-                                    {% with notes_with_type=notes|get_notetype_notes_count %}
-                                        {% if notes_with_type > 0 %}
-                                            <th>Note Type</th>
-                                        {% endif %}
-                                        <th>Note</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {% for note in notes reversed %}
-                                            <tr>
-                                                <td>
-                                                    {{ note.author.username }}
-                                                </td>
-                                                <td>
-                                                    {{ note.date }}
-                                                </td>
-                                                {% if notes_with_type > 0 %}
-                                                    <td>
-                                                        {% if note.note_type != None %}
-                                                            {{ note.note_type }}
-                                                        {% endif %}
-                                                    </td>
-                                                {% endif %}
-                                                <td>
-                                                    {{ note|linebreaks }}
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    {% endwith %}
-                            </table>
-                        {% endif %}
+                {% with notes=test.notes.all|get_public_notes %}
+                {% if notes.count > 0 %}
+                <h3> Test Notes </h3>
+                <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Date</th>
+                            {% with notes_with_type=notes|get_notetype_notes_count %}
+                            {% if notes_with_type > 0 %}
+                            <th>Note Type</th>
+                            {% endif %}
+                            <th>Note</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for note in notes reversed %}
+                        <tr>
+                            <td>
+                                {{ note.author.username }}
+                            </td>
+                            <td>
+                                {{ note.date }}
+                            </td>
+                            {% if notes_with_type > 0 %}
+                            <td>
+                                {% if note.note_type != None %}
+                                {{ note.note_type }}
+                                {% endif %}
+                            </td>
+                            {% endif %}
+                            <td>
+                                {{ note|linebreaks }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
                     {% endwith %}
+                </table>
+                {% endif %}
+                {% endwith %}
                 {% endif %}
 
                 {% if test.engagement.risk_acceptance.count > 0 %}
-                    <h3 id="risk_acceptance">Risk Accepted Findings</h3>
-                    <table style="width: 100%;max-width: 100%;margin-bottom: 20px;margin-top:0;border: 1px solid #DDDDDD;">
-                        <tr>
-                            <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
-                                Name
-                            </th>
-                            <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
-                                Date
-                            </th>
-                            <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
-                                Severity
-                            </th>
-                        </tr>
-                        {% for risk in test.engagement.risk_acceptance.all %}
-                            {% for finding in risk.accepted_findings.all %}
-                                <tr>
-                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.title }}</td>
-                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.date }}</td>
-                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.severity }}</td>
-                                </tr>
-                            {% endfor %}
-                        {% endfor %}
-                    </table>
+                <h3 id="risk_acceptance">Risk Accepted Findings</h3>
+                <table style="width: 100%;max-width: 100%;margin-bottom: 20px;margin-top:0;border: 1px solid #DDDDDD;">
+                    <tr>
+                        <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                            Name
+                        </th>
+                        <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                            Date
+                        </th>
+                        <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                            Severity
+                        </th>
+                    </tr>
+                    {% for risk in test.engagement.risk_acceptance.all %}
+                    {% for finding in risk.accepted_findings.all %}
+                    <tr>
+                        <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.title }}</td>
+                        <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.date }}</td>
+                        <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.severity }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% endfor %}
+                </table>
                 {% endif %}
             </div>
         </div>
         <div class="row">
             <div class="col-lg-12">
                 {% if findings %}
-                    <h3 id="findings">Findings</h3>
+                <h3 id="findings">Findings</h3>
                 {% endif %}
                 {% for finding in findings %}
-                    {% ifchanged finding.severity %}
-                        <h4>{{ finding.severity|capfirst }}</h4>
-                    {% endifchanged %}
-                    <div class="panel panel-default">
-                        <div class="panel-heading finding-title">
-                            <div class="clearfix">
-                                <h5>
-                                    Finding {{ forloop.counter }}: {{ finding.title }}
-                                    {% if finding.tags %}
-                                        <sup>
-                                            {% for tag in finding.tags.all %}
-                                            {{ tag }}
-                                            {% endfor %}
-                                        </sup>
-                                    {% endif %}
-                                </h5>
-                            </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table id="notes" class="table-striped table table-condensed table-hover centered">
-                                <tr>
-                                    <th>Severity</th>
-                                    <th>Status</th>
-                                    {% if finding.risk_acceptance_set.all %}
-                                        <th>Acceptance</th>
-                                    {% endif %}
-                                    <th>Date discovered</th>
-                                    <th>Age</th>
-                                    <th>Reporter</th>
-                                    {% if finding.mitigated %}
-                                        <th>Date Mitigated</th>
-                                        <th>Mitigated By</th>
-                                    {% endif %}
-                                    {% if finding.cwe > 0 %}
-                                        <th>CWE</th>
-                                    {% endif %}
-                                    <th>Dojo ID</th>
-                                </tr>
-                                <tr>
-                                    <td>
-                                    <span class="label severity severity-{{ finding.severity }}">
-                                        {% if finding.severity %}
-                                            {{ finding.severity }}
-                                        {% else %}
-                                            Unknown
-                                        {% endif %}
-                                    </span>
-                                    </td>
-                                    <td>{{ finding.status }}</td>
-                                    {% if finding.risk_acceptance_set.all %}
-                                    <td>
-                                        {% comment %} for some reason the font-awesome icons don't work with the report template{% endcomment %}
-                                        {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
-                                            <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
-                                            class="{% if ra.is_expired %}lightgrey{% endif%}">acceptance</a>&nbsp;
-                                        {% endfor %}
-                                    </td>
-                                    {% endif %}
-                                    <td>{{ finding.date }}</td>
-                                    <td>{{ finding.age }} days</td>
-                                    <td>{{ finding.reporter }}</td>
-                                    {% if finding.mitigated %}
-                                        <td>{{ finding.mitigated }}</td>
-                                        <td>{{ finding.mitigated_by }}</td>
-                                    {% endif %}
-                                    {% if finding.cwe > 0 %}
-                                        <td>
-                                            <a target="_blank"
-                                               href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
-                                                <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe }}
-                                            </a>
-                                        </td>
-                                    {% endif %}
-                                    <td>{{ finding.id }}</td>
-                                </tr>
-                            </table>
+                {% ifchanged finding.severity %}
+                <h4>{{ finding.severity|capfirst }}</h4>
+                {% endifchanged %}
+                <div class="panel panel-default">
+                    <div class="panel-heading finding-title">
+                        <div class="clearfix">
+                            <h5>
+                                Finding {{ forloop.counter }}: {{ finding.title }}
+                                {% if finding.tags %}
+                                <sup>
+                                    {% for tag in finding.tags.all %}
+                                    {{ tag }}
+                                    {% endfor %}
+                                </sup>
+                                {% endif %}
+                            </h5>
                         </div>
                     </div>
+                    <div class="table-responsive">
+                        <table id="notes" class="table-striped table table-condensed table-hover centered">
+                            <tr>
+                                <th>Severity</th>
+                                <th>Status</th>
+                                {% if finding.risk_acceptance_set.all %}
+                                <th>Acceptance</th>
+                                {% endif %}
+                                <th>Date discovered</th>
+                                <th>Age</th>
+                                <th>Reporter</th>
+                                {% if finding.mitigated %}
+                                <th>Date Mitigated</th>
+                                <th>Mitigated By</th>
+                                {% endif %}
+                                {% if finding.cwe > 0 %}
+                                <th>CWE</th>
+                                {% endif %}
+                                <th>Dojo ID</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="label severity severity-{{ finding.severity }}">
+                                        {% if finding.severity %}
+                                        {{ finding.severity }}
+                                        {% else %}
+                                        Unknown
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>{{ finding.status }}</td>
+                                {% if finding.risk_acceptance_set.all %}
+                                <td>
+                                    {% comment %} for some reason the font-awesome icons don't work with the report
+                                    template{% endcomment %}
+                                    {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
+                                    <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
+                                        class="{% if ra.is_expired %}lightgrey{% endif%}">acceptance</a>&nbsp;
+                                    {% endfor %}
+                                </td>
+                                {% endif %}
+                                <td>{{ finding.date }}</td>
+                                <td>{{ finding.age }} days</td>
+                                <td>{{ finding.reporter }}</td>
+                                {% if finding.mitigated %}
+                                <td>{{ finding.mitigated }}</td>
+                                <td>{{ finding.mitigated_by }}</td>
+                                {% endif %}
+                                {% if finding.cwe > 0 %}
+                                <td>
+                                    <a target="_blank"
+                                        href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe }}
+                                    </a>
+                                </td>
+                                {% endif %}
+                                <td>{{ finding.id }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
 
-                    {% include "dojo/snippets/endpoints.html" with finding=finding destination="Report" %}
+                {% include "dojo/snippets/endpoints.html" with finding=finding destination="Report" %}
 
-                     <h6>CVSS v3</h6>
-                    <pre>{{ finding.cvssv3|markdown_render }}</pre>
+                <h6>CVSS v3</h6>
+                <pre>{{ finding.cvssv3|markdown_render }}</pre>
 
-                    <h6>Description</h6>
-                    <pre>{{ finding.description|markdown_render }}</pre>
+                <h6>Description</h6>
+                <pre>{{ finding.description|markdown_render }}</pre>
 
-                    <h6>Mitigation</h6>
-                    <pre>{{ finding.mitigation|markdown_render }}</pre>
-                 {% if finding.get_report_requests %}
-                        <h5>Sample Request(s): Displaying {{finding.get_report_requests.count}} of {{finding.burprawrequestresponse_set.count}}</h5>
-                        {% for req in finding.get_report_requests %}
-                           <h6>Request {{forloop.counter}} </h6>
-                           <pre>{{ req.get_request }}</pre>
-                        {% if req.get_response %}
-                           <h6>Response {{forloop.counter}}</h6>
-                           <pre>{{ req.get_response|truncatechars_html:800 }}</pre>
-                        {% endif %}
-                        {% endfor %}
-                        {% endif %}
+                <h6>Mitigation</h6>
+                <pre>{{ finding.mitigation|markdown_render }}</pre>
+                {% if finding.get_report_requests %}
+                <h5>Sample Request(s): Displaying {{finding.get_report_requests.count}} of
+                    {{finding.burprawrequestresponse_set.count}}</h5>
+                {% for req in finding.get_report_requests %}
+                <h6>Request {{forloop.counter}} </h6>
+                <pre>{{ req.get_request }}</pre>
+                {% if req.get_response %}
+                <h6>Response {{forloop.counter}}</h6>
+                <pre>{{ req.get_response|truncatechars_html:800 }}</pre>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
 
-                    <h6>Impact</h6>
-                    <pre>{{ finding.impact|markdown_render }}</pre>
-                    {% if finding.steps_to_reproduce %}
-                    <h6>Steps to Reproduce</h6>
-                    <pre>{{ finding.steps_to_reproduce|markdown_render }}</pre>
-                    {% endif %}
-                    {% if finding.severity_justification %}
-                    <h6>Severity Justification</h6>
-                    <pre>{{ finding.severity_justification|markdown_render }}</pre>
-                    {% endif %}
-                    <h6>References</h6>
-                    <pre>{{ finding.references|markdown_render }}</pre>
-                    {% if include_finding_images %}
-                        {% include "dojo/snippets/file_images.html" with size='original' obj=finding size="original" format="HTML" %}
-                    {% endif %}
-                    {% if include_finding_notes %}
-                        {% with notes=finding.notes.all|get_public_notes %}
-                            {% if notes.count > 0 %}
-                                <h6>Notes</h6>
-                                <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>User</th>
-                                            <th>Date</th>
-                                            {% with notes_with_type=notes|get_notetype_notes_count %}
-                                              {% if notes_with_type > 0 %}
-                                                  <th>Note Type</th>
-                                              {% endif %}
-                                            <th>Note</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for note in notes reversed %}
-                                            <tr>
-                                                <td>
-                                                    {{ note.author.username }}
-                                                </td>
-                                                <td>
-                                                    {{ note.date }}
-                                                </td>
-                                                {% if notes_with_type > 0 %}
-                                                <td>
-                                                    {% if note.note_type != None %}
-                                                      {{ note.note_type }}
-                                                    {% endif %}
-                                                </td>
-                                                {% endif %}
-                                                <td>
-                                                    {{ note|linebreaks }}
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                  {% endwith %}
-                                </table>
+                <h6>Impact</h6>
+                <pre>{{ finding.impact|markdown_render }}</pre>
+                {% if finding.steps_to_reproduce %}
+                <h6>Steps to Reproduce</h6>
+                <pre>{{ finding.steps_to_reproduce|markdown_render }}</pre>
+                {% endif %}
+                {% if finding.severity_justification %}
+                <h6>Severity Justification</h6>
+                <pre>{{ finding.severity_justification|markdown_render }}</pre>
+                {% endif %}
+                <h6>References</h6>
+                <pre>{{ finding.references|markdown_render }}</pre>
+                {% if include_finding_images %}
+                {% include "dojo/snippets/file_images.html" with size='original' obj=finding size="original"
+                format="HTML" %}
+                {% endif %}
+                {% if include_finding_notes %}
+                {% with notes=finding.notes.all|get_public_notes %}
+                {% if notes.count > 0 %}
+                <h6>Notes</h6>
+                <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Date</th>
+                            {% with notes_with_type=notes|get_notetype_notes_count %}
+                            {% if notes_with_type > 0 %}
+                            <th>Note Type</th>
                             {% endif %}
-                        {% endwith %}
-                    {% endif %}
+                            <th>Note</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for note in notes reversed %}
+                        <tr>
+                            <td>
+                                {{ note.author.username }}
+                            </td>
+                            <td>
+                                {{ note.date }}
+                            </td>
+                            {% if notes_with_type > 0 %}
+                            <td>
+                                {% if note.note_type != None %}
+                                {{ note.note_type }}
+                                {% endif %}
+                            </td>
+                            {% endif %}
+                            <td>
+                                {{ note|linebreaks }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% endwith %}
+                </table>
+                {% endif %}
+                {% endwith %}
+                {% endif %}
                 {% endfor %}
             </div>
         </div>
         {% if include_table_of_contents %}
-			</div>
-		{% endif %}
-    </div> <!-- /container -->
+    </div>
+    {% endif %}
+</div> <!-- /container -->
 {% endblock %}
 {% block js %}
-    {{ block.super }}
+{{ block.super }}
 
-    <script src="{{ host }}{% static "jquery/dist/jquery.min.js" %}"></script>
-    <!-- Flot Charts JavaScript -->
-    <script src="{{ host }}{% static "flot/excanvas.min.js" %}"></script>
-    <script src="{{ host }}{% static "flot/jquery.flot.js" %}"></script>
-    <script src="{{ host }}{% static "flot/jquery.flot.resize.js" %}"></script>
-    <script src="{{ host }}{% static "flot/jquery.flot.time.js" %}"></script>
-    <script src="{{ host }}{% static "flot/jquery.flot.stack.js" %}"></script>
-    <script src="{{ host }}{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
-    <script src="{{ host }}{% static "dojo/js/metrics.js" %}"></script>
-    <script type="text/javascript">
-        {% if include_executive_summary %}
-            $(function () {
-                var critical = 0;
-                var high = 0;
-                var medium = 0;
-                var low = 0;
-                var info = 0;
-                var ticks = [
-                    [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-                ];
+<script src="{{ host }}{% static " jquery/dist/jquery.min.js" %}"></script>
+<!-- Flot Charts JavaScript -->
+<script src="{{ host }}{% static " flot/excanvas.min.js" %}"></script>
+<script src="{{ host }}{% static " flot/jquery.flot.js" %}"></script>
+<script src="{{ host }}{% static " flot/jquery.flot.resize.js" %}"></script>
+<script src="{{ host }}{% static " flot/jquery.flot.time.js" %}"></script>
+<script src="{{ host }}{% static " flot/jquery.flot.stack.js" %}"></script>
+<script src="{{ host }}{% static " flot-axis/jquery.flot.axislabels.js" %}"></script>
+<script src="{{ host }}{% static " dojo/js/metrics.js" %}"></script>
+<script type="text/javascript">
+    {% if include_executive_summary %}
+    $(function () {
+        var critical = 0;
+        var high = 0;
+        var medium = 0;
+        var low = 0;
+        var info = 0;
+        var ticks = [
+            [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
+        ];
 
-                {% for f in findings %}
-                    {% if f.severity == 'Critical' %}
-                        critical += 1;
-                    {% elif f.severity == 'High' %}
-                        high += 1;
-                    {% elif f.severity == 'Medium' %}
-                        medium += 1;
-                    {% elif f.severity == 'Low' %}
-                        low += 1;
-                    {% elif f.severity == 'Info' %}
-                        info += 1;
-                    {% endif %}
-                {% endfor %}
+        {% for f in findings %}
+        {% if f.severity == 'Critical' %}
+        critical += 1;
+        {% elif f.severity == 'High' %}
+        high += 1;
+        {% elif f.severity == 'Medium' %}
+        medium += 1;
+        {% elif f.severity == 'Low' %}
+        low += 1;
+        {% elif f.severity == 'Info' %}
+        info += 1;
+        {% endif %}
+        {% endfor %}
 
-                var d1 = [
-                    [0, critical],
-                ];
-                var d2 = [
-                    [1, high],
-                ];
-                var d3 = [
-                    [2, medium],
-                ];
-                var d4 = [
-                    [3, low],
-                ];
-                var d5 = [
-                    [4, info],
-                ];
-                open_findings(d1, d2, d3, d4, d5, ticks);
-            });
+        var d1 = [
+            [0, critical],
+        ];
+        var d2 = [
+            [1, high],
+        ];
+        var d3 = [
+            [2, medium],
+        ];
+        var d4 = [
+            [3, low],
+        ];
+        var d5 = [
+            [4, info],
+        ];
+        open_findings(d1, d2, d3, d4, d5, ticks);
+    });
 
-            var data = {};
-            var data_1 = []
-            ticks = []
-            {% for f in findings %}
-                if (data[{{ f.age }}]) {
-                    data[{{ f.age }}] += 1
+    var data = {};
+    var data_1 = []
+    ticks = []
+    {% for f in findings %}
+    if (data[{{ f.age }}]) {
+        data[{{ f.age }
+    }] += 1
                 }
                 else {
-                    data[{{ f.age }}] = 1
+        data[{{ f.age }
+    }] = 1
                 }
-            {% endfor %}
-            var i = 0;
-            $.each(data, function (index, value) {
-                if (value > 0) {
-                    data_1.push([i, value]);
-                    ticks.push([i, index])
-                }
-                i++;
-            });
-            finding_age(data_1, ticks);
+    {% endfor %}
+    var i = 0;
+    $.each(data, function (index, value) {
+        if (value > 0) {
+            data_1.push([i, value]);
+            ticks.push([i, index])
+        }
+        i++;
+    });
+    finding_age(data_1, ticks);
 
-            critical = [];
-            high = [];
-            medium = [];
-            low = [];
-            {% for month in endpoint_opened_per_month|slice:'1:' %}
-                critical.push([{{ month.0 }}, {{ month.2 }}]);
-                high.push([{{ month.0 }}, {{ month.3 }}]);
-                medium.push([{{ month.0 }}, {{ month.4 }}]);
-                low.push([{{ month.0 }}, {{ month.5 }}]);
-            {% endfor %}
-            {% if endpoint_opened_per_month %}
-                opened_per_month_2(critical, high, medium, low);
-            {%  endif %}
-        {% endif %}
+    critical = [];
+    high = [];
+    medium = [];
+    low = [];
+    {% for month in endpoint_opened_per_month | slice: '1:' %}
+    critical.push([{{ month.0 }}, {{ month.2 }}]);
+    high.push([{{ month.0 }}, {{ month.3 }}]);
+    medium.push([{{ month.0 }}, {{ month.4 }}]);
+    low.push([{{ month.0 }}, {{ month.5 }}]);
+    {% endfor %}
+    {% if endpoint_opened_per_month %}
+    opened_per_month_2(critical, high, medium, low);
+    {% endif %}
+    {% endif %}
 
-        window.onload = function () {
-            var toc = "";
-            var level = 3;
+    window.onload = function () {
+        var toc = "";
+        var level = 3;
 
-            document.getElementById("contents").innerHTML =
-                document.getElementById("contents").innerHTML.replace(
-                    /<h([\d])([^<]*)>([^<]+)<\/h([\d])>|<h([\d])([^>]*)>([^<]+)<sup>([^<]*)<\/sup>([^<]*)<\/h([\d])>/gi,
-                    function (str, openLevel, id, titleText, closeLevel, openLevel_t, id_t, titleText_t, tags, junk, closeLevel_t) {
-                        console.log("str :: " + str)
-                        if (openLevel != closeLevel || openLevel > 5) {
-                            return str;
-                        }
+        document.getElementById("contents").innerHTML =
+            document.getElementById("contents").innerHTML.replace(
+                /<h([\d])([^<]*)>([^<]+)<\/h([\d])>|<h([\d])([^>]*)>([^<]+)<sup>([^<]*)<\/sup>([^<]*)<\/h([\d])>/gi,
+                function (str, openLevel, id, titleText, closeLevel, openLevel_t, id_t, titleText_t, tags, junk, closeLevel_t) {
+                    if (openLevel != closeLevel || openLevel > 5) {
+                        return str;
+                    }
 
-                        if(tags)
-                        {
-                            openLevel = openLevel_t;
-                            id = id_t;
-                            titleText = titleText_t;
-                            closeLevel = closeLevel_t;
-                        }
+                    if (tags) {
+                        openLevel = openLevel_t;
+                        id = id_t;
+                        titleText = titleText_t;
+                        closeLevel = closeLevel_t;
+                    }
 
-                        if (openLevel > level) {
-                            toc += (new Array(openLevel - level + 1)).join("<ul>");
-                        } else if (openLevel < level) {
-                            toc += (new Array(level - openLevel + 1)).join("</ul>");
-                        }
+                    if (openLevel > level) {
+                        toc += (new Array(openLevel - level + 1)).join("<ul>");
+                    } else if (openLevel < level) {
+                        toc += (new Array(level - openLevel + 1)).join("</ul>");
+                    }
 
-                        level = parseInt(openLevel);
+                    level = parseInt(openLevel);
 
-                        var anchor = titleText.trim().replace(/ /g, "_");
+                    var anchor = titleText.trim().replace(/ /g, "_");
 
-                        if(tags)
-                        {
-                            if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
+                    if (tags) {
+                        if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
+                            toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
-                            }
-                            else {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
+                        }
+                        else {
+                            toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 titleText + "<sup>" + tags + "</sup></a></li>";
-                            }
-
-                            return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
-                                + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
-                        }
-                        else
-                        {
-                            if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
-                                "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
-                            }
-                            else {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
-                                titleText + "</a></li>";
-                            }
-
-                            return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
-                                + titleText + "</h" + closeLevel + "></a>";
                         }
 
                         return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
                             + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
                     }
-                );
+                    else {
+                        if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
+                            toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
+                                "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
+                        }
+                        else {
+                            toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
+                                titleText + "</a></li>";
+                        }
 
-            if (level) {
-                toc += (new Array(level + 1)).join("</ul>");
-            }
+                        return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
+                            + titleText + "</h" + closeLevel + "></a>";
+                    }
 
-            document.getElementById("toc").innerHTML += toc;
-        };
-    </script>
+                    return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
+                        + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
+                }
+            );
+
+        if (level) {
+            toc += (new Array(level + 1)).join("</ul>");
+        }
+
+        document.getElementById("toc").innerHTML += toc;
+    };
+</script>
 {% endblock %}
