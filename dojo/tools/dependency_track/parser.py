@@ -204,6 +204,9 @@ class DependencyTrackParser(object):
             logger.warning("Detected severity of %s that could not be mapped for %s. Defaulting to Critical!", dependency_track_severity, title)
             vulnerability_severity = "Critical"
 
+        # Get the cvss score of the vulnerabililty
+        cvss_score = dependency_track_finding['vulnerability'].get("cvssV3BaseScore")
+
         # Use the analysis state from Dependency Track to determine if the finding has already been marked as a false positive upstream
         analysis = dependency_track_finding.get('analysis')
         is_false_positive = True if analysis is not None and analysis.get('state') == 'FALSE_POSITIVE' else False
@@ -229,6 +232,9 @@ class DependencyTrackParser(object):
 
         if vulnerability_id:
             finding.unsaved_vulnerability_ids = vulnerability_id
+
+        if cvss_score:
+            finding.cvssv3_score = cvss_score
 
         return finding
 
