@@ -219,5 +219,5 @@ def access_file(request, fid, oid, obj_type, url=False):
     redirect_url = '{media_root}/{file_name}'.format(
         media_root=settings.MEDIA_ROOT,
         file_name=file.file.url.lstrip(settings.MEDIA_URL))
-    print(redirect_url)
+    logger.debug(redirect_url)
     return FileResponse(open(redirect_url))

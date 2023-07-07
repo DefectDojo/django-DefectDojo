@@ -953,7 +953,7 @@ def issue_from_jira_is_active(issue_from_jira):
     #         "resolution": "None"
 
     if not hasattr(issue_from_jira.fields, 'resolution'):
-        print(vars(issue_from_jira))
+        logger.debug(vars(issue_from_jira))
         return True
 
     if not issue_from_jira.fields.resolution:
