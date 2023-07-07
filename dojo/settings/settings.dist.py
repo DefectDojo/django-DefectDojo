@@ -346,7 +346,7 @@ def get_secret(secret_name):
     try:
         get_secret_value_response = client.get_secret_value(SecretId=secret_name)
     except ClientError as e:
-        logger.debug("An error occurred on requested secret " + secret_name, e)
+        logger.error("An error occurred on requested secret " + secret_name, e)
         raise e
 
     # Decrypts secret using the associated KMS key.

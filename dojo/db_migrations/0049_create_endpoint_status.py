@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
                         finding.endpoint_status.add(status)
                 except Exception as e:
                     # Something wild happened
-                    logger.debug(e)
+                    logger.error(e)
                     pass
 
     dependencies = [
