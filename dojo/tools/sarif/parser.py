@@ -8,7 +8,7 @@ from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
-CWE_REGEX = r'cwe-\d+'
+CWE_REGEX = r"cwe-\d+"
 
 
 class SarifParser(object):
@@ -31,18 +31,18 @@ class SarifParser(object):
         tree = json.load(filehandle)
         items = list()
         # for each runs we just aggregate everything
-        for run in tree.get('runs', list()):
+        for run in tree.get("runs", list()):
             items.extend(self.__get_items_from_run(run))
         return items
 
     def get_tests(self, scan_type, handle):
         tree = json.load(handle)
         tests = list()
-        for run in tree.get('runs', list()):
+        for run in tree.get("runs", list()):
             test = ParserTest(
-                name=run['tool']['driver']['name'],
-                type=run['tool']['driver']['name'],
-                version=run['tool']['driver'].get('version'),
+                name=run["tool"]["driver"]["name"],
+                type=run["tool"]["driver"]["name"],
+                version=run["tool"]["driver"].get("version"),
             )
             test.findings = self.__get_items_from_run(run)
             tests.append(test)
@@ -55,18 +55,18 @@ class SarifParser(object):
         artifacts = get_artifacts(run)
         # get the timestamp of the run if possible
         run_date = self.__get_last_invocation_date(run)
-        for result in run.get('results', list()):
+        for result in run.get("results", list()):
             item = get_item(result, rules, artifacts, run_date)
             if item is not None:
                 items.append(item)
         return items
 
     def __get_last_invocation_date(self, data):
-        invocations = data.get('invocations', [])
+        invocations = data.get("invocations", [])
         if len(invocations) == 0:
             return None
         # try to get the last 'endTimeUtc'
-        raw_date = invocations[-1].get('endTimeUtc')
+        raw_date = invocations[-1].get("endTimeUtc")
         if raw_date is None:
             return None
         # if the data is here we try to convert it to datetime
@@ -75,8 +75,8 @@ class SarifParser(object):
 
 def get_rules(run):
     rules = {}
-    for item in run['tool']['driver'].get('rules', []):
-        rules[item['id']] = item
+    for item in run["tool"]["driver"].get("rules", []):
+        rules[item["id"]] = item
     return rules
 
 
@@ -84,7 +84,7 @@ def get_rules(run):
 def get_properties_tags(value):
     if not value:
         return []
-    return value.get('properties', {}).get('tags', [])
+    return value.get("properties", {}).get("tags", [])
 
 
 def search_cwe(value, cwes):
@@ -96,9 +96,9 @@ def search_cwe(value, cwes):
 def get_rule_cwes(rule):
     cwes = []
     # data of the specification
-    if 'relationships' in rule and type(rule['relationships']) == list:
-        for relationship in rule['relationships']:
-            value = relationship['target']['id']
+    if "relationships" in rule and isinstance(rule["relationships"], list):
+        for relationship in rule["relationships"]:
+            value = relationship["target"]["id"]
             search_cwe(value, cwes)
         return cwes
 
@@ -110,8 +110,8 @@ def get_rule_cwes(rule):
 def get_result_cwes_properties(result):
     """Some tools like njsscan store the CWE in the properties of the result"""
     cwes = []
-    if 'properties' in result and 'cwe' in result['properties']:
-        value = result['properties']['cwe']
+    if "properties" in result and "cwe" in result["properties"]:
+        value = result["properties"]["cwe"]
         search_cwe(value, cwes)
     return cwes
 
@@ -119,8 +119,8 @@ def get_result_cwes_properties(result):
 def get_artifacts(run):
     artifacts = {}
     custom_index = 0  # hack because some tool doesn't generate this attribute
-    for tree_artifact in run.get('artifacts', []):
-        artifacts[tree_artifact.get('index', custom_index)] = tree_artifact
+    for tree_artifact in run.get("artifacts", []):
+        artifacts[tree_artifact.get("index", custom_index)] = tree_artifact
         custom_index += 1
     return artifacts
 
@@ -130,9 +130,9 @@ def get_message_from_multiformatMessageString(data, rule):
 
     See here for the specification: https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/sarif-v2.1.0-os.html#_Toc34317468
     """
-    if rule is not None and 'id' in data:
-        text = rule['messageStrings'][data['id']].get('text')
-        arguments = data.get('arguments', [])
+    if rule is not None and "id" in data:
+        text = rule["messageStrings"][data["id"]].get("text")
+        arguments = data.get("arguments", [])
         # argument substitution
         for i in range(6):  # the specification limit to 6
             substitution_str = "{" + str(i) + "}"
@@ -142,7 +142,7 @@ def get_message_from_multiformatMessageString(data, rule):
                 return text
     else:
         # TODO manage markdown
-        return data.get('text')
+        return data.get("text")
 
 
 def cve_try(val):
@@ -156,90 +156,129 @@ def cve_try(val):
 
 def get_title(result, rule):
     title = None
-    if 'message' in result:
-        title = get_message_from_multiformatMessageString(result['message'], rule)
+    if "message" in result:
+        title = get_message_from_multiformatMessageString(
+            result["message"], rule
+        )
     if title is None and rule is not None:
-        if 'shortDescription' in rule:
-            title = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
-        elif 'fullDescription' in rule:
-            title = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
-        elif 'name' in rule:
-            title = rule['name']
-        elif 'id' in rule:
-            title = rule['id']
+        if "shortDescription" in rule:
+            title = get_message_from_multiformatMessageString(
+                rule["shortDescription"], rule
+            )
+        elif "fullDescription" in rule:
+            title = get_message_from_multiformatMessageString(
+                rule["fullDescription"], rule
+            )
+        elif "name" in rule:
+            title = rule["name"]
+        elif "id" in rule:
+            title = rule["id"]
 
     if title is None:
-        raise ValueError('No information found to create a title')
+        raise ValueError("No information found to create a title")
 
     return textwrap.shorten(title, 150)
 
 
 def get_snippet(result):
     snippet = None
-    if 'locations' in result:
-        location = result['locations'][0]
-        if 'physicalLocation' in location:
-            if 'region' in location['physicalLocation']:
-                if 'snippet' in location['physicalLocation']['region']:
-                    if 'text' in location['physicalLocation']['region']['snippet']:
-                        snippet = location['physicalLocation']['region']['snippet']['text']
-            if snippet is None and 'contextRegion' in location['physicalLocation']:
-                if 'snippet' in location['physicalLocation']['contextRegion']:
-                    if 'text' in location['physicalLocation']['contextRegion']['snippet']:
-                        snippet = location['physicalLocation']['contextRegion']['snippet']['text']
+    if "locations" in result:
+        location = result["locations"][0]
+        if "physicalLocation" in location:
+            if "region" in location["physicalLocation"]:
+                if "snippet" in location["physicalLocation"]["region"]:
+                    if (
+                        "text"
+                        in location["physicalLocation"]["region"]["snippet"]
+                    ):
+                        snippet = location["physicalLocation"]["region"][
+                            "snippet"
+                        ]["text"]
+            if (
+                snippet is None
+                and "contextRegion" in location["physicalLocation"]
+            ):
+                if "snippet" in location["physicalLocation"]["contextRegion"]:
+                    if (
+                        "text"
+                        in location["physicalLocation"]["contextRegion"][
+                            "snippet"
+                        ]
+                    ):
+                        snippet = location["physicalLocation"][
+                            "contextRegion"
+                        ]["snippet"]["text"]
     return snippet
 
 
 def get_codeFlowsDescription(codeFlows):
-    description = ''
+    description = ""
     for codeFlow in codeFlows:
-        if 'threadFlows' not in codeFlow:
+        if "threadFlows" not in codeFlow:
             continue
-        for threadFlow in codeFlow['threadFlows']:
-            if 'locations' not in threadFlow:
+        for threadFlow in codeFlow["threadFlows"]:
+            if "locations" not in threadFlow:
                 continue
 
-            description = '**Code flow:**\n'
-            for location in threadFlow['locations']:
-                physicalLocation = location['location']['physicalLocation']
-                region = physicalLocation['region']
-                description += '\t' + physicalLocation['artifactLocation'][
-                    'uri'] if 'byteOffset' in region else '\t' + physicalLocation['artifactLocation']['uri'] + ':' + str(
-                    region['startLine'])
-                if 'startColumn' in region:
-                    description += ':' + str(region['startColumn'])
-                if 'snippet' in region:
-                    description += '\t-\t' + region['snippet']['text']
-                description += '\n'
+            description = "**Code flow:**\n"
+            for location in threadFlow["locations"]:
+                physicalLocation = location["location"]["physicalLocation"]
+                region = physicalLocation["region"]
+                description += (
+                    "\t" + physicalLocation["artifactLocation"]["uri"]
+                    if "byteOffset" in region
+                    else "\t"
+                    + physicalLocation["artifactLocation"]["uri"]
+                    + ":"
+                    + str(region["startLine"])
+                )
+                if "startColumn" in region:
+                    description += ":" + str(region["startColumn"])
+                if "snippet" in region:
+                    description += "\t-\t" + region["snippet"]["text"]
+                description += "\n"
 
     return description
 
 
 def get_description(result, rule):
-    description = ''
-    message = ''
-    if 'message' in result:
-        message = get_message_from_multiformatMessageString(result['message'], rule)
-        description += '**Result message:** {}\n'.format(message)
+    description = ""
+    message = ""
+    if "message" in result:
+        message = get_message_from_multiformatMessageString(
+            result["message"], rule
+        )
+        description += "**Result message:** {}\n".format(message)
     if get_snippet(result) is not None:
-        description += '**Snippet:**\n```{}```\n'.format(get_snippet(result))
+        description += "**Snippet:**\n```{}```\n".format(get_snippet(result))
     if rule is not None:
-        if 'name' in rule:
-            description += '**Rule name:** {}\n'.format(rule.get('name'))
-        shortDescription = ''
-        if 'shortDescription' in rule:
-            shortDescription = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
+        if "name" in rule:
+            description += "**Rule name:** {}\n".format(rule.get("name"))
+        shortDescription = ""
+        if "shortDescription" in rule:
+            shortDescription = get_message_from_multiformatMessageString(
+                rule["shortDescription"], rule
+            )
             if shortDescription != message:
-                description += '**Rule short description:** {}\n'.format(shortDescription)
-        if 'fullDescription' in rule:
-            fullDescription = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
-            if fullDescription != message and fullDescription != shortDescription:
-                description += '**Rule full description:** {}\n'.format(fullDescription)
+                description += "**Rule short description:** {}\n".format(
+                    shortDescription
+                )
+        if "fullDescription" in rule:
+            fullDescription = get_message_from_multiformatMessageString(
+                rule["fullDescription"], rule
+            )
+            if (
+                fullDescription != message
+                and fullDescription != shortDescription
+            ):
+                description += "**Rule full description:** {}\n".format(
+                    fullDescription
+                )
 
-    if len(result.get('codeFlows', [])) > 0:
-        description += get_codeFlowsDescription(result['codeFlows'])
+    if len(result.get("codeFlows", [])) > 0:
+        description += get_codeFlowsDescription(result["codeFlows"])
 
-    if description.endswith('\n'):
+    if description.endswith("\n"):
         description = description[:-1]
 
     return description
@@ -248,11 +287,13 @@ def get_description(result, rule):
 def get_references(rule):
     reference = None
     if rule is not None:
-        if 'helpUri' in rule:
-            reference = rule['helpUri']
-        elif 'help' in rule:
-            helpText = get_message_from_multiformatMessageString(rule['help'], rule)
-            if helpText.startswith('http'):
+        if "helpUri" in rule:
+            reference = rule["helpUri"]
+        elif "help" in rule:
+            helpText = get_message_from_multiformatMessageString(
+                rule["help"], rule
+            )
+            if helpText.startswith("http"):
                 reference = helpText
 
     return reference
@@ -260,11 +301,11 @@ def get_references(rule):
 
 def cvss_to_severity(cvss):
     severity_mapping = {
-        1: 'Info',
-        2: 'Low',
-        3: 'Medium',
-        4: 'High',
-        5: 'Critical'
+        1: "Info",
+        2: "Low",
+        3: "Medium",
+        4: "High",
+        5: "Critical",
     }
 
     if cvss >= 9:
@@ -280,30 +321,33 @@ def cvss_to_severity(cvss):
 
 
 def get_severity(result, rule):
-    severity = result.get('level')
+    severity = result.get("level")
     if severity is None and rule is not None:
         # get the severity from the rule
-        if 'defaultConfiguration' in rule:
-            severity = rule['defaultConfiguration'].get('level')
+        if "defaultConfiguration" in rule:
+            severity = rule["defaultConfiguration"].get("level")
 
-    if 'note' == severity:
-        return 'Info'
-    elif 'warning' == severity:
-        return 'Medium'
-    elif 'error' == severity:
-        return 'High'
+    if "note" == severity:
+        return "Info"
+    elif "warning" == severity:
+        return "Medium"
+    elif "error" == severity:
+        return "High"
     else:
-        return 'Medium'
+        return "Medium"
 
 
 def get_item(result, rules, artifacts, run_date):
-    # see https://docs.oasis-open.org/sarif/sarif/v2.1.0/csprd01/sarif-v2.1.0-csprd01.html / 3.27.9
-    kind = result.get('kind', 'fail')
-    if kind != 'fail':
+    # see
+    # https://docs.oasis-open.org/sarif/sarif/v2.1.0/csprd01/sarif-v2.1.0-csprd01.html
+    # / 3.27.9
+    kind = result.get("kind", "fail")
+    if kind != "fail":
         return None
 
     # if finding is suppressed, mark it as False Positive
-    # Note: see https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html#_Toc10127852
+    # Note: see
+    # https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html#_Toc10127852
     suppressed = False
     if result.get("suppressions"):
         suppressed = True
@@ -312,21 +356,21 @@ def get_item(result, rules, artifacts, run_date):
     file_path = None
     line = None
     if "locations" in result:
-        location = result['locations'][0]
-        if 'physicalLocation' in location:
-            file_path = location['physicalLocation']['artifactLocation']['uri']
+        location = result["locations"][0]
+        if "physicalLocation" in location:
+            file_path = location["physicalLocation"]["artifactLocation"]["uri"]
 
             # 'region' attribute is optionnal
-            if 'region' in location['physicalLocation']:
+            if "region" in location["physicalLocation"]:
                 # https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html / 3.30.1
                 # need to check whether it is byteOffset
-                if 'byteOffset' in location['physicalLocation']['region']:
+                if "byteOffset" in location["physicalLocation"]["region"]:
                     pass
                 else:
-                    line = location['physicalLocation']['region']['startLine']
+                    line = location["physicalLocation"]["region"]["startLine"]
 
     # test rule link
-    rule = rules.get(result.get('ruleId'))
+    rule = rules.get(result.get("ruleId"))
 
     finding = Finding(
         title=get_title(result, rule),
@@ -341,20 +385,21 @@ def get_item(result, rules, artifacts, run_date):
         references=get_references(rule),
     )
 
-    if 'ruleId' in result:
-        finding.vuln_id_from_tool = result['ruleId']
+    if "ruleId" in result:
+        finding.vuln_id_from_tool = result["ruleId"]
         # for now we only support when the id of the rule is a CVE
-        if cve_try(result['ruleId']):
-            finding.unsaved_vulnerability_ids = [cve_try(result['ruleId'])]
+        if cve_try(result["ruleId"]):
+            finding.unsaved_vulnerability_ids = [cve_try(result["ruleId"])]
     # some time the rule id is here but the tool doesn't define it
     if rule is not None:
         cwes_extracted = get_rule_cwes(rule)
         if len(cwes_extracted) > 0:
             finding.cwe = cwes_extracted[-1]
 
-        # Some tools such as GitHub or Grype return the severity in properties instead
-        if 'properties' in rule and 'security-severity' in rule['properties']:
-            cvss = float(rule['properties']['security-severity'])
+        # Some tools such as GitHub or Grype return the severity in properties
+        # instead
+        if "properties" in rule and "security-severity" in rule["properties"]:
+            cvss = float(rule["properties"]["security-severity"])
             severity = cvss_to_severity(cvss)
             finding.cvssv3_score = cvss
             finding.severity = severity
@@ -366,7 +411,9 @@ def get_item(result, rules, artifacts, run_date):
 
     # manage fixes provided in the report
     if "fixes" in result:
-        finding.mitigation = "\n".join([fix.get('description', {}).get("text") for fix in result["fixes"]])
+        finding.mitigation = "\n".join(
+            [fix.get("description", {}).get("text") for fix in result["fixes"]]
+        )
 
     if run_date:
         finding.date = run_date
@@ -378,16 +425,19 @@ def get_item(result, rules, artifacts, run_date):
     # manage fingerprints
     # fingerprinting in SARIF is more complete than in current implementation
     # SARIF standard make it possible to have multiple version in the same report
-    # for now we just take the first one and keep the format to be able to compare it
+    # for now we just take the first one and keep the format to be able to
+    # compare it
     if result.get("fingerprints"):
         hashes = get_fingerprints_hashes(result["fingerprints"])
         first_item = next(iter(hashes.items()))
-        finding.unique_id_from_tool = first_item[1]['value']
+        finding.unique_id_from_tool = first_item[1]["value"]
     elif result.get("partialFingerprints"):
         # for this one we keep an order to have id that could be compared
         hashes = get_fingerprints_hashes(result["partialFingerprints"])
         sorted_hashes = sorted(hashes.keys())
-        finding.unique_id_from_tool = "|".join([f'{key}:{hashes[key]["value"]}' for key in sorted_hashes])
+        finding.unique_id_from_tool = "|".join(
+            [f'{key}:{hashes[key]["value"]}' for key in sorted_hashes]
+        )
     return finding
 
 

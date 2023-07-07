@@ -32,30 +32,35 @@ class WazuhParser(object):
             return list()
 
         for item in vulnerability:
-            if item['condition'] != "Package unfixed" and item['severity'] != "Untriaged":
-                id = item.get('cve')
-                package_name = item.get('name')
-                package_version = item.get('version')
-                description = item.get('condition')
-                if item.get('severity') == "Untriaged":
+            if (
+                item["condition"] != "Package unfixed"
+                and item["severity"] != "Untriaged"
+            ):
+                id = item.get("cve")
+                package_name = item.get("name")
+                package_version = item.get("version")
+                description = item.get("condition")
+                if item.get("severity") == "Untriaged":
                     severity = "Info"
                 else:
-                    severity = item.get('severity')
-                if item.get('status') == "VALID":
+                    severity = item.get("severity")
+                if item.get("status") == "VALID":
                     active = True
                 else:
                     active = False
-                links = item.get('external_references')
-                title = item.get('title') + " (version: " + package_version + ")"
-                severity = item.get('severity', 'info').capitalize()
+                links = item.get("external_references")
+                title = (
+                    item.get("title") + " (version: " + package_version + ")"
+                )
+                severity = item.get("severity", "info").capitalize()
                 if links:
-                    references = ''
+                    references = ""
                     for link in links:
-                        references += f'{link}\n'
+                        references += f"{link}\n"
                 else:
                     references = None
 
-                if id and id.startswith('CVE'):
+                if id and id.startswith("CVE"):
                     vulnerability_id = id
                 else:
                     vulnerability_id = None
