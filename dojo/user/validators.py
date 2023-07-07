@@ -94,3 +94,4 @@ class DojoCommonPasswordValidator(CommonPasswordValidator):
             return super().validate(password, user)
         else:
             return None
+            
