@@ -3542,7 +3542,6 @@ def report_generate(request, obj, options):
 
     # generate = "_generate" in request.GET
     report_name = str(obj)
-    type(obj).__name__
 
     include_finding_notes = options.get("include_finding_notes", False)
     include_finding_images = options.get("include_finding_images", False)
@@ -3553,7 +3552,6 @@ def report_generate(request, obj, options):
         product_type = obj
 
         report_name = "Product Type Report: " + str(product_type)
-        str(product_type)
 
         findings = ReportFindingFilter(
             request.GET,
@@ -3601,7 +3599,7 @@ def report_generate(request, obj, options):
         product = obj
 
         report_name = "Product Report: " + str(product)
-        str(product)
+
         findings = ReportFindingFilter(
             request.GET,
             product=product,
@@ -3630,8 +3628,6 @@ def report_generate(request, obj, options):
         )
         report_name = "Engagement Report: " + str(engagement)
 
-        str(engagement)
-
         ids = set(finding.id for finding in findings.qs)
         tests = Test.objects.filter(finding__id__in=ids).distinct()
         ids = get_endpoint_ids(
@@ -3649,7 +3645,6 @@ def report_generate(request, obj, options):
             ),
         )
         report_name = "Test Report: " + str(test)
-        str(test)
 
     elif type(obj).__name__ == "Endpoint":
         endpoint = obj
