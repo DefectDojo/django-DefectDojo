@@ -1156,16 +1156,15 @@ def edit_finding(request, fid):
                             fp.save_no_options()
 
             if "request" in form.cleaned_data or "response" in form.cleaned_data:
-                burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
-                if burp_rr:
-                    burp_rr.burpRequestBase64 = base64.b64encode(
-                        form.cleaned_data["request"].encode()
-                    )
-                    burp_rr.burpResponseBase64 = base64.b64encode(
-                        form.cleaned_data["response"].encode()
-                    )
-                    burp_rr.clean()
-                    burp_rr.save()
+                burp_rr, _ = BurpRawRequestResponse.objects.get_or_create(finding=finding)
+                burp_rr.burpRequestBase64 = base64.b64encode(
+                    form.cleaned_data["request"].encode()
+                )
+                burp_rr.burpResponseBase64 = base64.b64encode(
+                    form.cleaned_data["response"].encode()
+                )
+                burp_rr.clean()
+                burp_rr.save()
 
             push_to_jira = False
             jira_message = None
