@@ -1146,26 +1146,26 @@ class ApiFindingFilter(DojoFilter):
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Tag name contains')
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
                              help_text='Comma separated list of exact tags')
-    test__tags = CharFieldInFilter(field_name='test__tags__name', lookup_expr='in',
-                                   help_text='Comma separated list of exact tags present on test')
-    test__engagement__tags = CharFieldInFilter(field_name='test__engagement__tags', lookup_expr='in',
+    test__tags = CharFieldInFilter(field_name='test__tags__name', lookup_expr='in', help_text='Comma separated list of exact tags present on test')
+    test__engagement__tags = CharFieldInFilter(field_name='test__engagement__tags__name', lookup_expr='in',
                                                help_text='Comma separated list of exact tags present on engagement')
-    test__engagement__product__tags = CharFieldInFilter(field_name='test__engagement__product__tags__name',
-                                                              lookup_expr='in',
-                                                              help_text='Comma separated list of exact tags present on product')
+    test__engagement__product__tags = CharFieldInFilter(
+        field_name='test__engagement__product__tags__name',
+        lookup_expr='in',
+        help_text='Comma separated list of exact tags present on product')
 
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Not Tag name contains', exclude='True')
     not_tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
                                  help_text='Comma separated list of exact tags not present on model', exclude='True')
-    not_test__tags = CharFieldInFilter(field_name='test__tags__name', lookup_expr='in',
-                                       help_text='Comma separated list of exact tags not present on test', exclude='True')
-    not_test__engagement__tags = CharFieldInFilter(field_name='test__engagement__tags', lookup_expr='in',
+    not_test__tags = CharFieldInFilter(field_name='test__tags__name', lookup_expr='in', help_text='Comma separated list of exact tags present on test')
+    not_test__engagement__tags = CharFieldInFilter(field_name='test__engagement__tags__name', lookup_expr='in',
                                                    help_text='Comma separated list of exact tags not present on engagement',
                                                    exclude='True')
-    not_test__engagement__product__tags = CharFieldInFilter(field_name='test__engagement__product__tags__name',
-                                                                  lookup_expr='in',
-                                                                  help_text='Comma separated list of exact tags not present on product',
-                                                                  exclude='True')
+    not_test__engagement__product__tags = CharFieldInFilter(
+        field_name='test__engagement__product__tags__name',
+        lookup_expr='in',
+        help_text='Comma separated list of exact tags not present on product',
+        exclude='True')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1898,7 +1898,7 @@ class ApiTestFilter(DojoFilter):
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Tag name contains')
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
                              help_text='Comma separated list of exact tags')
-    engagement__tags = CharFieldInFilter(field_name='engagement__tags', lookup_expr='in',
+    engagement__tags = CharFieldInFilter(field_name='engagement__tags__name', lookup_expr='in',
                                                help_text='Comma separated list of exact tags present on engagement')
     engagement__product__tags = CharFieldInFilter(field_name='engagement__product__tags__name',
                                                               lookup_expr='in',
@@ -1907,7 +1907,7 @@ class ApiTestFilter(DojoFilter):
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Not Tag name contains', exclude='True')
     not_tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
                                  help_text='Comma separated list of exact tags not present on model', exclude='True')
-    not_engagement__tags = CharFieldInFilter(field_name='engagement__tags', lookup_expr='in',
+    not_engagement__tags = CharFieldInFilter(field_name='engagement__tags__name', lookup_expr='in',
                                                    help_text='Comma separated list of exact tags not present on engagement',
                                                    exclude='True')
     not_engagement__product__tags = CharFieldInFilter(field_name='engagement__product__tags__name',
