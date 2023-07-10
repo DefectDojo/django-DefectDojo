@@ -1149,9 +1149,10 @@ class ApiFindingFilter(DojoFilter):
     test__tags = CharFieldInFilter(field_name='test__tags__name', lookup_expr='in',
     test__engagement__tags = CharFieldInFilter(field_name='test__engagement__tags__name', lookup_expr='in',
                                                help_text='Comma separated list of exact tags present on engagement')
-    test__engagement__product__tags = CharFieldInFilter(field_name='test__engagement__product__tags__name',
-                                                              lookup_expr='in',
-                                                              help_text='Comma separated list of exact tags present on product')
+    test__engagement__product__tags = CharFieldInFilter(
+        field_name='test__engagement__product__tags__name',
+        lookup_expr='in',
+        help_text='Comma separated list of exact tags present on product')
 
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Not Tag name contains', exclude='True')
     not_tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
@@ -1160,10 +1161,11 @@ class ApiFindingFilter(DojoFilter):
     not_test__engagement__tags = CharFieldInFilter(field_name='test__engagement__tags__name', lookup_expr='in',
                                                    help_text='Comma separated list of exact tags not present on engagement',
                                                    exclude='True')
-    not_test__engagement__product__tags = CharFieldInFilter(field_name='test__engagement__product__tags__name',
-                                                                  lookup_expr='in',
-                                                                  help_text='Comma separated list of exact tags not present on product',
-                                                                  exclude='True')
+    not_test__engagement__product__tags = CharFieldInFilter(
+        field_name='test__engagement__product__tags__name',
+        lookup_expr='in',
+        help_text='Comma separated list of exact tags not present on product',
+        exclude='True')
 
     o = OrderingFilter(
         # tuple-mapping retains order
