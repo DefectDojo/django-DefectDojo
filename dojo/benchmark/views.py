@@ -215,7 +215,7 @@ def benchmark_view(request, pid, type, cat=None):
         benchmark_product_summary = Benchmark_Product_Summary.objects.get(
             product=product, benchmark_type=benchmark_type
         )
-    except BaseException:
+    except Exception:
         benchmark_product_summary = Benchmark_Product_Summary(
             product=product, benchmark_type=benchmark_type
         )
