@@ -19,7 +19,7 @@ def jira_status_reconciliation(*args, **kwargs):
     logger.debug('mode: %s product:%s engagement: %s dryrun: %s', mode, product, engagement, dryrun)
 
     if mode and mode not in ('push_status_to_jira', 'import_status_from_jira', 'reconcile'):
-        print('mode must be one of reconcile, push_status_to_jira or import_status_from_jira')
+        logger.debug('mode must be one of reconcile, push_status_to_jira or import_status_from_jira')
         return False
 
     if not mode:
@@ -192,7 +192,7 @@ def jira_status_reconciliation(*args, **kwargs):
 
     logger.info('results (semicolon seperated)')
     for message in messages:
-        print(message)
+        logger.debug(message)
 
 
 class Command(BaseCommand):

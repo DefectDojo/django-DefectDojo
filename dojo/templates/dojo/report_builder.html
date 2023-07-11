@@ -178,7 +178,6 @@
 
             $(document).on('click', 'form.finding-list a.clear.centered, div.finding-pagination a', function (event) {
                 var link_href = $(this).attr('href')
-                console.log(link_href);
                 $.get("{% url 'report_findings' %}"+link_href).done(function (data) {
                     $('div.in-use-widgets li.finding-list').html(data);
                     setUpFindingFilters();

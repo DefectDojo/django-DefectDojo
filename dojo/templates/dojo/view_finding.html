@@ -1112,8 +1112,7 @@
 
             thumbnails.each(function (index) {
                 if ($(this).data('imageurl') == showing) {
-                    console.log(index, thumbnails.length)
-                    if (index == thumbnails.length - 1) {
+¿                    if (index == thumbnails.length - 1) {
                         // at the end
                         $("img#to_replace").attr('src', $(thumbnails[0]).data('imageurl'));
                         $("#caption_to_replace").html($(thumbnails[0]).data('caption'));

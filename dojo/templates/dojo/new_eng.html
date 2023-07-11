@@ -94,9 +94,7 @@
                 inherit_from_product = $(this)
                 checked = $(this).prop('checked')
                 $('[id^="id_jira-project-form-"]').each(function() {
-                    console.log('found field: ' + $(this).attr('id'))
                     if (!$(this).is(inherit_from_product)) {
-                        console.log('disabling: ' + $(this).attr('id'))
                         $(this).prop("disabled", checked)
                         if (checked) {
                             $(this).val('')

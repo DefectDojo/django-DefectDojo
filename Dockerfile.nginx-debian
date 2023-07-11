@@ -99,5 +99,5 @@ ENV \
   METRICS_HTTP_AUTH_USER="" \
   METRICS_HTTP_AUTH_PASSWORD=""
 USER ${uid}
-EXPOSE 8080
+
 ENTRYPOINT ["/entrypoint-nginx.sh"]
