@@ -42,6 +42,8 @@ env = environ.Env(
     DD_CSRF_COOKIE_SECURE=(bool, False),
     DD_CSRF_TRUSTED_ORIGINS=(list, []),
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
+    DD_CSRF_COOKIE_SAMESITE=(str, 'Lax'),
+    DD_SESSION_COOKIE_SAMESITE=(str, 'Lax'),
     DD_TIME_ZONE=(str, "UTC"),
     DD_LANG=(str, "en-us"),
     DD_TEAM_NAME=(str, "Security Team"),
@@ -736,9 +738,11 @@ CSRF_COOKIE_HTTPONLY = env("DD_CSRF_COOKIE_HTTPONLY")
 # the cookie will be marked as secure, which means browsers may ensure that the
 # cookie is only sent with an HTTPS connection.
 SESSION_COOKIE_SECURE = env("DD_SESSION_COOKIE_SECURE")
+SESSION_COOKIE_SAMESITE = env('DD_SESSION_COOKIE_SAMESITE')
 
 # Whether to use a secure cookie for the CSRF cookie.
 CSRF_COOKIE_SECURE = env("DD_CSRF_COOKIE_SECURE")
+CSRF_COOKIE_SAMESITE = env('DD_CSRF_COOKIE_SAMESITE')
 
 # A list of trusted origins for unsafe requests (e.g. POST).
 # Use comma-separated list of domains, they will be split to list automatically
@@ -1242,29 +1246,25 @@ if env("DD_DJANGO_METRICS_ENABLED"):
 HASHCODE_FIELDS_PER_SCANNER = {
     # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
     # Including the severity in the hash_code keeps those findings not duplicate
-    "Anchore Engine Scan": ["title", "severity", "component_name", "component_version", "file_path"],
-    "AnchoreCTL Vuln Report": ["title", "severity", "component_name", "component_version", "file_path"],
-    "AnchoreCTL Policies Report": ["title", "severity", "component_name", "file_path"],
-    "Anchore Enterprise Policy Check": ["title", "severity", "component_name", "file_path"],
-    "Anchore Grype": ["title", "severity", "component_name", "component_version"],
-    "Aqua Scan": ["severity", "vulnerability_ids", "component_name", "component_version"],
-    "Bandit Scan": ["file_path", "line", "vuln_id_from_tool"],
-    "CargoAudit Scan": ["vulnerability_ids", "severity", "component_name", "component_version", "vuln_id_from_tool"],
-    "Checkmarx Scan": ["cwe", "severity", "file_path"],
-    "Checkmarx OSA": ["vulnerability_ids", "component_name"],
-    "Cloudsploit Scan": ["title", "description"],
-    "SonarQube Scan": ["cwe", "severity", "file_path"],
-    "SonarQube API Import": ["title", "file_path", "line"],
-    "Dependency Check Scan": ["vulnerability_ids", "cwe", "file_path"],
-    "Dockle Scan": ["title", "description", "vuln_id_from_tool"],
-    "Dependency Track Finding Packaging Format (FPF) Export": [
-        "component_name",
-        "component_version",
-        "vulnerability_ids",
-    ],
-    "Mobsfscan Scan": ["title", "severity", "cwe"],
-    "Nessus Scan": ["title", "severity", "vulnerability_ids", "cwe"],
-    "Nexpose Scan": ["title", "severity", "vulnerability_ids", "cwe"],
+    'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
+    'AnchoreCTL Vuln Report': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
+    'AnchoreCTL Policies Report': ['title', 'severity', 'component_name', 'file_path'],
+    'Anchore Enterprise Policy Check': ['title', 'severity', 'component_name', 'file_path'],
+    'Anchore Grype': ['title', 'severity', 'component_name', 'component_version'],
+    'Aqua Scan': ['severity', 'vulnerability_ids', 'component_name', 'component_version'],
+    'Bandit Scan': ['file_path', 'line', 'vuln_id_from_tool'],
+    'CargoAudit Scan': ['vulnerability_ids', 'severity', 'component_name', 'component_version', 'vuln_id_from_tool'],
+    'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
+    'Checkmarx OSA': ['vulnerability_ids', 'component_name'],
+    'Cloudsploit Scan': ['title', 'description'],
+    'SonarQube Scan': ['cwe', 'severity', 'file_path'],
+    'SonarQube API Import': ['title', 'file_path', 'line'],
+    'Dependency Check Scan': ['title', 'cwe', 'file_path'],
+    'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
+    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'vulnerability_ids'],
+    'Mobsfscan Scan': ['title', 'severity', 'cwe'],
+    'Nessus Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
+    'Nexpose Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     "NPM Audit Scan": ["title", "severity", "file_path", "vulnerability_ids", "cwe"],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
@@ -1329,6 +1329,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "NeuVector (compliance)": ["title", "vuln_id_from_tool", "description"],
     "Wpscan": ["title", "description", "severity"],
     "Codechecker Report native": ["unique_id_from_tool"],
+    'Popeye Scan': ['title', 'description'],
     "Wazuh Scan": ["title"],
     "Nuclei Scan": ["title", "cwe", "severity"],
 }
@@ -1537,6 +1538,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "NeuVector (REST)": DEDUPE_ALGO_HASH_CODE,
     "NeuVector (compliance)": DEDUPE_ALGO_HASH_CODE,
     "Wpscan": DEDUPE_ALGO_HASH_CODE,
+    'Popeye Scan': DEDUPE_ALGO_HASH_CODE,
     "Nuclei Scan": DEDUPE_ALGO_HASH_CODE,
 }
 

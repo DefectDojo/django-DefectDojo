@@ -1220,7 +1220,7 @@ def get_engagements(request):
         if url.startswith('url='):
             url = url[4:]
 
-    path_items = list(filter(None, re.split('/|\?', url))) # noqa W605
+    path_items = list(filter(None, re.split(r'/|\?', url)))
 
     if not path_items or path_items[0] != 'engagement':
         raise ValidationError('URL is not an engagement view')

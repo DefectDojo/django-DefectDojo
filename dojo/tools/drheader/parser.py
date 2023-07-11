@@ -15,8 +15,11 @@ class DrHeaderParser(object):
         return "Import result of DrHeader JSON output."
 
     def get_findings(self, filename, test):
-        data = json.load(filename)
         items = []
+        try:
+            data = json.load(filename)
+        except ValueError as err:
+            data = {}
         for item in data:
             findingdetail = ''
             title = "Header : " + item["rule"]
@@ -27,6 +30,5 @@ class DrHeaderParser(object):
                            description=message,
                            severity=severity,
                            static_finding=False)
-
             items.append(find)
         return items
