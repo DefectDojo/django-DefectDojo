@@ -31,7 +31,7 @@
                 <tr>
                   <td>
                     {% if object.full_url %}
-                      <a href="{{ object.full_url }}" target="_blank">{{ object.object_id|tracked_object_value }}</a>
+                      <a rel="noopener noreferrer" href="{{ object.full_url }}" target="_blank">{{ object.object_id|tracked_object_value }}</a>
                     {% else %}
                     {{ object.object_id|tracked_object_value }}
                     {% endif %}
