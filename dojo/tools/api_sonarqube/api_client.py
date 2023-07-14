@@ -230,7 +230,7 @@ class SonarQubeAPI:
 
         return hotspots
 
-    def get_issue(self, issue_key, organization=None):
+    def get_issue(self, issue_key):
         """
         Search for issues.
         At most one of the following parameters can be provided at the same time:
@@ -243,7 +243,7 @@ class SonarQubeAPI:
             "issues": issue_key,
             "types": "BUG,VULNERABILITY,CODE_SMELL",
         }
-        
+
         response = self.session.get(
             url=f"{self.sonar_api_url}/issues/search",
             params=request_filter,
