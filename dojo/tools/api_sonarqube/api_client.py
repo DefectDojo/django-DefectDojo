@@ -261,11 +261,13 @@ class SonarQubeAPI:
             if issue["key"] == issue_key:
                 return issue
         raise Exception(
-            f"""Expected Issue "{issue_key}", but it returned "
-            "{[x.get('key') for x in response.json().get('issues')]}."""
+            f"""Expected Issue "{issue_key}", but it returned 
+            "{[x.get('key') for x in response.json().get('issues')]}."
+            full response: "
+            "{response.json()}"""
         )
 
-    def get_rule(self, rule_id):
+    def get_rule(self, rule_id, organization=None):
         """
         Get detailed information about a rule
         :param rule_id:
@@ -273,9 +275,17 @@ class SonarQubeAPI:
         """
         rule = self.rules_cache.get(rule_id)
         if not rule:
+            request_filter = {
+                "key": rule_id
+            }
+            if organization:
+                print(organization)
+                request_filter["organization"] = organization
+            elif self.org_id:
+                request_filter["organization"] = self.org_id
             response = self.session.get(
                 url=f"{self.sonar_api_url}/rules/show",
-                params={"key": rule_id},
+                params=request_filter,
                 headers=self.default_headers,
             )
             if not response.ok:
