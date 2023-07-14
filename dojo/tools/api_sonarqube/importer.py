@@ -144,7 +144,7 @@ class SonarQubeApiImporter(object):
                 component_key = issue["component"]
                 line = issue.get("line")
                 rule_id = issue["rule"]
-                rule = client.get_rule(rule_id)
+                rule = client.get_rule(rule_id,organization=organization)
                 severity = self.convert_sonar_severity(issue["severity"])
                 try:
                     sonarqube_permalink = f"[Issue permalink]({sonarUrl}project/issues?issues={issue['key']}&open={issue['key']}&resolved={issue['status']}&id={issue['project']}) \n"
