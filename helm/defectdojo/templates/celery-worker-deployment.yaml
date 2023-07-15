@@ -59,6 +59,11 @@ spec:
           {{- else if (eq .type "hostPath") }}
           type: {{ .pathType | default "Directory" }}
           path: {{ .hostPath }}
+          {{- else if (eq .type "csi") }}
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: {{ .secretProviderClass }}
           {{- end }}
       {{- end }}
       containers:
@@ -109,6 +114,7 @@ spec:
             name: {{ $fullName }}-extrasecrets
             optional: true
         env:
+        {{- if not .Values.externalBrokerPassword }}
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -119,6 +125,8 @@ spec:
               name: {{ .Values.redis.auth.existingSecret| default "defectdojo-redis-specific" }}
               key: {{ .Values.redis.auth.existingSecretPasswordKey | default "redis-password" }}
             {{- end }}
+        {{- end }}
+        {{- if not .Values.externalDatabasePassword }}
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -132,6 +140,7 @@ spec:
                 name: {{ .Values.mysql.auth.existingSecret | default "defectdojo-mysql-specific" }}
                 key: {{ .Values.mysql.auth.secretKey | default "mysql-password" }}
               {{- end }}
+        {{- end }}
         - name: DD_SECRET_KEY
           valueFrom:
             secretKeyRef:

@@ -68,7 +68,9 @@ spec:
             name: {{ $fullName }}
         - secretRef:
             name: {{ $fullName }}
+        {{- if or (not .Values.externalDatabasePassword) .Values.extraEnv }}
         env:
+        {{- if not .Values.externalDatabasePassword }}
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -82,8 +84,19 @@ spec:
               name: {{ .Values.mysql.auth.existingSecret }}
               key: {{ .Values.mysql.auth.secretKey }}
               {{- end }}
+        {{- end }}
         {{- if .Values.extraEnv }}
         {{- toYaml .Values.extraEnv | nindent 8 }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.initializer.extraVolumes }}
+        volumeMounts:
+        {{- range .Values.initializer.extraVolumes }}
+        - name: userconfig-{{ .name }}
+          readOnly: true
+          mountPath: {{ .path }}
+          subPath: {{ .subPath }}
+        {{- end }}
         {{- end }}
         resources:
           {{- toYaml .Values.initializer.resources | nindent 10 }}
@@ -99,6 +112,26 @@ spec:
       {{- with .Values.initializer.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.initializer.extraVolumes }}
+      volumes:
+      {{- range .Values.initializer.extraVolumes }}
+      - name: userconfig-{{ .name }}
+        {{ .type }}:
+          {{- if (eq .type "configMap") }}
+          name: {{ .name }}
+          {{- else if (eq .type "secret") }}
+          secretName: {{ .name }}
+          {{- else if (eq .type "hostPath") }}
+          type: {{ .pathType | default "Directory" }}
+          path: {{ .hostPath }}
+          {{- else if (eq .type "csi") }}
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: {{ .secretProviderClass }}
+          {{- end }}
+      {{- end }}
       {{- end }}
   backoffLimit: 1
 {{- end }}

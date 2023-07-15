@@ -20,6 +20,9 @@ createPostgresqlHaPgpoolSecret: false
 # - enabled, enables tracking configuration changes based on SHA256
 # trackConfig: disabled
 
+externalDatabasePassword: false
+externalBrokerPassword: false
+
 # Enables application network policy
 # For more info follow https://kubernetes.io/docs/concepts/services-networking/network-policies/
 networkPolicy:
@@ -173,7 +176,7 @@ celery:
   #
   # Each object supports the following keys:
   #
-  # - `type` - Type of the volume, must be one of "configMap", "secret", "hostPath". Case sensitive.
+  # - `type` - Type of the volume, must be one of "configMap", "secret", "hostPath", "csi". Case sensitive.
   #    Even is supported we are highly recommending to avoid hostPath for security reasons (usually blocked by PSP)
   # - `name` - Name of the configMap or secret to be mounted. This also controls
   #    the path that it is mounted to. The volume will be mounted to `/consul/userconfig/<name>`.
@@ -193,7 +196,8 @@ django:
     ingressClassName: ""
     activateTLS: true
     secretName: defectdojo-tls
-    annotations: {}
+    annotations:
+      {}
       # Restricts the type of ingress controller that can interact with our chart (nginx, traefik, ...)
       # kubernetes.io/ingress.class: nginx
       # Depending on the size and complexity of your scans, you might want to increase the default ingress timeouts if you see repeated 504 Gateway Timeouts
@@ -232,11 +236,11 @@ django:
     app_settings:
       processes: 2
       threads: 2
-    enable_debug: false  # this also requires DD_DEBUG to be set to True
+    enable_debug: false # this also requires DD_DEBUG to be set to True
     certificates:
-    # includes additional CA certificate as volume, it refrences REQUESTS_CA_BUNDLE env varible
-    # to create configMap `kubectl create  cm defectdojo-ca-certs --from-file=ca.crt`
-    # NOTE: it reflects REQUESTS_CA_BUNDLE for celery workers, beats as well
+      # includes additional CA certificate as volume, it refrences REQUESTS_CA_BUNDLE env varible
+      # to create configMap `kubectl create  cm defectdojo-ca-certs --from-file=ca.crt`
+      # NOTE: it reflects REQUESTS_CA_BUNDLE for celery workers, beats as well
       enabled: false
       configName: defectdojo-ca-certs
       certMountPath: /certs/
@@ -265,7 +269,7 @@ django:
   #
   # Each object supports the following keys:
   #
-  # - `type` - Type of the volume, must be one of "configMap", "secret", "hostPath". Case sensitive.
+  # - `type` - Type of the volume, must be one of "configMap", "secret", "hostPath", "csi". Case sensitive.
   #    Even is supported we are highly recommending to avoid hostPath for security reasons (usually blocked by PSP)
   # - `name` - Name of the configMap or secret to be mounted. This also controls
   #    the path that it is mounted to. The volume will be mounted to `/consul/userconfig/<name>`.
@@ -293,14 +297,12 @@ django:
       name:
       size: 5Gi
       accessModes:
-      - ReadWriteMany  # check KUBERNETES.md doc first for option to choose
+        - ReadWriteMany # check KUBERNETES.md doc first for option to choose
       storageClassName:
 
 initializer:
   run: true
-  jobAnnotations: {
-    helm.sh/hook: "post-install,post-upgrade"
-  }
+  jobAnnotations: { helm.sh/hook: "post-install,post-upgrade" }
   annotations: {}
   keepSeconds: 60
   affinity: {}
@@ -477,7 +479,7 @@ redis:
   scheme: "redis"
   transportEncryption:
     enabled: false
-    params: ''
+    params: ""
   auth:
     existingSecret: defectdojo-redis-specific
     existingSecretPasswordKey: redis-password
@@ -486,7 +488,6 @@ redis:
   # To use an external Redis instance, set enabled to false and uncomment
   # the line below:
   # redisServer: myrediscluster
-
 
 # To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
 # NOTE  Do not store any kind of sensitive information inside of it
@@ -500,7 +501,6 @@ redis:
 # extraSecrets:
 #   DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'
 extraConfigs: {}
-
 # To add (or override) extra variables which need to be pulled from another configMap, you can
 # use extraEnv. For example:
 # extraEnv:
