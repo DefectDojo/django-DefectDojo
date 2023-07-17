@@ -17,5 +17,5 @@ Follow these steps to setup API importing:
     previously added `Tool Configuration`. Proved values based on definitions below
 
 3.  After this is done, you can import the findings on the `Product` page through
-    `Findings -> Import Scan Results`. Select "Edgescan Scan" as the `Scan type`,
+    `Findings -> Import Scan Results`. As the `Scan type`, select the related type,
     the API scan configuration from the last step, and click `Import`.
