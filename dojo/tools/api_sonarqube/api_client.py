@@ -279,7 +279,6 @@ class SonarQubeAPI:
                 "key": rule_id
             }
             if organization:
-                print(organization)
                 request_filter["organization"] = organization
             elif self.org_id:
                 request_filter["organization"] = self.org_id
