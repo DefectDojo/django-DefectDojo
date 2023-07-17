@@ -261,7 +261,7 @@ class SonarQubeAPI:
             if issue["key"] == issue_key:
                 return issue
         raise Exception(
-            f"""Expected Issue "{issue_key}", but it returned 
+            f"""Expected Issue "{issue_key}", but it returned
             "{[x.get('key') for x in response.json().get('issues')]}."
             full response: "
             "{response.json()}"""
