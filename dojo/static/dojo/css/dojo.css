@@ -126,6 +126,11 @@ a:hover {
   text-decoration: none;
 }
 
+.nav.nav-second-level.nav-up {
+    transform: translateY(-100%);
+    margin-top: 41px;
+}
+
 .nav-tabs {
     border-bottom: 1px solid rgb(148, 168, 187);
 }
