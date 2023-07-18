@@ -70,9 +70,13 @@ class TalismanParser(object):
                     )
 
                     key = hashlib.md5(
-                        (title + message + file_path + description + severity).encode(
-                            "utf-8"
-                        )
+                        (
+                            title
+                            + message
+                            + file_path
+                            + description
+                            + severity
+                        ).encode("utf-8")
                     ).hexdigest()
 
                     if key not in dupes:
