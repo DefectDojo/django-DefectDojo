@@ -492,7 +492,7 @@
                                                 <i class="fa-solid fa-gear fa-fw"></i>
                                                 <span>{% trans "Configuration" %}</span>
                                             </a>
-                                            <ul class="nav nav-second-level">
+                                            <ul class="nav nav-second-level nav-up">
                                                 {% if "dojo.change_announcement"|has_configuration_permission:request %}
                                                     <li>
                                                         <a href="{% url 'configure_announcement' %}">
