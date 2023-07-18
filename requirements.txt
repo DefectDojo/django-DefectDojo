@@ -154,7 +154,9 @@ pyOpenSSL==23.2.0
 pyasn1-modules==0.3.0
 oauthlib==3.2.2
 google-auth==2.21.0
-
 rpds-py==0.8.10
 jsonschema-spec==0.2.3
 referencing==0.29.1
+tzdata==2023.3
+pathable==0.4.3
+jsonschema-specifications==2023.6.1
