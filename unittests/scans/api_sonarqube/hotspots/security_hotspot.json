@@ -30,14 +30,14 @@
     ],
     "components": [
         {
-            "key": "NU0014001_CGC_Virtual_Investment:dojo/static/dojo/js/index.js",
+            "key": "key_test:dojo/static/dojo/js/index.js",
             "qualifier": "FIL",
             "name": "index.js",
             "longName": "dojo/static/dojo/js/index.js",
             "path": "dojo/static/dojo/js/index.js"
         },
         {
-            "key": "NU0014001_CGC_Virtual_Investment",
+            "key": "key_test",
             "qualifier": "TRK",
             "name": "defect-dojo",
             "longName": "defect-dojo"
