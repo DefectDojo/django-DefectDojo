@@ -37,7 +37,7 @@
             "path": "dojo/static/dojo/js/index.js"
         },
         {
-            "key": "NU0014001_CGC_Virtual_Investment",
+            "key": "key_test",
             "qualifier": "TRK",
             "name": "defect-dojo",
             "longName": "defect-dojo"
