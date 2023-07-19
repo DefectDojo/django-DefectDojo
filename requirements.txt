@@ -67,7 +67,7 @@ django-debug-toolbar-request-history==0.1.4
 vcrpy==5.0.0
 vcrpy-unittest==0.1.7
 django-tagulous==1.3.3
-PyJWT==2.7.0
+PyJWT==2.8.0
 cvss==2.6
 django-fieldsignals==0.7.0
 hyperlink==21.0.0
