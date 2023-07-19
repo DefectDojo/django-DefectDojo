@@ -30,7 +30,7 @@
     ],
     "components": [
         {
-            "key": "NU0014001_CGC_Virtual_Investment:dojo/static/dojo/js/index.js",
+            "key": "key_test:dojo/static/dojo/js/index.js",
             "qualifier": "FIL",
             "name": "index.js",
             "longName": "dojo/static/dojo/js/index.js",
