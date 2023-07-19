@@ -1,0 +1,46 @@
+{
+    "paging": {
+        "pageIndex": 1,
+        "pageSize": 100,
+        "total": 1
+    },
+    "hotspots": [
+        {
+            "key": "AYlhtIhyqRxoJ-kHfc60",
+            "component": "name_project_key:dojo/static/dojo/js/index.js",
+            "project": "project_key sonar",
+            "securityCategory": "auth",
+            "vulnerabilityProbability": "HIGH",
+            "status": "TO_REVIEW",
+            "line": 251,
+            "message": "Review this potentially hardcoded credential.",
+            "author": "propersam2012@gmail.com",
+            "creationDate": "2019-04-24T20:12:34+0000",
+            "updateDate": "2023-07-17T02:34:05+0000",
+            "textRange": {
+                "startLine": 251,
+                "endLine": 251,
+                "startOffset": 27,
+                "endOffset": 37
+            },
+            "flows": [],
+            "ruleKey": "javascript:S2068",
+            "messageFormattings": []
+        }
+    ],
+    "components": [
+        {
+            "key": "NU0014001_CGC_Virtual_Investment:dojo/static/dojo/js/index.js",
+            "qualifier": "FIL",
+            "name": "index.js",
+            "longName": "dojo/static/dojo/js/index.js",
+            "path": "dojo/static/dojo/js/index.js"
+        },
+        {
+            "key": "NU0014001_CGC_Virtual_Investment",
+            "qualifier": "TRK",
+            "name": "defect-dojo",
+            "longName": "defect-dojo"
+        }
+    ]
+}
