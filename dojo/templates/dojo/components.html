@@ -36,7 +36,7 @@
                 <tbody>
                     {% for result in result  %}
                     <tr>
-                        <td>
+                        <td data-order="{{ result.component_name }}">
                             {% if result.component_name == none %}
                             <a href="{% url 'all_findings' %}?has_component=false"><b>{{ result.component_name }}</b></a>
                             {% else %}
@@ -45,7 +45,7 @@
                         </td>
 
                         <td>{{result.component_version}} </td>
-                        <td class="text-center">
+                        <td class="text-center" data-order="{{ result.active }}">
                             {% if result.active and result.component_name == none %}
                             <a href="{% url 'open_findings' %}?has_component=false"><b>{{ result.active }}</b></a>
                             {% elif result.active%}
@@ -54,7 +54,7 @@
                             0
                             {% endif %}
                         </td>
-                        <td class="text-center">
+                        <td class="text-center" data-order="{{ result.duplicate }}">
                             {% if result.duplicate and result.component_name == none %}
                             <a href="{% url 'all_findings' %}?has_component=false&duplicate=1"><b>{{ result.duplicate }}</b></a>
                             {% elif result.duplicate %}
@@ -63,7 +63,7 @@
                             0
                             {% endif %}
                         </td>
-                        <td class="text-center">
+                        <td class="text-center" data-order="{{ result.total }}">
                             {% if result.total and result.component_name == none %}
                             <a href="{% url 'all_findings' %}?has_component=false"><b>{{ result.total }}</b></a>
                             {% elif result.total %}
@@ -130,11 +130,11 @@
                 );
              },
              "columns": [
-                    { "data": "Component_name" },
+                    null, // Component_name
                     { "data": "Version" },
-                    { "data": "Active" },
-                    { "data": "Duplicate" },
-                    { "data": "Total" },
+                    null, // Active
+                    null, // Duplicate
+                    null, // Total
             ],
             order: [],
             columnDefs: [
