@@ -590,12 +590,13 @@
                                             {% endif %}
                                         {% endwith %}
                                     </td>
-                                    <td class="nowrap">
-                                        {% if filter_name == 'Closed' %}
-                                            {{ finding.mitigated|date }}
-                                        {% else %}
-                                            {{ finding.date }}
-                                        {% endif %}
+                                    {% if filter_name == 'Closed' %}
+                                    <td class="nowrap" data-order="{{ finding.mitigated|date:"U" }}">
+                                        {{ finding.mitigated|date }}
+                                    {% else %}
+                                    <td class="nowrap" data-order="{{ finding.date|date:"U" }}">
+                                        {{ finding.date }}
+                                    {% endif %}
                                     </td>
                                     <td>
                                         {{ finding.age }}
@@ -733,10 +734,24 @@
                     }},
                     { "data": "cwe" },
                     { "data": "cve" },
-                    { "data": "found_date" },
+                    { "data": "found_date", render: function (data, type, row, meta) {
+                        if(type === 'sort') {
+                            var api = new $.fn.dataTable.Api(meta.settings);
+                            var td = api.cell({row: meta.row, column: meta.col}).node();
+                            var data = $(td).attr("data-order");
+                        }
+                        return data;
+                    }},
                     { "data": "finding_age" },
-                {% if system_settings.enable_finding_sla %}
-                    { "data": "finding_sla" },
+                {% if system_settings.enable_finding_sla %}                
+                    { "data": "finding_sla", "type": "num", render: function (data, type, row, meta) {
+                        if(type === 'sort') {
+                            var api = new $.fn.dataTable.Api(meta.settings);
+                            var td = api.cell({row: meta.row, column: meta.col}).node();
+                            var data = $(td).find("a").text();
+                        }
+                        return data;
+                    }},
                 {% endif %}
                 { "data": "reported_by" },
                 { "data": "found_by_test" },
