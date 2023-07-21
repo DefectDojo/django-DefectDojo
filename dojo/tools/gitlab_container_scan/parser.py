@@ -29,10 +29,18 @@ class GitlabContainerScanParser(object):
         return ""
 
     def _get_identifier_cve(self, identifier):
-        return identifier["value"] if identifier.get("type", "no-type") == "cve" else None
+        return (
+            identifier["value"]
+            if identifier.get("type", "no-type") == "cve"
+            else None
+        )
 
     def _get_identifier_cwe(self, identifier):
-        return identifier["value"] if identifier.get("type", "no-type") == "cwe" else None
+        return (
+            identifier["value"]
+            if identifier.get("type", "no-type") == "cwe"
+            else None
+        )
 
     def _get_first_cve(self, identifiers):
         cwe = ""
@@ -54,7 +62,11 @@ class GitlabContainerScanParser(object):
                 return f"{dependency_name}-{dependency_version}"
             return dependency_name
         # check if name is missing, but at least version is here
-        return f"unknown-package-{dependency_version}" if dependency_version else None
+        return (
+            f"unknown-package-{dependency_version}"
+            if dependency_version
+            else None
+        )
 
     def get_findings(self, file, test):
         findings = []
@@ -70,7 +82,8 @@ class GitlabContainerScanParser(object):
             title = vulnerability.get("message")
             dependency = vulnerability["location"]["dependency"]
             identifiers = vulnerability["identifiers"]
-            # In new versiona, the message field is no longer in report, so build the title from other parts
+            # In new versiona, the message field is no longer in report, so
+            # build the title from other parts
             if not title:
                 issue_string = self._get_first_cve(identifiers)
                 location_string = self._get_package_string(dependency)
@@ -100,14 +113,19 @@ class GitlabContainerScanParser(object):
             if unsaved_vulnerability_ids:
                 finding.unsaved_vulnerability_ids = unsaved_vulnerability_ids
 
-            # Check package key before name as both is optional on GitLab schema
+            # Check package key before name as both is optional on GitLab
+            # schema
             dependency_name = self._get_dependency_name(dependency)
             if dependency_name:
-                finding.component_name = textwrap.shorten(dependency_name, width=190, placeholder="...")
+                finding.component_name = textwrap.shorten(
+                    dependency_name, width=190, placeholder="..."
+                )
 
             dependency_version = self._get_dependency_version(dependency)
             if dependency_version:
-                finding.component_version = textwrap.shorten(dependency_version, width=90, placeholder="...")
+                finding.component_version = textwrap.shorten(
+                    dependency_version, width=90, placeholder="..."
+                )
 
             if "solution" in vulnerability:
                 finding.mitigation = vulnerability["solution"]
