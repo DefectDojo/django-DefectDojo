@@ -12,7 +12,7 @@
                         Notification Webhook List
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
-                            {% if "dojo.add_notification_webhook"|has_configuration_permission %}
+                            {% if "dojo.add_notification_webhook"|has_configuration_permission:request %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                   data-toggle="dropdown" aria-expanded="true">
                               <span class="fa-solid fa-screwdriver-wrench"></span>
@@ -31,7 +31,7 @@
                     </h3>
                 </div>
                 <!-- <div id="the-filters" class="is-filters panel-body collapse {% if ntl.form.has_changed %}in{% endif %}">
-                    {% include "dojo/filter_snippet.html" with form=ntl.form %}
+                    {% include "dojo/filter_snippet.html" with form=ntl.form %} TODO
                 </div> -->
             </div>
             {% if nwhs %}
@@ -57,26 +57,15 @@
                               <td><a>{{ nwh.name }}</a></td>
                               <td><a>{{ nwh.url }}</a></td>
                               <td><a>{{ nwh.get_status_display }}</a></td>
-                              <td><a>{{ nwh.owner }}</a></td>
-                              {% if "dojo.edit_notification_webhook"|has_configuration_permission %}
+                              <td><a>{% if nwh.owner %}<a class="" href="{% url 'view_user' nwh.owner.id %}">{{ nwh.owner }}</a>{% else %}System Webhook{% endif %}</a></td>
+                              {% if "dojo.edit_notification_webhook"|has_configuration_permission:request %}
                                 <td>
                                     <div class="centered">
                                         <div class="btn-group" role="group">
                                             <a class="btn btn-sm btn-warning"
                                                href="{% url 'edit_notification_webhook' nwh.id %}">
-                                                <i class="fa-solid fa-file"></i> Edit
+                                                <i class="fa-solid fa-file"></i> Edit / activate / deactivate
                                             </a>
-                                            {% if nwh.is_active %} TODO fix checker
-                                            <a class="btn btn-sm btn-danger"
-                                               href="{% url 'delete_notification_webhook' nwh.id %}">
-                                                <i class="fa-solid fa-xmark"></i> Disable TODO fix url
-                                            </a>
-                                            {% else %}
-                                            <a class="btn btn-sm btn-success"
-                                               href="{% url 'delete_notification_webhook' nwh.id %}">
-                                                <i class="fa-solid fa-check"></i> Enable TODO fix url
-                                            </a>
-                                            {% endif %}
                                             <a class="btn btn-sm btn-danger"
                                                href="{% url 'delete_notification_webhook' nwh.id %}">
                                                 <i class="fa-solid fa-trash"></i> Delete
