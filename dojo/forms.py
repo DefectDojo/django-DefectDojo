@@ -2785,10 +2785,14 @@ class NotificationsWebhookForm(forms.ModelForm):
         exclude = []
 
     def __init__(self, *args, **kwargs):
+        is_superuser = kwargs.pop('is_superuser', False)
+        logger.debug(f"is_superuser: {is_superuser}")
         super(NotificationsWebhookForm, self).__init__(*args, **kwargs)
-        self.fields['status'].disabled = True
+        self.fields['status'].disabled = True  # TODO - same for API
         self.fields['first_error'].disabled = True
         self.fields['last_error'].disabled = True
+        if not is_superuser:  # Only superadmins can edit owner
+            self.fields['owner'].disabled = True  # TODO needs to be tested
 
 
 class DeleteNotificationsWebhookForm(forms.ModelForm):

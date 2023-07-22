@@ -357,10 +357,6 @@ class System_Settings(models.Model):
         models.BooleanField(default=False,
                             verbose_name=_('Enable Webhook notifications'),
                             blank=False)
-    webhooks_url = models.CharField(max_length=400, default='', blank=True,
-                                    help_text=_('The full URL of the incoming webhook'))
-    webhooks_token = models.CharField(max_length=100, default='', blank=True,
-                                   help_text=_('Token required for interacting with Webhook endpoint'))
 
     false_positive_history = models.BooleanField(
         default=False, help_text=_(
@@ -4151,6 +4147,18 @@ class Notification_Webhooks(models.Model):
     last_error = models.DateTimeField(help_text=_('If endpoint is active, when error happened last time'), blank=True, null=True)
     owner = models.ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=models.CASCADE,
                               help_text=_('Owner/receiver of notification, if empty processed as system notification'))
+
+    def can_be_activated(self):
+        # Cleaning of state (from STATUS_ACTIVE_500 to STATUS_ACTIVE) is Activation in this context
+        # So all non-STATUS_ACTIVE statuses are activatable
+        return self.status != self.STATUS_ACTIVE
+
+    def can_be_deactivated(self):
+        # Even if status is any "_STATUS_INACTIVE", user might want to force status to STATUS_INACTIVE_MANUAL
+        # So all non-STATUS_INACTIVE_MANUAL statuses are deactivatable
+        return self.status != self.STATUS_INACTIVE_MANUAL
+
+    # Yes, webhook can be activatable and deactivable in the same time
 
 
 class Tool_Product_Settings(models.Model):
