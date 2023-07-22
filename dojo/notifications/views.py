@@ -11,7 +11,9 @@ from django.views import View
 from dojo.forms import NotificationsForm
 
 from django.urls import reverse
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404
+from django.contrib.admin.utils import NestedObjects
+from django.db import DEFAULT_DB_ALIAS
 
 from dojo.models import Notifications, Notification_Webhooks
 from dojo.utils import get_enabled_notifications_list, get_page_items, add_breadcrumb, get_system_setting
@@ -169,25 +171,34 @@ def add_notification_webhook(request):
     if not get_system_setting('enable_webhooks_notifications'):
         raise Http404()
     
-    form = NotificationsWebhookForm()
+    nwh_form = NotificationsWebhookForm()
     if request.method == 'POST':
-        form = NotificationsWebhookForm(request.POST)
-        # TODO Allow edit owner on if superadmin
-        # TODO do not allow to change status, first_error, last_error
-        if form.is_valid():
-            form.save()
-            # TODO add check of connecticity
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Notification Webhook added successfully.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('notification_webhooks'))
+        nwh_form = NotificationsWebhookForm(request.POST)
+        if nwh_form.is_valid():
+            try:
+                test_webhooks_notification(nwh_form.instance)
+            except requests.exceptions.HTTPError as e:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    f'Test of endpoint was not sucessful: {e}',
+                    extra_tags='alert-danger')                    
+            else:
+                nwh_form.instance.status = Notification_Webhooks.STATUS_ACTIVE
+                nwh_form.save()
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    'Notification Webhook added successfully.',
+                    extra_tags="alert-success",
+                )
+                return HttpResponseRedirect(reverse("notification_webhooks"))
     # TODO Disable Owner if not superadmin
     add_breadcrumb(title="Add Notication Webhook", top_level=False, request=request)
     return render(request, 'dojo/add_notification_webhook.html', {
         'name': 'Add Notification Webhook',
         'user': request.user,
-        'form': form,
+        'form': nwh_form,
     })
 
 
@@ -199,22 +210,41 @@ def edit_notification_webhook(request, nwhid):
         raise Http404()
 
     nwh = get_object_or_404(Notification_Webhooks, pk=nwhid)
-    nwh_form = NotificationsWebhookForm(instance=nwh)
-    if request.method == "POST": # TODO do we need this:? and request.POST.get('edit_note_type'):
-        nwh_form = NotificationsWebhookForm(request.POST, instance=nwh)
-        # TODO Allow edit owner on if superadmin
-        # TODO do not allow to change status, first_error, last_error
-        if nwh_form.is_valid():
-            nwh = nwh_form.save()
-            # TODO add check of connecticity
+    nwh_form = NotificationsWebhookForm(instance=nwh, is_superuser = request.user.is_superuser)
+    if request.method == "POST":
+        if 'deactivate_webhook' in request.POST: # TODO add this to API as well
+            nwh.status = Notification_Webhooks.STATUS_INACTIVE_MANUAL
+            nwh.first_error = None
+            nwh.last_error = None
+            nwh.save()
             messages.add_message(
-                request,
-                messages.SUCCESS,
-                'Notification Webhook updated successfully.',
-                extra_tags="alert-success",
-            )
+                    request,
+                    messages.SUCCESS,
+                    'Notification Webhook deactivated successfully.',
+                    extra_tags="alert-success",
+                )
             return HttpResponseRedirect(reverse("notification_webhooks"))
-    # TODO Disable Owner if not superadmin
+        else:
+            nwh_form = NotificationsWebhookForm(request.POST, instance=nwh)
+            if nwh_form.is_valid():
+                try:
+                    test_webhooks_notification(nwh_form.instance)
+                except requests.exceptions.HTTPError as e:
+                    messages.add_message(
+                        request,
+                        messages.ERROR,
+                        f'Test of endpoint was not sucessful: {e}',
+                        extra_tags='alert-danger')                    
+                else:
+                    nwh_form.instance.status = Notification_Webhooks.STATUS_ACTIVE
+                    nwh = nwh_form.save()
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        'Notification Webhook updated successfully.',
+                        extra_tags="alert-success",
+                    )
+                    return HttpResponseRedirect(reverse("notification_webhooks"))
     add_breadcrumb(title="Edit Notication Webhook", top_level=False, request=request)
     return render(request, 'dojo/edit_notification_webhook.html', {
         'name': 'Edit Notication Webhook',

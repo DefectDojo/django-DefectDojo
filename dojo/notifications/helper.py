@@ -351,6 +351,28 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
         pass
 
 
+def webhooks_notification_request(endpoint, event, *args, **kwargs):
+    headers = {
+        "User-Agent": f"DefectDojo-{dd_version}",
+        "X-DefectDojo-Event": event,
+        "X-DefectDojo-Instance": settings.SITE_URL,
+    }
+    if endpoint.header_name is not None:
+        headers[endpoint.header_name] = endpoint.header_value
+    res = requests.request(
+        method='POST',
+        url=endpoint.url,
+        headers=headers,
+        data=create_notification_message(event, endpoint.owner, 'webhooks', *args, **kwargs))
+    return res
+
+def test_webhooks_notification(endpoint):
+    res = webhooks_notification_request(endpoint, 'ping', {"description": "Test webhook notification"})
+    res.raise_for_status() # in "send_webhooks_notification", we are doing deeper analysis, why it failed
+                           # for now, "raise_for_status" should be enough
+    logger.debug(f"res: {res.json()}")
+    
+
 @dojo_async_task
 @app.task
 def send_webhooks_notification(event, user=None, *args, **kwargs):
@@ -359,20 +381,11 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
         if endpoint.status.startswith(Notification_Webhooks._STATUS_ACTIVE):
             try:
                 if endpoint.url is not None:
-                    logger.debug(f"sending webhook message to endpoint {endpoint.name}")
-                    headers = {
-                        "User-Agent": f"DefectDojo-{dd_version}",
-                        "X-DefectDojo-Event": event,
-                        "X-DefectDojo-Instance": settings.SITE_URL,
-                    }
-                    if endpoint.header_name is not None:
-                        headers[endpoint.header_name] = endpoint.header_value
-                    res = requests.request(
-                        method='POST',
-                        url=endpoint.url,
-                        headers=headers,
-                        data=create_notification_message(event, None, 'webhooks', *args, **kwargs))
-                    if res.status_code not in [200, 201]:
+                    logger.debug(f"Sending webhook message to endpoint {endpoint.name}")
+                    res = webhooks_notification_request(endpoint, event, *args, **kwargs)
+                    if res.status_code in [200, 201]:
+                        logger.debug(f"Message sent to endpoint {endpoint.name} sucessfully.")
+                    else:
                         now = get_current_datetime()
 
                         # There is no reason to keep endpoint active if it is returning 4xx errors
