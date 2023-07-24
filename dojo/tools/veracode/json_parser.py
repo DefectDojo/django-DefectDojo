@@ -52,18 +52,9 @@ class VeracodeJSONParser(object):
     def get_findings(self, json_output, test):
         findings = []
         if json_output:
-            json_data = self.parse_json(json_output)
+            json_data = json.load(json_output)
             findings += self.get_items(json_data, test)
         return findings
-
-    def parse_json(self, json_output):
-        data = json_output.read()
-        try:
-            json_findings = json.loads(str(data, 'utf-8'))
-        except Exception:
-            json_findings = json.loads(data)
-
-        return json_findings
 
     def get_items(self, tree, test):
         parsed_findings = []
