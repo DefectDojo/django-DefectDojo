@@ -74,7 +74,7 @@ hyperlink==21.0.0
 django-test-migrations==1.3.0
 djangosaml2==1.7.0
 drf-spectacular==0.26.4
-django-ratelimit==4.0.0
+django-ratelimit==4.1.0
 argon2-cffi==21.3.0
 blackduck==1.1.0
 pycurl==7.45.2  # Required for Celery Broker AWS (SQS) support
