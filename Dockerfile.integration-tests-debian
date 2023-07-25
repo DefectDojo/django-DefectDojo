@@ -48,6 +48,7 @@ WORKDIR /app
 RUN \
   curl https://raw.githubusercontent.com/OpenAPITools/openapi-generator/master/bin/utils/openapi-generator-cli.sh > /usr/local/bin/openapi-generator-cli && \
   chmod +x /usr/local/bin/openapi-generator-cli && \
+  echo "Latest OpenAPI Generator version (currently pinned to 6.6.0):"
   openapi-generator-cli version
 
 COPY docker/wait-for-it.sh \

@@ -44,7 +44,7 @@ if [[ ! -z "$DD_INTEGRATION_TEST_FILENAME" ]]; then
     if [[ "$DD_INTEGRATION_TEST_FILENAME" == "openapi-validatator" ]]; then
         test="OpenAPI schema validation"
         echo "Running: $test"
-        if openapi-generator-cli validate -i "$DD_BASE_URL/api/v2/oa3/schema/?format=json" --recommend; then
+        if OPENAPI_GENERATOR_VERSION=6.6.0 openapi-generator-cli validate -i "$DD_BASE_URL/api/v2/oa3/schema/?format=json" --recommend; then
             success $test
         else fail
             fail $test
@@ -291,7 +291,7 @@ else
 
     test="OpenAPI schema validation"
     echo "Running: $test"
-    if openapi-generator-cli validate -i "$DD_BASE_URL/api/v2/oa3/schema/?format=json" --recommend; then
+    if OPENAPI_GENERATOR_VERSION=6.6.0 openapi-generator-cli validate -i "$DD_BASE_URL/api/v2/oa3/schema/?format=json" --recommend; then
         success $test
     else fail
         fail $test
