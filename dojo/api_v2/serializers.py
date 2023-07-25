@@ -1652,6 +1652,9 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     vulnerability_ids = VulnerabilityIdSerializer(
         source="vulnerability_id_set", many=True, required=False
     )
+    reporter = serializers.PrimaryKeyRelatedField(
+        required=False, queryset=User.objects.all()
+    )
 
     class Meta:
         model = Finding
@@ -1714,6 +1717,9 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         instance = super(TaggitSerializer, self).update(
             instance, validated_data
         )
+        # Save the reporter on the finding
+        if reporter_id := validated_data.get("reporter"):
+            instance.reporter = reporter_id
 
         # If we need to push to JIRA, an extra save call is needed.
         # Also if we need to update the mitigation date of the finding.
