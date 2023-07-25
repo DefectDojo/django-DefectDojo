@@ -29,10 +29,17 @@
     <div class="row navbar-fixed-top">
         <div class="col-md-12">
             <h2>{% blocktrans with start_date=start_date.date end_date=end_date.date%}{{ name }} for {{ start_date }} - {{ end_date }}{% endblocktrans %}
-                <a class="btn close pull-right" href="{% url 'metrics' %}" aria-hidden="true">&times;</a>
+                <a class="btn close pull-right"
+                   href="{% url 'metrics' %}"
+                   aria-hidden="true">&times;</a>
                 <div class="dropdown pull-right">
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                            data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
+                    <button class="btn btn-primary dropdown-toggle"
+                            type="button"
+                            id="dropdownMenu1"
+                            data-toggle="dropdown"
+                            label="view_selector"
+                            aria-label="view_selector"
+                            aria-expanded="true">
                         <span class="fa-solid fa-bars"></span>
                         <span class="caret"></span>
                     </button>
@@ -157,7 +164,9 @@
 
                         <p>
                             <br/>
-                            <span class="text-muted small">{% trans "* Weeks are only displayed if findings are available." %}</span>
+                            <span class="text-muted small">
+                                {% trans "* Weeks are only displayed if findings are available." %}
+                            </span>
                         </p>
                     </div>
                 </div>

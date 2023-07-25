@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
     {{ block.super }}
-    <form class="form-horizontal" action="{%  url 'configure_announcement' %}" method="post" enctype="multipart/form-data">{% csrf_token %}
+    <form class="form-horizontal"
+          action="{%  url 'configure_announcement' %}"
+          method="post"
+          enctype="multipart/form-data">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">

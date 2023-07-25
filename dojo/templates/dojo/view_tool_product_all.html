@@ -8,8 +8,11 @@
               <div class="panel panel-default table-responsive">
                   <div class="panel-heading">
                       <h4>Tools
-                          <a title="Add New Tool" class="pull-right btn btn-primary btn-sm"
-                             href="{% url 'new_tool_product' prod.id %}"><span class="fa-solid fa-plus"></span></a>
+                          <a title="Add New Tool"
+                             class="pull-right btn btn-primary btn-sm"
+                             href="{% url 'new_tool_product' prod.id %}">
+                              <span class="fa-solid fa-plus"></span>
+                          </a>
                       </h4>
                   </div>
                   {% if tools %}
@@ -36,7 +39,9 @@
                                   <td>{{ tool.tool_project_id }}</td>
                                   <td>
                                     {% if tool.tool_configuration.url %}
-                                        <a href="{{ tool.tool_configuration.url }}" target="_blank">{{ tool.tool_configuration.name }}</a>
+                                        <a href="{{ tool.tool_configuration.url }}"
+                                           target="_blank">{{ tool.tool_configuration.name }}
+                                        </a>
                                     {% else %}
                                         {{ tool.tool_configuration.name }}
                                     {% endif %}
@@ -45,9 +50,13 @@
                                   <td>
                                       <div class="btn-group">
                                           <a class="btn btn-sm btn-warning"
-                                             href="{% url 'edit_tool_product' tool.product.id tool.id  %}">Edit</a>
+                                             href="{% url 'edit_tool_product' tool.product.id tool.id  %}">
+                                              Edit
+                                          </a>
                                           <a class="btn btn-sm btn-danger delete-finding"
-                                             href="{% url 'delete_tool_product' tool.product.id tool.id  %}">Delete</a>
+                                             href="{% url 'delete_tool_product' tool.product.id tool.id  %}">
+                                              Delete
+                                          </a>
                                       </div>
                                   </td>
                               </tr>

@@ -9,15 +9,29 @@
             <div class="col-sm-offset-2 col-sm-10">
 
                 {% if survey %}
-                    <input class="btn btn-primary" type="submit" label="create_questionnaire" name="create_questionnaire" value="Update Questionnaire"/>
-                    <input class="btn btn-primary" type="submit" label="add_questions" name="add_questions"
+                    <input class="btn btn-primary"
+                           type="submit"
+                           label="create_questionnaire"
+                           name="create_questionnaire"
+                           value="Update Questionnaire"/>
+                    <input class="btn btn-primary"
+                           type="submit"
+                           label="add_questions"
+                           name="add_questions"
                            value="Edit Questions"/>
                     {% if "dojo.delete_engagement_survey"|has_configuration_permission:request %}
-                    <a class="btn btn-danger" href="{% url 'delete_questionnaire' survey.id %}">Delete Questionnaire</a>
+                    <a class="btn btn-danger"
+                       href="{% url 'delete_questionnaire' survey.id %}">Delete Questionnaire
+                    </a>
                     {% endif %}
                 {% else %}
-                    <input class="btn btn-primary" type="submit" label="create_questionnaire" name="create_questionnaire" value="Create Questionnaire"/>
-                    <input class="btn btn-primary" type="submit" label="add_questions" name="add_questions"
+                    <input class="btn btn-primary"
+                           type="submit" label="create_questionnaire"
+                           name="create_questionnaire"
+                           value="Create Questionnaire"/>
+                    <input class="btn btn-primary"
+                           type="submit" label="add_questions"
+                           name="add_questions"
                            value="Create Questionnaire and Add Questions"/>
                 {% endif %}
             </div>
