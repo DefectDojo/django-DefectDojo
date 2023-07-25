@@ -25,7 +25,7 @@ Veracode reports can be ingested in either XML or JSON Format
         }
         ```
     - Embedded 
-      - This response can be save directly to a file and uploaded
+      - This response can be saved directly to a file and uploaded
       - Not as ideal for crafting a refined report consisting of multiple requests
       - Desired Format:
         ```
