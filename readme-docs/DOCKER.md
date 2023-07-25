@@ -418,7 +418,9 @@ OpenSSL version: OpenSSL 1.0.1t  3 May 2016
 
 In this case, both docker (version 17.09.0-ce) and docker-compose (1.18.0) need to be updated.
 
-Follow [Dockers' documentation](https://docs.docker.com/install/) for your OS to get the latest version of Docker. For the docker command, most OSes have a built-in update mechanism like "apt upgrade".
+**NOTE** - As of docker compose version 2.19.0, there was an upgrade to docker compose that breaks running docker compose commands.  Please do not update docker compose version to anything older than 2.18.1, as a temporary workaround while this issue is fixed.
+
+Follow [Dockers' documentation](https://docs.docker.com/install/) for your OS to get the latest version of Docker* (see above Note). For the docker command, most OSes have a built-in update mechanism like "apt upgrade".
 
 Docker Compose isn't packaged like Docker and you'll need to manually update an existing install if using Linux. For Linux, either follow the instructions in the [Docker Compose documentation](https://docs.docker.com/compose/install/) or use the shell script below. The script below will update docker-compose to the latest version automatically. You will need to make the script executable and have sudo privileges to upgrade docker-compose:
 
