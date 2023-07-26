@@ -1,6 +1,7 @@
 
 # code: language=Dockerfile
 
+FROM openapitools/openapi-generator-cli:v6.6.0@sha256:54381220aecf2e77bb4b6694c4e1a03e733b49453292cd1af6f48b510f1f008a as openapitools
 FROM python:3.11.4-slim-bullseye@sha256:9b4d90af2003eef5d862f8118d8645d37d170402645a09e48241a3e492a0d4dc as build
 WORKDIR /app
 RUN \
@@ -11,7 +12,7 @@ RUN \
     curl \
     unzip \
     gpg \
-    maven \
+    default-jre-headless \
     jq \
     && \
   apt-get clean && \
@@ -45,11 +46,7 @@ RUN \
 WORKDIR /app
 
 # install openapi-generator-cli
-RUN \
-  curl https://raw.githubusercontent.com/OpenAPITools/openapi-generator/master/bin/utils/openapi-generator-cli.sh > /usr/local/bin/openapi-generator-cli && \
-  chmod +x /usr/local/bin/openapi-generator-cli && \
-  echo "Latest OpenAPI Generator version (currently pinned to 6.6.0):" && \
-  openapi-generator-cli version
+COPY --from=openapitools /opt/openapi-generator/modules/openapi-generator-cli/target/openapi-generator-cli.jar /usr/local/bin/openapi-generator-cli.jar
 
 COPY docker/wait-for-it.sh \
   docker/entrypoint-integration-tests.sh \
