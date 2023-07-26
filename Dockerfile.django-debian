@@ -106,11 +106,11 @@ RUN \
     chmod -R u+rwX,go+rX,go-w /app && \
     # Allow for bind mounting local_settings.py and other setting overrides
     chown -R root:${appuser} /app/dojo/settings && \
-    chmod -R 775 /app/dojo/settings && \
+    chmod -R 600 /app/dojo/settings && \
     mkdir /var/run/${appuser} && \
     chown ${appuser} /var/run/${appuser} && \
     chmod g=u /var/run/${appuser} && \
-    chmod 775 /*.sh && \
+    chmod 500 /*.sh && \
     mkdir -p media/threat && chown -R ${uid} media
 USER ${uid}
 ENV \
