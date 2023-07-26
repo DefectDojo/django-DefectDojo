@@ -58,7 +58,7 @@ debugpy==1.6.7
 python-gitlab==3.15.0
 drf_yasg==1.21.5
 cpe==1.2.1
-packageurl-python==0.11.1
+packageurl-python==0.11.2
 django-crum==0.7.9
 JSON-log-formatter==0.5.2
 django-split-settings==1.2.0
