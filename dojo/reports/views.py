@@ -831,23 +831,26 @@ def get_foreign_keys():
 
 
 def get_attributes():
-    return ["sla_age"]
+    return ["sla_age", "sla_deadline", "sla_days_remaining"]
 
 
 def csv_export(request):
     findings, obj = get_findings(request)
-
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=findings.csv'
-
     writer = csv.writer(response)
-
+    allowed_attributes = get_attributes()
+    excludes_list = get_excludes()
+    allowed_foreign_keys = get_attributes()
     first_row = True
+
     for finding in findings:
         if first_row:
             fields = []
             for key in dir(finding):
-                if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
+                if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                    if callable(getattr(finding, key)) and key not in allowed_attributes:
+                        continue
                     fields.append(key)
             fields.append('test')
             fields.append('found_by')
@@ -864,10 +867,16 @@ def csv_export(request):
         if not first_row:
             fields = []
             for key in dir(finding):
-                if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
-                    value = finding.__dict__.get(key)
-                    if (key in get_foreign_keys() or key in get_attributes()) and getattr(finding, key):
-                        value = str(getattr(finding, key))
+                if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                    if not callable(getattr(finding, key)):
+                        value = finding.__dict__.get(key)
+                    if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
+                        if callable(getattr(finding, key)):
+                            func = getattr(finding, key)
+                            result = func()
+                            value = result
+                        else:
+                            value = str(getattr(finding, key))
                     if value and isinstance(value, str):
                         value = value.replace('\n', ' NEWLINE ').replace('\r', '')
                     fields.append(value)
@@ -911,20 +920,23 @@ def csv_export(request):
 
 def excel_export(request):
     findings, obj = get_findings(request)
-
     workbook = Workbook()
     workbook.iso_dates = True
     worksheet = workbook.active
     worksheet.title = 'Findings'
-
     font_bold = Font(bold=True)
+    allowed_attributes = get_attributes()
+    excludes_list = get_excludes()
+    allowed_foreign_keys = get_attributes()
 
     row_num = 1
     for finding in findings:
         if row_num == 1:
             col_num = 1
             for key in dir(finding):
-                if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
+                if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                    if callable(getattr(finding, key)) and key not in allowed_attributes:
+                        continue
                     cell = worksheet.cell(row=row_num, column=col_num, value=key)
                     cell.font = font_bold
                     col_num += 1
@@ -953,10 +965,16 @@ def excel_export(request):
         if row_num > 1:
             col_num = 1
             for key in dir(finding):
-                if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
-                    value = finding.__dict__.get(key)
-                    if (key in get_foreign_keys() or key in get_attributes()) and getattr(finding, key):
-                        value = str(getattr(finding, key))
+                if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                    if not callable(getattr(finding, key)):
+                        value = finding.__dict__.get(key)
+                    if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
+                        if callable(getattr(finding, key)):
+                            func = getattr(finding, key)
+                            result = func()
+                            value = result
+                        else:
+                            value = str(getattr(finding, key))
                     if value and isinstance(value, datetime):
                         value = value.replace(tzinfo=None)
                     worksheet.cell(row=row_num, column=col_num, value=value)
