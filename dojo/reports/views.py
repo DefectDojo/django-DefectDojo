@@ -830,6 +830,10 @@ def get_foreign_keys():
         'mitigated_by', 'reporter', 'review_requested_by', 'sonarqube_issue', 'test']
 
 
+def get_attributes():
+    return ["sla_age"]
+
+
 def csv_export(request):
     findings, obj = get_findings(request)
 
@@ -862,7 +866,7 @@ def csv_export(request):
             for key in dir(finding):
                 if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
                     value = finding.__dict__.get(key)
-                    if key in get_foreign_keys() and getattr(finding, key):
+                    if (key in get_foreign_keys() or key in get_attributes()) and getattr(finding, key):
                         value = str(getattr(finding, key))
                     if value and isinstance(value, str):
                         value = value.replace('\n', ' NEWLINE ').replace('\r', '')
@@ -951,7 +955,7 @@ def excel_export(request):
             for key in dir(finding):
                 if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
                     value = finding.__dict__.get(key)
-                    if key in get_foreign_keys() and getattr(finding, key):
+                    if (key in get_foreign_keys() or key in get_attributes()) and getattr(finding, key):
                         value = str(getattr(finding, key))
                     if value and isinstance(value, datetime):
                         value = value.replace(tzinfo=None)
