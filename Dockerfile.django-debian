@@ -110,7 +110,7 @@ RUN \
     mkdir /var/run/${appuser} && \
     chown ${appuser} /var/run/${appuser} && \
     chmod g=u /var/run/${appuser} && \
-    chmod 500 /*.sh && \
+    chmod 555 /*.sh && \
     mkdir -p media/threat && chown -R ${uid} media
 USER ${uid}
 ENV \
