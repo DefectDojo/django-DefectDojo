@@ -14,7 +14,6 @@ framework.
 
 """
 import os
-from opentelemetry.instrumentation.wsgi import OpenTelemetryMiddleware
 
 # We defer to a DJANGO_SETTINGS_MODULE already in the environment. This breaks
 # if running multiple sites in the same mod_wsgi process. To fix this, use
@@ -28,7 +27,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
 from django.core.wsgi import get_wsgi_application
 
 application = get_wsgi_application()
-application = OpenTelemetryMiddleware(application)
 
 # Apply WSGI middleware here.
 # from helloworld.wsgi import HelloWorldApplication
