@@ -101,7 +101,7 @@ RUN \
     chmod -R u+rwX,go+rX,go-w /app && \
     # Allow for bind mounting local_settings.py and other setting overrides
     chown -R root:${appuser} /app/dojo/settings && \
-    chmod -R 600 /app/dojo/settings && \
+    chmod -R 770 /app/dojo/settings && \
     mkdir /var/run/${appuser} && \
     chown ${appuser} /var/run/${appuser} && \
     chmod g=u /var/run/${appuser} && \
