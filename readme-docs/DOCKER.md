@@ -289,13 +289,13 @@ To secure the application by https, follow those steps
 *  Generate a CSR (Certificate Signing Request)
 *  Have the CSR signed by a certificate authority
 *  Place the private key and the certificate under the nginx folder
-*  copy your secrets into:
+*  copy your secrets into ../nginx/nginx_TLS.conf:
 ```
         server_name                 your.servername.com;
         ssl_certificate             /etc/nginx/ssl/nginx.crt
         ssl_certificate_key        /etc/nginx/ssl/nginx.key;
 ```
-*set the GENERATE_TLS_CERTIFICATE != True in the docker-compose.override.https.yml
+*set the GENERATE_TLS_CERTIFICATE != True in the docker-compose.override.https.yml 
 * Protect your private key from other users:
 ```
 chmod 400 nginx/*.key
