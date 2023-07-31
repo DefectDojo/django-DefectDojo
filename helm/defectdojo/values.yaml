@@ -313,6 +313,39 @@ initializer:
       cpu: 2000m
       memory: 512Mi
 
+  # A list of extra volumes to mount. This
+  # is useful for bringing in extra data that can be referenced by other configurations
+  # at a well known path, such as local_settings. The
+  # value of this should be a list of objects.
+  #
+  # Example:
+  #
+  # ```yaml
+  # extraVolumes:
+  #   - type: configMap
+  #     name: local_settings
+  #     path: /app/dojo/settings/local_settings.py
+  #     subPath: local_settings.py
+  #   - type: hostPath
+  #     name: host_directory
+  #     path: /tmp
+  #     hostPath: /tmp
+  # ```
+  #
+  # Each object supports the following keys:
+  #
+  # - `type` - Type of the volume, must be one of "configMap", "secret", "hostPath". Case sensitive.
+  #    Even is supported we are highly recommending to avoid hostPath for security reasons (usually blocked by PSP)
+  # - `name` - Name of the configMap or secret to be mounted. This also controls
+  #    the path that it is mounted to. The volume will be mounted to `/consul/userconfig/<name>`.
+  # - `path` - defines where file should be exposed
+  # - `subPath` - extracts only particular file from secret or configMap
+  # - `pathType` - only for hostPath, can be one of the "DirectoryOrCreate", "Directory" (default), "FileOrCreate",
+  #   "File", "Socket", "CharDevice", "BlockDevice"
+  # - `hostPath` - only for hostPath, file or directory from local host
+  # @type: array<map>
+  extraVolumes: []
+
 mysql:
   enabled: false
   auth:
@@ -421,7 +454,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.33.8
+    tag: 1.33.9
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""

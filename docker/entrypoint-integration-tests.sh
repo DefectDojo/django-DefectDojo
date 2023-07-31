@@ -41,12 +41,22 @@ function success() {
 
 echo "IT FILENAME: $DD_INTEGRATION_TEST_FILENAME"
 if [[ ! -z "$DD_INTEGRATION_TEST_FILENAME" ]]; then
-    test=$DD_INTEGRATION_TEST_FILENAME
-    echo "Running: $test"
-    if python3 $DD_INTEGRATION_TEST_FILENAME; then
-        success $test
+    if [[ "$DD_INTEGRATION_TEST_FILENAME" == "openapi-validatator" ]]; then
+        test="OpenAPI schema validation"
+        echo "Running: $test"
+        if OPENAPI_GENERATOR_VERSION=6.6.0 openapi-generator-cli validate -i "$DD_BASE_URL/api/v2/oa3/schema/?format=json" --recommend; then
+            success $test
+        else fail
+            fail $test
+        fi
     else
-        fail $test
+        test=$DD_INTEGRATION_TEST_FILENAME
+        echo "Running: $test"
+        if python3 $DD_INTEGRATION_TEST_FILENAME; then
+            success $test
+        else
+            fail $test
+        fi
     fi
 
 else
@@ -276,6 +286,14 @@ else
     if python3 tests/tool_config.py ; then
         success $test
     else
+        fail $test
+    fi
+
+    test="OpenAPI schema validation"
+    echo "Running: $test"
+    if OPENAPI_GENERATOR_VERSION=6.6.0 openapi-generator-cli validate -i "$DD_BASE_URL/api/v2/oa3/schema/?format=json" --recommend; then
+        success $test
+    else fail
         fail $test
     fi
 

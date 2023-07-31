@@ -12,14 +12,16 @@ import itertools
 
 class DeletePreviewModelMixin:
     @extend_schema(
-        methods=['GET'],
-        responses={status.HTTP_200_OK: serializers.DeletePreviewSerializer(many=True)}
+        methods=["GET"],
+        responses={
+            status.HTTP_200_OK: serializers.DeletePreviewSerializer(many=True)
+        },
     )
     @swagger_auto_schema(
-        method='get',
-        responses={'default': serializers.DeletePreviewSerializer(many=True)}
+        method="get",
+        responses={"default": serializers.DeletePreviewSerializer(many=True)},
     )
-    @action(detail=True, methods=["get"], filter_backends=[], suffix='List')
+    @action(detail=True, methods=["get"], filter_backends=[], suffix="List")
     def delete_preview(self, request, pk=None):
         object = self.get_object()
 
@@ -36,8 +38,10 @@ class DeletePreviewModelMixin:
         rels = [
             {
                 "model": type(x).__name__,
-                "id": x.id if hasattr(x, 'id') else None,
-                "name": str(x) if not isinstance(x, Token) else "<APITokenIsHidden>"
+                "id": x.id if hasattr(x, "id") else None,
+                "name": str(x)
+                if not isinstance(x, Token)
+                else "<APITokenIsHidden>",
             }
             for x in flatten(rels)
         ]
