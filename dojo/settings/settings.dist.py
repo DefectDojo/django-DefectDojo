@@ -1194,7 +1194,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'vulnerability_ids'],
     'Mobsfscan Scan': ['title', 'severity', 'cwe'],
-    'Nessus Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
+    'Tenable Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     'Nexpose Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'vulnerability_ids', 'cwe'],
