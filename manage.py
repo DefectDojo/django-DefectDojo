@@ -2,6 +2,8 @@
 import os
 import sys
 from opentelemetry import trace
+from opentelemetry.instrumentation.django import DjangoInstrumentor
+from opentelemetry.instrumentation.logging import LoggingInstrumentor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
@@ -10,6 +12,9 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
+
+    DjangoInstrumentor().instrument()
+    LoggingInstrumentor().instrument()
 
     resource = Resource(attributes={"service.name": "defectdojo"})
     trace.set_tracer_provider(TracerProvider(resource=resource))

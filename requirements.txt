@@ -84,8 +84,9 @@ vulners==2.0.10
 fontawesomefree==6.4.0
 azure-devops==7.1.0b3
 opentelemetry-sdk==1.19.0
-opentelemetry-instrumentation-wsgi==0.40b0
 opentelemetry-exporter-otlp==1.19.0
+opentelemetry-instrumentation-django==0.40b0
+opentelemetry-instrumentation-logging==0.40b0
 
 #New Dependencies
 azure-core==1.27.1
