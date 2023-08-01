@@ -187,6 +187,8 @@ celery:
 
 django:
   annotations: {}
+  service:
+    annotations: {}
   affinity: {}
   ingress:
     enabled: true
