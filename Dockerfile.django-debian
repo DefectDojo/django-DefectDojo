@@ -97,7 +97,6 @@ RUN \
   mkdir -p dojo/migrations && \
   chmod g=u dojo/migrations && \
   true
-USER root
 RUN \
     addgroup --gid ${gid} ${appuser} && \
     adduser --system --no-create-home --disabled-password --gecos '' \
@@ -110,7 +109,7 @@ RUN \
     mkdir /var/run/${appuser} && \
     chown ${appuser} /var/run/${appuser} && \
     chmod g=u /var/run/${appuser} && \
-    chmod 555 /*.sh && \
+    chmod 505 /*.sh && \
     mkdir -p media/threat && chown -R ${uid} media
 USER ${uid}
 ENV \
