@@ -35,7 +35,6 @@ RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM build AS collectstatic
 
-USER root
 ENV \
   # This will point yarn to whatever version of node you decide to use
   # due to the use of nodejs instead of node name in some distros
