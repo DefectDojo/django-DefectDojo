@@ -1030,4 +1030,3 @@ def excel_export(request):
     )
     response['Content-Disposition'] = 'attachment; filename=findings.xlsx'
     return response
-    
