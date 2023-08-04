@@ -72,6 +72,19 @@ godojo installations
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
 
+## Upgrading to DefectDojo Version 2.25.x.
+
+There are no special instruction for upgrading to 2.25.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.25.0) for the contents of the release.
+
+**Deprecation**
+
+The OpenAPI 2.0 Swagger API documentation is being deprecated in favor of the existing
+OpenAPI 3.0 API documentation page. The OpenAPI 2.0 Swagger API documentation page is
+slated for removal in version 2.30.0
+
+*Note*: The API has not changed in any way and behaves the same between OAPI2 and OAPI3
+
+
 ## Upgrading to DefectDojo Version 2.24.x.
 
 There are no special instruction for upgrading to 2.24.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.24.0) for the contents of the release.
