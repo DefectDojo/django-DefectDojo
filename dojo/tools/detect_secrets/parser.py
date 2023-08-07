@@ -21,22 +21,22 @@ class DetectSecretsParser(object):
     def get_findings(self, filename, test):
         data = json.load(filename)
         dupes = {}
-        if data.get('generated_at'):
-            find_date = dateutil.parser.parse(data.get('generated_at'))
-        for detect_file in data.get('results'):
-            for item in data.get('results').get(detect_file):
-                type = item.get('type')
-                file = item.get('filename')
-                hashed_secret = item.get('hashed_secret')
-                is_verified = item.get('is_verified')
-                line = item.get('line_number')
+        if data.get("generated_at"):
+            find_date = dateutil.parser.parse(data.get("generated_at"))
+        for detect_file in data.get("results"):
+            for item in data.get("results").get(detect_file):
+                type = item.get("type")
+                file = item.get("filename")
+                hashed_secret = item.get("hashed_secret")
+                is_verified = item.get("is_verified")
+                line = item.get("line_number")
                 description = "Detected potential secret with the following related data:\n"
                 description += "**Filename:** " + file + "\n"
                 description += "**Line:** " + str(line) + "\n"
                 description += "**Type:** " + type + "\n"
 
                 dupe_key = hashlib.sha256(
-                    (type + file + str(line) + hashed_secret).encode('utf-8')
+                    (type + file + str(line) + hashed_secret).encode("utf-8")
                 ).hexdigest()
 
                 if dupe_key in dupes:
@@ -51,11 +51,14 @@ class DetectSecretsParser(object):
                         date=find_date,
                         severity="High",
                         verified=is_verified,
-                        active='is_secret' in item and item['is_secret'] is True or 'is_secret' not in item,
+                        active="is_secret" in item
+                        and item["is_secret"] is True
+                        or "is_secret" not in item,
                         file_path=file,
                         line=line,
                         nb_occurences=1,
-                        false_p='is_secret' in item and item['is_secret'] is False,
+                        false_p="is_secret" in item
+                        and item["is_secret"] is False,
                     )
                     dupes[dupe_key] = finding
         return list(dupes.values())
