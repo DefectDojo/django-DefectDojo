@@ -24,8 +24,11 @@ class DawnScannerParser(object):
 
         items = []
         for item in data["vulnerabilities"]:
-
-            findingdetail = item["message"] if item["message"][0:2] != "b," else item["message"][0:-1]
+            findingdetail = (
+                item["message"]
+                if item["message"][0:2] != "b,"
+                else item["message"][0:-1]
+            )
 
             finding = Finding(
                 title=item["name"],
@@ -40,7 +43,9 @@ class DawnScannerParser(object):
             )
 
             if self.CVE_REGEX.match(item["name"]):
-                finding.unsaved_vulnerability_ids = [self.CVE_REGEX.findall(item["name"])[0]]
+                finding.unsaved_vulnerability_ids = [
+                    self.CVE_REGEX.findall(item["name"])[0]
+                ]
 
             items.append(finding)
 

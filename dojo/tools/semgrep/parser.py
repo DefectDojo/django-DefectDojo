@@ -4,7 +4,6 @@ from dojo.models import Finding
 
 
 class SemgrepParser(object):
-
     def get_scan_types(self):
         return ["Semgrep JSON Report"]
 
@@ -25,7 +24,7 @@ class SemgrepParser(object):
                 title=item["check_id"],
                 severity=self.convert_severity(item["extra"]["severity"]),
                 description=self.get_description(item),
-                file_path=item['path'],
+                file_path=item["path"],
                 line=item["start"]["line"],
                 static_finding=True,
                 dynamic_finding=False,
@@ -34,26 +33,40 @@ class SemgrepParser(object):
             )
 
             # manage CWE
-            if 'cwe' in item["extra"]["metadata"]:
+            if "cwe" in item["extra"]["metadata"]:
                 if isinstance(item["extra"]["metadata"].get("cwe"), list):
-                    finding.cwe = int(item["extra"]["metadata"].get("cwe")[0].partition(':')[0].partition('-')[2])
+                    finding.cwe = int(
+                        item["extra"]["metadata"]
+                        .get("cwe")[0]
+                        .partition(":")[0]
+                        .partition("-")[2]
+                    )
                 else:
-                    finding.cwe = int(item["extra"]["metadata"].get("cwe").partition(':')[0].partition('-')[2])
+                    finding.cwe = int(
+                        item["extra"]["metadata"]
+                        .get("cwe")
+                        .partition(":")[0]
+                        .partition("-")[2]
+                    )
 
             # manage references from metadata
-            if 'references' in item["extra"]["metadata"]:
-                finding.references = "\n".join(item["extra"]["metadata"]["references"])
+            if "references" in item["extra"]["metadata"]:
+                finding.references = "\n".join(
+                    item["extra"]["metadata"]["references"]
+                )
 
             # manage mitigation from metadata
-            if 'fix' in item["extra"]:
+            if "fix" in item["extra"]:
                 finding.mitigation = item["extra"]["fix"]
-            elif 'fix_regex' in item["extra"]:
-                finding.mitigation = "\n".join([
-                    "**You can automaticaly apply this regex:**",
-                    "\n```\n",
-                    json.dumps(item["extra"]["fix_regex"]),
-                    "\n```\n",
-                ])
+            elif "fix_regex" in item["extra"]:
+                finding.mitigation = "\n".join(
+                    [
+                        "**You can automaticaly apply this regex:**",
+                        "\n```\n",
+                        json.dumps(item["extra"]["fix_regex"]),
+                        "\n```\n",
+                    ]
+                )
 
             dupe_key = finding.title + finding.file_path + str(finding.line)
 
@@ -76,13 +89,13 @@ class SemgrepParser(object):
             raise ValueError(f"Unknown value for severity: {val}")
 
     def get_description(self, item):
-        description = ''
+        description = ""
 
         message = item["extra"]["message"]
-        description += '**Result message:** {}\n'.format(message)
+        description += "**Result message:** {}\n".format(message)
 
         snippet = item["extra"].get("lines")
         if snippet is not None:
-            description += '**Snippet:**\n```{}```\n'.format(snippet)
+            description += "**Snippet:**\n```{}```\n".format(snippet)
 
         return description
