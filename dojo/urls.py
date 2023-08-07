@@ -184,7 +184,7 @@ schema_view = get_schema_view(
     openapi.Info(
         title="Defect Dojo API",
         default_version='v2',
-        description="To use the API you need be authorized.",
+        description="To use the API you need be authorized.\n\n## Deprecated - Removal in v2.30.0\n#### Please use the [OpenAPI3 version](/api/v2/oa3/swagger-ui/)",
     ),
     # if public=False, includes only endpoints the current user has access to
     public=True,
