@@ -1,5 +1,9 @@
 import re
-from rest_framework.exceptions import ParseError, PermissionDenied, ValidationError
+from rest_framework.exceptions import (
+    ParseError,
+    PermissionDenied,
+    ValidationError,
+)
 from dojo.api_v2.serializers import (
     get_import_meta_data_from_dict,
     get_product_id_from_dict,
@@ -84,15 +88,25 @@ class UserHasAppAnalysisPermission(permissions.BasePermission):
 
 class UserHasCredentialPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.data.get('product') is not None:
-            return check_post_permission(request, Cred_Mapping, "product", Permissions.Credential_Add)
-        if request.data.get('engagement') is not None:
-            return check_post_permission(request, Cred_Mapping, "engagement", Permissions.Credential_Add)
-        if request.data.get('test') is not None:
-            return check_post_permission(request, Cred_Mapping, "test", Permissions.Credential_Add)
-        if request.data.get('finding') is not None:
-            return check_post_permission(request, Cred_Mapping, "finding", Permissions.Credential_Add)
-        return check_post_permission(request, Cred_Mapping, "product", Permissions.Credential_Add)
+        if request.data.get("product") is not None:
+            return check_post_permission(
+                request, Cred_Mapping, "product", Permissions.Credential_Add
+            )
+        if request.data.get("engagement") is not None:
+            return check_post_permission(
+                request, Cred_Mapping, "engagement", Permissions.Credential_Add
+            )
+        if request.data.get("test") is not None:
+            return check_post_permission(
+                request, Cred_Mapping, "test", Permissions.Credential_Add
+            )
+        if request.data.get("finding") is not None:
+            return check_post_permission(
+                request, Cred_Mapping, "finding", Permissions.Credential_Add
+            )
+        return check_post_permission(
+            request, Cred_Mapping, "product", Permissions.Credential_Add
+        )
 
     def has_object_permission(self, request, view, obj):
         return check_object_permission(
@@ -107,19 +121,26 @@ class UserHasCredentialPermission(permissions.BasePermission):
 class UserHasDojoGroupPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == "GET":
-            return user_has_configuration_permission(request.user, "auth.view_group")
+            return user_has_configuration_permission(
+                request.user, "auth.view_group"
+            )
         elif request.method == "POST":
-            return user_has_configuration_permission(request.user, "auth.add_group")
+            return user_has_configuration_permission(
+                request.user, "auth.add_group"
+            )
         else:
             return True
 
     def has_object_permission(self, request, view, obj):
         if request.method == "GET":
             # Users need to be authorized to view groups in general and only the groups they are a member of
-            # because with the group they can see user information that might be considered as confidential
+            # because with the group they can see user information that might
+            # be considered as confidential
             return user_has_configuration_permission(
                 request.user, "auth.view_group"
-            ) and user_has_permission(request.user, obj, Permissions.Group_View)
+            ) and user_has_permission(
+                request.user, obj, Permissions.Group_View
+            )
         else:
             return check_object_permission(
                 request,
@@ -153,20 +174,29 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
             product_id = request.data.get("product", None)
             if product_id:
                 object = get_object_or_404(Product, pk=product_id)
-                has_permission_result = has_permission_result and user_has_permission(
-                    request.user, object, Permissions.Product_Edit
+                has_permission_result = (
+                    has_permission_result
+                    and user_has_permission(
+                        request.user, object, Permissions.Product_Edit
+                    )
                 )
             finding_id = request.data.get("finding", None)
             if finding_id:
                 object = get_object_or_404(Finding, pk=finding_id)
-                has_permission_result = has_permission_result and user_has_permission(
-                    request.user, object, Permissions.Finding_Edit
+                has_permission_result = (
+                    has_permission_result
+                    and user_has_permission(
+                        request.user, object, Permissions.Finding_Edit
+                    )
                 )
             endpoint_id = request.data.get("endpoint", None)
             if endpoint_id:
                 object = get_object_or_404(Endpoint, pk=endpoint_id)
-                has_permission_result = has_permission_result and user_has_permission(
-                    request.user, object, Permissions.Endpoint_Edit
+                has_permission_result = (
+                    has_permission_result
+                    and user_has_permission(
+                        request.user, object, Permissions.Endpoint_Edit
+                    )
                 )
             return has_permission_result
         else:
@@ -176,30 +206,39 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
         has_permission_result = True
         product = obj.product
         if product:
-            has_permission_result = has_permission_result and check_object_permission(
-                request,
-                product,
-                Permissions.Product_View,
-                Permissions.Product_Edit,
-                Permissions.Product_Edit,
+            has_permission_result = (
+                has_permission_result
+                and check_object_permission(
+                    request,
+                    product,
+                    Permissions.Product_View,
+                    Permissions.Product_Edit,
+                    Permissions.Product_Edit,
+                )
             )
         finding = obj.finding
         if finding:
-            has_permission_result = has_permission_result and check_object_permission(
-                request,
-                finding,
-                Permissions.Finding_View,
-                Permissions.Finding_Edit,
-                Permissions.Finding_Edit,
+            has_permission_result = (
+                has_permission_result
+                and check_object_permission(
+                    request,
+                    finding,
+                    Permissions.Finding_View,
+                    Permissions.Finding_Edit,
+                    Permissions.Finding_Edit,
+                )
             )
         endpoint = obj.endpoint
         if endpoint:
-            has_permission_result = has_permission_result and check_object_permission(
-                request,
-                endpoint,
-                Permissions.Endpoint_View,
-                Permissions.Endpoint_Edit,
-                Permissions.Endpoint_Edit,
+            has_permission_result = (
+                has_permission_result
+                and check_object_permission(
+                    request,
+                    endpoint,
+                    Permissions.Endpoint_View,
+                    Permissions.Endpoint_Edit,
+                    Permissions.Endpoint_Edit,
+                )
             )
         return has_permission_result
 
@@ -300,7 +339,9 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if UserHasRiskAcceptancePermission.path_risk_acceptance_post.match(
             request.path
-        ) or UserHasRiskAcceptancePermission.path_risk_acceptance.match(request.path):
+        ) or UserHasRiskAcceptancePermission.path_risk_acceptance.match(
+            request.path
+        ):
             return check_post_permission(
                 request, Product, "product", Permissions.Risk_Acceptance
             )
@@ -311,7 +352,9 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if UserHasRiskAcceptancePermission.path_risk_acceptance_post.match(
             request.path
-        ) or UserHasRiskAcceptancePermission.path_risk_acceptance.match(request.path):
+        ) or UserHasRiskAcceptancePermission.path_risk_acceptance.match(
+            request.path
+        ):
             return check_object_permission(
                 request,
                 obj,
@@ -342,10 +385,14 @@ class UserHasFindingPermission(permissions.BasePermission):
         if (
             UserHasFindingPermission.path_finding_post.match(request.path)
             or UserHasFindingPermission.path_finding.match(request.path)
-            or UserHasFindingPermission.path_stub_finding_post.match(request.path)
+            or UserHasFindingPermission.path_stub_finding_post.match(
+                request.path
+            )
             or UserHasFindingPermission.path_stub_finding.match(request.path)
         ):
-            return check_post_permission(request, Test, "test", Permissions.Finding_Add)
+            return check_post_permission(
+                request, Test, "test", Permissions.Finding_Add
+            )
         else:
             # related object only need object permission
             return True
@@ -354,7 +401,9 @@ class UserHasFindingPermission(permissions.BasePermission):
         if (
             UserHasFindingPermission.path_finding_post.match(request.path)
             or UserHasFindingPermission.path_finding.match(request.path)
-            or UserHasFindingPermission.path_stub_finding_post.match(request.path)
+            or UserHasFindingPermission.path_stub_finding_post.match(
+                request.path
+            )
             or UserHasFindingPermission.path_stub_finding.match(request.path)
         ):
             return check_object_permission(
@@ -422,7 +471,8 @@ class UserHasImportPermission(permissions.BasePermission):
                 "Need engagement_id or product_name + engagement_name to perform import",
             )
         else:
-            # the engagement doesn't exist, so we need to check if the user has requested and is allowed to use auto_create
+            # the engagement doesn't exist, so we need to check if the user has
+            # requested and is allowed to use auto_create
             return check_auto_create_permission(
                 request.user,
                 product,
@@ -440,9 +490,18 @@ class UserHasMetaImportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        _, _, _, _, _, product_name, _, _, _, _ = get_import_meta_data_from_dict(
-            request.data
-        )
+        (
+            _,
+            _,
+            _,
+            _,
+            _,
+            product_name,
+            _,
+            _,
+            _,
+            _,
+        ) = get_import_meta_data_from_dict(request.data)
         product = get_target_product_if_exists(product_name)
         if not product:
             product_id = get_product_id_from_dict(request.data)
@@ -467,7 +526,10 @@ class UserHasMetaImportPermission(permissions.BasePermission):
 class UserHasProductPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product_Type, "prod_type", Permissions.Product_Type_Add_Product
+            request,
+            Product_Type,
+            "prod_type",
+            Permissions.Product_Type_Add_Product,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -553,7 +615,10 @@ class UserHasProductTypeMemberPermission(permissions.BasePermission):
 class UserHasProductTypeGroupPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product_Type, "product_type", Permissions.Product_Type_Group_Add
+            request,
+            Product_Type,
+            "product_type",
+            Permissions.Product_Type_Group_Add,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -586,8 +651,12 @@ class UserHasReimportPermission(permissions.BasePermission):
 
         product_type = get_target_product_type_if_exists(product_type_name)
         product = get_target_product_if_exists(product_name, product_type_name)
-        engagement = get_target_engagement_if_exists(None, engagement_name, product)
-        test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
+        engagement = get_target_engagement_if_exists(
+            None, engagement_name, product
+        )
+        test = get_target_test_if_exists(
+            test_id, test_title, scan_type, engagement
+        )
 
         if test:
             # existing test, nothing special to check
@@ -596,7 +665,9 @@ class UserHasReimportPermission(permissions.BasePermission):
             )
         elif test_id:
             # test_id doesn't exist
-            raise serializers.ValidationError("Test '%s' doesn't exist" % test_id)
+            raise serializers.ValidationError(
+                "Test '%s' doesn't exist" % test_id
+            )
 
         if not auto_create_context:
             raise_no_auto_create_import_validation_error(
@@ -611,7 +682,8 @@ class UserHasReimportPermission(permissions.BasePermission):
                 "Need test_id or product_name + engagement_name + scan_type to perform reimport",
             )
         else:
-            # the test doesn't exist, so we need to check if the user has requested and is allowed to use auto_create
+            # the test doesn't exist, so we need to check if the user has
+            # requested and is allowed to use auto_create
             return check_auto_create_permission(
                 request.user,
                 product,
@@ -665,7 +737,9 @@ class UserHasTestPermission(permissions.BasePermission):
 
 class UserHasTestImportPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        return check_post_permission(request, Test, "test", Permissions.Test_Edit)
+        return check_post_permission(
+            request, Test, "test", Permissions.Test_Edit
+        )
 
     def has_object_permission(self, request, view, obj):
         return check_object_permission(
@@ -696,7 +770,10 @@ class UserHasLanguagePermission(permissions.BasePermission):
 class UserHasProductAPIScanConfigurationPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product, "product", Permissions.Product_API_Scan_Configuration_Add
+            request,
+            Product,
+            "product",
+            Permissions.Product_API_Scan_Configuration_Add,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -716,14 +793,20 @@ class UserHasJiraProductPermission(permissions.BasePermission):
             engagement_id = request.data.get("engagement", None)
             if engagement_id:
                 object = get_object_or_404(Engagement, pk=engagement_id)
-                has_permission_result = has_permission_result and user_has_permission(
-                    request.user, object, Permissions.Engagement_Edit
+                has_permission_result = (
+                    has_permission_result
+                    and user_has_permission(
+                        request.user, object, Permissions.Engagement_Edit
+                    )
                 )
             product_id = request.data.get("product", None)
             if product_id:
                 object = get_object_or_404(Product, pk=product_id)
-                has_permission_result = has_permission_result and user_has_permission(
-                    request.user, object, Permissions.Product_Edit
+                has_permission_result = (
+                    has_permission_result
+                    and user_has_permission(
+                        request.user, object, Permissions.Product_Edit
+                    )
                 )
             return has_permission_result
         else:
@@ -733,21 +816,27 @@ class UserHasJiraProductPermission(permissions.BasePermission):
         has_permission_result = True
         engagement = obj.engagement
         if engagement:
-            has_permission_result = has_permission_result and check_object_permission(
-                request,
-                engagement,
-                Permissions.Engagement_View,
-                Permissions.Engagement_Edit,
-                Permissions.Engagement_Edit,
+            has_permission_result = (
+                has_permission_result
+                and check_object_permission(
+                    request,
+                    engagement,
+                    Permissions.Engagement_View,
+                    Permissions.Engagement_Edit,
+                    Permissions.Engagement_Edit,
+                )
             )
         product = obj.product
         if product:
-            has_permission_result = has_permission_result and check_object_permission(
-                request,
-                product,
-                Permissions.Product_View,
-                Permissions.Product_Edit,
-                Permissions.Product_Edit,
+            has_permission_result = (
+                has_permission_result
+                and check_object_permission(
+                    request,
+                    product,
+                    Permissions.Product_View,
+                    Permissions.Product_Edit,
+                    Permissions.Product_Edit,
+                )
             )
         return has_permission_result
 
@@ -759,20 +848,29 @@ class UserHasJiraIssuePermission(permissions.BasePermission):
             engagement_id = request.data.get("engagement", None)
             if engagement_id:
                 object = get_object_or_404(Engagement, pk=engagement_id)
-                has_permission_result = has_permission_result and user_has_permission(
-                    request.user, object, Permissions.Engagement_Edit
+                has_permission_result = (
+                    has_permission_result
+                    and user_has_permission(
+                        request.user, object, Permissions.Engagement_Edit
+                    )
                 )
             finding_id = request.data.get("finding", None)
             if finding_id:
                 object = get_object_or_404(Finding, pk=finding_id)
-                has_permission_result = has_permission_result and user_has_permission(
-                    request.user, object, Permissions.Finding_Edit
+                has_permission_result = (
+                    has_permission_result
+                    and user_has_permission(
+                        request.user, object, Permissions.Finding_Edit
+                    )
                 )
             finding_group_id = request.data.get("finding_group", None)
             if finding_group_id:
                 object = get_object_or_404(Finding_Group, pk=finding_group_id)
-                has_permission_result = has_permission_result and user_has_permission(
-                    request.user, object, Permissions.Finding_Group_Edit
+                has_permission_result = (
+                    has_permission_result
+                    and user_has_permission(
+                        request.user, object, Permissions.Finding_Group_Edit
+                    )
                 )
             return has_permission_result
         else:
@@ -782,30 +880,39 @@ class UserHasJiraIssuePermission(permissions.BasePermission):
         has_permission_result = True
         engagement = obj.engagement
         if engagement:
-            has_permission_result = has_permission_result and check_object_permission(
-                request,
-                engagement,
-                Permissions.Engagement_View,
-                Permissions.Engagement_Edit,
-                Permissions.Engagement_Edit,
+            has_permission_result = (
+                has_permission_result
+                and check_object_permission(
+                    request,
+                    engagement,
+                    Permissions.Engagement_View,
+                    Permissions.Engagement_Edit,
+                    Permissions.Engagement_Edit,
+                )
             )
         finding = obj.finding
         if finding:
-            has_permission_result = has_permission_result and check_object_permission(
-                request,
-                finding,
-                Permissions.Finding_View,
-                Permissions.Finding_Edit,
-                Permissions.Finding_Edit,
+            has_permission_result = (
+                has_permission_result
+                and check_object_permission(
+                    request,
+                    finding,
+                    Permissions.Finding_View,
+                    Permissions.Finding_Edit,
+                    Permissions.Finding_Edit,
+                )
             )
         finding_group = obj.finding_group
         if finding_group:
-            has_permission_result = has_permission_result and check_object_permission(
-                request,
-                finding_group,
-                Permissions.Finding_Group_View,
-                Permissions.Finding_Group_Edit,
-                Permissions.Finding_Group_Edit,
+            has_permission_result = (
+                has_permission_result
+                and check_object_permission(
+                    request,
+                    finding_group,
+                    Permissions.Finding_Group_View,
+                    Permissions.Finding_Group_Edit,
+                    Permissions.Finding_Group_Edit,
+                )
             )
         return has_permission_result
 
@@ -921,17 +1028,23 @@ def check_auto_create_permission(
 
     if engagement:
         # existing engagement, nothing special to check
-        return user_has_permission(user, engagement, Permissions.Import_Scan_Result)
+        return user_has_permission(
+            user, engagement, Permissions.Import_Scan_Result
+        )
 
     if product and product_name and engagement_name:
         if not user_has_permission(user, product, Permissions.Engagement_Add):
             raise PermissionDenied(
-                "No permission to create engagements in product '%s'" % product_name
+                "No permission to create engagements in product '%s'"
+                % product_name
             )
 
-        if not user_has_permission(user, product, Permissions.Import_Scan_Result):
+        if not user_has_permission(
+            user, product, Permissions.Import_Scan_Result
+        ):
             raise PermissionDenied(
-                "No permission to import scans into product '%s'" % product_name
+                "No permission to import scans into product '%s'"
+                % product_name
             )
 
         # all good
@@ -945,11 +1058,15 @@ def check_auto_create_permission(
             )
 
         if not product_type:
-            if not user_has_global_permission(user, Permissions.Product_Type_Add):
+            if not user_has_global_permission(
+                user, Permissions.Product_Type_Add
+            ):
                 raise PermissionDenied(
-                    "No permission to create product_type '%s'" % product_type_name
+                    "No permission to create product_type '%s'"
+                    % product_type_name
                 )
-            # new product type can be created with current user as owner, so all objects in it can be created as well
+            # new product type can be created with current user as owner, so
+            # all objects in it can be created as well
             return True
         else:
             if not user_has_permission(
@@ -967,7 +1084,6 @@ def check_auto_create_permission(
 
 
 class UserHasConfigurationPermissionStaff(permissions.DjangoModelPermissions):
-
     # Override map to also provide 'view' permissions
     perms_map = {
         "GET": ["%(app_label)s.view_%(model_name)s"],
@@ -983,8 +1099,9 @@ class UserHasConfigurationPermissionStaff(permissions.DjangoModelPermissions):
         return super().has_permission(request, view)
 
 
-class UserHasConfigurationPermissionSuperuser(permissions.DjangoModelPermissions):
-
+class UserHasConfigurationPermissionSuperuser(
+    permissions.DjangoModelPermissions
+):
     # Override map to also provide 'view' permissions
     perms_map = {
         "GET": ["%(app_label)s.view_%(model_name)s"],

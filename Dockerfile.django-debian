@@ -5,7 +5,7 @@
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.11.4-slim-bullseye@sha256:91d194f58f50594cda71dcd2e8fdefd90e7ecc57d07823813b67c8521e565dcd as base
+FROM python:3.11.4-slim-bullseye@sha256:52c7a54aa5e5068ce76edaf3f8652a64fb99e378fb89fb0bfbe21a8756d0013c as base
 FROM base as build
 WORKDIR /app
 RUN \
@@ -111,7 +111,10 @@ RUN \
     chown ${appuser} /var/run/${appuser} && \
     chmod g=u /var/run/${appuser} && \
     chmod 775 /*.sh && \
-    mkdir -p media/threat && chown -R ${uid} media
+    mkdir -p media/threat && chown -R ${uid} media && \
+    # To avoid warning: (staticfiles.W004) The directory '/app/components/node_modules' in the STATICFILES_DIRS setting does not exist.
+    mkdir -p components/node_modules && \
+    chown ${appuser} components/node_modules
 USER ${uid}
 ENV \
   # Only variables that are not defined in settings.dist.py
