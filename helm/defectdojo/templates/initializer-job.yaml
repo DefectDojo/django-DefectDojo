@@ -1,4 +1,4 @@
-{{- if .Values.initializer.run  }}
+{{- if .Values.initializer.run }}
 {{- $fullName := include "defectdojo.fullname" . -}}
 apiVersion: batch/v1
 kind: Job
@@ -32,6 +32,19 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.imagePullSecrets }}
       {{- end }}
+      volumes:
+      {{- range .Values.initializer.extraVolumes }}
+      - name: userconfig-{{ .name }}
+        {{ .type }}:
+          {{- if (eq .type "configMap") }}
+          name: {{ .name }}
+          {{- else if (eq .type "secret") }}
+          secretName: {{ .name }}
+          {{- else if (eq .type "hostPath") }}
+          type: {{ .pathType | default "Directory" }}
+          path: {{ .hostPath }}
+          {{- end }}
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -60,7 +73,14 @@ spec:
         {{- if .Values.securityContext.enabled }}
         securityContext:
           {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
-        {{- end }}          
+        {{- end }}
+        volumeMounts:
+        {{- range .Values.initializer.extraVolumes }}
+        - name: userconfig-{{ .name }}
+          readOnly: true
+          mountPath: {{ .path }}
+          subPath: {{ .subPath }}
+        {{- end }}
         command:
           - /entrypoint-initializer.sh
         envFrom:

@@ -10,6 +10,7 @@ class ComposableSchema:
     yielding a new composable schema whose transformation is defined as the function composition
     of the transformation of the two source schema.
     """
+
     def transform_operation(self, operation, resolver):
         """Defines an operation transformation
 
@@ -17,7 +18,6 @@ class ComposableSchema:
             operation (Operation): the operation to transform
             resolver (Resolver): the schema refs resolver
         """
-        pass
 
     def composeWith(self, schema):
         """Allow two schema to be composed into a new schema.
@@ -36,7 +36,9 @@ class ComposableSchema:
 
         class _Wrapper(ComposableSchema):
             def transform_operation(self, operation, resolver):
-                return schema.transform_operation(op(operation, resolver), resolver)
+                return schema.transform_operation(
+                    op(operation, resolver), resolver
+                )
 
         return _Wrapper()
 
@@ -66,8 +68,8 @@ class IdentitySchema(ComposableSchema):
 
 
 class ExtraParameters(ComposableSchema):
-    """Define a schema that can add parameters to the operation
-    """
+    """Define a schema that can add parameters to the operation"""
+
     def __init__(self, operation_name, extra_parameters, *args, **kwargs):
         """Initialize the schema
 
@@ -90,8 +92,8 @@ class ExtraParameters(ComposableSchema):
 
 
 class ExtraResponseField(ComposableSchema):
-    """Define a schema that can add fields to the responses of the operation
-    """
+    """Define a schema that can add fields to the responses of the operation"""
+
     def __init__(self, operation_name, extra_fields, *args, **kwargs):
         """Initialize the schema
 
@@ -123,10 +125,16 @@ class ExtraResponseField(ComposableSchema):
         for code, params in self._extra_fields.items():
             if code in responses:
                 original_schema = responses[code]["schema"]
-                schema = original_schema if type(original_schema) is Schema else resolve_ref(original_schema, resolver)
+                schema = (
+                    original_schema
+                    if isinstance(original_schema, Schema)
+                    else resolve_ref(original_schema, resolver)
+                )
                 schema = copy.deepcopy(schema)
 
                 for name, param in params.items():
-                    schema["properties"][name] = resolve_lazy_ref(param, resolver)
+                    schema["properties"][name] = resolve_lazy_ref(
+                        param, resolver
+                    )
                 responses[code]["schema"] = schema
         return operation

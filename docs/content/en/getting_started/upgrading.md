@@ -76,6 +76,20 @@ If you have installed DefectDojo on "iron" and wish to upgrade the installation,
 
 There are no special instruction for upgrading to 2.25.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.25.0) for the contents of the release.
 
+A few query parameters related to filtering object via API related to a products tags have been renamed to be more consistent with the other "related object tags":
+
+**Breaking Change**
+
+ - Engagement
+   - `product__tags__name` -> `product__tags` 
+   - `not_product__tags__name` -> `not_product__tags` 
+ - Test
+   - `engagement__product__tags__name` -> `engagement__product__tags`
+   - `not_engagement__product__tags__name` -> `not_engagement__product__tags`
+ - Finding
+   - `test__engagement__product__tags__name` -> `test__engagement__product__tags`
+   - `not_test__engagement__product__tags__name` -> `not_test__engagement__product__tags`
+
 **Deprecation**
 
 The OpenAPI 2.0 Swagger API documentation is being deprecated in favor of the existing
@@ -84,6 +98,7 @@ slated for removal in version 2.30.0
 
 *Note*: The API has not changed in any way and behaves the same between OAPI2 and OAPI3
 
+For all other changes, check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.25.0) for the contents of the release.
 
 ## Upgrading to DefectDojo Version 2.24.x.
 

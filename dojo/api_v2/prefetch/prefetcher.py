@@ -7,7 +7,7 @@ import sys
 SERIALIZER_DEFS_MODULE = "dojo.api_v2.serializers"
 
 
-class _Prefetcher():
+class _Prefetcher:
     @staticmethod
     def _build_serializers():
         """Returns a map model -> serializer where model is a django model and serializer is the corresponding
@@ -16,13 +16,16 @@ class _Prefetcher():
         Returns:
             dict[model, serializer]: map of model to their serializer
         """
+
         def _is_model_serializer(obj):
             return inspect.isclass(obj) and issubclass(obj, ModelSerializer)
 
         serializers = dict()
         # We process all the serializers found in the module SERIALIZER_DEFS_MODULE. We restrict the scope to avoid
         # processing all the classes in the symbol table
-        available_serializers = inspect.getmembers(sys.modules[SERIALIZER_DEFS_MODULE], _is_model_serializer)
+        available_serializers = inspect.getmembers(
+            sys.modules[SERIALIZER_DEFS_MODULE], _is_model_serializer
+        )
 
         for _, serializer in available_serializers:
             model = serializer.Meta.model
@@ -80,9 +83,13 @@ class _Prefetcher():
             # Check if the field represents a many-to-many relationship as we need to instantiate
             # the serializer accordingly
             many = utils._is_many_to_many_relation(field_meta)
-            field_data = extra_serializer(many=many).to_representation(field_value)
+            field_data = extra_serializer(many=many).to_representation(
+                field_value
+            )
             # For convenience in processing we store the field data in a list
-            field_data_list = field_data if type(field_data) is list else [field_data]
+            field_data_list = (
+                field_data if isinstance(field_data, list) else [field_data]
+            )
 
             if field_to_fetch not in self._prefetch_data:
                 self._prefetch_data[field_to_fetch] = dict()

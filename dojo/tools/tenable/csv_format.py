@@ -50,7 +50,9 @@ class TenableCSVParser(object):
     def _format_cve(self, val):
         if val is None or val == "":
             return None
-        cve_match = re.findall(r"CVE-[0-9]+-[0-9]+", val.upper(), re.IGNORECASE)
+        cve_match = re.findall(
+            r"CVE-[0-9]+-[0-9]+", val.upper(), re.IGNORECASE
+        )
         if cve_match:
             return cve_match
         return None
@@ -64,7 +66,7 @@ class TenableCSVParser(object):
     def get_findings(self, filename: str, test: Test):
         # Read the CSV
         content = filename.read()
-        if type(content) is bytes:
+        if isinstance(content, bytes):
             content = content.decode("utf-8")
         csv.field_size_limit(int(sys.maxsize / 10))  # the request/resp are big
         reader = csv.DictReader(io.StringIO(content))
@@ -92,8 +94,15 @@ class TenableCSVParser(object):
             impact = row.get("Description", "N/A")
             references = row.get("See Also", "N/A")
             # Determine if the current row has already been processed
-            dupe_key = severity + title + row.get('Host', 'No host') + str(row.get('Port', 'No port')) + row.get('Synopsis', 'No synopsis')
-            # Finding has not been detected in the current report. Proceed with parsing
+            dupe_key = (
+                severity
+                + title
+                + row.get("Host", "No host")
+                + str(row.get("Port", "No port"))
+                + row.get("Synopsis", "No synopsis")
+            )
+            # Finding has not been detected in the current report. Proceed with
+            # parsing
             if dupe_key not in dupes:
                 # Create the finding object
                 find = Finding(
@@ -103,16 +112,18 @@ class TenableCSVParser(object):
                     severity=severity,
                     mitigation=mitigation,
                     impact=impact,
-                    references=references
+                    references=references,
                 )
 
                 # manage CVSS vector (only v3.x for now)
                 cvss_vector = row.get("CVSS V3 Vector", "")
                 if cvss_vector != "":
-                    find.cvssv3 = CVSS3("CVSS:3.0/" + str(cvss_vector)).clean_vector(output_prefix=True)
+                    find.cvssv3 = CVSS3(
+                        "CVSS:3.0/" + str(cvss_vector)
+                    ).clean_vector(output_prefix=True)
 
                 # Add CVSS score if present
-                cvssv3 = row.get('CVSSv3', "")
+                cvssv3 = row.get("CVSSv3", "")
                 if cvssv3 != "":
                     find.cvssv3_score = cvssv3
                 # manage CPE data
@@ -120,19 +131,31 @@ class TenableCSVParser(object):
                 if detected_cpe:
                     # FIXME support more than one CPE in Nessus CSV parser
                     if len(detected_cpe) > 1:
-                        LOGGER.debug("more than one CPE for a finding. NOT supported by Nessus CSV parser")
+                        LOGGER.debug(
+                            "more than one CPE for a finding. NOT supported by Nessus CSV parser"
+                        )
                     cpe_decoded = CPE(detected_cpe[0])
-                    find.component_name = cpe_decoded.get_product()[0] if len(cpe_decoded.get_product()) > 0 else None
-                    find.component_version = cpe_decoded.get_version()[0] if len(cpe_decoded.get_version()) > 0 else None
+                    find.component_name = (
+                        cpe_decoded.get_product()[0]
+                        if len(cpe_decoded.get_product()) > 0
+                        else None
+                    )
+                    find.component_version = (
+                        cpe_decoded.get_version()[0]
+                        if len(cpe_decoded.get_version()) > 0
+                        else None
+                    )
 
                 find.unsaved_endpoints = []
                 find.unsaved_vulnerability_ids = []
                 dupes[dupe_key] = find
             else:
-                # This is a duplicate. Update the description of the original finding
+                # This is a duplicate. Update the description of the original
+                # finding
                 find = dupes[dupe_key]
 
-            # Determine if there is more details to be included in the description
+            # Determine if there is more details to be included in the
+            # description
             plugin_output = str(row.get("Plugin Output", ""))
             if plugin_output != "":
                 find.description += f"\n\n{plugin_output}"
@@ -156,13 +179,10 @@ class TenableCSVParser(object):
             if isinstance(port, str) and port in ["", "0"]:
                 port = None
             # Update the endpoints
-            if '://' in host:
+            if "://" in host:
                 endpoint = Endpoint.from_uri(host)
             else:
-                endpoint = Endpoint(
-                    protocol=protocol,
-                    host=host,
-                    port=port)
+                endpoint = Endpoint(protocol=protocol, host=host, port=port)
             # Add the list to be processed later
             find.unsaved_endpoints.append(endpoint)
 
