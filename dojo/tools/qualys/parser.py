@@ -128,6 +128,9 @@ def parse_finding(host, tree):
                 ).date()
             else:
                 _temp["mitigation_date"] = None
+        # type: https://success.qualys.com/discussions/s/question/0D52L00004TnzgISAR/explanation-of-ig-vuln-practice
+        _type = TYPE_MAP.get(vuln_details.findtext("TYPE"), "Unknown")
+
         # read cvss value if present
         cvss3 = vuln_details.findtext("CVSS3_FINAL")
         if cvss3 is not None and cvss3 != "-":
@@ -153,9 +156,6 @@ def parse_finding(host, tree):
             # Solution Strips Heading Workaround(s)
             # _temp['solution'] = re.sub('Workaround(s)?:.+\n', '', htmltext(vuln_item.findtext('SOLUTION')))
             _temp["solution"] = htmltext(vuln_item.findtext("SOLUTION"))
-
-            # type
-            _type = TYPE_MAP.get(vuln_details.findtext("TYPE"), "Unknown")
 
             # Vuln_description
             _temp["vuln_description"] = "\n".join(
@@ -223,10 +223,11 @@ def parse_finding(host, tree):
         elif sev is None:
             sev = "Informational"
         finding = None
+        title = "QID-" + _gid[4:] + " | " + _type + " | " + _temp["vuln_name"]
         if _temp_cve_details:
             refs = "\n".join(list(_cl.values()))
             finding = Finding(
-                title="QID-" + _gid[4:] + " | " + _temp["vuln_name"],
+                title=title,
                 mitigation=_temp["solution"],
                 description=_temp["vuln_description"],
                 severity=sev,
@@ -238,7 +239,7 @@ def parse_finding(host, tree):
 
         else:
             finding = Finding(
-                title="QID-" + _gid[4:] + " | " + _temp["vuln_name"],
+                title=title,
                 mitigation=_temp["solution"],
                 description=_temp["vuln_description"],
                 severity=sev,
