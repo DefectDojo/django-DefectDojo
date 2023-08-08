@@ -9,6 +9,12 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
+{{- if .Values.django.service.annotations }}
+  annotations:
+  {{- range $key, $value := .Values.django.service.annotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}
 spec:
   selector:
     defectdojo.org/component: django
