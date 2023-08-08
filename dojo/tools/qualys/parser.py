@@ -49,7 +49,7 @@ REPORT_HEADERS = [
 ]
 
 TYPE_MAP = {
-    "Ig": "INFORMATION GATHERED",
+    "Ig": "INFORMATION",
     "Practice": "POTENTIAL",
     "Vuln": "CONFIRMED",
 }
