@@ -54,7 +54,7 @@ social-auth-app-django==5.2.0
 social-auth-core==4.4.2
 Python-jose==3.3.0
 gitpython==3.1.32
-debugpy==1.6.7
+debugpy==1.6.7.post1
 python-gitlab==3.15.0
 drf_yasg==1.21.5
 cpe==1.2.1
