@@ -10,6 +10,12 @@ import json
 import boto3
 from botocore.exceptions import ClientError
 
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -27,6 +33,7 @@ env = environ.Env(
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ""),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
+    DD_OPENTELEMETRY_TRACES_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, "/"),
     DD_LOGIN_URL=(str, "/login"),
     DD_DJANGO_ADMIN_ENABLED=(bool, True),
@@ -1251,6 +1258,17 @@ if env("DD_DJANGO_METRICS_ENABLED"):
     # CELERY_RESULT_BACKEND.replace('django.core','django_prometheus.', 1)
     LOGIN_EXEMPT_URLS += (r"^%sdjango_metrics/" % URL_PREFIX,)
 
+# ------------------------------------
+# Traces OpenTelemetry to OTLP
+# ------------------------------------
+if env("DD_OPENTELEMETRY_TRACES_ENABLED"):
+    resource = Resource.create()
+
+    trace.set_tracer_provider(TracerProvider(resource=resource))
+    # Please see the OTLP Exporter documentation for other options.
+    span_processor = BatchSpanProcessor(OTLPSpanExporter())
+    trace.get_tracer_provider().add_span_processor(span_processor)
+
 
 # ------------------------------------
 # Hashcode configuration
@@ -1624,10 +1642,6 @@ LOGGING = {
         "simple": {"format": "%(levelname)s %(funcName)s %(lineno)d %(message)s"},
         "json": {
             "()": "json_log_formatter.JSONFormatter",
-        },
-        "trace_formatter": {
-            "format": "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] [trace_id=%(otelTraceID)s span_id=%(otelSpanID)s] [%(funcName)s] %(message)s",  # optional, default is logging.BASIC_FORMAT
-            "datefmt": "%Y-%m-%d %H:%M:%S",  # optional, default is '%Y-%m-%d %H:%M:%S'
         },
     },
     "filters": {

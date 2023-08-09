@@ -30,7 +30,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
 # Shouldn't apply to docker-compose dev mode (1 process, 1 thread), but may be needed when enabling debugging in other contexts
 def is_debugger_listening(port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    return s.connect_ex(('127.0.0.1', port))
+    return s.connect_ex(("127.0.0.1", port))
 
 
 debugpy_port = os.environ.get("DD_DEBUG_PORT") if os.environ.get("DD_DEBUG_PORT") else 3000
@@ -42,10 +42,7 @@ if os.environ.get("DD_DEBUG") == "True" and not os.getenv("RUN_MAIN") and is_deb
         import debugpy
 
         # Required, otherwise debugpy will try to use the uwsgi binary as the python interpreter - https://github.com/microsoft/debugpy/issues/262
-        debugpy.configure({
-                            "python": "python",
-                            "subProcess": True
-                        })
+        debugpy.configure({"python": "python", "subProcess": True})
         debugpy.listen(("0.0.0.0", debugpy_port))
         if os.environ.get("DD_DEBUG_WAIT_FOR_CLIENT") == "True":
             logger.info("Waiting for the debugging client to connect on port {}".format(debugpy_port))
@@ -61,3 +58,10 @@ if os.environ.get("DD_DEBUG") == "True" and not os.getenv("RUN_MAIN") and is_deb
 from django.core.wsgi import get_wsgi_application
 
 application = get_wsgi_application()
+
+
+if os.environ.get("DD_OPENTELEMETRY_TRACES_ENABLED"):
+    # Configuring OpenTelemetry middleware for WSGI application
+    from opentelemetry.instrumentation.wsgi import OpenTelemetryMiddleware
+
+    application = OpenTelemetryMiddleware(application)
