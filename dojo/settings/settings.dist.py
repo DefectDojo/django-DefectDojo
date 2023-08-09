@@ -1259,7 +1259,7 @@ if env("DD_DJANGO_METRICS_ENABLED"):
     LOGIN_EXEMPT_URLS += (r"^%sdjango_metrics/" % URL_PREFIX,)
 
 # ------------------------------------
-# Traces OpenTelemetry Traces to OTLP
+# Traces OpenTelemetry to OTLP
 # ------------------------------------
 if env("DD_OPENTELEMETRY_TRACES_ENABLED"):
     resource = Resource.create()
