@@ -21,25 +21,22 @@ class JfrogXrayOnDemandBinaryScanParser(object):
     def get_findings(self, json_output, test):
         tree = json.load(json_output)
         return self.get_items(tree, test)
-        
 
     def get_items(self, tree, test):
         items = {}
         data = tree[0]
-        if 'vulnerabilities' in data:
-            vulnerability_tree = data['vulnerabilities']
+        if "vulnerabilities" in data:
+            vulnerability_tree = data["vulnerabilities"]
 
             for node in vulnerability_tree:
-
                 item = get_item(node, test)
 
                 title_cve = "No CVE"
-                if 'cves' in data:
-                    if 'cve' in data["cves"][0]:
+                if "cves" in data:
+                    if "cve" in data["cves"][0]:
                         title_cve = data["cve"]
 
-                unique_key = node.get("issue_id", "") + node.get("summary", "") + \
-                    title_cve
+                unique_key = node.get("issue_id", "") + node.get("summary", "") + title_cve
                 items[unique_key] = item
 
         return list(items.values())
@@ -49,15 +46,15 @@ def decode_cwe_number(value):
     match = re.match(r"CWE-\d+", value, re.IGNORECASE)
     if match is None:
         return 0
-    return int(match[0].rsplit('-')[1])
+    return int(match[0].rsplit("-")[1])
 
 
 def get_servery(vulnerability):
-    if 'severity' in vulnerability:
-        if vulnerability['severity'] == 'Unknown':
+    if "severity" in vulnerability:
+        if vulnerability["severity"] == "Unknown":
             severity = "Info"
         else:
-            severity = vulnerability['severity'].title()
+            severity = vulnerability["severity"].title()
     else:
         severity = "Info"
     return severity
@@ -78,8 +75,8 @@ def get_remediation(extended_information):
         remediation = "\n**Remediation**\n"
         remediation += extended_information["remediation"] + "\n"
     return remediation
-       
-        
+
+
 def get_severity_justification(vulnerability):
     severity_desc = ""
     remediation = ""
@@ -89,16 +86,19 @@ def get_severity_justification(vulnerability):
         if "short_description" in extended_information:
             severity_desc = "**short description**\n"
             severity_desc += extended_information["short_description"] + "\n"
+        if "full_description" in extended_information:
             severity_desc = "**full description**\n"
             severity_desc += extended_information["full_description"] + "\n"
+        if "jfrog_research_severity" in extended_information:
             severity_desc = "**jfrog research severity**\n"
             severity_desc += extended_information["jfrog_research_severity"] + "\n"
-            if "jfrog_research_severity_reasons" in extended_information:
-                severity_desc = "**jfrog research severity reasons**\n"
-                for item in extended_information["jfrog_research_severity_reasons"]:
-                    severity_desc += item["name"] + "\n" if item.get("name") else ""
-                    severity_desc += item["description"] + "\n" if item.get("description") else ""
-    return severity_desc, remediation 
+        if "jfrog_research_severity_reasons" in extended_information:
+            severity_desc = "**jfrog research severity reasons**\n"
+            for item in extended_information["jfrog_research_severity_reasons"]:
+                severity_desc += item["name"] + "\n" if item.get("name") else ""
+                severity_desc += item["description"] + "\n" if item.get("description") else ""
+    return severity_desc, remediation
+
 
 def get_component(vulnerability):
     mitigation = ""
@@ -125,16 +125,16 @@ def get_component(vulnerability):
 
 
 def get_version_vulnerability(vulnerability):
-    if 'vulnerable_versions' in vulnerability['component_versions']:
+    if "vulnerable_versions" in vulnerability["component_versions"]:
         extra_desc = "\n**Versions that are vulnerable:**\n"
-        extra_desc += "\n".join(vulnerability['component_versions']['vulnerable_versions'])
+        extra_desc += "\n".join(vulnerability["component_versions"]["vulnerable_versions"])
         return extra_desc
     return "None"
- 
+
 
 def get_provider(vulnerabiity):
     if "component_versions" in vulnerabiity:
-        provider = vulnerabiity.get('component_versions').get('more_details').get('provider')
+        provider = vulnerabiity.get("component_versions").get("more_details").get("provider")
         if provider:
             provider += f"\n**Provider:** {provider}"
             return provider
@@ -167,13 +167,13 @@ def get_item(vulnerability, test):
     cves = get_cve(vulnerability)
     if len(cves) > 0:
         for item in cves:
-            if item.get('cve'):
-                vulnerability_ids.append(item.get('cve'))
+            if item.get("cve"):
+                vulnerability_ids.append(item.get("cve"))
         # take only the first one for now, limitation of DD model.
-        if len(cves[0].get('cwe', [])) > 0:
-            cwe = decode_cwe_number(cves[0].get('cwe', [])[0])
-        if 'cvss_v3' in cves[0]:
-            cvss_v3 = cves[0]['cvss_v3']
+        if len(cves[0].get("cwe", [])) > 0:
+            cwe = decode_cwe_number(cves[0].get("cwe", [])[0])
+        if "cvss_v3" in cves[0]:
+            cvss_v3 = cves[0]["cvss_v3"]
             # this dedicated package will clean the vector
             cvssv3 = CVSS3.from_rh_vector(cvss_v3).clean_vector()
 
@@ -184,12 +184,20 @@ def get_item(vulnerability, test):
     # The 'id' field is empty? (at least in my sample file)
     if vulnerability_ids:
         if vulnerability.get("id"):
-            title = vulnerability['id'] + " - " + str(vulnerability_ids[0]) + " - " + component_name + ":" + component_version
+            title = (
+                vulnerability["id"]
+                + " - "
+                + str(vulnerability_ids[0])
+                + " - "
+                + component_name
+                + ":"
+                + component_version
+            )
         else:
             title = str(vulnerability_ids[0]) + " - " + component_name + ":" + component_version
     else:
         if vulnerability.get("id"):
-            title = vulnerability['id'] + " - " + component_name + ":" + component_version
+            title = vulnerability["id"] + " - " + component_name + ":" + component_version
         else:
             title = "No CVE - " + component_name + ":" + component_version
 
@@ -200,16 +208,17 @@ def get_item(vulnerability, test):
         test=test,
         severity_justification=severity_justification,
         severity=severity,
-        description=(vulnerability['summary'] + extra_desc).strip(),
+        description=(vulnerability["summary"] + extra_desc).strip(),
         mitigation=mitigation + remediation,
         component_name=component_name,
         component_version=component_version,
         impact=impact,
         references=references,
-        file_path=vulnerability.get('source_comp_id'),
+        file_path=vulnerability.get("source_comp_id"),
         static_finding=True,
         dynamic_finding=False,
-        cvssv3=cvssv3)
+        cvssv3=cvssv3,
+    )
     if vulnerability_ids:
         finding.unsaved_vulnerability_ids = vulnerability_ids
     return finding
