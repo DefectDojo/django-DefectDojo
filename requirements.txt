@@ -1,5 +1,5 @@
 # requirements.txt for DefectDojo using Python 3.x
-asteval==0.9.30
+asteval==0.9.31
 bleach==6.0.0
 bleach[css]
 celery==5.3.1
@@ -26,62 +26,62 @@ django-watson==1.6.3
 django-prometheus==2.3.1
 Django==4.1.10
 djangorestframework==3.14.0
-gunicorn==20.1.0
+gunicorn==21.2.0
 html2text==2020.1.16
-humanize==4.6.0
-jira==3.5.1
+humanize==4.7.0
+jira==3.5.2
 PyGithub==1.58.2
-lxml==4.9.2
-Markdown==3.4.3
+lxml==4.9.3
+Markdown==3.4.4
 mysqlclient==2.1.1
 openpyxl==3.1.2
 xlrd==1.2.0
-Pillow==9.5.0  # required by django-imagekit
+Pillow==10.0.0  # required by django-imagekit
 psycopg2-binary==2.9.6
 cryptography==41.0.3
 python-dateutil==2.8.2
 pytz==2023.3
 redis==4.6.0
 requests==2.31.0
-sqlalchemy==2.0.17  # Required by Celery broker transport
+sqlalchemy==2.0.19  # Required by Celery broker transport
 supervisor==4.2.5
 urllib3==1.26.11
-uWSGI==2.0.21
+uWSGI==2.0.22
 vobject==0.9.6.1
 whitenoise==5.2.0
 titlecase==2.3
 social-auth-app-django==5.2.0
 social-auth-core==4.4.2
 Python-jose==3.3.0
-GitPython==3.1.31
+GitPython==3.1.32
 debugpy==1.6.7
 python-gitlab==3.15.0
 drf_yasg==1.21.5
 cpe==1.2.1
-packageurl-python==0.11.1
+packageurl-python==0.11.2
 django-crum==0.7.9
 JSON-log-formatter==0.5.2
 django-split-settings==1.2.0
 django-debug-toolbar==4.1.0
 django-debug-toolbar-request-history==0.1.4
-vcrpy==4.3.1
+vcrpy==5.1.0
 vcrpy-unittest==0.1.7
 django-tagulous==1.3.3
-PyJWT==2.7.0
+PyJWT==2.8.0
 cvss==2.6
 django-fieldsignals==0.7.0
 hyperlink==21.0.0
 django-test-migrations==1.3.0
-djangosaml2==1.6.0
-drf-spectacular==0.26.3
-django-ratelimit==4.0.0
+djangosaml2==1.7.0
+drf-spectacular==0.26.4
+django-ratelimit==4.1.0
 argon2-cffi==21.3.0
 blackduck==1.1.0
 pycurl==7.45.2  # Required for Celery Broker AWS (SQS) support
-boto3==1.26.159  # Required for Celery Broker AWS (SQS) support
+boto3==1.28.18  # Required for Celery Broker AWS (SQS) support
 netaddr==0.8.0
 vulners==2.0.10
-fontawesomefree==6.4.0
+fontawesomefree==6.4.2
 azure-devops==7.1.0b3
 opentelemetry-sdk==1.19.0
 opentelemetry-api==1.19.0

@@ -1,0 +1,233 @@
+{
+    "_embedded": {
+        "findings": [
+            {
+                "issue_id": 1568514641,
+                "scan_type": "DYNAMIC",
+                "description": "<span>Injections happen when untrusted data is inserted into an interpreted syntax and subsequently evaluated on the server side. This syntax may be a SQL query, a parsed JSON or XML document, an executed script or other syntax that may be in use within the application. Although the target syntax has not been identified, the application behavior demonstrates that the input HTTP parameter may be inserted without proper escaping. It was observed by sending valid and invalid payloads that should throw or should not throw errors. By inserting a proper and improper comments such as ``, `*/_/*`, `/*_*/` into the `api` parameter, the scanner was able to spot a difference in the responses, which is a good indicator of a potential vulnerability. Confidence: medium. Response codes: `404`, `404`, `404`. Similarities: `` vs `*/_/*`: 0.0; `*/_/*` vs `/*_*/`: 0.0; `` vs `/*_*/`: 1.0. </span><span>It is recommended to identify how the current parameter is used in the application source code, and make sure it is escaped before inserting into any syntax or query. You can add valid values to an allowlist and invalid values to a blocklist. </span><span><a href=\"http://cwe.mitre.org/cgi-bin/jumpmenu.cgi?id=74\">CWE</a></span>",
+                "count": 1,
+                "context_type": "APPLICATION",
+                "context_guid": "zyx789-xyz987",
+                "violates_policy": true,
+                "finding_status": {
+                    "first_found_date": "2021-08-27T07:33:40.989Z",
+                    "status": "OPEN",
+                    "resolution": "UNRESOLVED",
+                    "mitigation_review_status": "NONE",
+                    "new": false,
+                    "resolution_status": "NONE",
+                    "last_seen_date": "2021-09-10T04:06:31.614Z"
+                },
+                "finding_details": {
+                    "severity": 4,
+                    "cwe": {
+                        "id": 74,
+                        "name": "Improper Neutralization of Special Elements in Output Used by a Downstream Component ('Injection')",
+                        "href": "https://api.veracode.com/appsec/v1/cwes/74"
+                    },
+                    "path": "/api/*_*//new_user_sign_up?param=wild-things",
+                    "hostname": "application.insecure-company-alliance.com",
+                    "plugin": "Code Injection",
+                    "port": "443",
+                    "discovered_by_vsa": 0,
+                    "finding_category": {
+                        "id": 28,
+                        "name": "Code Injection",
+                        "href": "https://api.veracode.com/appsec/v1/categories/28"
+                    },
+                    "vulnerable_parameter": "api",
+                    "attack_vector": "Improper Neutralization of Special Elements in Output Used by a Downstream Component ('Injection')",
+                    "url": "https://application.insecure-company-alliance.com:443/api/*_*//new_user_sign_up?param=wild-things"
+                },
+                "build_id": 986413
+            },
+            {
+                "issue_id": 1568514646,
+                "scan_type": "DYNAMIC",
+                "description": "<span>The target web page does not specify Content-Security-Policy. While lack of Content-Security-Policy on the website does not represents a security risk by itself, a strict Content-Security-Policy may serve as an additional protection layer from Cross-Site-Scripting attacks. Content-Security-Policy helps to ensure that all resources (such as scripts, images or video files) on the website are loaded from trusted sources. Content-Security-Policy may also help to protect from UI redressing attacks, such as \"Clickjacking\". </span><span>Consider implementing strict Content-Security-Policy by setting the corresponding HTTP header for each page response from the website. It is recommended to move all scripts to trusted locations and specify \"script-src\" or \"default-src\" directives. If inline javascript is required on the website, inline scripts may be accompanied with a cryptographic nonce (number used once) or a hash, to ensure only trusted scripts are executed. </span><span><a href=\"http://cwe.mitre.org/cgi-bin/jumpmenu.cgi?id=829\">CWE</a></span>",
+                "count": 1,
+                "context_type": "APPLICATION",
+                "context_guid": "zyx789-xyz987",
+                "violates_policy": true,
+                "finding_status": {
+                    "first_found_date": "2020-11-13T04:24:21.030Z",
+                    "status": "OPEN",
+                    "resolution": "MITIGATED",
+                    "mitigation_review_status": "NONE",
+                    "new": false,
+                    "resolution_status": "APPROVED",
+                    "last_seen_date": "2021-09-10T04:06:31.614Z"
+                },
+                "finding_details": {
+                    "severity": 3,
+                    "cwe": {
+                        "id": 829,
+                        "name": "Inclusion of Functionality from Untrusted Control Sphere",
+                        "href": "https://api.veracode.com/appsec/v1/cwes/829"
+                    },
+                    "path": "/?param=wild-things",
+                    "hostname": "application.insecure-company-alliance.com",
+                    "plugin": "Insecure Dependencies",
+                    "port": "443",
+                    "discovered_by_vsa": 0,
+                    "finding_category": {
+                        "id": 32,
+                        "name": "Insecure Dependencies",
+                        "href": "https://api.veracode.com/appsec/v1/categories/32"
+                    },
+                    "attack_vector": "Inclusion of Functionality from Untrusted Control Sphere",
+                    "url": "https://application.insecure-company-alliance.com:443/?param=wild-things"
+                },
+                "build_id": 986413
+            },
+            {
+                "issue_id": 1568514647,
+                "scan_type": "DYNAMIC",
+                "description": "<span>The site application.insecure-company-alliance.com:443 does not properly utilize the X-Content-Type-Options header. This header can be set to protect against MIME type confusion attacks in Internet Explorer versions 9 and higher, Chrome and Safari. Content sniffing is a method browsers use to attempt to determine the real content type of a response by looking at the content itself, instead of the response header's content-type value. By returning X-Content-Type-Options: nosniff, certain elements will only load external resources if their content-type matches what is expected. It should be noted this check was only executed against the first few pages of this site. </span><span>Set the X-Content-Type-Options header to a value of \"nosniff\" (without quotes). It is recommended this header be set side wide by configuring your web or application server to return this value for all resources. More information on configuring this header can be found at https://www.veracode.com/blog/2014/03/guidelines-for-setting-security-headers#xcto </span><span><a href=\"http://cwe.mitre.org/cgi-bin/jumpmenu.cgi?id=16\">CWE</a></span>",
+                "count": 1,
+                "context_type": "APPLICATION",
+                "context_guid": "zyx789-xyz987",
+                "violates_policy": false,
+                "finding_status": {
+                    "first_found_date": "2020-01-21T20:59:10.531Z",
+                    "status": "CLOSED",
+                    "resolution": "MITIGATED",
+                    "mitigation_review_status": "NONE",
+                    "new": false,
+                    "resolution_status": "APPROVED",
+                    "last_seen_date": "2021-09-10T04:06:31.614Z"
+                },
+                "finding_details": {
+                    "severity": 0,
+                    "cwe": {
+                        "id": 16,
+                        "name": "Configuration",
+                        "href": "https://api.veracode.com/appsec/v1/cwes/16"
+                    },
+                    "path": "/?param=something-CRAZY",
+                    "hostname": "application.insecure-company-alliance.com",
+                    "plugin": "Server Configuration",
+                    "port": "443",
+                    "discovered_by_vsa": 0,
+                    "finding_category": {
+                        "id": 27,
+                        "name": "Server Configuration",
+                        "href": "https://api.veracode.com/appsec/v1/categories/27"
+                    },
+                    "vulnerable_parameter": "x-content-type-options header",
+                    "attack_vector": "Configuration",
+                    "url": "https://application.insecure-company-alliance.com:443/?param=something-CRAZY"
+                },
+                "build_id": 986413
+            },
+            {
+                "issue_id": 156851234646,
+                "scan_type": "DYNAMIC",
+                "description": "<span>Weak TLSv1.2 cipher TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA is supported on application.insecure-company-alliance.com:-1. </span><span>Only support strong versions of ciphers.  Veracode recommends the guidance published by the National Institute of Standards and Technology (NIST), excerpted below from NIST 800-52: Cipher suites that use the Triple Data Encryption Algorithm (TDEA, also written as 3DES) are no longer allowed due to the limited amounts of data that can be processed under a single key. The server should be configured to only use cipher suites for which it has a valid certificate containing a signature providing at least 112 bits of security. Prefer ephemeral keys over static keys (i.e., prefer DHE over DH, and prefer ECDHE over ECDH). Ephemeral keys provide perfect forward secrecy. Prefer GCM or CCM modes over CBC mode. The use of an authenticated encryption mode prevents several attacks. Note that these are not available in versions prior to TLS 1.2. </span><span><a href=\"http://cwe.mitre.org/cgi-bin/jumpmenu.cgi?id=757\">CWE</a></span>",
+                "count": 1,
+                "context_type": "APPLICATION",
+                "context_guid": "zyx789-xyz987",
+                "violates_policy": true,
+                "finding_status": {
+                    "first_found_date": "2020-06-23T06:52:22.283Z",
+                    "status": "CLOSED",
+                    "resolution": "MITIGATED",
+                    "mitigation_review_status": "NONE",
+                    "new": false,
+                    "resolution_status": "APPROVED",
+                    "last_seen_date": "2021-09-10T04:06:31.614Z"
+                },
+                "finding_details": {
+                    "severity": 3,
+                    "cwe": {
+                        "id": 757,
+                        "name": "Selection of Less-Secure Algorithm During Negotiation ('Algorithm Downgrade')",
+                        "href": "https://api.veracode.com/appsec/v1/cwes/757"
+                    },
+                    "path": "/",
+                    "hostname": "application.insecure-company-alliance.com",
+                    "plugin": "Server Configuration",
+                    "port": "443",
+                    "discovered_by_vsa": 0,
+                    "finding_category": {
+                        "id": 27,
+                        "name": "Server Configuration",
+                        "href": "https://api.veracode.com/appsec/v1/categories/27"
+                    },
+                    "vulnerable_parameter": "TLSv1.2 cipher TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+                    "attack_vector": "Selection of Less-Secure Algorithm During Negotiation ('Algorithm Downgrade')",
+                    "url": "https://application.insecure-company-alliance.com:443/"
+                },
+                "build_id": 986413
+            },
+            {
+                "issue_id": 15623414646,
+                "scan_type": "DYNAMIC",
+                "description": "<span>Weak TLSv1.2 cipher TLS_RSA_WITH_AES_256_CBC_SHA is supported on application.insecure-company-alliance.com:-1. </span><span>Only support strong versions of ciphers.  Veracode recommends the guidance published by the National Institute of Standards and Technology (NIST), excerpted below from NIST 800-52: Cipher suites that use the Triple Data Encryption Algorithm (TDEA, also written as 3DES) are no longer allowed due to the limited amounts of data that can be processed under a single key. The server should be configured to only use cipher suites for which it has a valid certificate containing a signature providing at least 112 bits of security. Prefer ephemeral keys over static keys (i.e., prefer DHE over DH, and prefer ECDHE over ECDH). Ephemeral keys provide perfect forward secrecy. Prefer GCM or CCM modes over CBC mode. The use of an authenticated encryption mode prevents several attacks. Note that these are not available in versions prior to TLS 1.2. </span><span><a href=\"http://cwe.mitre.org/cgi-bin/jumpmenu.cgi?id=757\">CWE</a></span>",
+                "count": 1,
+                "context_type": "APPLICATION",
+                "context_guid": "zyx789-xyz987",
+                "violates_policy": true,
+                "finding_status": {
+                    "first_found_date": "2020-06-23T06:52:22.283Z",
+                    "status": "OPEN",
+                    "resolution": "MITIGATED",
+                    "mitigation_review_status": "NONE",
+                    "new": false,
+                    "resolution_status": "APPROVED",
+                    "last_seen_date": "2021-09-10T04:06:31.614Z"
+                },
+                "finding_details": {
+                    "severity": 3,
+                    "cwe": {
+                        "id": 757,
+                        "name": "Selection of Less-Secure Algorithm During Negotiation ('Algorithm Downgrade')",
+                        "href": "https://api.veracode.com/appsec/v1/cwes/757"
+                    },
+                    "path": "/",
+                    "hostname": "application.insecure-company-alliance.com",
+                    "plugin": "Server Configuration",
+                    "port": "443",
+                    "discovered_by_vsa": 0,
+                    "finding_category": {
+                        "id": 27,
+                        "name": "Server Configuration",
+                        "href": "https://api.veracode.com/appsec/v1/categories/27"
+                    },
+                    "vulnerable_parameter": "TLSv1.2 cipher TLS_RSA_WITH_AES_256_CBC_SHA",
+                    "attack_vector": "Selection of Less-Secure Algorithm During Negotiation ('Algorithm Downgrade')",
+                    "url": "https://application.insecure-company-alliance.com:443/"
+                },
+                "build_id": 986413
+            }
+        ]
+    },
+    "_links": {
+        "first": {
+            "href": "link"
+        },
+        "self": {
+            "href": "link",
+            "templated": true
+        },
+        "next": {
+            "href": "link"
+        },
+        "last": {
+            "href": "link"
+        },
+        "application": {
+            "href": "link"
+        },
+        "non-sca": {
+            "href": "link",
+            "templated": true
+        }
+    },
+    "page": {
+        "size": 5,
+        "total_elements": 10,
+        "total_pages": 2,
+        "number": 0
+    }
+}

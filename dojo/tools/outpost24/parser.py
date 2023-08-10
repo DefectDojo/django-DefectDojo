@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 class Outpost24Parser(object):
-
     def get_scan_types(self):
         return ["Outpost24 Scan"]
 
@@ -21,55 +20,72 @@ class Outpost24Parser(object):
     def get_findings(self, file, test):
         tree = ElementTree.parse(file)
         items = list()
-        for detail in tree.iterfind('.//detaillist/detail'):
+        for detail in tree.iterfind(".//detaillist/detail"):
             # finding details
-            title = detail.findtext('name')
+            title = detail.findtext("name")
             # date = detail.findtext('date') # can be used for Finding.date?
-            vulnerability_id = detail.findtext('./cve/id')
-            url = detail.findtext('./referencelist/reference/[type=\'solution\']/../url')
-            description = detail.findtext('description')
-            mitigation = detail.findtext('solution')
-            impact = detail.findtext('information')
-            cvss_score = detail.findtext('cvss_v3_score') or detail.findtext('cvss_score')
+            vulnerability_id = detail.findtext("./cve/id")
+            url = detail.findtext(
+                "./referencelist/reference/[type='solution']/../url"
+            )
+            description = detail.findtext("description")
+            mitigation = detail.findtext("solution")
+            impact = detail.findtext("information")
+            cvss_score = detail.findtext("cvss_v3_score") or detail.findtext(
+                "cvss_score"
+            )
             if not cvss_score:
                 cvss_score = 0
             if cvss_score:
                 score = float(cvss_score)
                 if score < 4:
-                    severity = 'Low'
+                    severity = "Low"
                 elif score < 7:
-                    severity = 'Medium'
+                    severity = "Medium"
                 elif score < 9:
-                    severity = 'High'
+                    severity = "High"
                 else:
-                    severity = 'Critical'
+                    severity = "Critical"
             else:
-                risk = int(detail.findtext('risk'))
+                risk = int(detail.findtext("risk"))
                 if risk == 0:
-                    severity = 'Low'
+                    severity = "Low"
                 elif risk == 1:
-                    severity = 'Medium'
+                    severity = "Medium"
                 elif risk == 2:
-                    severity = 'High'
+                    severity = "High"
                 else:
-                    severity = 'Critical'
-            cvss_description = detail.findtext('cvss_vector_description')
-            cvss_vector = detail.findtext('cvss_v3_vector') or detail.findtext('cvss_vector')
-            severity_justification = "{}\n{}".format(cvss_score, cvss_description)
-            finding = Finding(title=title, test=test, url=url, description=description, mitigation=mitigation,
-                              impact=impact, severity=severity,
-                              severity_justification=severity_justification)
+                    severity = "Critical"
+            cvss_description = detail.findtext("cvss_vector_description")
+            cvss_vector = detail.findtext("cvss_v3_vector") or detail.findtext(
+                "cvss_vector"
+            )
+            severity_justification = "{}\n{}".format(
+                cvss_score, cvss_description
+            )
+            finding = Finding(
+                title=title,
+                test=test,
+                url=url,
+                description=description,
+                mitigation=mitigation,
+                impact=impact,
+                severity=severity,
+                severity_justification=severity_justification,
+            )
             if vulnerability_id:
                 finding.unsaved_vulnerability_ids = [vulnerability_id]
             # endpoint details
-            host = detail.findtext('ip')
+            host = detail.findtext("ip")
             if host:
-                protocol = detail.findtext('./portinfo/service')
+                protocol = detail.findtext("./portinfo/service")
                 try:
-                    port = int(detail.findtext('./portinfo/portnumber'))
-                except ValueError as ve:
+                    port = int(detail.findtext("./portinfo/portnumber"))
+                except ValueError:
                     logger.debug("General port given. Assigning 0 as default.")
                     port = 0
-                finding.unsaved_endpoints.append(Endpoint(protocol=protocol, host=host, port=port))
+                finding.unsaved_endpoints.append(
+                    Endpoint(protocol=protocol, host=host, port=port)
+                )
             items.append(finding)
         return items
