@@ -1508,7 +1508,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "SonarQube API Import": DEDUPE_ALGO_HASH_CODE,
     "Dependency Check Scan": DEDUPE_ALGO_HASH_CODE,
     "Dockle Scan": DEDUPE_ALGO_HASH_CODE,
-    "Tenabled Scan": DEDUPE_ALGO_HASH_CODE,
+    "Tenable Scan": DEDUPE_ALGO_HASH_CODE,
     "Nexpose Scan": DEDUPE_ALGO_HASH_CODE,
     "NPM Audit Scan": DEDUPE_ALGO_HASH_CODE,
     "Yarn Audit Scan": DEDUPE_ALGO_HASH_CODE,
