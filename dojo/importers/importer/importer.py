@@ -428,7 +428,7 @@ class DojoDefaultImporter(object):
                 # So I can check on the task later
                 results_list += [result]
             # After all tasks have been started, time to pull the results
-            logger.info("IMPORT_SCAN: Collecting Findings " + str(results_list))
+            logger.info("IMPORT_SCAN: Collecting Findings")
             for results in results_list:
                 serial_new_findings = results.get()
                 new_findings += [
