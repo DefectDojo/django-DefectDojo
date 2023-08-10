@@ -72,7 +72,11 @@
 {% endif %}
 
 *Description*:
+{% if '**Secret:**' in finding.description and '**Match:**' in finding.description and '**Commit message:**' in finding.description %}
+{{ finding.description.split('**Secret:**')[0] }}**Secret:** `REDACTED`\n**Match:** `REDACTED`\n**Commit message:**{{ finding.description.split('**Commit message:**')[1] }}
+{% else %}
 {{ finding.description }}
+{% endif %}
 
 {% if finding.mitigation %}
 *Mitigation*:
