@@ -4,7 +4,6 @@ from dojo.models import Finding
 
 
 class DrHeaderParser(object):
-
     def get_scan_types(self):
         return ["DrHeader JSON Importer"]
 
@@ -15,10 +14,12 @@ class DrHeaderParser(object):
         return "Import result of DrHeader JSON output."
 
     def get_findings(self, filename, test):
-        data = json.load(filename)
         items = []
+        try:
+            data = json.load(filename)
+        except ValueError as err:
+            data = {}
         for item in data:
-            findingdetail = ''
             title = "Header : " + item["rule"]
             message = item["message"]
             severity = item["severity"].title()
@@ -27,6 +28,5 @@ class DrHeaderParser(object):
                            description=message,
                            severity=severity,
                            static_finding=False)
-
             items.append(find)
         return items

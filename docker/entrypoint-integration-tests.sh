@@ -41,12 +41,22 @@ function success() {
 
 echo "IT FILENAME: $DD_INTEGRATION_TEST_FILENAME"
 if [[ ! -z "$DD_INTEGRATION_TEST_FILENAME" ]]; then
-    test=$DD_INTEGRATION_TEST_FILENAME
-    echo "Running: $test"
-    if python3 $DD_INTEGRATION_TEST_FILENAME; then
-        success $test
+    if [[ "$DD_INTEGRATION_TEST_FILENAME" == "openapi-validatator" ]]; then
+        test="OpenAPI schema validation"
+        echo "Running: $test"
+        if java -jar /usr/local/bin/openapi-generator-cli.jar validate -i "$DD_BASE_URL/api/v2/oa3/schema/?format=json" --recommend; then
+            success $test
+        else fail
+            fail $test
+        fi
     else
-        fail $test
+        test=$DD_INTEGRATION_TEST_FILENAME
+        echo "Running: $test"
+        if python3 $DD_INTEGRATION_TEST_FILENAME; then
+            success $test
+        else
+            fail $test
+        fi
     fi
 
 else
@@ -219,6 +229,30 @@ else
         fail $test
     fi
 
+    test="Close Old Findings with dedupe integration tests"
+    echo "Running: $test"
+    if python3 tests/close_old_findings_dedupe_test.py ; then
+        success $test
+    else
+        fail $test
+    fi
+
+    test="Close Old Findings without dedupe integration tests"
+    echo "Running: $test"
+    if python3 tests/close_old_findings_test.py ; then
+        success $test
+    else
+        fail $test
+    fi
+    
+    test="False Positive History tests"
+    echo "Running: $test"
+    if python3 tests/false_positive_history_test.py ; then
+        success $test
+    else
+        fail $test
+    fi
+
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
 
@@ -252,6 +286,14 @@ else
     if python3 tests/tool_config.py ; then
         success $test
     else
+        fail $test
+    fi
+
+    test="OpenAPI schema validation"
+    echo "Running: $test"
+    if java -jar /usr/local/bin/openapi-generator-cli.jar validate -i "$DD_BASE_URL/api/v2/oa3/schema/?format=json" --recommend; then
+        success $test
+    else fail
         fail $test
     fi
 

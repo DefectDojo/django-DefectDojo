@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core import serializers
 from django.urls import reverse
 from django.http import Http404, HttpResponse, JsonResponse
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseRedirect
 from django.http import StreamingHttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import formats
@@ -29,6 +29,8 @@ from dojo.utils import (
     close_external_issue,
     redirect,
     reopen_external_issue,
+    do_false_positive_history,
+    match_finding_to_existing_findings,
 )
 import copy
 from dojo.filters import (
@@ -83,6 +85,7 @@ from dojo.models import (
     User,
     Engagement,
     Vulnerability_Id_Template,
+    System_Settings,
 )
 from dojo.utils import (
     get_page_items,
@@ -518,16 +521,14 @@ def view_finding(request, fid):
         else:
             form = NoteForm()
 
+    reqres = None
+    burp_request = None
+    burp_response = None
     try:
-        reqres = BurpRawRequestResponse.objects.get(finding=finding)
-        burp_request = base64.b64decode(reqres.burpRequestBase64)
-        burp_response = base64.b64decode(reqres.burpResponseBase64)
-
-    except BurpRawRequestResponse.DoesNotExist:
-        reqres = None
-        burp_request = None
-        burp_response = None
-
+        reqres = BurpRawRequestResponse.objects.filter(finding=finding).first()
+        if reqres is not None:
+            burp_request = base64.b64decode(reqres.burpRequestBase64)
+            burp_response = base64.b64decode(reqres.burpResponseBase64)
     except Exception as e:
         logger.debug(f"unespect error: {e}")
 
@@ -887,7 +888,7 @@ def apply_template_cwe(request, fid):
                 extra_tags="alert-danger",
             )
     else:
-        return HttpResponseForbidden()
+        raise PermissionDenied()
 
 
 @user_is_authorized(Finding, Permissions.Finding_Delete, "fid")
@@ -928,7 +929,7 @@ def delete_finding(request, fid):
                 extra_tags="alert-danger",
             )
     else:
-        return HttpResponseForbidden()
+        raise PermissionDenied()
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
@@ -992,6 +993,8 @@ def copy_finding(request, fid):
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def edit_finding(request, fid):
+    system_settings = System_Settings.objects.get()
+
     finding = get_object_or_404(Finding, id=fid)
     old_status = finding.status()
     old_finding = copy.copy(finding)
@@ -1130,17 +1133,41 @@ def edit_finding(request, fid):
                         status.last_modified = timezone.now()
                         status.save()
 
+            if system_settings.false_positive_history:
+                # If the finding is being marked as a false positive we dont need to call the
+                # fp history function because it will be called by the save function
+
+                # If finding was a false positive and is being reactivated: retroactively reactivates all equal findings
+                if old_finding.false_p and not new_finding.false_p:
+                    if system_settings.retroactive_false_positive_history:
+                        logger.debug('FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s', new_finding)
+
+                        existing_fp_findings = match_finding_to_existing_findings(
+                            new_finding, product=new_finding.test.engagement.product
+                        ).filter(false_p=True)
+
+                        for fp in existing_fp_findings:
+                            logger.debug('FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s', fp.id, fp)
+                            fp.active = new_finding.active
+                            fp.verified = new_finding.verified
+                            fp.false_p = False
+                            fp.out_of_scope = new_finding.out_of_scope
+                            fp.is_mitigated = new_finding.is_mitigated
+                            fp.save_no_options()
+
             if "request" in form.cleaned_data or "response" in form.cleaned_data:
-                burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
-                if burp_rr:
-                    burp_rr.burpRequestBase64 = base64.b64encode(
-                        form.cleaned_data["request"].encode()
-                    )
-                    burp_rr.burpResponseBase64 = base64.b64encode(
-                        form.cleaned_data["response"].encode()
-                    )
-                    burp_rr.clean()
-                    burp_rr.save()
+                try:
+                    burp_rr, _ = BurpRawRequestResponse.objects.get_or_create(finding=finding)
+                except BurpRawRequestResponse.MultipleObjectsReturned:
+                    burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
+                burp_rr.burpRequestBase64 = base64.b64encode(
+                    form.cleaned_data["request"].encode()
+                )
+                burp_rr.burpResponseBase64 = base64.b64encode(
+                    form.cleaned_data["response"].encode()
+                )
+                burp_rr.clean()
+                burp_rr.save()
 
             push_to_jira = False
             jira_message = None
@@ -1370,10 +1397,11 @@ def risk_unaccept(request, fid):
 def request_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
+    form = ReviewFindingForm(finding=finding, user=user)
     # in order to review a finding, we need to capture why a review is needed
     # we can do this with a Note
     if request.method == "POST":
-        form = ReviewFindingForm(request.POST)
+        form = ReviewFindingForm(request.POST, finding=finding, user=user)
 
         if form.is_valid():
             now = timezone.now()
@@ -1447,9 +1475,6 @@ def request_finding_review(request, fid):
             )
             return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
 
-    else:
-        form = ReviewFindingForm(finding=finding)
-
     product_tab = Product_Tab(
         finding.test.engagement.product, title="Review Finding", tab="findings"
     )
@@ -1465,12 +1490,14 @@ def request_finding_review(request, fid):
 def clear_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
+    # If the user wanting to clear the review is not the user who requested
+    # the review or one of the users requested to provide the review, then
+    # do not allow the user to clear the review.
+    if user != finding.review_requested_by and user not in finding.reviewers.all():
+        raise PermissionDenied()
+
     # in order to clear a review for a finding, we need to capture why and how it was reviewed
     # we can do this with a Note
-
-    if user != finding.review_requested_by or user not in finding.reviewers.all():
-        return HttpResponseForbidden()
-
     if request.method == "POST":
         form = ClearFindingReviewForm(request.POST, instance=finding)
 
@@ -1785,7 +1812,7 @@ def delete_stub_finding(request, fid):
                 extra_tags="alert-danger",
             )
     else:
-        return HttpResponseForbidden()
+        raise PermissionDenied()
 
 
 @user_is_authorized(Stub_Finding, Permissions.Finding_Edit, "fid")
@@ -2170,7 +2197,7 @@ def delete_template(request, tid):
                 extra_tags="alert-danger",
             )
     else:
-        return HttpResponseForbidden()
+        raise PermissionDenied()
 
 
 def download_finding_pic(request, token):
@@ -2434,6 +2461,8 @@ def merge_finding_product(request, pid):
 
 # bulk update and delete are combined, so we can't have the nice user_is_authorized decorator
 def finding_bulk_update_all(request, pid=None):
+    system_settings = System_Settings.objects.get()
+
     logger.debug("bulk 10")
     form = FindingBulkUpdateForm(request.POST)
     now = timezone.now()
@@ -2506,6 +2535,8 @@ def finding_bulk_update_all(request, pid=None):
                 finds = prefetch_for_findings(finds)
                 if form.cleaned_data["severity"] or form.cleaned_data["status"]:
                     for find in finds:
+                        old_find = copy.deepcopy(find)
+
                         if form.cleaned_data["severity"]:
                             find.severity = form.cleaned_data["severity"]
                             find.numerical_severity = Finding.get_numerical_severity(
@@ -2527,6 +2558,29 @@ def finding_bulk_update_all(request, pid=None):
                         # use super to avoid all custom logic in our overriden save method
                         # it will trigger the pre_save signal
                         find.save_no_options()
+
+                        if system_settings.false_positive_history:
+                            # If finding is being marked as false positive
+                            if find.false_p:
+                                do_false_positive_history(find)
+
+                            # If finding was a false positive and is being reactivated: retroactively reactivates all equal findings
+                            elif old_find.false_p and not find.false_p:
+                                if system_settings.retroactive_false_positive_history:
+                                    logger.debug('FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s', find)
+
+                                    existing_fp_findings = match_finding_to_existing_findings(
+                                        find, product=find.test.engagement.product
+                                    ).filter(false_p=True)
+
+                                    for fp in existing_fp_findings:
+                                        logger.debug('FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s', fp.id, fp)
+                                        fp.active = find.active
+                                        fp.verified = find.verified
+                                        fp.false_p = False
+                                        fp.out_of_scope = find.out_of_scope
+                                        fp.is_mitigated = find.is_mitigated
+                                        fp.save_no_options()
 
                     for prod in prods:
                         calculate_grade(prod)

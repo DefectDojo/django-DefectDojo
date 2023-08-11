@@ -371,7 +371,7 @@ def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     form_error = False
     jform = None
-    form = AddFindingForm(initial={'date': timezone.now().date()}, req_resp=None, product=test.engagement.product)
+    form = AddFindingForm(initial={'date': timezone.now().date(), 'verified': True}, req_resp=None, product=test.engagement.product)
     push_all_jira_issues = jira_helper.is_push_all_issues(test)
     use_jira = jira_helper.get_jira_project(test) is not None
 
@@ -446,7 +446,7 @@ def add_findings(request, tid):
 
             finding_helper.save_vulnerability_ids(new_finding, form.cleaned_data['vulnerability_ids'].split())
 
-            new_finding.save(false_history=True, push_to_jira=push_to_jira)
+            new_finding.save(push_to_jira=push_to_jira)
             create_notification(event='other',
                                 title=_('Addition of %(title)s') % {'title': new_finding.title},
                                 finding=new_finding,
@@ -536,12 +536,12 @@ def add_temp_finding(request, tid, fid):
 
             finding_helper.update_finding_status(new_finding, request.user)
 
-            new_finding.save(dedupe_option=False, false_history=False)
+            new_finding.save(dedupe_option=False)
 
             # Save and add new endpoints
             finding_helper.add_endpoints(new_finding, form)
 
-            new_finding.save(false_history=True)
+            new_finding.save()
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', instance=new_finding, push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test), finding_form=form)
                 if jform.is_valid():

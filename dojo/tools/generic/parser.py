@@ -69,29 +69,61 @@ class GenericParser(object):
                 del item["vulnerability_ids"]
 
             # check for required keys
-            required = ['title', 'severity', 'description']
-            missing = []
-            for field in required:
-                if field not in item.keys():
-                    missing.append(field)
+            required = {"title", "severity", "description"}
+            missing = sorted(required.difference(item))
             if missing:
                 raise ValueError(f"Required fields are missing: {missing}")
 
             # check for allowed keys
-            allowed = required + ['date', 'cwe', 'cve', 'cvssv3', 'cvssv3_score', 'mitigation', 'impact',
-                'steps_to_reproduce', 'severity_justification', 'references', 'active', 'verified',
-                'false_p', 'out_of_scope', 'risk_accepted', 'under_review', 'is_mitigated',
-                'thread_id', 'mitigated', 'numerical_severity', 'param', 'payload', 'line', 'file_path',
-                'component_name', 'component_version', 'static_finding', 'dynamic_finding',
-                'scanner_confidence', 'unique_id_from_tool', 'vuln_id_from_tool', 'sast_source_object',
-                'sast_sink_object', 'sast_source_line', 'sast_source_file_path', 'nb_occurences',
-                'publish_date', 'service', 'planned_remediation_date', 'planned_remediation_version', 'effort_for_fixing', 'tags']
-            not_allowed = []
-            for field in item.keys():
-                if field not in allowed:
-                    not_allowed.append(field)
+            allowed = {
+                "date",
+                "cwe",
+                "cve",
+                "cvssv3",
+                "cvssv3_score",
+                "mitigation",
+                "impact",
+                "steps_to_reproduce",
+                "severity_justification",
+                "references",
+                "active",
+                "verified",
+                "false_p",
+                "out_of_scope",
+                "risk_accepted",
+                "under_review",
+                "is_mitigated",
+                "thread_id",
+                "mitigated",
+                "numerical_severity",
+                "param",
+                "payload",
+                "line",
+                "file_path",
+                "component_name",
+                "component_version",
+                "static_finding",
+                "dynamic_finding",
+                "scanner_confidence",
+                "unique_id_from_tool",
+                "vuln_id_from_tool",
+                "sast_source_object",
+                "sast_sink_object",
+                "sast_source_line",
+                "sast_source_file_path",
+                "nb_occurences",
+                "publish_date",
+                "service",
+                "planned_remediation_date",
+                "planned_remediation_version",
+                "effort_for_fixing",
+                "tags",
+            }.union(required)
+            not_allowed = sorted(set(item).difference(allowed))
             if not_allowed:
-                raise ValueError(f"Not allowed fields are present: {not_allowed}")
+                raise ValueError(
+                    f"Not allowed fields are present: {not_allowed}"
+                )
 
             finding = Finding(**item)
 
@@ -99,13 +131,14 @@ class GenericParser(object):
             if unsaved_endpoints:
                 finding.unsaved_endpoints = []
                 for endpoint_item in unsaved_endpoints:
-                    if type(endpoint_item) is str:
+                    if isinstance(endpoint_item, str):
                         if "://" in endpoint_item:  # is the host full uri?
                             endpoint = Endpoint.from_uri(endpoint_item)
                             # can raise exception if the host is not valid URL
                         else:
                             endpoint = Endpoint.from_uri("//" + endpoint_item)
-                            # can raise exception if there is no way to parse the host
+                            # can raise exception if there is no way to parse
+                            # the host
                     else:
                         endpoint = Endpoint(**endpoint_item)
                     finding.unsaved_endpoints.append(endpoint)
@@ -116,17 +149,23 @@ class GenericParser(object):
                 finding.unsaved_vulnerability_ids = [finding.cve]
             if unsaved_vulnerability_ids:
                 if finding.unsaved_vulnerability_ids:
-                    finding.unsaved_vulnerability_ids.append(unsaved_vulnerability_ids)
+                    finding.unsaved_vulnerability_ids.append(
+                        unsaved_vulnerability_ids
+                    )
                 else:
-                    finding.unsaved_vulnerability_ids = unsaved_vulnerability_ids
+                    finding.unsaved_vulnerability_ids = (
+                        unsaved_vulnerability_ids
+                    )
             test_internal.findings.append(finding)
         return test_internal
 
     def _get_findings_csv(self, filename):
         content = filename.read()
-        if type(content) is bytes:
+        if isinstance(content, bytes):
             content = content.decode("utf-8")
-        reader = csv.DictReader(io.StringIO(content), delimiter=",", quotechar='"')
+        reader = csv.DictReader(
+            io.StringIO(content), delimiter=",", quotechar='"'
+        )
 
         dupes = dict()
         for row in reader:
@@ -135,7 +174,9 @@ class GenericParser(object):
                 description=row["Description"],
                 date=parse(row["Date"]).date(),
                 severity=row["Severity"],
-                duplicate=self._convert_bool(row.get("Duplicate", "FALSE")),  # bool False by default
+                duplicate=self._convert_bool(
+                    row.get("Duplicate", "FALSE")
+                ),  # bool False by default
                 nb_occurences=1,
             )
             # manage active
@@ -162,9 +203,13 @@ class GenericParser(object):
             # manage Vulnerability Id
             if "Vulnerability Id" in row and row["Vulnerability Id"]:
                 if finding.unsaved_vulnerability_ids:
-                    finding.unsaved_vulnerability_ids.append(row["Vulnerability Id"])
+                    finding.unsaved_vulnerability_ids.append(
+                        row["Vulnerability Id"]
+                    )
                 else:
-                    finding.unsaved_vulnerability_ids = [row["Vulnerability Id"]]
+                    finding.unsaved_vulnerability_ids = [
+                        row["Vulnerability Id"]
+                    ]
             # manage CWE
             if "CweId" in row:
                 finding.cwe = int(row["CweId"])
@@ -180,7 +225,9 @@ class GenericParser(object):
             # manage endpoints
             if "Url" in row:
                 finding.unsaved_endpoints = [
-                    Endpoint.from_uri(row["Url"]) if "://" in row["Url"] else Endpoint.from_uri("//" + row["Url"])
+                    Endpoint.from_uri(row["Url"])
+                    if "://" in row["Url"]
+                    else Endpoint.from_uri("//" + row["Url"])
                 ]
 
             # manage internal de-duplication
@@ -197,9 +244,13 @@ class GenericParser(object):
                 find = dupes[key]
                 find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                 if find.unsaved_vulnerability_ids:
-                    find.unsaved_vulnerability_ids.extend(finding.unsaved_vulnerability_ids)
+                    find.unsaved_vulnerability_ids.extend(
+                        finding.unsaved_vulnerability_ids
+                    )
                 else:
-                    find.unsaved_vulnerability_ids = finding.unsaved_vulnerability_ids
+                    find.unsaved_vulnerability_ids = (
+                        finding.unsaved_vulnerability_ids
+                    )
                 find.nb_occurences += 1
             else:
                 dupes[key] = finding
