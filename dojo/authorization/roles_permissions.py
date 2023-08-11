@@ -23,7 +23,8 @@ class Roles(IntEnum):
 
 def django_enum(cls):
     # decorator needed to enable enums in django templates
-    # see https://stackoverflow.com/questions/35953132/how-to-access-enum-types-in-django-templates
+    # see
+    # https://stackoverflow.com/questions/35953132/how-to-access-enum-types-in-django-templates
     cls.do_not_call_in_templates = True
     return cls
 
