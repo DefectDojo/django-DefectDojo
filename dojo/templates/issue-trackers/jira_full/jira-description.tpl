@@ -72,7 +72,7 @@
 {% endif %}
 
 *Description*:
-{{ finding.description }}
+{{ finding.get_redacted_description }}
 
 {% if finding.mitigation %}
 *Mitigation*:

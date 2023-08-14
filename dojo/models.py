@@ -2906,6 +2906,14 @@ class Finding(models.Model):
                 'url': reverse('view_finding', args=(self.id,))}]
         return bc
 
+    def get_redacted_description(self):
+        if '**Secret:**' in self.description and '**Commit hash:**' in self.description:
+            redacted_description = self.description.split('**Secret:**')[0]
+            redacted_description += '**Commit hash:**'
+            redacted_description += self.description.split('**Commit hash:**')[1]
+            return redacted_description
+        return self.description
+
     def get_report_requests(self):
         if self.burprawrequestresponse_set.count() >= 3:
             return self.burprawrequestresponse_set.all()[0:3]
