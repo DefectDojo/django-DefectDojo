@@ -1418,7 +1418,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'SARIF': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Azure Security Center Recommendations Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Hadolint Dockerfile check': DEDUPE_ALGO_HASH_CODE,
-    'Semgrep JSON Report': DEDUPE_ALGO_HASH_CODE,
+    'Semgrep JSON Report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Generic Findings Import': DEDUPE_ALGO_HASH_CODE,
     'Trufflehog3 Scan': DEDUPE_ALGO_HASH_CODE,
     'Detect-secrets Scan': DEDUPE_ALGO_HASH_CODE,
