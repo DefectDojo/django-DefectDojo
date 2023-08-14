@@ -32,6 +32,11 @@ class SemgrepParser(object):
                 nb_occurences=1,
             )
 
+            # fingerprint detection
+            unique_id_from_tool = item.get("extra", {}).get("fingerprint")
+            if unique_id_from_tool:
+                finding.unique_id_from_tool = unique_id_from_tool
+
             # manage CWE
             if "cwe" in item["extra"]["metadata"]:
                 if isinstance(item["extra"]["metadata"].get("cwe"), list):
