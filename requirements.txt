@@ -62,7 +62,7 @@ packageurl-python==0.11.2
 django-crum==0.7.9
 JSON-log-formatter==0.5.2
 django-split-settings==1.2.0
-django-debug-toolbar==4.1.0
+django-debug-toolbar==4.2.0
 django-debug-toolbar-request-history==0.1.4
 vcrpy==5.1.0
 vcrpy-unittest==0.1.7
@@ -78,7 +78,7 @@ django-ratelimit==4.1.0
 argon2-cffi==21.3.0
 blackduck==1.1.0
 pycurl==7.45.2  # Required for Celery Broker AWS (SQS) support
-boto3==1.28.21  # Required for Celery Broker AWS (SQS) support
+boto3==1.28.24  # Required for Celery Broker AWS (SQS) support
 netaddr==0.8.0
 vulners==2.0.10
 fontawesomefree==6.4.2
