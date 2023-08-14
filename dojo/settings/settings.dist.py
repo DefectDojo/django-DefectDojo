@@ -770,9 +770,11 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'Defect Dojo API v2',
     'DESCRIPTION': 'Defect Dojo - Open Source vulnerability Management made easy. Prefetch related parameters/responses not yet in the schema.',
     'VERSION': __version__,
+    'SCHEMA_PATH_PREFIX': "/api/v2",
     # OTHER SETTINGS
     # the following set to False could help some client generators
     # 'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': False,
+    'PREPROCESSING_HOOKS': ['dojo.urls.drf_spectacular_preprocessing_filter_spec'],
     'POSTPROCESSING_HOOKS': ['dojo.api_v2.prefetch.schema.prefetch_postprocessing_hook'],
     # show file selection dialogue, see https://github.com/tfranzel/drf-spectacular/issues/455
     "COMPONENT_SPLIT_REQUEST": True,
@@ -1418,7 +1420,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'SARIF': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Azure Security Center Recommendations Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Hadolint Dockerfile check': DEDUPE_ALGO_HASH_CODE,
-    'Semgrep JSON Report': DEDUPE_ALGO_HASH_CODE,
+    'Semgrep JSON Report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Generic Findings Import': DEDUPE_ALGO_HASH_CODE,
     'Trufflehog3 Scan': DEDUPE_ALGO_HASH_CODE,
     'Detect-secrets Scan': DEDUPE_ALGO_HASH_CODE,
