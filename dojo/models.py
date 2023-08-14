@@ -3005,6 +3005,13 @@ class Finding(models.Model):
         )
 
         return valid_req_resps
+    def get_redacted_description(self):
+        if '**Secret:**' in self.description and '**Commit hash:**' in self.description:
+            redacted_description = self.description.split('**Secret:**')[0]
+            redacted_description += '**Commit hash:**'
+            redacted_description += self.description.split('**Commit hash:**')[1]
+            return redacted_description
+        return self.description
 
     def get_report_requests(self):
         # Get the list of request response pairs that are non empty
