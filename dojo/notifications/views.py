@@ -1,5 +1,6 @@
 import logging
 import requests
+import urllib3
 
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404
@@ -178,7 +179,7 @@ def add_notification_webhook(request):
         if nwh_form.is_valid():
             try:
                 test_webhooks_notification(nwh_form.instance)
-            except requests.exceptions.HTTPError as e:
+            except requests.exceptions.RequestException as e:
                 messages.add_message(
                     request,
                     messages.ERROR,
@@ -230,7 +231,7 @@ def edit_notification_webhook(request, nwhid):
             if nwh_form.is_valid():
                 try:
                     test_webhooks_notification(nwh_form.instance)
-                except requests.exceptions.HTTPError as e:
+                except requests.exceptions.RequestException as e:
                     messages.add_message(
                         request,
                         messages.ERROR,
