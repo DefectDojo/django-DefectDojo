@@ -3347,7 +3347,7 @@ class NotificationWebhooksViewset(
     permission_classes = (IsAuthenticated, DjangoModelPermissions)  # TODO
     swagger_schema = prefetch.get_prefetch_schema(
         [
-            "notification_webhooks_list", 
+            "notification_webhooks_list",
             "notification_webhooks_read",
         ], serializers.NotificationWebhooksSerializer,
     ).to_schema()

@@ -2798,6 +2798,7 @@ class NotificationsWebhookForm(forms.ModelForm):
 class DeleteNotificationsWebhookForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
+
     def __init__(self, *args, **kwargs):
         super(DeleteNotificationsWebhookForm, self).__init__(*args, **kwargs)
         self.fields['name'].disabled = True

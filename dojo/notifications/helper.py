@@ -366,12 +366,14 @@ def webhooks_notification_request(endpoint, event, *args, **kwargs):
         data=create_notification_message(event, endpoint.owner, 'webhooks', *args, **kwargs))
     return res
 
+
 def test_webhooks_notification(endpoint):
     res = webhooks_notification_request(endpoint, 'ping', {"description": "Test webhook notification"})
-    res.raise_for_status() # in "send_webhooks_notification", we are doing deeper analysis, why it failed
-                           # for now, "raise_for_status" should be enough
+    res.raise_for_status()
+    # in "send_webhooks_notification", we are doing deeper analysis, why it failed
+    # for now, "raise_for_status" should be enough
     logger.debug(f"res: {res.json()}")
-    
+
 
 @dojo_async_task
 @app.task
