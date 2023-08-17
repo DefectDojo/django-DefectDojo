@@ -95,13 +95,12 @@ from dojo.tools.factory import (
     get_choices_sorted,
     requires_tool_type,
 )
-from dojo.utils import is_scan_file_too_large, get_system_setting
+from dojo.utils import is_scan_file_too_large
 from django.conf import settings
 from rest_framework import serializers
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import Permission
-from django.http import Http404
 from django.utils import timezone
 from django.urls import reverse
 from django.db.utils import IntegrityError
