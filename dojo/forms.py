@@ -1356,6 +1356,8 @@ class ApplyFindingTemplateForm(forms.Form):
 
 class FindingTemplateForm(forms.ModelForm):
     apply_to_findings = forms.BooleanField(required=False, help_text="Apply template to all findings that match this CWE. (Update will overwrite mitigation, impact and references for any active, verified findings.)")
+    list_replace = forms.BooleanField(required=False, help_text=f"Apply template to all findings listed in \"Findings to replace\". (Update will overwrite all filled fields. You can merge field using {{{{original}}}} placeholder.)")
+    findings_to_replace = forms.CharField(max_length=1000, required=False, help_text="Title of findings you want to replace with this template separate by two semicolon \";;\".")
     title = forms.CharField(max_length=1000, required=True)
 
     cwe = forms.IntegerField(label="CWE", required=False)
@@ -1368,7 +1370,7 @@ class FindingTemplateForm(forms.ModelForm):
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
-    field_order = ['title', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'references', 'tags', 'template_match', 'template_match_cwe', 'template_match_title', 'apply_to_findings']
+    field_order = ['title', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'references', 'tags', 'template_match', 'template_match_cwe', 'template_match_title', 'apply_to_findings', 'list_replace', 'finding_to_replace']
 
     def __init__(self, *args, **kwargs):
         super(FindingTemplateForm, self).__init__(*args, **kwargs)

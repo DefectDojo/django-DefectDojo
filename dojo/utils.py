@@ -2393,3 +2393,17 @@ def sum_by_severity_level(metrics):
             values[m.severity] += 1
 
     return values
+
+def template_replace_placeholder(original_field, template_field, placeholder):
+    # if placeholder combine field
+    if placeholder in template_field:
+        output = template_field.replace(placeholder, original_field)
+    else:
+        # If template field empty keep original
+        if template_field == "":
+            output = original_field
+        # Other than that template_field apply
+        else:
+            output = template_field 
+    
+    return output

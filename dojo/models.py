@@ -3165,7 +3165,8 @@ class Finding_Template(models.Model):
     numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
     template_match = models.BooleanField(default=False, verbose_name=_('Template Match Enabled'), help_text=_("Enables this template for matching remediation advice. Match will be applied to all active, verified findings by CWE."))
     template_match_title = models.BooleanField(default=False, verbose_name=_('Match Template by Title and CWE'), help_text=_('Matches by title text (contains search) and CWE.'))
-
+    list_replace = models.BooleanField(default=False, help_text="Apply template to all findings listed in \"Findings to replace\". (Update will overwrite all filled fields. You can merge field using {{{{original}}}} placeholder.)")
+    findings_to_replace = models.TextField(max_length=1000, null=True, blank=True, help_text="Title of findings you want to replace with this template separate by semicolon.")
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add."))
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
