@@ -1356,7 +1356,7 @@ class ApplyFindingTemplateForm(forms.Form):
 
 class FindingTemplateForm(forms.ModelForm):
     apply_to_findings = forms.BooleanField(required=False, help_text="Apply template to all findings that match this CWE. (Update will overwrite mitigation, impact and references for any active, verified findings.)")
-    list_replace = forms.BooleanField(required=False, help_text=f"Apply template to all findings listed in \"Findings to replace\". (Update will overwrite all filled fields. You can merge field using {{{{original}}}} placeholder.)")
+    list_replace = forms.BooleanField(required=False, help_text="Apply template to all findings listed in \"Findings to replace\". (Update will overwrite all filled fields. You can merge field using {{{{original}}}} placeholder.)")
     findings_to_replace = forms.CharField(max_length=1000, required=False, help_text="Title of findings you want to replace with this template separate by two semicolon \";;\".")
     title = forms.CharField(max_length=1000, required=True)
 

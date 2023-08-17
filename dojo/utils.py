@@ -2404,6 +2404,5 @@ def template_replace_placeholder(original_field, template_field, placeholder):
             output = original_field
         # Other than that template_field apply
         else:
-            output = template_field 
-    
+            output = template_field    
     return output

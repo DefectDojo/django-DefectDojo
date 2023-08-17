@@ -87,7 +87,6 @@ from dojo.models import (
     Engagement,
     Vulnerability_Id_Template,
     System_Settings,
-    _manage_inherited_tags,
 )
 from dojo.utils import (
     get_page_items,
@@ -96,7 +95,6 @@ from dojo.utils import (
     process_notifications,
     get_system_setting,
     apply_cwe_to_template,
-    template_replace_placeholder,
     Product_Tab,
     calculate_grade,
     redirect_to_return_url_or_else,
@@ -108,7 +106,7 @@ from dojo.utils import (
 from dojo.notifications.helper import create_notification
 
 from django.template.defaultfilters import pluralize
-from django.db.models import Q, F, QuerySet, Count, Case, When, Value
+from django.db.models import Q, QuerySet, Count
 from django.db.models.query import Prefetch
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
@@ -124,7 +122,7 @@ from dojo.test.queries import get_authorized_tests
 
 JFORM_PUSH_TO_JIRA_MESSAGE = "jform.push_to_jira: %s"
 
-FINDING_TEMPLATE_PLACEHOLDER =  "{{original}}"
+FINDING_TEMPLATE_PLACEHOLDER = "{{original}}"
 
 
 logger = logging.getLogger(__name__)
@@ -2026,21 +2024,21 @@ def apply_cwe_mitigation(apply_to_findings, template, update=True):
                     title=entry,
                 )
                 for finding in to_update.all():
-                        finding.title = template_replace_placeholder(finding.title, template.title, FINDING_TEMPLATE_PLACEHOLDER),
-                        finding.title = finding.title[0] # actually don't know why I get a Tuple
-                        if template.cwe and finding.cwe is None:
-                            finding.cwe = template.cwe
-                        finding.severity = template_replace_placeholder(finding.severity, template.severity, FINDING_TEMPLATE_PLACEHOLDER)
-                        finding.cvssv3 = template_replace_placeholder(finding.cvssv3, template.cvssv3, FINDING_TEMPLATE_PLACEHOLDER)
-                        finding.description = template_replace_placeholder(finding.description, template.description, FINDING_TEMPLATE_PLACEHOLDER)
-                        finding.mitigation = template_replace_placeholder(finding.mitigation, template.mitigation, FINDING_TEMPLATE_PLACEHOLDER)
-                        finding.impact = template_replace_placeholder(finding.impact, template.impact, FINDING_TEMPLATE_PLACEHOLDER)
-                        finding.references = template_replace_placeholder(finding.references, template.references, FINDING_TEMPLATE_PLACEHOLDER)
-                        # Combining all template & finding tags and avoid duplicate
-                        finding.tags.set_tag_list(list(set(finding.tags.get_tag_list()) | set(template.tags.get_tag_list())))
-                        finding.tags.save()
-                        finding.save()
-                        count += 1
+                    finding.title = template_replace_placeholder(finding.title, template.title, FINDING_TEMPLATE_PLACEHOLDER),
+                    finding.title = finding.title[0]  # actually don't know why I get a Tuple
+                    if template.cwe and finding.cwe is None:
+                        finding.cwe = template.cwe
+                    finding.severity = template_replace_placeholder(finding.severity, template.severity, FINDING_TEMPLATE_PLACEHOLDER)
+                    finding.cvssv3 = template_replace_placeholder(finding.cvssv3, template.cvssv3, FINDING_TEMPLATE_PLACEHOLDER)
+                    finding.description = template_replace_placeholder(finding.description, template.description, FINDING_TEMPLATE_PLACEHOLDER)
+                    finding.mitigation = template_replace_placeholder(finding.mitigation, template.mitigation, FINDING_TEMPLATE_PLACEHOLDER)
+                    finding.impact = template_replace_placeholder(finding.impact, template.impact, FINDING_TEMPLATE_PLACEHOLDER)
+                    finding.references = template_replace_placeholder(finding.references, template.references, FINDING_TEMPLATE_PLACEHOLDER)
+                    # Combining all template & finding tags and avoid duplicate
+                    finding.tags.set_tag_list(list(set(finding.tags.get_tag_list()) | set(template.tags.get_tag_list())))
+                    finding.tags.save()
+                    finding.save()
+                    count += 1
         else:
             finding_templates = Finding_Template.objects.filter(
                 cwe=template.cwe, template_match=True, template_match_title=True
