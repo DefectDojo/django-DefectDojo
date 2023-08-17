@@ -36,10 +36,10 @@ When running the application without building images, the application will run b
 
 The Docker Compose setup supports 2 different databases (MySQL and PostgreSQL) and 2 different celery brokers (RabbitMQ and Redis). To make this possible, docker-compose needs to be started with the parameter `--profile` with one of these choices:
 
-- mysql-rabbitmq*
+- mysql-rabbitmq
 - mysql-redis
 - postgres-rabbitmq
-- postgres-redis
+- postgres-redis*
 
 e.g. 
 ```zsh
@@ -48,7 +48,7 @@ e.g.
 
 A default profile can be set with the environment variable `DD_PROFILE`. If this environment variable is set when starting the containers, the parameter for the profile needs not to be given for the start scripts.
 
-When DD_PROFILE or command-line profile is not specified, the command will run "mysql-rabbitmq" as the default profile. 
+When DD_PROFILE or command-line profile is not specified, the command will run "postgres-redis" as the default profile. 
 
 The environment variables needed for the different profiles are prepared in files, which need to be included additionally with the parameter `--env-file` with a choices that fits to the profile:
 
@@ -418,7 +418,9 @@ OpenSSL version: OpenSSL 1.0.1t  3 May 2016
 
 In this case, both docker (version 17.09.0-ce) and docker-compose (1.18.0) need to be updated.
 
-Follow [Dockers' documentation](https://docs.docker.com/install/) for your OS to get the latest version of Docker. For the docker command, most OSes have a built-in update mechanism like "apt upgrade".
+**NOTE** - Docker Compose version 2.19.0 and greater includes syntax restrictions that are not compatible with our compose files.  As a temporary workaround while a more complete solution is determined, please do not update docker compose to a version greater than 2.18.1.
+
+Follow [Dockers' documentation](https://docs.docker.com/install/) for your OS to get the latest version of Docker* (see above Note). For the docker command, most OSes have a built-in update mechanism like "apt upgrade".
 
 Docker Compose isn't packaged like Docker and you'll need to manually update an existing install if using Linux. For Linux, either follow the instructions in the [Docker Compose documentation](https://docs.docker.com/compose/install/) or use the shell script below. The script below will update docker-compose to the latest version automatically. You will need to make the script executable and have sudo privileges to upgrade docker-compose:
 

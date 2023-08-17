@@ -1162,7 +1162,10 @@ def edit_finding(request, fid):
                             fp.save_no_options()
 
             if "request" in form.cleaned_data or "response" in form.cleaned_data:
-                burp_rr, _ = BurpRawRequestResponse.objects.get_or_create(finding=finding)
+                try:
+                    burp_rr, _ = BurpRawRequestResponse.objects.get_or_create(finding=finding)
+                except BurpRawRequestResponse.MultipleObjectsReturned:
+                    burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
                 burp_rr.burpRequestBase64 = base64.b64encode(
                     form.cleaned_data["request"].encode()
                 )

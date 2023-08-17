@@ -770,9 +770,11 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'Defect Dojo API v2',
     'DESCRIPTION': 'Defect Dojo - Open Source vulnerability Management made easy. Prefetch related parameters/responses not yet in the schema.',
     'VERSION': __version__,
+    'SCHEMA_PATH_PREFIX': "/api/v2",
     # OTHER SETTINGS
     # the following set to False could help some client generators
     # 'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': False,
+    'PREPROCESSING_HOOKS': ['dojo.urls.drf_spectacular_preprocessing_filter_spec'],
     'POSTPROCESSING_HOOKS': ['dojo.api_v2.prefetch.schema.prefetch_postprocessing_hook'],
     # show file selection dialogue, see https://github.com/tfranzel/drf-spectacular/issues/455
     "COMPONENT_SPLIT_REQUEST": True,
@@ -1194,7 +1196,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'vulnerability_ids'],
     'Mobsfscan Scan': ['title', 'severity', 'cwe'],
-    'Nessus Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
+    'Tenable Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     'Nexpose Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'vulnerability_ids', 'cwe'],
@@ -1282,7 +1284,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'SonarQube Scan': False,
     'Dependency Check Scan': True,
     'Mobsfscan Scan': False,
-    'Nessus Scan': True,
+    'Tenable Scan': True,
     'Nexpose Scan': True,
     'NPM Audit Scan': True,
     'Yarn Audit Scan': True,
@@ -1377,7 +1379,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'SonarQube API Import': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
     'Dockle Scan': DEDUPE_ALGO_HASH_CODE,
-    'Nessus Scan': DEDUPE_ALGO_HASH_CODE,
+    'Tenable Scan': DEDUPE_ALGO_HASH_CODE,
     'Nexpose Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1418,7 +1420,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'SARIF': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Azure Security Center Recommendations Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Hadolint Dockerfile check': DEDUPE_ALGO_HASH_CODE,
-    'Semgrep JSON Report': DEDUPE_ALGO_HASH_CODE,
+    'Semgrep JSON Report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Generic Findings Import': DEDUPE_ALGO_HASH_CODE,
     'Trufflehog3 Scan': DEDUPE_ALGO_HASH_CODE,
     'Detect-secrets Scan': DEDUPE_ALGO_HASH_CODE,
