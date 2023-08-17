@@ -1,6 +1,6 @@
 ---
 title: "Running in production"
-description: "For use in Produciton environments, performance tweaks and backups are recommended."
+description: "For use in Production environments, performance tweaks and backups are recommended."
 draft: false
 weight: 4
 ---
