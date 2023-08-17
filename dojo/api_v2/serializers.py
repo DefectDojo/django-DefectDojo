@@ -118,7 +118,7 @@ from dojo.tools.factory import (
     requires_tool_type,
 )
 from dojo.user.utils import get_configuration_permissions_codenames
-from dojo.utils import is_scan_file_too_large, get_system_setting
+from dojo.utils import is_scan_file_too_large
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
