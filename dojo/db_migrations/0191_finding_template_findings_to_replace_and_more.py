@@ -18,6 +18,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='finding_template',
             name='list_replace',
-            field=models.BooleanField(default=False, help_text='Apply template to all findings listed in "Findings to replace". (Update will overwrite all filled fields. You can merge field using {original} placeholder.)'),
+            field=models.BooleanField(default=False, help_text='Apply template to all findings listed in "Findings to replace". (Update will overwrite all filled fields. You can merge field using {{original}} placeholder.)'),
         ),
     ]
