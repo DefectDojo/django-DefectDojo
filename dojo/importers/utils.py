@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.core.exceptions import MultipleObjectsReturned
 from django.conf import settings
+from django.utils.timezone import make_aware
 from dojo.decorators import dojo_async_task
 from dojo.celery import app
 from dojo.endpoint.utils import endpoint_get_or_create
@@ -21,7 +22,10 @@ def update_timestamps(test, version, branch_tag, build_id, commit_hash, now, sca
     if test.engagement.engagement_type == 'CI/CD':
         test.engagement.target_end = max_safe([scan_date.date(), test.engagement.target_end])
 
-    test.target_end = max_safe([scan_date, test.target_end])
+    max_test_start_date = max_safe([scan_date, test.target_end])
+    if not max_test_start_date.tzinfo:
+        max_test_start_date = make_aware(max_test_start_date)
+    test.target_end = max_test_start_date
 
     if version:
         test.version = version
