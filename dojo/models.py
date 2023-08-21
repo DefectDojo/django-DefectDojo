@@ -2911,7 +2911,7 @@ class Finding(models.Model):
         if '**Secret:**' in redacted_description and '**Commit hash:**' in redacted_description:
             redacted_description = redacted_description.split('**Secret:**')[0]
             redacted_description += '- Commit hash:'
-            redacted_description += redacted_description.split('**Commit hash:**')[1]
+            redacted_description += self.description.split('**Commit hash:**')[1]
         if '**Link:**' in redacted_description:
             redacted_description = redacted_description.replace(
                 '**Link:**', '\n- Link:'
