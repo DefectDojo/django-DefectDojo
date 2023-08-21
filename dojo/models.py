@@ -2910,17 +2910,13 @@ class Finding(models.Model):
         redacted_description = self.description
         if '**Secret:**' in redacted_description and '**Commit hash:**' in redacted_description:
             redacted_description = redacted_description.split('**Secret:**')[0]
-            redacted_description += '**Commit hash:**'
+            redacted_description += '- Commit hash:'
             redacted_description += redacted_description.split('**Commit hash:**')[1]
         if '**Link:**' in redacted_description:
             redacted_description = redacted_description.replace(
                 '**Link:**', '\n- Link:'
             )
-        if '**Commit hash:**' in redacted_description:
-            redacted_description = redacted_description.replace(
-                '**Commit hash:**', '- Commit hash:'
-            )
-        if '*Commit date:*' in redacted_description:
+        if '**Commit date:**' in redacted_description:
             redacted_description = redacted_description.replace(
                 '**Commit date:**', '- Commit date:'
             )
