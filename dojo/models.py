@@ -3702,11 +3702,11 @@ class JIRA_Issue(models.Model):
                                        help_text=_("The date the linked Jira issue was last modified."))
 
     def set_obj(self, obj):
-        if type(obj) == Finding:
+        if isinstance(obj, Finding):
             self.finding = obj
-        elif type(obj) == Finding_Group:
+        elif isinstance(obj, Finding_Group):
             self.finding_group = obj
-        elif type(obj) == Engagement:
+        elif isinstance(obj, Engagement):
             self.engagement = obj
         else:
             raise ValueError('unknown object type while creating JIRA_Issue: %s' % to_str_typed(obj))
