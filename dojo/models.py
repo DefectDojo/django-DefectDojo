@@ -2916,6 +2916,13 @@ class Finding(models.Model):
             redacted_description = redacted_description.replace(
                 '**Link:**', '\n- Link:'
             )
+            if '(https://github.com/' in redacted_description:
+                _tmp_description = redacted_description.split('(https://github.com/')[0]
+                if ')' in redacted_description.split('(https://github.com/')[1]:
+                    _tmp_description = _tmp_description + redacted_description.split(
+                        '(https://github.com/'
+                    )[1].split(')')[1]
+                    redacted_description = _tmp_description
         if '**Commit date:**' in redacted_description:
             redacted_description = redacted_description.replace(
                 '**Commit date:**', '- Commit date:'
