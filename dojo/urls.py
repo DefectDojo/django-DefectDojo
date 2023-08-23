@@ -232,3 +232,13 @@ if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
 # sometimes urlpatterns needed be added from local_settings.py to avoid having to modify core defect dojo files
 if hasattr(settings, 'EXTRA_URL_PATTERNS'):
     urlpatterns += settings.EXTRA_URL_PATTERNS
+
+
+# Remove any other endpoints that drf-spectacular is guessing should be in the swagger
+def drf_spectacular_preprocessing_filter_spec(endpoints):
+    filtered = []
+    for (path, path_regex, method, callback) in endpoints:
+        # Remove all but DRF API endpoints
+        if path.startswith("/api/v2/"):
+            filtered.append((path, path_regex, method, callback))
+    return filtered
