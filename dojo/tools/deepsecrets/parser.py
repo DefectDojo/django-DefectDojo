@@ -26,8 +26,8 @@ class DeepsecretsParser(object):
         for detect_file in data:
             for item in data.get(detect_file):
                 type = item.get("reason")
-                file = item
-                hashed_secret = item.get("hashed_secret") #
+                file = detect_file
+                hashed_secret = item.get("fingerprint") #
                 is_verified = False
                 line = item.get("line_number")
                 description = "Detected potential secret with the following related data:\n"
@@ -48,7 +48,7 @@ class DeepsecretsParser(object):
                         test=test,
                         description=description,
                         cwe=798,
-                        date=find_date,
+                        #date=find_date,
                         severity="High",
                         verified=is_verified,
                         active="is_secret" in item
