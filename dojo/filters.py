@@ -145,7 +145,7 @@ class FindingStatusFilter(ChoiceFilter):
 class FindingSLAFilter(ChoiceFilter):
     def any(self, qs, name):
         return qs
-    
+
     def satisfies_sla(self, qs, name):
         non_sla_violations = [finding.id for finding in qs if not finding.violates_sla]
         return Finding.objects.filter(id__in=non_sla_violations)
@@ -176,7 +176,7 @@ class FindingSLAFilter(ChoiceFilter):
 class ProductSLAFilter(ChoiceFilter):
     def any(self, qs, name):
         return qs
-    
+
     def satisfies_sla(self, qs, name):
         non_sla_violations = [product.id for product in qs if not product.violates_sla]
         return Product.objects.filter(id__in=non_sla_violations)
@@ -1032,9 +1032,9 @@ class ProductFilter(DojoFilter):
     )
 
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
-    
+
     outside_of_sla = ProductSLAFilter(label="Outside of SLA")
-    
+
     has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
 
     o = OrderingFilter(
@@ -1112,7 +1112,7 @@ class ApiProductFilter(DojoFilter):
     not_tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
                                  help_text='Comma separated list of exact tags not present on product', exclude='True')
     has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
-    outside_of_sla = ProductSLAFilter()
+    outside_of_sla = extend_schema_field(OpenApiTypes.NUMBER)(ProductSLAFilter())
 
     # DateRangeFilter
     created = DateRangeFilter()
@@ -1240,7 +1240,7 @@ class ApiFindingFilter(DojoFilter):
         help_text='Comma separated list of exact tags not present on product',
         exclude='True')
     has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
-    outside_of_sla = FindingSLAFilter()
+    outside_of_sla = extend_schema_field(OpenApiTypes.NUMBER)(ProductSLAFilter())
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1410,9 +1410,9 @@ class FindingFilter(FindingFilterWithTags):
     )
 
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
-    
+
     outside_of_sla = FindingSLAFilter(label="Outside of SLA")
-    
+
     has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
 
     o = OrderingFilter(
