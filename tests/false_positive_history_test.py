@@ -73,6 +73,8 @@ class FalsePositiveHistoryTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Edit Finding").click()
         # Click on Active checkbox
         driver.find_element(By.ID, "id_active").click()
+        # Click on Verified checkbox
+        driver.find_element(By.ID, "id_verified").click()
         # Click on False Positive checkbox
         driver.find_element(By.ID, "id_false_p").click()
         # Send

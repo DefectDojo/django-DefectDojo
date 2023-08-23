@@ -45,14 +45,20 @@ class DojoDefaultImporter(object):
         if created:
             logger.info("Created new Test_Type with name %s because a report is being imported", test_type.name)
 
+        if scan_date and not scan_date.tzinfo:
+            scan_date = timezone.make_aware(scan_date)
+
+        if now and not now.tzinfo:
+            now = timezone.make_aware(now)
+
         test = Test(
             title=title,
             engagement=engagement,
             lead=lead,
             test_type=test_type,
             scan_type=scan_type,
-            target_start=scan_date if scan_date else now.date(),
-            target_end=scan_date if scan_date else now.date(),
+            target_start=scan_date or now,
+            target_end=scan_date or now,
             environment=environment,
             percent_complete=100,
             version=version,
