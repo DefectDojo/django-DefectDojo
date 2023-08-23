@@ -1116,8 +1116,7 @@ class Product(models.Model):
     @cached_property
     def open_findings_list(self):
         findings = Finding.objects.filter(test__engagement__product=self,
-                                          active=True,
-                                          )
+                                          active=True)
         findings_list = []
         for i in findings:
             findings_list.append(i.id)
@@ -1131,6 +1130,15 @@ class Product(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('view_product', args=[str(self.id)])
+
+    @property
+    def violates_sla(self):
+        findings = Finding.objects.filter(test__engagement__product=self,
+                                        active=True)
+        for f in findings:
+            if f.violates_sla:
+                return True
+        return False
 
 
 class Product_Member(models.Model):
@@ -3018,6 +3026,11 @@ class Finding(models.Model):
         # get a copy of the tags to be inherited
         incoming_inherited_tags = [tag.name for tag in self.test.engagement.product.tags.all()]
         _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
+
+    @property
+    def violates_sla(self):
+        days_remaining = self.sla_days_remaining()
+        return days_remaining < 0 if days_remaining else False
 
 
 class FindingAdmin(admin.ModelAdmin):
