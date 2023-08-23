@@ -521,7 +521,8 @@ redis:
   # To use an external Redis instance, set enabled to false and uncomment
   # the line below:
   # redisServer: myrediscluster
-
+  # To use a different port for Redis (default: 6379) add a port number and uncomment the line below:
+  # redisServerPort: xxxx
 
 # To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
 # NOTE  Do not store any kind of sensitive information inside of it
