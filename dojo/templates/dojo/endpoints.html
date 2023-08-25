@@ -117,10 +117,10 @@
                                 {% endif %}
                                 <td class="text-center">
                                   {% if host_view %}
-                                      {{ e.host_active_findings_count }}
+                                      {{ e.host_active_verified_findings_count }}
                                   {% else %}
-                                    {% if e.active_findings_count > 0 %}
-                                      <a href="{% url 'verified_findings' %}?endpoints={{ e.id }}">{{ e.active_findings_count }}</a>
+                                    {% if e.active_verified_findings_count > 0 %}
+                                      <a href="{% url 'verified_findings' %}?endpoints={{ e.id }}">{{ e.active_verified_findings_count }}</a>
                                     {% else %}
                                       0
                                     {% endif %}
@@ -133,7 +133,7 @@
                                     {% if e.mitigated %}
                                       Mitigated
                                     {% else %}
-                                      {% if e.active_findings_count > 0 %}
+                                      {% if e.active_verified_findings_count > 0 %}
                                         Vulnerable
                                       {% else %}
                                         No active verified findings
