@@ -2396,15 +2396,22 @@ def sum_by_severity_level(metrics):
 
 def get_open_findings_burndown(product):
     f = Finding.objects.filter(test__engagement__product=product)
+    findings = list(f)
 
     curr_date = datetime.combine(datetime.now(), datetime.min.time())
     start_date = curr_date - timedelta(days=90)
 
-    critical = f.filter(date__lt=start_date).filter(severity='Critical').count()
-    high = f.filter(date__lt=start_date).filter(severity='High').count()
-    medium = f.filter(date__lt=start_date).filter(severity='Medium').count()
-    low = f.filter(date__lt=start_date).filter(severity='Low').count()
-    info = f.filter(date__lt=start_date).filter(severity='Info').count()
+    critical = list(f.filter(date__lt=start_date).filter(severity='Critical'))
+    high = list(f.filter(date__lt=start_date).filter(severity='High'))
+    medium = list(f.filter(date__lt=start_date).filter(severity='Medium'))
+    low = list(f.filter(date__lt=start_date).filter(severity='Low'))
+    info = list(f.filter(date__lt=start_date).filter(severity='Info'))
+
+    critical_count = len(critical)
+    high_count = len(high)
+    medium_count = len(medium)
+    low_count = len(low)
+    info_count = len(info)
 
     past_90_day_data = {
         'Critical': [],
@@ -2418,19 +2425,59 @@ def get_open_findings_burndown(product):
         d_start = curr_date - timedelta(days=i)
         d_end = d_start + timedelta(days=1)
 
-        f_open = f.filter(date__gte=d_start).filter(date__lt=d_end)
-        f_mitigated = f.filter(mitigated__gte=d_start).filter(mitigated__lt=d_end)
+        f_open_critical = []
+        f_open_high = []
+        f_open_medium = []
+        f_open_low = []
+        f_open_info = []
 
-        critical += f_open.filter(severity='Critical').count() - f_mitigated.filter(severity='Critical').count()
-        high += f_open.filter(severity='High').count() - f_mitigated.filter(severity='High').count()
-        medium += f_open.filter(severity='Medium').count() - f_mitigated.filter(severity='Medium').count()
-        low += f_open.filter(severity='Low').count() - f_mitigated.filter(severity='Low').count()
-        info += f_open.filter(severity='Info').count() - f_mitigated.filter(severity='Info').count()
+        f_mitigated_critical = []
+        f_mitigated_high = []
+        f_mitigated_medium = []
+        f_mitigated_low = []
+        f_mitigated_info = []
 
-        past_90_day_data['Critical'].append([d_start.timestamp() * 1000, critical])
-        past_90_day_data['High'].append([d_start.timestamp() * 1000, high])
-        past_90_day_data['Medium'].append([d_start.timestamp() * 1000, medium])
-        past_90_day_data['Low'].append([d_start.timestamp() * 1000, low])
-        past_90_day_data['Info'].append([d_start.timestamp() * 1000, info])
+        for finding in findings:
+            if datetime.combine(finding.date, datetime.min.time()) >= d_start and datetime.combine(finding.date, datetime.min.time()) < d_end:
+                if finding.severity == 'Critical':
+                    f_open_critical.append(finding)
+                if finding.severity == 'High':
+                    f_open_high.append(finding)
+                if finding.severity == 'Medium':
+                    f_open_medium.append(finding)
+                if finding.severity == 'Low':
+                    f_open_low.append(finding)
+                if finding.severity == 'Info':
+                    f_open_info.append(finding)
+
+            if finding.mitigated:
+                if finding.mitigated.timestamp() >= d_start.timestamp() and finding.mitigated.timestamp() < d_end.timestamp():
+                    if finding.severity == 'Critical':
+                        f_mitigated_critical.append(finding)
+                    if finding.severity == 'High':
+                        f_mitigated_high.append(finding)
+                    if finding.severity == 'Medium':
+                        f_mitigated_medium.append(finding)
+                    if finding.severity == 'Low':
+                        f_mitigated_low.append(finding)
+                    if finding.severity == 'Info':
+                        f_mitigated_info.append(finding)
+
+        critical_count += len(f_open_critical) - len(f_mitigated_critical)
+        high_count += len(f_open_high) - len(f_mitigated_high)
+        medium_count += len(f_open_medium) - len(f_mitigated_medium)
+        low_count += len(f_open_low) - len(f_mitigated_low)
+        info_count += len(f_open_info) - len(f_mitigated_info)
+
+        past_90_day_data['Critical'].append([d_start.timestamp() * 1000, critical_count])
+        past_90_day_data['High'].append([d_start.timestamp() * 1000, high_count])
+        past_90_day_data['Medium'].append([d_start.timestamp() * 1000, medium_count])
+        past_90_day_data['Low'].append([d_start.timestamp() * 1000, low_count])
+        past_90_day_data['Info'].append([d_start.timestamp() * 1000, info_count])
+
+    y_max = max([max(x) for x in [[point[1] for point in past_90_day_data[y]] for y in past_90_day_data]])
+    y_min = min([min(x) for x in [[point[1] for point in past_90_day_data[y]] for y in past_90_day_data]])
+    past_90_day_data['y_max'] = y_max
+    past_90_day_data['y_min'] = y_min
 
     return past_90_day_data

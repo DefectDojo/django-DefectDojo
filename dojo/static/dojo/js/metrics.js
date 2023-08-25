@@ -733,14 +733,15 @@ function accepted_per_week_2(critical, high, medium, low) {
         product_metrics.html
 */
 
-function open_findings_burndown(critical, high, medium, low, info) {
+function open_findings_burndown(critical, high, medium, low, info, y_max, y_min) {
     var options = {
         xaxes: [{
             mode: "time",
             timeformat: "%Y/%m/%d"
         }],
         yaxes: [{
-            min: 0
+            max: y_max,
+            min: y_min
         }],
         series: {
             lines: {
