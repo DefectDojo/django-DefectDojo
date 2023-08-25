@@ -70,7 +70,7 @@
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <tr>
                             {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
-                            <th class="hidden-sm centered" title="Select all visible endpoint." id="bulk_edit">
+                            <th class="centered" title="Select all visible endpoint." id="bulk_edit">
                                 <form class="inline-form centered" action="#">
                                     <input type="checkbox" title="Select All" name="select_all" id="select_all"></input>
                                 </form>
@@ -94,7 +94,7 @@
                         {% for e in endpoints %}
                             <tr>
                                 {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
-                                <td class="hidden-sm centered">
+                                <td class="centered">
                                     <form action="#">
                                         <input type="checkbox" title= "Select_{{ e.id }}" name="select_{{ e.id }}"
                                                id="{{ e.id }}"  class="select_one {{ e.id }}"></input>
