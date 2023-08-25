@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 @user_is_configuration_authorized('auth.view_group')
 def group(request):
-    groups = get_authorized_groups(Permissions.Group_View)
+    groups = get_authorized_groups(Permissions.Group_View).prefetch_related('users', 'global_role', 'global_role__role')
     groups = GroupFilter(request.GET, queryset=groups)
     paged_groups = get_page_items(request, groups.qs, 25)
     add_breadcrumb(title="All Groups", top_level=True, request=request)
