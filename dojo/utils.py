@@ -2192,16 +2192,16 @@ def get_product(obj):
     if not obj:
         return None
 
-    if type(obj) == Finding or type(obj) == Finding_Group:
+    if isinstance(obj, Finding) or isinstance(obj, Finding_Group):
         return obj.test.engagement.product
 
-    if type(obj) == Test:
+    if isinstance(obj, Test):
         return obj.engagement.product
 
-    if type(obj) == Engagement:
+    if isinstance(obj, Engagement):
         return obj.product
 
-    if type(obj) == Product:
+    if isinstance(obj, Product):
         return obj
 
 
