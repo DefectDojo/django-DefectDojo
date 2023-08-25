@@ -1,5 +1,7 @@
 import logging
 import requests
+import json
+import yaml
 
 from django.core.mail import EmailMessage
 from django.conf import settings
@@ -315,14 +317,19 @@ def webhooks_notification_request(endpoint, event, *args, **kwargs):
         "User-Agent": f"DefectDojo-{dd_version}",
         "X-DefectDojo-Event": event,
         "X-DefectDojo-Instance": settings.SITE_URL,
+        "Accept": "application/json",
+        "Contenct-Type": "application/json",
     }
     if endpoint.header_name is not None:
         headers[endpoint.header_name] = endpoint.header_value
+    yaml_data = create_notification_message(event, endpoint.owner, 'webhooks', *args, **kwargs)
+    json_data = json.dumps(yaml.safe_load(yaml_data))
     res = requests.request(
         method='POST',
         url=endpoint.url,
         headers=headers,
-        data=create_notification_message(event, endpoint.owner, 'webhooks', *args, **kwargs))
+        data=json_data,
+    )
     return res
 
 
