@@ -268,7 +268,7 @@
                         <small>Ingested since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
-            </div>
+            </div>            
         </div>
     </div>
 
@@ -290,7 +290,23 @@
                 </div>
             </div>
         </div>
-      <div class="panel-body product-graphs">
+        <div class="panel-body product-graphs">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Open Day to Day by Severity
+                        <i title="Days are only displayed if findings are available."
+                           class="text-info fa-solid fa-circle-info"></i>
+                    </div>
+                    <div class="panel-body">
+                        <div id="open_findings_burndown" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i class="text-info fa-solid fa-circle-info"></i>
+                        <small>Days are only displayed if findings are available.</small>
+                    </div>
+                </div>
+            </div>
             <div class="col-md-6">
                 <div class="panel panel-default">
                     <div class="panel-heading">
@@ -514,6 +530,14 @@
             var ticks = [
                 [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
             ];
+
+            open_findings_burndown(
+                {{ open_findings_burndown.Critical }},
+                {{ open_findings_burndown.High }},
+                {{ open_findings_burndown.Medium }},
+                {{ open_findings_burndown.Low }},
+                {{ open_findings_burndown.Info }}
+            );
 
             accepted_objs(
                 [[0, {{ accepted_objs_by_severity.Critical }}]],

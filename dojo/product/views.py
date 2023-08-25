@@ -39,7 +39,7 @@ from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, T
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, \
     add_breadcrumb, async_delete, \
     get_system_setting, get_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs, \
-    get_enabled_notifications_list, get_zero_severity_level, sum_by_severity_level
+    get_enabled_notifications_list, get_zero_severity_level, sum_by_severity_level, get_open_findings_burndown
 
 from dojo.notifications.helper import create_notification
 from dojo.components.sql_group_concat import Sql_GroupConcat
@@ -632,6 +632,8 @@ def view_product_metrics(request, pid):
 
     open_objs_by_age = {x: len([_ for _ in filters.get('open') if _.age == x]) for x in set([_.age for _ in filters.get('open')])}
 
+    open_findings_burndown = get_open_findings_burndown(prod)
+
     return render(request, 'dojo/product_metrics.html', {
         'prod': prod,
         'product_tab': product_tab,
@@ -643,6 +645,7 @@ def view_product_metrics(request, pid):
         'open_objs': filters.get('open', None),
         'open_objs_by_severity': open_objs_by_severity,
         'open_objs_by_age': open_objs_by_age,
+        'open_findings_burndown': open_findings_burndown,
         'inactive_objs': filters.get('inactive', None),
         'inactive_objs_by_severity': sum_by_severity_level(filters.get('inactive')),
         'closed_objs': filters.get('closed', None),

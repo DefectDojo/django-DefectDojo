@@ -10,7 +10,7 @@ import hyperlink
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from calendar import monthrange
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from math import pi, sqrt
 import vobject
 from dateutil.relativedelta import relativedelta, MO, SU
@@ -1573,7 +1573,6 @@ def get_work_days(start: date, end: date):
     about specific country holidays or extra working days.
     https://stackoverflow.com/questions/3615375/number-of-days-between-2-dates-excluding-weekends/71977946#71977946
     """
-    from datetime import timedelta
 
     # if the start date is on a weekend, forward the date to next Monday
     if start.weekday() > WEEKDAY_FRIDAY:
@@ -2393,3 +2392,45 @@ def sum_by_severity_level(metrics):
             values[m.severity] += 1
 
     return values
+
+
+def get_open_findings_burndown(product):
+    f = Finding.objects.filter(test__engagement__product=product)
+
+    curr_date = datetime.combine(datetime.now(), datetime.min.time())
+    start_date = curr_date - timedelta(days=90)
+
+    critical = f.filter(date__lt=start_date).filter(severity='Critical').count()
+    high = f.filter(date__lt=start_date).filter(severity='High').count()
+    medium = f.filter(date__lt=start_date).filter(severity='Medium').count()
+    low = f.filter(date__lt=start_date).filter(severity='Low').count()
+    info = f.filter(date__lt=start_date).filter(severity='Info').count()
+
+    past_90_day_data = {
+        'Critical': [],
+        'High': [],
+        'Medium': [],
+        'Low': [],
+        'Info': []
+    }
+
+    for i in range(90, -1, -1):
+        d_start = curr_date - timedelta(days=i)
+        d_end = d_start + timedelta(days=1)
+
+        f_open = f.filter(date__gte=d_start).filter(date__lt=d_end)
+        f_mitigated = f.filter(mitigated__gte=d_start).filter(mitigated__lt=d_end)
+
+        critical += f_open.filter(severity='Critical').count() - f_mitigated.filter(severity='Critical').count()
+        high += f_open.filter(severity='High').count() - f_mitigated.filter(severity='High').count()
+        medium += f_open.filter(severity='Medium').count() - f_mitigated.filter(severity='Medium').count()
+        low += f_open.filter(severity='Low').count() - f_mitigated.filter(severity='Low').count()
+        info += f_open.filter(severity='Info').count() - f_mitigated.filter(severity='Info').count()
+
+        past_90_day_data['Critical'].append([d_start.timestamp() * 1000, critical])
+        past_90_day_data['High'].append([d_start.timestamp() * 1000, high])
+        past_90_day_data['Medium'].append([d_start.timestamp() * 1000, medium])
+        past_90_day_data['Low'].append([d_start.timestamp() * 1000, low])
+        past_90_day_data['Info'].append([d_start.timestamp() * 1000, info])
+
+    return past_90_day_data
