@@ -47,7 +47,7 @@ database: postgresql
 host: defectdojo.default.minikube.local
 
 # The full URL to your defectdojo instance, depends on the domain where DD is deployed, it also affects links in Jira
-# site_url: 'https://<yourdomain>'
+site_url: 'https://defectdojo.swordhealth.tech'
 
 # optional list of alternative hostnames to use that gets appended to
 # DD_ALLOWED_HOSTS. This is necessary when your local hostname does not match
