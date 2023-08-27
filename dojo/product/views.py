@@ -16,7 +16,7 @@ from django.db import DEFAULT_DB_ALIAS, connection
 from django.db.models import Sum, Count, Q, Max, Prefetch, F, OuterRef, Subquery
 from django.db.models.query import QuerySet
 from django.core.exceptions import ValidationError, PermissionDenied
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
@@ -632,8 +632,6 @@ def view_product_metrics(request, pid):
 
     open_objs_by_age = {x: len([_ for _ in filters.get('open') if _.age == x]) for x in set([_.age for _ in filters.get('open')])}
 
-    open_findings_burndown = get_open_findings_burndown(prod)
-
     return render(request, 'dojo/product_metrics.html', {
         'prod': prod,
         'product_tab': product_tab,
@@ -645,7 +643,6 @@ def view_product_metrics(request, pid):
         'open_objs': filters.get('open', None),
         'open_objs_by_severity': open_objs_by_severity,
         'open_objs_by_age': open_objs_by_age,
-        'open_findings_burndown': open_findings_burndown,
         'inactive_objs': filters.get('inactive', None),
         'inactive_objs_by_severity': sum_by_severity_level(filters.get('inactive')),
         'closed_objs': filters.get('closed', None),
@@ -674,6 +671,22 @@ def view_product_metrics(request, pid):
         'medium_weekly': medium_weekly,
         'test_data': test_data,
         'user': request.user})
+
+
+@user_is_authorized(Product, Permissions.Product_View, 'pid')
+def async_burndown_metrics(request, pid):
+    prod = get_object_or_404(Product, id=pid)
+    open_findings_burndown = get_open_findings_burndown(prod)
+
+    return JsonResponse({
+        'critical': open_findings_burndown.get('Critical', []),
+        'high': open_findings_burndown.get('High', []),
+        'medium': open_findings_burndown.get('Medium', []),
+        'low': open_findings_burndown.get('Low', []),
+        'info': open_findings_burndown.get('Info', []),
+        'max': open_findings_burndown.get('y_max', 0),
+        'min': open_findings_burndown.get('y_min', 0)
+    })
 
 
 @user_is_authorized(Product, Permissions.Engagement_View, 'pid')

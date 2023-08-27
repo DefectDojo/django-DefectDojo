@@ -4,7 +4,6 @@
 {% load static %}
 {% block add_styles %}
     {{ block.super }}
-    .graph {min-height: 158px;}
 {% endblock %}
 {% block content %}
     {{ block.super }}
@@ -298,7 +297,11 @@
                         <i title="Days are only displayed if findings are available."
                            class="text-info fa-solid fa-circle-info"></i>
                     </div>
-                    <div class="panel-body">
+                    <div class="panel-body text-center">
+                        <div id="id_open_findings_burndown_loader" class="graph-loader">
+                            <p><i class="fas fa-spinner fa-spin fa-2x"></i></p>
+                            <p>Loading Finding Burndown Metrics...</p>
+                        </div>
                         <div id="open_findings_burndown" class="graph"></div>
                     </div>
                     <div class="panel-footer">
@@ -531,15 +534,33 @@
                 [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
             ];
 
-            open_findings_burndown(
-                {{ open_findings_burndown.Critical }},
-                {{ open_findings_burndown.High }},
-                {{ open_findings_burndown.Medium }},
-                {{ open_findings_burndown.Low }},
-                {{ open_findings_burndown.Info }},
-                {{ open_findings_burndown.y_max }},
-                {{ open_findings_burndown.y_min }}
-            );
+            $(document).ready(function() {
+                fetch_burndown_metrics({{ prod.id }});
+            })
+
+            function fetch_burndown_metrics(pid) {
+                $.ajax({
+                    type: 'GET',
+                    url: '/product/' + pid + '/async_burndown_metrics',
+                    beforeSend: function() {
+                        $('#open_findings_burndown').hide();
+                        $('#id_open_findings_burndown_loader').show();
+                    },
+                    success: function(response) {
+                        $('#open_findings_burndown').show();
+                        $('#id_open_findings_burndown_loader').hide();
+                        open_findings_burndown(
+                            response.critical,
+                            response.high,
+                            response.medium,
+                            response.low,
+                            response.info,
+                            response.max,
+                            response.min,
+                        );
+                    }
+                });
+            }
 
             accepted_objs(
                 [[0, {{ accepted_objs_by_severity.Critical }}]],

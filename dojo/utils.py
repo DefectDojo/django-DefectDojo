@@ -2462,8 +2462,6 @@ def get_open_findings_burndown(product):
         past_90_days['Low'].append([d_start * 1000, low_count])
         past_90_days['Info'].append([d_start * 1000, info_count])
 
-    print(running_max)
-    print(running_min)
     past_90_days['y_max'] = running_max
     past_90_days['y_min'] = running_min
 
