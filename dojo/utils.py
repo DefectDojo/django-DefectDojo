@@ -2418,7 +2418,7 @@ def get_open_findings_burndown(product):
 
     for i in range(90, -1, -1):
         start = (curr_date - timedelta(days=i))
-        
+
         d_start = start.timestamp()
         d_end = (start + timedelta(days=1)).timestamp()
 
