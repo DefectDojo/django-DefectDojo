@@ -301,7 +301,7 @@ def findings(
     )
 
 
-def prefetch_for_findings(findings, prefetch_type="all"):
+def prefetch_for_findings(findings, prefetch_type="all", exclude_untouched=True):
     prefetched_findings = findings
     if isinstance(
         findings, QuerySet
@@ -334,15 +334,20 @@ def prefetch_for_findings(findings, prefetch_type="all"):
                 "duplicate_finding"
             )
 
-        # filter out noop reimport actions from finding status history
-        prefetched_findings = prefetched_findings.prefetch_related(
-            Prefetch(
-                "test_import_finding_action_set",
-                queryset=Test_Import_Finding_Action.objects.exclude(
-                    action=IMPORT_UNTOUCHED_FINDING
-                ),
+        if exclude_untouched:
+            # filter out noop reimport actions from finding status history
+            prefetched_findings = prefetched_findings.prefetch_related(
+                Prefetch(
+                    "test_import_finding_action_set",
+                    queryset=Test_Import_Finding_Action.objects.exclude(
+                        action=IMPORT_UNTOUCHED_FINDING
+                    ),
+                )
             )
-        )
+        else:
+            prefetched_findings = prefetched_findings.prefetch_related(
+                "test_import_finding_action_set"
+            )
         """
         we could try to prefetch only the latest note with SubQuery and OuterRef,
         but I'm getting that MySql doesn't support limits in subqueries.
@@ -428,7 +433,7 @@ def prefetch_for_similar_findings(findings):
 
 @user_is_authorized(Finding, Permissions.Finding_View, "fid")
 def view_finding(request, fid):
-    finding_qs = prefetch_for_findings(Finding.objects.all())
+    finding_qs = prefetch_for_findings(Finding.objects.all(), exclude_untouched=False)
     finding = get_object_or_404(finding_qs, id=fid)
     findings = (
         Finding.objects.filter(test=finding.test)
@@ -569,7 +574,7 @@ def view_finding(request, fid):
             )
         )
 
-    test_import_finding_actions = finding.test_import_finding_action_set.all()
+    test_import_finding_actions = finding.test_import_finding_action_set.all().order_by('-created')
 
     product_tab = Product_Tab(
         finding.test.engagement.product, title="View Finding", tab="findings"
@@ -610,7 +615,7 @@ def view_finding(request, fid):
             "can_be_pushed_to_jira": can_be_pushed_to_jira,
             "can_be_pushed_to_jira_error": can_be_pushed_to_jira_error,
             "test_import_finding_actions": test_import_finding_actions,
-            "latest_test_import_finding_action": test_import_finding_actions.order_by('created').last(),
+            "latest_test_import_finding_action": test_import_finding_actions.first(),
         },
     )
 
