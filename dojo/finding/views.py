@@ -569,6 +569,8 @@ def view_finding(request, fid):
             )
         )
 
+    test_import_finding_actions = finding.test_import_finding_action_set.all()
+
     product_tab = Product_Tab(
         finding.test.engagement.product, title="View Finding", tab="findings"
     )
@@ -607,6 +609,8 @@ def view_finding(request, fid):
             "similar_findings_filter": similar_findings_filter,
             "can_be_pushed_to_jira": can_be_pushed_to_jira,
             "can_be_pushed_to_jira_error": can_be_pushed_to_jira_error,
+            "test_import_finding_actions": test_import_finding_actions,
+            "latest_test_import_finding_action": test_import_finding_actions.order_by('created').last(),
         },
     )
 

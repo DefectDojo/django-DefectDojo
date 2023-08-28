@@ -42,6 +42,9 @@
                       {{ finding.date | naturalday }}
                     {% endif %}
                     </small>
+                    {% if latest_test_import_finding_action %}
+                        <small>, Last Mentioned in (Re)Import: {{ latest_test_import_finding_action.created | naturalday }} as {{ latest_test_import_finding_action.get_action_display.title }}</small>
+                    {% endif %}
                 </h3>
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
