@@ -589,7 +589,7 @@ def view_finding(request, fid):
     paged_test_import_finding_actions = get_page_items_and_count(request, test_import_finding_action_filter.qs, 5, prefix='test_import_finding_actions')
     paged_test_import_finding_actions.object_list = paged_test_import_finding_actions.object_list.prefetch_related('test_import')
 
-    latest_test_import_finding_action = finding.test_import_finding_action_set.latest('created')
+    latest_test_import_finding_action = finding.test_import_finding_action_set.order_by('-created').first
 
     product_tab = Product_Tab(
         finding.test.engagement.product, title="View Finding", tab="findings"
