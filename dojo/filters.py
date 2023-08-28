@@ -1348,6 +1348,7 @@ class FindingFilter(FindingFilterWithTags):
     effort_for_fixing = MultipleChoiceFilter(choices=EFFORT_FOR_FIXING_CHOICES)
 
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
+    endpoints = NumberFilter(widget=HiddenInput())
 
     if get_system_setting('enable_jira'):
         has_jira_issue = BooleanFilter(field_name='jira_issue',
