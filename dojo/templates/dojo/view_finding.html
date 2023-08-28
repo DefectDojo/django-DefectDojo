@@ -43,7 +43,7 @@
                     {% endif %}
                     </small>
                     {% if latest_test_import_finding_action %}
-                        <small>, Last Mentioned in (Re)Import: {{ latest_test_import_finding_action.created | naturalday }} as {{ latest_test_import_finding_action.get_action_display.title }}</small>
+                        <small>, Last Mentioned in (Re)Import: {{ latest_test_import_finding_action.created | naturalday }} as {{ latest_test_import_finding_action.get_action_display }}</small>
                     {% endif %}
                 </h3>
                     <div class="dropdown pull-right">
@@ -773,6 +773,107 @@
             </div>
         </div>
     </div>
+
+    <!--Import History begin -->
+    {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and latest_test_import_finding_action %}
+        <div class="panel panel-default collapse in">
+            <div class="panel-heading">
+                <div class="clearfix">
+                    <h4 class="has-filters">
+                        {% trans "Import History" %} ({{ test_import_finding_actions_count }})
+                        <i class="fa-solid fa-circle-question has-popover"
+                        data-trigger="hover"
+                        data-content="List of imports/reimports that created/closed/reactivated this finding in any test."
+                        data-placement="right"
+                        data-container="body"
+                        data-original-title=""
+                        title="">
+                        </i>
+                        <div class="dropdown pull-right">
+                            <button id="show-filters"
+                                    data-toggle="collapse"
+                                    data-target="#import-history-filters"
+                                    class="btn btn-primary toggle-filters">
+                                <i class="fa-solid fa-filter"></i> <i class="caret"></i>
+                            </button>
+                            &nbsp;
+                            <span class="pull-right">
+                                <a data-toggle="collapse" href="#import_history">
+                                    <i class="glyphicon glyphicon-chevron-down"></i>
+                                </a>
+                            </span>
+                        </div>
+                    </h4>
+                </div>
+            </div>
+            <div id="import-history-filters" class="is-filters panel-body collapse">
+                {% include "dojo/filter_snippet.html" with form=test_import_filter.form %}
+                {% include "dojo/filter_snippet.html" with form=test_import_finding_action_filter.form %}
+            </div>
+            <div id="import_history" class="panel panel-body table-responsive collapse">
+                {% if paged_test_import_finding_actions %}
+                    <table class="table-striped tablesorter-bootstrap table table-hover centered">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Action" %}</th>
+                                <th>{% trans "Date/Time" %}</th>
+                                <th>{% trans "Import Type" %}</th>
+                                <th>{% trans "Branch/Tag" %}</th>
+                                <th>{% trans "Build ID" %}</th>
+                                <th>{% trans "Commit" %}</th>
+                                <th>{% trans "Version" %}</th>
+                                <th>{% trans "Endpoint" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for test_import_finding_action in paged_test_import_finding_actions %}
+                                <tr>
+                                    <td>
+                                        {{ test_import_finding_action.get_action_display }}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'engagement_all_findings' test_import_finding_action.test_import.test.engagement.id %}?test_import_finding_action__test_import={{ test_import_finding_action.test_import.id }}">
+                                            {{ test_import_finding_action.test_import.created|date:"DATETIME_FORMAT" }}
+                                        </a>
+                                        {{ test_import_finding_action.test_import|import_settings_tag }}
+                                    </td>
+                                    <td>
+                                        {{ test_import_finding_action.test_import.type }}
+                                    </td>
+                                    <td>
+                                        {{ test_import_finding_action.test_import.branch_tag|default_if_none:"" }}
+                                    </td>
+                                    <td>
+                                        {{ test_import_finding_action.test_import.build_id|default_if_none:"" }}
+                                    </td>
+                                    <td>
+                                        {{ test_import_finding_action.test_import.commit_hash|default_if_none:"" }}
+                                    </td>
+                                    <td>
+                                        {{ test_import_finding_action.test_import.version|default_if_none:"" }}
+                                    </td>
+                                    <td>
+                                        {{ test_import_finding_action.test_import.import_settings.endpoint|default_if_none:"" }}
+                                    </td>
+
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="panel-body">
+                        <p class="text-center">
+                            {% trans "No import history found." %}
+                        </p>
+                    </div>
+                {% endif %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=paged_test_import_finding_actions prefix='test_import_finding_actions' page_size=True %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <!--Import activity end -->
 
     {% include "dojo/snippets/endpoints.html" with finding=finding destination="UI" %}
 
