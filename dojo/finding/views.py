@@ -269,7 +269,7 @@ def findings(
     endpoint = None
     if "endpoints" in request.GET:
         endpoints = request.GET.getlist("endpoints", [])
-        if len(endpoints) == 1:
+        if len(endpoints) == 1 and endpoints[0] != '' :
             endpoint = endpoints[0]
             endpoint = get_object_or_404(Endpoint, id=endpoint)
             filter_name = "Vulnerable Endpoints"
