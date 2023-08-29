@@ -15,6 +15,8 @@ urlpatterns = [
         views.import_scan_results_prod, name='import_scan_results_prod'),
     re_path(r'^product/(?P<pid>\d+)/metrics$', views.view_product_metrics,
         name='view_product_metrics'),
+    re_path(r'^product/(?P<pid>\d+)/async_burndown_metrics$', views.async_burndown_metrics,
+        name='async_burndown_metrics'),
     re_path(r'^product/(?P<pid>\d+)/edit$', views.edit_product,
         name='edit_product'),
     re_path(r'^product/(?P<pid>\d+)/delete$', views.delete_product,
