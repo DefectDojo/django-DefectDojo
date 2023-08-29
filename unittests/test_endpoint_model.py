@@ -155,6 +155,52 @@ class TestEndpointModel(DojoTestCase):
         )
         self.assertTrue(created7)
 
+    def test_equality_without_products(self):
+        # Test with all the fields
+        e1 = Endpoint(protocol="https", host="localhost", port=5439, path="test", query="param=value")
+        e2 = Endpoint(protocol="https", host="localhost", port=5439, path="test", query="param=value")
+        e3 = Endpoint(protocol="https", host="localhost", port=5439, path="different", query="param=value")
+        # Verify e1 and e2 are actually equal
+        self.assertTrue(e1 == e2)
+        # Verify e1 and e2 are not equal because the path is different
+        self.assertFalse(e1 == e3)
+
+    def test_equality_with_one_product_one_without(self):
+        # Define the product
+        p = Product.objects.get_or_create(
+            name="test product",
+            description="",
+            prod_type=Product_Type.objects.get_or_create(name="test pt")[0]
+        )[0]
+        e1 = Endpoint(host="localhost")
+        e2 = Endpoint(host="localhost", product=p)
+        # Verify e1 and e2 are actually equal
+        # Since on has a product and the other does not, we cannot use products to aid in equality
+        self.assertTrue(e1 == e2)
+
+    def test_equality_with_products(self):
+        # Define the product
+        p1 = Product.objects.get_or_create(
+            name="test product 1",
+            description="",
+            prod_type=Product_Type.objects.get_or_create(name="test pt")[0]
+        )[0]
+        p2 = Product.objects.get_or_create(
+            name="test product 2",
+            description="",
+            prod_type=Product_Type.objects.get_or_create(name="test pt")[0]
+        )[0]
+        # Define the endpoints
+        e1 = Endpoint(host="localhost", product=p1)
+        e2 = Endpoint(host="localhost", product=p1)
+        e3 = Endpoint(host="localhost", product=p2)
+        # Verify e1 and e2 are actually equal
+        # Since the products match, this should be true
+        self.assertTrue(e1 == e2)
+        # Verify e1 and e2 are not equal
+        # Because the products are different, the endpoint objects are not the same
+        self.assertFalse(e1 == e3)
+
 
 @skip("Outdated - this class was testing clean-up broken entries in old version of model; new version of model doesn't to store broken entries")
 class TestEndpointStatusBrokenModel(DojoTestCase):
