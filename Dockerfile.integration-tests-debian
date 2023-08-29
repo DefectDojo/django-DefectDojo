@@ -2,7 +2,7 @@
 # code: language=Dockerfile
 
 FROM openapitools/openapi-generator-cli:v7.0.0@sha256:469376dae86c38cb4152b9b820a93d2e74d27a442ea99014f8c7f4a6f2848b9f as openapitools
-FROM python:3.11.4-slim-bullseye@sha256:40319d0a897896e746edf877783ef39685d44e90e1e6de8d964d0382df0d4952 as build
+FROM python:3.11.5-slim-bullseye@sha256:0bc6588e043ceff0278c3936467fce6dad52c5889bf4eb257ad5147a17522064 as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
