@@ -73,6 +73,7 @@ docs/_build/
 *.crt
 *.csr
 *.key
+dojo/db_migrations/*
 dojo/migrations
 dojo/static/img/threat/*
 dojo/uploads/risk/*
