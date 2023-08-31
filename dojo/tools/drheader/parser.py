@@ -1,6 +1,6 @@
 import json
 
-from dojo.models import Finding
+from dojo.models import Endpoint, Finding
 
 
 class DrHeaderParser(object):
@@ -32,6 +32,7 @@ class DrHeaderParser(object):
                                 description=message,
                                 severity=severity,
                                 static_finding=False)
+                    find.unsaved_endpoints = [Endpoint(host=url)]
                     items.append(find)
             return items
         else:
