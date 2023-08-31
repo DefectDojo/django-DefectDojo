@@ -124,12 +124,12 @@ def process_endpoint_view(request, eid, host_view=False):
         endpoints = endpoint.host_endpoints()
         endpoint_metadata = None
         all_findings = endpoint.host_findings()
-        active_findings = endpoint.host_active_findings()
+        active_verified_findings = endpoint.host_active_verified_findings()
     else:
         endpoints = None
         endpoint_metadata = dict(endpoint.endpoint_meta.values_list('name', 'value'))
         all_findings = endpoint.findings.all()
-        active_findings = endpoint.active_findings()
+        active_verified_findings = endpoint.active_verified_findings()
 
     if all_findings:
         start_date = timezone.make_aware(datetime.combine(all_findings.last().date, datetime.min.time()))
@@ -148,11 +148,11 @@ def process_endpoint_view(request, eid, host_view=False):
     monthly_counts = get_period_counts(all_findings, closed_findings, None, months_between, start_date,
                                        relative_delta='months')
 
-    paged_findings = get_page_items(request, active_findings, 25)
+    paged_findings = get_page_items(request, active_verified_findings, 25)
 
     vulnerable = False
 
-    if active_findings.count() != 0:
+    if active_verified_findings.count() != 0:
         vulnerable = True
 
     product_tab = Product_Tab(endpoint.product, "Host" if host_view else "Endpoint", tab="endpoints")

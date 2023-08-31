@@ -1116,8 +1116,7 @@ class Product(models.Model):
     @cached_property
     def open_findings_list(self):
         findings = Finding.objects.filter(test__engagement__product=self,
-                                          active=True,
-                                          )
+                                          active=True)
         findings_list = []
         for i in findings:
             findings_list.append(i.id)
@@ -1131,6 +1130,15 @@ class Product(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('view_product', args=[str(self.id)])
+
+    @property
+    def violates_sla(self):
+        findings = Finding.objects.filter(test__engagement__product=self,
+                                        active=True)
+        for f in findings:
+            if f.violates_sla:
+                return True
+        return False
 
 
 class Product_Member(models.Model):
@@ -1663,7 +1671,17 @@ class Endpoint(models.Model):
 
     def __eq__(self, other):
         if isinstance(other, Endpoint):
-            return str(self) == str(other)
+            # Check if the contents of the endpoint match
+            contents_match = str(self) == str(other)
+            # Determine if products should be used in the equation
+            if self.product is not None and other.product is not None:
+                # Check if the products are the same
+                products_match = (self.product) == other.product
+                # Check if the contents match
+                return products_match and contents_match
+            else:
+                return contents_match
+
         else:
             return NotImplemented
 
@@ -1692,20 +1710,41 @@ class Endpoint(models.Model):
         return self.findings.all().count()
 
     def active_findings(self):
-        findings = self.findings.filter(active=True,
-                                      out_of_scope=False,
-                                      mitigated__isnull=True,
-                                      false_p=False,
-                                      duplicate=False,
-                                      status_finding__mitigated=False,
-                                      status_finding__false_positive=False,
-                                      status_finding__out_of_scope=False,
-                                      status_finding__risk_accepted=False).order_by('numerical_severity')
+        findings = self.findings.filter(
+            active=True,
+            out_of_scope=False,
+            mitigated__isnull=True,
+            false_p=False,
+            duplicate=False,
+            status_finding__mitigated=False,
+            status_finding__false_positive=False,
+            status_finding__out_of_scope=False,
+            status_finding__risk_accepted=False
+        ).order_by('numerical_severity')
+        return findings
+
+    def active_verified_findings(self):
+        findings = self.findings.filter(
+            active=True,
+            verified=True,
+            out_of_scope=False,
+            mitigated__isnull=True,
+            false_p=False,
+            duplicate=False,
+            status_finding__mitigated=False,
+            status_finding__false_positive=False,
+            status_finding__out_of_scope=False,
+            status_finding__risk_accepted=False
+        ).order_by('numerical_severity')
         return findings
 
     @property
     def active_findings_count(self):
         return self.active_findings().count()
+
+    @property
+    def active_verified_findings_count(self):
+        return self.active_verified_findings().count()
 
     def host_endpoints(self):
         return Endpoint.objects.filter(host=self.host,
@@ -1741,21 +1780,43 @@ class Endpoint(models.Model):
         return self.host_findings().count()
 
     def host_active_findings(self):
-        findings = Finding.objects.filter(active=True,
-                                        out_of_scope=False,
-                                        mitigated__isnull=True,
-                                        false_p=False,
-                                        duplicate=False,
-                                        status_finding__mitigated=False,
-                                        status_finding__false_positive=False,
-                                        status_finding__out_of_scope=False,
-                                        status_finding__risk_accepted=False,
-                                        endpoints__in=self.host_endpoints()).order_by('numerical_severity')
+        findings = Finding.objects.filter(
+            active=True,
+            out_of_scope=False,
+            mitigated__isnull=True,
+            false_p=False,
+            duplicate=False,
+            status_finding__mitigated=False,
+            status_finding__false_positive=False,
+            status_finding__out_of_scope=False,
+            status_finding__risk_accepted=False,
+            endpoints__in=self.host_endpoints()
+        ).order_by('numerical_severity')
+        return findings
+
+    def host_active_verified_findings(self):
+        findings = Finding.objects.filter(
+            active=True,
+            verified=True,
+            out_of_scope=False,
+            mitigated__isnull=True,
+            false_p=False,
+            duplicate=False,
+            status_finding__mitigated=False,
+            status_finding__false_positive=False,
+            status_finding__out_of_scope=False,
+            status_finding__risk_accepted=False,
+            endpoints__in=self.host_endpoints()
+        ).order_by('numerical_severity')
         return findings
 
     @property
     def host_active_findings_count(self):
         return self.host_active_findings().count()
+
+    @property
+    def host_active_verified_findings_count(self):
+        return self.host_active_verified_findings().count()
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
@@ -3019,6 +3080,11 @@ class Finding(models.Model):
         incoming_inherited_tags = [tag.name for tag in self.test.engagement.product.tags.all()]
         _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
 
+    @property
+    def violates_sla(self):
+        days_remaining = self.sla_days_remaining()
+        return days_remaining < 0 if days_remaining else False
+
 
 class FindingAdmin(admin.ModelAdmin):
     # For efficiency with large databases, display many-to-many fields with raw
@@ -3650,11 +3716,11 @@ class JIRA_Issue(models.Model):
                                        help_text=_("The date the linked Jira issue was last modified."))
 
     def set_obj(self, obj):
-        if type(obj) == Finding:
+        if isinstance(obj, Finding):
             self.finding = obj
-        elif type(obj) == Finding_Group:
+        elif isinstance(obj, Finding_Group):
             self.finding_group = obj
-        elif type(obj) == Engagement:
+        elif isinstance(obj, Engagement):
             self.engagement = obj
         else:
             raise ValueError('unknown object type while creating JIRA_Issue: %s' % to_str_typed(obj))
