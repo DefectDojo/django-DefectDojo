@@ -92,9 +92,9 @@ ENV \
   DD_UWSGI_PASS="uwsgi_server" \
   DD_UWSGI_HOST="uwsgi" \
   DD_UWSGI_PORT="3031" \
-  GENERATE_TLS_CERTIFICATE="false" \
-  USE_TLS="false" \
-  NGINX_METRICS_ENABLED="false" \
+  GENERATE_TLS_CERTIFICATE="true" \
+  USE_TLS="true" \
+  NGINX_METRICS_ENABLED="true" \
   METRICS_HTTP_AUTH_USER="" \
   METRICS_HTTP_AUTH_PASSWORD=""
 USER ${uid}
