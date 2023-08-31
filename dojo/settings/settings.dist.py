@@ -1562,6 +1562,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Bugcrowd API": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Rubocop Scan": DEDUPE_ALGO_HASH_CODE,
     "JFrog Xray Scan": DEDUPE_ALGO_HASH_CODE,
+    "Jfrog Xray On Demand Binary Scan": DEDUPE_ALGO_HASH_CODE,
     "CycloneDX Scan": DEDUPE_ALGO_HASH_CODE,
     "SSLyze Scan (JSON)": DEDUPE_ALGO_HASH_CODE,
     "Harbor Vulnerability Scan": DEDUPE_ALGO_HASH_CODE,

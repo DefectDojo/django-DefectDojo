@@ -185,7 +185,11 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
         token = soc.extra_data["access_token"]
         group_names = search_azure_groups(kwargs, token, soc)
         logger.debug("detected groups " + str(group_names))
-        if len(group_names) > 0 and settings.AZURE_DEVOPS_MAIN_SECURITY_GROUP in group_names:
+        if (
+            group_names is not None
+            and len(group_names) > 0
+            and settings.AZURE_DEVOPS_MAIN_SECURITY_GROUP in group_names
+        ):
             user_login = kwargs["details"]["email"]
             request_headers = {"Authorization": "Bearer " + token}
             graph_user_request = requests.get(
