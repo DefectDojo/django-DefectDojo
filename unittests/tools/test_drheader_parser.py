@@ -32,3 +32,10 @@ class TestDrHeaderParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(11, len(findings))
+
+    def test_parse_file_has_many_finding_multiple_urls(self):
+        testfile = open("unittests/scans/drheader/multiple_urls.json")
+        parser = DrHeaderParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(4, len(findings))

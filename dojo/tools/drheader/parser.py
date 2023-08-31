@@ -19,14 +19,30 @@ class DrHeaderParser(object):
             data = json.load(filename)
         except ValueError as err:
             data = {}
-        for item in data:
-            title = "Header : " + item["rule"]
-            message = item["message"]
-            severity = item["severity"].title()
-            find = Finding(title=title,
-                           test=test,
-                           description=message,
-                           severity=severity,
-                           static_finding=False)
-            items.append(find)
-        return items
+        if data != {} and data[0].get("url") != None:
+            for item in data:
+                url = item["url"]
+                for finding in item["report"]:
+                    title = "Header : " + finding["rule"]
+                    message = finding["message"] + "\nURL : " + url
+                    severity = finding["severity"].title()
+                    find = Finding(title=title,
+                                test=test,
+                                url=url,
+                                description=message,
+                                severity=severity,
+                                static_finding=False)
+                    items.append(find)
+            return items
+        else:
+            for item in data:
+                title = "Header : " + item["rule"]
+                message = item["message"]
+                severity = item["severity"].title()
+                find = Finding(title=title,
+                            test=test,
+                            description=message,
+                            severity=severity,
+                            static_finding=False)
+                items.append(find)
+            return items
