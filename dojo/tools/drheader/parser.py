@@ -19,7 +19,7 @@ class DrHeaderParser(object):
             data = json.load(filename)
         except ValueError as err:
             data = {}
-        if data != {} and data[0].get("url") != None:
+        if data != {} and data[0].get("url") is not None:
             for item in data:
                 url = item["url"]
                 for finding in item["report"]:
