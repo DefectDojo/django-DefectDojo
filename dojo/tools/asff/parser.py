@@ -31,11 +31,11 @@ class AsffParser(object):
         result = list()
         for item in data:
             if item.get("Remediation"):
-                mitigation=item.get("Remediation").get("Recommendation").get("Text")
-                references=item.get("Remediation").get("Recommendation").get("Url")
+                mitigation = item.get("Remediation").get("Recommendation").get("Text")
+                references = item.get("Remediation").get("Recommendation").get("Url")
             else:
-                mitigation=None
-                references=None
+                mitigation = None
+                references = None
             result.append(
                 Finding(
                     title=item.get("Title"),
