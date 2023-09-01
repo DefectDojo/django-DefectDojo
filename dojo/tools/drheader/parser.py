@@ -37,7 +37,6 @@ class DrHeaderParser(object):
                     severity = finding["severity"].title()
                     find = Finding(title=title,
                                 test=test,
-                                url=url,
                                 description=message,
                                 severity=severity,
                                 static_finding=False)

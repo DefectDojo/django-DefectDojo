@@ -1,6 +1,6 @@
 [
     {
-      "url": "http://example.com",
+      "url": "https://example.com",
       "report": [
         {
           "rule": "Content-Security-Policy",
