@@ -1,8 +1,7 @@
 import hashlib
 import json
-from urllib.parse import urlparse
-from dojo.models import Endpoint, Finding
-from datetime import datetime
+from dojo.models import Finding
+
 
 class KubeHunterParser(object):
     """
@@ -36,21 +35,21 @@ class KubeHunterParser(object):
             findingdetail += '**Category**: ' + item.get('category') + '\n\n'
             findingdetail += '**Location**: ' + item.get('location') + '\n\n'
             findingdetail += '**Description**:\n' + item.get('description') + '\n\n'
-            
+
             # Finding severity
             severity = item.get('severity', 'info')
-            allowed_severity = ['info','low','medium','high',"critical"]
+            allowed_severity = ['info', 'low', 'medium', 'high', "critical"]
             if severity.lower() in allowed_severity:
                 severity = severity.capitalize()
-            else :
+            else:
                 severity = 'Info'
 
             # Finding mitigation and reference
             avd_reference = item.get('avd_reference')
 
-            if avd_reference and avd_reference != '' and vulnerability_id != 'None' :
+            if avd_reference and avd_reference != '' and vulnerability_id != 'None':
                 mitigation = f"Further details can be found in kube-hunter documentation available at : {avd_reference}"
-                references = "**Kube-hunter AVD reference**: "+avd_reference
+                references = "**Kube-hunter AVD reference**: " + avd_reference
             else:
                 mitigation = ''
                 references = ''
@@ -58,7 +57,7 @@ class KubeHunterParser(object):
             # Finding evidence
             evidence = item.get('evidence')
             steps_to_reproduce = 'No evidence provided.'
-            if evidence and evidence != '' and evidence != 'none' :
+            if evidence and evidence != '' and evidence != 'none':
                 steps_to_reproduce += '**Evidence**: ' + item.get('evidence')
 
             finding = Finding(
@@ -83,7 +82,8 @@ class KubeHunterParser(object):
                 dupes[dupe_key] = finding
 
         return list(dupes.values())
-    
+
+
 def check_required_attributes(vulnerabilities):
     required_attributes = ["hunter", "category", "location", "description", "evidence", "avd_reference", "severity"]
 
@@ -94,6 +94,6 @@ def check_required_attributes(vulnerabilities):
 
         if missing_attributes:
             missing_vulnerabilities.append(f"Vulnerability {idx}: Missing attributes: {', '.join(missing_attributes)}")
-    
+
     if missing_vulnerabilities:
         raise ValueError("\n`".join(missing_vulnerabilities))
