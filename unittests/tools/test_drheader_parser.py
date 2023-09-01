@@ -46,4 +46,4 @@ class TestDrHeaderParser(DojoTestCase):
             finding = findings[0]
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual(443, endpoint.port)
-            self.assertEqual("https://example.com", endpoint.host)
+            self.assertEqual("example.com", endpoint.host)
