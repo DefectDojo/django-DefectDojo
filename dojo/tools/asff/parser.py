@@ -30,16 +30,30 @@ class AsffParser(object):
         data = json.load(file)
         result = list()
         for item in data:
-            result.append(
-                Finding(
-                    title=item.get("Title"),
-                    description=item.get("Description"),
-                    date=dateutil.parser.parse(item.get("CreatedAt")),
-                    severity=self.get_severity(item.get("Severity")),
-                    active=True,  # TODO manage attribute 'RecordState'
-                    unique_id_from_tool=item.get("Id"),
+            if item.get("Remediation") is not None:
+                result.append(
+                    Finding(
+                        title=item.get("Title"),
+                        description=item.get("Description"),
+                        date=dateutil.parser.parse(item.get("CreatedAt")),
+                        mitigation=item.get("Remediation").get("Recommendation").get("Text"),
+                        references=item.get("Remediation").get("Recommendation").get("Url"),
+                        severity=self.get_severity(item.get("Severity")),
+                        active=True,  # TODO manage attribute 'RecordState'
+                        unique_id_from_tool=item.get("Id"),
+                    )
                 )
-            )
+            else:
+                result.append(
+                    Finding(
+                        title=item.get("Title"),
+                        description=item.get("Description"),
+                        date=dateutil.parser.parse(item.get("CreatedAt")),
+                        severity=self.get_severity(item.get("Severity")),
+                        active=True,  # TODO manage attribute 'RecordState'
+                        unique_id_from_tool=item.get("Id"),
+                    )
+                )
         return result
 
     def get_severity(self, data):
