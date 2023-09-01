@@ -37,5 +37,8 @@ class TestDrHeaderParser(DojoTestCase):
         testfile = open("unittests/scans/drheader/multiple_urls.json")
         parser = DrHeaderParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         testfile.close()
         self.assertEqual(4, len(findings))

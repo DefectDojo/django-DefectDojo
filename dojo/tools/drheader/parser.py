@@ -25,6 +25,15 @@ class DrHeaderParser(object):
                 for finding in item["report"]:
                     title = "Header : " + finding["rule"]
                     message = finding["message"] + "\nURL : " + url
+                    if finding.get("value") is not None:
+                        message += "\nObserved values: " + finding["value"]
+                    if finding.get("expected") is not None:
+                        message += "\nExpected values: "
+                        for expect in finding["expected"]:
+                            if expect == finding["expected"][-1]:
+                                message += expect
+                            else:
+                                message += expect + "; "
                     severity = finding["severity"].title()
                     find = Finding(title=title,
                                 test=test,
@@ -32,13 +41,22 @@ class DrHeaderParser(object):
                                 description=message,
                                 severity=severity,
                                 static_finding=False)
-                    find.unsaved_endpoints = [Endpoint(host=url)]
+                    find.unsaved_endpoints = [Endpoint.from_uri(url)]
                     items.append(find)
             return items
         else:
             for item in data:
                 title = "Header : " + item["rule"]
                 message = item["message"]
+                if item.get("value") is not None:
+                    message += "\nObserved values: " + item["value"]
+                if item.get("expected") is not None:
+                    message += "\nExpected values: "
+                    for expect in item["expected"]:
+                        if expect == item["expected"][-1]:
+                            message += expect
+                        else:
+                            message += expect + "; "
                 severity = item["severity"].title()
                 find = Finding(title=title,
                             test=test,
