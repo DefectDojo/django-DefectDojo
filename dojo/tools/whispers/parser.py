@@ -1,6 +1,6 @@
 import json
 
-from dojo.models import Endpoint, Finding
+from dojo.models import Finding
 
 
 class WhispersParser(object):
