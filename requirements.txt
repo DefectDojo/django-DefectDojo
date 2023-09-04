@@ -2,13 +2,13 @@
 asteval==0.9.31
 bleach==6.0.0
 bleach[css]
-celery==5.3.1
+celery==5.3.3
 coverage==7.3.0
 defusedxml==0.7.1
 django_celery_results==2.5.1
 django-auditlog==2.3.0
 django-dbbackup==4.0.2
-django-environ==0.10.0
+django-environ==0.11.1
 django-filter==23.2
 django-imagekit==4.1.0
 # This library is very outdated, but is a pillar of DefectDojo
@@ -78,7 +78,7 @@ django-ratelimit==4.1.0
 argon2-cffi==23.1.0
 blackduck==1.1.0
 pycurl==7.45.2  # Required for Celery Broker AWS (SQS) support
-boto3==1.28.36  # Required for Celery Broker AWS (SQS) support
+boto3==1.28.39  # Required for Celery Broker AWS (SQS) support
 netaddr==0.8.0
 vulners==2.0.10
 fontawesomefree==6.4.2
