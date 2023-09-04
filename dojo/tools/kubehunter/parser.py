@@ -51,8 +51,8 @@ class KubeHunterParser(object):
                 mitigation = f"Further details can be found in kube-hunter documentation available at : {avd_reference}"
                 references = "**Kube-hunter AVD reference**: " + avd_reference
             else:
-                mitigation = ''
-                references = ''
+                mitigation = None
+                references = None
 
             # Finding evidence
             evidence = item.get('evidence')
