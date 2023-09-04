@@ -56,9 +56,10 @@ class KubeHunterParser(object):
 
             # Finding evidence
             evidence = item.get('evidence')
-            steps_to_reproduce = 'No evidence provided.'
             if evidence and evidence != '' and evidence != 'none':
-                steps_to_reproduce += '**Evidence**: ' + item.get('evidence')
+                steps_to_reproduce = '**Evidence**: ' + item.get('evidence')
+            else:
+                steps_to_reproduce = None
 
             finding = Finding(
                 title=title,
@@ -76,6 +77,8 @@ class KubeHunterParser(object):
             )
 
             # internal de-duplication
+            if finding.steps_to_reproduce is None:
+                finding.steps_to_reproduce = ''
             dupe_key = hashlib.sha256(str(finding.description + finding.title + finding.steps_to_reproduce + finding.vuln_id_from_tool).encode('utf-8')).hexdigest()
 
             if dupe_key not in dupes:
