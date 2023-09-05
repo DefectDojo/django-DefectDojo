@@ -33,7 +33,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
           submodules: recursive  # Fetch the Docsy theme
@@ -46,7 +46,7 @@ jobs:
       # for dev we move everything into a subfolder, so the master version stays in the root
       - run: mkdir /tmp/dev && mv docs/public/* /tmp/dev/
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
           submodules: recursive  # Fetch the Docsy theme
