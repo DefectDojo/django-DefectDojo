@@ -1,5 +1,4 @@
 import os.path
-import re
 
 from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.tools.trivy.parser import TrivyParser
@@ -164,20 +163,8 @@ APT had several integer overflows and underflows while parsing .deb packages, ak
 
 A program inside the container can elevate its own privileges and run as root, which might give the program control over the container and node.
 Container 'follower' of Deployment 'redis-follower' should set 'securityContext.allowPrivilegeEscalation' to false
-Number  Content
-132                     - image: gcr.io/google_samples/gb-redis-follower:v2
-133                       imagePullPolicy: IfNotPresent
-134                       name: follower
-135                       ports:
-136                         - containerPort: 6379
-137                           protocol: TCP
-138                       resources:
-139                         requests:
-140                             cpu: 100m
-141'''
-        re_description = re.sub(r"\s+", " ", description)
-        re_finding_description = re.sub(r"\s+", " ", finding.description)
-        self.assertEqual(re_description.strip(), re_finding_description.strip())
+'''
+        self.assertEqual(description, finding.description)
         self.assertEqual('Set \'set containers[].securityContext.allowPrivilegeEscalation\' to \'false\'.', finding.mitigation)
         self.assertIsNone(finding.unsaved_vulnerability_ids)
         self.assertEqual(['config', 'kubernetes'], finding.tags)
