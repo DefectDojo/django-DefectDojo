@@ -277,7 +277,7 @@
     </div>
 </div>
 {% block postscript %}
-<script>
+    <script nonce="{{request.csp_nonce}}">
         // DataTables setup
         $(document).ready(function() {
             var date =  new Date().toISOString().slice(0, 10);

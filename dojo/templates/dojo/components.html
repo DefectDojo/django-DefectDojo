@@ -85,7 +85,7 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-<script>
+<script nonce="{{request.csp_nonce}}">
         $(function () {
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
@@ -105,7 +105,7 @@
             });
         });
 </script>
-<script>
+<script nonce="{{request.csp_nonce}}">
     // DataTables setup
     $(document).ready(function() {
         date =  new Date().toISOString().slice(0, 10);

@@ -49,8 +49,8 @@ env = environ.Env(
     DD_CSRF_COOKIE_SECURE=(bool, False),
     DD_CSRF_TRUSTED_ORIGINS=(list, []),
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
-    DD_CSRF_COOKIE_SAMESITE=(str, "Lax"),
-    DD_SESSION_COOKIE_SAMESITE=(str, "Lax"),
+    DD_CSRF_COOKIE_SAMESITE=(str, "Strict"),
+    DD_SESSION_COOKIE_SAMESITE=(str, "Strict"),
     DD_TIME_ZONE=(str, "UTC"),
     DD_LANG=(str, "en-us"),
     DD_TEAM_NAME=(str, "Security Team"),
@@ -756,12 +756,33 @@ CSRF_COOKIE_HTTPONLY = env("DD_CSRF_COOKIE_HTTPONLY")
 # Whether to use a secure cookie for the session cookie. If this is set to True,
 # the cookie will be marked as secure, which means browsers may ensure that the
 # cookie is only sent with an HTTPS connection.
-SESSION_COOKIE_SECURE = env("DD_SESSION_COOKIE_SECURE")
-SESSION_COOKIE_SAMESITE = env("DD_SESSION_COOKIE_SAMESITE")
+DD_SESSION_COOKIE_SECURE = env("DD_SESSION_COOKIE_SECURE")
+DD_SESSION_COOKIE_SAMESITE = env("DD_SESSION_COOKIE_SAMESITE")
 
 # Whether to use a secure cookie for the CSRF cookie.
-CSRF_COOKIE_SECURE = env("DD_CSRF_COOKIE_SECURE")
-CSRF_COOKIE_SAMESITE = env("DD_CSRF_COOKIE_SAMESITE")
+DD_CSRF_COOKIE_SECURE = env("DD_CSRF_COOKIE_SECURE")
+DD_CSRF_COOKIE_SAMESITE = env("DD_CSRF_COOKIE_SAMESITE")
+
+# Content Security Policy
+CSP_INCLUDE_NONCE_IN = ['script-src']
+# Content Security Policy
+CSP_IMG_SRC = ("'self'")
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "maxcdn.bootstrapcdn.com")
+CSP_FONT_SRC = ("'self'", "maxcdn.bootstrapcdn.com")
+CSP_SCRIPT_SRC = ("'self'")
+# CSP_SCRIPT_SRC = ("'self'\
+#     'sha256-Ttg/FdtgEpeFX4Fi2w4CW2d4tarsub6QAxpr76uZaZs='\
+#     'sha256-N2m+h2dL1jkiIrpfPLwB/UYRVI/K6J2shKA5oUqZnK4='\
+#     'sha256-kVXTuVyrBvSmDdt9pq+32zN7Z3Gbsy8QTVzqMcwc250='\
+#     'sha256-45Hk+eV2g2lg6tX3wt/gi/ovqCeayaqs+2lr7BXy0jA='\
+#     'sha256-d67a/aZCydKp37vN9dCcM9lR4hZLfoKinXXTkYXsyEY='\
+#     'sha256-5+pwrx2Sqjl/avFtF6fl0AI2NWTJKFi85jHWC5WClLY='\
+#     'sha256-KLC2c/jOiFuDb857eep/XE3PQELBO2bzgF65fTnWEtE='\
+#     'sha256-nkT93AM0Ga6mGBoE/YaMbGLYns0yxZlsoVJWJAvr5xw='\
+#     'sha256-6Zf+FV1BGtH9z5dT6BRYk/GzEGhf/eb8e7SaGX+hZCs='\
+#     'sha256-xD126rUQQLcod074v0gSmxK1yBX+/4R9aymQutGf1p4='\
+#     'sha256-Zds7onbE1RqJJIlmYbdLCO3ODXlAEZ/92pBquCOUydQ='\
+#     'sha256-CxI1T50WYk55488gv4VMGpNzMYBe/D7Ah6AmX/+dULw='")
 
 # A list of trusted origins for unsafe requests (e.g. POST).
 # Use comma-separated list of domains, they will be split to list automatically
@@ -939,6 +960,7 @@ INSTALLED_APPS = (
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
 DJANGO_MIDDLEWARE_CLASSES = [
+    "csp.middleware.CSPMiddleware",
     "django.middleware.common.CommonMiddleware",
     "dojo.middleware.APITrailingSlashMiddleware",
     "dojo.middleware.DojoSytemSettingsMiddleware",
@@ -958,6 +980,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
+
 
 # WhiteNoise allows your web app to serve its own static files,
 # making it a self-contained unit that can be deployed anywhere without relying on nginx

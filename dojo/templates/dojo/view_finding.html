@@ -1034,7 +1034,7 @@
     <script src="{% static "clipboard/dist/clipboard.min.js" %}"></script>
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="{{request.csp_nonce}}">
         var firstID = {{findings_list.0}};
         var currentID = {{finding.id}};
         var lastID = {{findings_list_lastElement}};
@@ -1336,7 +1336,7 @@
 
     </script>
 
-    <script type="application/javascript">
+    <script type="application/javascript" nonce="{{request.csp_nonce}}">
         // DataTables Setup
         $(document).ready(function() {
             date =  new Date().toISOString().slice(0, 10);

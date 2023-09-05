@@ -514,7 +514,7 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="{{request.csp_nonce}}">
         {% comment %} django filters do no support a "full_text" query field which is not a field of the model
         so we have to inject it clientside to qavoid duplicating the whole form with hardcoded fields etc. {% endcomment %}
         $(function () {

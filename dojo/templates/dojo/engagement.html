@@ -199,7 +199,7 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         $(function() {
             $('.table-responsive').on('shown.bs.dropdown', function(e) {
                 var t = $(this),
@@ -222,7 +222,7 @@
             });
         });
     </script>
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         $(function () {
             var prodWords = [
                 {% for word in product_name_words %}

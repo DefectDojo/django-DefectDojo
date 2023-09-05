@@ -55,7 +55,7 @@
 {% block postscript %}
     {{ block.super }}
 <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
-<script type="text/javascript">
+<script type="text/javascript" nonce="request.csp_nonce">
     $(function () {
         $('input#select_all').on('click', function (e) {
             if ($(this).is(":checked")) {

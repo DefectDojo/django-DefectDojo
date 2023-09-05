@@ -177,7 +177,7 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         $(function() {
             $('.table-responsive').on('shown.bs.dropdown', function(e) {
                 var t = $(this),
@@ -200,7 +200,7 @@
             });
         });
     </script>
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         $(function () {
             var availableTags = [
                 {% for word in name_words %}
@@ -220,7 +220,7 @@
             });
         });
     </script>
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         // DataTables setup
         $(document).ready(function() {
             date =  new Date().toISOString().slice(0, 10);

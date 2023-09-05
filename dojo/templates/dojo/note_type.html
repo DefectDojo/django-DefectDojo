@@ -118,7 +118,7 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         $(function () {
             var availableTags = [
                 {% for word in name_words %}
