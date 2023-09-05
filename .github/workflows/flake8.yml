@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Checkout
         if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         # by default the pull_requst_target event checks out the base branch, i.e. dev
         # so we need to explicitly checkout the head of the PR
         # we use fetch-depth 0 to make sure the full history is checked out and we can compare against
@@ -28,7 +28,7 @@ jobs:
       - name: Checkout
         # for non PR runs we just checkout the default, which is a sha on a branch probably
         if: github.event_name != 'pull_request' && github.event_name != 'pull_request_target'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # - uses: tayfun/flake8-your-pr@master
       - uses: DefectDojo/flake8-your-pr@master

@@ -1394,6 +1394,17 @@ div.custom-search-form {
 	border-left: 1px solid #dcdedf;
 }
 
+.graph {
+    min-height: 158px;
+}
+
+.graph-loader {
+    min-height: 158px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
 .panel-footer {
     background-color: #dddedf;
     border-top: 1px solid #ddd;
