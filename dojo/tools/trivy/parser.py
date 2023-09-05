@@ -70,11 +70,10 @@ class TrivyParser:
             return self.get_result_items(test, data)
         else:
             schema_version = data.get("SchemaVersion", None)
-            artifact_name = data.get("ArtifactName", "")
             cluster_name = data.get("ClusterName")
             if schema_version == 2:
                 results = data.get("Results", [])
-                return self.get_result_items(test, results, artifact_name=artifact_name)
+                return self.get_result_items(test, results)
             elif cluster_name:
                 findings = list()
                 vulnerabilities = data.get("Vulnerabilities", [])
@@ -117,7 +116,7 @@ class TrivyParser:
                     "Schema of Trivy json report is not supported"
                 )
 
-    def get_result_items(self, test, results, service_name=None, artifact_name=""):
+    def get_result_items(self, test, results, service_name=None):
         items = list()
         for target_data in results:
             if (
@@ -205,19 +204,13 @@ class TrivyParser:
                 misc_severity = misconfiguration.get("Severity")
                 misc_primary_url = misconfiguration.get("PrimaryURL")
                 misc_references = misconfiguration.get("References", [])
-                misc_causemetadata = misconfiguration.get("CauseMetadata", {})
-                misc_cause_code = misc_causemetadata.get("Code", {})
-                misc_cause_lines = misc_cause_code.get("Lines", [])
-                string_lines_table = self.get_lines_as_string_table(misc_cause_lines)
-                if string_lines_table != "":
-                    misc_message += ("\n" + string_lines_table)
 
                 title = f"{misc_id} - {misc_title}"
                 description = MISC_DESCRIPTION_TEMPLATE.format(
                     target=target_target,
                     type=misc_type,
                     description=misc_description,
-                    message=misc_message
+                    message=misc_message,
                 )
                 severity = TRIVY_SEVERITIES[misc_severity]
                 references = None
@@ -308,20 +301,3 @@ class TrivyParser:
                 items.append(finding)
 
         return items
-
-    def get_lines_as_string_table(self, lines):
-        if lines is None:
-            return ""
-        # Define column headers
-        headers = ["Number", "Content"]
-
-        # Create the header row
-        header_row = "\t".join(headers)
-
-        # Create the table string
-        table_string = f"{header_row}\n"
-        for item in lines:
-            row = "\t".join(str(item.get(header, '')) for header in headers)
-            table_string += f"{row}\n"
-
-        return table_string
