@@ -93,7 +93,7 @@
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
     <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
 
-    <script type="application/javascript">
+    <script type="application/javascript" nocne="{{request.csp_nonce}}">
         $ = django.jQuery;
         $.hotkeys.options.filterInputAcceptingElements = false;
         $.hotkeys.options.filterTextInputs = false;

@@ -652,7 +652,7 @@
     {% block metrics %}
         <script src="{% static "dojo/js/metrics.js" %}"></script>
     {% endblock metrics %}
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         $('.gaugeloop').each(function () {
             j_obj = $(this);
             var g_id = j_obj.attr('id');

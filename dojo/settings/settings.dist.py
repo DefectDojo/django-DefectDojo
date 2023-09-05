@@ -769,20 +769,12 @@ CSP_INCLUDE_NONCE_IN = ['script-src']
 CSP_IMG_SRC = ("'self'")
 CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "maxcdn.bootstrapcdn.com")
 CSP_FONT_SRC = ("'self'", "maxcdn.bootstrapcdn.com")
-CSP_SCRIPT_SRC = ("'self'")
-# CSP_SCRIPT_SRC = ("'self'\
-#     'sha256-Ttg/FdtgEpeFX4Fi2w4CW2d4tarsub6QAxpr76uZaZs='\
-#     'sha256-N2m+h2dL1jkiIrpfPLwB/UYRVI/K6J2shKA5oUqZnK4='\
-#     'sha256-kVXTuVyrBvSmDdt9pq+32zN7Z3Gbsy8QTVzqMcwc250='\
-#     'sha256-45Hk+eV2g2lg6tX3wt/gi/ovqCeayaqs+2lr7BXy0jA='\
-#     'sha256-d67a/aZCydKp37vN9dCcM9lR4hZLfoKinXXTkYXsyEY='\
-#     'sha256-5+pwrx2Sqjl/avFtF6fl0AI2NWTJKFi85jHWC5WClLY='\
-#     'sha256-KLC2c/jOiFuDb857eep/XE3PQELBO2bzgF65fTnWEtE='\
-#     'sha256-nkT93AM0Ga6mGBoE/YaMbGLYns0yxZlsoVJWJAvr5xw='\
-#     'sha256-6Zf+FV1BGtH9z5dT6BRYk/GzEGhf/eb8e7SaGX+hZCs='\
-#     'sha256-xD126rUQQLcod074v0gSmxK1yBX+/4R9aymQutGf1p4='\
-#     'sha256-Zds7onbE1RqJJIlmYbdLCO3ODXlAEZ/92pBquCOUydQ='\
-#     'sha256-CxI1T50WYk55488gv4VMGpNzMYBe/D7Ah6AmX/+dULw='")
+CSP_SCRIPT_SRC = ("'self'\
+    'sha256-kVXTuVyrBvSmDdt9pq+32zN7Z3Gbsy8QTVzqMcwc250='\
+    'sha256-5+pwrx2Sqjl/avFtF6fl0AI2NWTJKFi85jHWC5WClLY='\
+    'sha256-KLC2c/jOiFuDb857eep/XE3PQELBO2bzgF65fTnWEtE='\
+    'sha256-N2m+h2dL1jkiIrpfPLwB/UYRVI/K6J2shKA5oUqZnK4='\
+    'sha256-CxI1T50WYk55488gv4VMGpNzMYBe/D7Ah6AmX/+dULw='")
 
 # A list of trusted origins for unsafe requests (e.g. POST).
 # Use comma-separated list of domains, they will be split to list automatically
