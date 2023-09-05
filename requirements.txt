@@ -6,6 +6,7 @@ celery==5.3.1
 coverage==7.2.7
 defusedxml==0.7.1
 django_celery_results==2.5.1
+django-csp==3.7
 django-auditlog==2.3.0
 django-dbbackup==4.0.2
 django-environ==0.10.0
