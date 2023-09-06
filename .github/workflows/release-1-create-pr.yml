@@ -21,7 +21,7 @@ jobs:
     steps:
      
       - name: Checkout from_branch branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.from_branch }}
      
@@ -45,7 +45,7 @@ jobs:
         run: git push origin HEAD:${NEW_BRANCH}
      
       - name: Checkout release branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.NEW_BRANCH }}
      

@@ -10,7 +10,7 @@ import hyperlink
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from calendar import monthrange
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from math import pi, sqrt
 import vobject
 from dateutil.relativedelta import relativedelta, MO, SU
@@ -1573,7 +1573,6 @@ def get_work_days(start: date, end: date):
     about specific country holidays or extra working days.
     https://stackoverflow.com/questions/3615375/number-of-days-between-2-dates-excluding-weekends/71977946#71977946
     """
-    from datetime import timedelta
 
     # if the start date is on a weekend, forward the date to next Monday
     if start.weekday() > WEEKDAY_FRIDAY:
@@ -2193,16 +2192,16 @@ def get_product(obj):
     if not obj:
         return None
 
-    if type(obj) == Finding or type(obj) == Finding_Group:
+    if isinstance(obj, Finding) or isinstance(obj, Finding_Group):
         return obj.test.engagement.product
 
-    if type(obj) == Test:
+    if isinstance(obj, Test):
         return obj.engagement.product
 
-    if type(obj) == Engagement:
+    if isinstance(obj, Engagement):
         return obj.product
 
-    if type(obj) == Product:
+    if isinstance(obj, Product):
         return obj
 
 
@@ -2393,3 +2392,77 @@ def sum_by_severity_level(metrics):
             values[m.severity] += 1
 
     return values
+
+
+def get_open_findings_burndown(product):
+    findings = Finding.objects.filter(test__engagement__product=product)
+    f_list = list(findings)
+
+    curr_date = datetime.combine(datetime.now(), datetime.min.time())
+    start_date = curr_date - timedelta(days=90)
+
+    critical_count = len(list(findings.filter(date__lt=start_date).filter(severity='Critical')))
+    high_count = len(list(findings.filter(date__lt=start_date).filter(severity='High')))
+    medium_count = len(list(findings.filter(date__lt=start_date).filter(severity='Medium')))
+    low_count = len(list(findings.filter(date__lt=start_date).filter(severity='Low')))
+    info_count = len(list(findings.filter(date__lt=start_date).filter(severity='Info')))
+
+    running_min, running_max = float('inf'), float('-inf')
+    past_90_days = {
+        'Critical': [],
+        'High': [],
+        'Medium': [],
+        'Low': [],
+        'Info': []
+    }
+
+    for i in range(90, -1, -1):
+        start = (curr_date - timedelta(days=i))
+
+        d_start = start.timestamp()
+        d_end = (start + timedelta(days=1)).timestamp()
+
+        for f in f_list:
+            f_open_date = datetime.combine(f.date, datetime.min.time()).timestamp()
+            if f_open_date >= d_start and f_open_date < d_end:
+                if f.severity == 'Critical':
+                    critical_count += 1
+                if f.severity == 'High':
+                    high_count += 1
+                if f.severity == 'Medium':
+                    medium_count += 1
+                if f.severity == 'Low':
+                    low_count += 1
+                if f.severity == 'Info':
+                    info_count += 1
+
+            if f.is_mitigated:
+                f_mitigated_date = f.mitigated.timestamp()
+                if f_mitigated_date >= d_start and f_mitigated_date < d_end:
+                    if f.severity == 'Critical':
+                        critical_count -= 1
+                    if f.severity == 'High':
+                        high_count -= 1
+                    if f.severity == 'Medium':
+                        medium_count -= 1
+                    if f.severity == 'Low':
+                        low_count -= 1
+                    if f.severity == 'Info':
+                        info_count -= 1
+
+        f_day = [critical_count, high_count, medium_count, low_count, info_count]
+        if min(f_day) < running_min:
+            running_min = min(f_day)
+        if max(f_day) > running_max:
+            running_max = max(f_day)
+
+        past_90_days['Critical'].append([d_start * 1000, critical_count])
+        past_90_days['High'].append([d_start * 1000, high_count])
+        past_90_days['Medium'].append([d_start * 1000, medium_count])
+        past_90_days['Low'].append([d_start * 1000, low_count])
+        past_90_days['Info'].append([d_start * 1000, info_count])
+
+    past_90_days['y_max'] = running_max
+    past_90_days['y_min'] = running_min
+
+    return past_90_days

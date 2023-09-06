@@ -21,7 +21,7 @@ jobs:
     steps:
       
       - name: Checkout master
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: master
       
@@ -38,7 +38,7 @@ jobs:
         run: git push origin HEAD:${NEW_BRANCH}
       
       - name: Checkout new branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.NEW_BRANCH }}
       
@@ -87,7 +87,7 @@ jobs:
     steps:
       
       - name: Checkout master
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: master
       
@@ -104,7 +104,7 @@ jobs:
         run: git push origin HEAD:${NEW_BRANCH}
       
       - name: Checkout new branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.NEW_BRANCH }}
       
