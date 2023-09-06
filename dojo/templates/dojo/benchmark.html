@@ -142,7 +142,7 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         function highlight_level(desired_level) {
             switch (desired_level) {
                 case "Level 2":

@@ -57,7 +57,7 @@ No files for this build were found.
 {% block postscript %}
     {{ block.super }}
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="{{request.csp_nonce}}">
         $(function () {
             $('form#bulk_change_form').on('submit', function(e){
                 $('input[type=checkbox].select_one:checked').each(function(){

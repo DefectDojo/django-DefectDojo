@@ -44,6 +44,7 @@ env = environ.Env(
     DD_SECURE_HSTS_INCLUDE_SUBDOMAINS=(bool, False),
     DD_SECURE_HSTS_SECONDS=(int, 31536000),  # One year expiration
     DD_SESSION_COOKIE_SECURE=(bool, False),
+    DD_SESSION_COOKIE_DOMAIN=(str, "localhost"),
     DD_SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, False),
     DD_SESSION_COOKIE_AGE=(int, 1209600),  # 14 days
     DD_CSRF_COOKIE_SECURE=(bool, False),
@@ -756,6 +757,7 @@ CSRF_COOKIE_HTTPONLY = env("DD_CSRF_COOKIE_HTTPONLY")
 # Whether to use a secure cookie for the session cookie. If this is set to True,
 # the cookie will be marked as secure, which means browsers may ensure that the
 # cookie is only sent with an HTTPS connection.
+SESSION_COOKIE_DOMAIN = env("DD_SESSION_COOKIE_DOMAIN")
 SESSION_COOKIE_SECURE = env("DD_SESSION_COOKIE_SECURE")
 SESSION_COOKIE_SAMESITE = env("DD_SESSION_COOKIE_SAMESITE")
 
@@ -765,16 +767,17 @@ CSRF_COOKIE_SAMESITE = env("DD_CSRF_COOKIE_SAMESITE")
 
 # Content Security Policy
 CSP_INCLUDE_NONCE_IN = ['script-src']
-# Content Security Policy
 CSP_IMG_SRC = ("'self'")
-CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "maxcdn.bootstrapcdn.com")
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "maxcdn.bootstrapcdn.com", "https://cdn.jsdelivr.net/")
 CSP_FONT_SRC = ("'self'", "maxcdn.bootstrapcdn.com")
 CSP_SCRIPT_SRC = ("'self'\
     'sha256-kVXTuVyrBvSmDdt9pq+32zN7Z3Gbsy8QTVzqMcwc250='\
     'sha256-5+pwrx2Sqjl/avFtF6fl0AI2NWTJKFi85jHWC5WClLY='\
     'sha256-KLC2c/jOiFuDb857eep/XE3PQELBO2bzgF65fTnWEtE='\
     'sha256-N2m+h2dL1jkiIrpfPLwB/UYRVI/K6J2shKA5oUqZnK4='\
+    'sha256-UEzT5nigNpCgb+fPsTD0s0QmaPBXku0aBOrleuQFvxg='\
     'sha256-CxI1T50WYk55488gv4VMGpNzMYBe/D7Ah6AmX/+dULw='")
+CSP_IMG_SRC=("'self'", "https://cdn.jsdelivr.net/")
 
 # A list of trusted origins for unsafe requests (e.g. POST).
 # Use comma-separated list of domains, they will be split to list automatically
