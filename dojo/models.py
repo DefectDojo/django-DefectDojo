@@ -315,7 +315,7 @@ class System_Settings(models.Model):
                                       blank=False)
 
     # will be set to random / uuid by initializer so null needs to be True
-    jira_webhook_secret = models.CharField(max_length=64, blank=False, null=True, verbose_name=_('JIRA Webhook URL'),
+    jira_webhook_secret = models.CharField(max_length=64, blank=True, null=True, verbose_name=_('JIRA Webhook URL'),
                                            help_text=_('Secret needed in URL for incoming JIRA Webhook'))
 
     jira_choices = (('Critical', 'Critical'),
