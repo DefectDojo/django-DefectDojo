@@ -44,6 +44,7 @@ env = environ.Env(
     DD_SECURE_HSTS_INCLUDE_SUBDOMAINS=(bool, False),
     DD_SECURE_HSTS_SECONDS=(int, 31536000),  # One year expiration
     DD_SESSION_COOKIE_SECURE=(bool, False),
+    DD_SESSION_COOKIE_DOMAIN=(str, "localhost"),
     DD_SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, False),
     DD_SESSION_COOKIE_AGE=(int, 1209600),  # 14 days
     DD_CSRF_COOKIE_SECURE=(bool, False),
@@ -756,6 +757,7 @@ CSRF_COOKIE_HTTPONLY = env("DD_CSRF_COOKIE_HTTPONLY")
 # Whether to use a secure cookie for the session cookie. If this is set to True,
 # the cookie will be marked as secure, which means browsers may ensure that the
 # cookie is only sent with an HTTPS connection.
+SESSION_COOKIE_DOMAIN = env("DD_SESSION_COOKIE_DOMAIN")
 SESSION_COOKIE_SECURE = env("DD_SESSION_COOKIE_SECURE")
 SESSION_COOKIE_SAMESITE = env("DD_SESSION_COOKIE_SAMESITE")
 
