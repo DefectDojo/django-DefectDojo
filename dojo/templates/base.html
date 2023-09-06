@@ -92,7 +92,7 @@
         <link rel="stylesheet" href="{% static "datatables.net-bs/css/dataTables.bootstrap.min.css" %}">
         <link rel="stylesheet" href="{% static "datatables.net-buttons-bs/css/buttons.bootstrap.min.css" %}">
 
-        <style>
+        <style nonce="{{request.csp_nonce}}">
             {% block add_styles %}
             {% endblock %}
         </style>
@@ -1069,7 +1069,7 @@
         <script src="{% static "dojo/js/cvsscalc31_helptext.js" %}"></script>
         <script src="{% static "dojo/js/cvsscalc31.js" %}"></script>
         <script src="{% static "dojo/js/cvss_calculator.js" %}"></script>
-        <script type="application/javascript">
+        <script type="application/javascript" nonce="{{request.csp_nonce}}">
             $(document).ready(function() {
                 $('.has-popover').hover(
                     function() { $(this).popover('show'); }, // hover

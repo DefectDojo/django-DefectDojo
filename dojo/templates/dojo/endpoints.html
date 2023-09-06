@@ -161,7 +161,7 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-<script>
+<script nonce="{{request.csp_nonce}}">
         var checkbox_count = 0;
         function check_checked_endpoint()
         {

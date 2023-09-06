@@ -57,7 +57,7 @@
     <script src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script src="{% static "google-code-prettify/src/prettify.js" %}"></script>
     <script src="{% static "bootstrap-wysiwyg/src/bootstrap-wysiwyg.js" %}"></script>
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         function setUpFindingFilters() {
             $(".report-filter-set :input").not("button").addClass("form-control input-sm");
             $(".report-filter-set label").css("display", "block");

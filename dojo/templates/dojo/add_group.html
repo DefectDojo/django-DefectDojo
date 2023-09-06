@@ -34,7 +34,7 @@
 
 {% block postscript %}
 <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
-<script type="application/javascript">
+<script type="application/javascript" nonce="{{request.csp_nonce}}">
     $(function () {
         $("textarea").each(function (index, elem) {
             if (elem.hasAttribute("required")) {

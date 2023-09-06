@@ -185,7 +185,7 @@
     {% block metrics %}
         <script src="{% static "dojo/js/metrics.js" %}"></script>
     {% endblock metrics %}
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         $(function () {
             setInterval(function () {
                 window.location.reload();

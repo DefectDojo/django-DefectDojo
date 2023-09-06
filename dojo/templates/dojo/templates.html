@@ -157,7 +157,7 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         $(function () {
             $('button.template-delete').on('click', function (e) {
                 return confirm('Are you sure you want to delete this template?')

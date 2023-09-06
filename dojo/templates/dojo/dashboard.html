@@ -265,9 +265,9 @@
         <script src="{% static "JUMFlot/javascripts/jquery.flot.bubbles.js" %}"></script>
     {% endif %}
     {% block metrics %}
-        <script src="{% static "dojo/js/metrics.js" %}"></script>
+    <script src="{% static "dojo/js/metrics.js" %}"></script>
     {% endblock metrics %}
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         $(function () {
             homepage_pie_chart("{{critical}}", "{{high}}", "{{medium}}", "{{low}}", "{{info}}");
 

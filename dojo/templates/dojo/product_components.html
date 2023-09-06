@@ -103,7 +103,7 @@
             });
         });
 </script>
-<script>
+    <script nonce="{{request.csp_nonce}}">
     // DataTables setup
     $(document).ready(function() {
         date =  new Date().toISOString().slice(0, 10);
