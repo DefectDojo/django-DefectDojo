@@ -2980,6 +2980,10 @@ class Finding(models.Model):
         return create_bleached_link(link, self.file_path)
 
     def get_file_path_with_raw_link(self):
+        if '**Link:**' in self.description and '(https://github.com/' in self.description:
+            _tmp_link = 'https://github.com/' + self.description.split('(https://github.com/')[1]
+            if ')' in _tmp_link:
+                return _tmp_link.split(')')[0]
         if self.file_path is None:
             return None
         link = self.test.engagement.source_code_management_uri
