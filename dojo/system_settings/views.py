@@ -51,7 +51,6 @@ def system_settings(request):
     if request.method == 'POST':
         form = SystemSettingsForm(request.POST, instance=system_settings_obj)
         if form.is_valid():
-            print("33333333333333333333333333333")
             if (form.cleaned_data['default_group'] is None and form.cleaned_data['default_group_role'] is not None) or \
                (form.cleaned_data['default_group'] is not None and form.cleaned_data['default_group_role'] is None):
                 messages.add_message(request,
