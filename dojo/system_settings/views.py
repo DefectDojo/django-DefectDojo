@@ -2,14 +2,12 @@
 import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.urls import reverse
 from django.shortcuts import render
 from dojo.models import System_Settings, enable_disable_auditlog
 from dojo.utils import (add_breadcrumb,
                         get_celery_worker_status)
 from dojo.forms import SystemSettingsForm
 from django.conf import settings
-from django.http import HttpResponseRedirect
 
 logger = logging.getLogger(__name__)
 
