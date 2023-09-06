@@ -46,7 +46,7 @@ env = environ.Env(
     DD_SESSION_COOKIE_SECURE=(bool, False),
     DD_SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, False),
     DD_SESSION_COOKIE_AGE=(int, 1209600),  # 14 days
-    DD_CSRF_COOKIE_SECURE=(bool, False),
+    DD_CSRF_COOKIE_SECURE=(bool, True),
     DD_CSRF_TRUSTED_ORIGINS=(list, []),
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
     DD_CSRF_COOKIE_SAMESITE=(str, "Lax"),
@@ -756,12 +756,12 @@ CSRF_COOKIE_HTTPONLY = env("DD_CSRF_COOKIE_HTTPONLY")
 # Whether to use a secure cookie for the session cookie. If this is set to True,
 # the cookie will be marked as secure, which means browsers may ensure that the
 # cookie is only sent with an HTTPS connection.
-DD_SESSION_COOKIE_SECURE = env("DD_SESSION_COOKIE_SECURE")
-DD_SESSION_COOKIE_SAMESITE = env("DD_SESSION_COOKIE_SAMESITE")
+SESSION_COOKIE_SECURE = env("DD_SESSION_COOKIE_SECURE")
+SESSION_COOKIE_SAMESITE = env("DD_SESSION_COOKIE_SAMESITE")
 
 # Whether to use a secure cookie for the CSRF cookie.
-DD_CSRF_COOKIE_SECURE = env("DD_CSRF_COOKIE_SECURE")
-DD_CSRF_COOKIE_SAMESITE = env("DD_CSRF_COOKIE_SAMESITE")
+CSRF_COOKIE_SECURE = env("DD_CSRF_COOKIE_SECURE")
+CSRF_COOKIE_SAMESITE = env("DD_CSRF_COOKIE_SAMESITE")
 
 # Content Security Policy
 CSP_INCLUDE_NONCE_IN = ['script-src']
