@@ -720,12 +720,6 @@
         };
 
         $(document).ready(function() {
-            $("#severity").on('change', function(e){
-                setTimeout(() => {
-                    $("#bulk_edit_menu").children().first().trigger('click')
-                }, 0);
-            })
-
             date =  new Date().toISOString().slice(0, 10);
             var fileDated = 'Findings_List_' + date;
             var columns = [
