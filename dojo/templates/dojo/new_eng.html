@@ -88,7 +88,7 @@
             });
         });
     </script>
-    <script type="application/javascript">
+    <script type="application/javascript" nonce="{{request.csp_nonce}}">
         $(function () {
             $('[id$="inherit_from_product"]').click(function()  {
                 inherit_from_product = $(this)
