@@ -31,7 +31,9 @@ from dojo.utils import (
     reopen_external_issue,
     do_false_positive_history,
     match_finding_to_existing_findings,
+    finding_template_placeholder
     template_replace_placeholder,
+    get_page_items_and_count,
 )
 import copy
 from dojo.filters import (
@@ -39,6 +41,8 @@ from dojo.filters import (
     SimilarFindingFilter,
     FindingFilter,
     AcceptedFindingFilter,
+    TestImportFindingActionFilter,
+    TestImportFilter,
 )
 from dojo.forms import (
     EditPlannedRemediationDateFindingForm,
@@ -82,6 +86,7 @@ from dojo.models import (
     Cred_Mapping,
     Test,
     Product,
+    Test_Import,
     Test_Import_Finding_Action,
     User,
     Engagement,
@@ -305,7 +310,7 @@ def findings(
     )
 
 
-def prefetch_for_findings(findings, prefetch_type="all"):
+def prefetch_for_findings(findings, prefetch_type="all", exclude_untouched=True):
     prefetched_findings = findings
     if isinstance(
         findings, QuerySet
@@ -338,15 +343,20 @@ def prefetch_for_findings(findings, prefetch_type="all"):
                 "duplicate_finding"
             )
 
-        # filter out noop reimport actions from finding status history
-        prefetched_findings = prefetched_findings.prefetch_related(
-            Prefetch(
-                "test_import_finding_action_set",
-                queryset=Test_Import_Finding_Action.objects.exclude(
-                    action=IMPORT_UNTOUCHED_FINDING
-                ),
+        if exclude_untouched:
+            # filter out noop reimport actions from finding status history
+            prefetched_findings = prefetched_findings.prefetch_related(
+                Prefetch(
+                    "test_import_finding_action_set",
+                    queryset=Test_Import_Finding_Action.objects.exclude(
+                        action=IMPORT_UNTOUCHED_FINDING
+                    ),
+                )
             )
-        )
+        else:
+            prefetched_findings = prefetched_findings.prefetch_related(
+                "test_import_finding_action_set"
+            )
         """
         we could try to prefetch only the latest note with SubQuery and OuterRef,
         but I'm getting that MySql doesn't support limits in subqueries.
@@ -432,7 +442,7 @@ def prefetch_for_similar_findings(findings):
 
 @user_is_authorized(Finding, Permissions.Finding_View, "fid")
 def view_finding(request, fid):
-    finding_qs = prefetch_for_findings(Finding.objects.all())
+    finding_qs = prefetch_for_findings(Finding.objects.all(), exclude_untouched=False)
     finding = get_object_or_404(finding_qs, id=fid)
     findings = (
         Finding.objects.filter(test=finding.test)
@@ -573,6 +583,19 @@ def view_finding(request, fid):
             )
         )
 
+    test_imports = Test_Import.objects.filter(findings_affected=finding)
+    test_import_filter = TestImportFilter(request.GET, test_imports)
+
+    test_import_finding_actions = finding.test_import_finding_action_set
+    test_import_finding_actions_count = test_import_finding_actions.all().count()
+    test_import_finding_actions = test_import_finding_actions.filter(test_import__in=test_import_filter.qs)
+    test_import_finding_action_filter = TestImportFindingActionFilter(request.GET, test_import_finding_actions)
+
+    paged_test_import_finding_actions = get_page_items_and_count(request, test_import_finding_action_filter.qs, 5, prefix='test_import_finding_actions')
+    paged_test_import_finding_actions.object_list = paged_test_import_finding_actions.object_list.prefetch_related('test_import')
+
+    latest_test_import_finding_action = finding.test_import_finding_action_set.order_by('-created').first
+
     product_tab = Product_Tab(
         finding.test.engagement.product, title="View Finding", tab="findings"
     )
@@ -611,6 +634,11 @@ def view_finding(request, fid):
             "similar_findings_filter": similar_findings_filter,
             "can_be_pushed_to_jira": can_be_pushed_to_jira,
             "can_be_pushed_to_jira_error": can_be_pushed_to_jira_error,
+            "test_import_filter": test_import_filter,
+            "test_import_finding_action_filter": test_import_finding_action_filter,
+            "paged_test_import_finding_actions": paged_test_import_finding_actions,
+            "latest_test_import_finding_action": latest_test_import_finding_action,
+            "test_import_finding_actions_count": test_import_finding_actions_count,
         },
     )
 
