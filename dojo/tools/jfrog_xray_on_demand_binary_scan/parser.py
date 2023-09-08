@@ -24,20 +24,20 @@ class JfrogXrayOnDemandBinaryScanParser(object):
 
     def get_items(self, tree, test):
         items = {}
-        data = tree[0]
-        if "vulnerabilities" in data:
-            vulnerability_tree = data["vulnerabilities"]
+        for data in tree:
+            if "vulnerabilities" in data:
+                vulnerability_tree = data["vulnerabilities"]
 
-            for node in vulnerability_tree:
-                item = get_item(node, test)
+                for node in vulnerability_tree:
+                    item = get_item(node, test)
 
-                title_cve = "No CVE"
-                if "cves" in data:
-                    if "cve" in data["cves"][0]:
-                        title_cve = data["cve"]
+                    title_cve = "No CVE"
+                    if "cves" in tree:
+                        if "cve" in tree["cves"][0]:
+                            title_cve = tree["cve"]
 
-                unique_key = node.get("issue_id", "") + node.get("summary", "") + title_cve
-                items[unique_key] = item
+                    unique_key = node.get("issue_id", "") + node.get("summary", "") + title_cve
+                    items[unique_key] = item
 
         return list(items.values())
 
