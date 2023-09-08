@@ -31,7 +31,6 @@ from dojo.utils import (
     reopen_external_issue,
     do_false_positive_history,
     match_finding_to_existing_findings,
-    finding_template_placeholder,
     template_replace_placeholder,
     get_page_items_and_count,
 )
