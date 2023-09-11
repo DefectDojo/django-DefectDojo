@@ -1,0 +1,47 @@
+{
+  "artifacts": [
+    {
+      "general": {
+        "name": "artifact1:1.0",
+        "component_id": "artifact1:1.0",
+        "pkg_type": "Docker",
+        "path": "artifact_path/artifact1/1.0/",
+        "sha256": "eaab06c0a28618bfb65481bf31bce7d6dd3a15dac528297690111c202a1cd468"
+      },
+      "issues": [
+        {
+          "issue_id": "XRAY-523195",
+          "summary": "Okio GzipSource unhandled exception Denial of Service",
+          "description": "GzipSource does not handle an exception that might be raised when parsing a malformed gzip buffer. This may lead to denial of service of the Okio client when handling a crafted GZIP archive, by using the GzipSource class.",
+          "issue_type": "security",
+          "severity": "Medium",
+          "provider": "JFrog",
+          "cves": [
+            { "cve": "CVE-2023-3635", "cwe": ["CWE-195"], "cvss_v3": "5.9" }
+          ],
+          "created": "2023-06-12T00:00:00.585Z",
+          "impact_path": [
+            "default/local/com.evel.corp/snoop/2023.2.1-build00008-j8uwlfh3728dj2h16dk9f1f93/deployments/main.jar/BOOT-INF/lib/okio-jvm-2.8.0.jar"
+          ]
+        }
+      ],
+      "licenses": [
+        {
+          "name": "OpenSSL",
+          "full_name": "OpenSSL LICENSE",
+          "more_info_url": [
+            "https://spdx.org/licenses/OpenSSL.html",
+            "http://www.openssl.org/source/license.html",
+            "https://www.openssl.org/source/license.html",
+            "https://spdx.org/licenses/OpenSSL"
+          ],
+          "components": [
+            "alpine://3.12:libcrypto1.1:1.1.1k-r0",
+            "alpine://3.12:libssl1.1:1.1.1k-r0",
+            "alpine://3.12:openssl:1.1.1k-r0"
+          ]
+        }
+      ]
+    }
+  ]
+}
