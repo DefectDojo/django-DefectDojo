@@ -45,8 +45,7 @@ services:
       - postgres-rabbitmq
       - postgres-redis
     depends_on:
-      - mysql
-      - postgres
+      - ${DD_DOCKERCOMPOSE_DATABASE}
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST}:${DD_DATABASE_PORT}', '-t', '30', '--', '/entrypoint-uwsgi.sh']
     environment:
       DD_DEBUG: 'False'
@@ -69,9 +68,8 @@ services:
       - postgres-rabbitmq
       - postgres-redis
     depends_on:
-      - mysql
-      - postgres
-      - rabbitmq
+      - ${DD_DOCKERCOMPOSE_DATABASE}
+      - ${DD_DOCKERCOMPOSE_BROKER}
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST}:${DD_DATABASE_PORT}', '-t', '30', '--', '/entrypoint-celery-beat.sh']
     environment:
       DD_DATABASE_URL: ${DD_DATABASE_URL}
@@ -90,10 +88,8 @@ services:
       - postgres-rabbitmq
       - postgres-redis
     depends_on:
-      - mysql
-      - postgres
-      - rabbitmq
-      - redis
+      - ${DD_DOCKERCOMPOSE_DATABASE}
+      - ${DD_DOCKERCOMPOSE_BROKER}
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST}:${DD_DATABASE_PORT}', '-t', '30', '--', '/entrypoint-celery-worker.sh']
     environment:
       DD_DATABASE_URL: ${DD_DATABASE_URL}
@@ -113,8 +109,7 @@ services:
       - postgres-rabbitmq
       - postgres-redis
     depends_on:
-      - mysql
-      - postgres
+      - ${DD_DOCKERCOMPOSE_DATABASE}
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST}:${DD_DATABASE_PORT}', '--', '/entrypoint-initializer.sh']
     environment:
       DD_DATABASE_URL: ${DD_DATABASE_URL}
