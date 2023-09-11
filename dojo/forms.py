@@ -2537,10 +2537,21 @@ class DeleteEngagementPresetsForm(forms.ModelForm):
 
 
 class SystemSettingsForm(forms.ModelForm):
+    jira_webhook_secret = forms.CharField(required=False)
 
     def __init__(self, *args, **kwargs):
         super(SystemSettingsForm, self).__init__(*args, **kwargs)
         self.fields['default_group_role'].queryset = get_group_member_roles()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        enable_jira_value = cleaned_data.get('enable_jira')
+        jira_webhook_secret_value = cleaned_data.get('jira_webhook_secret').strip()
+
+        if enable_jira_value and not jira_webhook_secret_value:
+            self.add_error('jira_webhook_secret', 'This field is required when enable Jira Integration is True')
+
+        return cleaned_data
 
     class Meta:
         model = System_Settings
