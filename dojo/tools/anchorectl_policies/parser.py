@@ -29,8 +29,8 @@ class AnchoreCTLPoliciesParser:
         find_date = datetime.now()
         items = list()
         try:
-            if image['detail'] is not None:
-                for image in data:
+            for image in data:
+                if image['detail'] is not None:
                     for result in image["detail"]:
                         try:
                             gate = result["gate"]
