@@ -7,6 +7,10 @@ class Roles(IntEnum):
     Writer = 2
     Maintainer = 3
     Owner = 4
+    Developer = 6
+    Leader = 7
+    Cibersecurity = 8
+    Risk = 9
 
     @classmethod
     def has_value(cls, value):
@@ -179,27 +183,15 @@ class Permissions(IntEnum):
 
     @classmethod
     def get_finding_group_permissions(cls):
-        return {
-            Permissions.Finding_Group_View,
-            Permissions.Finding_Group_Edit,
-            Permissions.Finding_Group_Delete,
-        }
+        return {Permissions.Finding_Group_View, Permissions.Finding_Group_Edit, Permissions.Finding_Group_Delete}
 
     @classmethod
     def get_endpoint_permissions(cls):
-        return {
-            Permissions.Endpoint_View,
-            Permissions.Endpoint_Edit,
-            Permissions.Endpoint_Delete,
-        }
+        return {Permissions.Endpoint_View, Permissions.Endpoint_Edit, Permissions.Endpoint_Delete}
 
     @classmethod
     def get_product_member_permissions(cls):
-        return {
-            Permissions.Product_View,
-            Permissions.Product_Manage_Members,
-            Permissions.Product_Member_Delete,
-        }
+        return {Permissions.Product_View, Permissions.Product_Manage_Members, Permissions.Product_Member_Delete}
 
     @classmethod
     def get_product_type_member_permissions(cls):
@@ -211,11 +203,7 @@ class Permissions(IntEnum):
 
     @classmethod
     def get_product_group_permissions(cls):
-        return {
-            Permissions.Product_Group_View,
-            Permissions.Product_Group_Edit,
-            Permissions.Product_Group_Delete,
-        }
+        return {Permissions.Product_Group_View, Permissions.Product_Group_Edit, Permissions.Product_Group_Delete}
 
     @classmethod
     def get_product_type_group_permissions(cls):
@@ -238,27 +226,15 @@ class Permissions(IntEnum):
 
     @classmethod
     def get_group_member_permissions(cls):
-        return {
-            Permissions.Group_View,
-            Permissions.Group_Manage_Members,
-            Permissions.Group_Member_Delete,
-        }
+        return {Permissions.Group_View, Permissions.Group_Manage_Members, Permissions.Group_Member_Delete}
 
     @classmethod
     def get_language_permissions(cls):
-        return {
-            Permissions.Language_View,
-            Permissions.Language_Edit,
-            Permissions.Language_Delete,
-        }
+        return {Permissions.Language_View, Permissions.Language_Edit, Permissions.Language_Delete}
 
     @classmethod
     def get_technology_permissions(cls):
-        return {
-            Permissions.Technology_View,
-            Permissions.Technology_Edit,
-            Permissions.Technology_Delete,
-        }
+        return {Permissions.Technology_View, Permissions.Technology_Edit, Permissions.Technology_Delete}
 
     @classmethod
     def get_product_api_scan_configuration_permissions(cls):
@@ -513,6 +489,92 @@ def get_roles_with_permissions():
             Permissions.Credential_Edit,
             Permissions.Credential_Delete,
         },
+        Roles.Developer: {
+            Permissions.Product_Type_View,
+            Permissions.Product_View,
+            Permissions.Engagement_View,
+            Permissions.Test_View,
+            Permissions.Finding_View,
+            Permissions.Finding_Group_View,
+            Permissions.Endpoint_View,
+            Permissions.Component_View,
+            Permissions.Note_Add,
+            Permissions.Product_Group_View,
+            Permissions.Product_Type_Group_View,
+            Permissions.Group_View,
+            Permissions.Language_View,
+            Permissions.Technology_View,
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_Tracking_Files_View,
+            Permissions.Credential_View,
+        },
+        Roles.Leader: {
+            Permissions.Product_Type_View,
+            Permissions.Product_View,
+            Permissions.Product_Configure_Notifications,
+            Permissions.Product_Edit,
+            Permissions.Engagement_View,
+            Permissions.Risk_Acceptance,
+            Permissions.Test_View,
+            Permissions.Finding_View,
+            Permissions.Finding_Group_View,
+            Permissions.Endpoint_View,
+            Permissions.Benchmark_Edit,
+            Permissions.Component_View,
+            Permissions.Note_View_History,
+            Permissions.Product_Group_View,
+            Permissions.Product_Type_Group_View,
+            Permissions.Group_View,
+            Permissions.Language_View,
+            Permissions.Language_Add,
+            Permissions.Language_Edit,
+            Permissions.Technology_View,
+            Permissions.Technology_Add,
+            Permissions.Technology_Edit,
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_Tracking_Files_View,
+            Permissions.Credential_View,
+        },
+        Roles.Cibersecurity: {
+            Permissions.Product_Type_View,
+            Permissions.Product_View,
+            Permissions.Engagement_View,
+            Permissions.Test_View,
+            Permissions.Finding_View,
+            Permissions.Finding_Group_View,
+            Permissions.Endpoint_View,
+            Permissions.Component_View,
+            Permissions.Note_Add,
+            Permissions.Product_Group_View,
+            Permissions.Product_Type_Group_View,
+            Permissions.Group_View,
+            Permissions.Language_View,
+            Permissions.Technology_View,
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_Tracking_Files_View,
+            Permissions.Credential_View,
+            Permissions.Risk_Acceptance,
+        },
+        Roles.Risk: {
+            Permissions.Product_Type_View,
+            Permissions.Product_View,
+            Permissions.Engagement_View,
+            Permissions.Test_View,
+            Permissions.Finding_View,
+            Permissions.Finding_Group_View,
+            Permissions.Endpoint_View,
+            Permissions.Component_View,
+            Permissions.Note_Add,
+            Permissions.Product_Group_View,
+            Permissions.Product_Type_Group_View,
+            Permissions.Group_View,
+            Permissions.Language_View,
+            Permissions.Technology_View,
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_Tracking_Files_View,
+            Permissions.Credential_View,
+            Permissions.Risk_Acceptance,
+        },
     }
 
 
@@ -520,7 +582,4 @@ def get_global_roles_with_permissions():
     """
     Extra permissions for global roles, on top of the permissions granted to the "normal" roles above.
     """
-    return {
-        Roles.Maintainer: {Permissions.Product_Type_Add},
-        Roles.Owner: {Permissions.Product_Type_Add},
-    }
+    return {Roles.Maintainer: {Permissions.Product_Type_Add}, Roles.Owner: {Permissions.Product_Type_Add}}

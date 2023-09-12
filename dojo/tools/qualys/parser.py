@@ -69,9 +69,7 @@ def split_cvss(value, _temp):
         split = value.split(" (")
         _temp["CVSS_value"] = float(split[0])
         # remove ")" at the end
-        _temp["CVSS_vector"] = CVSS3(
-            "CVSS:3.0/" + split[1][:-1]
-        ).clean_vector()
+        _temp["CVSS_vector"] = CVSS3("CVSS:3.0/" + split[1][:-1]).clean_vector()
     else:
         _temp["CVSS_value"] = float(value)
 
@@ -109,9 +107,7 @@ def parse_finding(host, tree):
         _last_found = str(vuln_details.findtext("LAST_FOUND"))
         _times_found = str(vuln_details.findtext("TIMES_FOUND"))
 
-        _temp["date"] = datetime.datetime.strptime(
-            vuln_details.findtext("LAST_FOUND"), "%Y-%m-%dT%H:%M:%SZ"
-        ).date()
+        _temp["date"] = datetime.datetime.strptime(vuln_details.findtext("LAST_FOUND"), "%Y-%m-%dT%H:%M:%SZ").date()
         # Vuln_status
         status = vuln_details.findtext("VULN_STATUS")
         if status == "Active" or status == "Re-Opened" or status == "New":
@@ -123,9 +119,7 @@ def parse_finding(host, tree):
             _temp["mitigated"] = True
             last_fixed = vuln_details.findtext("LAST_FIXED")
             if last_fixed is not None:
-                _temp["mitigation_date"] = datetime.datetime.strptime(
-                    last_fixed, "%Y-%m-%dT%H:%M:%SZ"
-                ).date()
+                _temp["mitigation_date"] = datetime.datetime.strptime(last_fixed, "%Y-%m-%dT%H:%M:%SZ").date()
             else:
                 _temp["mitigation_date"] = None
         # read cvss value if present
@@ -139,9 +133,7 @@ def parse_finding(host, tree):
                 # DefectDojo does not support cvssv2
                 _temp["CVSS_vector"] = None
 
-        search = ".//GLOSSARY/VULN_DETAILS_LIST/VULN_DETAILS[@id='{}']".format(
-            _gid
-        )
+        search = ".//GLOSSARY/VULN_DETAILS_LIST/VULN_DETAILS[@id='{}']".format(_gid)
         vuln_item = tree.find(search)
         if vuln_item is not None:
             finding = Finding()
@@ -190,10 +182,7 @@ def parse_finding(host, tree):
             # CVE and LINKS
             _temp_cve_details = vuln_item.iterfind("CVE_ID_LIST/CVE_ID")
             if _temp_cve_details:
-                _cl = {
-                    cve_detail.findtext("ID"): cve_detail.findtext("URL")
-                    for cve_detail in _temp_cve_details
-                }
+                _cl = {cve_detail.findtext("ID"): cve_detail.findtext("URL") for cve_detail in _temp_cve_details}
                 _temp["cve"] = "\n".join(list(_cl.keys()))
                 _temp["links"] = "\n".join(list(_cl.values()))
         # The CVE in Qualys report might not have a CVSS score, so findings are informational by default
@@ -260,8 +249,8 @@ def parse_finding(host, tree):
 
 
 def qualys_parser(qualys_xml_file):
-    parser = etree.XMLParser()
-    tree = etree.parse(qualys_xml_file, parser)
+    parser = etree.XMLParser(forbid_external=True)
+    tree = etree.parse(qualys_xml_file, parser, forbid_external=True)
     host_list = tree.find("HOST_LIST")
     finding_list = []
     if host_list is not None:

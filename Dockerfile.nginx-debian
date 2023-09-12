@@ -35,7 +35,6 @@ RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM build AS collectstatic
 
-USER root
 ENV \
   # This will point yarn to whatever version of node you decide to use
   # due to the use of nodejs instead of node name in some distros
@@ -93,11 +92,11 @@ ENV \
   DD_UWSGI_PASS="uwsgi_server" \
   DD_UWSGI_HOST="uwsgi" \
   DD_UWSGI_PORT="3031" \
-  GENERATE_TLS_CERTIFICATE="false" \
-  USE_TLS="false" \
+  GENERATE_TLS_CERTIFICATE="true" \
+  USE_TLS="true" \
   NGINX_METRICS_ENABLED="false" \
   METRICS_HTTP_AUTH_USER="" \
   METRICS_HTTP_AUTH_PASSWORD=""
 USER ${uid}
-EXPOSE 8080
+
 ENTRYPOINT ["/entrypoint-nginx.sh"]

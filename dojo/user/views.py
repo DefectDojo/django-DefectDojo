@@ -117,7 +117,7 @@ def login_view(request):
         settings.KEYCLOAK_OAUTH2_ENABLED,
         settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED,
         settings.SAML2_ENABLED
-    ]) == 1 and not ('force_login_form' in request.GET):
+    ]) == 1:
         if settings.GOOGLE_OAUTH_ENABLED:
             social_auth = 'google-oauth2'
         elif settings.OKTA_OAUTH_ENABLED:

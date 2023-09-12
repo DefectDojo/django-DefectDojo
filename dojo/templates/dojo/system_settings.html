@@ -46,7 +46,7 @@ Django forms are very rigid so without crispy-forms we're forced to use javascri
 {endcomment}
 {% block postscript %}
     {{ block.super }}
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         function updatenotificationsgroup(group) {
            if ($('#id_enable_' + group + "_notifications").is(':checked')) {
                 $("[id^='id_" + group + "']").closest('.form-group').show();

@@ -43,7 +43,10 @@ coverage.xml
 
 # Translations
 *.mo
-
+# Sonar
+.pre-commit-config.yaml
+.scannerwork/
+sonar-project.properties
 # Mr Developer
 .mr.developer.cfg
 .project
@@ -134,3 +137,4 @@ helm/defectdojo/charts
 docs/public
 docs/node_modules
 docs/resources
+

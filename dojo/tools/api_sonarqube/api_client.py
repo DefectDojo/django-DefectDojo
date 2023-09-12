@@ -230,7 +230,33 @@ class SonarQubeAPI:
 
         return hotspots
 
+    def get_hotspots(self, issue_key):
+        request_filter = {
+            "hotspots": issue_key,
+        }
+
+        response = self.session.get(
+            url=f"{self.sonar_api_url}/hotspots/search",
+            params=request_filter,
+            headers=self.default_headers,
+        )
+
+        if not response.ok:
+            raise Exception(
+                f"Unable to get hotspot {issue_key} "
+                f'due to {response.status_code} - {response.content.decode("utf-8")}'
+            )
+        hotspots = response.json().get("hotspots", [])
+        for hotspot in hotspots:
+            if hotspot["key"] == issue_key:
+                return hotspot
+        raise Exception(
+            f"""Expected Issue "{issue_key}", but it returned "
+            "{[x.get('key') for x in response.json().get('hotspots')]}."""
+        )
+
     def get_issue(self, issue_key):
+
         """
         Search for issues.
         At most one of the following parameters can be provided at the same time:
@@ -255,7 +281,6 @@ class SonarQubeAPI:
                 f"Unable to get issue {issue_key} "
                 f'due to {response.status_code} - {response.content.decode("utf-8")}'
             )
-
         issues = response.json().get("issues", [])
         for issue in issues:
             if issue["key"] == issue_key:

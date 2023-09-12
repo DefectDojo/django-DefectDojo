@@ -501,7 +501,7 @@
     {% block metrics %}
         <script src="{% static "dojo/js/metrics.js" %}"></script>
     {% endblock metrics %}
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="{{request.csp_nonce}}">
         $(function () {
             if (document.referrer.indexOf('simple_search') > 0) {
                 var terms = '';

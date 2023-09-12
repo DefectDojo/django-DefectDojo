@@ -495,7 +495,6 @@
                 document.getElementById("contents").innerHTML.replace(
                     /<h([\d])([^<]*)>([^<]+)<\/h([\d])>|<h([\d])([^>]*)>([^<]+)<sup>([^<]*)<\/sup>([^<]*)<\/h([\d])>/gi,
                     function (str, openLevel, id, titleText, closeLevel, openLevel_t, id_t, titleText_t, tags, junk, closeLevel_t) {
-                        console.log("str :: " + str)
                         if (openLevel != closeLevel || openLevel > 5) {
                             return str;
                         }

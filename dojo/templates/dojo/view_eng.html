@@ -1025,7 +1025,7 @@
     {{ block.super }}
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="{{request.csp_nonce}}">
         $(function () {
             $(document).on('keypress', null, 'e', function () {
                 window.location.assign('{% url 'edit_engagement' eng.id %}');
