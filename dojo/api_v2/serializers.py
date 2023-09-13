@@ -2957,6 +2957,9 @@ class NotificationsSerializer(serializers.ModelSerializer):
     sla_breach = MultipleChoiceField(
         choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
     )
+    sla_breach_combined = MultipleChoiceField(
+        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
+    )
     risk_acceptance_expiration = MultipleChoiceField(
         choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
     )
