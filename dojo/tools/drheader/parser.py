@@ -1,5 +1,4 @@
 import json
-
 from dojo.models import Endpoint, Finding
 
 
@@ -11,46 +10,74 @@ class DrHeaderParser(object):
         return scan_type  # no custom label for now
 
     def get_description_for_scan_types(self, scan_type):
-        return "Import result of DrHeader JSON output."
+        return "Import DrHeader JSON output."
 
-    def return_finding(self, test, finding, url=None):
-        title = "Header : " + finding["rule"]
-        if url is not None:
-            message = finding["message"] + "\nURL : " + url
-        else:
-            message = finding["message"]
-        if finding.get("value") is not None:
-            message += "\nObserved values: " + finding["value"]
-        if finding.get("expected") is not None:
-            message += "\nExpected values: "
-            for expect in finding["expected"]:
-                if expect == finding["expected"][-1]:
-                    message += expect
-                else:
-                    message += expect + "; "
-        severity = finding["severity"].title()
-        find = Finding(title=title,
-                    test=test,
-                    description=message,
-                    severity=severity,
-                    static_finding=False)
-        if url is not None:
-            find.unsaved_endpoints = [Endpoint.from_uri(url)]
-        return find
+    @staticmethod
+    def _create_finding(test, finding, url=None):
+        rule = finding.get("rule")
+        value = finding.get("value", "")
+        expected = finding.get("expected", [])
+        anomalies = finding.get("anomalies", [])
+        delimiter = finding.get("delimiter", ", ")
 
-    def get_findings(self, filename, test):
-        items = []
+        title = f"Header: {rule}"
+        description = [f"{finding['message']}"]
+
+        if url is not None:
+            description.append(f"**URL**: {url}")
+
+        if value:
+            description.append(f"**Observed**: {value}")
+
+        if expected:
+            description.append(f"**Expected**: {delimiter.join(expected)}")
+
+        if anomalies:
+            description.append(f"**Anomalies**: {delimiter.join(anomalies)}")
+
+        severity = finding.get("severity").title()
+
+        finding = Finding(
+            title=title,
+            test=test,
+            description="\n".join(description),
+            severity=severity,
+            active=True,
+            verified=True,
+            static_finding=False,
+        )
+
+        if url is not None:
+            finding.unsaved_endpoints = [Endpoint.from_uri(url)]
+
+        return finding
+
+    @staticmethod
+    def _parse_json(filename):
         try:
             data = json.load(filename)
-        except ValueError as err:
-            data = {}
-        if data != {} and data[0].get("url") is not None:
-            for item in data:
-                url = item["url"]
-                for finding in item["report"]:
-                    items.append(self.return_finding(test=test, finding=finding, url=url))
+        except ValueError:
+            data = []  # Workaround for DrHeader invalid json. Issue #8281
+        return data
+
+    def get_findings(self, filename, test):
+        data = self._parse_json(filename)
+        items = []
+
+        # Exit early if data is empty
+        if not data:
             return items
-        else:
-            for finding in data:
-                items.append(self.return_finding(test=test, finding=finding))
-            return items
+
+        if any("url" in item for item in data):  # Handle bulk reports
+
+            items = [
+                self._create_finding(test=test, finding=finding, url=item["url"])
+                for item in data
+                for finding in item.get("report", [])
+            ]
+        else:  # Handle single reports
+            items = [
+                self._create_finding(test=test, finding=finding) for finding in data
+            ]
+
+        return items
