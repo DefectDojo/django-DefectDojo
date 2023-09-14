@@ -135,6 +135,8 @@ def get_item(finding: dict, test):
         unique_id_from_tool=finding_id,
         mitigated=mitigated,
         is_mitigated=is_Mitigated,
+        static_finding=True,
+        dynamic_finding=False,
     )
     # Add the unsaved vulnerability ids
     result.unsaved_vulnerability_ids = unsaved_vulnerability_ids
