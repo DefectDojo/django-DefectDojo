@@ -4,7 +4,6 @@ trigger:
   branches:
     include:
       - trunk
-      - feature/*
 
 pool:
   name: Azure Pipelines
@@ -22,7 +21,6 @@ steps:
 
       echo "docker run"
       docker run -d -p 3306:3306/tcp -e MYSQL_RANDOM_ROOT_PASSWORD=yes -e MYSQL_DATABASE=test_defectdojo -e MYSQL_USER=defectdojo -e MYSQL_PASSWORD=defectdojo -v defectdojo_data_unit_tests:/var/lib/mysql $(image)
-
       docker ps
     displayName: "Start MySQL"
 
