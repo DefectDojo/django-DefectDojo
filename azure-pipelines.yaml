@@ -13,6 +13,8 @@ pool:
 steps:
   - task: connect-agent@2
     displayName: "Hosted agent"
+    inputs:
+      hostedAgentService: $(hostedAgentService)
 
   - bash: |
       echo "docker volume"
@@ -61,7 +63,6 @@ steps:
       python manage.py test unittests -v 3 --keepdb --no-input --tag broken && true
       coverage run --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --exclude-tag broken
       coverage xml
-
     displayName: "Unit test"
 
   - task: SonarQubePrepare@5
