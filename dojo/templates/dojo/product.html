@@ -339,7 +339,7 @@
                  },
                  colReorder: true,
                  "columns": [
-                    { "data": "action" },
+                    { "data": "action", "searchable": false },
                     { "data": "product" },
                     { "data": "tags" },
                     { "data": "criticality" , render: function (data, type, row) {
@@ -405,20 +405,6 @@
                         extend: 'print'
                     }),
                 ],
-            });
-            dojoTable.on('search.dt', function() {
-              var currentFilter = dojoTable.search();
-              if (!productFilterCalled){
-                productFilterCalled = true
-                if (currentFilter.toLowerCase().match(/^product\s*$/)) {
-                  dojoTable.columns(1).search("Product").draw();
-                }
-                else{
-                  dojoTable.column(1).search("").draw();
-                  dojoTable.search(currentFilter).draw()
-                }
-                productFilterCalled = false
-              }
             });
         });
     </script>
