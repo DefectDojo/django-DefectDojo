@@ -3,6 +3,7 @@ import base64
 import json
 import logging
 import mimetypes
+import contextlib
 from collections import OrderedDict, defaultdict
 from django.db import models
 from django.db.models.functions import Length
@@ -19,6 +20,7 @@ from django.utils import formats
 from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.views import View
 from itertools import chain
 from imagekit import ImageSpec
 from imagekit.processors import ResizeToFill
@@ -435,207 +437,287 @@ def prefetch_for_similar_findings(findings):
     return prefetched_findings
 
 
-@user_is_authorized(Finding, Permissions.Finding_View, "fid")
-def view_finding(request, fid):
-    finding_qs = prefetch_for_findings(Finding.objects.all(), exclude_untouched=False)
-    finding = get_object_or_404(finding_qs, id=fid)
-    findings = (
-        Finding.objects.filter(test=finding.test)
-        .order_by("numerical_severity")
-        .values_list("id", flat=True)
-    )
-    logger.debug(findings)
-    try:
-        prev_finding_id = findings[(list(findings).index(finding.id)) - 1]
-    except (AssertionError, ValueError):
-        prev_finding_id = finding.id
-    try:
-        next_finding_id = findings[(list(findings).index(finding.id)) + 1]
-    except (IndexError, ValueError):
+class ViewFinding(View):
+    def get_finding(self, finding_id):
+        finding_qs = prefetch_for_findings(Finding.objects.all(), exclude_untouched=False)
+        finding = get_object_or_404(finding_qs, id=finding_id)
+        return finding
+
+    def get_dojo_user(self, request):
+        user = request.user
+        dojo_user = get_object_or_404(Dojo_User, id=user.id)
+
+        return dojo_user
+
+    def get_previous_and_next_findings(self, finding):
+        # Get the whole list of findings in the current test
+        findings = (
+            Finding.objects.filter(test=finding.test)
+            .order_by("numerical_severity")
+            .values_list("id", flat=True)
+        )
+        logger.debug(findings)
+        # Set some reasonable defaults
         next_finding_id = finding.id
+        prev_finding_id = finding.id
+        last_pos = (len(findings)) - 1
+        # get the index of the current finding
+        current_finding_index = list(findings).index(finding.id)
+        # Try to get the next and previous IDs
+        with contextlib.suppress(IndexError, ValueError):
+            prev_finding_id = findings[current_finding_index - 1]
+            next_finding_id = findings[current_finding_index + 1]
 
-    cred_finding = (
-        Cred_Mapping.objects.filter(finding=finding.id)
-        .select_related("cred_id")
-        .order_by("cred_id")
-    )
-    creds = (
-        Cred_Mapping.objects.filter(test=finding.test.id)
-        .select_related("cred_id")
-        .order_by("cred_id")
-    )
-    cred_engagement = (
-        Cred_Mapping.objects.filter(engagement=finding.test.engagement.id)
-        .select_related("cred_id")
-        .order_by("cred_id")
-    )
-    user = request.user
-    cwe_template = None
-    try:
-        cwe_template = Finding_Template.objects.filter(cwe=finding.cwe).first()
-    except Finding_Template.DoesNotExist:
-        pass
+        return {
+            "prev_finding_id": prev_finding_id,
+            "next_finding_id": next_finding_id,
+            "findings_list": findings,
+            "findings_list_lastElement": findings[last_pos],
+        }
 
-    dojo_user = get_object_or_404(Dojo_User, id=user.id)
-
-    notes = finding.notes.all()
-    files = finding.files.all()
-    note_type_activation = Note_Type.objects.filter(is_active=True).count()
-    if note_type_activation:
-        available_note_types = find_available_notetypes(notes)
-    if request.method == "POST":
-        user_has_permission_or_403(request.user, finding, Permissions.Note_Add)
-        if note_type_activation:
-            form = TypedNoteForm(
-                request.POST, available_note_types=available_note_types
-            )
-        else:
-            form = NoteForm(request.POST)
-        if form.is_valid():
-            new_note = form.save(commit=False)
-            new_note.author = request.user
-            new_note.date = timezone.now()
-            new_note.save()
-            history = NoteHistory(
-                data=new_note.entry, time=new_note.date, current_editor=new_note.author
-            )
-            history.save()
-            new_note.history.add(history)
-            finding.notes.add(new_note)
-            finding.last_reviewed = new_note.date
-            finding.last_reviewed_by = user
-            finding.save()
-
-            if finding.has_jira_issue:
-                jira_helper.add_comment(finding, new_note)
-            elif finding.has_jira_group_issue:
-                jira_helper.add_comment(finding.finding_group, new_note)
-
-            if note_type_activation:
-                form = TypedNoteForm(available_note_types=available_note_types)
-            else:
-                form = NoteForm()
-            url = request.build_absolute_uri(
-                reverse("view_finding", args=(finding.id,))
-            )
-            title = "Finding: " + finding.title
-            process_notifications(request, new_note, url, title)
-            messages.add_message(
-                request, messages.SUCCESS, "Note saved.", extra_tags="alert-success"
-            )
-            return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
-    else:
-        if note_type_activation:
-            form = TypedNoteForm(available_note_types=available_note_types)
-        else:
-            form = NoteForm()
-
-    reqres = None
-    burp_request = None
-    burp_response = None
-    try:
-        reqres = BurpRawRequestResponse.objects.filter(finding=finding).first()
-        if reqres is not None:
-            burp_request = base64.b64decode(reqres.burpRequestBase64)
-            burp_response = base64.b64decode(reqres.burpResponseBase64)
-    except Exception as e:
-        logger.debug(f"unespect error: {e}")
-
-    # add related actions for non-similar and non-duplicate cluster members
-    finding.related_actions = calculate_possible_related_actions_for_similar_finding(
-        request, finding, finding
-    )
-    if finding.duplicate_finding:
-        finding.duplicate_finding.related_actions = (
-            calculate_possible_related_actions_for_similar_finding(
-                request, finding, finding.duplicate_finding
-            )
+    def get_credential_objects(self, finding):
+        creds = (
+            Cred_Mapping.objects.filter(test=finding.test.id)
+            .select_related("cred_id")
+            .order_by("cred_id")
+        )
+        cred_engagement = (
+            Cred_Mapping.objects.filter(engagement=finding.test.engagement.id)
+            .select_related("cred_id")
+            .order_by("cred_id")
+        )
+        cred_finding = (
+            Cred_Mapping.objects.filter(finding=finding.id)
+            .select_related("cred_id")
+            .order_by("cred_id")
         )
 
-    similar_findings_filter = SimilarFindingFilter(
-        request.GET,
-        queryset=get_authorized_findings(Permissions.Finding_View),
-        user=request.user,
-        finding=finding,
-    )
-    logger.debug("similar query: %s", similar_findings_filter.qs.query)
-
-    similar_findings = get_page_items(
-        request,
-        similar_findings_filter.qs,
-        settings.SIMILAR_FINDINGS_MAX_RESULTS,
-        prefix="similar",
-    )
-
-    similar_findings.object_list = prefetch_for_similar_findings(
-        similar_findings.object_list
-    )
-
-    for similar_finding in similar_findings:
-        similar_finding.related_actions = (
-            calculate_possible_related_actions_for_similar_finding(
-                request, finding, similar_finding
-            )
-        )
-
-    test_imports = Test_Import.objects.filter(findings_affected=finding)
-    test_import_filter = TestImportFilter(request.GET, test_imports)
-
-    test_import_finding_actions = finding.test_import_finding_action_set
-    test_import_finding_actions_count = test_import_finding_actions.all().count()
-    test_import_finding_actions = test_import_finding_actions.filter(test_import__in=test_import_filter.qs)
-    test_import_finding_action_filter = TestImportFindingActionFilter(request.GET, test_import_finding_actions)
-
-    paged_test_import_finding_actions = get_page_items_and_count(request, test_import_finding_action_filter.qs, 5, prefix='test_import_finding_actions')
-    paged_test_import_finding_actions.object_list = paged_test_import_finding_actions.object_list.prefetch_related('test_import')
-
-    latest_test_import_finding_action = finding.test_import_finding_action_set.order_by('-created').first
-
-    product_tab = Product_Tab(
-        finding.test.engagement.product, title="View Finding", tab="findings"
-    )
-
-    (
-        can_be_pushed_to_jira,
-        can_be_pushed_to_jira_error,
-        error_code,
-    ) = jira_helper.can_be_pushed_to_jira(finding)
-
-    last_pos = (len(findings)) - 1
-    return render(
-        request,
-        "dojo/view_finding.html",
-        {
-            "product_tab": product_tab,
-            "finding": finding,
-            "burp_request": burp_request,
+        return {
             "cred_finding": cred_finding,
             "creds": creds,
             "cred_engagement": cred_engagement,
-            "burp_response": burp_response,
-            "dojo_user": dojo_user,
-            "user": user,
+        }
+
+    def get_cwe_template(self, finding):
+        cwe_template = None
+        with contextlib.suppress(Finding_Template.DoesNotExist):
+            cwe_template = Finding_Template.objects.filter(cwe=finding.cwe).first()
+        
+        return {
+            "cwe_template": cwe_template
+        }
+
+    def get_external_objects(self, finding):
+        notes = finding.notes.all()
+        files = finding.files.all()
+        note_type_activation = Note_Type.objects.filter(is_active=True).count()
+        available_note_types = None
+        if note_type_activation:
+            available_note_types = find_available_notetypes(notes)
+
+        return {
             "notes": notes,
             "files": files,
-            "form": form,
-            "cwe_template": cwe_template,
-            "found_by": finding.found_by.all().distinct(),
-            "findings_list": findings,
-            "findings_list_lastElement": findings[last_pos],
-            "prev_finding_id": prev_finding_id,
-            "next_finding_id": next_finding_id,
-            "duplicate_cluster": duplicate_cluster(request, finding),
-            "similar_findings": similar_findings,
-            "similar_findings_filter": similar_findings_filter,
-            "can_be_pushed_to_jira": can_be_pushed_to_jira,
-            "can_be_pushed_to_jira_error": can_be_pushed_to_jira_error,
+            "note_type_activation": note_type_activation,
+            "available_note_types": available_note_types,
+        }
+
+    def get_request_response(self, finding):
+        reqres = None
+        burp_request = None
+        burp_response = None
+        try:
+            reqres = BurpRawRequestResponse.objects.filter(finding=finding).first()
+            if reqres is not None:
+                burp_request = base64.b64decode(reqres.burpRequestBase64)
+                burp_response = base64.b64decode(reqres.burpResponseBase64)
+        except Exception as e:
+            logger.debug(f"unsuspected error: {e}")
+
+        return {
+            "burp_request": burp_request,
+            "burp_response": burp_response,
+        }
+
+    def get_test_import_data(self, request, finding):
+        test_imports = Test_Import.objects.filter(findings_affected=finding)
+        test_import_filter = TestImportFilter(request.GET, test_imports)
+
+        test_import_finding_actions = finding.test_import_finding_action_set
+        test_import_finding_actions_count = test_import_finding_actions.all().count()
+        test_import_finding_actions = test_import_finding_actions.filter(test_import__in=test_import_filter.qs)
+        test_import_finding_action_filter = TestImportFindingActionFilter(request.GET, test_import_finding_actions)
+
+        paged_test_import_finding_actions = get_page_items_and_count(request, test_import_finding_action_filter.qs, 5, prefix='test_import_finding_actions')
+        paged_test_import_finding_actions.object_list = paged_test_import_finding_actions.object_list.prefetch_related('test_import')
+
+        latest_test_import_finding_action = finding.test_import_finding_action_set.order_by('-created').first
+
+        return {
             "test_import_filter": test_import_filter,
             "test_import_finding_action_filter": test_import_finding_action_filter,
             "paged_test_import_finding_actions": paged_test_import_finding_actions,
             "latest_test_import_finding_action": latest_test_import_finding_action,
             "test_import_finding_actions_count": test_import_finding_actions_count,
-        },
-    )
+        }
+
+    def get_similar_findings(self, request, finding):
+        # add related actions for non-similar and non-duplicate cluster members
+        finding.related_actions = calculate_possible_related_actions_for_similar_finding(
+            request, finding, finding
+        )
+        if finding.duplicate_finding:
+            finding.duplicate_finding.related_actions = (
+                calculate_possible_related_actions_for_similar_finding(
+                    request, finding, finding.duplicate_finding
+                )
+            )
+        similar_findings_filter = SimilarFindingFilter(
+            request.GET,
+            queryset=get_authorized_findings(Permissions.Finding_View),
+            user=request.user,
+            finding=finding,
+        )
+        logger.debug("similar query: %s", similar_findings_filter.qs.query)
+        similar_findings = get_page_items(
+            request,
+            similar_findings_filter.qs,
+            settings.SIMILAR_FINDINGS_MAX_RESULTS,
+            prefix="similar",
+        )
+        similar_findings.object_list = prefetch_for_similar_findings(
+            similar_findings.object_list
+        )
+        for similar_finding in similar_findings:
+            similar_finding.related_actions = (
+                calculate_possible_related_actions_for_similar_finding(
+                    request, finding, similar_finding
+                )
+            )
+        
+        return {
+            "duplicate_cluster": duplicate_cluster(request, finding),
+            "similar_findings": similar_findings,
+            "similar_findings_filter": similar_findings_filter,
+        }
+
+    def get_jira_data(self, finding):
+        (
+            can_be_pushed_to_jira,
+            can_be_pushed_to_jira_error,
+            error_code,
+        ) = jira_helper.can_be_pushed_to_jira(finding)
+        # Check the error code
+        if error_code:
+            logger.error(error_code)
+
+        return {
+            "can_be_pushed_to_jira": can_be_pushed_to_jira,
+            "can_be_pushed_to_jira_error": can_be_pushed_to_jira_error,
+        }
+
+    def process_form(self, request, form, finding, user):
+        # Create the note object
+        new_note = form.save(commit=False)
+        new_note.author = request.user
+        new_note.date = timezone.now()
+        new_note.save()
+        # Add an entry to the note history
+        history = NoteHistory(
+            data=new_note.entry, time=new_note.date, current_editor=new_note.author
+        )
+        history.save()
+        new_note.history.add(history)
+        # Associate the note with the finding
+        finding.notes.add(new_note)
+        finding.last_reviewed = new_note.date
+        finding.last_reviewed_by = user
+        finding.save()
+        # Determine if the note should be sent to jira
+        if finding.has_jira_issue:
+            jira_helper.add_comment(finding, new_note)
+        elif finding.has_jira_group_issue:
+            jira_helper.add_comment(finding.finding_group, new_note)
+        # Send the notification of the note being added
+        url = request.build_absolute_uri(
+            reverse("view_finding", args=(finding.id,))
+        )
+        title = "Finding: " + finding.title
+        process_notifications(request, new_note, url, title)
+        # Add a message to the request
+        messages.add_message(
+            request, messages.SUCCESS, "Note saved.", extra_tags="alert-success"
+        )
+        # Redirect back to the finding page
+        return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
+
+    @user_is_authorized(Finding, Permissions.Finding_View, "finding_id")
+    def get(self, request, finding_id):
+        # Get the initial objects
+        finding = self.get_finding(finding_id)
+        user = self.get_dojo_user(request)
+        # Set up the initial context
+        context = {
+            "finding": finding,
+            "dojo_user": user,
+            "user": request.user,
+            "product_tab": Product_Tab(
+                finding.test.engagement.product, title="View Finding", tab="findings"
+            )
+        }
+        # Add in the other extras
+        context |= self.get_previous_and_next_findings(finding)
+        context |= self.get_credential_objects(finding)
+        context |= self.get_cwe_template(finding)
+        context |= self.get_external_objects(finding)
+        # Determine how the form should be rendered
+        if context.get("note_type_activation", 0):
+            context["form"] = TypedNoteForm(available_note_types=context.get("available_note_types"))
+        else:
+            context["form"] = NoteForm()
+        # Add in more of the other extras
+        context |= self.get_request_response(finding)
+        context |= self.get_similar_findings(request, finding)
+        context |= self.get_test_import_data(request, finding)
+        context |= self.get_jira_data(finding)
+        # Render the form
+        return render(request, "dojo/view_finding.html", context)
+
+    @user_is_authorized(Finding, Permissions.Finding_View, "finding_id")
+    def post(self, request, finding_id):
+        # Get the initial objects
+        finding = self.get_finding(finding_id)
+        user = self.get_dojo_user(request)
+        # Set up the initial context
+        context = {
+            "finding": finding,
+            "dojo_user": user,
+            "user": request.user,
+            "product_tab": Product_Tab(
+                finding.test.engagement.product, title="View Finding", tab="findings"
+            )
+        }
+        # Add in the other extras
+        context |= self.get_external_objects(finding)
+        # Quick perms check to determine if the user has access to edit the finding
+        user_has_permission_or_403(request.user, finding, Permissions.Note_Add)
+        # Determine how the form should be rendered
+        if context.get("note_type_activation", 0):
+            context["form"] = TypedNoteForm(
+                request.POST, available_note_types=context.get("available_note_types")
+            )
+        else:
+            context["form"] = NoteForm(request.POST)
+        # Determine the validity of the form
+        if context["form"].is_valid():
+            self.process_form(context["form"], finding, user)
+        # Add in more of the other extras
+        context |= self.get_request_response(finding)
+        context |= self.get_similar_findings(request, finding)
+        context |= self.get_test_import_data(request, finding)
+        context |= self.get_jira_data(finding)
+        # Render the form
+        return render(request, "dojo/view_finding.html", context)
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
