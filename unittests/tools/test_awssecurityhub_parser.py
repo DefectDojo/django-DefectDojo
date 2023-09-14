@@ -20,6 +20,7 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertEqual("Informational", finding.severity)
             self.assertTrue(finding.is_mitigated)
             self.assertFalse(finding.active)
+            self.assertEqual("https://docs.aws.amazon.com/console/securityhub/IAM.5/remediation", finding.references)
 
     def test_one_finding_active(self):
         with open(get_unit_tests_path() + sample_path("config_one_finding_active.json")) as test_file:
@@ -59,6 +60,9 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertEqual(5, len(findings))
             finding = findings[0]
             self.assertIn("CVE-2022-3643", finding.title)
+            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual("CVE-2022-3643", finding.unsaved_vulnerability_ids[0])
+            self.assertEqual("- Update kernel-4.14.301\n\t- yum update kernel\n", finding.mitigation)
 
     def test_inspector_ec2_with_no_vulnerabilities(self):
         with open(get_unit_tests_path() + sample_path("inspector_ec2_cve_no_vulnerabilities.json")) as test_file:
@@ -76,3 +80,5 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertFalse(finding.is_mitigated)
             self.assertTrue(finding.active)
             self.assertIn("GHSA-p98r-538v-jgw5", finding.title)
+            self.assertSetEqual({"CVE-2023-34256", "GHSA-p98r-538v-jgw5"}, set(finding.unsaved_vulnerability_ids))
+            self.assertEqual("https://github.com/bottlerocket-os/bottlerocket/security/advisories/GHSA-p98r-538v-jgw5", finding.references)

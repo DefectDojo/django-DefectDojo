@@ -42,6 +42,7 @@ def get_item(finding: dict, test):
     title = finding.get("Title", "")
     severity = finding.get("Severity", {}).get("Label", "INFORMATIONAL").title()
     mitigation = ""
+    references = []
     unsaved_vulnerability_ids = []
     if aws_scanner_type == "Inspector":
         description = f"This is an Inspector Finding\n{finding.get('Description', '')}"
@@ -50,12 +51,18 @@ def get_item(finding: dict, test):
             # Save the CVE if it is present
             if cve := vulnerability.get("Id"):
                 unsaved_vulnerability_ids.append(cve)
+            for alias in vulnerability.get("RelatedVulnerabilities", []):
+                if alias != cve:
+                    unsaved_vulnerability_ids.append(alias)
             # Add information about the vulnerable packages to the description and mitigation
             vulnerable_packages = vulnerability.get("VulnerablePackages", [])
             for package in vulnerable_packages:
                 mitigation += f"- Update {package.get('Name', '')}-{package.get('Version', '')}\n"
                 if remediation := package.get("Remediation"):
                     mitigation += f"\t- {remediation}\n"
+            if vendor := vulnerability.get("Vendor"):
+                if vendor_url := vendor.get("Url"):
+                    references.append(vendor_url)
 
         if finding.get("ProductFields", {}).get("aws/inspector/FindingStatus", "ACTIVE") == "ACTIVE":
             mitigated = None
@@ -93,7 +100,8 @@ def get_item(finding: dict, test):
 
     resources = finding.get("Resources", "")
     resource_id = resources[0]["Id"].split(":")[-1]
-    references = finding.get("Remediation", {}).get("Recommendation", {}).get("Url")
+    if remediation_rec_url := finding.get("Remediation", {}).get("Recommendation", {}).get("Url"):
+        references.append(remediation_rec_url)
     false_p = False
 
     finding = Finding(
@@ -101,7 +109,7 @@ def get_item(finding: dict, test):
         test=test,
         description=description,
         mitigation=mitigation,
-        references=references,
+        references="\n".join(references),
         severity=severity,
         impact=f"Resource: {resource_id}",
         active=active,
