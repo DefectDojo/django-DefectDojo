@@ -25,6 +25,7 @@ class VeracodeJSONParser(object):
     """
 
     severity_mapping = {
+        0: "Info",
         1: "Info",
         2: "Low",
         3: "Medium",
@@ -89,7 +90,7 @@ class VeracodeJSONParser(object):
 
     def create_finding_from_details(self, finding_details, scan_type, policy_violated) -> Finding:
         # Fetch the common attributes that should be in every scan type
-        severity = self.severity_mapping.get(finding_details.get("severity", 1))
+        severity = self.severity_mapping.get(finding_details.get("severity", 1), 1)
         # Set up the finding with just severity for now
         finding = Finding(
             title=f"{scan_type} Finding",
