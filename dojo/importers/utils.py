@@ -6,6 +6,7 @@ from dojo.decorators import dojo_async_task
 from dojo.celery import app
 from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.utils import max_safe
+from django.urls import reverse
 from dojo.models import (
     IMPORT_CLOSED_FINDING,
     IMPORT_CREATED_FINDING,

@@ -859,7 +859,7 @@
                     <thead>
                         <tr>
                             {% if test|has_object_permission:"Test_Edit" or test|has_object_permission:"Test_Delete" %}
-                                <th class="hidden-sm centered" title="Select all visible findings.">
+                                <th class="centered" title="Select all visible findings.">
                                     <div class="dropdown">
                                         <button class="btn btn-primary dropdown-toggle"
                                                 type="button"
@@ -964,7 +964,7 @@
                         {% for finding in findings %}
                             <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
                                 {% if test|has_object_permission:"Test_Edit" or test|has_object_permission:"Test_Delete" %}
-                                    <td class="hidden-sm centered">
+                                    <td class="centered">
                                         <form action="#">
                                             <input type="checkbox"
                                                 name="select_{{ finding.id }}"

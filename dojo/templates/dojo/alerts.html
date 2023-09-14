@@ -17,7 +17,7 @@
                             <th>{% trans "Title" %}</th>
                             <th>{% trans "Description" %}</th>
                             <th>{% trans "Timeframe" %}</th>
-                            <th class="hidden-sm centered" title="{% trans "Select all visible alerts" %}">
+                            <th class="centered" title="{% trans "Select all visible alerts" %}">
                                     <input type="checkbox" name="select_all" id="select_all"/>
                             </th>
                         </tr>
@@ -30,7 +30,7 @@
                                 <td>{%if alert.url %}<a href="{{ alert.url }}">{% endif %}{{ alert.title }}{% if alert.url %}</a>{% endif %}</td>
                                 <td>{{ alert.description|linebreaks }}</td>
                                 <td>{{ alert.created }}</td>
-                                <td class="hidden-sm centered">
+                                <td class="centered">
                                         <input type="checkbox" name="alert_select" value="{{ alert.id }}"
                                                 class="select_one {{ alert.source }}"/>
                                 </td>

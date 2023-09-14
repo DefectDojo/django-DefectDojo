@@ -16,7 +16,7 @@ from django.db import DEFAULT_DB_ALIAS, connection
 from django.db.models import Sum, Count, Q, Max, Prefetch, F, OuterRef, Subquery
 from django.db.models.query import QuerySet
 from django.core.exceptions import ValidationError, PermissionDenied
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
@@ -39,7 +39,7 @@ from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, T
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, \
     add_breadcrumb, async_delete, \
     get_system_setting, get_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs, \
-    get_enabled_notifications_list, get_zero_severity_level, sum_by_severity_level
+    get_enabled_notifications_list, get_zero_severity_level, sum_by_severity_level, get_open_findings_burndown
 
 from dojo.notifications.helper import create_notification
 from dojo.components.sql_group_concat import Sql_GroupConcat
@@ -671,6 +671,22 @@ def view_product_metrics(request, pid):
         'medium_weekly': medium_weekly,
         'test_data': test_data,
         'user': request.user})
+
+
+@user_is_authorized(Product, Permissions.Product_View, 'pid')
+def async_burndown_metrics(request, pid):
+    prod = get_object_or_404(Product, id=pid)
+    open_findings_burndown = get_open_findings_burndown(prod)
+
+    return JsonResponse({
+        'critical': open_findings_burndown.get('Critical', []),
+        'high': open_findings_burndown.get('High', []),
+        'medium': open_findings_burndown.get('Medium', []),
+        'low': open_findings_burndown.get('Low', []),
+        'info': open_findings_burndown.get('Info', []),
+        'max': open_findings_burndown.get('y_max', 0),
+        'min': open_findings_burndown.get('y_min', 0)
+    })
 
 
 @user_is_authorized(Product, Permissions.Engagement_View, 'pid')

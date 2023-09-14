@@ -264,7 +264,7 @@
                         <thead>
                             <tr>
                                 {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
-                                    <th class="hidden-sm centered" title="Select all visible findings.">
+                                    <th class="centered" title="Select all visible findings.">
                                         <div class="dropdown">
                                             <button class="btn btn-primary dropdown-toggle"
                                                     type="button"
@@ -383,7 +383,7 @@
                             {% for finding in findings %}
                                 <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
                                     {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
-                                        <td class="hidden-sm centered">
+                                        <td class="centered">
                                             <form action="#">
                                                 <input type="checkbox" name="select_{{ finding.id }}" id="{{ finding.id }}" class="select_one {{ finding.severity }}" aria-label="select-finding"/>
                                             </form>
@@ -720,6 +720,12 @@
         };
 
         $(document).ready(function() {
+            $("#severity").on('change', function(e){
+                setTimeout(() => {
+                    $("#bulk_edit_menu").children().first().trigger('click')
+                }, 0);
+            })
+
             date =  new Date().toISOString().slice(0, 10);
             var fileDated = 'Findings_List_' + date;
             var columns = [
