@@ -4,7 +4,6 @@ trigger:
   branches:
     include:
       - trunk
-      - feature/*
 
 pool:
   name: Azure Pipelines
