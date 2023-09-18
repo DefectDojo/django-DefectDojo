@@ -72,6 +72,10 @@ godojo installations
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
 
+## Upgrading to DefectDojo Version 2.26.x.
+
+There are no special instruction for upgrading to 2.26.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.26.0) for the contents of the release.
+
 ## Upgrading to DefectDojo Version 2.25.x.
 
 There are no special instruction for upgrading to 2.25.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.25.0) for the contents of the release.
