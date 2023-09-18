@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.brakeman.parser import BrakemanParser
 from dojo.models import Test
 
 
-class TestBrakemanParser(DojoTestCase):
+class TestBrakemanParser(DojoParserTestCase):
 
     def test_parse_file_no_finding(self):
         testfile = open("unittests/scans/brakeman/no_finding.json")

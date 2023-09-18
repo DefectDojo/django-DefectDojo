@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.ort.parser import OrtParser
 from dojo.models import Test
 
 
-class TestOrtParser(DojoTestCase):
+class TestOrtParser(DojoParserTestCase):
     def test_parse_without_file_has_no_finding(self):
         parser = OrtParser()
         findings = parser.get_findings(None, Test())

@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.yarn_audit.parser import YarnAuditParser
 from dojo.models import Engagement, Product, Test
 
 
-class TestYarnAuditParser(DojoTestCase):
+class TestYarnAuditParser(DojoParserTestCase):
     def get_test(self):
         test = Test()
         test.engagement = Engagement()

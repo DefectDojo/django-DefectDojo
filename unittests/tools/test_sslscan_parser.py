@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.sslscan.parser import SslscanParser
 from dojo.models import Test
 
 
-class TestSslscanParser(DojoTestCase):
+class TestSslscanParser(DojoParserTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/sslscan/sslscan_no_vuln.xml")

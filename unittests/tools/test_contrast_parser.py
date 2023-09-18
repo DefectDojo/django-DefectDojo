@@ -1,12 +1,12 @@
 import datetime
 
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 
 from dojo.models import Test, Engagement, Product
 from dojo.tools.contrast.parser import ContrastParser
 
 
-class TestContrastParser(DojoTestCase):
+class TestContrastParser(DojoParserTestCase):
 
     def test_example_report(self):
         test = Test()

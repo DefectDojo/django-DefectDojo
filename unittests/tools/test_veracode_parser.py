@@ -1,11 +1,11 @@
 import datetime
 
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.veracode.parser import VeracodeParser
 from dojo.models import Test, Product_Type, Product, Engagement, Endpoint
 
 
-class TestVeracodeScannerParser(DojoTestCase):
+class TestVeracodeScannerParser(DojoParserTestCase):
 
     def setUp(self):
         product_type, _ = Product_Type.objects.get_or_create(name="Fake unit tests")

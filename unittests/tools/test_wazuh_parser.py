@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.wazuh.parser import WazuhParser
 from dojo.models import Test
 
 
-class TestWazuhParser(DojoTestCase):
+class TestWazuhParser(DojoParserTestCase):
 
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/wazuh/no_findings.json")

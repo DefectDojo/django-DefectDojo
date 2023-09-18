@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.kics.parser import KICSParser
 from dojo.models import Test
 
 
-class TestKICSParser(DojoTestCase):
+class TestKICSParser(DojoParserTestCase):
 
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/kics/no_findings.json")

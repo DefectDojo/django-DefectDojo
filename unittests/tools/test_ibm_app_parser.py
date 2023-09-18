@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test
 from dojo.tools.ibm_app.parser import IbmAppParser
 
 
-class TestIbmAppParser(DojoTestCase):
+class TestIbmAppParser(DojoParserTestCase):
 
     def test_parse_file(self):
         testfile = open("unittests/scans/ibm_app/testfire.xml")

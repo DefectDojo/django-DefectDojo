@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.solar_appscreener.parser import SolarAppscreenerParser
 from dojo.models import Test
 
 
-class TestSolarAppscreenerParser(DojoTestCase):
+class TestSolarAppscreenerParser(DojoParserTestCase):
 
     def test_solar_appscreener_parser_with_no_vuln_has_no_findings(self):
         testfile = open(

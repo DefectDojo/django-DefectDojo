@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.pmd.parser import PmdParser
 from dojo.models import Test
 
 
-class TestPMDParser(DojoTestCase):
+class TestPMDParser(DojoParserTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/pmd/pmd_no_vuln.csv")

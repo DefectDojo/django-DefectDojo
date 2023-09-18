@@ -1,10 +1,10 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.cred_scan.parser import CredScanParser
 from dojo.models import Test
 import datetime
 
 
-class TestCredScanParser(DojoTestCase):
+class TestCredScanParser(DojoParserTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/cred_scan/cred_scan_no_vuln.csv")

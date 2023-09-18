@@ -1,10 +1,10 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 
 from dojo.models import Finding, Test
 from dojo.tools.anchore_grype.parser import AnchoreGrypeParser
 
 
-class TestAnchoreGrypeParser(DojoTestCase):
+class TestAnchoreGrypeParser(DojoParserTestCase):
 
     def test_parser_has_no_findings(self):
         testfile = open("unittests/scans/anchore_grype/no_vuln.json")

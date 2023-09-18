@@ -1,12 +1,12 @@
 import datetime
 from os import path
 
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test
 from dojo.tools.horusec.parser import HorusecParser
 
 
-class TestHorusecParser(DojoTestCase):
+class TestHorusecParser(DojoParserTestCase):
     def test_get_findings(self):
         """Version 2.6.3 with big project in Python"""
         with open(path.join(path.dirname(__file__), "../scans/horusec/version_2.6.3.json")) as testfile:

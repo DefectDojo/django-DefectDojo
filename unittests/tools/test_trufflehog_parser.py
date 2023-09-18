@@ -1,6 +1,6 @@
 import os.path
 
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.trufflehog.parser import TruffleHogParser
 from dojo.models import Test
 
@@ -9,7 +9,7 @@ def sample_path(file_name):
     return os.path.join(get_unit_tests_path() + "/scans/trufflehog", file_name)
 
 
-class TestTruffleHogParser(DojoTestCase):
+class TestTruffleHogParser(DojoParserTestCase):
 
     def test_many_vulns_v2(self):
         test_file = open(sample_path("v2_many_vulns.json"))

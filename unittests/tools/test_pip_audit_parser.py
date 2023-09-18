@@ -1,10 +1,10 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 
 from dojo.models import Test
 from dojo.tools.pip_audit.parser import PipAuditParser
 
 
-class TestPipAuditParser(DojoTestCase):
+class TestPipAuditParser(DojoParserTestCase):
 
     def test_parser_empty(self):
         testfile = open("unittests/scans/pip_audit/empty.json")

@@ -1,10 +1,10 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.models import Test
 from dojo.tools.burp_api.parser import BurpApiParser
 from dojo.tools.burp_api.parser import convert_severity, convert_confidence
 
 
-class TestParser(DojoTestCase):
+class TestParser(DojoParserTestCase):
 
     def test_example_report(self):
         testfile = get_unit_tests_path() + "/scans/burp_api/example.json"

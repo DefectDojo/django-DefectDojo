@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.h1.parser import H1Parser
 from dojo.models import Test
 
 
-class TestHackerOneParser(DojoTestCase):
+class TestHackerOneParser(DojoParserTestCase):
 
     def test_parse_file_with_no_vuln_has_no_finding(self):
         testfile = open("unittests/scans/h1/data_empty.json")

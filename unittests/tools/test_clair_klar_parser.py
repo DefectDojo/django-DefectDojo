@@ -1,4 +1,4 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.clair_klar.parser import ClairKlarParser
 
 
@@ -11,7 +11,7 @@ class TestFile(object):
         self.content = content
 
 
-class TestClairKlarParser(DojoTestCase):
+class TestClairKlarParser(DojoParserTestCase):
 
     def test_parse_no_content_no_findings(self):
         my_file_handle = open("unittests/scans/clair_klar/empty.json")

@@ -1,10 +1,10 @@
 from os import path
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test
 from dojo.tools.twistlock.parser import TwistlockParser
 
 
-class TestTwistlockParser(DojoTestCase):
+class TestTwistlockParser(DojoParserTestCase):
     def test_parse_file_with_no_vuln(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/twistlock/no_vuln.json"))
         parser = TwistlockParser()

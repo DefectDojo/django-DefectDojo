@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.pwn_sast.parser import PWNSASTParser
 from dojo.models import Test
 
 
-class TestPWNSASTParser(DojoTestCase):
+class TestPWNSASTParser(DojoParserTestCase):
 
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/pwn_sast/no_findings.json")

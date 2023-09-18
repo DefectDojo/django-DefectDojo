@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.outpost24.parser import Outpost24Parser
 from dojo.models import Test
 
 
-class TestOutpost24Parser(DojoTestCase):
+class TestOutpost24Parser(DojoParserTestCase):
     def assert_file_has_n_items(self, filename, item_count):
         with open(filename) as file:
             parser = Outpost24Parser()

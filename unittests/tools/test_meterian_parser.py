@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test
 from dojo.tools.meterian.parser import MeterianParser
 
 
-class TestMeterianParser(DojoTestCase):
+class TestMeterianParser(DojoParserTestCase):
 
     def test_meterianParser_invalid_security_report_raise_ValueError_exception(self):
         with self.assertRaises(ValueError):

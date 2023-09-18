@@ -1,11 +1,11 @@
 from os import path
 
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test
 from dojo.tools.burp.parser import BurpParser
 
 
-class TestBurpParser(DojoTestCase):
+class TestBurpParser(DojoParserTestCase):
 
     def test_burp_with_one_vuln_has_one_finding(self):
         with open(path.join(path.dirname(__file__), "../scans/burp/one_finding.xml")) as test_file:

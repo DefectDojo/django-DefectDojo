@@ -5,7 +5,7 @@ from dateutil.tz import tzoffset, tzlocal
 from dojo.models import Test
 from dojo.tools.dependency_check.parser import DependencyCheckParser
 
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 
 
 class TestFile(object):
@@ -17,7 +17,7 @@ class TestFile(object):
         self.content = content
 
 
-class TestDependencyCheckParser(DojoTestCase):
+class TestDependencyCheckParser(DojoParserTestCase):
     def test_parse_empty_file(self):
         testfile = open("unittests/scans/dependency_check/single_dependency_with_related_no_vulnerability.xml")
         parser = DependencyCheckParser()

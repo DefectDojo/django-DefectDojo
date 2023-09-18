@@ -1,4 +1,4 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test
 from dojo.tools.jfrog_xray_api_summary_artifact.parser import (
     JFrogXrayApiSummaryArtifactParser,
@@ -6,7 +6,7 @@ from dojo.tools.jfrog_xray_api_summary_artifact.parser import (
 import hashlib
 
 
-class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):
+class TestJFrogXrayApiSummaryArtifactParser(DojoParserTestCase):
     def test_parse_file_with_no_vuln(self):
         testfile = open("unittests/scans/jfrog_xray_api_summary_artifact/no_vuln.json")
         parser = JFrogXrayApiSummaryArtifactParser()

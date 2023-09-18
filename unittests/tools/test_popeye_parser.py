@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.popeye.parser import PopeyeParser
 from dojo.models import Test
 
 
-class TestPopeyeParser(DojoTestCase):
+class TestPopeyeParser(DojoParserTestCase):
 
     def test_popeye_parser_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/popeye/popeye_zero_vul.json")

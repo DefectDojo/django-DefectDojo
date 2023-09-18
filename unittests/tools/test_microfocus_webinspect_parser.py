@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.microfocus_webinspect.parser import MicrofocusWebinspectParser
 from dojo.models import Test, Engagement, Product
 
 
-class TestMicrofocusWebinspectParser(DojoTestCase):
+class TestMicrofocusWebinspectParser(DojoParserTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         test = Test()

@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.checkov.parser import CheckovParser
 from dojo.models import Test
 
 
-class TestCheckovParser(DojoTestCase):
+class TestCheckovParser(DojoParserTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/checkov/checkov-report-0-vuln.json")

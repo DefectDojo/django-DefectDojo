@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test
 from dojo.tools.intsights.parser import IntSightsParser
 
 
-class TestIntSightsParser(DojoTestCase):
+class TestIntSightsParser(DojoParserTestCase):
     def test_intsights_parser_with_one_critical_vuln_has_one_findings_json(
             self):
         testfile = open("unittests/scans/intsights/intsights_one_vul.json")

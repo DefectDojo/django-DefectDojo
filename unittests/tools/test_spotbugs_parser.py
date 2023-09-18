@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.spotbugs.parser import SpotbugsParser
 from dojo.models import Test
 
 
-class TestSpotbugsParser(DojoTestCase):
+class TestSpotbugsParser(DojoParserTestCase):
 
     def test_no_findings(self):
         parser = SpotbugsParser()

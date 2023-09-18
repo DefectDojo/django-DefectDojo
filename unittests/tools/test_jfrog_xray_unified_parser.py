@@ -1,10 +1,10 @@
 import datetime
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test
 from dojo.tools.jfrog_xray_unified.parser import JFrogXrayUnifiedParser
 
 
-class TestJFrogXrayUnifiedParser(DojoTestCase):
+class TestJFrogXrayUnifiedParser(DojoParserTestCase):
 
     def test_parse_file_with_no_vuln(self):
         testfile = open("unittests/scans/jfrog_xray_unified/no_vuln.json")

@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.gitlab_api_fuzzing.parser import GitlabAPIFuzzingParser
 from dojo.models import Test
 
 
-class TestGitlabAPIFuzzingParser(DojoTestCase):
+class TestGitlabAPIFuzzingParser(DojoParserTestCase):
     def test_gitlab_api_fuzzing_parser_with_no_vuln_has_no_findings(self):
         with open(f"{get_unit_tests_path()}/scans/gitlab_api_fuzzing/gitlab_api_fuzzing_0_vuln.json") as testfile:
             parser = GitlabAPIFuzzingParser()

@@ -1,10 +1,10 @@
 from dojo.models import Test
 from dojo.tools.fortify.parser import FortifyParser
 
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 
 
-class TestFortifyParser(DojoTestCase):
+class TestFortifyParser(DojoParserTestCase):
     def test_fortify_many_findings(self):
         testfile = get_unit_tests_path() + "/scans/fortify/fortify_many_findings.xml"
         parser = FortifyParser()

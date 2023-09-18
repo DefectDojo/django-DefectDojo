@@ -4,14 +4,14 @@ import os.path
 from dojo.models import Test
 from dojo.tools.asff.parser import AsffParser
 
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 
 
 def sample_path(file_name):
     return os.path.join("/scans/asff", file_name)
 
 
-class TestAsffParser(DojoTestCase):
+class TestAsffParser(DojoParserTestCase):
     def test_get_severity(self):
         """To designate severity, the finding must have either the Label or Normalized field populated.
         Label is the preferred attribute. If neither attribute is populated, then the finding is not valid."""

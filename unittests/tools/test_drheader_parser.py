@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.drheader.parser import DrHeaderParser
 from dojo.models import Test
 
 
-class TestDrHeaderParser(DojoTestCase):
+class TestDrHeaderParser(DojoParserTestCase):
 
     def test_parse_file_has_no_findings(self):
         testfile = open("unittests/scans/drheader/no_vulns.json")

@@ -1,10 +1,10 @@
 import datetime
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.aws_prowler.parser import AWSProwlerParser
 from dojo.models import Test
 
 
-class TestAwsProwlerParser(DojoTestCase):
+class TestAwsProwlerParser(DojoParserTestCase):
     def setup(self, testfile):
         parser = AWSProwlerParser()
         findings = parser.get_findings(testfile, Test())

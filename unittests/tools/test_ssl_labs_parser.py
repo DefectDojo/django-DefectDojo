@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.ssl_labs.parser import SslLabsParser
 from dojo.models import Test
 
 
-class TestSslLabsParser(DojoTestCase):
+class TestSslLabsParser(DojoParserTestCase):
     def test_parse_none(self):
         parser = SslLabsParser()
         with open("unittests/scans/ssl_labs/none.json") as test_file:

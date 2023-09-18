@@ -1,13 +1,13 @@
 import json
 
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from unittest.mock import patch
 
 from dojo.tools.api_cobalt.parser import ApiCobaltParser
 from dojo.models import Test, Test_Type
 
 
-class TestApiCobaltParser(DojoTestCase):
+class TestApiCobaltParser(DojoParserTestCase):
 
     def test_cobalt_api_parser_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/api_cobalt/cobalt_api_zero_vul.json")

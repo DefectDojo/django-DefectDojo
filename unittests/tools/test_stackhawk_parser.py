@@ -2,10 +2,10 @@ import datetime
 
 from dojo.tools.stackhawk.parser import StackHawkParser
 from dojo.models import Test, Finding
-from unittests.dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoParserTestCase
 
 
-class TestStackHawkParser(DojoTestCase):
+class TestStackHawkParser(DojoParserTestCase):
     __test_datetime = datetime.datetime(2022, 2, 16, 23, 7, 19, 575000, datetime.timezone.utc)
 
     def test_invalid_json_format(self):

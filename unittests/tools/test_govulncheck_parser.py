@@ -1,9 +1,9 @@
-from unittests.dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoParserTestCase
 from dojo.tools.govulncheck.parser import GovulncheckParser
 from dojo.models import Test
 
 
-class TestGovulncheckParser(DojoTestCase):
+class TestGovulncheckParser(DojoParserTestCase):
 
     def test_parse_empty(self):
         with self.assertRaises(ValueError) as exp:

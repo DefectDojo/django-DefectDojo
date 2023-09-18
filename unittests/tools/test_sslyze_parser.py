@@ -1,11 +1,11 @@
 from os import path
 
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.sslyze.parser import SslyzeParser
 from dojo.models import Test
 
 
-class TestSslyzeJSONParser(DojoTestCase):
+class TestSslyzeJSONParser(DojoParserTestCase):
     def test_parse_json_file_with_one_target_has_zero_vuln_old(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/one_target_zero_vuln_old.json"))
         parser = SslyzeParser()
@@ -151,7 +151,7 @@ class TestSslyzeJSONParser(DojoTestCase):
         self.assertEqual(443, endpoint.port)
 
 
-class TestSSLyzeXMLParser(DojoTestCase):
+class TestSSLyzeXMLParser(DojoParserTestCase):
     def test_parse_file_with_one_target_has_three_vuln(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/report_one_target_three_vuln.xml"))
         parser = SslyzeParser()

@@ -1,6 +1,6 @@
 import os.path
 
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.trivy_operator.parser import TrivyOperatorParser
 from dojo.models import Test
 
@@ -9,7 +9,7 @@ def sample_path(file_name):
     return os.path.join(get_unit_tests_path() + "/scans/trivy_operator", file_name)
 
 
-class TestTrivyOperatorParser(DojoTestCase):
+class TestTrivyOperatorParser(DojoParserTestCase):
 
     def test_configauditreport_no_vuln(self):
         test_file = open(sample_path("configauditreport_no_vuln.json"))

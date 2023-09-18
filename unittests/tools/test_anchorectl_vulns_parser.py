@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.anchorectl_vulns.parser import AnchoreCTLVulnsParser
 from dojo.models import Test
 
 
-class TestAnchoreCTLVulnsParser(DojoTestCase):
+class TestAnchoreCTLVulnsParser(DojoParserTestCase):
     def test_anchore_engine_parser_has_no_finding(self):
         testfile = open("unittests/scans/anchorectl_vulns/no_vuln.json")
         parser = AnchoreCTLVulnsParser()

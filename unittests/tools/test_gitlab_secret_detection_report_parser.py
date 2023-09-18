@@ -1,12 +1,12 @@
 from datetime import datetime
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.gitlab_secret_detection_report.parser import (
     GitlabSecretDetectionReportParser,
 )
 from dojo.models import Test
 
 
-class TestGitlabSecretDetectionReportParser(DojoTestCase):
+class TestGitlabSecretDetectionReportParser(DojoParserTestCase):
     def test_gitlab_secret_detection_report_parser_with_no_vuln_has_no_findings(self):
         with open(f"{get_unit_tests_path()}/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_0_vuln.json") as testfile:
             parser = GitlabSecretDetectionReportParser()

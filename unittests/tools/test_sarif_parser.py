@@ -4,10 +4,10 @@ from os import path
 from dojo.models import Finding, Test
 from dojo.tools.sarif.parser import SarifParser, get_fingerprints_hashes
 
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 
 
-class TestSarifParser(DojoTestCase):
+class TestSarifParser(DojoParserTestCase):
     def common_checks(self, finding):
         self.assertLessEqual(len(finding.title), 250)
         self.assertIn(finding.severity, Finding.SEVERITIES)

@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.api_vulners.parser import ApiVulnersParser
 from dojo.models import Test
 
 
-class TestApiVulnersParser(DojoTestCase):
+class TestApiVulnersParser(DojoParserTestCase):
 
     def test_parse_many_findings(self):
         testfile = open("unittests/scans/api_vulners/report_many_vulns.json")

@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.xanitizer.parser import XanitizerParser
 from dojo.models import Test
 
 
-class TestXanitizerParser(DojoTestCase):
+class TestXanitizerParser(DojoParserTestCase):
 
     def test_parse_file_with_no_findings(self):
         testfile = open("unittests/scans/xanitizer/no-findings.xml")

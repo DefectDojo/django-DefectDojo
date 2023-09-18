@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.anchore_engine.parser import AnchoreEngineParser
 from dojo.models import Test
 
 
-class TestAnchoreEngineParser(DojoTestCase):
+class TestAnchoreEngineParser(DojoParserTestCase):
     def test_anchore_engine_parser_has_no_finding(self):
         testfile = open("unittests/scans/anchore_engine/no_vuln.json")
         parser = AnchoreEngineParser()

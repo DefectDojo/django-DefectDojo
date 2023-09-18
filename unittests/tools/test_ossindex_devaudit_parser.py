@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.ossindex_devaudit.parser import OssIndexDevauditParser
 from dojo.models import Test
 
 
-class TestOssIndexDevauditParser(DojoTestCase):
+class TestOssIndexDevauditParser(DojoParserTestCase):
 
     def test_ossindex_devaudit_parser_with_no_vulns_has_no_findings(self):
         testfile = open(

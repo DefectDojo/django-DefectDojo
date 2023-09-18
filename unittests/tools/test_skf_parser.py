@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.skf.parser import SKFParser
 from dojo.models import Test
 
 
-class TestSkfParser(DojoTestCase):
+class TestSkfParser(DojoParserTestCase):
 
     def test_single_has_no_finding(self):
         testfile = open("unittests/scans/skf/export.csv")

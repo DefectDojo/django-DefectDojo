@@ -1,10 +1,10 @@
 from os import path
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.tenable.parser import TenableParser
 from dojo.models import Finding, Test, Engagement, Product
 
 
-class TestTenableParser(DojoTestCase):
+class TestTenableParser(DojoParserTestCase):
     def create_test(self):
         test = Test()
         test.engagement = Engagement()

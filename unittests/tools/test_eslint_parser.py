@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.eslint.parser import ESLintParser
 from dojo.models import Test
 
 
-class TestESLintParser(DojoTestCase):
+class TestESLintParser(DojoParserTestCase):
     def test_parse_file_has_two_findings(self):
         testfile = open("unittests/scans/eslint/scan.json")
         parser = ESLintParser()

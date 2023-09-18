@@ -1,10 +1,10 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test
 from dojo.tools.acunetix360.parser import Acunetix360Parser
 from datetime import datetime
 
 
-class TestAcunetix360Parser(DojoTestCase):
+class TestAcunetix360Parser(DojoParserTestCase):
 
     def test_parse_file_with_one_finding(self):
         testfile = open("unittests/scans/acunetix360/acunetix360_one_finding.json")

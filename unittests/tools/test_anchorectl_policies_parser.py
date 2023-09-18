@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.anchorectl_policies.parser import AnchoreCTLPoliciesParser
 from dojo.models import Test
 
 
-class TestAnchoreCTLPoliciesParser(DojoTestCase):
+class TestAnchoreCTLPoliciesParser(DojoParserTestCase):
     def test_anchore_engine_parser_has_no_finding(self):
         testfile = open("unittests/scans/anchorectl_policies/no_violation.json")
         parser = AnchoreCTLPoliciesParser()

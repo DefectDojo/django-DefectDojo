@@ -1,11 +1,11 @@
 import datetime
 
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test
 from dojo.tools.coverity_api.parser import CoverityApiParser
 
 
-class TestZapParser(DojoTestCase):
+class TestZapParser(DojoParserTestCase):
     def test_parse_wrong_file(self):
         with self.assertRaises(ValueError) as ve:
             testfile = open("unittests/scans/coverity_api/wrong.json")

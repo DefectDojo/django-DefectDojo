@@ -741,6 +741,9 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             logger.debug(str(eps.id) + ': ' + str(eps.endpoint) + ': ' + str(eps.endpoint.id) + ': ' + str(eps.mitigated))
 
 
+class DojoParserTestCase(DojoTestCase):
+    pass
+
 class DojoVCRTestCase(DojoTestCase, VCRTestCase):
     def __init__(self, *args, **kwargs):
         DojoTestCase.__init__(self, *args, **kwargs)

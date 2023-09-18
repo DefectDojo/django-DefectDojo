@@ -1,10 +1,10 @@
 from dojo.models import Test
 from dojo.tools.talisman.parser import TalismanParser
 
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 
 
-class TestTalismanParser(DojoTestCase):
+class TestTalismanParser(DojoParserTestCase):
     def test_parse_empty(self):
         testfile = open("unittests/scans/talisman/no_finding.json")
         parser = TalismanParser()

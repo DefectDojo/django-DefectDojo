@@ -1,11 +1,11 @@
 from os import path
 
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test
 from dojo.tools.burp_enterprise.parser import BurpEnterpriseParser
 
 
-class TestBurpEnterpriseParser(DojoTestCase):
+class TestBurpEnterpriseParser(DojoParserTestCase):
 
     def test_burp_enterprise_with_multiple_vulns(self):
         with open(path.join(path.dirname(__file__), "../scans/burp_enterprise/many_vulns.html")) as test_file:

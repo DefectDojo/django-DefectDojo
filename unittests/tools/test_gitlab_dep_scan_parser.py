@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.gitlab_dep_scan.parser import GitlabDepScanParser
 from dojo.models import Test
 
 
-class TestGitlabDepScanParser(DojoTestCase):
+class TestGitlabDepScanParser(DojoParserTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open(

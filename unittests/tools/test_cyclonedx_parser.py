@@ -1,11 +1,11 @@
 import datetime
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 
 from dojo.models import Test, Finding
 from dojo.tools.cyclonedx.parser import CycloneDXParser
 
 
-class TestParser(DojoTestCase):
+class TestParser(DojoParserTestCase):
     def test_grype_report(self):
         with open("unittests/scans/cyclonedx/grype_dd_1_14_1.xml") as file:
             parser = CycloneDXParser()

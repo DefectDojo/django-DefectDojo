@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.openscap.parser import OpenscapParser
 from dojo.models import Test
 
 
-class TestOpenscapParser(DojoTestCase):
+class TestOpenscapParser(DojoParserTestCase):
 
     def test_openscap_parser_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/openscap/no_vuln_rhsa.xml")

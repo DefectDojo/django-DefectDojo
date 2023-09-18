@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.auditjs.parser import AuditJSParser
 from dojo.models import Test
 
 
-class TestAuditJSParser(DojoTestCase):
+class TestAuditJSParser(DojoParserTestCase):
 
     def test_auditjs_parser_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/auditjs/auditjs_zero_vul.json")

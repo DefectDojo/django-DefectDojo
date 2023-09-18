@@ -1,6 +1,6 @@
 import os.path
 
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.awssecurityhub.parser import AwsSecurityHubParser
 from dojo.models import Test
 
@@ -9,7 +9,7 @@ def sample_path(file_name: str):
     return os.path.join("/scans/awssecurityhub", file_name)
 
 
-class TestAwsSecurityHubParser(DojoTestCase):
+class TestAwsSecurityHubParser(DojoParserTestCase):
 
     def test_one_finding(self):
         with open(get_unit_tests_path() + sample_path("config_one_finding.json")) as test_file:

@@ -1,11 +1,11 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.nuclei.parser import NucleiParser
 from dojo.models import Test
 from datetime import datetime
 from dateutil.tz import tzoffset
 
 
-class TestNucleiParser(DojoTestCase):
+class TestNucleiParser(DojoParserTestCase):
 
     def test_parse_no_empty(self):
         testfile = open("unittests/scans/nuclei/empty.jsonl")

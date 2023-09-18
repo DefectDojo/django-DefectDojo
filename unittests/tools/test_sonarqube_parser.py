@@ -1,10 +1,10 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 
 from dojo.models import Test, Engagement, Product
 from dojo.tools.sonarqube.parser import SonarQubeParser
 
 
-class TestSonarQubeParser(DojoTestCase):
+class TestSonarQubeParser(DojoParserTestCase):
     # comment out to get full diff with big reports
     # maxDiff = None
 

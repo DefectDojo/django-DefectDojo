@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test
 from dojo.tools.sonatype.parser import SonatypeParser
 
 
-class TestSonatypeParser(DojoTestCase):
+class TestSonatypeParser(DojoParserTestCase):
     def test_parse_file_with_one_vuln(self):
         testfile = open("unittests/scans/sonatype/one_vuln.json")
         parser = SonatypeParser()

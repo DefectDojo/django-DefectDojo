@@ -1,10 +1,10 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 
 from dojo.models import Test
 from dojo.tools.rubocop.parser import RubocopParser
 
 
-class TestRubocopParser(DojoTestCase):
+class TestRubocopParser(DojoParserTestCase):
     def test_parser_empty(self):
         testfile = open("unittests/scans/rubocop/empty.json")
         parser = RubocopParser()

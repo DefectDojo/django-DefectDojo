@@ -1,10 +1,10 @@
-from django.test import TestCase
+from ..dojo_test_case import DojoParserTestCase
 
 from dojo.tools.api_edgescan.parser import ApiEdgescanParser
 from dojo.models import Test
 
 
-class TestApiEdgescanParser(TestCase):
+class TestApiEdgescanParser(DojoParserTestCase):
 
     def test_get_scan_types(self):
         parser = ApiEdgescanParser()

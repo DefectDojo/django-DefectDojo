@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.nexpose.parser import NexposeParser
 from dojo.models import Test, Engagement, Product
 
 
-class TestNexposeParser(DojoTestCase):
+class TestNexposeParser(DojoParserTestCase):
 
     def test_nexpose_parser_has_no_finding(self):
         testfile = open("unittests/scans/nexpose/no_vuln.xml")

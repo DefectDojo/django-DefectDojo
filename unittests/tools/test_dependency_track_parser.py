@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.dependency_track.parser import DependencyTrackParser
 from dojo.models import Test
 
 
-class TestDependencyTrackParser(DojoTestCase):
+class TestDependencyTrackParser(DojoParserTestCase):
 
     def test_dependency_track_parser_with_empty_list_for_findings_key_has_no_findings(
         self,

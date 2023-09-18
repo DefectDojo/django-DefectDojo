@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.scantist.parser import ScantistParser
 from dojo.models import Test
 
 
-class TestScantistParser(DojoTestCase):
+class TestScantistParser(DojoParserTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/scantist/scantist-no-vuln.json")

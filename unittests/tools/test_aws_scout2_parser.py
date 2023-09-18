@@ -1,10 +1,10 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.aws_scout2.parser import AWSScout2Parser
 from django.utils import timezone
 from dojo.models import Test, Engagement, Product, Product_Type, Test_Type
 
 
-class TestAwsProwlerParser(DojoTestCase):
+class TestAwsProwlerParser(DojoParserTestCase):
     def setup(self, testfile):
         product_type = Product_Type(critical_product=True, key_product=False)
         product_type.save()

@@ -1,10 +1,10 @@
 from os import path
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test
 from dojo.tools.neuvector.parser import NeuVectorParser
 
 
-class TestNeuVectorParser(DojoTestCase):
+class TestNeuVectorParser(DojoParserTestCase):
     def test_parse_file_with_no_vuln(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/neuvector/no_vuln.json"))
         parser = NeuVectorParser()

@@ -2,10 +2,10 @@ from datetime import datetime, date
 
 from dojo.tools.hydra.parser import HydraParser
 from dojo.models import Test, Finding
-from unittests.dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoParserTestCase
 
 
-class TestHydraParser(DojoTestCase):
+class TestHydraParser(DojoParserTestCase):
     __test_datetime = datetime(2019, 3, 1, 14, 44, 22)
 
     def test_invalid_json_format(self):

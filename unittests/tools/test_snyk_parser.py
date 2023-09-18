@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test
 from dojo.tools.snyk.parser import SnykParser
 
 
-class TestSnykParser(DojoTestCase):
+class TestSnykParser(DojoParserTestCase):
 
     def test_snykParser_single_has_no_finding(self):
         testfile = open("unittests/scans/snyk/single_project_no_vulns.json")

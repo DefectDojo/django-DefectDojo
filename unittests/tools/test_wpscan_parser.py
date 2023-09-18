@@ -1,12 +1,12 @@
 import datetime
 
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 
 from dojo.models import Test
 from dojo.tools.wpscan.parser import WpscanParser
 
 
-class TestWpscanParser(DojoTestCase):
+class TestWpscanParser(DojoParserTestCase):
 
     def test_parse_file_empty(self):
         """Report from the tool wich have no data"""

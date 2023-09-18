@@ -1,11 +1,11 @@
 import datetime
 
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test
 from dojo.tools.risk_recon.parser import RiskReconParser
 
 
-class TestRiskReconAPIParser(DojoTestCase):
+class TestRiskReconAPIParser(DojoParserTestCase):
 
     def test_api_with_bad_url(self):
         testfile = open("unittests/scans/risk_recon/bad_url.json")

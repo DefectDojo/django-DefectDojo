@@ -1,11 +1,11 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 
 from dojo.models import Test, Engagement, Product
 from dojo.tools.checkmarx_osa.parser import CheckmarxOsaParser
 from datetime import datetime
 
 
-class TestCheckmarxOsaParser(DojoTestCase):
+class TestCheckmarxOsaParser(DojoParserTestCase):
     # comment out to get full diff with big reports
     # maxDiff = None
 

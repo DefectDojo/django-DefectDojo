@@ -1,9 +1,9 @@
-from django.test import TestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.whispers.parser import WhispersParser
 from dojo.models import Test
 
 
-class TestWhispersParser(TestCase):
+class TestWhispersParser(DojoParserTestCase):
 
     def test_whispers_parser_severity_map(self):
         fixtures = [

@@ -1,5 +1,5 @@
 import datetime
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test, Engagement, Product, Finding
 from dojo.tools.generic.parser import GenericParser
 
@@ -14,7 +14,7 @@ class TestFile(object):
         self.content = content
 
 
-class TestGenericParser(DojoTestCase):
+class TestGenericParser(DojoParserTestCase):
 
     def setUp(self):
         self.product = Product(name='sample product',

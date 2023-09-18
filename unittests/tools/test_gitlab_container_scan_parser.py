@@ -1,10 +1,10 @@
 from datetime import datetime
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.gitlab_container_scan.parser import GitlabContainerScanParser
 from dojo.models import Test
 
 
-class TestGitlabContainerScanParser(DojoTestCase):
+class TestGitlabContainerScanParser(DojoParserTestCase):
     def test_gitlab_container_scan_parser_with_no_vuln_has_no_findings(self):
         with open("unittests/scans/gitlab_container_scan/gl-container-scanning-report-0-vuln.json") as testfile:
             parser = GitlabContainerScanParser()

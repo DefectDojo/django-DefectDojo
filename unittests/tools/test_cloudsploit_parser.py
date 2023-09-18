@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test
 from dojo.tools.cloudsploit.parser import CloudsploitParser
 
 
-class TestCloudsploitParser(DojoTestCase):
+class TestCloudsploitParser(DojoParserTestCase):
 
     def test_cloudsploit_parser_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/cloudsploit/cloudsploit_zero_vul.json")

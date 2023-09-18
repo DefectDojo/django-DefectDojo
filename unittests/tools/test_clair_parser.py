@@ -1,8 +1,8 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.clair.parser import ClairParser
 
 
-class TestClairParser(DojoTestCase):
+class TestClairParser(DojoParserTestCase):
 
     def test_no_findings(self):
         my_file_handle = open("unittests/scans/clair/empty.json")

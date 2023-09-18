@@ -1,11 +1,11 @@
 import datetime
 
-from django.test import TestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.api_bugcrowd.parser import ApiBugcrowdParser
 from dojo.models import Test, Product_API_Scan_Configuration
 
 
-class TestApiBugcrowdParser(TestCase):
+class TestApiBugcrowdParser(DojoParserTestCase):
     def test_parse_file_with_no_vuln_has_no_findings(self):
         with open("unittests/scans/api_bugcrowd/bugcrowd_empty.json") as testfile:
             parser = ApiBugcrowdParser()

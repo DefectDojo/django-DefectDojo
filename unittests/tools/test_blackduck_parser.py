@@ -1,10 +1,10 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.blackduck.parser import BlackduckParser
 from dojo.models import Test
 from pathlib import Path
 
 
-class TestBlackduckHubParser(DojoTestCase):
+class TestBlackduckHubParser(DojoParserTestCase):
     def test_blackduck_csv_parser_has_no_finding(self):
         testfile = Path(get_unit_tests_path() + "/scans/blackduck/no_vuln.csv")
         parser = BlackduckParser()

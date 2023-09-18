@@ -4,10 +4,10 @@ from unittest.mock import patch
 from dojo.models import Engagement, Product, Test
 from dojo.tools.checkmarx.parser import CheckmarxParser
 
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 
 
-class TestCheckmarxParser(DojoTestCase):
+class TestCheckmarxParser(DojoParserTestCase):
     # comment out to get full diff with big reports
     # maxDiff = None
 

@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.php_symfony_security_check.parser import PhpSymfonySecurityCheckParser
 from dojo.models import Test
 
 
-class TestPhpSymfonySecurityCheckerParser(DojoTestCase):
+class TestPhpSymfonySecurityCheckerParser(DojoParserTestCase):
 
     def test_php_symfony_security_check_parser_with_no_vuln_has_no_findings(self):
         testfile = open(

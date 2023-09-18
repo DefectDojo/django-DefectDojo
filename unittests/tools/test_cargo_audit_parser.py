@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.cargo_audit.parser import CargoAuditParser
 from dojo.models import Test
 
 
-class TestCargoAuditParser(DojoTestCase):
+class TestCargoAuditParser(DojoParserTestCase):
 
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/cargo_audit/no_findings.json")

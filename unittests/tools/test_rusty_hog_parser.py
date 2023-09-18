@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.rusty_hog.parser import RustyhogParser
 from dojo.models import Test
 
 
-class TestRustyhogParser(DojoTestCase):
+class TestRustyhogParser(DojoParserTestCase):
     def test_parse_file_with_no_vuln_has_no_finding_choctawhog(self):
         testfile = open("unittests/scans/rusty_hog/choctawhog_no_vuln.json")
         parser = RustyhogParser()

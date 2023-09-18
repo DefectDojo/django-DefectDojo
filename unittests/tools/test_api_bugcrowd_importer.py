@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from ..dojo_test_case import DojoParserTestCase
 from unittest.mock import patch
 
 from dojo.models import (
@@ -13,7 +13,7 @@ from dojo.models import (
 from dojo.tools.api_bugcrowd.importer import BugcrowdApiImporter
 
 
-class TestBugcrowdApiImporter(TestCase):
+class TestBugcrowdApiImporter(DojoParserTestCase):
     @classmethod
     def setUpTestData(cls):
 

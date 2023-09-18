@@ -1,10 +1,10 @@
 import datetime
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.arachni.parser import ArachniParser
 from dojo.models import Test
 
 
-class TestArachniParser(DojoTestCase):
+class TestArachniParser(DojoParserTestCase):
 
     def test_parser_has_one_finding(self):
         with open("unittests/scans/arachni/arachni.afr.json") as testfile:

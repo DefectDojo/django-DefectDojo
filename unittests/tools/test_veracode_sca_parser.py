@@ -1,13 +1,13 @@
 import datetime
 
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.veracode_sca.parser import VeracodeScaParser
 from dojo.models import Test
 
 from dateutil.tz import UTC
 
 
-class TestVeracodeScaScannerParser(DojoTestCase):
+class TestVeracodeScaScannerParser(DojoParserTestCase):
 
     def test_parse_csv(self):
         testfile = open("unittests/scans/veracode_sca/veracode_sca.csv")

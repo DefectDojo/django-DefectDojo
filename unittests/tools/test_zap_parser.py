@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.models import Test, Finding
 from dojo.tools.zap.parser import ZapParser
 
 
-class TestZapParser(DojoTestCase):
+class TestZapParser(DojoParserTestCase):
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/zap/empty_2.9.0.xml")
         parser = ZapParser()

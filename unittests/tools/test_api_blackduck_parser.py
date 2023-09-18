@@ -2,10 +2,10 @@
 from dojo.models import Test, SEVERITIES
 from dojo.tools.api_blackduck.parser import ApiBlackduckParser
 
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 
 
-class TestApiBlackduckParser(DojoTestCase):
+class TestApiBlackduckParser(DojoParserTestCase):
 
     def test_bandit_parser_has_many_findings(self):
         testfile = open("unittests/scans/api_blackduck/many_vulns.json")

@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.gitleaks.parser import GitleaksParser
 from dojo.models import Test
 
 
-class TestGitleaksParser(DojoTestCase):
+class TestGitleaksParser(DojoParserTestCase):
 
     def test_parse_file_legacy_with_no_findings(self):
         testfile = open(get_unit_tests_path() + "/scans/gitleaks/no_findings.json")

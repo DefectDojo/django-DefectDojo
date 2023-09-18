@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.ggshield.parser import GgshieldParser
 from dojo.models import Test
 
 
-class TestGgshieldParser(DojoTestCase):
+class TestGgshieldParser(DojoParserTestCase):
 
     def test_parse_empty(self):
         testfile = open("unittests/scans/ggshield/no_finding.json")

@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
 from dojo.tools.gitlab_sast.parser import GitlabSastParser
 from dojo.models import Test
 
 
-class TestGitlabSastParser(DojoTestCase):
+class TestGitlabSastParser(DojoParserTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         with open("unittests/scans/gitlab_sast/gl-sast-report-0-vuln.json") as testfile:

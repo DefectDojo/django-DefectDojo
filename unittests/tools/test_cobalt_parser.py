@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.cobalt.parser import CobaltParser
 from dojo.models import Test
 
 
-class TestCobaltParser(DojoTestCase):
+class TestCobaltParser(DojoParserTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
 

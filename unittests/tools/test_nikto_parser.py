@@ -1,9 +1,9 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoParserTestCase
 from dojo.tools.nikto.parser import NiktoParser
 from dojo.models import Test, Engagement, Product
 
 
-class TestNiktoParser(DojoTestCase):
+class TestNiktoParser(DojoParserTestCase):
 
     def test_parse_file_with_old_format(self):
         test = Test()
