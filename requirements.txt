@@ -9,7 +9,7 @@ django_celery_results==2.5.1
 django-auditlog==2.3.0
 django-dbbackup==4.0.2
 django-environ==0.11.2
-django-filter==23.2
+django-filter==23.3
 django-imagekit==4.1.0
 # This library is very outdated, but is a pillar of DefectDojo
 # django-multiselectfield==0.1.12
