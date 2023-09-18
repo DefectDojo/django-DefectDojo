@@ -1671,7 +1671,17 @@ class Endpoint(models.Model):
 
     def __eq__(self, other):
         if isinstance(other, Endpoint):
-            return str(self) == str(other)
+            # Check if the contents of the endpoint match
+            contents_match = str(self) == str(other)
+            # Determine if products should be used in the equation
+            if self.product is not None and other.product is not None:
+                # Check if the products are the same
+                products_match = (self.product) == other.product
+                # Check if the contents match
+                return products_match and contents_match
+            else:
+                return contents_match
+
         else:
             return NotImplemented
 
@@ -1700,20 +1710,41 @@ class Endpoint(models.Model):
         return self.findings.all().count()
 
     def active_findings(self):
-        findings = self.findings.filter(active=True,
-                                      out_of_scope=False,
-                                      mitigated__isnull=True,
-                                      false_p=False,
-                                      duplicate=False,
-                                      status_finding__mitigated=False,
-                                      status_finding__false_positive=False,
-                                      status_finding__out_of_scope=False,
-                                      status_finding__risk_accepted=False).order_by('numerical_severity')
+        findings = self.findings.filter(
+            active=True,
+            out_of_scope=False,
+            mitigated__isnull=True,
+            false_p=False,
+            duplicate=False,
+            status_finding__mitigated=False,
+            status_finding__false_positive=False,
+            status_finding__out_of_scope=False,
+            status_finding__risk_accepted=False
+        ).order_by('numerical_severity')
+        return findings
+
+    def active_verified_findings(self):
+        findings = self.findings.filter(
+            active=True,
+            verified=True,
+            out_of_scope=False,
+            mitigated__isnull=True,
+            false_p=False,
+            duplicate=False,
+            status_finding__mitigated=False,
+            status_finding__false_positive=False,
+            status_finding__out_of_scope=False,
+            status_finding__risk_accepted=False
+        ).order_by('numerical_severity')
         return findings
 
     @property
     def active_findings_count(self):
         return self.active_findings().count()
+
+    @property
+    def active_verified_findings_count(self):
+        return self.active_verified_findings().count()
 
     def host_endpoints(self):
         return Endpoint.objects.filter(host=self.host,
@@ -1749,21 +1780,43 @@ class Endpoint(models.Model):
         return self.host_findings().count()
 
     def host_active_findings(self):
-        findings = Finding.objects.filter(active=True,
-                                        out_of_scope=False,
-                                        mitigated__isnull=True,
-                                        false_p=False,
-                                        duplicate=False,
-                                        status_finding__mitigated=False,
-                                        status_finding__false_positive=False,
-                                        status_finding__out_of_scope=False,
-                                        status_finding__risk_accepted=False,
-                                        endpoints__in=self.host_endpoints()).order_by('numerical_severity')
+        findings = Finding.objects.filter(
+            active=True,
+            out_of_scope=False,
+            mitigated__isnull=True,
+            false_p=False,
+            duplicate=False,
+            status_finding__mitigated=False,
+            status_finding__false_positive=False,
+            status_finding__out_of_scope=False,
+            status_finding__risk_accepted=False,
+            endpoints__in=self.host_endpoints()
+        ).order_by('numerical_severity')
+        return findings
+
+    def host_active_verified_findings(self):
+        findings = Finding.objects.filter(
+            active=True,
+            verified=True,
+            out_of_scope=False,
+            mitigated__isnull=True,
+            false_p=False,
+            duplicate=False,
+            status_finding__mitigated=False,
+            status_finding__false_positive=False,
+            status_finding__out_of_scope=False,
+            status_finding__risk_accepted=False,
+            endpoints__in=self.host_endpoints()
+        ).order_by('numerical_severity')
         return findings
 
     @property
     def host_active_findings_count(self):
         return self.host_active_findings().count()
+
+    @property
+    def host_active_verified_findings_count(self):
+        return self.host_active_verified_findings().count()
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
