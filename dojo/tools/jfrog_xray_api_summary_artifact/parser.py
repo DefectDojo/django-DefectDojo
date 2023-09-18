@@ -3,6 +3,7 @@ import re
 import hashlib
 
 from cvss import CVSS3
+from cvss.exceptions import CVSS3RHScoreDoesNotMatch, CVSS3RHMalformedError
 
 from dojo.models import Finding
 
@@ -80,7 +81,12 @@ def get_item(
             cwe = decode_cwe_number(cves[0].get("cwe", [])[0])
         if "cvss_v3" in cves[0]:
             cvss_v3 = cves[0]["cvss_v3"]
-            cvssv3 = CVSS3.from_rh_vector(cvss_v3).clean_vector()
+            try:
+                cvssv3 = CVSS3.from_rh_vector(cvss_v3).clean_vector()
+            except (CVSS3RHScoreDoesNotMatch, CVSS3RHMalformedError):
+                # Note: Xray sometimes takes over malformed cvss scores like `5.9` that can not be parsed.
+                #       Without the try-except block here the whole import of all findings would fail.
+                pass
 
     impact_paths = vulnerability.get("impact_path", [])
     if len(impact_paths) > 0:
@@ -96,9 +102,7 @@ def get_item(
         )
         vuln_id_from_tool = vulnerability["issue_id"]
     elif cve:
-        unique_id = str(
-            artifact_sha256 + impact_path.name + impact_path.version + cve
-        )
+        unique_id = str(artifact_sha256 + impact_path.name + impact_path.version + cve)
     else:
         unique_id = str(
             artifact_sha256
