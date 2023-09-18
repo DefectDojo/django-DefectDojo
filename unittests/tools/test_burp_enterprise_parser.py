@@ -7,10 +7,11 @@ from dojo.tools.burp_enterprise.parser import BurpEnterpriseParser
 
 class TestBurpEnterpriseParser(DojoParserTestCase):
 
+    parser = BurpEnterpriseParser()
+
     def test_burp_enterprise_with_multiple_vulns(self):
         with open(path.join(path.dirname(__file__), "../scans/burp_enterprise/many_vulns.html")) as test_file:
-            parser = BurpEnterpriseParser()
-            findings = parser.get_findings(test_file, Test())
+            findings = self.parser.get_findings(test_file, Test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()

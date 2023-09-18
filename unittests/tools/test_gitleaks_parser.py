@@ -5,16 +5,16 @@ from dojo.models import Test
 
 class TestGitleaksParser(DojoParserTestCase):
 
+    parser = GitleaksParser()
+
     def test_parse_file_legacy_with_no_findings(self):
         testfile = open(get_unit_tests_path() + "/scans/gitleaks/no_findings.json")
-        parser = GitleaksParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_legacy_with_one_finding(self):
         testfile = open(get_unit_tests_path() + "/scans/gitleaks/data_one.json")
-        parser = GitleaksParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
@@ -25,8 +25,7 @@ class TestGitleaksParser(DojoParserTestCase):
 
     def test_parse_file_legacy_with_multiple_finding(self):
         testfile = open(get_unit_tests_path() + "/scans/gitleaks/data_many.json")
-        parser = GitleaksParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(2, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
@@ -37,14 +36,12 @@ class TestGitleaksParser(DojoParserTestCase):
 
     def test_parse_file_legacy_with_multiple_redacted_finding(self):
         testfile = open(get_unit_tests_path() + "/scans/gitleaks/redacted_data_many.json")
-        parser = GitleaksParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(6, len(findings))
 
     def test_parse_file_legacy_from_issue4336(self):
         testfile = open(get_unit_tests_path() + "/scans/gitleaks/issue4336.json")
-        parser = GitleaksParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
@@ -54,8 +51,7 @@ class TestGitleaksParser(DojoParserTestCase):
 
     def test_parse_file_from_version_7_5_0(self):
         testfile = open(get_unit_tests_path() + "/scans/gitleaks/version_7.5.0.json")
-        parser = GitleaksParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(4, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
@@ -85,8 +81,7 @@ class TestGitleaksParser(DojoParserTestCase):
 
     def test_parse_file_from_version_8(self):
         testfile = open(get_unit_tests_path() + "/scans/gitleaks/gitleaks8_many.json")
-        parser = GitleaksParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(3, len(findings))
         with self.subTest(i=0):
             finding = findings[0]

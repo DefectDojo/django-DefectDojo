@@ -11,16 +11,16 @@ def sample_path(file_name):
 
 class TestTruffleHog3Parser(DojoParserTestCase):
 
+    parser = TruffleHog3Parser()
+
     def test_zero_vulns(self):
         test_file = open(sample_path("zero_vulns.json"))
-        parser = TruffleHog3Parser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(len(findings), 0)
 
     def test_many_vulns_legacy(self):
         test_file = open(sample_path("many_vulns_legacy.json"))
-        parser = TruffleHog3Parser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(len(findings), 7)
         # {
         #     "date": "2018-05-28 03:24:03",
@@ -46,8 +46,7 @@ class TestTruffleHog3Parser(DojoParserTestCase):
 
     def test_many_vulns2_legacy(self):
         test_file = open(sample_path("many_vulns2_legacy.json"))
-        parser = TruffleHog3Parser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(len(findings), 27)
         finding = findings[0]
         self.assertEqual("High", finding.severity)
@@ -57,8 +56,7 @@ class TestTruffleHog3Parser(DojoParserTestCase):
 
     def test_many_vulns_current(self):
         test_file = open(sample_path("many_vulns_current.json"))
-        parser = TruffleHog3Parser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(len(findings), 3)
 
         finding = findings[0]

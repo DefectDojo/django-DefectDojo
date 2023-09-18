@@ -5,17 +5,18 @@ from dojo.models import Test
 
 
 class TestNpmAuditParser(DojoParserTestCase):
+
+    parser = NpmAuditParser()
+
     def test_npm_audit_parser_with_no_vuln_has_no_findings(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/no_vuln.json"))
-        parser = NpmAuditParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_npm_audit_parser_with_one_criticle_vuln_has_one_findings(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/one_vuln.json"))
-        parser = NpmAuditParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
         self.assertEqual(94, findings[0].cwe)
@@ -24,8 +25,7 @@ class TestNpmAuditParser(DojoParserTestCase):
 
     def test_npm_audit_parser_with_many_vuln_has_many_findings(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/many_vuln.json"))
-        parser = NpmAuditParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(5, len(findings))
 
@@ -44,8 +44,7 @@ class TestNpmAuditParser(DojoParserTestCase):
     def test_npm_audit_parser_multiple_cwes_per_finding(self):
         # cwes formatted as escaped list: "cwe": "[\"CWE-346\",\"CWE-453\"]",
         testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/multiple_cwes.json"))
-        parser = NpmAuditParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(41, len(findings))
         self.assertEqual(400, findings[0].cwe)
@@ -54,16 +53,14 @@ class TestNpmAuditParser(DojoParserTestCase):
     def test_npm_audit_parser_multiple_cwes_per_finding_list(self):
         # cwes formatted as proper list: "cwe": ["CWE-918","CWE-1333"],
         testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/multiple_cwes2.json"))
-        parser = NpmAuditParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(6, len(findings))
         self.assertEqual(918, findings[0].cwe)
 
     def test_npm_audit_parser_with_one_criticle_vuln_has_null_as_cwe(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/cwe_null.json"))
-        parser = NpmAuditParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
         self.assertEqual(1035, findings[0].cwe)
@@ -73,8 +70,7 @@ class TestNpmAuditParser(DojoParserTestCase):
     def test_npm_audit_parser_empty_with_error(self):
         with self.assertRaises(ValueError) as context:
             testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/empty_with_error.json"))
-            parser = NpmAuditParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             testfile.close()
             self.assertTrue("npm audit report contains errors:" in str(context.exception))
             self.assertTrue("ENOAUDIT" in str(context.exception))
@@ -82,8 +78,7 @@ class TestNpmAuditParser(DojoParserTestCase):
     def test_npm_audit_parser_many_vuln_npm7(self):
         with self.assertRaises(ValueError) as context:
             testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/many_vuln_npm7.json"))
-            parser = NpmAuditParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             testfile.close()
             self.assertTrue("npm7 with auditReportVersion 2 or higher not yet supported" in str(context.exception))
             self.assertEqual(findings, None)

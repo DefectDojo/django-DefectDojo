@@ -5,10 +5,11 @@ from dojo.models import Test, Engagement, Product
 
 class TestNexposeParser(DojoParserTestCase):
 
+    parser = NexposeParser()
+
     def test_nexpose_parser_has_no_finding(self):
         testfile = open("unittests/scans/nexpose/no_vuln.xml")
-        parser = NexposeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
 
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
@@ -26,8 +27,7 @@ class TestNexposeParser(DojoParserTestCase):
         test.engagement = Engagement()
         test.engagement.product = Product()
         testfile = open("unittests/scans/nexpose/many_vulns.xml")
-        parser = NexposeParser()
-        findings = parser.get_findings(testfile, test)
+        findings = self.parser.get_findings(testfile, test)
         testfile.close()
 
         for finding in findings:
@@ -133,9 +133,7 @@ class TestNexposeParser(DojoParserTestCase):
 
     def test_nexpose_parser_tests_outside_endpoint(self):
         testfile = open("unittests/scans/nexpose/report_auth.xml")
-        parser = NexposeParser()
-
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -165,8 +163,7 @@ class TestNexposeParser(DojoParserTestCase):
 
     def test_nexpose_parser_dns(self):
         testfile = open("unittests/scans/nexpose/dns.xml")
-        parser = NexposeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
 
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:

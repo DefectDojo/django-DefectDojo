@@ -4,17 +4,17 @@ from dojo.tools.clair.parser import ClairParser
 
 class TestClairParser(DojoParserTestCase):
 
+    parser = ClairParser()
+
     def test_no_findings(self):
         my_file_handle = open("unittests/scans/clair/empty.json")
-        parser = ClairParser()
-        findings = parser.get_findings(my_file_handle, None)
+        findings = self.parser.get_findings(my_file_handle, None)
         my_file_handle.close()
         self.assertEqual(0, len(findings))
 
     def test_many_findings(self):
         my_file_handle = open("unittests/scans/clair/many_vul.json")
-        parser = ClairParser()
-        findings = parser.get_findings(my_file_handle, None)
+        findings = self.parser.get_findings(my_file_handle, None)
         my_file_handle.close()
         self.assertEqual(35, len(findings))
         finding = findings[0]

@@ -7,10 +7,11 @@ from dojo.tools.burp_graphql.parser import BurpGraphQLParser
 
 class TestBurpGraphQLParser(DojoParserTestCase):
 
+    parser = BurpGraphQLParser()
+
     def test_burp_one_finding(self):
         with open(path.join(path.dirname(__file__), "../scans/burp_graphql/one_finding.json")) as test_file:
-            parser = BurpGraphQLParser()
-            findings = parser.get_findings(test_file, Test())
+            findings = self.parser.get_findings(test_file, Test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
@@ -34,8 +35,7 @@ class TestBurpGraphQLParser(DojoParserTestCase):
 
     def test_burp_two_findings(self):
         with open(path.join(path.dirname(__file__), "../scans/burp_graphql/two_findings.json")) as test_file:
-            parser = BurpGraphQLParser()
-            findings = parser.get_findings(test_file, Test())
+            findings = self.parser.get_findings(test_file, Test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
@@ -51,27 +51,23 @@ class TestBurpGraphQLParser(DojoParserTestCase):
     def test_burp_no_findings(self):
         with open(path.join(path.dirname(__file__), "../scans/burp_graphql/no_findings.json")) as test_file:
 
-            parser = BurpGraphQLParser()
-            findings = parser.get_findings(test_file, Test())
+            findings = self.parser.get_findings(test_file, Test())
             self.assertEqual(0, len(findings))
 
     def test_burp_null_title(self):
         with open(path.join(path.dirname(__file__), "../scans/burp_graphql/null_title.json")) as test_file:
 
             with self.assertRaises(ValueError):
-                parser = BurpGraphQLParser()
-                findings = parser.get_findings(test_file, Test())
+                findings = self.parser.get_findings(test_file, Test())
 
     def test_burp_null_request_segments(self):
         with open(path.join(path.dirname(__file__), "../scans/burp_graphql/null_request_segments.json")) as test_file:
-            parser = BurpGraphQLParser()
-            findings = parser.get_findings(test_file, Test())
+            findings = self.parser.get_findings(test_file, Test())
             self.assertEqual(1, len(findings))
 
     def test_burp_null_data(self):
         with open(path.join(path.dirname(__file__), "../scans/burp_graphql/null_data.json")) as test_file:
-            parser = BurpGraphQLParser()
-            findings = parser.get_findings(test_file, Test())
+            findings = self.parser.get_findings(test_file, Test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()

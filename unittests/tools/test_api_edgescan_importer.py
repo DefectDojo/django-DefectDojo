@@ -1,5 +1,5 @@
 import json
-from ..dojo_test_case import DojoParserTestCase
+from ..dojo_test_case import DojoTestCase
 from unittest.mock import patch
 from django.core.exceptions import ValidationError
 
@@ -7,7 +7,7 @@ from dojo.models import Test, Engagement, Product, Product_API_Scan_Configuratio
 from dojo.tools.api_edgescan.importer import EdgescanImporter
 
 
-class TestEdgescanImporter(DojoParserTestCase):
+class TestEdgescanImporter(DojoTestCase):
 
     @classmethod
     def setUpTestData(cls):

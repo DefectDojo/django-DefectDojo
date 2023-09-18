@@ -5,16 +5,16 @@ from dojo.models import Test
 
 class TestTestsslParser(DojoParserTestCase):
 
+    parser = TestsslParser()
+
     def test_parse_file_with_no_vuln_has_no_finding(self):
         testfile = open("unittests/scans/testssl/defectdojo_no_vuln.csv")
-        parser = TestsslParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
         testfile = open("unittests/scans/testssl/defectdojo_one_vuln.csv")
-        parser = TestsslParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -22,8 +22,7 @@ class TestTestsslParser(DojoParserTestCase):
 
     def test_parse_file_with_many_vuln_has_many_findings(self):
         testfile = open("unittests/scans/testssl/defectdojo_many_vuln.csv")
-        parser = TestsslParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -46,8 +45,7 @@ class TestTestsslParser(DojoParserTestCase):
 
     def test_parse_file_with_many_cves(self):
         testfile = open("unittests/scans/testssl/many_cves.csv")
-        parser = TestsslParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -67,8 +65,7 @@ class TestTestsslParser(DojoParserTestCase):
 
     def test_parse_file_with_31_version(self):
         testfile = open("unittests/scans/testssl/demo.csv")
-        parser = TestsslParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -76,8 +73,7 @@ class TestTestsslParser(DojoParserTestCase):
 
     def test_parse_file_with_31_version2(self):
         testfile = open("unittests/scans/testssl/demo2.csv")
-        parser = TestsslParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -85,8 +81,7 @@ class TestTestsslParser(DojoParserTestCase):
 
     def test_parse_file_with_one_vuln_has_overall_medium(self):
         testfile = open("unittests/scans/testssl/overall_medium.csv")
-        parser = TestsslParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -94,8 +89,7 @@ class TestTestsslParser(DojoParserTestCase):
 
     def test_parse_file_with_one_vuln_has_overall_critical(self):
         testfile = open("unittests/scans/testssl/overall_critical.csv")
-        parser = TestsslParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -103,8 +97,7 @@ class TestTestsslParser(DojoParserTestCase):
 
     def test_parse_file_with_one_vuln_has_failed_target(self):
         testfile = open("unittests/scans/testssl/failed_target.csv")
-        parser = TestsslParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()

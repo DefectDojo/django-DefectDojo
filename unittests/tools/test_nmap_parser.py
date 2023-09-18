@@ -7,10 +7,11 @@ from dojo.tools.nmap.parser import NmapParser
 
 class TestNmapParser(DojoParserTestCase):
 
+    parser = NmapParser()
+
     def test_parse_file_with_no_open_ports_has_no_findings(self):
         testfile = open("unittests/scans/nmap/nmap_0port.xml")
-        parser = NmapParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -18,8 +19,7 @@ class TestNmapParser(DojoParserTestCase):
 
     def test_parse_file_with_single_open_ports_has_single_finding(self):
         testfile = open("unittests/scans/nmap/nmap_1port.xml")
-        parser = NmapParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -38,8 +38,7 @@ class TestNmapParser(DojoParserTestCase):
 
     def test_parse_file_with_multiple_open_ports_has_multiple_finding(self):
         testfile = open("unittests/scans/nmap/nmap_multiple_port.xml")
-        parser = NmapParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -58,8 +57,7 @@ class TestNmapParser(DojoParserTestCase):
 
     def test_parse_file_with_script_vulner(self):
         testfile = open("unittests/scans/nmap/nmap_script_vulners.xml")
-        parser = NmapParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -84,8 +82,7 @@ class TestNmapParser(DojoParserTestCase):
 
     def test_parse_issue4406(self):
         testfile = open("unittests/scans/nmap/issue4406.xml")
-        parser = NmapParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()

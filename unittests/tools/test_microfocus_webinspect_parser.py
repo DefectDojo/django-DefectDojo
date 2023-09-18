@@ -5,6 +5,8 @@ from dojo.models import Test, Engagement, Product
 
 class TestMicrofocusWebinspectParser(DojoParserTestCase):
 
+    parser = MicrofocusWebinspectParser()
+
     def test_parse_file_with_no_vuln_has_no_findings(self):
         test = Test()
         test.engagement = Engagement()
@@ -12,8 +14,7 @@ class TestMicrofocusWebinspectParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/microfocus_webinspect/Webinspect_no_vuln.xml"
         )
-        parser = MicrofocusWebinspectParser()
-        findings = parser.get_findings(testfile, test)
+        findings = self.parser.get_findings(testfile, test)
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_findings(self):
@@ -23,8 +24,7 @@ class TestMicrofocusWebinspectParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/microfocus_webinspect/Webinspect_one_vuln.xml"
         )
-        parser = MicrofocusWebinspectParser()
-        findings = parser.get_findings(testfile, test)
+        findings = self.parser.get_findings(testfile, test)
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -44,8 +44,7 @@ class TestMicrofocusWebinspectParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/microfocus_webinspect/Webinspect_many_vuln.xml"
         )
-        parser = MicrofocusWebinspectParser()
-        findings = parser.get_findings(testfile, test)
+        findings = self.parser.get_findings(testfile, test)
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -74,8 +73,7 @@ class TestMicrofocusWebinspectParser(DojoParserTestCase):
 
     def test_parse_file_version_18_20(self):
         testfile = open("unittests/scans/microfocus_webinspect/Webinspect_V18_20.xml")
-        parser = MicrofocusWebinspectParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()

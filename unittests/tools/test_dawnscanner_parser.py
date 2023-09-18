@@ -7,10 +7,12 @@ from dojo.tools.dawnscanner.parser import DawnScannerParser
 
 
 class TestDawnScannerParser(DojoParserTestCase):
+
+    parser = DawnScannerParser()
+
     def test_burp_with_one_vuln_has_one_finding(self):
         with open(path.join(path.dirname(__file__), "../scans/dawnscanner/dawnscanner_v1.6.9.json")) as test_file:
-            parser = DawnScannerParser()
-            findings = parser.get_findings(test_file, Test())
+            findings = self.parser.get_findings(test_file, Test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()

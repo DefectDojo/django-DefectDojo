@@ -4,10 +4,12 @@ from dojo.models import Test
 
 
 class TestOutpost24Parser(DojoParserTestCase):
+
+    parser = Outpost24Parser()
+
     def assert_file_has_n_items(self, filename, item_count):
         with open(filename) as file:
-            parser = Outpost24Parser()
-            findings = parser.get_findings(file, Test())
+            findings = self.parser.get_findings(file, Test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()

@@ -7,19 +7,20 @@ from dojo.tools.horusec.parser import HorusecParser
 
 
 class TestHorusecParser(DojoParserTestCase):
+
+    parser = HorusecParser()
+
     def test_get_findings(self):
         """Version 2.6.3 with big project in Python"""
         with open(path.join(path.dirname(__file__), "../scans/horusec/version_2.6.3.json")) as testfile:
-            parser = HorusecParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             self.assertEqual(267, len(findings))
             self.assertEqual('2021-10-19', findings[0].date.strftime("%Y-%m-%d"))
 
     def test_get_tests(self):
         """Version 2.6.3 with big project in Python"""
         with open(path.join(path.dirname(__file__), "../scans/horusec/version_2.6.3.json")) as testfile:
-            parser = HorusecParser()
-            tests = parser.get_tests("Horusec Scan", testfile)
+            tests = self.parser.get_tests("Horusec Scan", testfile)
             self.assertEqual(1, len(tests))
             test = tests[0]
             self.assertEqual('2.6.3', test.version)
@@ -50,8 +51,7 @@ class TestHorusecParser(DojoParserTestCase):
     def test_get_tests_ok(self):
         """Version 2.6.3 with big project in Python"""
         with open(path.join(path.dirname(__file__), "../scans/horusec/horres3.json")) as testfile:
-            parser = HorusecParser()
-            tests = parser.get_tests("Horusec Scan", testfile)
+            tests = self.parser.get_tests("Horusec Scan", testfile)
             self.assertEqual(1, len(tests))
             test = tests[0]
             self.assertEqual(266, len(test.findings))
@@ -82,8 +82,7 @@ class TestHorusecParser(DojoParserTestCase):
     def test_get_tests_issue_6258(self):
         """"""
         with open(path.join(path.dirname(__file__), "../scans/horusec/issue_6258.json")) as testfile:
-            parser = HorusecParser()
-            tests = parser.get_tests("Horusec Scan", testfile)
+            tests = self.parser.get_tests("Horusec Scan", testfile)
             self.assertEqual(1, len(tests))
             test = tests[0]
             self.assertEqual(14, len(test.findings))
@@ -118,8 +117,7 @@ class TestHorusecParser(DojoParserTestCase):
     def test_get_tests_pr_6563(self):
         """"""
         with open(path.join(path.dirname(__file__), "../scans/horusec/pr_6563.json")) as testfile:
-            parser = HorusecParser()
-            tests = parser.get_tests("Horusec Scan", testfile)
+            tests = self.parser.get_tests("Horusec Scan", testfile)
             self.assertEqual(1, len(tests))
             test = tests[0]
             self.assertEqual(1, len(test.findings))

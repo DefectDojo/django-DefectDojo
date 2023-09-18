@@ -4,17 +4,18 @@ from dojo.tools.zap.parser import ZapParser
 
 
 class TestZapParser(DojoParserTestCase):
+
+    parser = ZapParser()
+
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/zap/empty_2.9.0.xml")
-        parser = ZapParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertIsInstance(findings, list)
         self.assertEqual(0, len(findings))
 
     def test_parse_some_findings(self):
         testfile = open("unittests/scans/zap/some_2.9.0.xml")
-        parser = ZapParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertIsInstance(findings, list)
         self.assertEqual(7, len(findings))
         for finding in findings:
@@ -24,8 +25,7 @@ class TestZapParser(DojoParserTestCase):
 
     def test_parse_some_findings_0(self):
         testfile = open("unittests/scans/zap/0_zap_sample.xml")
-        parser = ZapParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertIsInstance(findings, list)
         self.assertEqual(4, len(findings))
         for finding in findings:
@@ -35,8 +35,7 @@ class TestZapParser(DojoParserTestCase):
 
     def test_parse_some_findings_1(self):
         testfile = open("unittests/scans/zap/1_zap_sample_0_and_new_absent.xml")
-        parser = ZapParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertIsInstance(findings, list)
         self.assertEqual(4, len(findings))
         for finding in findings:
@@ -46,8 +45,7 @@ class TestZapParser(DojoParserTestCase):
 
     def test_parse_some_findings_2(self):
         testfile = open("unittests/scans/zap/2_zap_sample_0_and_new_endpoint.xml")
-        parser = ZapParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertIsInstance(findings, list)
         self.assertEqual(4, len(findings))
         for finding in findings:
@@ -57,8 +55,7 @@ class TestZapParser(DojoParserTestCase):
 
     def test_parse_some_findings_3(self):
         testfile = open("unittests/scans/zap/3_zap_sampl_0_and_different_severities.xml")
-        parser = ZapParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertIsInstance(findings, list)
         self.assertEqual(4, len(findings))
         for finding in findings:
@@ -68,8 +65,7 @@ class TestZapParser(DojoParserTestCase):
 
     def test_parse_some_findings_5(self):
         testfile = open("unittests/scans/zap/5_zap_sample_one.xml")
-        parser = ZapParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertIsInstance(findings, list)
         self.assertEqual(2, len(findings))
         for finding in findings:
@@ -82,8 +78,7 @@ class TestZapParser(DojoParserTestCase):
         see: https://github.com/DefectDojo/django-DefectDojo/issues/4360
         """
         testfile = open("unittests/scans/zap/dvwa_baseline_dojo.xml")
-        parser = ZapParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertIsInstance(findings, list)
         self.assertEqual(19, len(findings))
         for finding in findings:
@@ -116,8 +111,7 @@ class TestZapParser(DojoParserTestCase):
         see: https://github.com/DefectDojo/django-DefectDojo/issues/4697
         """
         testfile = open("unittests/scans/zap/zap-results-first-scan.xml")
-        parser = ZapParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -157,8 +151,7 @@ class TestZapParser(DojoParserTestCase):
     def test_parse_juicy(self):
         """Generated with OWASP Juicy shop"""
         testfile = open("unittests/scans/zap/juicy2.xml")
-        parser = ZapParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -197,8 +190,7 @@ class TestZapParser(DojoParserTestCase):
 
     def test_parse_xml_plus_format(self):
         testfile = open("unittests/scans/zap/zap-xml-plus-format.xml")
-        parser = ZapParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()

@@ -5,11 +5,13 @@ from pathlib import Path
 
 
 class TestBlackduckComponentRiskParser(DojoParserTestCase):
+
+    parser = BlackduckComponentRiskParser()
+
     def test_blackduck_enhanced_zip_upload(self):
         testfile = Path(
             get_unit_tests_path() + "/scans/blackduck_component_risk/"
             "blackduck_hub_component_risk.zip"
         )
-        parser = BlackduckComponentRiskParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(12, len(findings))

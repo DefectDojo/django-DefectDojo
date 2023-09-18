@@ -5,24 +5,24 @@ from dojo.tools.rubocop.parser import RubocopParser
 
 
 class TestRubocopParser(DojoParserTestCase):
+
+    parser = RubocopParser()
+
     def test_parser_empty(self):
         testfile = open("unittests/scans/rubocop/empty.json")
-        parser = RubocopParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_parser_zero_findings(self):
         testfile = open("unittests/scans/rubocop/zero_vulns.json")
-        parser = RubocopParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_parser_one_vuln(self):
         testfile = open("unittests/scans/rubocop/one_finding.json")
-        parser = RubocopParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
         with self.subTest(i=0):
@@ -35,8 +35,7 @@ class TestRubocopParser(DojoParserTestCase):
 
     def test_parser_many_vulns(self):
         testfile = open("unittests/scans/rubocop/many_vulns.json")
-        parser = RubocopParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(7, len(findings))
         with self.subTest(i=0):

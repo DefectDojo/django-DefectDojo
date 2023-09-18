@@ -35,6 +35,9 @@ def empty_list(self, *args, **kwargs):
 
 
 class TestApiSonarQubeParser(DojoParserTestCase):
+
+    parser = ApiSonarQubeParser()
+
     def setUp(self):
         product_type, _ = Product_Type.objects.get_or_create(name="Fake unit tests")
         product, _ = Product.objects.get_or_create(name="product", prod_type=product_type)
@@ -55,6 +58,5 @@ class TestApiSonarQubeParser(DojoParserTestCase):
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_get_findings(self):
-        parser = ApiSonarQubeParser()
-        findings = parser.get_findings(None, self.test)
+        findings = self.parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))

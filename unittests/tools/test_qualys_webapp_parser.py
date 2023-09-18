@@ -5,10 +5,11 @@ from dojo.models import Test
 
 class TestQualysWebAppParser(DojoParserTestCase):
 
+    parser = QualysWebAppParser()
+
     def test_qualys_webapp_parser_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/qualys_webapp/qualys_webapp_no_vuln.xml")
-        parser = QualysWebAppParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
@@ -19,8 +20,7 @@ class TestQualysWebAppParser(DojoParserTestCase):
 
     def test_qualys_webapp_parser_with_one_criticle_vuln_has_one_findings(self):
         testfile = open("unittests/scans/qualys_webapp/qualys_webapp_one_vuln.xml")
-        parser = QualysWebAppParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
@@ -33,8 +33,7 @@ class TestQualysWebAppParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/qualys_webapp/qualys_webapp_many_vuln.xml"
         )
-        parser = QualysWebAppParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
@@ -47,8 +46,7 @@ class TestQualysWebAppParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/qualys_webapp/qualys_webapp_many_vuln.xml"
         )
-        parser = QualysWebAppParser()
-        findings = parser.get_findings(testfile, Test(), True)
+        findings = self.parser.get_findings(testfile, Test(), True)
         testfile.close()
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:

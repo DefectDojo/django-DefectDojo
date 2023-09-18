@@ -5,34 +5,31 @@ from dojo.models import Test
 
 class TestCheckovParser(DojoParserTestCase):
 
+    parser = CheckovParser()
+
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/checkov/checkov-report-0-vuln.json")
-        parser = CheckovParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_no_vuln_has_no_findings_v2(self):
         testfile = open("unittests/scans/checkov/checkov2-report-0-vuln.json")
-        parser = CheckovParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
         testfile = open("unittests/scans/checkov/checkov-report-1-vuln.json")
-        parser = CheckovParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open("unittests/scans/checkov/checkov-report-many-vuln.json")
-        parser = CheckovParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertTrue(len(findings) > 2)
 
     def test_parse_file_with_multiple_check_type_has_multiple_check_type(self):
         testfile = open("unittests/scans/checkov/checkov-report-multiple-check_type.json")
-        parser = CheckovParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
 
         # Number of findings
         self.assertEqual(13, len(findings))
@@ -81,8 +78,7 @@ class TestCheckovParser(DojoParserTestCase):
 
     def test_parse_file_with_specified_severity(self):
         testfile = open("unittests/scans/checkov/checkov-report-severity.json")
-        parser = CheckovParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(4, len(findings))
         self.assertEqual("Medium", findings[0].severity)
         self.assertEqual("Medium", findings[1].severity)

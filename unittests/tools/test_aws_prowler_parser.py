@@ -5,9 +5,11 @@ from dojo.models import Test
 
 
 class TestAwsProwlerParser(DojoParserTestCase):
+
+    parser = AWSProwlerParser()
+
     def setup(self, testfile):
-        parser = AWSProwlerParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         return findings
 

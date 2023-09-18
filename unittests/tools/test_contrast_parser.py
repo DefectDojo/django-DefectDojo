@@ -8,13 +8,14 @@ from dojo.tools.contrast.parser import ContrastParser
 
 class TestContrastParser(DojoParserTestCase):
 
+    parser = ContrastParser()
+
     def test_example_report(self):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
         testfile = open("unittests/scans/contrast/contrast-node-goat.csv")
-        parser = ContrastParser()
-        findings = parser.get_findings(testfile, test)
+        findings = self.parser.get_findings(testfile, test)
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -58,8 +59,7 @@ class TestContrastParser(DojoParserTestCase):
         test.engagement = Engagement()
         test.engagement.product = Product()
         testfile = open("unittests/scans/contrast/vulnerabilities2020-09-21.csv")
-        parser = ContrastParser()
-        findings = parser.get_findings(testfile, test)
+        findings = self.parser.get_findings(testfile, test)
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()

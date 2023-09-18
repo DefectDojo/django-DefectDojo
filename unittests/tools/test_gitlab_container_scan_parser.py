@@ -5,16 +5,16 @@ from dojo.models import Test
 
 
 class TestGitlabContainerScanParser(DojoParserTestCase):
+    parser = GitlabContainerScanParser()
+
     def test_gitlab_container_scan_parser_with_no_vuln_has_no_findings(self):
         with open("unittests/scans/gitlab_container_scan/gl-container-scanning-report-0-vuln.json") as testfile:
-            parser = GitlabContainerScanParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_gitlab_container_scan_parser_with_one_vuln_has_one_findings_v14(self):
         with open("unittests/scans/gitlab_container_scan/gl-container-scanning-report-1-vuln_v14.json") as testfile:
-            parser = GitlabContainerScanParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -32,8 +32,7 @@ class TestGitlabContainerScanParser(DojoParserTestCase):
 
     def test_gitlab_container_scan_parser_with_one_vuln_has_one_findings_v15(self):
         with open("unittests/scans/gitlab_container_scan/gl-container-scanning-report-1-vuln_v15.json") as testfile:
-            parser = GitlabContainerScanParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -51,8 +50,7 @@ class TestGitlabContainerScanParser(DojoParserTestCase):
 
     def test_gitlab_container_scan_parser_with_five_vuln_has_five_findings_v14(self):
         with open("unittests/scans/gitlab_container_scan/gl-container-scanning-report-5-vuln_v14.json") as testfile:
-            parser = GitlabContainerScanParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -60,8 +58,7 @@ class TestGitlabContainerScanParser(DojoParserTestCase):
 
     def test_gitlab_container_scan_parser_with_five_vuln_has_five_findings_v15(self):
         with open("unittests/scans/gitlab_container_scan/gl-container-scanning-report-5-vuln_v15.json") as testfile:
-            parser = GitlabContainerScanParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -69,8 +66,7 @@ class TestGitlabContainerScanParser(DojoParserTestCase):
 
     def test_gitlab_container_scan_parser_with_fless_data_v14(self):
         with open("unittests/scans/gitlab_container_scan/issue6639_v14.json") as testfile:
-            parser = GitlabContainerScanParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -104,8 +100,7 @@ class TestGitlabContainerScanParser(DojoParserTestCase):
 
     def test_gitlab_container_scan_parser_with_fless_data_v15(self):
         with open("unittests/scans/gitlab_container_scan/issue6639_v15.json") as testfile:
-            parser = GitlabContainerScanParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()

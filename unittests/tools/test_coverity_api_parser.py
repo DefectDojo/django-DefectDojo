@@ -6,29 +6,28 @@ from dojo.tools.coverity_api.parser import CoverityApiParser
 
 
 class TestZapParser(DojoParserTestCase):
+
+    parser = CoverityApiParser()
+
     def test_parse_wrong_file(self):
         with self.assertRaises(ValueError) as ve:
             testfile = open("unittests/scans/coverity_api/wrong.json")
-            parser = CoverityApiParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
 
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/coverity_api/empty.json")
-        parser = CoverityApiParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_only_quality(self):
         """This report only have quality findings"""
         testfile = open("unittests/scans/coverity_api/only_quality.json")
-        parser = CoverityApiParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_some_findings(self):
         testfile = open("unittests/scans/coverity_api/few_findings.json")
-        parser = CoverityApiParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertIsInstance(findings, list)
         self.assertEqual(1, len(findings))
         with self.subTest(i=0):
@@ -44,8 +43,7 @@ class TestZapParser(DojoParserTestCase):
 
     def test_parse_few_findings_triaged_as_bug(self):
         testfile = open("unittests/scans/coverity_api/few_findings_triaged_as_bug.json")
-        parser = CoverityApiParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertIsInstance(findings, list)
         self.assertEqual(1, len(findings))
         with self.subTest(i=0):
@@ -61,8 +59,7 @@ class TestZapParser(DojoParserTestCase):
 
     def test_parse_some_findings_mitigated(self):
         testfile = open("unittests/scans/coverity_api/few_findings_mitigated.json")
-        parser = CoverityApiParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertIsInstance(findings, list)
         self.assertEqual(20, len(findings))
         with self.subTest(i=0):

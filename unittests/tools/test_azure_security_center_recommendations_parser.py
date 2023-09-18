@@ -6,16 +6,16 @@ from dojo.models import Test
 
 class TestAzureSecurityCenterRecommendationsParser(DojoParserTestCase):
 
+    parser = AzureSecurityCenterRecommendationsParser()
+
     def test_parse_file_with_no_findings(self):
         testfile = open("unittests/scans/azure_security_center_recommendations/zero_vulns.csv")
-        parser = AzureSecurityCenterRecommendationsParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_multiple_findings(self):
         testfile = open("unittests/scans/azure_security_center_recommendations/many_vulns.csv")
-        parser = AzureSecurityCenterRecommendationsParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
 
         self.assertEqual(3, len(findings))
 

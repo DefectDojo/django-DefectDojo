@@ -5,22 +5,21 @@ from dojo.models import Test
 
 class TestXanitizerParser(DojoParserTestCase):
 
+    parser = XanitizerParser()
+
     def test_parse_file_with_no_findings(self):
         testfile = open("unittests/scans/xanitizer/no-findings.xml")
-        parser = XanitizerParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_findings(self):
         testfile = open("unittests/scans/xanitizer/one-findings.xml")
-        parser = XanitizerParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
 
     def test_parse_file_with_multiple_findings(self):
         testfile = open("unittests/scans/xanitizer/multiple-findings.xml")
-        parser = XanitizerParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(9, len(findings))
         finding = findings[5]
         self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
@@ -30,6 +29,5 @@ class TestXanitizerParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/xanitizer/multiple-findings-no-details.xml"
         )
-        parser = XanitizerParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(9, len(findings))

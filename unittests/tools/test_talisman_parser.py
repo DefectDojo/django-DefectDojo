@@ -5,17 +5,18 @@ from ..dojo_test_case import DojoParserTestCase
 
 
 class TestTalismanParser(DojoParserTestCase):
+
+    parser = TalismanParser()
+
     def test_parse_empty(self):
         testfile = open("unittests/scans/talisman/no_finding.json")
-        parser = TalismanParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_parse_one_finding(self):
         testfile = open("unittests/scans/talisman/one_finding.json")
-        parser = TalismanParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
         finding = findings[0]
@@ -25,8 +26,7 @@ class TestTalismanParser(DojoParserTestCase):
 
     def test_parse_many_finding(self):
         testfile = open("unittests/scans/talisman/many_findings.json")
-        parser = TalismanParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(3, len(findings))
         finding = findings[0]

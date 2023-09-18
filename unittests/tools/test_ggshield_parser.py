@@ -5,17 +5,17 @@ from dojo.models import Test
 
 class TestGgshieldParser(DojoParserTestCase):
 
+    parser = GgshieldParser()
+
     def test_parse_empty(self):
         testfile = open("unittests/scans/ggshield/no_finding.json")
-        parser = GgshieldParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_parse_one_finding(self):
         testfile = open("unittests/scans/ggshield/one_finding.json")
-        parser = GgshieldParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
         finding = findings[0]
@@ -26,8 +26,7 @@ class TestGgshieldParser(DojoParserTestCase):
 
     def test_parse_many_finding(self):
         testfile = open("unittests/scans/ggshield/many_findings.json")
-        parser = GgshieldParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(2, len(findings))
         finding = findings[0]

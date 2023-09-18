@@ -6,10 +6,12 @@ from dojo.models import Test, Product_API_Scan_Configuration
 
 
 class TestApiBugcrowdParser(DojoParserTestCase):
+
+    parser = ApiBugcrowdParser()
+
     def test_parse_file_with_no_vuln_has_no_findings(self):
         with open("unittests/scans/api_bugcrowd/bugcrowd_empty.json") as testfile:
-            parser = ApiBugcrowdParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_findings(self):
@@ -23,11 +25,10 @@ class TestApiBugcrowdParser(DojoParserTestCase):
             # - Bug Url: https://example.com/
 
             # Bugcrowd link: /submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a"""
-            parser = ApiBugcrowdParser()
             test = Test()
             test.api_scan_configuration = Product_API_Scan_Configuration()
             test.api_scan_configuration.service_key_1 = "example"
-            findings = parser.get_findings(testfile, test)
+            findings = self.parser.get_findings(testfile, test)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual(finding.title, "JWT Alg none")
@@ -51,8 +52,7 @@ class TestApiBugcrowdParser(DojoParserTestCase):
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         with open("unittests/scans/api_bugcrowd/bugcrowd_many.json") as testfile:
-            parser = ApiBugcrowdParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
             finding_1 = findings[0]
             finding_2 = findings[1]
@@ -127,8 +127,7 @@ class TestApiBugcrowdParser(DojoParserTestCase):
             # - Bug Url: https://example.com/
 
             # Bugcrowd link: /submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a"""
-            parser = ApiBugcrowdParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual(finding.title, "JWT Alg none")
@@ -148,8 +147,7 @@ class TestApiBugcrowdParser(DojoParserTestCase):
 
     def test_parse_file_with_broken_bug_url(self):
         with open("unittests/scans/api_bugcrowd/bugcrowd_broken_bug_url.json") as testfile:
-            parser = ApiBugcrowdParser()
             with self.assertLogs('dojo.tools.api_bugcrowd.parser', level='ERROR') as cm:
-                parser.get_findings(testfile, Test())
+                self.parser.get_findings(testfile, Test())
             self.assertEqual(cm.output, ['ERROR:dojo.tools.api_bugcrowd.parser:'
                 'Error parsing bugcrowd bug_url : curl https://example.com/'])

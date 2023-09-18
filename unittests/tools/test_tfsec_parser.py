@@ -5,16 +5,16 @@ from dojo.models import Test
 
 class TestTFSecParser(DojoParserTestCase):
 
+    parser = TFSecParser()
+
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/tfsec/no_findings.json")
-        parser = TFSecParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_one_finding_legacy(self):
         testfile = open("unittests/scans/tfsec/one_finding_legacy.json")
-        parser = TFSecParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
 
         with self.subTest(i=0):
@@ -32,8 +32,7 @@ class TestTFSecParser(DojoParserTestCase):
 
     def test_parse_many_findings_legacy(self):
         testfile = open("unittests/scans/tfsec/many_findings_legacy.json")
-        parser = TFSecParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(3, len(findings))
 
         with self.subTest(i=0):
@@ -77,8 +76,7 @@ class TestTFSecParser(DojoParserTestCase):
 
     def test_parse_many_findings_current(self):
         testfile = open("unittests/scans/tfsec/many_findings_current.json")
-        parser = TFSecParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(13, len(findings))
 
         finding = findings[0]

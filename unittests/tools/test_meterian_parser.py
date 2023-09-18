@@ -5,17 +5,17 @@ from dojo.tools.meterian.parser import MeterianParser
 
 class TestMeterianParser(DojoParserTestCase):
 
+    parser = MeterianParser()
+
     def test_meterianParser_invalid_security_report_raise_ValueError_exception(self):
         with self.assertRaises(ValueError):
             testfile = open("unittests/scans/meterian/report_invalid.json")
-            parser = MeterianParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
 
     def test_meterianParser_report_has_no_finding(self):
         testfile = open("unittests/scans/meterian/report_no_vulns.json")
 
-        parser = MeterianParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
 
         self.assertEqual(0, len(findings))
@@ -23,8 +23,7 @@ class TestMeterianParser(DojoParserTestCase):
     def test_meterianParser_report_has_one_findings(self):
         testfile = open("unittests/scans/meterian/report_one_vuln.json")
 
-        parser = MeterianParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
 
         self.assertEqual(1, len(findings))
@@ -32,8 +31,7 @@ class TestMeterianParser(DojoParserTestCase):
     def test_meterianParser_report_has_many_findings(self):
         testfile = open("unittests/scans/meterian/report_many_vulns.json")
 
-        parser = MeterianParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
 
         self.assertEqual(20, len(findings))
@@ -41,8 +39,7 @@ class TestMeterianParser(DojoParserTestCase):
     def test_meterianParser_finding_has_fields(self):
         testfile = open("unittests/scans/meterian/report_one_vuln.json")
 
-        parser = MeterianParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
 
         finding = findings[0]
@@ -73,8 +70,7 @@ class TestMeterianParser(DojoParserTestCase):
     def test_meterianParser_finding_has_no_remediation(self):
         testfile = open("unittests/scans/meterian/report_one_vuln_no_remediation.json")
 
-        parser = MeterianParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
 
         finding = findings[0]
@@ -85,8 +81,7 @@ class TestMeterianParser(DojoParserTestCase):
     def test_meterianParser_dual_language_report_has_two_findins(self):
         testfile = open("unittests/scans/meterian/report_multi_language.json")
 
-        parser = MeterianParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
 
         self.assertEqual(2, len(findings))

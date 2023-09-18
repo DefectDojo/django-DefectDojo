@@ -6,10 +6,11 @@ from dojo.models import Test
 
 class TestArachniParser(DojoParserTestCase):
 
+    parser = ArachniParser()
+
     def test_parser_has_one_finding(self):
         with open("unittests/scans/arachni/arachni.afr.json") as testfile:
-            parser = ArachniParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
@@ -23,8 +24,7 @@ class TestArachniParser(DojoParserTestCase):
 
     def test_parser_has_many_finding(self):
         with open("unittests/scans/arachni/dd.com.afr.json") as testfile:
-            parser = ArachniParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
@@ -54,8 +54,7 @@ class TestArachniParser(DojoParserTestCase):
 
     def test_parser_has_many_finding2(self):
         with open("unittests/scans/arachni/js.com.afr.json") as testfile:
-            parser = ArachniParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()

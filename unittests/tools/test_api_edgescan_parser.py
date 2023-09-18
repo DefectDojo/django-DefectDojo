@@ -6,41 +6,36 @@ from dojo.models import Test
 
 class TestApiEdgescanParser(DojoParserTestCase):
 
+    parser = ApiEdgescanParser()
+
     def test_get_scan_types(self):
-        parser = ApiEdgescanParser()
-        self.assertEqual(parser.get_scan_types(), ["Edgescan Scan"])
+        self.assertEqual(self.parser.get_scan_types(), ["Edgescan Scan"])
 
     def test_get_label_for_scan_types(self):
         scan_type = "Edgescan Scan"
-        parser = ApiEdgescanParser()
-        self.assertEqual(parser.get_label_for_scan_types(scan_type), "Edgescan Scan")
+        self.assertEqual(self.parser.get_label_for_scan_types(scan_type), "Edgescan Scan")
 
     def get_description_for_scan_types(self):
         scan_type = "Edgescan Scan"
-        parser = ApiEdgescanParser()
         self.assertEqual(
-            parser.get_description_for_scan_types(scan_type),
+            self.parser.get_description_for_scan_types(scan_type),
             "Edgescan findings can be imported by API or JSON file."
         )
 
     def test_requires_file(self):
-        parser = ApiEdgescanParser()
-        self.assertEqual(parser.requires_file("scan_type"), False)
+        self.assertEqual(self.parser.requires_file("scan_type"), False)
 
     def test_requires_tool_type(self):
-        parser = ApiEdgescanParser()
-        self.assertEqual(parser.requires_tool_type("scan_type"), "Edgescan")
+        self.assertEqual(self.parser.requires_tool_type("scan_type"), "Edgescan")
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         with open("unittests/scans/api_edgescan/no_vuln.json") as testfile:
-            parser = ApiEdgescanParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_findings(self):
         with open("unittests/scans/api_edgescan/one_vuln.json") as testfile:
-            parser = ApiEdgescanParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual(finding.title, "Cross-site scripting (reflected)")
@@ -62,8 +57,7 @@ class TestApiEdgescanParser(DojoParserTestCase):
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         with open("unittests/scans/api_edgescan/many_vulns.json") as testfile:
-            parser = ApiEdgescanParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))
             finding_1 = findings[0]
             finding_2 = findings[1]

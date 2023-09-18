@@ -6,18 +6,18 @@ from dojo.tools.anchore_grype.parser import AnchoreGrypeParser
 
 class TestAnchoreGrypeParser(DojoParserTestCase):
 
+    parser = AnchoreGrypeParser()
+
     def test_parser_has_no_findings(self):
         testfile = open("unittests/scans/anchore_grype/no_vuln.json")
-        parser = AnchoreGrypeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_parser_has_many_findings(self):
         found = False
         testfile = open("unittests/scans/anchore_grype/many_vulns.json")
-        parser = AnchoreGrypeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1509, len(findings))
         for finding in findings:
@@ -39,8 +39,7 @@ class TestAnchoreGrypeParser(DojoParserTestCase):
     def test_grype_parser_with_one_criticle_vuln_has_one_findings(self):
         found = False
         testfile = open("unittests/scans/anchore_grype/many_vulns2.json")
-        parser = AnchoreGrypeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1567, len(findings))
         for finding in findings:
@@ -61,8 +60,7 @@ class TestAnchoreGrypeParser(DojoParserTestCase):
     def test_grype_parser_with_many_vulns3(self):
         found = False
         testfile = open("unittests/scans/anchore_grype/many_vulns3.json")
-        parser = AnchoreGrypeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(327, len(findings))
         for finding in findings:
@@ -83,8 +81,7 @@ class TestAnchoreGrypeParser(DojoParserTestCase):
     def test_grype_parser_with_new_matcher_list(self):
         found = False
         testfile = open("unittests/scans/anchore_grype/many_vulns4.json")
-        parser = AnchoreGrypeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(9, len(findings))
         for finding in findings:
@@ -104,8 +101,7 @@ class TestAnchoreGrypeParser(DojoParserTestCase):
 
     def test_check_all_fields(self):
         testfile = open("unittests/scans/anchore_grype/check_all_fields.json")
-        parser = AnchoreGrypeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(5, len(findings))
 

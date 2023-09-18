@@ -5,14 +5,15 @@ from dojo.models import Test
 
 class TestDependencyTrackParser(DojoParserTestCase):
 
+    parser = DependencyTrackParser()
+
     def test_dependency_track_parser_with_empty_list_for_findings_key_has_no_findings(
         self,
     ):
         testfile = open(
             get_unit_tests_path() + "/scans/dependency_track/no_findings_because_findings_key_is_empty_list.json"
         )
-        parser = DependencyTrackParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
@@ -20,8 +21,7 @@ class TestDependencyTrackParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/dependency_track/no_findings_because_findings_key_is_missing.json"
         )
-        parser = DependencyTrackParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
@@ -29,8 +29,7 @@ class TestDependencyTrackParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/dependency_track/no_findings_because_findings_key_is_null.json"
         )
-        parser = DependencyTrackParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
@@ -38,8 +37,7 @@ class TestDependencyTrackParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/dependency_track/many_findings.json"
         )
-        parser = DependencyTrackParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(4, len(findings))
 
@@ -57,8 +55,7 @@ class TestDependencyTrackParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/dependency_track/one_finding.json"
         )
-        parser = DependencyTrackParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
 
@@ -66,8 +63,7 @@ class TestDependencyTrackParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/dependency_track/dependency_track_3.8.0_2021-01-18.json"
         )
-        parser = DependencyTrackParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(9, len(findings))
         self.assertTrue(all(item.file_path is not None for item in findings))
@@ -77,8 +73,7 @@ class TestDependencyTrackParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/dependency_track/many_findings_with_alias.json"
         )
-        parser = DependencyTrackParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
 
         self.assertEqual(12, len(findings))
@@ -90,8 +85,7 @@ class TestDependencyTrackParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/dependency_track/many_findings_with_empty_alias.json"
         )
-        parser = DependencyTrackParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
 
         self.assertEqual(12, len(findings))
@@ -99,8 +93,7 @@ class TestDependencyTrackParser(DojoParserTestCase):
 
     def test_dependency_track_parser_findings_with_cvssV3_score(self):
         with open(f"{get_unit_tests_path()}/scans/dependency_track/many_findings_with_cvssV3_score.json") as testfile:
-            parser = DependencyTrackParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(12, len(findings))
         self.assertTrue(all(item.file_path is not None for item in findings))
         self.assertTrue(all(item.vuln_id_from_tool is not None for item in findings))

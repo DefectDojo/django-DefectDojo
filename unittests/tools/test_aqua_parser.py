@@ -5,16 +5,17 @@ from collections import Counter
 
 
 class TestAquaParser(DojoParserTestCase):
+
+    parser = AquaParser()
+
     def test_aqua_parser_has_no_finding(self):
         testfile = open("unittests/scans/aqua/no_vuln.json")
-        parser = AquaParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_aqua_parser_has_one_finding(self):
         testfile = open("unittests/scans/aqua/one_vuln.json")
-        parser = AquaParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
         finding = findings[0]
@@ -31,15 +32,13 @@ class TestAquaParser(DojoParserTestCase):
 
     def test_aqua_parser_has_many_findings(self):
         testfile = open("unittests/scans/aqua/many_vulns.json")
-        parser = AquaParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(24, len(findings))
 
     def test_aqua_parser_v2_has_one_finding(self):
         with open("unittests/scans/aqua/one_v2.json") as testfile:
-            parser = AquaParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual('CVE-2019-15601: curl', finding.title)
@@ -51,14 +50,12 @@ class TestAquaParser(DojoParserTestCase):
 
     def test_aqua_parser_v2_has_many_findings(self):
         with open("unittests/scans/aqua/many_v2.json") as testfile:
-            parser = AquaParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
 
     def test_aqua_parser_cvssv3_has_no_finding(self):
         with open("unittests/scans/aqua/many_v2.json") as testfile:
-            parser = AquaParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             nb_cvssv3 = 0
             for finding in findings:
                 if finding.cvssv3 is not None:
@@ -68,8 +65,7 @@ class TestAquaParser(DojoParserTestCase):
 
     def test_aqua_parser_cvssv3_has_many_findings(self):
         with open("unittests/scans/aqua/many_vulns.json") as testfile:
-            parser = AquaParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             nb_cvssv3 = 0
             for finding in findings:
                 if finding.cvssv3 is not None:
@@ -79,8 +75,7 @@ class TestAquaParser(DojoParserTestCase):
 
     def test_aqua_parser_for_aqua_severity(self):
         with open("unittests/scans/aqua/vulns_with_aqua_severity.json") as testfile:
-            parser = AquaParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             sevs = list()
 
             for finding in findings:

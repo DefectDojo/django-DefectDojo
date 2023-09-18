@@ -18,16 +18,17 @@ class TestFile(object):
 
 
 class TestDependencyCheckParser(DojoParserTestCase):
+
+    parser = DependencyCheckParser()
+
     def test_parse_empty_file(self):
         testfile = open("unittests/scans/dependency_check/single_dependency_with_related_no_vulnerability.xml")
-        parser = DependencyCheckParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_single_vulnerability_has_single_finding(self):
         testfile = open("unittests/scans/dependency_check/single_vuln.xml")
-        parser = DependencyCheckParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         items = findings
         self.assertEqual(1, len(items))
         i = 0
@@ -44,15 +45,13 @@ class TestDependencyCheckParser(DojoParserTestCase):
 
     def test_parse_file_with_single_dependency_with_related_no_vulnerability(self):
         testfile = open("unittests/scans/dependency_check/single_dependency_with_related_no_vulnerability.xml")
-        parser = DependencyCheckParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         items = findings
         self.assertEqual(0, len(items))
 
     def test_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self):
         testfile = open("unittests/scans/dependency_check/multiple_vulnerabilities_has_multiple_findings.xml")
-        parser = DependencyCheckParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         items = findings
         self.assertEqual(11, len(items))
         # test also different component_name formats
@@ -253,8 +252,7 @@ class TestDependencyCheckParser(DojoParserTestCase):
     def test_parse_java_6_5_3(self):
         """Test with version 6.5.3"""
         with open(path.join(path.dirname(__file__), "../scans/dependency_check/version-6.5.3.xml")) as test_file:
-            parser = DependencyCheckParser()
-            findings = parser.get_findings(test_file, Test())
+            findings = self.parser.get_findings(test_file, Test())
             items = findings
             self.assertEqual(1, len(items))
 
@@ -272,8 +270,7 @@ class TestDependencyCheckParser(DojoParserTestCase):
 
     def test_parse_file_pr6439(self):
         testfile = open("unittests/scans/dependency_check/PR6439.xml")
-        parser = DependencyCheckParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         items = findings
         self.assertEqual(37, len(items))
         # test also different component_name formats

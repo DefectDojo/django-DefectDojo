@@ -5,17 +5,17 @@ from dojo.models import Test
 
 class TestSemgrepParser(DojoParserTestCase):
 
+    parser = SemgrepParser()
+
     def test_parse_empty(self):
         testfile = open("unittests/scans/semgrep/empty.json")
-        parser = SemgrepParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_parse_one_finding(self):
         testfile = open("unittests/scans/semgrep/one_finding.json")
-        parser = SemgrepParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
         finding = findings[0]
@@ -30,8 +30,7 @@ class TestSemgrepParser(DojoParserTestCase):
 
     def test_parse_many_finding(self):
         testfile = open("unittests/scans/semgrep/many_findings.json")
-        parser = SemgrepParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(3, len(findings))
         finding = findings[0]
@@ -51,8 +50,7 @@ class TestSemgrepParser(DojoParserTestCase):
 
     def test_parse_repeated_finding(self):
         testfile = open("unittests/scans/semgrep/repeated_findings.json")
-        parser = SemgrepParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
         finding = findings[0]
@@ -66,8 +64,7 @@ class TestSemgrepParser(DojoParserTestCase):
 
     def test_parse_many_vulns(self):
         testfile = open("unittests/scans/semgrep/many_vulns.json")
-        parser = SemgrepParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(48, len(findings))
         finding = findings[0]
@@ -96,8 +93,7 @@ class TestSemgrepParser(DojoParserTestCase):
 
     def test_parse_cwe_list(self):
         testfile = open("unittests/scans/semgrep/cwe_list.json")
-        parser = SemgrepParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
         finding = findings[0]
@@ -111,12 +107,10 @@ class TestSemgrepParser(DojoParserTestCase):
 
     def test_different_lines_same_fingerprint(self):
         testfile = open("unittests/scans/semgrep/semgrep_version_1_30_0_line_26.json")
-        parser = SemgrepParser()
-        findings_first = parser.get_findings(testfile, Test())
+        findings_first = self.parser.get_findings(testfile, Test())
         testfile.close()
         testfile = open("unittests/scans/semgrep/semgrep_version_1_30_0_line_27.json")
-        parser = SemgrepParser()
-        findings_second = parser.get_findings(testfile, Test())
+        findings_second = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(len(findings_first), len(findings_second))
         for first, second in zip(findings_first, findings_second):

@@ -5,10 +5,11 @@ from dojo.models import Test
 
 class TestSkfParser(DojoParserTestCase):
 
+    parser = SKFParser()
+
     def test_single_has_no_finding(self):
         testfile = open("unittests/scans/skf/export.csv")
-        parser = SKFParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(27, len(findings))
         # finding 0
         finding = findings[0]

@@ -5,6 +5,8 @@ from dojo.models import Test
 
 class TestWhispersParser(DojoParserTestCase):
 
+    parser = WhispersParser()
+
     def test_whispers_parser_severity_map(self):
         fixtures = [
             "unittests/scans/whispers/whispers_one_vul.json",  # v2.1 format
@@ -21,15 +23,13 @@ class TestWhispersParser(DojoParserTestCase):
 
     def test_whispers_parser_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/whispers/whispers_zero_vul.json")
-        parser = WhispersParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_whispers_parser_with_one_critical_vuln_has_one_findings(self):
         testfile = open("unittests/scans/whispers/whispers_one_vul.json")
-        parser = WhispersParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
@@ -41,8 +41,7 @@ class TestWhispersParser(DojoParserTestCase):
 
     def test_whispers_parser_with_many_vuln_has_many_findings(self):
         testfile = open("unittests/scans/whispers/whispers_many_vul.json")
-        parser = WhispersParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:

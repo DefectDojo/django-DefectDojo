@@ -6,16 +6,17 @@ from dojo.models import Test
 
 
 class TestSslyzeJSONParser(DojoParserTestCase):
+
+    parser = SslyzeParser()
+
     def test_parse_json_file_with_one_target_has_zero_vuln_old(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/one_target_zero_vuln_old.json"))
-        parser = SslyzeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_json_file_with_one_target_has_one_vuln_old(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/one_target_one_vuln_old.json"))
-        parser = SslyzeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
 
         self.assertEqual(1, len(findings))
         finding = findings[0]
@@ -36,8 +37,7 @@ class TestSslyzeJSONParser(DojoParserTestCase):
 
     def test_parse_json_file_with_one_target_has_four_vuln_old(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/one_target_many_vuln_old.json"))
-        parser = SslyzeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
 
         self.assertEqual(4, len(findings))
 
@@ -49,21 +49,18 @@ class TestSslyzeJSONParser(DojoParserTestCase):
 
     def test_parse_json_file_with_two_target_has_many_vuln_old(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/two_targets_two_vuln_old.json"))
-        parser = SslyzeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
 
         self.assertEqual(2, len(findings))
 
     def test_parse_json_file_with_one_target_has_zero_vuln_new(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/one_target_zero_vuln_new.json"))
-        parser = SslyzeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_json_file_with_one_target_has_one_vuln_new(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/one_target_one_vuln_new.json"))
-        parser = SslyzeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
 
         self.assertEqual(1, len(findings))
         finding = findings[0]
@@ -99,14 +96,12 @@ class TestSslyzeJSONParser(DojoParserTestCase):
 
     def test_parse_json_file_with_one_target_has_three_vuln_new(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/one_target_many_vuln_new.json"))
-        parser = SslyzeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(3, len(findings))
 
     def test_parse_json_file_with_two_target_has_many_vuln_new(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/two_targets_many_vuln_new.json"))
-        parser = SslyzeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(5, len(findings))
 
         # We look at 2 examplary findings, the others are similar and don't give more test coverage
@@ -152,10 +147,12 @@ class TestSslyzeJSONParser(DojoParserTestCase):
 
 
 class TestSSLyzeXMLParser(DojoParserTestCase):
+
+    parser = SslyzeParser()
+
     def test_parse_file_with_one_target_has_three_vuln(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/report_one_target_three_vuln.xml"))
-        parser = SslyzeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -163,8 +160,7 @@ class TestSSLyzeXMLParser(DojoParserTestCase):
 
     def test_parse_xml_file_with_one_target_has_one_vuln(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/report_one_target_one_vuln.xml"))
-        parser = SslyzeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -172,8 +168,7 @@ class TestSSLyzeXMLParser(DojoParserTestCase):
 
     def test_parse_xml_file_with_one_target_has_three_vuln(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/report_one_target_three_vuln.xml"))
-        parser = SslyzeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -181,8 +176,7 @@ class TestSSLyzeXMLParser(DojoParserTestCase):
 
     def test_parse_xml_file_with_two_target_has_many_vuln(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/report_two_target_many_vuln.xml"))
-        parser = SslyzeParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()

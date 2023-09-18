@@ -12,20 +12,21 @@ def sample_path(file_name):
 
 
 class TestAsffParser(DojoParserTestCase):
+
+    parser = AsffParser()
+
     def test_get_severity(self):
         """To designate severity, the finding must have either the Label or Normalized field populated.
         Label is the preferred attribute. If neither attribute is populated, then the finding is not valid."""
-        parser = AsffParser()
-
         with self.subTest(type="invalid"):
-            self.assertEqual(None, parser.get_severity({"Seveiryt": 3}))
+            self.assertEqual(None, self.parser.get_severity({"Seveiryt": 3}))
 
         with self.subTest(type="label low"):
-            self.assertEqual("Low", parser.get_severity({"Label": "LOW", "Normalized": 40, "Product": 2}))
+            self.assertEqual("Low", self.parser.get_severity({"Label": "LOW", "Normalized": 40, "Product": 2}))
         with self.subTest(type="label medium"):
-            self.assertEqual("Medium", parser.get_severity({"Label": "MEDIUM", "Normalized": 50, "Product": 5}))
+            self.assertEqual("Medium", self.parser.get_severity({"Label": "MEDIUM", "Normalized": 50, "Product": 5}))
         with self.subTest(type="label"):
-            self.assertEqual("Low", parser.get_severity({"Label": "LOW", "Normalized": 40, "Product": 2}))
+            self.assertEqual("Low", self.parser.get_severity({"Label": "LOW", "Normalized": 40, "Product": 2}))
 
         # 0 - INFORMATIONAL
         # 1–39 - LOW
@@ -33,18 +34,17 @@ class TestAsffParser(DojoParserTestCase):
         # 70–89 - HIGH
         # 90–100 - CRITICAL
         with self.subTest(type="normalized low"):
-            self.assertEqual("Low", parser.get_severity({"Normalized": 20, "Product": 2}))
+            self.assertEqual("Low", self.parser.get_severity({"Normalized": 20, "Product": 2}))
         with self.subTest(type="normalized medium"):
-            self.assertEqual("Medium", parser.get_severity({"Normalized": 50, "Product": 5}))
+            self.assertEqual("Medium", self.parser.get_severity({"Normalized": 50, "Product": 5}))
         with self.subTest(type="normalized high"):
-            self.assertEqual("High", parser.get_severity({"Normalized": 80, "Product": 2}))
+            self.assertEqual("High", self.parser.get_severity({"Normalized": 80, "Product": 2}))
         with self.subTest(type="normalizedinfo"):
-            self.assertEqual("Info", parser.get_severity({"Normalized": 0, "Product": 2}))
+            self.assertEqual("Info", self.parser.get_severity({"Normalized": 0, "Product": 2}))
 
     def test_prowler_finding(self):
         with open(get_unit_tests_path() + sample_path("prowler-output.asff.json")) as test_file:
-            parser = AsffParser()
-            findings = parser.get_findings(test_file, Test())
+            findings = self.parser.get_findings(test_file, Test())
             self.assertEqual(731, len(findings))
             for finding in findings:
                 self.common_check_finding(finding)
@@ -93,8 +93,7 @@ class TestAsffParser(DojoParserTestCase):
             get_unit_tests_path()
             + sample_path("guardduty/Unusual Behaviors-User-Persistence IAMUser-NetworkPermissions.json")
         ) as test_file:
-            parser = AsffParser()
-            findings = parser.get_findings(test_file, Test())
+            findings = self.parser.get_findings(test_file, Test())
             self.assertEqual(1, len(findings))
             for finding in findings:
                 self.common_check_finding(finding)

@@ -5,19 +5,19 @@ from dojo.models import Test
 
 class TestSolarAppscreenerParser(DojoParserTestCase):
 
+    parser = SolarAppscreenerParser()
+
     def test_solar_appscreener_parser_with_no_vuln_has_no_findings(self):
         testfile = open(
             get_unit_tests_path() + "/scans/solar_appscreener/solar_appscreener_zero_vul.csv")
-        parser = SolarAppscreenerParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_solar_appscreener_parser_with_one_criticle_vuln_has_one_findings(self):
         testfile = open(
             get_unit_tests_path() + "/scans/solar_appscreener/solar_appscreener_one_vul.csv")
-        parser = SolarAppscreenerParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
@@ -34,8 +34,7 @@ class TestSolarAppscreenerParser(DojoParserTestCase):
     def test_solar_appscreener_parser_with_many_vuln_has_many_findings(self):
         testfile = open(
             get_unit_tests_path() + "/scans/solar_appscreener/solar_appscreener_many_vul.csv")
-        parser = SolarAppscreenerParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:

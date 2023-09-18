@@ -9,6 +9,8 @@ class TestCheckmarxOsaParser(DojoParserTestCase):
     # comment out to get full diff with big reports
     # maxDiff = None
 
+    parser = CheckmarxOsaParser()
+
     def init(self, report_filename):
         my_file_handle = open(report_filename)
         product = Product()
@@ -30,8 +32,7 @@ class TestCheckmarxOsaParser(DojoParserTestCase):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/checkmarx_osa/no_finding.json"
         )
-        parser = CheckmarxOsaParser()
-        findings = parser.get_findings(my_file_handle, test)
+        findings = self.parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(0, len(findings))
 
@@ -44,8 +45,7 @@ class TestCheckmarxOsaParser(DojoParserTestCase):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/checkmarx_osa/single_finding.json"
         )
-        parser = CheckmarxOsaParser()
-        findings = parser.get_findings(my_file_handle, test)
+        findings = self.parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(1, len(findings))
         # check content
@@ -96,8 +96,7 @@ class TestCheckmarxOsaParser(DojoParserTestCase):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/checkmarx_osa/single_finding_false_positive.json"
         )
-        parser = CheckmarxOsaParser()
-        findings = parser.get_findings(my_file_handle, test)
+        findings = self.parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(1, len(findings))
         item = findings[0]
@@ -117,8 +116,7 @@ class TestCheckmarxOsaParser(DojoParserTestCase):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/checkmarx_osa/single_finding_confirmed.json"
         )
-        parser = CheckmarxOsaParser()
-        findings = parser.get_findings(my_file_handle, test)
+        findings = self.parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(1, len(findings))
         item = findings[0]
@@ -138,8 +136,7 @@ class TestCheckmarxOsaParser(DojoParserTestCase):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/checkmarx_osa/multiple_findings.json"
         )
-        parser = CheckmarxOsaParser()
-        findings = parser.get_findings(my_file_handle, test)
+        findings = self.parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(18, len(findings))
 
@@ -152,8 +149,7 @@ class TestCheckmarxOsaParser(DojoParserTestCase):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/checkmarx_osa/single_finding_no_score.json"
         )
-        parser = CheckmarxOsaParser()
-        findings = parser.get_findings(my_file_handle, test)
+        findings = self.parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(1, len(findings))
         item = findings[0]
@@ -168,8 +164,7 @@ class TestCheckmarxOsaParser(DojoParserTestCase):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/checkmarx_osa/single_finding_no_url.json"
         )
-        parser = CheckmarxOsaParser()
-        findings = parser.get_findings(my_file_handle, test)
+        findings = self.parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(1, len(findings))
         item = findings[0]
@@ -185,8 +180,7 @@ class TestCheckmarxOsaParser(DojoParserTestCase):
             my_file_handle, product, engagement, test = self.init(
                 get_unit_tests_path() + "/scans/checkmarx_osa/single_finding_no_libraryId.json"
             )
-            parser = CheckmarxOsaParser()
-            parser.get_findings(my_file_handle, test)
+            self.parser.get_findings(my_file_handle, test)
             self.teardown(my_file_handle)
             self.assertTrue(
                 "Invalid format: missing mandatory field libraryId:" in str(context.exception)

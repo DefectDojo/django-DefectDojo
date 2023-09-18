@@ -4,16 +4,16 @@ from dojo.models import Test
 
 
 class TestSslLabsParser(DojoParserTestCase):
+    parser = SslLabsParser()
+
     def test_parse_none(self):
-        parser = SslLabsParser()
         with open("unittests/scans/ssl_labs/none.json") as test_file:
-            findings = parser.get_findings(test_file, Test())
+            findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_ok(self):
-        parser = SslLabsParser()
         with open("unittests/scans/ssl_labs/ssl_labs_ok_v1.5.0.json") as test_file:
-            findings = parser.get_findings(test_file, Test())
+            findings = self.parser.get_findings(test_file, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -25,9 +25,8 @@ class TestSslLabsParser(DojoParserTestCase):
         self.assertTrue("TLS" in findings[0].description)
 
     def test_parse_dh1024(self):
-        parser = SslLabsParser()
         with open("unittests/scans/ssl_labs/ssl_labs_dh1024_v1.5.0.json") as test_file:
-            findings = parser.get_findings(test_file, Test())
+            findings = self.parser.get_findings(test_file, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -40,9 +39,8 @@ class TestSslLabsParser(DojoParserTestCase):
         self.assertTrue("TLS" in findings[0].description)
 
     def test_parse_3des(self):
-        parser = SslLabsParser()
         with open("unittests/scans/ssl_labs/ssl_labs_3des_v1.5.0.json") as test_file:
-            findings = parser.get_findings(test_file, Test())
+            findings = self.parser.get_findings(test_file, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -55,9 +53,8 @@ class TestSslLabsParser(DojoParserTestCase):
         self.assertTrue("TLS" in findings[0].description)
 
     def test_parse_revoked(self):
-        parser = SslLabsParser()
         with open("unittests/scans/ssl_labs/ssl_labs_revoked_v1.5.0.json") as test_file:
-            findings = parser.get_findings(test_file, Test())
+            findings = self.parser.get_findings(test_file, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -70,9 +67,8 @@ class TestSslLabsParser(DojoParserTestCase):
         self.assertTrue("TLS" in findings[0].description)
 
     def test_parse_multiple(self):
-        parser = SslLabsParser()
         with open("unittests/scans/ssl_labs/ssl_labs_multiple_v1.5.0.json") as test_file:
-            findings = parser.get_findings(test_file, Test())
+            findings = self.parser.get_findings(test_file, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()

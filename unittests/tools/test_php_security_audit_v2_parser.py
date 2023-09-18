@@ -5,10 +5,11 @@ from dojo.models import Test
 
 class TestPhpSecurityAuditV2ParserParser(DojoParserTestCase):
 
+    parser = PhpSecurityAuditV2Parser()
+
     def test_php_symfony_security_check_parser_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/php_security_audit_v2/php_security_audit_v2.0.0_unformatted.json")
-        parser = PhpSecurityAuditV2Parser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         items = findings
         self.assertEqual(2, len(items))
@@ -24,8 +25,7 @@ class TestPhpSecurityAuditV2ParserParser(DojoParserTestCase):
     def test_php_symfony_security_check_parser_with_many_vuln(self):
         """New report with latest version"""
         testfile = open("unittests/scans/php_security_audit_v2/many_vulns.json")
-        parser = PhpSecurityAuditV2Parser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         items = findings
         self.assertEqual(908, len(items))

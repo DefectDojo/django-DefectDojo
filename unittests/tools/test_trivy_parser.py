@@ -12,16 +12,16 @@ def sample_path(file_name):
 
 class TestTrivyParser(DojoParserTestCase):
 
+    parser = TrivyParser()
+
     def test_legacy_no_vuln(self):
         test_file = open(sample_path("legacy_no_vuln.json"))
-        parser = TrivyParser()
-        trivy_findings = parser.get_findings(test_file, Test())
+        trivy_findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(len(trivy_findings), 0)
 
     def test_legacy_many_vulns(self):
         test_file = open(sample_path("legacy_many_vulns.json"))
-        parser = TrivyParser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(len(findings), 93)
         finding = findings[0]
         self.assertEqual("Low", finding.severity)
@@ -33,14 +33,12 @@ class TestTrivyParser(DojoParserTestCase):
 
     def test_scheme_2_no_vuln(self):
         test_file = open(sample_path("scheme_2_no_vuln.json"))
-        parser = TrivyParser()
-        trivy_findings = parser.get_findings(test_file, Test())
+        trivy_findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(len(trivy_findings), 0)
 
     def test_scheme_2_many_vulns(self):
         test_file = open(sample_path("scheme_2_many_vulns.json"))
-        parser = TrivyParser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
 
         self.assertEqual(len(findings), 5)
 
@@ -78,8 +76,7 @@ class TestTrivyParser(DojoParserTestCase):
 
     def test_misconfigurations_and_secrets(self):
         test_file = open(sample_path("misconfigurations_and_secrets.json"))
-        parser = TrivyParser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
 
         self.assertEqual(len(findings), 5)
 
@@ -113,8 +110,7 @@ https://docs.docker.com/develop/develop-images/dockerfile_best-practices/'''
 
     def test_kubernetes(self):
         test_file = open(sample_path("kubernetes.json"))
-        parser = TrivyParser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
 
         self.assertEqual(len(findings), 20)
 
@@ -187,8 +183,7 @@ Number  Content
 
     def test_license_scheme(self):
         test_file = open(sample_path("license_scheme.json"))
-        parser = TrivyParser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
 
         self.assertEqual(len(findings), 19)
         finding = findings[0]

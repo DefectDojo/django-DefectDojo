@@ -6,11 +6,12 @@ from dojo.tools.burp_api.parser import convert_severity, convert_confidence
 
 class TestParser(DojoParserTestCase):
 
+    parser = BurpApiParser()
+
     def test_example_report(self):
         testfile = get_unit_tests_path() + "/scans/burp_api/example.json"
         with open(testfile) as f:
-            parser = BurpApiParser()
-            findings = parser.get_findings(f, Test())
+            findings = self.parser.get_findings(f, Test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
@@ -27,8 +28,7 @@ class TestParser(DojoParserTestCase):
     def test_validate_more(self):
         testfile = get_unit_tests_path() + "/scans/burp_api/many_vulns.json"
         with open(testfile) as f:
-            parser = BurpApiParser()
-            findings = parser.get_findings(f, Test())
+            findings = self.parser.get_findings(f, Test())
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()

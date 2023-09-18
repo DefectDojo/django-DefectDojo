@@ -7,18 +7,19 @@ from dojo.models import Test
 
 
 class TestGitlabSecretDetectionReportParser(DojoParserTestCase):
+
+    parser = GitlabSecretDetectionReportParser()
+
     def test_gitlab_secret_detection_report_parser_with_no_vuln_has_no_findings(self):
         with open(f"{get_unit_tests_path()}/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_0_vuln.json") as testfile:
-            parser = GitlabSecretDetectionReportParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_gitlab_secret_detection_report_parser_with_one_vuln_has_one_findings_v14(
         self,
     ):
         with open(f"{get_unit_tests_path()}/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_1_vuln_v14.json") as testfile:
-            parser = GitlabSecretDetectionReportParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -38,8 +39,7 @@ class TestGitlabSecretDetectionReportParser(DojoParserTestCase):
         self,
     ):
         with open(f"{get_unit_tests_path()}/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_1_vuln_v15.json") as testfile:
-            parser = GitlabSecretDetectionReportParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -59,8 +59,7 @@ class TestGitlabSecretDetectionReportParser(DojoParserTestCase):
         self,
     ):
         with open(f"{get_unit_tests_path()}/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln_v14.json") as testfile:
-            parser = GitlabSecretDetectionReportParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -70,8 +69,7 @@ class TestGitlabSecretDetectionReportParser(DojoParserTestCase):
         self,
     ):
         with open(f"{get_unit_tests_path()}/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln_v15.json") as testfile:
-            parser = GitlabSecretDetectionReportParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()

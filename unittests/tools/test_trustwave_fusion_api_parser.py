@@ -4,18 +4,19 @@ from dojo.models import Test
 
 
 class TestTrustwaveFusionAPIParser(DojoParserTestCase):
+
+    parser = TrustwaveFusionAPIParser()
+
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open(
             get_unit_tests_path() + "/scans/trustwave_fusion_api/trustwave_fusion_api_zero_vul.json"
         )
-        parser = TrustwaveFusionAPIParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_vuln_with_valid_cve(self):
         testfile = open("unittests/scans/trustwave_fusion_api/test_cve.json")
-        parser = TrustwaveFusionAPIParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
 
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
@@ -44,8 +45,7 @@ class TestTrustwaveFusionAPIParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/trustwave_fusion_api/trustwave_fusion_api_many_vul.json"
         )
-        parser = TrustwaveFusionAPIParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
 
         self.assertEqual(3, len(findings))  # checking dupes
 

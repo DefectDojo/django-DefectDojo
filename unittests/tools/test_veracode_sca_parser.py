@@ -9,10 +9,11 @@ from dateutil.tz import UTC
 
 class TestVeracodeScaScannerParser(DojoParserTestCase):
 
+    parser = VeracodeScaParser()
+
     def test_parse_csv(self):
         testfile = open("unittests/scans/veracode_sca/veracode_sca.csv")
-        parser = VeracodeScaParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(3, len(findings))
 
         finding = findings[0]
@@ -53,8 +54,7 @@ class TestVeracodeScaScannerParser(DojoParserTestCase):
 
     def test_parse_json(self):
         testfile = open("unittests/scans/veracode_sca/veracode_sca.json")
-        parser = VeracodeScaParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
 
         finding = findings[0]
@@ -72,8 +72,7 @@ class TestVeracodeScaScannerParser(DojoParserTestCase):
 
     def test_parse_json_fixed(self):
         testfile = open("unittests/scans/veracode_sca/veracode_sca_fixed.json")
-        parser = VeracodeScaParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
 
         finding = findings[0]

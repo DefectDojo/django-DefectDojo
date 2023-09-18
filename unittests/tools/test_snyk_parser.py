@@ -5,52 +5,47 @@ from dojo.tools.snyk.parser import SnykParser
 
 class TestSnykParser(DojoParserTestCase):
 
+    parser = SnykParser()
+
     def test_snykParser_single_has_no_finding(self):
         testfile = open("unittests/scans/snyk/single_project_no_vulns.json")
-        parser = SnykParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
         testfile.close()
 
     def test_snykParser_allprojects_has_no_finding(self):
         testfile = open("unittests/scans/snyk/all-projects_no_vulns.json")
-        parser = SnykParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
         testfile.close()
 
     def test_snykParser_single_has_one_finding(self):
         testfile = open("unittests/scans/snyk/single_project_one_vuln.json")
-        parser = SnykParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
         testfile.close()
 
     def test_snykParser_allprojects_has_one_finding(self):
         testfile = open("unittests/scans/snyk/all-projects_one_vuln.json")
-        parser = SnykParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
 
     def test_snykParser_single_has_many_findings(self):
         testfile = open("unittests/scans/snyk/single_project_many_vulns.json")
-        parser = SnykParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(41, len(findings))
 
     def test_snykParser_allprojects_has_many_findings(self):
         testfile = open("unittests/scans/snyk/all-projects_many_vulns.json")
-        parser = SnykParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(4, len(findings))
 
     def test_snykParser_finding_has_fields(self):
         testfile = open("unittests/scans/snyk/single_project_one_vuln.json")
-        parser = SnykParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         finding = findings[0]
         self.assertEqual(
@@ -90,8 +85,7 @@ class TestSnykParser(DojoParserTestCase):
 
     def test_snykParser_file_path_with_ampersand_is_preserved(self):
         testfile = open("unittests/scans/snyk/single_project_one_vuln_with_ampersands.json")
-        parser = SnykParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
         finding = findings[0]
@@ -103,8 +97,7 @@ class TestSnykParser(DojoParserTestCase):
     def test_snykParser_allprojects_issue4277(self):
         """Report to linked to issue 4277"""
         testfile = open("unittests/scans/snyk/all_projects_issue4277.json")
-        parser = SnykParser()
-        findings = list(parser.get_findings(testfile, Test()))
+        findings = list(self.parser.get_findings(testfile, Test()))
         testfile.close()
         self.assertEqual(82, len(findings))
         with self.subTest(i=0):
@@ -140,8 +133,7 @@ class TestSnykParser(DojoParserTestCase):
 
     def test_snykParser_cvssscore_none(self):
         with open("unittests/scans/snyk/single_project_None_cvss.json") as testfile:
-            parser = SnykParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual("Low", finding.severity)
@@ -151,8 +143,7 @@ class TestSnykParser(DojoParserTestCase):
 
     def test_snykParser_target_file(self):
         with open("unittests/scans/snyk/all_containers_target_output.json") as testfile:
-            parser = SnykParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             self.assertEqual(40, len(findings))
             # Mobile-Security-Framework-MobSF@0.0.0: SQL Injection
             finding = findings[0]
@@ -161,8 +152,7 @@ class TestSnykParser(DojoParserTestCase):
 
     def test_snykParser_update_libs_tag(self):
         with open("unittests/scans/snyk/single_project_upgrade_libs.json") as testfile:
-            parser = SnykParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             for index in range(len(findings)):
                 print(index, findings[index], findings[index].unsaved_tags)
             self.assertEqual(254, len(findings))

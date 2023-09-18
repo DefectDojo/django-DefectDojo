@@ -5,20 +5,20 @@ from dojo.models import Test
 
 class TestCodeCheckerParser(DojoParserTestCase):
 
+    parser = CodeCheckerParser()
+
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open(
             get_unit_tests_path() + "/scans/codechecker/cc-report-0-vuln.json"
         )
-        parser = CodeCheckerParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
         testfile = open(
             get_unit_tests_path() + "/scans/codechecker/cc-report-1-vuln.json"
         )
-        parser = CodeCheckerParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
         finding = findings[0]
         self.assertEqual("clang-diagnostic-sign-compare", finding.title)
@@ -35,8 +35,7 @@ class TestCodeCheckerParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/codechecker/cc-report-many-vuln.json"
         )
-        parser = CodeCheckerParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertTrue(94 == len(findings), str(len(findings)))
 
         self.assertTrue(sum(1 for f in findings if f.duplicate) == 0)
@@ -62,8 +61,7 @@ class TestCodeCheckerParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/codechecker/cc-report-review-status.json"
         )
-        parser = CodeCheckerParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertTrue(len(findings) == 4)
 
         finding = findings[0]

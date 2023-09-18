@@ -6,10 +6,11 @@ from datetime import datetime
 
 class TestAcunetix360Parser(DojoParserTestCase):
 
+    parser = Acunetix360Parser()
+
     def test_parse_file_with_one_finding(self):
         testfile = open("unittests/scans/acunetix360/acunetix360_one_finding.json")
-        parser = Acunetix360Parser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
@@ -29,8 +30,7 @@ class TestAcunetix360Parser(DojoParserTestCase):
 
     def test_parse_file_with_one_finding_false_positive(self):
         testfile = open("unittests/scans/acunetix360/acunetix360_one_finding_false_positive.json")
-        parser = Acunetix360Parser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
@@ -49,8 +49,7 @@ class TestAcunetix360Parser(DojoParserTestCase):
 
     def test_parse_file_with_one_finding_risk_accepted(self):
         testfile = open("unittests/scans/acunetix360/acunetix360_one_finding_accepted_risk.json")
-        parser = Acunetix360Parser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
@@ -69,8 +68,7 @@ class TestAcunetix360Parser(DojoParserTestCase):
 
     def test_parse_file_with_multiple_finding(self):
         testfile = open("unittests/scans/acunetix360/acunetix360_many_findings.json")
-        parser = Acunetix360Parser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(16, len(findings))
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
@@ -110,8 +108,7 @@ class TestAcunetix360Parser(DojoParserTestCase):
 
     def test_parse_file_with_mulitple_cwe(self):
         testfile = open("unittests/scans/acunetix360/acunetix360_multiple_cwe.json")
-        parser = Acunetix360Parser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:

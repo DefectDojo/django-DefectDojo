@@ -202,6 +202,8 @@ class TestVCGCsvParser(DojoParserTestCase):
 
 class TestVCGImport(DojoParserTestCase):
 
+    parser = VCGParser()
+
     def test_can_parse_xml(self):
         content = """<?xml version="1.0" encoding="utf-8"?>
         <!--XML Export of VCG Results for directory: C:\\Projects\\WebGoat.Net. Scanned for C# security issues.-->
@@ -220,8 +222,7 @@ class TestVCGImport(DojoParserTestCase):
         </CodeIssue>
         </CodeIssueCollection>"""
         filename = TestFile("data.xml", content)
-        parser = VCGParser()
-        findings = parser.get_findings(filename, Test())
+        findings = self.parser.get_findings(filename, Test())
         self.assertEqual(1, len(findings))
 
     def test_can_parse_csv(self):
@@ -230,6 +231,5 @@ class TestVCGImport(DojoParserTestCase):
             ""
         )
         filename = TestFile("data.csv", content)
-        parser = VCGParser()
-        findings = parser.get_findings(filename, Test())
+        findings = self.parser.get_findings(filename, Test())
         self.assertEqual(1, len(findings))

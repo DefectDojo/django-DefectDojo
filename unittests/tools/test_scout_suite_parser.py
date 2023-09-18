@@ -6,16 +6,17 @@ from dojo.tools.scout_suite.parser import ScoutSuiteParser
 
 
 class TestScoutSuiteParser(DojoParserTestCase):
+
+    parser = ScoutSuiteParser()
+
     def test_scout_suite_parser_with_no_vuln_has_no_findings(self):
         test_file = open("unittests/scans/scout_suite/no_vuln.js")
-        parser = ScoutSuiteParser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(0, len(findings))
 
     def test_scout_suite_parser_with_two_findings(self):
         test_file = open("unittests/scans/scout_suite/two_findings.js")
-        parser = ScoutSuiteParser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(4, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
@@ -33,8 +34,7 @@ class TestScoutSuiteParser(DojoParserTestCase):
 
     def test_get_findings(self):
         test_file = open("unittests/scans/scout_suite/new2.js")
-        parser = ScoutSuiteParser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(356, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
@@ -57,9 +57,8 @@ class TestScoutSuiteParser(DojoParserTestCase):
 
     def test_get_tests(self):
         test_file = open("unittests/scans/scout_suite/new2.js")
-        parser = ScoutSuiteParser()
-        scan_type = parser.get_scan_types()[0]
-        tests = parser.get_tests(scan_type, test_file)
+        scan_type = self.parser.get_scan_types()[0]
+        tests = self.parser.get_tests(scan_type, test_file)
         self.assertEqual(1, len(tests))
         test = tests[0]
         self.assertEqual("Scout Suite", test.name)

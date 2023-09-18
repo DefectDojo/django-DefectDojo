@@ -8,17 +8,17 @@ from dojo.tools.wpscan.parser import WpscanParser
 
 class TestWpscanParser(DojoParserTestCase):
 
+    parser = WpscanParser()
+
     def test_parse_file_empty(self):
         """Report from the tool wich have no data"""
         testfile = open("unittests/scans/wpscan/empty.json")
-        parser = WpscanParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_exemple(self):
         testfile = open("unittests/scans/wpscan/sample.json")
-        parser = WpscanParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -31,8 +31,7 @@ class TestWpscanParser(DojoParserTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/wpscan/wordpress_no_vuln.json")
-        parser = WpscanParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -40,8 +39,7 @@ class TestWpscanParser(DojoParserTestCase):
 
     def test_parse_file_with_one_vuln_has_one_findings(self):
         testfile = open("unittests/scans/wpscan/wordpress_one_vuln.json")
-        parser = WpscanParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -54,8 +52,7 @@ class TestWpscanParser(DojoParserTestCase):
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         testfile = open("unittests/scans/wpscan/wordpress_many_vuln.json")
-        parser = WpscanParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -68,8 +65,7 @@ class TestWpscanParser(DojoParserTestCase):
 
     def test_parse_file_with_multiple_vuln(self):
         testfile = open("unittests/scans/wpscan/wpscan.json")
-        parser = WpscanParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -95,8 +91,7 @@ class TestWpscanParser(DojoParserTestCase):
 
     def test_parse_file_with_multiple_vuln_in_version(self):
         testfile = open("unittests/scans/wpscan/wordpress_vuln_version.json")
-        parser = WpscanParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -112,8 +107,7 @@ class TestWpscanParser(DojoParserTestCase):
 
     def test_parse_file_issue5774(self):
         testfile = open("unittests/scans/wpscan/issue5774.json")
-        parser = WpscanParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -151,8 +145,7 @@ class TestWpscanParser(DojoParserTestCase):
             self.assertEqual("Certain", finding.get_scanner_confidence_text())  # data are => 100%
 
     def test_confidence(self):
-        parser = WpscanParser()
-        self.assertEqual(0, parser._get_scanner_confidence(100))
-        self.assertEqual(5, parser._get_scanner_confidence(50))
-        self.assertEqual(7, parser._get_scanner_confidence(30))
-        self.assertEqual(10, parser._get_scanner_confidence(0))
+        self.assertEqual(0, self.parser._get_scanner_confidence(100))
+        self.assertEqual(5, self.parser._get_scanner_confidence(50))
+        self.assertEqual(7, self.parser._get_scanner_confidence(30))
+        self.assertEqual(10, self.parser._get_scanner_confidence(0))

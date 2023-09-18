@@ -4,10 +4,11 @@ from dojo.tools.retirejs.parser import RetireJsParser
 
 
 class TestRetireJsParser(DojoParserTestCase):
+    parser = RetireJsParser()
+
     def test_parse(self):
         testfile = open("unittests/scans/retirejs/latest.json")
-        parser = RetireJsParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertIsInstance(findings, list)
         self.assertEqual(23, len(findings))
         with self.subTest(i=0):

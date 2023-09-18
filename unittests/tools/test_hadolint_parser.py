@@ -5,10 +5,11 @@ from dojo.tools.hadolint.parser import HadolintParser
 
 class TesthadolintParser(DojoParserTestCase):
 
+    parser = HadolintParser()
+
     def test_parse_file_with_one_dockerfile(self):
         testfile = open("unittests/scans/hadolint/one_dockerfile.json")
-        parser = HadolintParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(4, len(findings))
         finding = list(findings)[0]
@@ -17,7 +18,6 @@ class TesthadolintParser(DojoParserTestCase):
 
     def test_parse_file_with_many_dockerfile(self):
         testfile = open("unittests/scans/hadolint/many_dockerfile.json")
-        parser = HadolintParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(12, len(findings))

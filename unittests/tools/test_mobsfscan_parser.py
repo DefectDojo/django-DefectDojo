@@ -5,17 +5,17 @@ from dojo.models import Test
 
 class TestMobsfscanParser(DojoParserTestCase):
 
+    parser = MobsfscanParser()
+
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/mobsfscan/no_findings.json")
-        parser = MobsfscanParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_parse_many_findings(self):
         testfile = open("unittests/scans/mobsfscan/many_findings.json")
-        parser = MobsfscanParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(7, len(findings))
 
@@ -86,8 +86,7 @@ class TestMobsfscanParser(DojoParserTestCase):
 
     def test_parse_many_findings_cwe_lower(self):
         testfile = open("unittests/scans/mobsfscan/many_findings_cwe_lower.json")
-        parser = MobsfscanParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(7, len(findings))
 

@@ -11,16 +11,16 @@ def sample_path(file_name):
 
 class TestTrivyOperatorParser(DojoParserTestCase):
 
+    parser = TrivyOperatorParser()
+
     def test_configauditreport_no_vuln(self):
         test_file = open(sample_path("configauditreport_no_vuln.json"))
-        parser = TrivyOperatorParser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(len(findings), 0)
 
     def test_configauditreport_single_vulns(self):
         test_file = open(sample_path("configauditreport_single_vuln.json"))
-        parser = TrivyOperatorParser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(len(findings), 1)
         finding = findings[0]
         self.assertEqual("Low", finding.severity)
@@ -30,8 +30,7 @@ class TestTrivyOperatorParser(DojoParserTestCase):
 
     def test_configauditreport_many_vulns(self):
         test_file = open(sample_path("configauditreport_many.json"))
-        parser = TrivyOperatorParser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(len(findings), 13)
         finding = findings[0]
         self.assertEqual("Low", finding.severity)
@@ -46,14 +45,12 @@ class TestTrivyOperatorParser(DojoParserTestCase):
 
     def test_vulnerabilityreport_no_vuln(self):
         test_file = open(sample_path("vulnerabilityreport_no_vuln.json"))
-        parser = TrivyOperatorParser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(len(findings), 0)
 
     def test_vulnerabilityreport_single_vulns(self):
         test_file = open(sample_path("vulnerabilityreport_single_vuln.json"))
-        parser = TrivyOperatorParser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(len(findings), 1)
         finding = findings[0]
         self.assertEqual("Critical", finding.severity)
@@ -65,8 +62,7 @@ class TestTrivyOperatorParser(DojoParserTestCase):
 
     def test_vulnerabilityreport_many(self):
         test_file = open(sample_path("vulnerabilityreport_many.json"))
-        parser = TrivyOperatorParser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(len(findings), 41)
         finding = findings[0]
         self.assertEqual("Critical", finding.severity)
@@ -85,14 +81,12 @@ class TestTrivyOperatorParser(DojoParserTestCase):
 
     def test_exposedsecretreport_no_vuln(self):
         test_file = open(sample_path("exposedsecretreport_no_vuln.json"))
-        parser = TrivyOperatorParser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(len(findings), 0)
 
     def test_exposedsecretreport_single_vulns(self):
         test_file = open(sample_path("exposedsecretreport_single_vuln.json"))
-        parser = TrivyOperatorParser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(len(findings), 1)
         finding = findings[0]
         self.assertEqual("Critical", finding.severity)
@@ -104,8 +98,7 @@ class TestTrivyOperatorParser(DojoParserTestCase):
 
     def test_exposedsecretreport_many(self):
         test_file = open(sample_path("exposedsecretreport_many.json"))
-        parser = TrivyOperatorParser()
-        findings = parser.get_findings(test_file, Test())
+        findings = self.parser.get_findings(test_file, Test())
         self.assertEqual(len(findings), 2)
         finding = findings[0]
         self.assertEqual("Critical", finding.severity)

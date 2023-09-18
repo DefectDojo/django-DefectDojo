@@ -5,10 +5,11 @@ from dojo.models import Test
 
 class TestApiVulnersParser(DojoParserTestCase):
 
+    parser = ApiVulnersParser()
+
     def test_parse_many_findings(self):
         testfile = open("unittests/scans/api_vulners/report_many_vulns.json")
-        parser = ApiVulnersParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(3, len(findings))
         finding = findings[2]
         self.assertEqual("High", finding.severity)
@@ -20,8 +21,7 @@ class TestApiVulnersParser(DojoParserTestCase):
 
     def test_parse_one_finding(self):
         testfile = open("unittests/scans/api_vulners/report_one_vuln.json")
-        parser = ApiVulnersParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
         finding = findings[0]
         self.assertEqual("Critical", finding.severity)
@@ -32,14 +32,12 @@ class TestApiVulnersParser(DojoParserTestCase):
 
     def test_parse_no_finding(self):
         testfile = open("unittests/scans/api_vulners/report_no_vulns.json")
-        parser = ApiVulnersParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_no_description(self):
         testfile = open("unittests/scans/api_vulners/report_no_description.json")
-        parser = ApiVulnersParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
         finding = findings[0]
         self.assertEqual("Critical", finding.severity)

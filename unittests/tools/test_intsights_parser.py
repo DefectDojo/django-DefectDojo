@@ -4,11 +4,13 @@ from dojo.tools.intsights.parser import IntSightsParser
 
 
 class TestIntSightsParser(DojoParserTestCase):
+
+    parser = IntSightsParser()
+
     def test_intsights_parser_with_one_critical_vuln_has_one_findings_json(
             self):
         testfile = open("unittests/scans/intsights/intsights_one_vul.json")
-        parser = IntSightsParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
 
         self.assertEqual(1, len(findings))
@@ -29,8 +31,7 @@ class TestIntSightsParser(DojoParserTestCase):
     def test_intsights_parser_with_one_critical_vuln_has_one_findings_csv(
             self):
         testfile = open("unittests/scans/intsights/intsights_one_vuln.csv")
-        parser = IntSightsParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
 
@@ -45,15 +46,13 @@ class TestIntSightsParser(DojoParserTestCase):
 
     def test_intsights_parser_with_many_vuln_has_many_findings_json(self):
         testfile = open("unittests/scans/intsights/intsights_many_vul.json")
-        parser = IntSightsParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(3, len(findings))
 
     def test_intsights_parser_with_many_vuln_has_many_findings_csv(self):
         testfile = open("unittests/scans/intsights/intsights_many_vuln.csv")
-        parser = IntSightsParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(9, len(findings))
 
@@ -61,19 +60,16 @@ class TestIntSightsParser(DojoParserTestCase):
         with self.assertRaises(ValueError):
             testfile = open(
                 "unittests/scans/intsights/intsights_invalid_file.txt")
-            parser = IntSightsParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
 
     def test_intsights_parser_with_no_alerts_json(self):
         testfile = open("unittests/scans/intsights/intsights_zero_vuln.json")
-        parser = IntSightsParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_intsights_parser_with_no_alerts_csv(self):
         testfile = open("unittests/scans/intsights/intsights_zero_vuln.csv")
-        parser = IntSightsParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))

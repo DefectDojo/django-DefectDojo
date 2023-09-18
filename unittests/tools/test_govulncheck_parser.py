@@ -5,19 +5,19 @@ from dojo.models import Test
 
 class TestGovulncheckParser(DojoParserTestCase):
 
+    parser = GovulncheckParser()
+
     def test_parse_empty(self):
         with self.assertRaises(ValueError) as exp:
             testfile = open("unittests/scans/govulncheck/empty.json")
-            parser = GovulncheckParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             self.assertTrue(
                 "Invalid JSON format" in str(exp.exception)
             )
 
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/govulncheck/no_vulns.json")
-        parser = GovulncheckParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_new_version_findings(self):
@@ -37,8 +37,7 @@ class TestGovulncheckParser(DojoParserTestCase):
 
     def test_parse_many_findings(self):
         testfile = open("unittests/scans/govulncheck/many_vulns.json")
-        parser = GovulncheckParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
 
         self.assertEqual(3, len(findings))

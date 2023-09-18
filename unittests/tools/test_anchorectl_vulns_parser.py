@@ -4,16 +4,17 @@ from dojo.models import Test
 
 
 class TestAnchoreCTLVulnsParser(DojoParserTestCase):
+
+    parser = AnchoreCTLVulnsParser()
+
     def test_anchore_engine_parser_has_no_finding(self):
         testfile = open("unittests/scans/anchorectl_vulns/no_vuln.json")
-        parser = AnchoreCTLVulnsParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_anchore_engine_parser_has_one_finding_and_it_is_correctly_parsed(self):
         testfile = open("unittests/scans/anchorectl_vulns/one_vuln.json")
-        parser = AnchoreCTLVulnsParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
         singleFinding = findings[0]
@@ -23,7 +24,6 @@ class TestAnchoreCTLVulnsParser(DojoParserTestCase):
 
     def test_anchore_engine_parser_has_many_findings(self):
         testfile = open("unittests/scans/anchorectl_vulns/many_vulns.json")
-        parser = AnchoreCTLVulnsParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(23, len(findings))

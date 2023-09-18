@@ -7,16 +7,17 @@ from dojo.tools.bandit.parser import BanditParser
 
 
 class TestBanditParser(DojoParserTestCase):
+
+    parser = BanditParser()
+
     def test_bandit_parser_has_no_finding(self):
         testfile = open("unittests/scans/bandit/no_vuln.json")
-        parser = BanditParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_bandit_parser_has_one_finding(self):
         testfile = open("unittests/scans/bandit/one_vuln.json")
-        parser = BanditParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
         with self.subTest(i=0):
@@ -34,8 +35,7 @@ class TestBanditParser(DojoParserTestCase):
 
     def test_bandit_parser_has_many_findings(self):
         testfile = open("unittests/scans/bandit/many_vulns.json")
-        parser = BanditParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(214, len(findings))
         with self.subTest(i=0):
@@ -50,8 +50,7 @@ class TestBanditParser(DojoParserTestCase):
 
     def test_bandit_parser_has_many_findings_recent(self):
         testfile = open("unittests/scans/bandit/dd.json")
-        parser = BanditParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(47, len(findings))
         with self.subTest(i=0):
@@ -65,8 +64,7 @@ class TestBanditParser(DojoParserTestCase):
 
     def test_bandit_parser_has_many_findings_recent2(self):
         testfile = open("unittests/scans/bandit/dd2.json")
-        parser = BanditParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(165, len(findings))
         with self.subTest(i=0):

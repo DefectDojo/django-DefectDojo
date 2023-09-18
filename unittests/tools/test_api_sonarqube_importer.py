@@ -3,7 +3,7 @@ from unittest import mock
 from django.core.exceptions import ValidationError
 
 from dojo.tools.api_sonarqube.importer import SonarQubeApiImporter
-from ..dojo_test_case import DojoParserTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoParserTestCase, DojoTestCase, get_unit_tests_path
 from dojo.models import Test, Engagement, Product, Product_API_Scan_Configuration
 
 
@@ -65,7 +65,7 @@ def empty_list(self, *args, **kwargs):
     return list()
 
 
-class TestSonarqubeImporterNoSQToolConfig(DojoParserTestCase):
+class TestSonarqubeImporterNoSQToolConfig(DojoTestCase):
     # Testing case no 1. https://github.com/DefectDojo/django-DefectDojo/pull/4676
     fixtures = [
         'unit_sonarqube_toolType.json',
@@ -82,7 +82,7 @@ class TestSonarqubeImporterNoSQToolConfig(DojoParserTestCase):
             SonarQubeApiImporter.prepare_client(self.test)
 
 
-class TestSonarqubeImporterOneSQToolConfig(DojoParserTestCase):
+class TestSonarqubeImporterOneSQToolConfig(DojoTestCase):
     # Testing case no 2. https://github.com/DefectDojo/django-DefectDojo/pull/4676
     fixtures = [
         'unit_sonarqube_toolType.json',
@@ -100,7 +100,7 @@ class TestSonarqubeImporterOneSQToolConfig(DojoParserTestCase):
             SonarQubeApiImporter.prepare_client(self.test)
 
 
-class TestSonarqubeImporterMultipleSQToolConfig(DojoParserTestCase):
+class TestSonarqubeImporterMultipleSQToolConfig(DojoTestCase):
     # Testing case no 3. https://github.com/DefectDojo/django-DefectDojo/pull/4676
     fixtures = [
         'unit_sonarqube_toolType.json',
@@ -129,6 +129,8 @@ class TestSonarqubeImporterOneSQConfigNoKey(DojoParserTestCase):
         'unit_sonarqube_sqcNoKey.json'
     ]
 
+    parser = SonarQubeApiImporter()
+
     def setUp(self):
         product = Product.objects.get(name='product')
         engagement = Engagement(product=product)
@@ -140,8 +142,7 @@ class TestSonarqubeImporterOneSQConfigNoKey(DojoParserTestCase):
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_parser(self):
-        parser = SonarQubeApiImporter()
-        findings = parser.get_findings(None, self.test)
+        findings = self.parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
 
 
@@ -155,6 +156,8 @@ class TestSonarqubeImporterOneSQConfigWithKey(DojoParserTestCase):
         'unit_sonarqube_sqcWithKey.json'
     ]
 
+    parser = SonarQubeApiImporter()
+
     def setUp(self):
         product = Product.objects.get(name='product')
         engagement = Engagement(product=product)
@@ -166,8 +169,7 @@ class TestSonarqubeImporterOneSQConfigWithKey(DojoParserTestCase):
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_parser(self):
-        parser = SonarQubeApiImporter()
-        findings = parser.get_findings(None, self.test)
+        findings = self.parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
 
 
@@ -181,6 +183,8 @@ class TestSonarqubeImporterMultipleSQConfigs(DojoParserTestCase):
         'unit_sonarqube_sqcNoKey.json',
         'unit_sonarqube_sqcWithKey.json'
     ]
+
+    parser = SonarQubeApiImporter()
 
     def setUp(self):
         product = Product.objects.get(name='product')
@@ -203,6 +207,8 @@ class TestSonarqubeImporterSelectedSQConfigsNoKey(DojoParserTestCase):
         'unit_sonarqube_sqcWithKey.json'
     ]
 
+    parser = SonarQubeApiImporter()
+
     def setUp(self):
         product = Product.objects.get(name='product')
         engagement = Engagement(product=product)
@@ -217,8 +223,7 @@ class TestSonarqubeImporterSelectedSQConfigsNoKey(DojoParserTestCase):
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_parser(self):
-        parser = SonarQubeApiImporter()
-        findings = parser.get_findings(None, self.test)
+        findings = self.parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
 
 
@@ -232,6 +237,8 @@ class TestSonarqubeImporterSelectedSQConfigsWithKey(DojoParserTestCase):
         'unit_sonarqube_sqcNoKey.json',
         'unit_sonarqube_sqcWithKey.json'
     ]
+
+    parser = SonarQubeApiImporter()
 
     def setUp(self):
         product = Product.objects.get(name='product')
@@ -253,8 +260,7 @@ class TestSonarqubeImporterSelectedSQConfigsWithKey(DojoParserTestCase):
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_parser(self):
-        parser = SonarQubeApiImporter()
-        findings = parser.get_findings(None, self.test)
+        findings = self.parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
 
     def test_product_mismatch(self):
@@ -274,6 +280,8 @@ class TestSonarqubeImporterExternalRule(DojoParserTestCase):
         'unit_sonarqube_sqcWithKey.json'
     ]
 
+    parser = SonarQubeApiImporter()
+
     def setUp(self):
         product = Product.objects.get(name='product')
         engagement = Engagement(product=product)
@@ -288,8 +296,7 @@ class TestSonarqubeImporterExternalRule(DojoParserTestCase):
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_parser(self):
-        parser = SonarQubeApiImporter()
-        findings = parser.get_findings(None, self.test)
+        findings = self.parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
         finding = findings[0]
         self.assertEqual('Remove this useless assignment to local variable "currentValue".', finding.title)
@@ -310,6 +317,8 @@ class TestSonarqubeImporterTwoIssuesNoHotspots(DojoParserTestCase):
         'unit_sonarqube_product.json'
     ]
 
+    parser = SonarQubeApiImporter()
+
     def setUp(self):
         product = Product.objects.get(name='product')
         engagement = Engagement(product=product)
@@ -321,8 +330,7 @@ class TestSonarqubeImporterTwoIssuesNoHotspots(DojoParserTestCase):
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_parser(self):
-        parser = SonarQubeApiImporter()
-        findings = parser.get_findings(None, self.test)
+        findings = self.parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
 
 
@@ -335,6 +343,8 @@ class TestSonarqubeImporterNoIssuesOneHotspot(DojoParserTestCase):
         'unit_sonarqube_product.json'
     ]
 
+    parser = SonarQubeApiImporter()
+
     def setUp(self):
         product = Product.objects.get(name='product')
         engagement = Engagement(product=product)
@@ -346,8 +356,7 @@ class TestSonarqubeImporterNoIssuesOneHotspot(DojoParserTestCase):
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots', dummy_one_hotspot)
     def test_parser(self):
-        parser = SonarQubeApiImporter()
-        findings = parser.get_findings(None, self.test)
+        findings = self.parser.get_findings(None, self.test)
         self.assertEqual(1, len(findings))
 
 
@@ -360,6 +369,8 @@ class TestSonarqubeImporterNoIssuesTwoHotspots(DojoParserTestCase):
         'unit_sonarqube_product.json'
     ]
 
+    parser = SonarQubeApiImporter()
+
     def setUp(self):
         product = Product.objects.get(name='product')
         engagement = Engagement(product=product)
@@ -371,8 +382,7 @@ class TestSonarqubeImporterNoIssuesTwoHotspots(DojoParserTestCase):
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots', dummy_many_hotspots)
     def test_parser(self):
-        parser = SonarQubeApiImporter()
-        findings = parser.get_findings(None, self.test)
+        findings = self.parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
 
 
@@ -385,6 +395,8 @@ class TestSonarqubeImporterTwoIssuesTwoHotspots(DojoParserTestCase):
         'unit_sonarqube_product.json'
     ]
 
+    parser = SonarQubeApiImporter()
+
     def setUp(self):
         product = Product.objects.get(name='product')
         engagement = Engagement(product=product)
@@ -396,8 +408,7 @@ class TestSonarqubeImporterTwoIssuesTwoHotspots(DojoParserTestCase):
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots', dummy_many_hotspots)
     def test_parser(self):
-        parser = SonarQubeApiImporter()
-        findings = parser.get_findings(None, self.test)
+        findings = self.parser.get_findings(None, self.test)
         self.assertEqual(4, len(findings))
 
 
@@ -410,6 +421,8 @@ class TestSonarqubeImporterValidateHotspotData(DojoParserTestCase):
         'unit_sonarqube_product.json'
     ]
 
+    parser = SonarQubeApiImporter()
+
     def setUp(self):
         product = Product.objects.get(name='product')
         engagement = Engagement(product=product)
@@ -421,8 +434,7 @@ class TestSonarqubeImporterValidateHotspotData(DojoParserTestCase):
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots', dummy_one_hotspot)
     def test_parser(self):
-        parser = SonarQubeApiImporter()
-        findings = parser.get_findings(None, self.test)
+        findings = self.parser.get_findings(None, self.test)
         self.assertEqual(findings[0].title, '"password" detected here, make sure this is not a hard-coded credential.')
         self.assertEqual(findings[0].cwe, 798)
         self.assertMultiLineEqual(
@@ -481,6 +493,8 @@ class TestSonarqubeImporterHotspotRule_WO_Risk_Description(DojoParserTestCase):
         'unit_sonarqube_product.json'
     ]
 
+    parser = SonarQubeApiImporter()
+
     def setUp(self):
         product = Product.objects.get(name='product')
         engagement = Engagement(product=product)
@@ -492,8 +506,7 @@ class TestSonarqubeImporterHotspotRule_WO_Risk_Description(DojoParserTestCase):
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule_wo_risk_description)
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots', dummy_one_hotspot)
     def test_parser(self):
-        parser = SonarQubeApiImporter()
-        findings = parser.get_findings(None, self.test)
+        findings = self.parser.get_findings(None, self.test)
         self.assertEqual(findings[0].title, '"password" detected here, make sure this is not a hard-coded credential.')
         self.assertIsNone(findings[0].cwe)
         self.assertMultiLineEqual(

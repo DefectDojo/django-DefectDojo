@@ -5,6 +5,9 @@ from dojo.models import Test, Engagement, Product, Product_Type, Test_Type
 
 
 class TestAwsProwlerParser(DojoParserTestCase):
+
+    parser = AWSScout2Parser()
+
     def setup(self, testfile):
         product_type = Product_Type(critical_product=True, key_product=False)
         product_type.save()
@@ -20,8 +23,7 @@ class TestAwsProwlerParser(DojoParserTestCase):
         )
         engagement.save()
 
-        parser = AWSScout2Parser()
-        findings = parser.get_findings(
+        findings = self.parser.get_findings(
             testfile,
             Test(
                 engagement=engagement,

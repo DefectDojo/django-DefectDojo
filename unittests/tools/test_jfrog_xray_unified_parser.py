@@ -6,17 +6,17 @@ from dojo.tools.jfrog_xray_unified.parser import JFrogXrayUnifiedParser
 
 class TestJFrogXrayUnifiedParser(DojoParserTestCase):
 
+    parser = JFrogXrayUnifiedParser()
+
     def test_parse_file_with_no_vuln(self):
         testfile = open("unittests/scans/jfrog_xray_unified/no_vuln.json")
-        parser = JFrogXrayUnifiedParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln(self):
         testfile = open("unittests/scans/jfrog_xray_unified/one_vuln.json")
-        parser = JFrogXrayUnifiedParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
         item = findings[0]
@@ -45,15 +45,13 @@ class TestJFrogXrayUnifiedParser(DojoParserTestCase):
 
     def test_parse_file_with_many_vulns(self):
         testfile = open("unittests/scans/jfrog_xray_unified/many_vulns.json")
-        parser = JFrogXrayUnifiedParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(3, len(findings))
 
     def test_parse_file_with_very_many_vulns(self):
         testfile = open("unittests/scans/jfrog_xray_unified/very_many_vulns.json")
-        parser = JFrogXrayUnifiedParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
 
         self.assertEqual(14219, len(findings))
@@ -339,7 +337,6 @@ class TestJFrogXrayUnifiedParser(DojoParserTestCase):
 
     def test_parse_file_with_another_report(self):
         testfile = open("unittests/scans/jfrog_xray_unified/Vulnerabilities-Report-XRAY_Unified.json")
-        parser = JFrogXrayUnifiedParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(7, len(findings))

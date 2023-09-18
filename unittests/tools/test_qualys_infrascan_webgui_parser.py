@@ -10,12 +10,13 @@ from dojo.tools.qualys_infrascan_webgui.parser import \
 
 class TestQualysInfrascanWebguiParser(DojoParserTestCase):
 
+    parser = QualysInfrascanWebguiParser()
+
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open(
             get_unit_tests_path() + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_0.xml"
         )
-        parser = QualysInfrascanWebguiParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     # Sample with One Test
@@ -24,8 +25,7 @@ class TestQualysInfrascanWebguiParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_1.xml"
         )
-        parser = QualysInfrascanWebguiParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -41,8 +41,7 @@ class TestQualysInfrascanWebguiParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_multiple.xml"
         )
-        parser = QualysInfrascanWebguiParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -64,8 +63,7 @@ class TestQualysInfrascanWebguiParser(DojoParserTestCase):
         testfile = open(
             get_unit_tests_path() + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_3.xml"
         )
-        parser = QualysInfrascanWebguiParser()
-        findings = parser.get_findings(testfile, Test())
+        findings = self.parser.get_findings(testfile, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()

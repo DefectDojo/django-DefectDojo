@@ -5,10 +5,12 @@ from dojo.models import Test
 
 
 class TestBundlerAuditParser(DojoParserTestCase):
+
+    parser = BundlerAuditParser()
+
     def test_get_findings(self):
         with open(path.join(path.dirname(__file__), "../scans/bundler_audit/bundler-audit_v0.6.1.txt")) as testfile:
-            parser = BundlerAuditParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
@@ -29,8 +31,7 @@ class TestBundlerAuditParser(DojoParserTestCase):
 
     def test_get_findings_version9(self):
         with open(path.join(path.dirname(__file__), "../scans/bundler_audit/version_9.0.txt")) as testfile:
-            parser = BundlerAuditParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = self.parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]

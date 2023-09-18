@@ -5,13 +5,14 @@ from dojo.models import Test, Engagement, Product
 
 class TestOpenVASUploadCsvParser(DojoParserTestCase):
 
+    parser = OpenVASCsvParser()
+
     def test_openvas_csv_one_vuln(self):
         with open("unittests/scans/openvas_csv/one_vuln.csv") as f:
             test = Test()
             test.engagement = Engagement()
             test.engagement.product = Product()
-            parser = OpenVASCsvParser()
-            findings = parser.get_findings(f, test)
+            findings = self.parser.get_findings(f, test)
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
@@ -31,8 +32,7 @@ class TestOpenVASUploadCsvParser(DojoParserTestCase):
             test = Test()
             test.engagement = Engagement()
             test.engagement.product = Product()
-            parser = OpenVASCsvParser()
-            findings = parser.get_findings(f, test)
+            findings = self.parser.get_findings(f, test)
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
