@@ -210,6 +210,7 @@ class SonarQubeApiImporter(object):
                 source="SonarQube API",
                 obj=test.engagement.product,
             )
+            raise e
 
         return items
 

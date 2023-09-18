@@ -1,6 +1,6 @@
 import requests
 from requests.exceptions import JSONDecodeError as RequestsJSONDecodeError
-
+from rest_framework.exceptions import ValidationError
 from dojo.utils import prepare_for_view
 
 
@@ -115,17 +115,20 @@ class SonarQubeAPI:
             parameters["organization"] = organization
         elif self.org_id:
             parameters["organization"] = self.org_id
-
-        response = self.session.get(
-            url=f"{self.sonar_api_url}/components/show",
-            params=parameters,
-            headers=self.default_headers,
-        )
+        try:
+            response = self.session.get(
+                url=f"{self.sonar_api_url}/components/show",
+                params=parameters,
+                headers=self.default_headers,
+            )
+        except Exception as e:
+            raise ValidationError(e)
 
         if not response.ok:
-            raise Exception(
-                f"Unable to find the project {project_key} "
-                f'due to {response.status_code} - {response.content.decode("utf-8")}'
+            raise ValidationError(
+                detail=f"Unable to find the project key {project_key} "
+                f"due to {response.status_code} - {response.content.decode('utf-8')}"
+                f"Url: {response.url}"
             )
 
         return response.json().get("component")
