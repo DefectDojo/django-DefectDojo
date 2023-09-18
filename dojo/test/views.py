@@ -25,7 +25,7 @@ from dojo.forms import NoteForm, TestForm, \
     ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm, CopyTestForm
 from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, Cred_Mapping, System_Settings, Test_Import, Product_API_Scan_Configuration, Test_Import_Finding_Action
+    Finding_Template, Cred_Mapping, Test_Import, Product_API_Scan_Configuration, Test_Import_Finding_Action
 
 from dojo.tools.factory import get_choices_sorted, get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
@@ -74,7 +74,6 @@ def view_test(request, tid):
     stub_findings = Stub_Finding.objects.filter(test=test)
     cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
-    system_settings = get_object_or_404(System_Settings, id=1)
     if request.method == 'POST':
         user_has_permission_or_403(request.user, test, Permissions.Note_Add)
         if note_type_activation:
