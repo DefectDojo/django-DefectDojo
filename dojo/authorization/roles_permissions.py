@@ -276,6 +276,8 @@ def get_roles_with_permissions():
             Permissions.Credential_View,
         },
         Roles.API_Importer: {
+            Permissions.Product_Type_Add,
+            Permissions.Product_Type_Add_Product,
             Permissions.Product_Type_View,
             Permissions.Product_View,
             Permissions.Engagement_View,
@@ -292,6 +294,8 @@ def get_roles_with_permissions():
             Permissions.Technology_View,
             Permissions.Import_Scan_Result,
             Permissions.Credential_View,
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_API_Scan_Configuration_Add,
         },
         Roles.Writer: {
             Permissions.Product_Type_View,

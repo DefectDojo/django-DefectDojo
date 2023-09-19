@@ -217,14 +217,18 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
             graph_client = connection.clients.get_graph_client()
             result_query_subjects = graph_client.query_subjects({"query": user_login, "subjectKind": ["User"]})
 
-            if result_query_subjects is not None:
-                role_assigned = {"role": Role.objects.get(id=Roles.Developer)}
-                if (
-                    job_title in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[0]
-                    or job_title in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[1]
-                ):
-                    role_assigned = {"role": Role.objects.get(id=Roles.Leader)}
+            role_assigned = {"role": Role.objects.get(id=Roles.Developer)}
+            if job_title in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[0]:
+                role_assigned = {"role": Role.objects.get(id=Roles.Leader)}
+                Product.objects.filter(
+                    description__contains=re.sub(
+                        settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[2], "", office_location
+                    ).replace(" ", "-")
+                ).update(team_manager=user)
+            elif job_title in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[1]:
+                role_assigned = {"role": Role.objects.get(id=Roles.Leader)}
 
+            if result_query_subjects is not None:
                 # Get user's current product types names
                 user_product_types_names = [
                     prod.product_type.name
@@ -269,7 +273,10 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
 
                         # if user is not project type member any more, remove him from list of product type members
                         for product_type_name in user_product_types_names:
-                            if product_type_name != group_team_leve2.display_name:
+                            if (
+                                product_type_name != group_team_leve2.display_name
+                                and user_login.split("@")[0] not in settings.AZURE_DEVOPS_USERS_EXCLUDED_TPM
+                            ):
                                 product_type = Product_Type.objects.get(name=product_type_name)
                                 Product_Type_Member.objects.filter(product_type=product_type, user=user).delete()
                                 logger.debug(
