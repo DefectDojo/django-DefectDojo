@@ -144,6 +144,7 @@ env = environ.Env(
     DD_SOCIAL_AUTH_AZURE_DEVOPS_OFFICES_LOCATION=(str, ""),
     DD_SOCIAL_AUTH_AZURE_DEVOPS_GROUP_TEAM_FILTERS=(str, ""),
     DD_SOCIAL_AUTH_AZURE_DEVOPS_JOBS_TITLE=(str, ""),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_USERS_EXCLUDED_TPM=(str, ""),
     DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_TAGS=(bool, False),
@@ -638,6 +639,7 @@ AZURE_DEVOPS_MAIN_SECURITY_GROUP = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_MAIN_SECURIT
 AZURE_DEVOPS_OFFICES_LOCATION = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_OFFICES_LOCATION")
 AZURE_DEVOPS_JOBS_TITLE = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_JOBS_TITLE")
 AZURE_DEVOPS_GROUP_TEAM_FILTERS = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_GROUP_TEAM_FILTERS")
+AZURE_DEVOPS_USERS_EXCLUDED_TPM = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_USERS_EXCLUDED_TPM")
 
 GITLAB_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED")
 GITLAB_PROJECT_AUTO_IMPORT = env("DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT")
@@ -766,11 +768,12 @@ CSRF_COOKIE_SECURE = env("DD_CSRF_COOKIE_SECURE")
 CSRF_COOKIE_SAMESITE = env("DD_CSRF_COOKIE_SAMESITE")
 
 # Content Security Policy
-CSP_INCLUDE_NONCE_IN = ['script-src']
-CSP_DEFAULT_SRC = ("'self'")
+CSP_INCLUDE_NONCE_IN = ["script-src"]
+CSP_DEFAULT_SRC = "'self'"
 CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "maxcdn.bootstrapcdn.com", "https://cdn.jsdelivr.net/")
 CSP_FONT_SRC = ("'self'", "maxcdn.bootstrapcdn.com")
-CSP_SCRIPT_SRC = ("'self'\
+CSP_SCRIPT_SRC = (
+    "'self'\
     'sha256-kVXTuVyrBvSmDdt9pq+32zN7Z3Gbsy8QTVzqMcwc250='\
     'sha256-5+pwrx2Sqjl/avFtF6fl0AI2NWTJKFi85jHWC5WClLY='\
     'sha256-KLC2c/jOiFuDb857eep/XE3PQELBO2bzgF65fTnWEtE='\
@@ -779,9 +782,10 @@ CSP_SCRIPT_SRC = ("'self'\
     'sha256-MaVZQAjCSc9XBKyhKStNf1pRXWXwoAUFx8O/9RarS5Y='\
     'sha256-cvC+Syj3v3KJmWIrEfedrdOftmWCiaMeXwjthb9vMjY='\
     'sha256-CxI1T50WYk55488gv4VMGpNzMYBe/D7Ah6AmX/+dULw='",
-    "https://cdn.jsdelivr.net/")
+    "https://cdn.jsdelivr.net/",
+)
 CSP_SCRIPT_SRC_ELEM = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")
-CSP_IMG_SRC=("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")
+CSP_IMG_SRC = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")
 
 # A list of trusted origins for unsafe requests (e.g. POST).
 # Use comma-separated list of domains, they will be split to list automatically
