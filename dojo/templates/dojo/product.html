@@ -342,7 +342,16 @@
                     { "data": "product" },
                     { "data": "tags" },
                     { "data": "criticality" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                      const criticals = {
+                        'Very High': 5,
+                        'High': 4,
+                        'Medium': 3,
+                        'Low': 2,
+                        'Very Low': 1,
+                        'None': 0
+                      };
+                      return type === 'sort' ? criticals[getDojoExportValueFromTag(data, 'i', 'data-content')] :
+                            type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') : data;
                     }},
                     { "data": "metadata", render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
