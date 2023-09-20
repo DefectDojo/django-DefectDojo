@@ -308,7 +308,7 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
     content = file.read()
     sig = content.decode('utf-8-sig')
     content = sig.encode("utf-8")
-    if type(content) is bytes:
+    if isinstance(content, bytes):
         content = content.decode('utf-8')
     reader = csv.DictReader(io.StringIO(content))
 
