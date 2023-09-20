@@ -19,7 +19,7 @@ def npm_censor_hashes(apps, schema_editor):
     # version than this migration expects. We use the historical version.
     logger.info('Removing random hashes from npm audit file_paths')
 
-    now = timezone.now()
+    timezone.now()
     Finding = apps.get_model('dojo', 'Finding')
     Test_Type = apps.get_model('dojo', 'Test_Type')
     npm_audit, _ = Test_Type.objects.get_or_create(name='NPM Audit Scan')

@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
                             logger.warning('product type successfully changed to %i', prod_type_lost_and_found.id)
 
                         obj.save()
-                    except Exception as e:
+                    except Exception:
                         logger.error('Error saving old existing django-tagging tags to new string field')
                         logger.error('Details of object:')
                         logger.error(vars(obj))
@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
 
                     try:
                         obj.save()
-                    except Exception as e:
+                    except Exception:
                         logger.error('Error saving tags to new tagulous m2m field')
                         logger.error('Details of object:')
                         logger.error(vars(obj))

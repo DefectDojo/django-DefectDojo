@@ -390,7 +390,7 @@ def metrics(request, mtype):
         request.GET._mutable = True
         request.GET.appendlist('test__engagement__product__prod_type', mtype)
         request.GET._mutable = False
-        product = pt[0].name
+        pt[0].name
         show_pt_filter = False
         page_name = _('%(product_type)s Metrics') % {'product_type': mtype}
         prod_type = pt

@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                 # new install do not have jira enabled, so we can assume this is an existing install
                 ss.disable_jira_webhook_secret = True
                 ss.save()
-        except Exception as e:
+        except Exception:
             # probably a test run such as running unittest, no values in table
             pass
 

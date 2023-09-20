@@ -2821,7 +2821,6 @@ class Finding(models.Model):
 
     def has_github_issue(self):
         try:
-            issue = self.github_issue
             return True
         except GITHUB_Issue.DoesNotExist:
             return False

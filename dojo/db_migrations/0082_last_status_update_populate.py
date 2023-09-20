@@ -10,7 +10,7 @@ def populate_last_status_update(apps, schema_editor):
     # version than this migration expects. We use the historical version.
     logger.info('Setting last_status_update timestamp on findings to be initially equal to last_reviewed timestamp (may take a while)')
 
-    now = timezone.now()
+    timezone.now()
     Finding = apps.get_model('dojo', 'Finding')
     findings = Finding.objects.order_by('id').only('id', 'is_Mitigated', 'mitigated')
 

@@ -383,7 +383,6 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
 
 # Gets a connection to a Jira server based on the finding
 def get_jira_connection(obj):
-    jira = None
 
     jira_instance = obj
     if not isinstance(jira_instance, JIRA_Instance):
@@ -786,7 +785,7 @@ def add_jira_issue(obj, *args, **kwargs):
         j_issue.jira_creation = timezone.now()
         j_issue.jira_change = timezone.now()
         j_issue.save()
-        issue = jira.issue(new_issue.id)
+        jira.issue(new_issue.id)
 
         logger.info('Created the following jira issue for %d:%s', obj.id, to_str_typed(obj))
 
@@ -1022,12 +1021,12 @@ def get_issuetype_fields(
             project = None
             try:
                 project = meta['projects'][0]
-            except Exception as e:
+            except Exception:
                 raise JIRAError("Project misconfigured or no permissions in Jira ?")
 
             try:
                 issuetype_fields = project['issuetypes'][0]['fields'].keys()
-            except Exception as e:
+            except Exception:
                 raise JIRAError("Misconfigured default issue type ?")
 
         else:
@@ -1054,7 +1053,7 @@ def get_issuetype_fields(
 
             try:
                 issuetype_fields = [f['fieldId'] for f in issuetype_fields['values']]
-            except Exception as e:
+            except Exception:
                 raise JIRAError("Misconfigured default issue type ?")
 
     except JIRAError as e:
@@ -1072,7 +1071,7 @@ def is_jira_project_valid(jira_project):
         jira = get_jira_connection(jira_project)
         get_issuetype_fields(jira, jira_project.project_key, jira_project.jira_instance.default_issue_type)
         return True
-    except JIRAError as e:
+    except JIRAError:
         logger.debug("invalid JIRA Project Config, can't retrieve metadata for '%s'", jira_project)
         return False
 
@@ -1337,7 +1336,7 @@ def finding_link_jira(request, finding, new_jira_issue_key):
 
     finding.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
-    jira_issue_url = get_jira_url(finding)
+    get_jira_url(finding)
 
     return True
 
@@ -1369,7 +1368,7 @@ def finding_group_link_jira(request, finding_group, new_jira_issue_key):
 
     finding_group.save()
 
-    jira_issue_url = get_jira_url(finding_group)
+    get_jira_url(finding_group)
 
     return True
 

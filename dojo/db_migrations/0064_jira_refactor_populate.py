@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         # We can't import models directly as it may be a newer
         # version than this migration expects. We use the historical version.
         logger.info('migrating finding.jira_creation and jira_change fields to JIRA_Issue model')
-        Finding = apps.get_model('dojo', 'Finding')
+        apps.get_model('dojo', 'Finding')
         JIRA_Issue = apps.get_model('dojo', 'JIRA_Issue')
         for jira_issue in JIRA_Issue.objects.all().select_related('finding'):
             # try:

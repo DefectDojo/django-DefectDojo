@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
             if jira_sev_value is None:
                 ss.jira_minimum_severity = 'Low'
                 ss.save()
-        except Exception as e:
+        except Exception:
             # probably a test run such as running unittest, no values in table
             pass
 

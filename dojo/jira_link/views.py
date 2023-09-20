@@ -326,7 +326,7 @@ def new_jira(request):
             jira_password = jform.cleaned_data.get('password')
 
             logger.debug('calling get_jira_connection_raw')
-            jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
+            jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
 
             new_j = jform.save(commit=False)
             new_j.url = jira_server

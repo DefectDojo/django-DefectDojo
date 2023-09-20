@@ -259,7 +259,7 @@ def get_tags_model_from_field_name(field):
         parts = field.split('__')
         model_name = parts[-2]
         return apps.get_model('dojo.%s' % model_name, require_ready=True), exclude
-    except Exception as e:
+    except Exception:
         return None, exclude
 
 

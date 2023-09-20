@@ -986,9 +986,9 @@ def import_history(finding, autoescape=True):
         return ''
 
     if autoescape:
-        esc = conditional_escape
+        pass
     else:
-        esc = lambda x: x
+        pass
 
     # prefetched, so no filtering here
     status_changes = finding.test_import_finding_action_set.all()

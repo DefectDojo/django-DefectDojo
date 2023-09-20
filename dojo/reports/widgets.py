@@ -28,7 +28,7 @@ class CustomReportJsonForm(forms.Form):
     def clean_json(self):
         jdata = self.cleaned_data['json']
         try:
-            json_data = json.loads(jdata)
+            json.loads(jdata)
         except:
             raise forms.ValidationError("Invalid data in json")
         return jdata
@@ -406,7 +406,7 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
                 else:
                     d[item['name']] = item['value']
             from dojo.endpoint.views import get_endpoint_ids
-            ids = get_endpoint_ids(endpoints)
+            get_endpoint_ids(endpoints)
 
             endpoints = Endpoint.objects.filter(id__in=endpoints)
             endpoints = EndpointFilter(d, queryset=endpoints, user=request.user)
