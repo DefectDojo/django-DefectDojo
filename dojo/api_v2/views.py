@@ -3977,6 +3977,7 @@ class SLAConfigurationViewset(
     mixins.DestroyModelMixin,
     mixins.CreateModelMixin,
     viewsets.GenericViewSet,
+    dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.SLAConfigurationSerializer
     queryset = SLA_Configuration.objects.all()
