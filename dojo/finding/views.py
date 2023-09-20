@@ -502,7 +502,7 @@ class ViewFinding(View):
         cwe_template = None
         with contextlib.suppress(Finding_Template.DoesNotExist):
             cwe_template = Finding_Template.objects.filter(cwe=finding.cwe).first()
-        
+
         return {
             "cwe_template": cwe_template
         }
@@ -594,7 +594,7 @@ class ViewFinding(View):
                     request, finding, similar_finding
                 )
             )
-        
+
         return {
             "duplicate_cluster": duplicate_cluster(request, finding),
             "similar_findings": similar_findings,
@@ -617,47 +617,45 @@ class ViewFinding(View):
         }
 
     def process_form(self, request, form, finding, user):
-        # Create the note object
-        new_note = form.save(commit=False)
-        new_note.author = request.user
-        new_note.date = timezone.now()
-        new_note.save()
-        # Add an entry to the note history
-        history = NoteHistory(
-            data=new_note.entry, time=new_note.date, current_editor=new_note.author
-        )
-        history.save()
-        new_note.history.add(history)
-        # Associate the note with the finding
-        finding.notes.add(new_note)
-        finding.last_reviewed = new_note.date
-        finding.last_reviewed_by = user
-        finding.save()
-        # Determine if the note should be sent to jira
-        if finding.has_jira_issue:
-            jira_helper.add_comment(finding, new_note)
-        elif finding.has_jira_group_issue:
-            jira_helper.add_comment(finding.finding_group, new_note)
-        # Send the notification of the note being added
-        url = request.build_absolute_uri(
-            reverse("view_finding", args=(finding.id,))
-        )
-        title = "Finding: " + finding.title
-        process_notifications(request, new_note, url, title)
-        # Add a message to the request
-        messages.add_message(
-            request, messages.SUCCESS, "Note saved.", extra_tags="alert-success"
-        )
-        # Redirect back to the finding page
-        return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
+        if form.is_valid():
+            # Create the note object
+            new_note = form.save(commit=False)
+            new_note.author = request.user
+            new_note.date = timezone.now()
+            new_note.save()
+            # Add an entry to the note history
+            history = NoteHistory(
+                data=new_note.entry, time=new_note.date, current_editor=new_note.author
+            )
+            history.save()
+            new_note.history.add(history)
+            # Associate the note with the finding
+            finding.notes.add(new_note)
+            finding.last_reviewed = new_note.date
+            finding.last_reviewed_by = user
+            finding.save()
+            # Determine if the note should be sent to jira
+            if finding.has_jira_issue:
+                jira_helper.add_comment(finding, new_note)
+            elif finding.has_jira_group_issue:
+                jira_helper.add_comment(finding.finding_group, new_note)
+            # Send the notification of the note being added
+            url = request.build_absolute_uri(
+                reverse("view_finding", args=(finding.id,))
+            )
+            title = "Finding: " + finding.title
+            process_notifications(request, new_note, url, title)
+            # Add a message to the request
+            messages.add_message(
+                request, messages.SUCCESS, "Note saved.", extra_tags="alert-success"
+            )
+            # Redirect back to the finding page
+            return request, form, True
 
-    @user_is_authorized(Finding, Permissions.Finding_View, "finding_id")
-    def get(self, request, finding_id):
-        # Get the initial objects
-        finding = self.get_finding(finding_id)
-        user = self.get_dojo_user(request)
-        # Set up the initial context
-        context = {
+        return request, form, False
+
+    def get_initial_context(self, request, finding, user):
+        return {
             "finding": finding,
             "dojo_user": user,
             "user": request.user,
@@ -665,6 +663,15 @@ class ViewFinding(View):
                 finding.test.engagement.product, title="View Finding", tab="findings"
             )
         }
+
+    def get(self, request, finding_id):
+        # Get the initial objects
+        finding = self.get_finding(finding_id)
+        user = self.get_dojo_user(request)
+        # Make sure the user is authorized
+        user_has_permission_or_403(user, finding, Permissions.Finding_View)
+        # Set up the initial context
+        context = self.get_initial_context(request, finding, user)
         # Add in the other extras
         context |= self.get_previous_and_next_findings(finding)
         context |= self.get_credential_objects(finding)
@@ -683,20 +690,14 @@ class ViewFinding(View):
         # Render the form
         return render(request, "dojo/view_finding.html", context)
 
-    @user_is_authorized(Finding, Permissions.Finding_View, "finding_id")
     def post(self, request, finding_id):
         # Get the initial objects
         finding = self.get_finding(finding_id)
         user = self.get_dojo_user(request)
+        # Make sure the user is authorized
+        user_has_permission_or_403(user, finding, Permissions.Finding_View)
         # Set up the initial context
-        context = {
-            "finding": finding,
-            "dojo_user": user,
-            "user": request.user,
-            "product_tab": Product_Tab(
-                finding.test.engagement.product, title="View Finding", tab="findings"
-            )
-        }
+        context = self.get_initial_context(request, finding, user)
         # Add in the other extras
         context |= self.get_external_objects(finding)
         # Quick perms check to determine if the user has access to edit the finding
@@ -709,8 +710,12 @@ class ViewFinding(View):
         else:
             context["form"] = NoteForm(request.POST)
         # Determine the validity of the form
-        if context["form"].is_valid():
-            self.process_form(context["form"], finding, user)
+        request, form, success = self.process_form(request, context["form"], finding, user)
+        # Handle the case of a successful form
+        if success:
+            return HttpResponseRedirect(reverse("view_finding", args=(finding_id,)))
+        # Update the form in the context to reflect the errors
+        context["form"] = form
         # Add in more of the other extras
         context |= self.get_request_response(finding)
         context |= self.get_similar_findings(request, finding)
@@ -718,6 +723,365 @@ class ViewFinding(View):
         context |= self.get_jira_data(finding)
         # Render the form
         return render(request, "dojo/view_finding.html", context)
+
+
+class EditFinding(View):
+    def get_finding(self, finding_id):
+        finding = get_object_or_404(Finding, id=finding_id)
+        return finding
+
+    def get_request_response(self, finding):
+        req_resp = None
+        if burp_rr := BurpRawRequestResponse.objects.filter(finding=finding).first():
+            req_resp = (burp_rr.get_request(), burp_rr.get_response())
+
+        return req_resp
+
+    def get_finding_form(self, request, finding):
+        # Get the burp request if available
+        req_resp = self.get_request_response(finding)
+        # Set up the args for the form
+        args = [request.POST] if request.method == "POST" else []
+        # Set the initial form args
+        kwargs = {
+            "instance": finding,
+            "req_resp": req_resp,
+            "can_edit_mitigated_data": finding_helper.can_edit_mitigated_data(request.user),
+            "initial": {"vulnerability_ids": "\n".join(finding.vulnerability_ids)},
+        }
+
+        return FindingForm(*args, **kwargs)
+
+    def get_jira_form(self, request, finding, finding_form=None):
+        # Determine if jira should be used
+        if (jira_project := jira_helper.get_jira_project(finding)) is not None:
+            # Determine if push all findings is enabled
+            push_all_findings = jira_helper.is_push_all_issues(finding)
+            # Set up the args for the form
+            args = [request.POST] if request.method == "POST" else []
+            # Set the initial form args
+            kwargs = {
+                "push_all": push_all_findings,
+                "prefix": "jiraform",
+                "instance": finding,
+                "jira_project": jira_project,
+                "finding_form": finding_form,
+            }
+
+            return JIRAFindingForm(*args, **kwargs)
+        return None
+
+    def get_github_form(self, request, finding):
+        # Determine if github should be used
+        if get_system_setting("enable_github"):
+            # Ensure there is a github conf correctly configured for the product
+            config_present = GITHUB_PKey.objects.filter(product=finding.test.engagement.product)
+            if config_present := config_present.exclude(git_conf_id=None):
+                # Set up the args for the form
+                args = [request.POST] if request.method == "POST" else []
+                # Set the initial form args
+                kwargs = {
+                    "enabled": finding.has_github_issue(),
+                    "prefix": "githubform"
+                }
+
+                return GITHUBFindingForm(*args, **kwargs)
+        return None
+
+    def get_initial_context(self, request, finding):
+        # Get the finding form first since it is used in another place
+        finding_form = self.get_finding_form(request, finding)
+        return {
+            "form": finding_form,
+            "finding": finding,
+            "jform": self.get_jira_form(request, finding, finding_form=finding_form),
+            "gform": self.get_github_form(request, finding),
+            "return_url": get_return_url(request),
+            "product_tab": Product_Tab(
+                finding.test.engagement.product, title="Edit Finding", tab="findings"
+            )
+        }
+
+    def validate_status_change(self, request, finding, form):
+        # If the finding is already not active, skip this extra validation
+        if not finding.active:
+            return request, form
+        # Validate the proper notes are added for mitigation
+        if (not form["active"].value() or form["false_p"].value() or form["out_of_scope"].value()) and not form["duplicate"].value():
+            note_type_activation = Note_Type.objects.filter(is_active=True).count()
+            closing_disabled = 0
+            if note_type_activation:
+                closing_disabled = len(get_missing_mandatory_notetypes(finding))
+            if closing_disabled != 0:
+                error_inactive = ValidationError(
+                    "Can not set a finding as inactive without adding all mandatory notes",
+                    code="inactive_without_mandatory_notes",
+                )
+                error_false_p = ValidationError(
+                    "Can not set a finding as false positive without adding all mandatory notes",
+                    code="false_p_without_mandatory_notes",
+                )
+                error_out_of_scope = ValidationError(
+                    "Can not set a finding as out of scope without adding all mandatory notes",
+                    code="out_of_scope_without_mandatory_notes",
+                )
+                if form["active"].value() is False:
+                    form.add_error("active", error_inactive)
+                if form["false_p"].value():
+                    form.add_error("false_p", error_false_p)
+                if form["out_of_scope"].value():
+                    form.add_error("out_of_scope", error_out_of_scope)
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    ("Can not set a finding as inactive, "
+                        "false positive or out of scope without adding all mandatory notes"),
+                    extra_tags="alert-danger",
+                )
+
+        return request, form
+
+    def process_mitigated_data(self, request, finding, form):
+        # If active is not checked and CAN_EDIT_MITIGATED_DATA,
+        # mitigate the finding and the associated endpoints status
+        if finding_helper.can_edit_mitigated_data(request.user):
+            if (
+                form["active"].value() is False
+                or form["false_p"].value()
+                or form["out_of_scope"].value()
+            ) and form["duplicate"].value() is False:
+                now = timezone.now()
+                finding.is_mitigated = True
+                endpoint_status = finding.status_finding.all()
+                for status in endpoint_status:
+                    status.mitigated_by = (
+                        form.cleaned_data.get("mitigated_by") or request.user
+                    )
+                    status.mitigated_time = (
+                        form.cleaned_data.get("mitigated") or now
+                    )
+                    status.mitigated = True
+                    status.last_modified = timezone.now()
+                    status.save()
+
+    def process_false_positive_history(self, finding):
+        if get_system_setting("false_positive_history", False):
+            # If the finding is being marked as a false positive we dont need to call the
+            # fp history function because it will be called by the save function
+            # If finding was a false positive and is being reactivated: retroactively reactivates all equal findings
+            if finding.false_p and not finding.false_p:
+                if get_system_setting("retroactive_false_positive_history"):
+                    logger.debug('FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s', finding)
+
+                    existing_fp_findings = match_finding_to_existing_findings(
+                        finding, product=finding.test.engagement.product
+                    ).filter(false_p=True)
+
+                    for fp in existing_fp_findings:
+                        logger.debug('FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s', fp.id, fp)
+                        fp.active = finding.active
+                        fp.verified = finding.verified
+                        fp.false_p = False
+                        fp.out_of_scope = finding.out_of_scope
+                        fp.is_mitigated = finding.is_mitigated
+                        fp.save_no_options()
+
+    def process_burp_request_response(self, form, finding):
+        if "request" in form.cleaned_data or "response" in form.cleaned_data:
+            try:
+                burp_rr, _ = BurpRawRequestResponse.objects.get_or_create(finding=finding)
+            except BurpRawRequestResponse.MultipleObjectsReturned:
+                burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
+            burp_rr.burpRequestBase64 = base64.b64encode(
+                form.cleaned_data["request"].encode()
+            )
+            burp_rr.burpResponseBase64 = base64.b64encode(
+                form.cleaned_data["response"].encode()
+            )
+            burp_rr.clean()
+            burp_rr.save()
+
+    def process_finding_form(self, request, form, finding):
+        if form.is_valid():
+            # process some fo the easy stuff first
+            new_finding = form.save(commit=False)
+            new_finding.test = finding.test
+            new_finding.numerical_severity = Finding.get_numerical_severity(new_finding.severity)
+            new_finding.last_reviewed = timezone.now()
+            new_finding.last_reviewed_by = request.user
+            new_finding.tags = form.cleaned_data["tags"]
+            # Handle group related things
+            if "group" in form.cleaned_data:
+                finding_group = form.cleaned_data["group"]
+                finding_helper.update_finding_group(new_finding, finding_group)
+            # Handle risk exception related things
+            if "risk_accepted" in form.cleaned_data and form["risk_accepted"].value():
+                if new_finding.test.engagement.product.enable_simple_risk_acceptance:
+                    ra_helper.simple_risk_accept(new_finding, perform_save=False)
+            else:
+                if new_finding.risk_accepted:
+                    ra_helper.risk_unaccept(new_finding, perform_save=False)
+            # Save and add new endpoints
+            finding_helper.add_endpoints(new_finding, form)
+            # Remove unrelated endpoints
+            endpoint_status_list = Endpoint_Status.objects.filter(finding=new_finding)
+            for endpoint_status in endpoint_status_list:
+                if endpoint_status.endpoint not in new_finding.endpoints.all():
+                    endpoint_status.delete()
+            # Handle some of the other steps
+            self.process_mitigated_data(request, new_finding, form)
+            self.process_false_positive_history(new_finding)
+            self.process_burp_request_response(form, new_finding)
+            # Save the vulnerability IDs
+            finding_helper.save_vulnerability_ids(new_finding, form.cleaned_data["vulnerability_ids"].split())
+            # Add a success message
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Finding saved successfully.",
+                extra_tags="alert-success",
+            )
+
+            return finding, request, form, True
+        else:
+            add_error_message_to_response("The form has errors, please correct them below.")
+            add_field_errors_to_response(form)
+
+        return finding, request, form, False
+
+    def process_jira_form(self, request, form, finding):
+        # Capture case if the jira not being enabled
+        if form is None:
+            return request, form, True, False
+
+        if form and form.is_valid():
+            jira_message = None
+            logger.debug("jform.jira_issue: %s", form.cleaned_data.get("jira_issue"))
+            logger.debug(JFORM_PUSH_TO_JIRA_MESSAGE, form.cleaned_data.get("push_to_jira"))
+            # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
+            push_all_jira_issues = jira_helper.is_push_all_issues(finding)
+            push_to_jira = push_all_jira_issues or form.cleaned_data.get("push_to_jira")
+            logger.debug("push_to_jira: %s", push_to_jira)
+            logger.debug("push_all_jira_issues: %s", push_all_jira_issues)
+            logger.debug("has_jira_group_issue: %s", finding.has_jira_group_issue)
+            # if the jira issue key was changed, update database
+            new_jira_issue_key = form.cleaned_data.get("jira_issue")
+            # we only support linking / changing if there is no group issue
+            if not finding.has_jira_group_issue:
+                if finding.has_jira_issue:
+                    """
+                    everything in DD around JIRA integration is based on the internal id
+                    of the issue in JIRA instead of on the public jira issue key.
+                    I have no idea why, but it means we have to retrieve the issue from JIRA
+                    to get the internal JIRA id. we can assume the issue exist,
+                    which is already checked in the validation of the form
+                    """
+                    if not new_jira_issue_key:
+                        jira_helper.finding_unlink_jira(request, finding)
+                        jira_message = "Link to JIRA issue removed successfully."
+                    elif new_jira_issue_key != finding.jira_issue.jira_key:
+                        jira_helper.finding_unlink_jira(request, finding)
+                        jira_helper.finding_link_jira(request, finding, new_jira_issue_key)
+                        jira_message = "Changed JIRA link successfully."
+                else:
+                    if new_jira_issue_key:
+                        jira_helper.finding_link_jira(request, finding, new_jira_issue_key)
+                        jira_message = "Linked a JIRA issue successfully."
+            # any existing finding should be updated
+            push_to_jira = (
+                push_to_jira
+                and not (push_to_jira and finding.finding_group)
+                and finding.has_jira_issue
+                and jira_helper.get_jira_instance(finding).finding_jira_sync
+            )
+            # Determine if a message should be added
+            if jira_message:
+                messages.add_message(
+                    request, messages.SUCCESS, jira_message, extra_tags="alert-success"
+                )
+
+            return request, form, True, push_to_jira
+        else:
+            add_field_errors_to_response(form)
+
+        return request, form, False, False
+
+    def process_github_form(self, request, form, finding, old_status):
+        if "githubform-push_to_github" not in request.POST:
+            return request, form, True
+
+        if form.is_valid():
+            if GITHUB_Issue.objects.filter(finding=finding).exists():
+                update_external_issue(finding, old_status, "github")
+            else:
+                add_external_issue(finding, "github")
+
+            return request, form, True
+        else:
+            add_field_errors_to_response(form)
+
+        return request, form, False
+
+    def process_form(self, request, context, finding):
+        # Set vars for the completed forms
+        form = context["form"]
+        jform = context["jform"]
+        gform = context["gform"]
+        old_status = finding.status()
+        old_finding = copy.copy(finding)
+        # Validate finding mitigation
+        request, form = self.validate_status_change(request, finding, form)
+        # Check the validity of the form overall
+        new_finding, request, form, form_valid = self.process_finding_form(request, form, finding)
+        request, jform, jform_valid, push_to_jira = self.process_jira_form(request, jform, new_finding)
+        request, gform, gform_valid = self.process_github_form(request, gform, new_finding, old_status)
+        # Check the validity of all the forms
+        if form_valid and jform_valid and gform_valid:
+            # if we're removing the "duplicate" in the edit finding screen
+            # do not relaunch deduplication, otherwise, it's never taken into account
+            if old_finding.duplicate and not new_finding.duplicate:
+                new_finding.duplicate_finding = None
+                new_finding.save(push_to_jira=push_to_jira, dedupe_option=False)
+            else:
+                new_finding.save(push_to_jira=push_to_jira)
+            # we only push the group after storing the finding to make sure
+            # the updated data of the finding is pushed as part of the group
+            if push_to_jira and finding.finding_group:
+                jira_helper.push_to_jira(finding.finding_group)
+
+            return request, context, True
+
+        # in the event of form validation errors, update the context with the updated forms
+        context["form"] = form
+        context["jform"] = jform
+        context["gform"] = gform
+
+        return request, context, False
+
+    def get(self, request, finding_id):
+        # Get the initial objects
+        finding = self.get_finding(finding_id)
+        # Make sure the user is authorized
+        user_has_permission_or_403(request.user, finding, Permissions.Finding_Edit)
+        # Set up the initial context
+        context = self.get_initial_context(request, finding)
+        # Render the form
+        return render(request, "dojo/edit_finding.html", context)
+
+    def post(self, request, finding_id):
+        # Get the initial objects
+        finding = self.get_finding(finding_id)
+        # Make sure the user is authorized
+        user_has_permission_or_403(request.user, finding, Permissions.Finding_Edit)
+        # Set up the initial context
+        context = self.get_initial_context(request, finding)
+        # Process the form
+        request, context, success = self.process_form(request, context, finding)
+        # Handle the case of a successful form
+        if success:
+            return redirect_to_return_url_or_else(request, reverse("view_finding", args=(finding_id,)))
+        # Render the form
+        return render(request, "dojo/edit_finding.html", context)
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
@@ -1000,10 +1364,64 @@ def apply_template_cwe(request, fid):
         raise PermissionDenied()
 
 
+class DeleteFinding(View):
+    def get_finding(self, finding_id):
+        return get_object_or_404(Finding, id=finding_id)
+
+    def process_form(self, request, form, finding):
+        if form.is_valid():
+            product = finding.test.engagement.product
+            finding.delete()
+            # Update the grade of the product async
+            calculate_grade(product)
+            # Add a message to the request that the finding was successfully deleted
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Finding deleted successfully.",
+                extra_tags="alert-success",
+            )
+            # Send a notification that the finding had been deleted
+            create_notification(
+                event="other",
+                title=f"Deletion of {finding.title}",
+                description=f'The finding "{finding.title}" was deleted by {request.user}',
+                product=product,
+                url=request.build_absolute_uri(reverse("all_findings")),
+                recipients=[finding.test.engagement.lead],
+                icon="exclamation-triangle",
+            )
+            # return the request
+            return request, True
+
+        # Add a failure message
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Unable to delete finding, please try again.",
+            extra_tags="alert-danger",
+        )
+
+        return request, False
+
+    def post(self, request, finding_id):
+        # Get the initial objects
+        finding = self.get_finding(finding_id)
+        # Make sure the user is authorized
+        user_has_permission_or_403(request.user, finding, Permissions.Finding_Delete)
+        # Get the finding form
+        form = DeleteFindingForm(request.POST, instance=finding)
+        # Process the form
+        request, success = self.process_form(request, form, finding)
+        # Handle the case of a successful form
+        if success:
+            return redirect_to_return_url_or_else(request, reverse("view_test", args=(finding.test.id,)))
+        raise PermissionDenied()
+
+
 @user_is_authorized(Finding, Permissions.Finding_Delete, "fid")
 def delete_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-
     if request.method == "POST":
         form = DeleteFindingForm(request.POST, instance=finding)
         if form.is_valid():
