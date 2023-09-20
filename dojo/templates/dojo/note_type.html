@@ -20,7 +20,7 @@
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
-                                        <a href="{% url 'add_note_type' %}">
+                                        <a rel="noopener noreferrer" href="{% url 'add_note_type' %}">
                                             <i class="fa-solid fa-plus"></i> Add Note Type
                                         </a>
                                     </li>
@@ -55,44 +55,44 @@
                         <tbody>
                         {% for nt in nts %}
                             <tr>
-                              <td><a> {{ nt.name }} </a></td>
-                              <td><a>{{ nt.description }}</a></td>
+                              <td><a rel="noopener noreferrer"> {{ nt.name }} </a></td>
+                              <td><a rel="noopener noreferrer">{{ nt.description }}</a></td>
                               <td>
                                 {% if nt.is_single %}
-                                  <a>Single</a>
+                                  <a rel="noopener noreferrer">Single</a>
                                 {% else %}
-                                  <a>Multiple</a>
+                                  <a rel="noopener noreferrer">Multiple</a>
                                 {% endif %}
                               </td>
                               <td>
                                 {% if nt.is_mandatory %}
-                                  <a>Mandatory</a>
+                                  <a rel="noopener noreferrer">Mandatory</a>
                                 {% else %}
-                                <a>Optional</a>
+                                <a rel="noopener noreferrer">Optional</a>
                                 {% endif %}
                               </td>
                               <td>
                                 {% if nt.is_active %}
-                                  <a>Active</a>
+                                  <a rel="noopener noreferrer">Active</a>
                                 {% else %}
-                                <a>Disabled</a>
+                                <a rel="noopener noreferrer">Disabled</a>
                                 {% endif %}
                               </td>
                               {% if "dojo.change_note_type"|has_configuration_permission:request %}
                                     <td>
                                         <div class="centered">
                                             <div class="btn-group" role="group">
-                                                <a class="btn btn-sm btn-warning"
+                                                <a rel="noopener noreferrer" class="btn btn-sm btn-warning"
                                                    href="{% url 'edit_note_type' nt.id %}">
                                                     <i class="fa-solid fa-file"></i> Edit Note Type
                                                 </a>
                                                 {% if nt.is_active %}
-                                                <a class="btn btn-sm btn-danger"
+                                                <a rel="noopener noreferrer" class="btn btn-sm btn-danger"
                                                    href="{% url 'disable_note_type' nt.id %}">
                                                     <i class="fa-solid fa-xmark"></i> Disable Note Type
                                                 </a>
                                                 {% else %}
-                                                <a class="btn btn-sm btn-success"
+                                                <a rel="noopener noreferrer" class="btn btn-sm btn-success"
                                                    href="{% url 'enable_note_type' nt.id %}">
                                                     <i class="fa-solid fa-check"></i> Enable Note Type
                                                 </a>

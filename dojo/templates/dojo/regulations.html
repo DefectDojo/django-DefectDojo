@@ -19,7 +19,7 @@
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
-                                        <a href="{% url 'new_regulation' %}">
+                                        <a rel="noopener noreferrer" href="{% url 'new_regulation' %}">
                                             <i class="fa-solid fa-plus"></i> Add regulation
                                         </a>
                                     </li>
@@ -53,7 +53,7 @@
                             <tr>
                                 <td>
                                     {% if "dojo.change_regulation"|has_configuration_permission:request %}
-                                    <a href="{% url 'edit_regulations' conf.id %}"><b>{{ conf.name }}</b></a>
+                                    <a rel="noopener noreferrer" href="{% url 'edit_regulations' conf.id %}"><b>{{ conf.name }}</b></a>
                                     {% else %}
                                     {{ conf.name }}
                                     {% endif %}

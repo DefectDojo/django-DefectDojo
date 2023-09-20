@@ -134,12 +134,12 @@
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                                         <li role="presentation">
-                                            <a href="{% url 'metrics_product_type' %}?type=Finding">
+                                            <a rel="noopener noreferrer" href="{% url 'metrics_product_type' %}?type=Finding">
                                                 <i class="fa-solid fa-file-lines"></i> {% trans "Measures Findings" %}
                                             </a>
                                         </li>
                                         <li role="presentation">
-                                            <a href="{% url 'metrics_product_type' %}?type=Endpoint">
+                                            <a rel="noopener noreferrer" href="{% url 'metrics_product_type' %}?type=Endpoint">
                                                 <i class="fa-solid fa-file-lines"></i> {% trans "Measure Affected Endpoints" %}
                                             </a>
                                         </li>
@@ -171,28 +171,28 @@
                                     <p>{% blocktranslate with name=c_prod.name%}{{ name }} is affected by <b>both</b> critical and
                                         high severity vulnerabilities.{% endblocktranslate %} </p>
                                     <p>
-                                        <a href="{{ url_prefix }}/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">
+                                        <a rel="noopener noreferrer" href="{{ url_prefix }}/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">
                                             {% trans "Critical Severity Vulnerabilities" %}</a></p>
                                     <p>
-                                        <a href="{{ url_prefix }}/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">
+                                        <a rel="noopener noreferrer" href="{{ url_prefix }}/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">
                                             {% trans "High Severity Vulnerabilities" %}</a></p>
                                 {% elif c_prod.critical_present %}
                                     <p>{% blocktranslate with name=c_prod.name%}
                                         {{ name }} is affected by critical vulnerabilities.{% endblocktranslate %}
                                     </p>
                                     <p>
-                                        <a href="{{ url_prefix }}/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">
+                                        <a rel="noopener noreferrer" href="{{ url_prefix }}/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">
                                             {% trans "Critical Severity Vulnerabilities" %}</a></p>
                                 {% elif c_prod.high_present %}
                                     <p>{% blocktranslate with name=c_prod.name%}
                                         {{ name }} is affected by high severity vulnerabilities.{% endblocktranslate %}
                                     </p>
                                     <p>
-                                        <a href="{{ url_prefix }}/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">
+                                        <a rel="noopener noreferrer" href="{{ url_prefix }}/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">
                                             {% trans "High Severity Vulnerabilities" %}</a></p>
                                 {% endif %}
                                 <p>
-                                    <a href='{{ url_prefix }}/metrics/product/type?date=2&test__engagement__product__prod_type={{ c_prod.id }}&status='>
+                                    <a rel="noopener noreferrer" href='{{ url_prefix }}/metrics/product/type?date=2&test__engagement__product__prod_type={{ c_prod.id }}&status='>
                                         {% trans "Full Metrics" %}</a></p></div>
                             <br>
                         </div>
@@ -287,20 +287,20 @@
                                 <ul class="nav nav-tabs">
                                     {% if top_ten_products %}
                                         <li class="active">
-                                            <a data-toggle="tab" href="#tabs-1">
+                                            <a rel="noopener noreferrer" data-toggle="tab" href="#tabs-1">
                                                 {% trans "Top 10 Products <br/> by bug severity" %}
                                             </a>
                                         </li>
                                     {% endif %}
-                                    <li><a data-toggle="tab" href="#tabs-2">{% trans "Detail Breakdown" %}</a></li>
-                                    <li><a data-toggle="tab" href="#tabs-3">{% trans "Opened Findings" %}</a></li>
-                                    <li><a data-toggle="tab" href="#tabs-4">{% trans "Accepted Findings" %}</a></li>
-                                    <li><a data-toggle="tab" href="#tabs-5">{% trans "Closed Findings" %}</a></li>
-                                    <li><a data-toggle="tab" href="#tabs-6">{% trans "Trending Open<br/>Bug Count" %}
+                                    <li><a rel="noopener noreferrer" data-toggle="tab" href="#tabs-2">{% trans "Detail Breakdown" %}</a></li>
+                                    <li><a rel="noopener noreferrer" data-toggle="tab" href="#tabs-3">{% trans "Opened Findings" %}</a></li>
+                                    <li><a rel="noopener noreferrer" data-toggle="tab" href="#tabs-4">{% trans "Accepted Findings" %}</a></li>
+                                    <li><a rel="noopener noreferrer" data-toggle="tab" href="#tabs-5">{% trans "Closed Findings" %}</a></li>
+                                    <li><a rel="noopener noreferrer" data-toggle="tab" href="#tabs-6">{% trans "Trending Open<br/>Bug Count" %}
                                     </a></li>
-                                    <li><a data-toggle="tab" href="#tabs-7">{% trans "Trending Accepted <br/> Bug Count" %}
+                                    <li><a rel="noopener noreferrer" data-toggle="tab" href="#tabs-7">{% trans "Trending Accepted <br/> Bug Count" %}
                                     </a></li>
-                                    <li><a data-toggle="tab" href="#tabs-8">{% trans "Age of Issues" %}</a></li>
+                                    <li><a rel="noopener noreferrer" data-toggle="tab" href="#tabs-8">{% trans "Age of Issues" %}</a></li>
                                 </ul>
                                 <div class="tab-content">
                                     {% if top_ten_products %}
@@ -317,7 +317,7 @@
                                                 </tr>
                                                 {% for t in top_ten_products %}
                                                     <tr>
-                                                        <td><a href="{% url 'view_product' t.id %}">{{ t.name }}</a>
+                                                        <td><a rel="noopener noreferrer" href="{% url 'view_product' t.id %}">{{ t.name }}</a>
                                                         </td>
                                                         <td>{{ t.critical|default_if_none:0 }}</td>
                                                         <td>{{ t.high|default_if_none:0 }}</td>
@@ -350,7 +350,7 @@
                                         </span>
                                                     </td>
                                                     <td>{{ finding.severity_display }}</td>
-                                                    <td><a href="{% url 'view_finding' finding.id %}"
+                                                    <td><a rel="noopener noreferrer" href="{% url 'view_finding' finding.id %}"
                                                            title="{{ finding.title }}">{{ finding.title|truncatechars_html:20 }}</a>
                                                     </td>
                                                     <td>{{ finding.age }}</td>
@@ -395,7 +395,7 @@
                                                 </tr>
                                                 {% for key, value in in_period_details.items %}
                                                     <tr>
-                                                        <td><a href="{{ value.path }}">{{ key }}</a></td>
+                                                        <td><a rel="noopener noreferrer" href="{{ value.path }}">{{ key }}</a></td>
                                                         <td>{{ value.Critical }}</td>
                                                         <td>{{ value.High }}</td>
                                                         <td>{{ value.Medium }}</td>
@@ -442,7 +442,7 @@
                                                 </tr>
                                                 {% for key, value in accepted_in_period_details.items %}
                                                     <tr>
-                                                        <td><a href="{{ value.path }}">{{ key }}</a></td>
+                                                        <td><a rel="noopener noreferrer" href="{{ value.path }}">{{ key }}</a></td>
                                                         <td>{{ value.Critical }}</td>
                                                         <td>{{ value.High }}</td>
                                                         <td>{{ value.Medium }}</td>
@@ -492,7 +492,7 @@
                                                 </tr>
                                                 {% for key, value in closed_in_period_details.items %}
                                                     <tr>
-                                                        <td><a href="{{ value.path }}">{{ key }}</a></td>
+                                                        <td><a rel="noopener noreferrer" href="{{ value.path }}">{{ key }}</a></td>
                                                         <td>{{ value.Critical }}</td>
                                                         <td>{{ value.High }}</td>
                                                         <td>{{ value.Medium }}</td>

@@ -71,7 +71,7 @@
                             <td>
                                 {% comment %} for some reason the font-awesome icons don't work with the report template{% endcomment %}
                                 {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
-                                    <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
+                                    <a rel="noopener noreferrer" href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
                                     class="{% if ra.is_expired %}lightgrey{% endif%}">acceptance</a>&nbsp;
                                 {% endfor %}
                             </td>
@@ -85,7 +85,7 @@
                         {% endif %}
                         {% if finding.cwe %}
                             <td>
-                                <a target="_blank"
+                                <a rel="noopener noreferrer" target="_blank"
                                     href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
                                     <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe }}
                                 </a>

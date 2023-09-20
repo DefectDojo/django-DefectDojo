@@ -18,9 +18,9 @@
             </button>
             &nbsp;
             {% if clear_link %}
-                <a href="{{ clear_link }}" class="clear centered"> [Clear Filters] </a>
+                <a rel="noopener noreferrer" href="{{ clear_link }}" class="clear centered"> [Clear Filters] </a>
             {% else %}
-                <a href="{{ request.path }}" class="clear centered"> [Clear Filters] </a>
+                <a rel="noopener noreferrer" href="{{ request.path }}" class="clear centered"> [Clear Filters] </a>
             {% endif %}
         </div>
 

@@ -107,7 +107,7 @@
                         <td>{{ risk_acceptance.expiration_date_handled|date }}</td>
                         <td>{{ risk_acceptance.accepted_findings.count }}</td>
                         {% if risk_acceptance.filename %}
-                            <td><a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a></td>
+                            <td><a rel="noopener noreferrer" href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a></td>
                         {% else %}
                             <td>No</a></td>
                         {% endif %}
@@ -178,7 +178,7 @@
                               {{ finding.severity_display }}
                           </span>
                         </td>
-                        <td><a href="{% url 'view_finding' finding.id %}"
+                        <td><a rel="noopener noreferrer" href="{% url 'view_finding' finding.id %}"
                                title="{{ finding.title }}">{{ finding.title|truncatechars_html:140 }}</a></td>
                         <td>{{ finding.date }}</td>
                         <td>{{ finding.active }}</td>
@@ -244,7 +244,7 @@
             <tr>
                 {% if risk_acceptance.filename %}
                     <td>
-                        <a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a>
+                        <a rel="noopener noreferrer" href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a>
                     </td>
                     <td>
                         {{ risk_acceptance.created }}

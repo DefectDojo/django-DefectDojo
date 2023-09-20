@@ -40,14 +40,14 @@
                 </button>
                 &nbsp;
                 {% if clear_js %}
-                    <a href="#{{form_id}}" id="clear_js" class="clear centered"> [Clear Filters] </a>
+                    <a rel="noopener noreferrer" href="#{{form_id}}" id="clear_js" class="clear centered"> [Clear Filters] </a>
                 {% elif clear_link %}
-                    <a href="{{ clear_link }}" id="clear" class="clear centered"> [Clear Filters] </a>
+                    <a rel="noopener noreferrer" href="{{ clear_link }}" id="clear" class="clear centered"> [Clear Filters] </a>
                 {% else %}
-                    <a href="{{ request.path }}" id="clear" class="clear centered"> [Clear Filters] </a>
+                    <a rel="noopener noreferrer" href="{{ request.path }}" id="clear" class="clear centered"> [Clear Filters] </a>
                 {% endif %}
                 {% if restart_link %}
-                    <a href="{{ restart_link }}" id="clear" class="clear centered"> [Restart] </a>
+                    <a rel="noopener noreferrer" href="{{ restart_link }}" id="clear" class="clear centered"> [Restart] </a>
                 {% endif %}
             </div>
         {% endif %}

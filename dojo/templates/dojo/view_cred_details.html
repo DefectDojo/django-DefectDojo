@@ -23,18 +23,18 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
-                            <a href="{% url 'edit_cred' cred.id  %}">
+                            <a rel="noopener noreferrer" href="{% url 'edit_cred' cred.id  %}">
                                 <i class="fa-solid fa-pen-to-square"></i> Edit Credential
                             </a>
                         </li>
                         <li role="presentation">
-                            <a id="add_notes_link" href="#add_notes">
+                            <a rel="noopener noreferrer" id="add_notes_link" href="#add_notes">
                                 <i class="fa-solid fa-comments"></i> Add Notes
                             </a>
                         </li>
                         <li role="separator" class="divider"></li>
                         <!--<li role="presentation">
-                            <a class="text-danger" href="">
+                            <a rel="noopener noreferrer" class="text-danger" href="">
                                 <i class="fa-solid fa-trash"></i> Delete Configuraiton
                             </a>
                         </li>!-->
@@ -55,10 +55,10 @@
                   <th>Valid Login</th>
                 </tr>
                 <tr>
-                  <td><a href="{{ cred.url }}" target="_blank">{{ cred.name  }}</a></td>
+                  <td><a rel="noopener noreferrer" href="{{ cred.url }}" target="_blank">{{ cred.name  }}</a></td>
                   <td>
                     {% if cred.url %}
-                      <a href="{{ cred.url }}">Alternate URL</a>
+                      <a rel="noopener noreferrer" href="{{ cred.url }}">Alternate URL</a>
                     {% endif %}
                   </td>
                   <td>{{ cred.username }}</td>
@@ -116,11 +116,11 @@
                 {% for cred in cred_products %}
                   <tr>
                     <td>
-                      <a href="{% url 'view_product' cred.product.id %}">{{ cred.product }}</a>
+                      <a rel="noopener noreferrer" href="{% url 'view_product' cred.product.id %}">{{ cred.product }}</a>
                     </td>
                     <td>
                       {% if cred.url %}
-                        <a href="{{ cred.url }}">Alternate URL</a>
+                        <a rel="noopener noreferrer" href="{{ cred.url }}">Alternate URL</a>
                       {% else %}
                         None Configured
                       {% endif %}
@@ -163,7 +163,7 @@
                         <td>
                             {{ note }}
                             {% if person == note.author.username %}
-                                <a href="{% url 'delete_test_note' test.id note.id %}" class="btn btn-danger btn-xs"
+                                <a rel="noopener noreferrer" href="{% url 'delete_test_note' test.id note.id %}" class="btn btn-danger btn-xs"
                                    title="Delete">
                                     <i class="fa-solid fa-trash" aria-hidden="true"></i>
                                 </a>
@@ -283,13 +283,13 @@
                         jqXHR.setRequestHeader('X-CSRFToken', $('input[name=csrfmiddlewaretoken]').val());
                     },
                     success: function (data, textStatus, jqXHR) {
-                        // Your processing of the data here. <a href='" + jqXHR.getResponseHeader('Location') + "'>" +  + "</a>
+                        // Your processing of the data here. <a rel="noopener noreferrer" href='" + jqXHR.getResponseHeader('Location') + "'>" +  + "</a>
                         //
                         $('table#stub_findings').removeClass('hidden');
                         var fid = jqXHR.getResponseHeader('Location').split('/');
                         fid = fid[fid.length - 2];
                         var row = $("<tr id='added-" + fid + "' class='success'></tr>");
-                        var link = $('<a></a>');
+                        var link = $('<a rel="noopener noreferrer"></a>');
 
                         link.attr('href', "/stub_finding/" + fid + "/promote");
                         link.text($("input#quick_add_finding").val());
@@ -297,7 +297,7 @@
                         var severity = $("<td> </td>");
                         var reporter = $("<td>{{ request.user.username }}</td>");
                         var date = $("<td>None</td>");
-                        var actions = $('<td><div class="btn-group"><a class="btn btn-sm btn-warning" href="/stub_finding/[id]/promote">Promote To Finding</a> <a class="btn btn-sm btn-danger" href="/stub_finding/[id]/delete">Delete</a></div></td>'.replace(/\[id\]/g, fid));
+                        var actions = $('<td><div class="btn-group"><a rel="noopener noreferrer" class="btn btn-sm btn-warning" href="/stub_finding/[id]/promote">Promote To Finding</a> <a rel="noopener noreferrer" class="btn btn-sm btn-danger" href="/stub_finding/[id]/delete">Delete</a></div></td>'.replace(/\[id\]/g, fid));
 
                         row.append(title, severity, reporter, date, actions).appendTo("#stub_findings tbody");
                         $("input#quick_add_finding").val("")

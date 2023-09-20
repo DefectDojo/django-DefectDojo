@@ -20,7 +20,7 @@
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
-                                        <a href="{% url 'add_cred' %}">
+                                        <a rel="noopener noreferrer" href="{% url 'add_cred' %}">
                                             <i class="fa-solid fa-plus"></i> Add Credential
                                         </a>
                                     </li>
@@ -53,7 +53,7 @@
                         {% for conf in confs %}
                             <tr>
                                 <td>
-                                    <a href="{{ conf.url }}" target="_blank">{{ conf.name }}</a>
+                                    <a rel="noopener noreferrer" href="{{ conf.url }}" target="_blank">{{ conf.name }}</a>
                                 </td>
                                 <td>{{ conf.username }}</td>
                                 <td>{{ conf.role }}</td>
@@ -61,14 +61,14 @@
                                 <td>{{ conf.is_valid }}</td>
                                 <td>
                                     <div class="btn-group">
-                                        <a class="btn btn-sm btn-secondary"
+                                        <a rel="noopener noreferrer" class="btn btn-sm btn-secondary"
                                            href="{% url 'view_cred_details' conf.id  %}">View</a>
                                         {% if "dojo.change_cred_user"|has_configuration_permission:request %}
-                                        <a class="btn btn-sm btn-warning"
+                                        <a rel="noopener noreferrer" class="btn btn-sm btn-warning"
                                            href="{% url 'edit_cred' conf.id  %}">Edit</a>
                                         {% endif %}
                                         {% if "dojo.delete_cred_user"|has_configuration_permission:request %}
-                                        <a class="btn btn-sm btn-danger delete-finding"
+                                        <a rel="noopener noreferrer" class="btn btn-sm btn-danger delete-finding"
                                            href="{% url 'delete_cred' conf.id  %}">Delete</a>
                                         {% endif %}
                                         </div>

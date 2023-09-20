@@ -44,9 +44,9 @@
                         </tr>
                         {% for u in users %}
                             <tr>
-                                <td><a href="{% url 'view_engineer' u.id %}">{{ u.first_name }}</a></td>
-                                <td><a href="{% url 'view_engineer' u.id %}">{{ u.last_name }}</a></td>
-                                <td><a href="{% url 'view_engineer' u.id %}">{{ u.username }}</a></td>
+                                <td><a rel="noopener noreferrer" href="{% url 'view_engineer' u.id %}">{{ u.first_name }}</a></td>
+                                <td><a rel="noopener noreferrer" href="{% url 'view_engineer' u.id %}">{{ u.last_name }}</a></td>
+                                <td><a rel="noopener noreferrer" href="{% url 'view_engineer' u.id %}">{{ u.username }}</a></td>
                                 <td>{{ u.email }}</td>
                                 <td>{{ u.last_login }}</td>
                                 <td class="text-center">{% if u.is_active %}

@@ -77,7 +77,7 @@
                         {% for finding in paged_findings %}
                             <tr>
                                 <td>
-                                    <a title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:50 }}</a>
+                                    <a rel="noopener noreferrer" title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:50 }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                                 </td>
                                 <td class="nowrap">{{ finding.date }}</td>

@@ -16,9 +16,9 @@
                 {% for num in page|paginate:5 %}
                     <li {% if num.is_current %}class="active"{% endif %}>
                         {% if num.page_number %}
-                            <a href="?{% url_replace request page_param num.page_number %}"> {{ num.display }}</a>
+                            <a rel="noopener noreferrer" href="?{% url_replace request page_param num.page_number %}"> {{ num.display }}</a>
                         {% else %}
-                            <a>{{ num.display }}</a>
+                            <a rel="noopener noreferrer">{{ num.display }}</a>
                         {% endif %}
                     </li>
                 {% endfor %}
@@ -34,15 +34,15 @@
                             <span class="sr-only">{% trans "Toggle Dropdown" %}</span>
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a href="?{% url_replace request page_size_param 25 %}">25</a></li>
-                            <li><a href="?{% url_replace request page_size_param 50 %}">50</a></li>
-                            <li><a href="?{% url_replace request page_size_param 75 %}">75</a></li>
-                            <li><a href="?{% url_replace request page_size_param 100 %}">100</a></li>
-                            <li><a href="?{% url_replace request page_size_param 150 %}">150</a></li>
+                            <li><a rel="noopener noreferrer" href="?{% url_replace request page_size_param 25 %}">25</a></li>
+                            <li><a rel="noopener noreferrer" href="?{% url_replace request page_size_param 50 %}">50</a></li>
+                            <li><a rel="noopener noreferrer" href="?{% url_replace request page_size_param 75 %}">75</a></li>
+                            <li><a rel="noopener noreferrer" href="?{% url_replace request page_size_param 100 %}">100</a></li>
+                            <li><a rel="noopener noreferrer" href="?{% url_replace request page_size_param 150 %}">150</a></li>
                             {% if page.paginator.count > 500 %}
-                                <li><a href="?{% url_replace request page_size_param 500 %}">500</a></li>
+                                <li><a rel="noopener noreferrer" href="?{% url_replace request page_size_param 500 %}">500</a></li>
                             {% endif %}
-                            <li><a href="?{% url_replace request page_size_param page.paginator.count %}">{% trans "All" %}</a></li>
+                            <li><a rel="noopener noreferrer" href="?{% url_replace request page_size_param page.paginator.count %}">{% trans "All" %}</a></li>
                         </ul>
                     </div>
                 </li>

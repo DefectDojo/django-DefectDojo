@@ -50,38 +50,38 @@
                               {% if not host_view %}
                                 {% if endpoint|has_object_permission:"Endpoint_Edit" %}
                                     <li role="presentation">
-                                        <a href="{% url 'edit_endpoint' endpoint.id %}">
+                                        <a rel="noopener noreferrer" href="{% url 'edit_endpoint' endpoint.id %}">
                                             <i class="fa-solid fa-pen-to-square"></i> Edit Endpoint
                                         </a>
                                     </li>
                                     <li role="presentation">
-                                        <a href="{% url 'add_endpoint_meta_data' endpoint.id %}">
+                                        <a rel="noopener noreferrer" href="{% url 'add_endpoint_meta_data' endpoint.id %}">
                                             <i class="fa-solid fa-rectangle-list"></i> Add Metadata
                                         </a>
                                     </li>
                                 {% endif %}
                                     <li role="presentation">
-                                        <a href="{% url 'action_history' endpoint|content_type endpoint.id %}">
+                                        <a rel="noopener noreferrer" href="{% url 'action_history' endpoint|content_type endpoint.id %}">
                                             <i class="fa-solid fa-clock-rotate-left"></i> View History
                                         </a>
                                     </li>
                                     <li role="separator" class="divider"></li>
                                     <li role="presentation">
-                                        <a href="{% url 'endpoint_report' endpoint.id %}?active=1">
+                                        <a rel="noopener noreferrer" href="{% url 'endpoint_report' endpoint.id %}?active=1">
                                             <i class="fa-solid fa-file-lines"></i> Report
                                         </a>
                                     </li>
                                 {% if endpoint|has_object_permission:"Endpoint_Delete" %}
                                     <li role="separator" class="divider"></li>
                                     <li role="presentation" class="text-danger">
-                                        <a class="text-danger" href="{% url 'delete_endpoint' endpoint.id %}">
+                                        <a rel="noopener noreferrer" class="text-danger" href="{% url 'delete_endpoint' endpoint.id %}">
                                             <i class="fa-solid fa-trash"></i> Delete Endpoint
                                         </a>
                                     </li>
                                 {% endif %}
                               {% else %}
                                 <li role="presentation">
-                                    <a href="{% url 'endpoint_host_report' endpoint.id %}?&active=1">
+                                    <a rel="noopener noreferrer" href="{% url 'endpoint_host_report' endpoint.id %}?&active=1">
                                         <i class="fa-solid fa-file-lines"></i> Report
                                     </a>
                                 </li>
@@ -125,9 +125,9 @@
                                     <span class=" fa-2x">{{ all_findings|length }}</span>
                                     <span>
                                       {% if not host_view %}
-                                        <a href="{% url 'endpoint_report' endpoint.id %}">
+                                        <a rel="noopener noreferrer" href="{% url 'endpoint_report' endpoint.id %}">
                                       {% else %}
-                                        <a href="{% url 'endpoint_host_report' endpoint.id %}">
+                                        <a rel="noopener noreferrer" href="{% url 'endpoint_host_report' endpoint.id %}">
                                       {% endif %}
                                             endpoint finding{{ all_findings|length|pluralize }} <i
                                                 class="fa-solid fa-circle-right"></i></a>
@@ -175,7 +175,7 @@
                         <tr>
                             {% for item in row %}
                                 <td>{% if item %}
-                                      <a data-toggle="tooltip" data-placement="top" data-original-title="{{ item }}" href="{% url 'view_endpoint' item.id %}">
+                                      <a rel="noopener noreferrer" data-toggle="tooltip" data-placement="top" data-original-title="{{ item }}" href="{% url 'view_endpoint' item.id %}">
                                       {% if item.vulnerable %}
                                         <span style="color:OrangeRed" class="fa-solid fa-thumbs-down"></span>
                                       {% else %}
@@ -196,7 +196,7 @@
         {% else %}
             <div class="panel-heading"><h4>Host</h4></div>
             <div id="vuln_endpoints" class="panel-body table-responsive">
-                <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.host }}" href="{% url 'view_endpoint_host' endpoint.id %}">{{ endpoint.host }}</a>
+                <a rel="noopener noreferrer" data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.host }}" href="{% url 'view_endpoint_host' endpoint.id %}">{{ endpoint.host }}</a>
             </div>
         {% endif %}
     </div>
@@ -219,11 +219,11 @@
                     <div class="panel-heading">
                         <h4>Additional Information
                             <div class="btn-group pull-right">
-                                <a title="Edit Information" class="btn btn-sm btn-primary"
+                                <a rel="noopener noreferrer" title="Edit Information" class="btn btn-sm btn-primary"
                                    href="{% url 'edit_endpoint_meta_data' endpoint.id %}">
                                     <span class="fa-solid fa-pen-to-square"></span>
                                 </a>
-                                <a title="Add Information" class="btn btn-sm btn-primary"
+                                <a rel="noopener noreferrer" title="Add Information" class="btn btn-sm btn-primary"
                                    href="{% url 'add_endpoint_meta_data' endpoint.id %}">
                                     <span class="fa-solid fa-plus"></span>
                                 </a>
@@ -268,7 +268,7 @@
                 {% for finding in findings %}
                     <tr>
                         <td> 
-                            <a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                            <a rel="noopener noreferrer" href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
                         </td>
                         <td class="text-center">
                             <span class="label severity severity-{{ finding.severity }}">

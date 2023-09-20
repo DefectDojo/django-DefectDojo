@@ -20,7 +20,7 @@
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
-                                        <a href="{%  url 'add_dev_env' %}">
+                                        <a rel="noopener noreferrer" href="{%  url 'add_dev_env' %}">
                                             <i class="fa-solid fa-plus"></i> New Environment </a>
                                     </li>
                             </ul>
@@ -49,7 +49,7 @@
                         {% for de in devs %}
                             <tr>
                                 {% if "dojo.change_development_environment"|has_configuration_permission:request %}
-                                    <td><a href="{% url 'edit_dev_env' de.id %}"> {{ de.name }} </a></td>
+                                    <td><a rel="noopener noreferrer" href="{% url 'edit_dev_env' de.id %}"> {{ de.name }} </a></td>
                                 {% else %}
                                     <td> {{ de.name }} </a> </td>
                                 {% endif %}

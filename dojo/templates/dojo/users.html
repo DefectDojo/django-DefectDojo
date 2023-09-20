@@ -28,7 +28,7 @@
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
-                                        <a href="{% url 'add_user' %}">
+                                        <a rel="noopener noreferrer" href="{% url 'add_user' %}">
                                             <i class="fa-solid fa-plus"></i> {% trans "New User" %}
                                         </a>
                                     </li>
@@ -78,28 +78,28 @@
                                         <td>
                                             <ul>
                                                 <li class="dropdown" style="list-style:none;position:absolute">
-                                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" id="dropdownMenuUser">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
+                                                    <a rel="noopener noreferrer" href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" id="dropdownMenuUser">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                                     <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuUsers">
                                                         <li role="presentation">
-                                                            <a class="" href="{% url 'view_user' u.id %}" id="viewUser">
+                                                            <a rel="noopener noreferrer" class="" href="{% url 'view_user' u.id %}" id="viewUser">
                                                             <i class="fa-solid fa-rectangle-list"></i> {% trans "View" %}</a>
                                                         </li>
                                                         {% if "auth.change_user"|has_configuration_permission:request %}
                                                         <li role="presentation">
-                                                            <a class="" href="{% url 'edit_user' u.id %}"  id="editUser">
+                                                            <a rel="noopener noreferrer" class="" href="{% url 'edit_user' u.id %}"  id="editUser">
                                                             <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}</a>
                                                         </li>
                                                         {% endif %}
                                                         <li role="separator" class="divider"></li>
                                                         <li role="presentation">
-                                                        <a href="{% url 'action_history' u|content_type u.id %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'action_history' u|content_type u.id %}">
                                                             <i class="fa-solid fa-clock-rotate-left"></i> {% trans "View History" %}
                                                         </a>
                                                         </li>
                                                         {% if "auth.delete_user"|has_configuration_permission:request and u.id != request.user.id %}
                                                         <li role="separator" class="divider"></li>
                                                         <li role="presentation">
-                                                            <a class="" href="{% url 'delete_user' u.id %}">
+                                                            <a rel="noopener noreferrer" class="" href="{% url 'delete_user' u.id %}">
                                                             <i class="fa-solid fa-trash"></i> {% trans "Delete" %}</a>
                                                         </li>
                                                         {% endif %}
@@ -107,9 +107,9 @@
                                                 </li>
                                             </ul>
                                         </td>
-                                        <td><a href="{% url 'view_user' u.id %}">{{ u.first_name }}</a></td>
-                                        <td><a href="{% url 'view_user' u.id %}">{{ u.last_name }}</a></td>
-                                        <td><a href="{% url 'view_user' u.id %}">{{ u.username }}</a></td>
+                                        <td><a rel="noopener noreferrer" href="{% url 'view_user' u.id %}">{{ u.first_name }}</a></td>
+                                        <td><a rel="noopener noreferrer" href="{% url 'view_user' u.id %}">{{ u.last_name }}</a></td>
+                                        <td><a rel="noopener noreferrer" href="{% url 'view_user' u.id %}">{{ u.username }}</a></td>
                                         <td>{{ u.email }}</td>
                                         <td>{% if u.usercontactinfo.title %} {{ u.usercontactinfo.title }} {% endif %}</td>
                                         <td>

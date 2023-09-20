@@ -24,7 +24,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
-                            <a href="{% url 'new_object' product.id %}">
+                            <a rel="noopener noreferrer" href="{% url 'new_object' product.id %}">
                                 <i class="fa-solid fa-pen-to-square"></i> Add Tracked Files
                             </a>
                         </li>
@@ -53,11 +53,11 @@
                     <td>
                        <div class="btn-group">
                         {% if product|has_object_permission:"Product_Tracking_Files_Edit" %}
-                           <a class="btn btn-sm btn-warning"
+                           <a rel="noopener noreferrer" class="btn btn-sm btn-warning"
                               href="{% url 'edit_object' object.product.id object.id %}">Edit</a>
                         {% endif %}
                         {% if product|has_object_permission:"Product_Tracking_Files_Delete" %}
-                           <a class="btn btn-sm btn-danger"
+                           <a rel="noopener noreferrer" class="btn btn-sm btn-danger"
                               href="{% url 'delete_object' object.product.id object.id %}">Delete</a>
                         {% endif %}
                        </div>
@@ -158,13 +158,13 @@
                         jqXHR.setRequestHeader('X-CSRFToken', $('input[name=csrfmiddlewaretoken]').val());
                     },
                     success: function (data, textStatus, jqXHR) {
-                        // Your processing of the data here. <a href='" + jqXHR.getResponseHeader('Location') + "'>" +  + "</a>
+                        // Your processing of the data here. <a rel="noopener noreferrer" href='" + jqXHR.getResponseHeader('Location') + "'>" +  + "</a>
                         //
                         $('table#stub_findings').removeClass('hidden');
                         var fid = jqXHR.getResponseHeader('Location').split('/');
                         fid = fid[fid.length - 2];
                         var row = $("<tr id='added-" + fid + "' class='success'></tr>");
-                        var link = $('<a></a>');
+                        var link = $('<a rel="noopener noreferrer"></a>');
 
                         link.attr('href', "/stub_finding/" + fid + "/promote");
                         link.text($("input#quick_add_finding").val());
@@ -172,7 +172,7 @@
                         var severity = $("<td> </td>");
                         var reporter = $("<td>{{ request.user.username }}</td>");
                         var date = $("<td>None</td>");
-                        var actions = $('<td><div class="btn-group"><a class="btn btn-sm btn-warning" href="/stub_finding/[id]/promote">Promote To Finding</a> <a class="btn btn-sm btn-danger" href="/stub_finding/[id]/delete">Delete</a></div></td>'.replace(/\[id\]/g, fid));
+                        var actions = $('<td><div class="btn-group"><a rel="noopener noreferrer" class="btn btn-sm btn-warning" href="/stub_finding/[id]/promote">Promote To Finding</a> <a rel="noopener noreferrer" class="btn btn-sm btn-danger" href="/stub_finding/[id]/delete">Delete</a></div></td>'.replace(/\[id\]/g, fid));
 
                         row.append(title, severity, reporter, date, actions).appendTo("#stub_findings tbody");
                         $("input#quick_add_finding").val("")

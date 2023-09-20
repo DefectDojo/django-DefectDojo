@@ -21,12 +21,12 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
-                            <a href="{% url 'view_product_metrics' prod.id %}?type=Finding">
+                            <a rel="noopener noreferrer" href="{% url 'view_product_metrics' prod.id %}?type=Finding">
                                 <i class="fa-solid fa-file-lines"></i> Measure Findings
                             </a>
                         </li>
                         <li role="presentation">
-                            <a href="{% url 'view_product_metrics' prod.id %}?type=Endpoint">
+                            <a rel="noopener noreferrer" href="{% url 'view_product_metrics' prod.id %}?type=Endpoint">
                                 <i class="fa-solid fa-file-lines"></i> Measure Affected Endpoints
                             </a>
                         </li>
@@ -51,7 +51,7 @@
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ verified_objs|length }}</span>
-                                    <span><a
+                                    <span><a rel="noopener noreferrer"
                                             href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that are open/active and verified">Verified
                                         {{ view }}{{ verified_objs|length|pluralize }} <i
@@ -80,7 +80,7 @@
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ open_objs|length }}</span>
-                                    <span><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                    <span><a rel="noopener noreferrer" href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                         title="Findings that are open/active, but not (yet) verified">Open
                                         {{ view }}{{ open_objs|length|pluralize }} <i
                                                 class="fa-solid fa-circle-right"></i></a>
@@ -108,7 +108,7 @@
 
                                 <div class="pull-right text-right">
                                     <span class="fa-2x">{{ accepted_objs|length }}</span>
-                                    <span><a
+                                    <span><a rel="noopener noreferrer"
                                             href="{% url 'accepted_findings' %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that have been accepted in a risk acceptance.">Risk Accepted
                                     {{ view }}s <i class="fa-solid fa-circle-right"></i></a>
@@ -136,7 +136,7 @@
 
                                 <div class="text-right pull-right">
                                     <span class="fa-2x">{{ closed_objs|length }}</span>
-                                    <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ prod.id }}"
+                                    <span><a rel="noopener noreferrer" href="{% url 'closed_findings' %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are closed and mitigated.">Closed
                                         {{ view }}{{ closed_objs|length|pluralize }} <i
                                                 class="fa-solid fa-circle-right"></i></a>
@@ -164,7 +164,7 @@
 
                                 <div class="text-right pull-right">
                                     <span class="fa-2x">{{ false_positive_objs|length }}</span>
-                                    <span><a href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                    <span><a rel="noopener noreferrer" href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are marked as false postive.">False-postive
                                         {{ view }}{{ false_positive_objs|length|pluralize }} <i
                                                 class="fa-solid fa-circle-right"></i></a>
@@ -192,7 +192,7 @@
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ out_of_scope_objs|length }}</span>
-                                    <span><a
+                                    <span><a rel="noopener noreferrer"
                                             href="{% url 'product_out_of_scope_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that are marked as out of scope.">Out Of Scope
                                         {{ view }}{{ out_of_scope_objs|length|pluralize }} <i
@@ -221,7 +221,7 @@
 
                                 <div class="text-right pull-right">
                                     <span class="fa-2x">{{ all_objs|length }}</span>
-                                    <span><a href="{% url 'product_all_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                    <span><a rel="noopener noreferrer" href="{% url 'product_all_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="All findings.">Total
                                         {{ view }}{{ all_objs|length|pluralize }} <i
                                                 class="fa-solid fa-circle-right"></i></a>
@@ -249,7 +249,7 @@
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ inactive_objs|length }}</span>
-                                    <span><a href="{% url 'product_inactive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                    <span><a rel="noopener noreferrer" href="{% url 'product_inactive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are not active but not mitigated for some reason">Inactive
                                         {{ view }}{{ inactive_objs|length|pluralize }} <i
                                                 class="fa-solid fa-circle-right"></i></a>
