@@ -21,7 +21,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
-                            <a href="{% url 'add_api_scan_configuration' pid %}">
+                            <a rel="noopener noreferrer" href="{% url 'add_api_scan_configuration' pid %}">
                                 <i class="fa-solid fa-plus"></i> Add API Scan Configuration
                             </a>
                         </li>
@@ -40,7 +40,7 @@
                 <tr>
                     <td>
                         {% if request.user.is_superuser %}
-                            <a href="{% url 'edit_tool_config' product_api_scan_configuration.tool_configuration.id %}">
+                            <a rel="noopener noreferrer" href="{% url 'edit_tool_config' product_api_scan_configuration.tool_configuration.id %}">
                         {% endif %}
                         {{ product_api_scan_configuration.tool_configuration }}
                         {% if request.user.is_superuser %}
@@ -50,9 +50,9 @@
                     <td>{{ product_api_scan_configuration.details }}</td>
                     <td>
                        <div class="btn-group">
-                           <a class="btn btn-sm btn-warning"
+                           <a rel="noopener noreferrer" class="btn btn-sm btn-warning"
                               href="{% url 'edit_api_scan_configuration' product_api_scan_configuration.product.id product_api_scan_configuration.id %}">Edit</a>
-                           <a class="btn btn-sm btn-danger"
+                           <a rel="noopener noreferrer" class="btn btn-sm btn-danger"
                               href="{% url 'delete_api_scan_configuration' product_api_scan_configuration.product.id product_api_scan_configuration.id %}">Delete</a>
                        </div>
                    </td>

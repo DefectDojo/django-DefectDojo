@@ -14,7 +14,7 @@
         </div>
         {% for alert in alerts %}
             <tr>
-                <td>{% if alert.url %}<a href="{{ alert.url }}">{% endif %}{{ alert.title|linebreaks }}{% if alert.url %}</a>{% endif %}</td>
+                <td>{% if alert.url %}<a rel="noopener noreferrer" href="{{ alert.url }}">{% endif %}{{ alert.title|linebreaks }}{% if alert.url %}</a>{% endif %}</td>
             </tr>
         {% endfor %}
         <form class="form-horizontal" method="post">
