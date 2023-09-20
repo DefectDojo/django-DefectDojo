@@ -1084,6 +1084,61 @@ class EditFinding(View):
         return render(request, "dojo/edit_finding.html", context)
 
 
+class DeleteFinding(View):
+    def get_finding(self, finding_id):
+        return get_object_or_404(Finding, id=finding_id)
+
+    def process_form(self, request, form, finding):
+        if form.is_valid():
+            product = finding.test.engagement.product
+            finding.delete()
+            # Update the grade of the product async
+            calculate_grade(product)
+            # Add a message to the request that the finding was successfully deleted
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Finding deleted successfully.",
+                extra_tags="alert-success",
+            )
+            # Send a notification that the finding had been deleted
+            create_notification(
+                event="other",
+                title=f"Deletion of {finding.title}",
+                description=f'The finding "{finding.title}" was deleted by {request.user}',
+                product=product,
+                url=request.build_absolute_uri(reverse("all_findings")),
+                recipients=[finding.test.engagement.lead],
+                icon="exclamation-triangle",
+            )
+            # return the request
+            return request, True
+
+        # Add a failure message
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Unable to delete finding, please try again.",
+            extra_tags="alert-danger",
+        )
+
+        return request, False
+
+    def post(self, request, finding_id):
+        # Get the initial objects
+        finding = self.get_finding(finding_id)
+        # Make sure the user is authorized
+        user_has_permission_or_403(request.user, finding, Permissions.Finding_Delete)
+        # Get the finding form
+        form = DeleteFindingForm(request.POST, instance=finding)
+        # Process the form
+        request, success = self.process_form(request, form, finding)
+        # Handle the case of a successful form
+        if success:
+            return redirect_to_return_url_or_else(request, reverse("view_test", args=(finding.test.id,)))
+        raise PermissionDenied()
+
+
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def close_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
@@ -1358,101 +1413,6 @@ def apply_template_cwe(request, fid):
                 request,
                 messages.ERROR,
                 "Unable to apply CWE template finding, please try again.",
-                extra_tags="alert-danger",
-            )
-    else:
-        raise PermissionDenied()
-
-
-class DeleteFinding(View):
-    def get_finding(self, finding_id):
-        return get_object_or_404(Finding, id=finding_id)
-
-    def process_form(self, request, form, finding):
-        if form.is_valid():
-            product = finding.test.engagement.product
-            finding.delete()
-            # Update the grade of the product async
-            calculate_grade(product)
-            # Add a message to the request that the finding was successfully deleted
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Finding deleted successfully.",
-                extra_tags="alert-success",
-            )
-            # Send a notification that the finding had been deleted
-            create_notification(
-                event="other",
-                title=f"Deletion of {finding.title}",
-                description=f'The finding "{finding.title}" was deleted by {request.user}',
-                product=product,
-                url=request.build_absolute_uri(reverse("all_findings")),
-                recipients=[finding.test.engagement.lead],
-                icon="exclamation-triangle",
-            )
-            # return the request
-            return request, True
-
-        # Add a failure message
-        messages.add_message(
-            request,
-            messages.ERROR,
-            "Unable to delete finding, please try again.",
-            extra_tags="alert-danger",
-        )
-
-        return request, False
-
-    def post(self, request, finding_id):
-        # Get the initial objects
-        finding = self.get_finding(finding_id)
-        # Make sure the user is authorized
-        user_has_permission_or_403(request.user, finding, Permissions.Finding_Delete)
-        # Get the finding form
-        form = DeleteFindingForm(request.POST, instance=finding)
-        # Process the form
-        request, success = self.process_form(request, form, finding)
-        # Handle the case of a successful form
-        if success:
-            return redirect_to_return_url_or_else(request, reverse("view_test", args=(finding.test.id,)))
-        raise PermissionDenied()
-
-
-@user_is_authorized(Finding, Permissions.Finding_Delete, "fid")
-def delete_finding(request, fid):
-    finding = get_object_or_404(Finding, id=fid)
-    if request.method == "POST":
-        form = DeleteFindingForm(request.POST, instance=finding)
-        if form.is_valid():
-            tid = finding.test.id
-            product = finding.test.engagement.product
-            finding.delete()
-            calculate_grade(product)
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Finding deleted successfully.",
-                extra_tags="alert-success",
-            )
-            create_notification(
-                event="other",
-                title="Deletion of %s" % finding.title,
-                description='The finding "%s" was deleted by %s'
-                % (finding.title, request.user),
-                product=product,
-                url=request.build_absolute_uri(reverse("all_findings")),
-                recipients=[finding.test.engagement.lead],
-                icon="exclamation-triangle",
-            )
-            return redirect_to_return_url_or_else(
-                request, reverse("view_test", args=(tid,))
-            )
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "Unable to delete finding, please try again.",
                 extra_tags="alert-danger",
             )
     else:
