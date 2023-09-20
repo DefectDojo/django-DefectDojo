@@ -38,7 +38,7 @@ openpyxl==3.1.2
 xlrd==1.2.0
 Pillow==10.0.1  # required by django-imagekit
 psycopg2-binary==2.9.7
-cryptography==41.0.3
+cryptography==41.0.4
 python-dateutil==2.8.2
 pytz==2023.3.post1
 redis==5.0.0
@@ -78,7 +78,7 @@ django-ratelimit==4.1.0
 argon2-cffi==23.1.0
 blackduck==1.1.0
 pycurl==7.45.2  # Required for Celery Broker AWS (SQS) support
-boto3==1.28.50  # Required for Celery Broker AWS (SQS) support
+boto3==1.28.51  # Required for Celery Broker AWS (SQS) support
 netaddr==0.8.0
 vulners==2.1.0
 fontawesomefree==6.4.2
