@@ -283,13 +283,18 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
                                     "Deleting membership of user %s from product type %s", user, product_type_name
                                 )
                     else:
-                        clean_project_type_user(user_product_types_names, user, job_title)
+                        clean_project_type_user(user_product_types_names, user, user_login, job_title)
                 else:
-                    clean_project_type_user(user_product_types_names, user, job_title)
+                    clean_project_type_user(user_product_types_names, user, user_login, job_title)
 
 
-def clean_project_type_user(user_product_types_names, user, job_title):
-    if job_title not in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[1]:
+def clean_project_type_user(user_product_types_names, user, user_login, job_title):
+    logger.debug(user_login.split("@")[0])
+    logger.debug(settings.AZURE_DEVOPS_USERS_EXCLUDED_TPM)
+    if (
+        job_title not in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[1]
+        and user_login.split("@")[0] not in settings.AZURE_DEVOPS_USERS_EXCLUDED_TPM
+    ):
         for product_type_name in user_product_types_names:
             product_type = Product_Type.objects.get(name=product_type_name)
             Product_Type_Member.objects.filter(product_type=product_type, user=user).delete()
