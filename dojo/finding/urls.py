@@ -3,55 +3,125 @@ from django.urls import re_path
 from dojo.finding import views
 
 urlpatterns = [
+    # CRUD operations
+    re_path(
+        r'^finding/(?P<finding_id>\d+)$',
+        views.ViewFinding.as_view(),
+        name='view_finding'
+    ),
+    re_path(
+        r'^finding/(?P<finding_id>\d+)/edit$',
+        views.EditFinding.as_view(),
+        name='edit_finding'
+    ),
+    re_path(
+        r'^finding/(?P<finding_id>\d+)/delete$',
+        views.DeleteFinding.as_view(),
+        name='delete_finding'
+    ),
+    # Listing operations
+    re_path(
+        r'^finding$',
+        views.ListFindings.as_view(),
+        name='all_findings'
+    ),
+    re_path(
+        r'^finding/open$',
+        views.ListOpenFindings.as_view(),
+        name='open_findings'
+    ),
+    re_path(
+        r'^finding/verified$',
+        views.ListVerifiedFindings.as_view(),
+        name='verified_findings'
+    ),
+    re_path(
+        r'^finding/closed$',
+        views.ListClosedFindings.as_view(),
+        name='closed_findings'
+    ),
+    re_path(
+        r'^finding/accepted',
+        views.ListAcceptedFindings.as_view(),
+        name='accepted_findings'
+    ),
+    re_path(
+        r'^product/(?P<product_id>\d+)/finding/open$',
+        views.ListOpenFindings.as_view(),
+        name='product_open_findings'
+    ),
+    re_path(
+        r'^product/(?P<product_id>\d+)/findings$',
+        views.ListOpenFindings.as_view(),
+        name='view_product_findings_old'
+    ),
+    re_path(
+        r'^product/(?P<product_id>\d+)/finding/verified$',
+        views.ListVerifiedFindings.as_view(),
+        name='product_verified_findings'
+    ),
+    re_path(
+        r'^product/(?P<product_id>\d+)/finding/out_of_scope$',
+        views.ListOutOfScopeFindings.as_view(),
+        name='product_out_of_scope_findings'
+    ),
+    re_path(
+        r'^product/(?P<product_id>\d+)/finding/inactive$',
+        views.ListInactiveFindings.as_view(),
+        name='product_inactive_findings'
+    ),
+    re_path(
+        r'^product/(?P<product_id>\d+)/finding/all$',
+        views.ListFindings.as_view(),
+        name='product_all_findings'
+    ),
+    re_path(
+        r'^product/(?P<product_id>\d+)/finding/closed$',
+        views.ListClosedFindings.as_view(),
+        name='product_closed_findings'
+    ),
+    re_path(
+        r'^product/(?P<product_id>\d+)/finding/false_positive$',
+        views.ListFalsePositiveFindings.as_view(),
+        name='product_false_positive_findings'
+    ),
+    re_path(
+        r'^product/(?P<product_id>\d+)/finding/accepted$',
+        views.ListAcceptedFindings.as_view(),
+        name='product_accepted_findings'
+    ),
+    re_path(
+        r'^engagement/(?P<engagement_id>\d+)/finding/open$',
+        views.ListOpenFindings.as_view(),
+        name='engagement_open_findings'
+    ),
+    re_path(
+        r'^engagement/(?P<engagement_id>\d+)/finding/closed$',
+        views.ListClosedFindings.as_view(),
+        name='engagement_closed_findings'
+    ),
+    re_path(
+        r'^engagement/(?P<engagement_id>\d+)/finding/verified$',
+        views.ListVerifiedFindings.as_view(),
+        name='engagement_verified_findings'
+    ),
+    re_path(
+        r'^engagement/(?P<engagement_id>\d+)/finding/accepted$',
+        views.ListAcceptedFindings.as_view(),
+        name='engagement_accepted_findings'
+    ),
+    re_path(
+        r'^engagement/(?P<engagement_id>\d+)/finding/all$',
+        views.ListFindings.as_view(),
+        name='engagement_all_findings'
+    ),
     #  findings
-    re_path(r'^finding$', views.open_findings, {'view': 'All'},
-        name='all_findings'),
     re_path(r'^finding/bulk$', views.finding_bulk_update_all,
         name='finding_bulk_update_all'),
     re_path(r'^product/(?P<pid>\d+)/finding/bulk_product$', views.finding_bulk_update_all,
         name='finding_bulk_update_all_product'),
     # re_path(r'^test/(?P<tid>\d+)/bulk', views.finding_bulk_update_all,
     #     name='finding_bulk_update_all_test'),
-    re_path(r'^finding/open$', views.open_findings,
-        name='open_findings'),
-    re_path(r'^finding/verified$', views.verified_findings,
-        name='verified_findings'),
-    re_path(r'^product/(?P<pid>\d+)/finding/open$', views.open_findings,
-        name='product_open_findings'),
-    # legacy url kept for old bookmarks etc
-    re_path(r'^product/(?P<pid>\d+)/findings$', views.open_findings,
-       name='view_product_findings_old'),
-    re_path(r'^product/(?P<pid>\d+)/finding/verified$', views.verified_findings,
-        name='product_verified_findings'),
-    re_path(r'^product/(?P<pid>\d+)/finding/out_of_scope$', views.out_of_scope_findings,
-        name='product_out_of_scope_findings'),
-    re_path(r'^product/(?P<pid>\d+)/finding/inactive$', views.inactive_findings,
-        name='product_inactive_findings'),
-    re_path(r'^product/(?P<pid>\d+)/finding/all$', views.findings, {'view': 'All'},
-        name='product_all_findings'),
-    re_path(r'^engagement/(?P<eid>\d+)/finding/open$', views.open_findings,
-        name='engagement_open_findings'),
-    re_path(r'^engagement/(?P<eid>\d+)/finding/closed$', views.closed_findings,
-        name='engagement_closed_findings'),
-    re_path(r'^engagement/(?P<eid>\d+)/finding/verified$', views.verified_findings,
-        name='engagement_verified_findings'),
-    re_path(r'^engagement/(?P<eid>\d+)/finding/accepted$', views.accepted_findings,
-        name='engagement_accepted_findings'),
-    re_path(r'^engagement/(?P<eid>\d+)/finding/all$', views.findings, {'view': 'All'},
-        name='engagement_all_findings'),
-    re_path(r'^product/(?P<pid>\d+)/finding/closed$', views.closed_findings,
-        name='product_closed_findings'),
-    re_path(r'^product/(?P<pid>\d+)/finding/false_positive$', views.false_positive_findings,
-        name='product_false_positive_findings'),
-    re_path(r'^product/(?P<pid>\d+)/finding/accepted$', views.accepted_findings,
-        name='product_accepted_findings'),
-    re_path(r'^finding/closed$', views.closed_findings,
-        name='closed_findings'),
-    re_path(r'^finding/accepted', views.accepted_findings,
-        name='accepted_findings'),
-    re_path(r'^finding/(?P<finding_id>\d+)$', views.ViewFinding.as_view(), name='view_finding'),
-    re_path(r'^finding/(?P<finding_id>\d+)/edit$', views.EditFinding.as_view(), name='edit_finding'),
-    re_path(r'^finding/(?P<finding_id>\d+)/delete$', views.DeleteFinding.as_view(), name='delete_finding'),
     re_path(r'^finding/(?P<fid>\d+)/touch',
         views.touch_finding, name='touch_finding'),
     re_path(r'^finding/(?P<fid>\d+)/simple_risk_accept',
