@@ -357,7 +357,7 @@ def simple_search(request):
     if cookie:
         response.set_cookie("highlight", value=keywords_query,
                             max_age=None, expires=None,
-                            path='/', secure=True, httponly=False)
+                            path='/', secure=True, httponly=True)
     else:
         response.delete_cookie("highlight", path='/')
     return response
