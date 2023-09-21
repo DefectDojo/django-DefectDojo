@@ -1,8 +1,8 @@
 
 # code: language=Dockerfile
 
-FROM openapitools/openapi-generator-cli:v6.6.0@sha256:54381220aecf2e77bb4b6694c4e1a03e733b49453292cd1af6f48b510f1f008a as openapitools
-FROM python:3.11.4-slim-bullseye@sha256:52c7a54aa5e5068ce76edaf3f8652a64fb99e378fb89fb0bfbe21a8756d0013c as build
+FROM openapitools/openapi-generator-cli:v7.0.0@sha256:469376dae86c38cb4152b9b820a93d2e74d27a442ea99014f8c7f4a6f2848b9f as openapitools
+FROM python:3.11.4-slim-bullseye@sha256:40319d0a897896e746edf877783ef39685d44e90e1e6de8d964d0382df0d4952 as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -39,7 +39,7 @@ RUN \
   chrome_version=$(apt-cache show google-chrome-stable | grep Version | awk '{print $2}' | cut -d '-' -f 1) && \
   chrome_version_blob=$(curl -k https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json | jq ".versions[] | select(.version==\"$chrome_version\")") && \
   chromedriver_url=$(echo $chrome_version_blob | jq -r ".downloads.chromedriver[] | select(.platform==\"linux64\") | .url") && \
-  wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/115.0.5790.98/linux64/chromedriver-linux64.zip && \
+  wget $chromedriver_url && \
   unzip -j chromedriver-linux64.zip chromedriver-linux64/chromedriver && \
   rm -rf chromedriver-linux64.zip && \
   chmod -R 0755 .
