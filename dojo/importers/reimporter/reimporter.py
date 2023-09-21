@@ -744,8 +744,8 @@ class DojoDefaultReImporter(object):
                 reactivated_findings,
                 untouched_findings,
             )
-        if apply_tags_to_findings:
-            for finding in test_import.findings_affected:
+        if apply_tags_to_findings and tags:
+            for finding in test_import.findings_affected.all():
                 for tag in tags:
                     finding.tags.add(tag)
         logger.debug("REIMPORT_SCAN: Generating notifications")
