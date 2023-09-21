@@ -746,7 +746,8 @@ class DojoDefaultReImporter(object):
             )
         if apply_tags_to_findings:
             for finding in test_import.findings_affected:
-                finding.tags.set(tags)
+                for tag in tags:
+                    finding.tags.add(tag)
         logger.debug("REIMPORT_SCAN: Generating notifications")
 
         updated_count = (

@@ -365,7 +365,8 @@ class DojoDefaultImporter(object):
                                                                 push_to_jira, close_old_findings, test, new_findings, closed_findings)
             if apply_tags_to_findings:
                 for finding in test_import.findings_affected:
-                    finding.tags.set(tags)
+                    for tag in tags:
+                        finding.tags.add(tag)
 
         logger.debug('IMPORT_SCAN: Generating notifications')
         notifications_helper.notify_test_created(test)

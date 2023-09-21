@@ -2153,6 +2153,7 @@ class ImportScanSerializer(serializers.Serializer):
         commit_hash = data.get("commit_hash", None)
         api_scan_configuration = data.get("api_scan_configuration", None)
         service = data.get("service", None)
+        apply_tags_to_findings = data.get("apply_tags_to_findings", False)
         source_code_management_uri = data.get(
             "source_code_management_uri", None
         )
@@ -2245,6 +2246,7 @@ class ImportScanSerializer(serializers.Serializer):
                 service=service,
                 title=test_title,
                 create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
+                apply_tags_to_findings=apply_tags_to_findings,
             )
 
             if test:
@@ -2429,6 +2431,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         close_old_findings_product_scope = data.get(
             "close_old_findings_product_scope"
         )
+        apply_tags_to_findings = data.get("apply_tags_to_findings", False)
         do_not_reactivate = data.get("do_not_reactivate", False)
         version = data.get("version", None)
         build_id = data.get("build_id", None)
@@ -2529,6 +2532,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     service=service,
                     do_not_reactivate=do_not_reactivate,
                     create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
+                    apply_tags_to_findings=apply_tags_to_findings,
                 )
 
                 if test_import:
