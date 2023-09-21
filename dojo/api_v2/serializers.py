@@ -2438,7 +2438,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         service = data.get("service", None)
         lead = data.get("lead", None)
         tags = data.get("tags", None)
-        apply_tags_to_findings = data.get("apply_tags_to_findings", False)
         environment_name = data.get("environment", "Development")
         environment = Development_Environment.objects.get(
             name=environment_name
