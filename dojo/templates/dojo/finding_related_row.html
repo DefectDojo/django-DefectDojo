@@ -19,7 +19,7 @@
         </span>
     </td>
     <td>
-        <a title="{{ similar_finding.title }}" href="{% url 'view_finding' similar_finding.id %}">{{ similar_finding.title|truncatechars_html:80 }}</a>
+        <a rel="noopener noreferrer" title="{{ similar_finding.title }}" href="{% url 'view_finding' similar_finding.id %}">{{ similar_finding.title|truncatechars_html:80 }}</a>
         {% if similar_finding.tags %}
         <small>
             {% include "dojo/snippets/tags.html" with tags=similar_finding.tags.all %}
@@ -31,19 +31,19 @@
     </td>
     <td class="nowrap">{{ similar_finding.date|date }}</td>
     <td>{{ similar_finding|finding_display_status|safe }}&nbsp;{{ similar_finding|import_history }}</td>
-    <td><a href="{% url 'view_test' similar_finding.test_id %}">{{ similar_finding.test }}</a></td>
-    <td><a href="{% url 'view_engagement' similar_finding.test.engagement_id %}">{{ similar_finding.test.engagement.name }}</a>
+    <td><a rel="noopener noreferrer" href="{% url 'view_test' similar_finding.test_id %}">{{ similar_finding.test }}</a></td>
+    <td><a rel="noopener noreferrer" href="{% url 'view_engagement' similar_finding.test.engagement_id %}">{{ similar_finding.test.engagement.name }}</a>
     {% if similar_finding.test.engagement.version %}
         <sup>
-                <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ similar_finding.test.engagement.version }}">
+                <a rel="noopener noreferrer" target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ similar_finding.test.engagement.version }}">
                 {{ similar_finding.test.engagement.version }}</a>
         </sup>
     {% endif %}
     </td>
-    <td><a href="{% url 'view_product' similar_finding.test.engagement.product.id %}">{{ similar_finding.test.engagement.product.name }}</a>
+    <td><a rel="noopener noreferrer" href="{% url 'view_product' similar_finding.test.engagement.product.id %}">{{ similar_finding.test.engagement.product.name }}</a>
     <td>
         {% if similar_finding.cwe > 0 %}
-        <a target="_blank" href="{{ similar_finding.cwe|cwe_url }}">
+        <a rel="noopener noreferrer" target="_blank" href="{{ similar_finding.cwe|cwe_url }}">
             <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ similar_finding.cwe }}
         </a>
         {% endif %}
@@ -61,7 +61,7 @@
     {% if system_settings.enable_jira %}
         <td>
             {% if similar_finding.jira_issue %}
-                <a href="{{ similar_finding | jira_issue_url }}"
+                <a rel="noopener noreferrer" href="{{ similar_finding | jira_issue_url }}"
                 target="_blank" title="{{similar_finding | jira_issue_url }}">{{ similar_finding | jira_key }}</a>
             {% endif %}
         </td>

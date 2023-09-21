@@ -15,7 +15,7 @@
     {% for key, value in findings.items %}
 
         <h3 class="inline-block">{{ key.name }}</h3> [
-        <a href="{% url 'product_type_metrics' key.id %}" class="inline-block">{% trans "View Details" %}</a>]
+        <a rel="noopener noreferrer" href="{% url 'product_type_metrics' key.id %}" class="inline-block">{% trans "View Details" %}</a>]
         <div class="panel panel-default table-responsive">
             <table class="table table-bordered table-condensed table-striped">
                 <thead>

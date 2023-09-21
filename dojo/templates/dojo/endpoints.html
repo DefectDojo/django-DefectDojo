@@ -22,9 +22,9 @@
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
                                       {% if product_tab %}
-                                        <a href="{% url 'add_endpoint' product_tab.product.id %}">
+                                        <a rel="noopener noreferrer" href="{% url 'add_endpoint' product_tab.product.id %}">
                                       {% else %}
-                                        <a href="{% url 'add_product_endpoint' %}">
+                                        <a rel="noopener noreferrer" href="{% url 'add_product_endpoint' %}">
                                       {% endif %}
                                             <i class="fa-solid fa-plus"></i> New Endpoint
                                         </a>
@@ -53,7 +53,7 @@
                         {% endif %}
                         {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Delete" %}
 						<button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Endpoint">
-								<a class="white-color delete-bulk" href="#" alt="Delete Endpoints">
+								<a rel="noopener noreferrer" class="white-color delete-bulk" href="#" alt="Delete Endpoints">
 								<i class="fa-solid fa-trash"></i>
 								</a>
 						</button>
@@ -102,16 +102,16 @@
                                 </td>
                                 {% endif %}
                                 {% if host_view %}
-                                  <td><a href="{% url 'view_endpoint_host' e.id %}">{{ e.host }}</a>
+                                  <td><a rel="noopener noreferrer" href="{% url 'view_endpoint_host' e.id %}">{{ e.host }}</a>
                                 {% else %}
                                 <td>
-                                  <a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
+                                  <a rel="noopener noreferrer" href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
                                 {% endif %}
                                   {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                 </td>
                                 {% if not product_tab %}
                                   <td>
-                                    <a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a>
+                                    <a rel="noopener noreferrer" href="{% url 'view_product' e.product.id %}">{{ e.product }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=e.product.tags.all %}
                                   </td>
                                 {% endif %}
@@ -120,7 +120,7 @@
                                       {{ e.host_active_verified_findings_count }}
                                   {% else %}
                                     {% if e.active_verified_findings_count > 0 %}
-                                      <a href="{% url 'verified_findings' %}?endpoints={{ e.id }}">{{ e.active_verified_findings_count }}</a>
+                                      <a rel="noopener noreferrer" href="{% url 'verified_findings' %}?endpoints={{ e.id }}">{{ e.active_verified_findings_count }}</a>
                                     {% else %}
                                       0
                                     {% endif %}

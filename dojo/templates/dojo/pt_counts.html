@@ -21,7 +21,7 @@
         <h2>{% blocktrans with start_date=start_date.date end_date=end_date.date%}Finding Information For Period of {{ start_date }} - {{ end_date }}
             {% endblocktrans %}</h2>
         <h3 class="inline-block">{{ pt.name }}</h3> [
-        <a href="{% url 'product_type_metrics' pt.id %}" class="inline-block">{% trans "View Details" %}</a>]
+        <a rel="noopener noreferrer" href="{% url 'product_type_metrics' pt.id %}" class="inline-block">{% trans "View Details" %}</a>]
         <div class="panel panel-default table-responsive">
             <div class="panel-heading">
                 <h4>{% trans "Total Security Bug Count In Period" %}</h4>
@@ -248,7 +248,7 @@
                 {% for finding in all_current_in_pt %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td><a title="{{ finding.title }}"
+                        <td><a rel="noopener noreferrer" title="{{ finding.title }}"
                                href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
                         </td>
                         <td class="nowrap">{{ finding.date }}</td>
@@ -256,7 +256,7 @@
                             <p class="text-danger">
                         {% else %}<p>{% endif %}{{ finding.severity_display }}</p></td>
                         <td>{{ finding.age }}</td>
-                        <td><a
+                        <td><a rel="noopener noreferrer"
                                 href="{% url 'view_product' finding.test.engagement.product.id %}"
                                 title="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product }}</a>
                         </td>

@@ -281,7 +281,7 @@
                                     <td>
                                         {% comment %} for some reason the font-awesome icons don't work with the report template{% endcomment %}
                                         {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
-                                            <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
+                                            <a rel="noopener noreferrer" href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
                                             class="{% if ra.is_expired %}lightgrey{% endif%}">acceptance</a>&nbsp;
                                         {% endfor %}
                                     </td>
@@ -295,7 +295,7 @@
                                     {% endif %}
                                     {% if finding.cwe > 0 %}
                                         <td>
-                                            <a target="_blank"
+                                            <a rel="noopener noreferrer" target="_blank"
                                                href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
                                                 <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe }}
                                             </a>
@@ -520,33 +520,33 @@
                         if(tags)
                         {
                             if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
+                                toc += "<li><a rel="noopener noreferrer" style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
                             }
                             else {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
+                                toc += "<li><a rel="noopener noreferrer" style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 titleText + "<sup>" + tags + "</sup></a></li>";
                             }
 
-                            return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
+                            return "<a rel="noopener noreferrer" style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
                                 + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
                         }
                         else
                         {
                             if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
+                                toc += "<li><a rel="noopener noreferrer" style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
                             }
                             else {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
+                                toc += "<li><a rel="noopener noreferrer" style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 titleText + "</a></li>";
                             }
 
-                            return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
+                            return "<a rel="noopener noreferrer" style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
                                 + titleText + "</h" + closeLevel + "></a>";
                         }
 
-                        return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
+                        return "<a rel="noopener noreferrer" style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
                             + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
                     }
                 );

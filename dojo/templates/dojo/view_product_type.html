@@ -21,23 +21,23 @@
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                             {% if pt|has_object_permission:"Product_Type_Edit" %}
                             <li>
-                                <a class="" href="{% url 'edit_product_type' pt.id %}">
+                                <a rel="noopener noreferrer" class="" href="{% url 'edit_product_type' pt.id %}">
                                 <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}</a>
                             </li>
                             <li role="separator" class="divider"></li>
                             {% endif %}
                             <li>
-                                <a class="" href="{% url 'product_type_metrics' pt.id %}">
+                                <a rel="noopener noreferrer" class="" href="{% url 'product_type_metrics' pt.id %}">
                                 <i class="fa-solid fa-chart-line"></i> {% trans "Metrics" %}</a>
                             </li>
                             <li>
-                                <a class="" href="{% url 'product_type_report' pt.id %}">
+                                <a rel="noopener noreferrer" class="" href="{% url 'product_type_report' pt.id %}">
                                 <i class="fa-solid fa-file-lines"></i> {% trans "Product Type Report" %} </a>
                             </li>
                             {% if pt|has_object_permission:"Product_Type_Delete" %}
                             <li role="separator" class="divider"></li>
                             <li>
-                                <a class="" href="{% url 'delete_product_type' pt.id %}">
+                                <a rel="noopener noreferrer" class="" href="{% url 'delete_product_type' pt.id %}">
                                 <i class="fa-solid fa-trash"></i> {% trans "Delete" %}</a>
                             </li>
                             {% endif %}
@@ -63,7 +63,7 @@
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                                     <li>
-                                        <a class="" href="{% url 'add_product_to_product_type' pt.id %}">
+                                        <a rel="noopener noreferrer" class="" href="{% url 'add_product_to_product_type' pt.id %}">
                                         <i class="fa-solid fa-plus"></i> {% trans "Add Product" %}</a>
                                     </li>
                                 </ul>
@@ -90,7 +90,7 @@
                             <tbody>
                             {% for product in products %}
                                 <tr>
-                                    <td><a href="{% url 'view_product' product.id %}">{{ product.name }}</a></td>
+                                    <td><a rel="noopener noreferrer" href="{% url 'view_product' product.id %}">{{ product.name }}</a></td>
                                     <!-- Tags column -->
                                     <td class="text-center">
                                         {% include "dojo/snippets/tags.html" with tags=product.tags.all %}
@@ -106,8 +106,8 @@
                                     </td>
                                     <td class="text-center">
                                         {% if product.findings_count %}
-                                            <a href="{% url 'product_open_findings' product.id %}"><b>{{ product.findings_count }}</b></a>
-                                            &nbsp;(<a href="{% url 'product_verified_findings' product.id %}">{{ product.findings_active_verified_count }}</a>)
+                                            <a rel="noopener noreferrer" href="{% url 'product_open_findings' product.id %}"><b>{{ product.findings_count }}</b></a>
+                                            &nbsp;(<a rel="noopener noreferrer" href="{% url 'product_verified_findings' product.id %}">{{ product.findings_active_verified_count }}</a>)
                                         {% else %}
                                             0
                                         {% endif %}
@@ -131,7 +131,7 @@
                         <div class="clearfix">
                             <h4 class="pull-left">{% trans "Members" %}</h4>
                             &nbsp;
-                            <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
+                            <a rel="noopener noreferrer" href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
                                 <i class="fa-solid fa-circle-question"></i></a>
                             {% if pt|has_object_permission:"Product_Type_Manage_Members" %}
                             <div class="dropdown pull-right">
@@ -142,7 +142,7 @@
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
-                                        <a id="addProductTypeMember" href="{% url 'add_product_type_member' pt.id %}">
+                                        <a rel="noopener noreferrer" id="addProductTypeMember" href="{% url 'add_product_type_member' pt.id %}">
                                             <i class="fa-solid fa-plus"></i> {% trans "Add Users" %}
                                         </a>
                                     </li>
@@ -167,17 +167,17 @@
                                         <td>
                                             <ul>
                                             <li class="dropdown" style="list-style:none;position:absolute">
-                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" name="dropdownManageProductTypeMember">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
+                                                <a rel="noopener noreferrer" href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" name="dropdownManageProductTypeMember">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                                 <ul class="dropdown-menu">
                                                     {% if pt|has_object_permission:"Product_Type_Manage_Members" %}
                                                     <li>
-                                                        <a name="editProductTypeMember" href="{% url 'edit_product_type_member' member.id %}">
+                                                        <a rel="noopener noreferrer" name="editProductTypeMember" href="{% url 'edit_product_type_member' member.id %}">
                                                         <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}</a>
                                                     </li>
                                                     {% endif %}
                                                     {% if member|has_object_permission:"Product_Type_Member_Delete" %}
                                                     <li>
-                                                        <a name="deleteProductTypeMember" href="{% url 'delete_product_type_member' member.id %}">
+                                                        <a rel="noopener noreferrer" name="deleteProductTypeMember" href="{% url 'delete_product_type_member' member.id %}">
                                                         <i class="fa-solid fa-trash"></i> {% trans "Delete" %}</a>
                                                     </li>
                                                     {% endif %}
@@ -204,7 +204,7 @@
                     <div class="clearfix">
                         <h4 class="pull-left">{% trans "Groups" %}</h4>
                         &nbsp;
-                        <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
+                        <a rel="noopener noreferrer" href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
                             <i class="fa-solid fa-circle-question"></i></a>
                         {% if pt|has_object_permission:"Product_Type_Group_Add" %}
                         <div class="dropdown pull-right">
@@ -215,7 +215,7 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                                 <li role="presentation">
-                                    <a id="addProductTypeGroup" href="{% url 'add_product_type_group' pt.id %}">
+                                    <a rel="noopener noreferrer" id="addProductTypeGroup" href="{% url 'add_product_type_group' pt.id %}">
                                         <i class="fa-solid fa-plus"></i> {% trans "Add Groups" %}
                                     </a>
                                 </li>
@@ -240,17 +240,17 @@
                             <td>
                                 <ul>
                                     <li class="dropdown" style="list-style:none;position:absolute">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" name="dropdownManageProductTypeGroup">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
+                                        <a rel="noopener noreferrer" href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" name="dropdownManageProductTypeGroup">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                         <ul class="dropdown-menu">
                                             {% if pt|has_object_permission:"Product_Type_Group_Edit" %}
                                             <li>
-                                                <a name="editProductTypeGroup" href="{% url 'edit_product_type_group' group.id %}">
+                                                <a rel="noopener noreferrer" name="editProductTypeGroup" href="{% url 'edit_product_type_group' group.id %}">
                                                     <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}</a>
                                             </li>
                                             {% endif %}
                                             {% if pt|has_object_permission:"Product_Type_Group_Delete" %}
                                             <li>
-                                                <a name="deleteProductTypeGroup" href="{% url 'delete_product_type_group' group.id %}">
+                                                <a rel="noopener noreferrer" name="deleteProductTypeGroup" href="{% url 'delete_product_type_group' group.id %}">
                                                     <i class="fa-solid fa-trash"></i> {% trans "Delete" %}</a>
                                             </li>
                                             {% endif %}

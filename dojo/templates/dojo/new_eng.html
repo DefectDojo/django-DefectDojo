@@ -37,13 +37,13 @@
                     </label>
                     <div class="col-sm-10 form-control-static">
                         {% if engagement.has_jira_issue %}
-                            <a href="{{ engagement | jira_issue_url }}"
+                            <a rel="noopener noreferrer" href="{{ engagement | jira_issue_url }}"
                             target="_blank"> {{ engagement | jira_issue_url }} </a>
                         {% elif engagement %}
-                            <a href="{{ engagement | jira_project_url }}"
+                            <a rel="noopener noreferrer" href="{{ engagement | jira_project_url }}"
                             target="_blank"> {{ engagement | jira_project_url }} </a>
                         {% else %}
-                            <a href="{{ product_tab.product | jira_project_url }}"
+                            <a rel="noopener noreferrer" href="{{ product_tab.product | jira_project_url }}"
                             target="_blank"> {{ product_tab.product | jira_project_url }} </a>
                         {% endif %}
                     </div>

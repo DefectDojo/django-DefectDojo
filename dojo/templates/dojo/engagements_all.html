@@ -51,15 +51,15 @@
                                     <td class="nowrap">
                                         <div class="align-top">
                                             <div class="dropdown">
-                                                <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
+                                                <a rel="noopener noreferrer" href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
                                                 <ul class="dropdown-menu">
                                                     <li>
-                                                        <a class="" href="{% url 'view_engagement' e.id %}">
+                                                        <a rel="noopener noreferrer" class="" href="{% url 'view_engagement' e.id %}">
                                                             <i class="fa-solid fa-rectangle-list"></i> View
                                                     </li>
                                                     {% if e|has_object_permission:"Engagement_Edit" %}
                                                     <li>
-                                                        <a class="" href="{% url 'edit_engagement' e.id %}">
+                                                        <a rel="noopener noreferrer" class="" href="{% url 'edit_engagement' e.id %}">
                                                             <i class="fa-solid fa-pen-to-square"></i> Edit
                                                         </a>
                                                     </li>
@@ -67,54 +67,54 @@
                                                     {% endif %}
                                                     {% if e|has_object_permission:"Test_Add" %}
                                                     <li role="presentation">
-                                                        <a class="" href="{% url 'add_tests' e.id %}">
+                                                        <a rel="noopener noreferrer" class="" href="{% url 'add_tests' e.id %}">
                                                             <i class="fa-solid fa-plus"></i> Add Tests
                                                         </a>
                                                     </li>
                                                     {% endif %}
                                                     {% if e|has_object_permission:"Import_Scan_Result" %}
                                                     <li role="presentation">
-                                                        <a class="" href="{% url 'import_scan_results' e.id %}">
+                                                        <a rel="noopener noreferrer" class="" href="{% url 'import_scan_results' e.id %}">
                                                             <i class="fa-solid fa-upload"></i> Import Scan Results
                                                         </a>
                                                     </li>
                                                     {% endif %}
                                                     <li class="divider"></li>
                                                     <li role="presentation">
-                                                        <a href="{% url 'engagement_open_findings' e.id %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'engagement_open_findings' e.id %}">
                                                             <i class="fa-solid fa-file-lines"></i> View Active Findings
                                                         </a>
                                                     </li>
                                                     <li role="presentation">
-                                                        <a href="{% url 'engagement_verified_findings' e.id %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'engagement_verified_findings' e.id %}">
                                                             <i class="fa-solid fa-file-lines"></i> View Active and Verified Findings
                                                         </a>
                                                     </li>
                                                     <li role="presentation">
-                                                        <a href="{% url 'engagement_closed_findings' e.id %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'engagement_closed_findings' e.id %}">
                                                             <i class="fa-solid fa-file-lines"></i> View Mitigated Findings
                                                         </a>
                                                     </li>
                                                     <li role="presentation">
-                                                        <a href="{% url 'engagement_accepted_findings' e.id %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'engagement_accepted_findings' e.id %}">
                                                             <i class="fa-solid fa-file-lines"></i> View Accepted Findings
                                                         </a>
                                                     </li>
                                                     <li role="presentation">
-                                                        <a href="{% url 'engagement_all_findings' e.id %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'engagement_all_findings' e.id %}">
                                                             <i class="fa-solid fa-file-lines"></i> View All Findings
                                                         </a>
                                                     </li>
                                                     <li class="divider"></li>
                                                     <li role="presentation">
-                                                        <a href="{% url 'engagement_report' e.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
+                                                        <a rel="noopener noreferrer" href="{% url 'engagement_report' e.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
                                                             <i class="fa-solid fa-file-lines"></i> Engagement Report
                                                         </a>
                                                     </li>
                                                     {% if e|has_object_permission:"Engagement_Delete" %}
                                                     <li class="divider"></li>
                                                     <li>
-                                                        <a class="text-danger" href="{% url 'delete_engagement' e.id %}">
+                                                        <a rel="noopener noreferrer" class="text-danger" href="{% url 'delete_engagement' e.id %}">
                                                             <i class="fa-solid fa-trash"></i> Delete Engagement
                                                         </a>
                                                     </li>
@@ -123,14 +123,14 @@
                                                 </li>
                                                 </ul>
                                     </td>
-                                    <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a>
+                                    <td class="prod_name"><a rel="noopener noreferrer" href="{% url 'view_product' p.id %}">{{ p.name }}</a>
                                         {% include "dojo/snippets/tags.html" with tags=p.tags.all %}
                                     </td>
                                     <td class="prod_name">
-                                        <a href="{% url 'product_type_metrics' p.prod_type.id %}">{{ p.prod_type.name }}</a>
+                                        <a rel="noopener noreferrer" href="{% url 'product_type_metrics' p.prod_type.id %}">{{ p.prod_type.name }}</a>
                                     </td>
                                     <td>
-                                        <a class="eng_link" href="{% url 'view_engagement' e.id %}">{% if e.name %}{{ e.name }}{% endif %}</a>
+                                        <a rel="noopener noreferrer" class="eng_link" href="{% url 'view_engagement' e.id %}">{% if e.name %}{{ e.name }}{% endif %}</a>
                                         {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                         <br>
                                     </td>
@@ -147,14 +147,14 @@
                                     </td>
                                     <td> {{ e.lead.first_name }} {{ e.lead.last_name }}</td>
                                     <td>
-                                        <a class="eng_link"
+                                        <a rel="noopener noreferrer" class="eng_link"
                                            href="{% url 'view_engagement' e.id %}#tests">
                                             {{ e.test_count }}
                                         </a>
                                     </td>
                                     <td>
                                         {% if p|has_object_permission:"Engagement_Add" %}
-                                        <a class="btn btn-sm btn-success" href="{% url 'new_eng_for_prod' p.id %}">
+                                        <a rel="noopener noreferrer" class="btn btn-sm btn-success" href="{% url 'new_eng_for_prod' p.id %}">
                                                 <i class="fa-solid fa-plus"></i> Add
                                         </a>
                                         {% endif %}
