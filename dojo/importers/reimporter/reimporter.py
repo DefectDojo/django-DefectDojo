@@ -42,6 +42,7 @@ class DojoDefaultReImporter(object):
         scan_date=None,
         do_not_reactivate=False,
         create_finding_groups_for_all_findings=True,
+        apply_tags_to_findings=False,
         **kwargs,
     ):
 
@@ -69,6 +70,8 @@ class DojoDefaultReImporter(object):
             deduplication_algorithm,
         )
         for item in items:
+            if apply_tags_to_findings:
+                item.tags.set(tags)
             # FIXME hack to remove when all parsers have unit tests for this attribute
             if item.severity.lower().startswith("info") and item.severity != "Info":
                 item.severity = "Info"
@@ -111,7 +114,6 @@ class DojoDefaultReImporter(object):
             findings = reimporter_utils.match_new_finding_to_existing_finding(
                 item, test, deduplication_algorithm
             )
-
             deduplicationLogger.debug(
                 "found %i findings matching with current new finding", len(findings)
             )
@@ -571,6 +573,7 @@ class DojoDefaultReImporter(object):
         service=None,
         do_not_reactivate=False,
         create_finding_groups_for_all_findings=True,
+        apply_tags_to_findings=False,
     ):
 
         logger.debug(f"REIMPORT_SCAN: parameters: {locals()}")
@@ -741,7 +744,9 @@ class DojoDefaultReImporter(object):
                 reactivated_findings,
                 untouched_findings,
             )
-
+        if apply_tags_to_findings:
+            for finding in test_import.findings_affected:
+                finding.tags.set(tags)
         logger.debug("REIMPORT_SCAN: Generating notifications")
 
         updated_count = (

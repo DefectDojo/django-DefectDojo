@@ -2130,6 +2130,11 @@ class ImportScanSerializer(serializers.Serializer):
     product_type_id = serializers.IntegerField(read_only=True)
 
     statistics = ImportStatisticsSerializer(read_only=True, required=False)
+    apply_tags_to_findings = serializers.BooleanField(
+        help_text="If set to True, the tags will be applied to the findings",
+        required=False,
+        default=True,
+    )
 
     def save(self, push_to_jira=False):
         data = self.validated_data
@@ -2408,6 +2413,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     product_type_id = serializers.IntegerField(read_only=True)
 
     statistics = ImportStatisticsSerializer(read_only=True, required=False)
+    apply_tags_to_findings = serializers.BooleanField(
+        help_text="If set to True, the tags will be applied to the findings",
+        required=False
+    )
 
     def save(self, push_to_jira=False):
         logger.debug("push_to_jira: %s", push_to_jira)
@@ -2429,6 +2438,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         service = data.get("service", None)
         lead = data.get("lead", None)
         tags = data.get("tags", None)
+        apply_tags_to_findings = data.get("apply_tags_to_findings", False)
         environment_name = data.get("environment", "Development")
         environment = Development_Environment.objects.get(
             name=environment_name
