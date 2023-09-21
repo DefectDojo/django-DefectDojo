@@ -96,7 +96,6 @@ def get_item(item_node, test):
     url = item_node.get("url")
     path = item_node.findall("path")[0].text
     location = item_node.findall("location")[0].text
-    print("rene-", location)
     rparameter = re.search(r"(\[)([^\[\]]*)(\])", location)
     parameter = None
     if rparameter:
