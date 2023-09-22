@@ -1257,6 +1257,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Popeye Scan': ['title', 'description'],
     'Wazuh Scan': ['title'],
     'Nuclei Scan': ['title', 'cwe', 'severity'],
+    'ThreAgile risks report': ['title', 'cwe', 'unique_id_from_tool']
 }
 
 # Override the hardcoded settings here via the env var
@@ -1314,6 +1315,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Codechecker Report native': True,
     'Wazuh': True,
     'Nuclei Scan': True,
+    'ThreAgile risks report': True
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1450,6 +1452,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Wpscan': DEDUPE_ALGO_HASH_CODE,
     'Popeye Scan': DEDUPE_ALGO_HASH_CODE,
     'Nuclei Scan': DEDUPE_ALGO_HASH_CODE,
+    'ThreAgile risks report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE
 }
 
 # Override the hardcoded settings here via the env var
