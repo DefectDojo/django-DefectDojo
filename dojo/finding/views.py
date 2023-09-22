@@ -309,36 +309,32 @@ class BaseListFindings:
 
     def filter_findings_by_object(self, findings: QuerySet[Finding]):
         if product_id := self.get_product_id():
-            object_filtered_findings = findings.filter(test__engagement__product__id=product_id)
+            return findings.filter(test__engagement__product__id=product_id)
         elif engagement_id := self.get_engagement_id():
-            object_filtered_findings = findings.filter(test__engagement=engagement_id)
+            return findings.filter(test__engagement=engagement_id)
         elif test_id := self.get_test_id():
-            object_filtered_findings = findings.filter(test=test_id)
+            return findings.filter(test=test_id)
         else:
-            object_filtered_findings = findings
-
-        return object_filtered_findings
+            return findings
 
     def filter_findings_by_filter_name(self, findings: QuerySet[Finding]):
         filter_name = self.get_filter_name()
         if filter_name == "Open":
-            filter_name_filtered_findings = findings.filter(finding_helper.OPEN_FINDINGS_QUERY)
+            return findings.filter(finding_helper.OPEN_FINDINGS_QUERY)
         elif filter_name == "Verified":
-            filter_name_filtered_findings = findings.filter(finding_helper.VERIFIED_FINDINGS_QUERY)
+            return findings.filter(finding_helper.VERIFIED_FINDINGS_QUERY)
         elif filter_name == "Out of Scope":
-            filter_name_filtered_findings = findings.filter(finding_helper.OUT_OF_SCOPE_FINDINGS_QUERY)
+            return findings.filter(finding_helper.OUT_OF_SCOPE_FINDINGS_QUERY)
         elif filter_name == "False Positive":
-            filter_name_filtered_findings = findings.filter(finding_helper.FALSE_POSITIVE_FINDINGS_QUERY)
+            return findings.filter(finding_helper.FALSE_POSITIVE_FINDINGS_QUERY)
         elif filter_name == "Inactive":
-            filter_name_filtered_findings = findings.filter(finding_helper.INACTIVE_FINDINGS_QUERY)
+            return findings.filter(finding_helper.INACTIVE_FINDINGS_QUERY)
         elif filter_name == "Accepted":
-            filter_name_filtered_findings = findings.filter(finding_helper.ACCEPTED_FINDINGS_QUERY)
+            return findings.filter(finding_helper.ACCEPTED_FINDINGS_QUERY)
         elif filter_name == "Closed":
-            filter_name_filtered_findings = findings.filter(finding_helper.CLOSED_FINDINGS_QUERY)
+            return findings.filter(finding_helper.CLOSED_FINDINGS_QUERY)
         else:
-            filter_name_filtered_findings = findings
-
-        return filter_name_filtered_findings
+            return findings
 
     def filter_findings_by_form(self, request: HttpRequest, findings: QuerySet[Finding]):
         # Set up the args for the form
@@ -395,7 +391,7 @@ class ListFindings(View, BaseListFindings):
             context["show_product_column"] = False
             context["product_tab"] = Product_Tab(engagement.product, title=engagement.name, tab="engagements")
             context["jira_project"] = jira_helper.get_jira_project(engagement)
-            if github_config :=  GITHUB_PKey.objects.filter(product__engagement=engagement).first():
+            if github_config := GITHUB_PKey.objects.filter(product__engagement=engagement).first():
                 context["github_config"] = github_config.git_conf_id
 
         return request, context
@@ -529,7 +525,7 @@ class ViewFinding(View):
         }
 
     def get_credential_objects(self, finding: Finding):
-        creds = (
+        cred = (
             Cred_Mapping.objects.filter(test=finding.test.id)
             .select_related("cred_id")
             .order_by("cred_id")
@@ -547,7 +543,7 @@ class ViewFinding(View):
 
         return {
             "cred_finding": cred_finding,
-            "creds": creds,
+            "cred": cred,
             "cred_engagement": cred_engagement,
         }
 
@@ -561,14 +557,14 @@ class ViewFinding(View):
         }
 
     def get_request_response(self, finding: Finding):
-        reqres = None
+        request_response = None
         burp_request = None
         burp_response = None
         try:
-            reqres = BurpRawRequestResponse.objects.filter(finding=finding).first()
-            if reqres is not None:
-                burp_request = base64.b64decode(reqres.burpRequestBase64)
-                burp_response = base64.b64decode(reqres.burpResponseBase64)
+            request_response = BurpRawRequestResponse.objects.filter(finding=finding).first()
+            if request_response is not None:
+                burp_request = base64.b64decode(request_response.burpRequestBase64)
+                burp_response = base64.b64decode(request_response.burpResponseBase64)
         except Exception as e:
             logger.debug(f"unsuspected error: {e}")
 
@@ -712,9 +708,8 @@ class ViewFinding(View):
             messages.add_message(
                 request, messages.SUCCESS, "Note saved.", extra_tags="alert-success"
             )
-            # Redirect back to the finding page
-            return request, True
 
+            return request, True
 
         return request, False
 
@@ -909,47 +904,45 @@ class EditFinding(View):
     def process_mitigated_data(self, request: HttpRequest, finding: Finding, context: dict):
         # If active is not checked and CAN_EDIT_MITIGATED_DATA,
         # mitigate the finding and the associated endpoints status
-        if finding_helper.can_edit_mitigated_data(request.user):
-            if (
-                context["form"]["active"].value() is False
-                or context["form"]["false_p"].value()
-                or context["form"]["out_of_scope"].value()
-            ) and context["form"]["duplicate"].value() is False:
-                now = timezone.now()
-                finding.is_mitigated = True
-                endpoint_status = finding.status_finding.all()
-                for status in endpoint_status:
-                    status.mitigated_by = (
-                        context["form"].cleaned_data.get("mitigated_by") or request.user
-                    )
-                    status.mitigated_time = (
-                        context["form"].cleaned_data.get("mitigated") or now
-                    )
-                    status.mitigated = True
-                    status.last_modified = timezone.now()
-                    status.save()
+        if finding_helper.can_edit_mitigated_data(request.user) and ((
+            context["form"]["active"].value() is False
+            or context["form"]["false_p"].value()
+            or context["form"]["out_of_scope"].value()
+        ) and context["form"]["duplicate"].value() is False):
+            now = timezone.now()
+            finding.is_mitigated = True
+            endpoint_status = finding.status_finding.all()
+            for status in endpoint_status:
+                status.mitigated_by = (
+                    context["form"].cleaned_data.get("mitigated_by") or request.user
+                )
+                status.mitigated_time = (
+                    context["form"].cleaned_data.get("mitigated") or now
+                )
+                status.mitigated = True
+                status.last_modified = timezone.now()
+                status.save()
 
     def process_false_positive_history(self, finding: Finding):
         if get_system_setting("false_positive_history", False):
             # If the finding is being marked as a false positive we dont need to call the
             # fp history function because it will be called by the save function
             # If finding was a false positive and is being reactivated: retroactively reactivates all equal findings
-            if finding.false_p and not finding.false_p:
-                if get_system_setting("retroactive_false_positive_history"):
-                    logger.debug('FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s', finding)
+            if finding.false_p and not finding.false_p and get_system_setting("retroactive_false_positive_history"):
+                logger.debug('FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s', finding)
 
-                    existing_fp_findings = match_finding_to_existing_findings(
-                        finding, product=finding.test.engagement.product
-                    ).filter(false_p=True)
+                existing_fp_findings = match_finding_to_existing_findings(
+                    finding, product=finding.test.engagement.product
+                ).filter(false_p=True)
 
-                    for fp in existing_fp_findings:
-                        logger.debug('FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s', fp.id, fp)
-                        fp.active = finding.active
-                        fp.verified = finding.verified
-                        fp.false_p = False
-                        fp.out_of_scope = finding.out_of_scope
-                        fp.is_mitigated = finding.is_mitigated
-                        fp.save_no_options()
+                for fp in existing_fp_findings:
+                    logger.debug('FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s', fp.id, fp)
+                    fp.active = finding.active
+                    fp.verified = finding.verified
+                    fp.false_p = False
+                    fp.out_of_scope = finding.out_of_scope
+                    fp.is_mitigated = finding.is_mitigated
+                    fp.save_no_options()
 
     def process_burp_request_response(self, finding: Finding, context: dict):
         if "request" in context["form"].cleaned_data or "response" in context["form"].cleaned_data:
