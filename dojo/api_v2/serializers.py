@@ -2133,7 +2133,6 @@ class ImportScanSerializer(serializers.Serializer):
     apply_tags_to_findings = serializers.BooleanField(
         help_text="If set to True, the tags will be applied to the findings",
         required=False,
-        default=True,
     )
 
     def save(self, push_to_jira=False):
@@ -2172,6 +2171,8 @@ class ImportScanSerializer(serializers.Serializer):
             name=environment_name
         )
         tags = data.get("tags", None)
+        if tags:
+            tags = [tags]
         lead = data.get("lead")
 
         scan = data.get("file", None)
