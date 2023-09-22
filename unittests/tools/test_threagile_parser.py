@@ -30,4 +30,3 @@ class TestThreAgileParser(DojoTestCase):
             self.assertEqual("unguarded-direct-datastore-access@energon-ta>energontopolicyregofilestorage@energon-ta@policies-rego-storage-ta", finding.unique_id_from_tool)
             self.assertEqual("501", finding.cwe)
             self.assertEqual("medium", finding.impact)
-
