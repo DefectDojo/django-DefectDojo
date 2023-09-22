@@ -785,7 +785,7 @@ def add_jira_issue(obj, *args, **kwargs):
         j_issue.jira_creation = timezone.now()
         j_issue.jira_change = timezone.now()
         j_issue.save()
-        jira.issue(new_issue.id)
+        _ = jira.issue(new_issue.id)
 
         logger.info('Created the following jira issue for %d:%s', obj.id, to_str_typed(obj))
 
@@ -1335,9 +1335,6 @@ def finding_link_jira(request, finding, new_jira_issue_key):
     jira_issue.save()
 
     finding.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
-
-    get_jira_url(finding)
-
     return True
 
 
@@ -1365,10 +1362,7 @@ def finding_group_link_jira(request, finding_group, new_jira_issue_key):
     jira_issue.jira_change = timezone.now()
 
     jira_issue.save()
-
     finding_group.save()
-
-    get_jira_url(finding_group)
 
     return True
 

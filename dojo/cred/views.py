@@ -214,11 +214,6 @@ def view_cred_product_engagement(request, eid, ttid):
         title="Credential Manager", top_level=False, request=request)
     cred_type = "Engagement"
     edit_link = ""
-    reverse(
-        'view_cred_product_engagement', args=(
-            eid,
-            cred.id,
-        ))
     delete_link = reverse(
         'delete_cred_engagement', args=(
             eid,
@@ -326,11 +321,6 @@ def view_cred_finding(request, fid, ttid):
         title="Credential Manager", top_level=False, request=request)
     cred_type = "Finding"
     edit_link = None
-    reverse(
-        'view_cred_finding', args=(
-            fid,
-            cred.id,
-        ))
     delete_link = reverse(
         'delete_cred_finding', args=(
             fid,

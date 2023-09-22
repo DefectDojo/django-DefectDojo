@@ -65,7 +65,7 @@ def product(request):
     if 'prod_type' in request.GET:
         p = request.GET.getlist('prod_type', [])
         if len(p) == 1:
-            get_object_or_404(Product_Type, id=p[0])
+            _ = get_object_or_404(Product_Type, id=p[0])
 
     prods = get_authorized_products(Permissions.Product_View)
 
@@ -515,7 +515,6 @@ def view_product_metrics(request, pid):
 
     start_date = filters['start_date']
     end_date = filters['end_date']
-    filters['week']
 
     tests = Test.objects.filter(engagement__product=prod).prefetch_related('finding_set', 'test_type')
     tests = tests.annotate(verified_finding_count=Count('finding__id', filter=Q(finding__verified=True)))
@@ -534,7 +533,6 @@ def view_product_metrics(request, pid):
     add_breadcrumb(parent=prod, top_level=False, request=request)
 
     open_close_weekly = OrderedDict()
-    OrderedDict()
     severity_weekly = OrderedDict()
     critical_weekly = OrderedDict()
     high_weekly = OrderedDict()
@@ -603,10 +601,6 @@ def view_product_metrics(request, pid):
             open_objs_by_severity[v.severity] += 1
 
     for a in filters.get('accepted', None):
-        if view == 'Finding':
-            pass
-        elif view == 'Endpoint':
-            pass
         iso_cal = a.date.isocalendar()
         x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
         y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
@@ -887,7 +881,7 @@ def edit_product(request, pid):
         jira_project = jira_helper.get_jira_project(product)
         if form.is_valid():
             form.save()
-            request.POST.getlist('tags')
+            _ = request.POST.getlist('tags')
             messages.add_message(request,
                                  messages.SUCCESS,
                                  _('Product updated successfully.'),
@@ -1008,7 +1002,7 @@ def new_eng_for_app(request, pid, cicd=False):
 
     if request.method == 'POST':
         form = EngForm(request.POST, cicd=cicd, product=product, user=request.user)
-        jira_helper.get_jira_project(product)
+        _ = jira_helper.get_jira_project(product)
         logger.debug('new_eng_for_app')
 
         if form.is_valid():
@@ -1067,7 +1061,7 @@ def new_eng_for_app(request, pid, cicd=False):
                        product=product, user=request.user)
 
         if get_system_setting('enable_jira'):
-            jira_helper.get_jira_project(product)
+            _ = jira_helper.get_jira_project(product)
             logger.debug('showing jira-project-form')
             jira_project_form = JIRAProjectForm(target='engagement', product=product)
             logger.debug('showing jira-epic-form')

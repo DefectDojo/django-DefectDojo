@@ -368,8 +368,6 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
 
 
 def remove_broken_endpoint_statuses(apps):
-    apps.get_model('dojo', 'Finding')
-    apps.get_model('dojo', 'Endpoint')
     Endpoint_Status = apps.get_model('dojo', 'endpoint_status')
     broken_eps = Endpoint_Status.objects.filter(Q(endpoint=None) | Q(finding=None))
     if broken_eps.count() == 0:

@@ -2,7 +2,6 @@
 from dojo.tools.npm_audit.parser import censor_path_hashes
 from dojo.utils import mass_model_updater
 from django.db import migrations
-from django.utils import timezone
 import logging
 logger = logging.getLogger(__name__)
 
@@ -19,7 +18,6 @@ def npm_censor_hashes(apps, schema_editor):
     # version than this migration expects. We use the historical version.
     logger.info('Removing random hashes from npm audit file_paths')
 
-    timezone.now()
     Finding = apps.get_model('dojo', 'Finding')
     Test_Type = apps.get_model('dojo', 'Test_Type')
     npm_audit, _ = Test_Type.objects.get_or_create(name='NPM Audit Scan')

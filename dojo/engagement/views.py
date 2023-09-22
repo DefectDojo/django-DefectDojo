@@ -428,7 +428,6 @@ def view_engagement(request, eid):
                 form = TypedNoteForm(available_note_types=available_note_types)
             else:
                 form = NoteForm()
-            request.build_absolute_uri(reverse("view_engagement", args=(eng.id,)))
             title = "Engagement: %s on %s" % (eng.name, eng.product.name)
             messages.add_message(request,
                                  messages.SUCCESS,

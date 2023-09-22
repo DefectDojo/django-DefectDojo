@@ -110,8 +110,7 @@ class MonthYearWidget(Widget):
                 match = RE_DATE.match(value)
                 if match:
                     year_val,
-                    month_val,
-                    [int(v) for v in match.groups()]
+                    month_val = [int(v) for v in match.groups()]
 
         output = []
 
@@ -661,7 +660,7 @@ class MergeFindings(forms.ModelForm):
         help_text="The action to take on the merged finding. Set the findings to inactive or delete the findings.")
 
     def __init__(self, *args, **kwargs):
-        kwargs.pop('finding')
+        _ = kwargs.pop('finding')
         findings = kwargs.pop('findings')
         super(MergeFindings, self).__init__(*args, **kwargs)
 
