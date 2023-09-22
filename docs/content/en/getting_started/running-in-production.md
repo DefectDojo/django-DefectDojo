@@ -81,7 +81,7 @@ and see what is in effect.
 
 #### Asynchronous Import
 
-**Please note: Asynchronous Import is currently an experimental feature which is still in development.  Please exercise caution with this method as results may be inconsistent.**
+**Please note: Asynchronous Import is currently an experimental feature.  Please exercise caution with this method as results may be inconsistent.**
 
 Import and Re-Import can also be configured to handle uploads asynchronously to aid in 
 processing especially large scans. It works by batching Findings and Endpoints by a 
