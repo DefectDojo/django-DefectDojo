@@ -99,7 +99,7 @@
         "title": "\u003cb\u003eMissing Authentication\u003c/b\u003e covering communication link \u003cb\u003eSome Traffic\u003c/b\u003e from \u003cb\u003eSome Technical Asset\u003c/b\u003e to \u003cb\u003eSome Other Technical Asset\u003c/b\u003e",
         "synthetic_id": "missing-authentication@some-component\u003esome-traffic@some-component@some-other-component",
         "most_relevant_data_asset": "",
-        "most_relevant_technical_asset": "some-other-component",
+        "most_relevant_technical_asset": "",
         "most_relevant_trust_boundary": "",
         "most_relevant_shared_runtime": "",
         "most_relevant_communication_link": "some-component\u003esome-traffic",

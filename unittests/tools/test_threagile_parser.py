@@ -30,6 +30,7 @@ class TestThreAgileParser(DojoTestCase):
             self.assertEqual("unguarded-direct-datastore-access@energon-ta>energontopolicyregofilestorage@energon-ta@policies-rego-storage-ta", finding.unique_id_from_tool)
             self.assertEqual("501", finding.cwe)
             self.assertEqual("medium", finding.impact)
+            self.assertEqual("policies-rego-storage-ta", finding.component_name)
 
     def test_in_discussion_is_under_review(self):
         with open("unittests/scans/threagile/risks.json") as testfile:
@@ -58,6 +59,7 @@ class TestThreAgileParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             finding = findings[4]
             self.assertTrue(finding.mitigated)
+            self.assertEqual("some-runtime", finding.component_name)
 
     def test_false_positive_is_false_positive(self):
         with open("unittests/scans/threagile/risks.json") as testfile:
@@ -65,3 +67,4 @@ class TestThreAgileParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             finding = findings[5]
             self.assertTrue(finding.false_p)
+            self.assertEqual("some-component\u003esome-traffic", finding.component_name)

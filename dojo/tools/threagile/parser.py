@@ -96,6 +96,7 @@ class ThreagileParser(object):
             self.determine_under_review(finding, item)
             self.determine_false_positive(finding, item)
             self.determine_verified(finding, item)
+            self.determine_component(finding, item)
             findings.append(finding)
         return findings
 
@@ -123,3 +124,20 @@ class ThreagileParser(object):
         risk_status = item.get("risk_status", "unchecked")
         if risk_status == "in-progress":
             finding.verified = True
+
+    def determine_component(self, finding, item):
+        if item.get("most_relevant_technical_asset"):
+            finding.component_name = item.get("most_relevant_technical_asset")
+            return
+        if item.get("most_relevant_trust_boundary"):
+            finding.component_name = item.get("most_relevant_trust_boundary")
+            return
+        if item.get("most_relevant_data_asset"):
+            finding.component_name = item.get("most_relevant_data_asset")
+            return
+        if item.get("most_relevant_shared_runtime"):
+            finding.component_name = item.get("most_relevant_shared_runtime")
+            return
+        if item.get("most_relevant_communication_link"):
+            finding.component_name = item.get("most_relevant_communication_link")
+            return
