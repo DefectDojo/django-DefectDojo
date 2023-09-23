@@ -56,13 +56,13 @@ class ThreagileParser(object):
     REQUIRED_FIELDS = ["category", "title", "severity", "synthetic_id", "exploitation_impact"]
 
     def get_scan_types(self):
-        return ["ThreaAgile risks report"]
+        return ["Threagile risks report"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "ThreAgile risks report"
+        return "Threagile risks report"
 
     def get_description_for_scan_types(self, scan_type):
-        return "ThreAgile Risks Report in JSON format (risks.json)."
+        return "Threagile Risks Report in JSON format (risks.json)."
 
     def get_findings(self, file, test):
         if file is None:
@@ -91,5 +91,35 @@ class ThreagileParser(object):
                 test=test,
                 unique_id_from_tool=item.get("synthetic_id")
             )
+            self.determine_mitigated(finding, item)
+            self.determine_accepted(finding, item)
+            self.determine_under_review(finding, item)
+            self.determine_false_positive(finding, item)
+            self.determine_verified(finding, item)
             findings.append(finding)
         return findings
+
+    def determine_mitigated(self, finding, item):
+        risk_status = item.get("risk_status", "unchecked")
+        if risk_status == "mitigated":
+            finding.is_mitigated = True
+
+    def determine_accepted(self, finding, item):
+        risk_status = item.get("risk_status", "unchecked")
+        if risk_status == "accepted":
+            finding.risk_accepted = True
+
+    def determine_under_review(self, finding, item):
+        risk_status = item.get("risk_status", "unchecked")
+        if risk_status == "in-discussion":
+            finding.under_review = True
+
+    def determine_false_positive(self, finding, item):
+        risk_status = item.get("risk_status", "unchecked")
+        if risk_status == "false-positive":
+            finding.false_p = True
+
+    def determine_verified(self, finding, item):
+        risk_status = item.get("risk_status", "unchecked")
+        if risk_status == "in-progress":
+            finding.verified = True

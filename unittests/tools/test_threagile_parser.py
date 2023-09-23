@@ -22,7 +22,7 @@ class TestThreAgileParser(DojoTestCase):
         with open("unittests/scans/threagile/risks.json") as testfile:
             parser = ThreagileParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(4, len(findings))
+            self.assertEqual(6, len(findings))
             finding = findings[0]
             self.assertEqual("unguarded-direct-datastore-access", finding.title)
             self.assertEqual("\u003cb\u003eUnguarded Direct Datastore Access\u003c/b\u003e of \u003cb\u003ePoliciesRegoStorage\u003c/b\u003e by \u003cb\u003eEnergon\u003c/b\u003e via \u003cb\u003eEnergonToPolicyRegoFileStorage\u003c/b\u003e", finding.description)
@@ -30,3 +30,38 @@ class TestThreAgileParser(DojoTestCase):
             self.assertEqual("unguarded-direct-datastore-access@energon-ta>energontopolicyregofilestorage@energon-ta@policies-rego-storage-ta", finding.unique_id_from_tool)
             self.assertEqual("501", finding.cwe)
             self.assertEqual("medium", finding.impact)
+
+    def test_in_discussion_is_under_review(self):
+        with open("unittests/scans/threagile/risks.json") as testfile:
+            parser = ThreagileParser()
+            findings = parser.get_findings(testfile, Test())
+            finding = findings[1]
+            self.assertTrue(finding.under_review)
+
+    def test_accepted_finding_is_accepted(self):
+        with open("unittests/scans/threagile/risks.json") as testfile:
+            parser = ThreagileParser()
+            findings = parser.get_findings(testfile, Test())
+            finding = findings[2]
+            self.assertTrue(finding.risk_accepted)
+
+    def test_in_progress_is_verified(self):
+        with open("unittests/scans/threagile/risks.json") as testfile:
+            parser = ThreagileParser()
+            findings = parser.get_findings(testfile, Test())
+            finding = findings[3]
+            self.assertTrue(finding.verified)
+
+    def test_mitigated_is_mitigated(self):
+        with open("unittests/scans/threagile/risks.json") as testfile:
+            parser = ThreagileParser()
+            findings = parser.get_findings(testfile, Test())
+            finding = findings[4]
+            self.assertTrue(finding.mitigated)
+
+    def test_false_positive_is_false_positive(self):
+        with open("unittests/scans/threagile/risks.json") as testfile:
+            parser = ThreagileParser()
+            findings = parser.get_findings(testfile, Test())
+            finding = findings[5]
+            self.assertTrue(finding.false_p)
