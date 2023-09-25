@@ -423,130 +423,227 @@ def test_ics(request, tid):
     return response
 
 
-@user_is_authorized(Test, Permissions.Finding_Add, 'tid')
-def add_findings(request, tid):
-    test = Test.objects.get(id=tid)
-    form_error = False
-    jform = None
-    form = AddFindingForm(initial={'date': timezone.now().date(), 'verified': True}, req_resp=None, product=test.engagement.product)
-    push_all_jira_issues = jira_helper.is_push_all_issues(test)
-    use_jira = jira_helper.get_jira_project(test) is not None
+class AddFindingView(View):
+    def get_test(self, test_id: int):
+        return get_object_or_404(Test, id=test_id)
 
-    if request.method == 'POST':
-        form = AddFindingForm(request.POST, req_resp=None, product=test.engagement.product)
-        if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
+    def get_initial_context(self, request: HttpRequest, test: Test):
+        # Get the finding form first since it is used in another place
+        finding_form = self.get_finding_form(request, test)
+        product_tab = Product_Tab(test.engagement.product, title=_("Add Finding"), tab="engagements")
+        product_tab.setEngagement(test.engagement)
+        return {
+            "form": finding_form,
+            "product_tab": product_tab,
+            "temp": False,
+            'test': test,
+            "tid": test.id,
+            "pid": test.engagement.product.id,
+            "form_error": False,
+            "jform": self.get_jira_form(request, test, finding_form=finding_form),
+        }
+
+    def get_finding_form(self, request: HttpRequest, test: Test):
+        # Set up the args for the form
+        args = [request.POST] if request.method == "POST" else []
+        # Set the initial form args
+        kwargs = {
+            "initial": {'date': timezone.now().date(), 'verified': True},
+            "req_resp": None,
+            "product": test.engagement.product,
+        }
+        # Remove the initial state on post
+        if request.method == "POST":
+            kwargs.pop("initial")
+
+        return AddFindingForm(*args, **kwargs)
+
+    def get_jira_form(self, request: HttpRequest, test: Test, finding_form: AddFindingForm = None):
+        # Determine if jira should be used
+        if (jira_project := jira_helper.get_jira_project(test)) is not None:
+            # Set up the args for the form
+            args = [request.POST] if request.method == "POST" else []
+            # Set the initial form args
+            kwargs = {
+                "push_all": jira_helper.is_push_all_issues(test),
+                "prefix": "jiraform",
+                "jira_project": jira_project,
+                "finding_form": finding_form,
+            }
+
+            return JIRAFindingForm(*args, **kwargs)
+        return None
+
+    def validate_status_change(self, request: HttpRequest, context: dict):
+        if ((context["form"]['active'].value() is False or
+            context["form"]['false_p'].value()) and
+            context["form"]['duplicate'].value() is False):
+
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
-                error_inactive = ValidationError(_('Can not set a finding as inactive without adding all mandatory notes'),
-                                        code='inactive_without_mandatory_notes')
-                error_false_p = ValidationError(_('Can not set a finding as false positive without adding all mandatory notes'),
-                                        code='false_p_without_mandatory_notes')
-                if form['active'].value() is False:
-                    form.add_error('active', error_inactive)
-                if form['false_p'].value():
-                    form.add_error('false_p', error_false_p)
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     _('Can not set a finding as inactive or false positive without adding all mandatory notes'),
-                                     extra_tags='alert-danger')
-        if use_jira:
-            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test), finding_form=form)
+                error_inactive = ValidationError(
+                    _('Can not set a finding as inactive without adding all mandatory notes'),
+                    code='inactive_without_mandatory_notes')
+                error_false_p = ValidationError(
+                    _('Can not set a finding as false positive without adding all mandatory notes'),
+                    code='false_p_without_mandatory_notes')
+                if context["form"]['active'].value() is False:
+                    context["form"].add_error('active', error_inactive)
+                if context["form"]['false_p'].value():
+                    context["form"].add_error('false_p', error_false_p)
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    _('Can not set a finding as inactive or false positive without adding all mandatory notes'),
+                    extra_tags='alert-danger')
 
-        if form.is_valid() and (jform is None or jform.is_valid()):
-            if jform:
-                logger.debug('jform.jira_issue: %s', jform.cleaned_data.get('jira_issue'))
-                logger.debug('jform.push_to_jira: %s', jform.cleaned_data.get('push_to_jira'))
+        return request
 
-            new_finding = form.save(commit=False)
-            new_finding.test = test
-            new_finding.reporter = request.user
-            new_finding.numerical_severity = Finding.get_numerical_severity(
-                new_finding.severity)
-            new_finding.tags = form.cleaned_data['tags']
-            new_finding.save(dedupe_option=False, push_to_jira=False)
-
+    def process_finding_form(self, request: HttpRequest, test: Test, context: dict):
+        finding = None
+        if context["form"].is_valid():
+            finding = context["form"].save(commit=False)
+            finding.test = test
+            finding.reporter = request.user
+            finding.numerical_severity = Finding.get_numerical_severity(finding.severity)
+            finding.tags = context["form"].cleaned_data['tags']
+            finding.save()
             # Save and add new endpoints
-            finding_helper.add_endpoints(new_finding, form)
+            finding_helper.add_endpoints(finding, context["form"])
+            # Save the finding at the end and return
+            finding.save()
 
-            # Push to jira?
-            push_to_jira = False
+            return finding, request, True
+        else:
+            add_error_message_to_response("The form has errors, please correct them below.")
+            add_field_errors_to_response(context["form"])
+
+        return finding, request, False
+
+    def process_jira_form(self, request: HttpRequest, finding: Finding, context: dict):
+        # Capture case if the jira not being enabled
+        if context["jform"] is None:
+            return request, True, False
+
+        if context["jform"] and context["jform"].is_valid():
+            # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
+            # push_to_jira = jira_helper.is_push_to_jira(finding, jform.cleaned_data.get('push_to_jira'))
+            push_to_jira = jira_helper.is_push_all_issues(finding) or context["jform"].cleaned_data.get('push_to_jira')
             jira_message = None
-            if jform and jform.is_valid():
-                # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
-                # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
-                push_to_jira = push_all_jira_issues or jform.cleaned_data.get('push_to_jira')
+            # if the jira issue key was changed, update database
+            new_jira_issue_key = context["jform"].cleaned_data.get('jira_issue')
+            if finding.has_jira_issue:
+                jira_issue = finding.jira_issue
+                # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
+                # instead of on the public jira issue key.
+                # I have no idea why, but it means we have to retrieve the issue from JIRA to get the internal JIRA id.
+                # we can assume the issue exist, which is already checked in the validation of the jform
+                if not new_jira_issue_key:
+                    jira_helper.finding_unlink_jira(request, finding)
+                    jira_message = 'Link to JIRA issue removed successfully.'
 
-                # if the jira issue key was changed, update database
-                new_jira_issue_key = jform.cleaned_data.get('jira_issue')
-                if new_finding.has_jira_issue:
-                    jira_issue = new_finding.jira_issue
+                elif new_jira_issue_key != finding.jira_issue.jira_key:
+                    jira_helper.finding_unlink_jira(request, finding)
+                    jira_helper.finding_link_jira(request, finding, new_jira_issue_key)
+                    jira_message = 'Changed JIRA link successfully.'
+            else:
+                logger.debug('finding has no jira issue yet')
+                if new_jira_issue_key:
+                    logger.debug('finding has no jira issue yet, but jira issue specified in request. trying to link.')
+                    jira_helper.finding_link_jira(request, finding, new_jira_issue_key)
+                    jira_message = 'Linked a JIRA issue successfully.'
+            # Determine if a message should be added
+            if jira_message:
+                messages.add_message(
+                    request, messages.SUCCESS, jira_message, extra_tags="alert-success"
+                )
 
-                    # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
-                    # instead of on the public jira issue key.
-                    # I have no idea why, but it means we have to retrieve the issue from JIRA to get the internal JIRA id.
-                    # we can assume the issue exist, which is already checked in the validation of the jform
+            return request, True, push_to_jira
+        else:
+            add_field_errors_to_response(context["jform"])
 
-                    if not new_jira_issue_key:
-                        jira_helper.finding_unlink_jira(request, new_finding)
-                        jira_message = 'Link to JIRA issue removed successfully.'
+        return request, False, False
 
-                    elif new_jira_issue_key != new_finding.jira_issue.jira_key:
-                        jira_helper.finding_unlink_jira(request, new_finding)
-                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
-                        jira_message = 'Changed JIRA link successfully.'
-                else:
-                    logger.debug('finding has no jira issue yet')
-                    if new_jira_issue_key:
-                        logger.debug('finding has no jira issue yet, but jira issue specified in request. trying to link.')
-                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
-                        jira_message = 'Linked a JIRA issue successfully.'
-
-            finding_helper.save_vulnerability_ids(new_finding, form.cleaned_data['vulnerability_ids'].split())
-
-            new_finding.save(push_to_jira=push_to_jira)
-            create_notification(event='other',
-                                title=_('Addition of %(title)s') % {'title': new_finding.title},
-                                finding=new_finding,
-                                description=_('Finding "%(title)s" was added by %(user)s') % {
-                                    'title': new_finding.title, 'user': request.user
-                                },
-                                url=request.build_absolute_uri(reverse('view_finding', args=(new_finding.id,))),
-                                icon="exclamation-triangle")
-
-            if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
+    def process_forms(self, request: HttpRequest, test: Test, context: dict):
+        form_success_list = []
+        finding = None
+        # Set vars for the completed forms
+        # Validate finding mitigation
+        request = self.validate_status_change(request, context)
+        # Check the validity of the form overall
+        finding, request, success = self.process_finding_form(request, test, context)
+        form_success_list.append(success)
+        request, success, push_to_jira = self.process_jira_form(request, finding, context)
+        form_success_list.append(success)
+        # Determine if all forms were successful
+        all_forms_valid = all(form_success_list)
+        # Check the validity of all the forms
+        if all_forms_valid:
+            # if we're removing the "duplicate" in the edit finding screen
+            finding_helper.save_vulnerability_ids(finding, context["form"].cleaned_data["vulnerability_ids"].split())
+            # Push things to jira if needed
+            finding.save(push_to_jira=push_to_jira)
+            # Save the burp req resp
+            if "request" in context["form"].cleaned_data or "response" in context["form"].cleaned_data:
                 burp_rr = BurpRawRequestResponse(
-                    finding=new_finding,
-                    burpRequestBase64=base64.b64encode(form.cleaned_data['request'].encode()),
-                    burpResponseBase64=base64.b64encode(form.cleaned_data['response'].encode()),
+                    finding=finding,
+                    burpRequestBase64=base64.b64encode(context["form"].cleaned_data["request"].encode()),
+                    burpResponseBase64=base64.b64encode(context["form"].cleaned_data["response"].encode()),
                 )
                 burp_rr.clean()
                 burp_rr.save()
+            # Create a notification
+            create_notification(
+                event='other',
+                title=_('Addition of %(title)s') % {'title': finding.title},
+                finding=finding,
+                description=_('Finding "%(title)s" was added by %(user)s') % {
+                    'title': finding.title, 'user': request.user
+                },
+                url=request.build_absolute_uri(reverse('view_finding', args=(finding.id,))),
+                icon="exclamation-triangle")
+            # Add a success message
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                _('Finding added successfully.'),
+                extra_tags='alert-success')
 
+        return finding, request, all_forms_valid
+
+    def get_template(self):
+        return "dojo/add_findings.html"
+
+    def get(self, request: HttpRequest, test_id: int):
+        # Get the initial objects
+        test = self.get_test(test_id)
+        # Make sure the user is authorized
+        user_has_permission_or_403(request.user, test, Permissions.Finding_Add)
+        # Set up the initial context
+        context = self.get_initial_context(request, test)
+        # Render the form
+        return render(request, self.get_template(), context)
+
+    def post(self, request: HttpRequest, test_id: int):
+        # Get the initial objects
+        test = self.get_test(test_id)
+        # Make sure the user is authorized
+        user_has_permission_or_403(request.user, test, Permissions.Finding_Add)
+        # Set up the initial context
+        context = self.get_initial_context(request, test)
+        # Process the form
+        _, request, success = self.process_forms(request, test, context)
+        # Handle the case of a successful form
+        if success:
             if '_Finished' in request.POST:
                 return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
             else:
                 return HttpResponseRedirect(reverse('add_findings', args=(test.id,)))
         else:
-            form_error = True
-            add_error_message_to_response(_('The form has errors, please correct them below.'))
-            add_field_errors_to_response(jform)
-            add_field_errors_to_response(form)
+            context["form_error"] = True
+        # Render the form
+        return render(request, self.get_template(), context)
 
-    else:
-        if use_jira:
-            jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test), finding_form=form)
-
-    product_tab = Product_Tab(test.engagement.product, title=_("Add Finding"), tab="engagements")
-    product_tab.setEngagement(test.engagement)
-    return render(request, 'dojo/add_findings.html',
-                  {'form': form,
-                   'product_tab': product_tab,
-                   'test': test,
-                   'temp': False,
-                   'tid': tid,
-                   'form_error': form_error,
-                   'jform': jform,
-                   })
 
 
 @user_is_authorized(Test, Permissions.Finding_Add, 'tid')

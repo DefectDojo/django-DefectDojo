@@ -18,7 +18,9 @@ urlpatterns = [
         name='delete_test'),
     re_path(r'^test/(?P<tid>\d+)/copy$', views.copy_test,
         name='copy_test'),
-    re_path(r'^test/(?P<tid>\d+)/add_findings$', views.add_findings,
+    re_path(
+        r'^test/(?P<test_id>\d+)/add_findings$',
+        views.AddFindingView.as_view(),
         name='add_findings'),
     re_path(r'^test/(?P<tid>\d+)/add_findings/(?P<fid>\d+)$',
         views.add_temp_finding, name='add_temp_finding'),

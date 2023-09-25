@@ -725,7 +725,7 @@ class ViewFinding(View):
             "dojo_user": user,
             "user": request.user,
             "notes": notes,
-            "files": files,
+            "files": finding.files.all(),
             "note_type_activation": note_type_activation,
             "available_note_types": available_note_types,
             "product_tab": Product_Tab(
@@ -1124,7 +1124,7 @@ class EditFinding(View):
         # Render the form
         return render(request, self.get_template(), context)
 
-    def post(self, request: HttpRequest, finding_id):
+    def post(self, request: HttpRequest, finding_id: int):
         # Get the initial objects
         finding = self.get_finding(finding_id)
         # Make sure the user is authorized

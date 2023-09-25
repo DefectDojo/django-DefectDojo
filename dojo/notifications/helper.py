@@ -264,12 +264,15 @@ def send_msteams_notification(event, user=None, *args, **kwargs):
         pass
 
 
-@dojo_async_task
-@app.task
+# @dojo_async_task
+# @app.task
 def send_mail_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
-
-    if user:
+    email_from_address = get_system_setting('email_from')
+    # Attempt to get the "to" address
+    if "recipient" in kwargs:
+        address = kwargs.get("recipient")
+    elif user:
         address = user.email
     else:
         address = get_system_setting('mail_notifications_to')
@@ -277,16 +280,25 @@ def send_mail_notification(event, user=None, *args, **kwargs):
     logger.debug('notification email for user %s to %s', user, address)
 
     try:
-        subject = '%s notification' % get_system_setting('team_name')
+        subject = f"{get_system_setting('team_name')} notification"
         if 'title' in kwargs:
-            subject += ': %s' % kwargs['title']
+            subject += f": {kwargs['title']}"
+
+        body = create_notification_message(event, user, 'mail', *args, **kwargs)
+        print("\n\n")
+        print(f"subject: {subject}")
+        print(f"address: {address}")
+        print(f"email_from_address: {email_from_address}")
+        print("\n\n")
+        print(f"body: {body}")
+        print("\n\n")
 
         email = EmailMessage(
             subject,
             create_notification_message(event, user, 'mail', *args, **kwargs),
-            get_system_setting('email_from'),
+            email_from_address,
             [address],
-            headers={"From": "{}".format(get_system_setting('email_from'))}
+            headers={"From": f"{email_from_address}"},
         )
         email.content_subtype = 'html'
         logger.debug('sending email alert')
@@ -296,7 +308,6 @@ def send_mail_notification(event, user=None, *args, **kwargs):
     except Exception as e:
         logger.exception(e)
         log_alert(e, "Email Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
-        pass
 
 
 def send_alert_notification(event, user=None, *args, **kwargs):
