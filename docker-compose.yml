@@ -13,7 +13,7 @@ services:
       context: ./
       dockerfile: "Dockerfile.nginx-${DEFECT_DOJO_OS:-debian}"
     image: "defectdojo/defectdojo-nginx:${NGINX_VERSION:-latest}"
-    profiles: 
+    profiles:
       - mysql-rabbitmq
       - mysql-redis
       - postgres-rabbitmq
@@ -39,13 +39,13 @@ services:
       dockerfile: "Dockerfile.django-${DEFECT_DOJO_OS:-debian}"
       target: django
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
-    profiles: 
+    profiles:
       - mysql-rabbitmq
       - mysql-redis
       - postgres-rabbitmq
       - postgres-redis
     depends_on:
-      - ${DD_DOCKERCOMPOSE_DATABASE}
+      - ${DD_DOCKERCOMPOSE_DATABASE:-postgres}
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST}:${DD_DATABASE_PORT}', '-t', '30', '--', '/entrypoint-uwsgi.sh']
     environment:
       DD_DEBUG: 'False'
@@ -62,14 +62,14 @@ services:
         - "defectdojo_media:${DD_MEDIA_ROOT:-/app/media}"
   celerybeat:
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
-    profiles: 
+    profiles:
       - mysql-rabbitmq
       - mysql-redis
       - postgres-rabbitmq
       - postgres-redis
     depends_on:
-      - ${DD_DOCKERCOMPOSE_DATABASE}
-      - ${DD_DOCKERCOMPOSE_BROKER}
+      - ${DD_DOCKERCOMPOSE_DATABASE:-postgres}
+      - ${DD_DOCKERCOMPOSE_BROKER:-redis}
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST}:${DD_DATABASE_PORT}', '-t', '30', '--', '/entrypoint-celery-beat.sh']
     environment:
       DD_DATABASE_URL: ${DD_DATABASE_URL}
@@ -82,14 +82,14 @@ services:
           target: /app/docker/extra_settings
   celeryworker:
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
-    profiles: 
+    profiles:
       - mysql-rabbitmq
       - mysql-redis
       - postgres-rabbitmq
       - postgres-redis
     depends_on:
-      - ${DD_DOCKERCOMPOSE_DATABASE}
-      - ${DD_DOCKERCOMPOSE_BROKER}
+      - ${DD_DOCKERCOMPOSE_DATABASE:-postgres}
+      - ${DD_DOCKERCOMPOSE_BROKER:-redis}
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST}:${DD_DATABASE_PORT}', '-t', '30', '--', '/entrypoint-celery-worker.sh']
     environment:
       DD_DATABASE_URL: ${DD_DATABASE_URL}
@@ -103,13 +103,13 @@ services:
         - "defectdojo_media:${DD_MEDIA_ROOT:-/app/media}"
   initializer:
     image: "defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}"
-    profiles: 
+    profiles:
       - mysql-rabbitmq
       - mysql-redis
       - postgres-rabbitmq
       - postgres-redis
     depends_on:
-      - ${DD_DOCKERCOMPOSE_DATABASE}
+      - ${DD_DOCKERCOMPOSE_DATABASE:-postgres}
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST}:${DD_DATABASE_PORT}', '--', '/entrypoint-initializer.sh']
     environment:
       DD_DATABASE_URL: ${DD_DATABASE_URL}
@@ -126,7 +126,7 @@ services:
           target: /app/docker/extra_settings
   mysql:
     image: mysql:5.7.43@sha256:2c23f254c6b9444ecda9ba36051a9800e8934a2f5828ecc8730531db8142af83
-    profiles: 
+    profiles:
       - mysql-rabbitmq
       - mysql-redis
     environment:
@@ -149,7 +149,7 @@ services:
     volumes:
       - defectdojo_postgres:/var/lib/postgresql/data
   rabbitmq:
-    image: rabbitmq:3.12.4-alpine@sha256:13f1d6925638b44bb9c547f65d2aa3c54d3b1c634530cc9004f9215f7f37fed7
+    image: rabbitmq:3.12.6-alpine@sha256:d391169ad3b06b4a9aa9aa6ed2bba4518d119901cf7b291cd6f5447a951fa62b
     profiles: 
       - mysql-rabbitmq
       - postgres-rabbitmq
