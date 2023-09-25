@@ -1448,6 +1448,9 @@ class EditEndpointForm(forms.ModelForm):
         if 'instance' in kwargs:
             self.endpoint_instance = kwargs.pop('instance')
             self.product = self.endpoint_instance.product
+            product_id = self.endpoint_instance.product.pk
+            findings = Finding.objects.filter(test__engagement__product__id=product_id)
+            self.fields["findings"].queryset = findings
 
     def clean(self):
 
