@@ -699,47 +699,47 @@
         </div>
     </div>
 {% endblock %}
-<script type="application/javascript">
-    {% block datatables_columns %}
-        var datatables_columns = [
-            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
-                { "data": "checkbox" },
-            {% endif %}
-                { "data": "action" },
-                { "data": "severity" },
-                { "data": "finding" , render: function (data, type, row) {
-                        return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                }},
-                { "data": "cwe" },
-                { "data": "cve" },
-                { "data": "found_date" },
-                { "data": "finding_age" },
-            {% if system_settings.enable_finding_sla %}
-                { "data": "finding_sla" },
-            {% endif %}
-            { "data": "reported_by" },
-            { "data": "found_by_test" },
-            { "data": "status" },
-            {% if system_settings.enable_jira %}
-                {% if jira_project and product_tab or not product_tab %}
-                    { "data": "jira_id" },
-                    { "data": "jira_age" },
-                    { "data": "jira_change" },
-                {% endif %}
-            {% endif %}
-            {% if 'is_finding_groups_enabled'|system_setting_enabled %}
-                { "data": "grouped" },
-            {% endif %}
-            {% if show_product_column and product_tab is None %}
-                { "data": "product" },
-            {% endif %}
-            { "data": "service" },
-            { "data": "planned_remediation_date" },
-        ];
-    {% endblock datatables_columns %}
-</script>
 {% block postscript %}
     <script type="application/javascript" src="{% static "chosen-js/chosen.jquery.min.js" %}"></script>
+    <script type="application/javascript">
+        {% block datatables_columns %}
+            var datatables_columns = [
+                {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
+                    { "data": "checkbox" },
+                {% endif %}
+                    { "data": "action" },
+                    { "data": "severity" },
+                    { "data": "finding" , render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
+                    }},
+                    { "data": "cwe" },
+                    { "data": "cve" },
+                    { "data": "found_date" },
+                    { "data": "finding_age" },
+                {% if system_settings.enable_finding_sla %}
+                    { "data": "finding_sla" },
+                {% endif %}
+                { "data": "reported_by" },
+                { "data": "found_by_test" },
+                { "data": "status" },
+                {% if system_settings.enable_jira %}
+                    {% if jira_project and product_tab or not product_tab %}
+                        { "data": "jira_id" },
+                        { "data": "jira_age" },
+                        { "data": "jira_change" },
+                    {% endif %}
+                {% endif %}
+                {% if 'is_finding_groups_enabled'|system_setting_enabled %}
+                    { "data": "grouped" },
+                {% endif %}
+                {% if show_product_column and product_tab is None %}
+                    { "data": "product" },
+                {% endif %}
+                { "data": "service" },
+                { "data": "planned_remediation_date" },
+            ];
+        {% endblock datatables_columns %}
+    </script>
     <script type="application/javascript">
         // DataTables Setup
         $.fn.dataTable.ext.order['severity-asc'] = function (settings, col) {

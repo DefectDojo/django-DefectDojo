@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.urls import reverse, Resolver404
 from django.db.models import Q, QuerySet, Count
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
@@ -37,6 +37,7 @@ import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
 from django.views.decorators.vary import vary_on_cookie
 from django.views.decorators.debug import sensitive_variables
+from django.views import View
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
@@ -48,107 +49,6 @@ from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImpo
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
-
-
-@sensitive_variables('service_account_info', 'credentials')
-@user_is_authorized(Test, Permissions.Test_View, 'tid')
-def view_test(request, tid):
-    test_prefetched = get_authorized_tests(Permissions.Test_View)
-    test_prefetched = test_prefetched.annotate(total_reimport_count=Count('test_import__id', distinct=True))
-    # tests_prefetched = test_prefetched.prefetch_related(Prefetch('test_import_set', queryset=Test_Import.objects.filter(~Q(findings_affected=None))))
-    # tests_prefetched = test_prefetched.prefetch_related('test_import_set')
-    # test_prefetched = test_prefetched.prefetch_related('test_import_set__test_import_finding_action_set')
-
-    test = get_object_or_404(test_prefetched, pk=tid)
-    # test = get_object_or_404(Test, pk=tid)
-
-    prod = test.engagement.product
-    notes = test.notes.all()
-    note_type_activation = Note_Type.objects.filter(is_active=True).count()
-    if note_type_activation:
-        available_note_types = find_available_notetypes(notes)
-    files = test.files.all()
-    person = request.user.username
-    findings = Finding.objects.filter(test=test).order_by('numerical_severity')
-    findings = FindingFilter(request.GET, queryset=findings)
-    stub_findings = Stub_Finding.objects.filter(test=test)
-    cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')
-    creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
-    system_settings = get_object_or_404(System_Settings, id=1)
-    if request.method == 'POST':
-        user_has_permission_or_403(request.user, test, Permissions.Note_Add)
-        if note_type_activation:
-            form = TypedNoteForm(request.POST, available_note_types=available_note_types)
-        else:
-            form = NoteForm(request.POST)
-        if form.is_valid():
-            new_note = form.save(commit=False)
-            new_note.author = request.user
-            new_note.date = timezone.now()
-            new_note.save()
-            test.notes.add(new_note)
-            if note_type_activation:
-                form = TypedNoteForm(available_note_types=available_note_types)
-            else:
-                form = NoteForm()
-            url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
-            title = "Test: %s on %s" % (test.test_type.name, test.engagement.product.name)
-            process_notifications(request, new_note, url, title)
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 _('Note added successfully.'),
-                                 extra_tags='alert-success')
-    else:
-        if note_type_activation:
-            form = TypedNoteForm(available_note_types=available_note_types)
-        else:
-            form = NoteForm()
-
-    title_words = get_words_for_field(Finding, 'title')
-    component_words = get_words_for_field(Finding, 'component_name')
-
-    # test_imports = test.test_import_set.all()
-    test_imports = Test_Import.objects.filter(test=test)
-    test_import_filter = TestImportFilter(request.GET, test_imports)
-
-    paged_test_imports = get_page_items_and_count(request, test_import_filter.qs, 5, prefix='test_imports')
-    paged_test_imports.object_list = paged_test_imports.object_list.prefetch_related('test_import_finding_action_set')
-
-    paged_findings = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25, prefix='findings')
-    paged_stub_findings = get_page_items(request, stub_findings, 25)
-    show_re_upload = any(test.test_type.name in code for code in get_choices_sorted())
-
-    product_tab = Product_Tab(prod, title=_("Test"), tab="engagements")
-    product_tab.setEngagement(test.engagement)
-    jira_project = jira_helper.get_jira_project(test)
-
-    finding_groups = test.finding_group_set.all().prefetch_related('findings', 'jira_issue', 'creator', 'findings__vulnerability_id_set')
-
-    bulk_edit_form = FindingBulkUpdateForm(request.GET)
-    return render(request, 'dojo/view_test.html',
-                  {'test': test,
-                   'prod': prod,
-                   'product_tab': product_tab,
-                   'findings': paged_findings,
-                   'filtered': findings,
-                   'stub_findings': paged_stub_findings,
-                   'title_words': title_words,
-                   'component_words': component_words,
-                   'form': form,
-                   'notes': notes,
-                   'files': files,
-                   'person': person,
-                   'request': request,
-                   'show_re_upload': show_re_upload,
-                   'creds': creds,
-                   'cred_test': cred_test,
-                   'jira_project': jira_project,
-                   'bulk_edit_form': bulk_edit_form,
-                   'paged_test_imports': paged_test_imports,
-                   'test_import_filter': test_import_filter,
-                   'finding_groups': finding_groups,
-                   'finding_group_by_options': Finding_Group.GROUP_BY_OPTIONS,
-                   })
 
 
 def prefetch_for_findings(findings):
@@ -179,6 +79,163 @@ def prefetch_for_findings(findings):
         logger.debug('unable to prefetch because query was already executed')
 
     return prefetched_findings
+
+
+class ViewTest(View):
+    def get_test(self, test_id: int):
+        test_prefetched = get_authorized_tests(Permissions.Test_View)
+        test_prefetched = test_prefetched.annotate(total_reimport_count=Count('test_import__id', distinct=True))
+        return get_object_or_404(test_prefetched, pk=test_id)
+
+    def get_test_import_data(self, request: HttpRequest, test: Test):
+        test_imports = Test_Import.objects.filter(test=test)
+        test_import_filter = TestImportFilter(request.GET, test_imports)
+
+        paged_test_imports = get_page_items_and_count(request, test_import_filter.qs, 5, prefix="test_imports")
+        paged_test_imports.object_list = paged_test_imports.object_list.prefetch_related("test_import_finding_action_set")
+
+        return {
+            "paged_test_imports": paged_test_imports,
+            "test_import_filter": test_import_filter,
+        }
+
+    def get_stub_findings(self, request: HttpRequest, test: Test):
+        stub_findings = Stub_Finding.objects.filter(test=test)
+        paged_stub_findings = get_page_items(request, stub_findings, 25)
+
+        return {
+            "stub_findings": paged_stub_findings,
+        }
+
+    def get_findings(self, request: HttpRequest, test: Test):
+        findings = Finding.objects.filter(test=test).order_by("numerical_severity")
+        findings = FindingFilter(request.GET, queryset=findings)
+        paged_findings = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25, prefix='findings')
+
+        return {
+            "findings": paged_findings,
+            "filtered": findings,
+        }
+
+    def get_note_form(self, request: HttpRequest):
+        # Set up the args for the form
+        args = [request.POST] if request.method == "POST" else []
+        # Set the initial form args
+        kwargs = {}
+
+        return NoteForm(*args, **kwargs)
+
+    def get_typed_note_form(self, request: HttpRequest, context: dict):
+        # Set up the args for the form
+        args = [request.POST] if request.method == "POST" else []
+        # Set the initial form args
+        kwargs = {
+            "available_note_types": context.get("available_note_types")
+        }
+
+        return TypedNoteForm(*args, **kwargs)
+
+    def get_form(self, request: HttpRequest, context: dict):
+        return (
+            self.get_typed_note_form(request, context)
+            if context.get("note_type_activation", 0)
+            else self.get_note_form(request)
+        )
+
+    def get_initial_context(self, request: HttpRequest, test: Test):
+        # Set up the product tab
+        product_tab = Product_Tab(test.engagement.product, title=_("Test"), tab="engagements")
+        product_tab.setEngagement(test.engagement)
+        # Set up the notes and associated info to generate the form with
+        notes = test.notes.all()
+        note_type_activation = Note_Type.objects.filter(is_active=True).count()
+        available_note_types = None
+        if note_type_activation:
+            available_note_types = find_available_notetypes(notes)
+        # Set the current context
+        context = {
+            "test": test,
+            "prod": test.engagement.product,
+            "product_tab": product_tab,
+            "title_words": get_words_for_field(Finding, 'title'),
+            "component_words": get_words_for_field(Finding, 'component_name'),
+            "notes": notes,
+            "note_type_activation": note_type_activation,
+            "available_note_types": available_note_types,
+            "files": test.files.all(),
+            "person": request.user.username,
+            "request": request,
+            "show_re_upload": any(test.test_type.name in code for code in get_choices_sorted()),
+            "creds": Cred_Mapping.objects.filter(engagement=test.engagement).select_related("cred_id").order_by("cred_id"),
+            "cred_test": Cred_Mapping.objects.filter(test=test).select_related("cred_id").order_by("cred_id"),
+            "jira_project": jira_helper.get_jira_project(test),
+            "bulk_edit_form": FindingBulkUpdateForm(request.GET),
+            'finding_groups': test.finding_group_set.all().prefetch_related("findings", "jira_issue", "creator", "findings__vulnerability_id_set"),
+            'finding_group_by_options': Finding_Group.GROUP_BY_OPTIONS,
+
+        }
+        # Set the form using the context, and then update the context
+        form = self.get_form(request, context)
+        context["form"] = form
+        # Add some of the related objects
+        context |= self.get_findings(request, test)
+        context |= self.get_stub_findings(request, test)
+        context |= self.get_test_import_data(request, test)
+
+        return context
+
+    def process_form(self, request: HttpRequest, test: Test, context: dict):
+        if context["form"].is_valid():
+            # Save the note
+            new_note = context["form"].save(commit=False)
+            new_note.author = request.user
+            new_note.date = timezone.now()
+            new_note.save()
+            test.notes.add(new_note)
+            # Make a notification for this actions
+            url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
+            title = f"Test: {test.test_type.name} on {test.engagement.product.name}"
+            process_notifications(request, new_note, url, title)
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                _('Note added successfully.'),
+                extra_tags='alert-success')
+
+            return request, True
+        return request, False
+
+    def get_template(self):
+        return "dojo/view_test.html"
+
+    def get(self, request: HttpRequest, test_id: int):
+        # Get the initial objects
+        test = self.get_test(test_id)
+        # Make sure the user is authorized
+        user_has_permission_or_403(request.user, test, Permissions.Test_View)
+        # Quick perms check to determine if the user has access to add a note to the test
+        user_has_permission_or_403(request.user, test, Permissions.Note_Add)
+        # Set up the initial context
+        context = self.get_initial_context(request, test)
+        # Render the form
+        return render(request, self.get_template(), context)
+
+    def post(self, request: HttpRequest, test_id: int):
+        # Get the initial objects
+        test = self.get_test(test_id)
+        # Make sure the user is authorized
+        user_has_permission_or_403(request.user, test, Permissions.Test_View)
+        # Quick perms check to determine if the user has access to add a note to the test
+        user_has_permission_or_403(request.user, test, Permissions.Note_Add)
+        # Set up the initial context
+        context = self.get_initial_context(request, test)
+        # Determine the validity of the form
+        request, success = self.process_form(request, test, context)
+        # Handle the case of a successful form
+        if success:
+            return redirect_to_return_url_or_else(request, reverse("view_test", args=(test_id,)))
+        # Render the form
+        return render(request, self.get_template(), context)
 
 
 # def prefetch_for_test_imports(test_imports):

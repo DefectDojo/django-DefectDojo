@@ -715,7 +715,6 @@ class ViewFinding(View):
 
     def get_initial_context(self, request: HttpRequest, finding: Finding, user: Dojo_User):
         notes = finding.notes.all()
-        files = finding.files.all()
         note_type_activation = Note_Type.objects.filter(is_active=True).count()
         available_note_types = None
         if note_type_activation:
