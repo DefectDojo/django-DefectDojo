@@ -767,6 +767,7 @@ class RiskAcceptanceViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin,
+    mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
