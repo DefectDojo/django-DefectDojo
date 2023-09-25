@@ -2171,8 +2171,6 @@ class ImportScanSerializer(serializers.Serializer):
             name=environment_name
         )
         tags = data.get("tags", None)
-        if tags:
-            tags = [tags]
         lead = data.get("lead")
 
         scan = data.get("file", None)
