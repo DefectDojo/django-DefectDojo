@@ -3,6 +3,7 @@ import io
 import logging
 import re
 from datetime import datetime
+from dateutil import parser
 
 from dojo.models import Endpoint, Finding
 
@@ -114,19 +115,26 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
         else:
             endpoint = Endpoint(host=report_finding["IP"])
 
+        if "CVSS3 Base" in report_finding:
+            cvssv3 = _extract_cvss_vectors(
+                        report_finding["CVSS3 Base"], report_finding["CVSS3 Temporal"]
+                    )
+        elif "CVSS3.1 Base" in report_finding:
+            cvssv3 = _extract_cvss_vectors(
+                        report_finding["CVSS3.1 Base"], report_finding["CVSS3.1 Temporal"]
+                    )
+
         finding = Finding(
             title=f"QID-{report_finding['QID']} | {report_finding['Title']}",
             mitigation=report_finding["Solution"],
             description=f"{report_finding['Threat']}\nResult Evidence: \n{report_finding.get('Threat', 'Not available')}",
             severity=severity_lookup.get(report_finding["Severity"], "Info"),
             impact=report_finding["Impact"],
-            date=datetime.strptime(
-                report_finding["Last Detected"], "%m/%d/%Y %H:%M:%S"
-            ).date(),
-            vuln_id_from_tool=report_finding["QID"],
-            cvssv3=_extract_cvss_vectors(
-                report_finding["CVSS3 Base"], report_finding["CVSS3 Temporal"]
+            date=parser.parse(
+                report_finding["Last Detected"].replace("Z", "")
             ),
+            vuln_id_from_tool=report_finding["QID"],
+            cvssv3=cvssv3
         )
 
         cve_data = report_finding.get("CVE ID")
