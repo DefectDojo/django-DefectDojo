@@ -8,7 +8,6 @@ from django.db.models.deletion import RestrictedError
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpRequest
 from django.core.exceptions import PermissionDenied
-from django.db.models.query import QuerySet
 from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS

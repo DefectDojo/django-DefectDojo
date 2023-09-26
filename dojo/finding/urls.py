@@ -132,7 +132,6 @@ urlpatterns = [
         views.request_finding_review, name='request_finding_review'),
     re_path(r'^finding/(?P<fid>\d+)/review',
         views.clear_finding_review, name='clear_finding_review'),
-    
     re_path(r'^finding/(?P<fid>\d+)/copy$',
         views.copy_finding, name='copy_finding'),
     re_path(r'^finding/(?P<fid>\d+)/apply_cwe$',

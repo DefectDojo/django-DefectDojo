@@ -1,7 +1,6 @@
 import logging
 
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render
 from django.http import HttpRequest
 from django.utils.translation import gettext as _
@@ -61,7 +60,7 @@ class SystemNotificationsView(View):
                 request,
                 messages.SUCCESS,
                 _('Settings saved.'),
-                extra_tags='alert-success') 
+                extra_tags='alert-success')
             return request, True
         return request, False
 

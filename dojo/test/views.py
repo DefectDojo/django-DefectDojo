@@ -476,8 +476,8 @@ class AddFindingView(View):
 
     def validate_status_change(self, request: HttpRequest, context: dict):
         if ((context["form"]['active'].value() is False or
-            context["form"]['false_p'].value()) and
-            context["form"]['duplicate'].value() is False):
+             context["form"]['false_p'].value()) and
+             context["form"]['duplicate'].value() is False):
 
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
@@ -645,7 +645,6 @@ class AddFindingView(View):
         return render(request, self.get_template(), context)
 
 
-
 @user_is_authorized(Test, Permissions.Finding_Add, 'tid')
 def add_temp_finding(request, tid, fid):
     jform = None
@@ -664,10 +663,12 @@ def add_temp_finding(request, tid, fid):
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
-                error_inactive = ValidationError(_('Can not set a finding as inactive without adding all mandatory notes'),
-                                        code='not_active_or_false_p_true')
-                error_false_p = ValidationError(_('Can not set a finding as false positive without adding all mandatory notes'),
-                                        code='not_active_or_false_p_true')
+                error_inactive = ValidationError(
+                    _('Can not set a finding as inactive without adding all mandatory notes'),
+                    code='not_active_or_false_p_true')
+                error_false_p = ValidationError(
+                    _('Can not set a finding as false positive without adding all mandatory notes'),
+                    code='not_active_or_false_p_true')
                 if form['active'].value() is False:
                     form.add_error('active', error_inactive)
                 if form['false_p'].value():
