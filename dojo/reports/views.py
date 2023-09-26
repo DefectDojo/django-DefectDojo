@@ -812,7 +812,7 @@ def get_findings(request):
         product_id=pid,
         engagement_id=eid,
         test_id=tid)
-    findings = list_findings.get_filtered_findings(request).qs
+    findings = list_findings.get_fully_filtered_findings(request).qs
 
     return findings, obj
 

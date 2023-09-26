@@ -284,15 +284,6 @@ def send_mail_notification(event, user=None, *args, **kwargs):
         if 'title' in kwargs:
             subject += f": {kwargs['title']}"
 
-        body = create_notification_message(event, user, 'mail', *args, **kwargs)
-        print("\n\n")
-        print(f"subject: {subject}")
-        print(f"address: {address}")
-        print(f"email_from_address: {email_from_address}")
-        print("\n\n")
-        print(f"body: {body}")
-        print("\n\n")
-
         email = EmailMessage(
             subject,
             create_notification_message(event, user, 'mail', *args, **kwargs),
