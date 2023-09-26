@@ -1316,7 +1316,7 @@ class AdHocFindingView(View):
         return None
 
     def validate_status_change(self, request: HttpRequest, context: dict):
-        if ((context["form"]['active'].value() is False or 
+        if ((context["form"]['active'].value() is False or
              context["form"]['false_p'].value()) and
              context["form"]['duplicate'].value() is False):
 

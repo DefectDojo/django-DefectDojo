@@ -36,7 +36,6 @@ from functools import reduce
 import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
 from django.views.decorators.vary import vary_on_cookie
-from django.views.decorators.debug import sensitive_variables
 from django.views import View
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.authorization import user_has_permission_or_403
