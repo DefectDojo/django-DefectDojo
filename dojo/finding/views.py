@@ -960,7 +960,7 @@ class EditFinding(View):
 
     def process_finding_form(self, request: HttpRequest, finding: Finding, context: dict):
         if context["form"].is_valid():
-            # process some fo the easy stuff first
+            # process some of the easy stuff first
             new_finding = context["form"].save(commit=False)
             new_finding.test = finding.test
             new_finding.numerical_severity = Finding.get_numerical_severity(new_finding.severity)
