@@ -871,19 +871,23 @@ def csv_export(request):
         if not first_row:
             fields = []
             for key in dir(finding):
-                if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
-                    if not callable(getattr(finding, key)):
-                        value = finding.__dict__.get(key)
-                    if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
-                        if callable(getattr(finding, key)):
-                            func = getattr(finding, key)
-                            result = func()
-                            value = result
-                        else:
-                            value = str(getattr(finding, key))
-                    if value and isinstance(value, str):
-                        value = value.replace('\n', ' NEWLINE ').replace('\r', '')
-                    fields.append(value)
+                try:
+                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                        if not callable(getattr(finding, key)):
+                            value = finding.__dict__.get(key)
+                        if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
+                            if callable(getattr(finding, key)):
+                                func = getattr(finding, key)
+                                result = func()
+                                value = result
+                            else:
+                                value = str(getattr(finding, key))
+                        if value and isinstance(value, str):
+                            value = value.replace('\n', ' NEWLINE ').replace('\r', '')
+                        fields.append(value)
+                except Exception as exc:
+                    logger.debug('Error in attribute: ' + str(exc))
+                    continue
             fields.append(finding.test.title)
             fields.append(finding.test.test_type.name)
             fields.append(finding.test.engagement.id)
@@ -973,20 +977,24 @@ def excel_export(request):
         if row_num > 1:
             col_num = 1
             for key in dir(finding):
-                if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
-                    if not callable(getattr(finding, key)):
-                        value = finding.__dict__.get(key)
-                    if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
-                        if callable(getattr(finding, key)):
-                            func = getattr(finding, key)
-                            result = func()
-                            value = result
-                        else:
-                            value = str(getattr(finding, key))
-                    if value and isinstance(value, datetime):
-                        value = value.replace(tzinfo=None)
-                    worksheet.cell(row=row_num, column=col_num, value=value)
-                    col_num += 1
+                try:
+                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                        if not callable(getattr(finding, key)):
+                            value = finding.__dict__.get(key)
+                        if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
+                            if callable(getattr(finding, key)):
+                                func = getattr(finding, key)
+                                result = func()
+                                value = result
+                            else:
+                                value = str(getattr(finding, key))
+                        if value and isinstance(value, datetime):
+                            value = value.replace(tzinfo=None)
+                        worksheet.cell(row=row_num, column=col_num, value=value)
+                        col_num += 1
+                except Exception as exc:
+                    logger.debug('Error in attribute: ' + str(exc))
+                    continue
             worksheet.cell(row=row_num, column=col_num, value=finding.test.test_type.name)
             col_num += 1
             worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.id)
