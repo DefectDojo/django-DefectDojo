@@ -402,10 +402,10 @@ class ListFindings(View, BaseListFindings):
     def add_breadcrumbs(self, request: HttpRequest, context: dict):
         # show custom breadcrumb if user has filtered by exactly 1 endpoint
         if "endpoints" in request.GET:
-            endpoints = request.GET.getlist("endpoints", [])
-            if len(endpoints) == 1 and endpoints[0] != '':
-                endpoint = endpoints[0]
-                endpoint = get_object_or_404(Endpoint, id=endpoint)
+            endpoint_ids = request.GET.getlist("endpoints", [])
+            if len(endpoint_ids) == 1 and endpoint_ids[0] != '':
+                endpoint_id = endpoint_ids[0]
+                endpoint = get_object_or_404(Endpoint, id=endpoint_id)
                 context["filter_name"] = "Vulnerable Endpoints"
                 context["custom_breadcrumb"] = OrderedDict(
                     [
