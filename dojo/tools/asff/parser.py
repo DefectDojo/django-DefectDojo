@@ -12,6 +12,7 @@ SEVERITY_MAPPING = {
     "CRITICAL": "Critical",
 }
 
+
 def is_private_ipv4(ip):
     parts = ip.split('.')
     if len(parts) != 4:
@@ -26,6 +27,7 @@ def is_private_ipv4(ip):
     if parts[0] == '192' and parts[1] == '168':
         return True
     return False
+
 
 class AsffParser(object):
     def get_scan_types(self):
