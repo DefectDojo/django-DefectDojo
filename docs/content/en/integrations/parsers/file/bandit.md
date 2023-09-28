@@ -6,7 +6,7 @@ toc_hide: true
 ### File Types
 DefectDojo parser accepts a .json file.
 
-To export a .json file from Bandit, you will need to install and run the .json report formatter to your Bandit instance.  
+To export a .json file from Bandit, you will need to install and run the .json report formatter from your Bandit instance.  
 See Bandit documentation: https://bandit.readthedocs.io/en/latest/formatters/index.html
 
 
