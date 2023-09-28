@@ -1,6 +1,7 @@
 import json
 from dojo.models import Finding, Endpoint
 
+
 class WazuhParser(object):
     """
     IMPORTANT: Please use the 'wazuh-vulns-extractor.py' script to generate 
@@ -48,14 +49,15 @@ class WazuhParser(object):
                     severity = item.get("severity").capitalize()
                     agent_ip = item.get("agent_ip")
                     links = item.get("external_references")
-                
+
                     if links:
                         references = "\n".join(links)
                     else:
                         references = None
 
                     title = (
-                        item.get("title") + " (version: " + package_version + ")"
+                        item.get("title") +
+                        " (version: " + package_version + ")"
                     )
                     dupe_key = title
 
