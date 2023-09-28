@@ -25,7 +25,7 @@ RUN \
   echo "deb [arch=amd64]  http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list && \
   apt-get -y update && \
   apt-get -y install \
-    google-chrome-stable \
+    google-chrome-stable=117.0.5938.132-1 \
   && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
@@ -38,7 +38,7 @@ WORKDIR /opt/chrome-driver
 RUN \
   chrome_version=$(apt-cache show google-chrome-stable | grep Version | awk '{print $2}' | cut -d '-' -f 1) && \
   chrome_version_blob=$(curl -k https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json | jq ".versions[] | select(.version==\"$chrome_version\")") && \
-  chromedriver_url=$(echo $chrome_version_blob | jq -r ".downloads.chromedriver[] | select(.platform==\"linux64\") | .url") && \
+  chromedriver_url=https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/117.0.5938.92/linux64/chromedriver-linux64.zip && \
   wget $chromedriver_url && \
   unzip -j chromedriver-linux64.zip chromedriver-linux64/chromedriver && \
   rm -rf chromedriver-linux64.zip && \
