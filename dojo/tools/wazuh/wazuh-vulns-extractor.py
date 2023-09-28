@@ -31,8 +31,6 @@ GROUP_1 = "<group1-name>"
 GROUP_2 = "<group2-name>"
 
 # Authenticate and set token
-
-
 def authenticate():
     response = requests.get(AUTH_URL, auth=HTTPBasicAuth(
         USERNAME, PASSWORD), verify=False)
@@ -44,8 +42,6 @@ def authenticate():
             f"Failed to authenticate. Status code: {response.status_code}, Detail: {response.text}")
 
 # Retrieve agents for a specific group
-
-
 def get_agents_in_group(group_name):
     endpoint = f"{BASE_URL}/groups/{group_name}/agents"
     response = requests.get(endpoint, headers=HEADERS, verify=False)
@@ -57,8 +53,6 @@ def get_agents_in_group(group_name):
         return []
 
 # Retrieve vulnerabilities for a specific agent
-
-
 def get_vulnerabilities_for_agent(agent_id):
     endpoint = f"{BASE_URL}/vulnerability/{agent_id}"
     response = requests.get(endpoint, headers=HEADERS, verify=False)
@@ -70,8 +64,6 @@ def get_vulnerabilities_for_agent(agent_id):
         return None
 
 # Main function
-
-
 def main():
     authenticate()
 
