@@ -12,8 +12,8 @@ AUTH_URL = f"{BASE_URL}/security/user/authenticate?raw=true"
 HEADERS = {}
 
 # Basic authentication creds
-USERNAME = '<wazuh-api-user>'
-PASSWORD = '<wazuh-api-pass>'
+USERNAME = "<wazuh-api-user>"
+PASSWORD = "<wazuh-api-pass>"
 
 """
 Using Two Groups for Wazuh Agent Queries:
@@ -34,14 +34,17 @@ GROUP_2 = "<group2-name>"
 
 
 def authenticate():
-    response = requests.get(AUTH_URL, auth=HTTPBasicAuth(
-        USERNAME, PASSWORD), verify=False)
+    response = requests.get(
+        AUTH_URL, auth=HTTPBasicAuth(USERNAME, PASSWORD), verify=False
+    )
     if response.status_code == 200:
         token = response.text
-        HEADERS['Authorization'] = f'Bearer {token}'
+        HEADERS["Authorization"] = f"Bearer {token}"
     else:
         raise ValueError(
-            f"Failed to authenticate. Status code: {response.status_code}, Detail: {response.text}")
+            f"Failed to authenticate. Status code: {response.status_code}, Detail: {response.text}"
+        )
+
 
 # Retrieve agents for a specific group
 
@@ -50,11 +53,13 @@ def get_agents_in_group(group_name):
     endpoint = f"{BASE_URL}/groups/{group_name}/agents"
     response = requests.get(endpoint, headers=HEADERS, verify=False)
     if response.status_code == 200:
-        return response.json()['data']['affected_items']
+        return response.json()["data"]["affected_items"]
     else:
         print(
-            f"Failed to retrieve agents for group {group_name}. Status code: {response.status_code}, Detail: {response.text}")
+            f"Failed to retrieve agents for group {group_name}. Status code: {response.status_code}, Detail: {response.text}"
+        )
         return []
+
 
 # Retrieve vulnerabilities for a specific agent
 
@@ -66,8 +71,10 @@ def get_vulnerabilities_for_agent(agent_id):
         return response.json()
     else:
         print(
-            f"Failed to retrieve vulnerabilities for agent {agent_id}. Status code: {response.status_code}, Detail: {response.text}")
+            f"Failed to retrieve vulnerabilities for agent {agent_id}. Status code: {response.status_code}, Detail: {response.text}"
+        )
         return None
+
 
 # Main function
 
@@ -79,8 +86,8 @@ def main():
     group2_agents = get_agents_in_group(GROUP_2)
 
     # Extract the agent IDs and IPs from the response for each group
-    group1_agents_data = {agent['id']: agent['ip'] for agent in group1_agents}
-    group2_ids = set(agent['id'] for agent in group2_agents)
+    group1_agents_data = {agent["id"]: agent["ip"] for agent in group1_agents}
+    group2_ids = set(agent["id"] for agent in group2_agents)
 
     # Find the intersection of the two sets
     common_ids = set(group1_agents_data.keys()).intersection(group2_ids)
@@ -93,7 +100,9 @@ def main():
         if vulnerabilities:
             filtered_vulnerabilities = []
             # Extend the vulnerabilities with agent_ip field
-            for vulnerability in vulnerabilities.get("data", {}).get("affected_items", []):
+            for vulnerability in vulnerabilities.get("data", {}).get(
+                "affected_items", []
+            ):
                 # Skip the vulnerability if its condition is "Package unfixed"
                 if vulnerability.get("condition") != "Package unfixed":
                     vulnerability["agent_ip"] = group1_agents_data[agent_id]
