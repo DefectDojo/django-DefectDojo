@@ -4,12 +4,12 @@ from dojo.models import Finding, Endpoint
 
 class WazuhParser(object):
     """
-    IMPORTANT: Please use the 'wazuh-vulns-extractor.py' script to generate 
+    IMPORTANT: Please use the 'wazuh-vulns-extractor.py' script to generate
     the report for DefectDojo. This script enhances the reporting by:
     1. Handling multiple agents, thus allowing consolidated reporting.
     2. Introducing the 'agent_ip' field, which DefectDojo uses to create distinct endpoints.
     3. Correlating individual vulnerabilities with their respective vulnerable host.
-    All these improvements are combined into a single, comprehensive report for streamlined 
+    All these improvements are combined into a single, comprehensive report for streamlined
     integration with DefectDojo.
 
     The vulnerabilities with condition "Package unfixed" are skipped because there is no fix out yet.
@@ -55,10 +55,7 @@ class WazuhParser(object):
                     else:
                         references = None
 
-                    title = (
-                        item.get("title") +
-                        " (version: " + package_version + ")"
-                    )
+                    title = item.get("title") + " (version: " + package_version + ")"
                     dupe_key = title
 
                     if dupe_key in dupes:
