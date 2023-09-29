@@ -350,8 +350,16 @@
                         'Very Low': 1,
                         'None': 0
                       };
-                      return type === 'sort' ? criticals[getDojoExportValueFromTag(data, 'i', 'data-content')] :
-                            type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') : data;
+                      if (type === 'sort') {
+                        return criticals[getDojoExportValueFromTag(data, 'i', 'data-content')]
+                      }
+                      else if (type === 'export') {
+                          return getDojoExportValueFromTag(data, 'i', 'data-content')
+                      }
+                      else if (data != undefined||data != null) {
+                          return data
+                      }
+                      return ""
                     }},
                     { "data": "metadata", render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
