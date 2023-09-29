@@ -34,7 +34,7 @@
                     </label>
                     <div class="col-sm-10 form-control-static">
                         {% if product_tab.product.has_jira_configured %}
-                            <a href="{{ product_tab.product|jira_project_url }}"
+                            <a rel="noopener noreferrer" href="{{ product_tab.product|jira_project_url }}"
                             target="_blank"> {{ product_tab.product|jira_project_url }} </a>
                         {% else %}
                         None
@@ -62,7 +62,7 @@
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js"%}"></script>
     <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
-    <script type="application/javascript">
+    <script type="application/javascript" nonce="{{request.csp_nonce}}">
         $ = django.jQuery;
         $(function () {
             $("textarea").each(function (index, elem) {

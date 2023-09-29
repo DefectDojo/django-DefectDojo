@@ -28,7 +28,7 @@
                                 </div>
                             </div>
                         </div>
-                        <a href="{% url 'engagement' %}">
+                        <a rel="noopener noreferrer" href="{% url 'engagement' %}">
                             <div class="panel-footer">
                                 <span class="pull-left">{% trans "View Engagement Details" %}</span>
                                 <span class="pull-right"><i class="fa-solid fa-circle-right"></i></span>
@@ -52,7 +52,7 @@
                                 </div>
                             </div>
                         </div>
-                        <a href="{% url 'all_findings' %}?duplicate=2&date=2&o=-date">
+                        <a rel="noopener noreferrer" href="{% url 'all_findings' %}?duplicate=2&date=2&o=-date">
                             <div class="panel-footer">
                                 <span class="pull-left">{% trans "View Finding Details" %}</span>
                                 <span class="pull-right"><i class="fa-solid fa-circle-right"></i></span>
@@ -76,7 +76,7 @@
                                 </div>
                             </div>
                         </div>
-                        <a href="{% url 'closed_findings' %}?duplicate=2&mitigated=2">
+                        <a rel="noopener noreferrer" href="{% url 'closed_findings' %}?duplicate=2&mitigated=2">
                             <div class="panel-footer">
                                 <span class="pull-left">{% trans "View Finding Details" %}</span>
                                 <span class="pull-right"><i class="fa-solid fa-circle-right"></i></span>
@@ -100,7 +100,7 @@
                                 </div>
                             </div>
                         </div>
-                        <a href="{% url 'accepted_findings' %}?duplicate=2&risk_acceptance__created__date=2">
+                        <a rel="noopener noreferrer" href="{% url 'accepted_findings' %}?duplicate=2&risk_acceptance__created__date=2">
                             <div class="panel-footer">
                                 <span class="pull-left">{% trans "View Finding Details" %}</span>
                                 <span class="pull-right"><i class="fa-solid fa-circle-right"></i></span>
@@ -173,14 +173,14 @@
                                         <tr>
                                             <td>
                                                 {% if survey.engagement %}
-                                                    <a href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}">{{ survey.survey.name }}</a>
+                                                    <a rel="noopener noreferrer" href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}">{{ survey.survey.name }}</a>
                                                 {% else %}
-                                                    <a href="/empty_questionnaire/{{ survey.id }}">{{ survey.survey.name }}</a>
+                                                    <a rel="noopener noreferrer" href="/empty_questionnaire/{{ survey.id }}">{{ survey.survey.name }}</a>
                                                 {% endif %}
                                             </td> 
-                                            <td><a href="/product/{{ survey.engagement.product_id }}">{{ survey.engagement.product.name }}</a></td>
+                                            <td><a rel="noopener noreferrer" href="/product/{{ survey.engagement.product_id }}">{{ survey.engagement.product.name }}</a></td>
                                             <td>
-                                                <a href="/engagement/{{ survey.engagement.id }}">{{ survey.engagement.name }}</a> 
+                                                <a rel="noopener noreferrer" href="/engagement/{{ survey.engagement.id }}">{{ survey.engagement.name }}</a> 
                                             </td> 
                                             <td>
                                                 {% if survey.responder %}
@@ -200,14 +200,14 @@
                                             <td>
                                                 <div class="btn-group">
                                                     {% if survey.engagement %}
-                                                        <a class="btn btn-sm btn-secondary"
+                                                        <a rel="noopener noreferrer" class="btn btn-sm btn-secondary"
                                                         href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}">{% trans "View Responses" %}</a>
-                                                        <a class="btn btn-sm btn-info"
+                                                        <a rel="noopener noreferrer" class="btn btn-sm btn-info"
                                                         href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign">{% trans "Assign User" %}</a>
                                                     {% else %}
-                                                        <a class="btn btn-sm btn-secondary"
+                                                        <a rel="noopener noreferrer" class="btn btn-sm btn-secondary"
                                                         href="/empty_questionnaire/{{ survey.id }}">{% trans "View Responses" %}</a>
-                                                        <a class="btn btn-sm btn-success" href="empty_questionnaire/{{ survey.id }}/new_engagement">{% trans "Create Engagement" %}</a>
+                                                        <a rel="noopener noreferrer" class="btn btn-sm btn-success" href="empty_questionnaire/{{ survey.id }}/new_engagement">{% trans "Create Engagement" %}</a>
                                                         <button class="btn btn-sm btn-info" disabled
                                                         href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign">{% trans "Assign User" %}</button>
                                                     {% endif %}
@@ -265,9 +265,9 @@
         <script src="{% static "JUMFlot/javascripts/jquery.flot.bubbles.js" %}"></script>
     {% endif %}
     {% block metrics %}
-        <script src="{% static "dojo/js/metrics.js" %}"></script>
+    <script src="{% static "dojo/js/metrics.js" %}"></script>
     {% endblock metrics %}
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         $(function () {
             homepage_pie_chart("{{critical}}", "{{high}}", "{{medium}}", "{{low}}", "{{info}}");
 

@@ -23,7 +23,7 @@
                 </div>
                 <div class="panel-footer">
                     <div class="clearfix">
-                        <a class="btn btn-success disabled pull-right run_report" href="#">Run</a>
+                        <a rel="noopener noreferrer" class="btn btn-success disabled pull-right run_report" href="#">Run</a>
                     </div>
                 </div>
             </div>
@@ -57,7 +57,7 @@
     <script src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script src="{% static "google-code-prettify/src/prettify.js" %}"></script>
     <script src="{% static "bootstrap-wysiwyg/src/bootstrap-wysiwyg.js" %}"></script>
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         function setUpFindingFilters() {
             $(".report-filter-set :input").not("button").addClass("form-control input-sm");
             $(".report-filter-set label").css("display", "block");
@@ -178,7 +178,6 @@
 
             $(document).on('click', 'form.finding-list a.clear.centered, div.finding-pagination a', function (event) {
                 var link_href = $(this).attr('href')
-                console.log(link_href);
                 $.get("{% url 'report_findings' %}"+link_href).done(function (data) {
                     $('div.in-use-widgets li.finding-list').html(data);
                     setUpFindingFilters();

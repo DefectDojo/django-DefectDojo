@@ -41,52 +41,52 @@
         <ul class="nav nav-tabs" role="tablist">
             {% if findings %}
                 <li role="presentation" {% if activetab == 'findings' %}class="active"{% endif %}>
-                    <a href="#tabs-1" role="tab" data-toggle="tab">{% trans "Findings" %} ({{ findings.paginator.count }})</a>
+                    <a rel="noopener noreferrer" href="#tabs-1" role="tab" data-toggle="tab">{% trans "Findings" %} ({{ findings.paginator.count }})</a>
                 </li>
             {% endif %}
             {% if vulnerability_ids %}
                 <li role="presentation" {% if activetab == 'vulnerability_ids' %}class="active"{% endif %}>
-                    <a href="#tabs-2" role="tab" data-toggle="tab">{% trans "Vulnerability Ids" %} ({{ vulnerability_ids|length }})</a>
+                    <a rel="noopener noreferrer" href="#tabs-2" role="tab" data-toggle="tab">{% trans "Vulnerability Ids" %} ({{ vulnerability_ids|length }})</a>
                 </li>
             {% endif %}
             {% if products %}
                 <li role="presentation" {% if activetab == 'products' %}class="active"{% endif %}>
-                    <a href="#tabs-3" role="tab" data-toggle="tab">{% trans "Products" %} ({{ products|length }})</a>
+                    <a rel="noopener noreferrer" href="#tabs-3" role="tab" data-toggle="tab">{% trans "Products" %} ({{ products|length }})</a>
                 </li>
             {% endif %}
             {% if engagements %}
                 <li role="presentation" {% if activetab == 'engagements' %}class="active"{% endif %}>
-                    <a href="#tabs-4" role="tab" data-toggle="tab">{% trans "Engagements" %} ({{ engagements|length }})</a>
+                    <a rel="noopener noreferrer" href="#tabs-4" role="tab" data-toggle="tab">{% trans "Engagements" %} ({{ engagements|length }})</a>
                 </li>
             {% endif %}
             {% if tests %}
                 <li role="presentation" {% if activetab == 'tests' %}class="active"{% endif %}>
-                    <a href="#tabs-5" role="tab" data-toggle="tab">{% trans "Tests" %} ({{ tests|length }})</a>
+                    <a rel="noopener noreferrer" href="#tabs-5" role="tab" data-toggle="tab">{% trans "Tests" %} ({{ tests|length }})</a>
                 </li>
             {% endif %}
             {% if endpoints %}
                 <li role="presentation" {% if activetab == 'endpoints' %}class="active"{% endif %}>
-                    <a href="#tabs-6" role="tab" data-toggle="tab">{% trans "Endpoints" %} ({{ endpoints|length }})</a>
+                    <a rel="noopener noreferrer" href="#tabs-6" role="tab" data-toggle="tab">{% trans "Endpoints" %} ({{ endpoints|length }})</a>
                 </li>
             {% endif %}
             {% if finding_templates %}
                 <li role="presentation">
-                    <a href="#tabs-7" role="tab" data-toggle="tab">{% trans "Finding Templates" %} ({{ finding_templates|length }})</a>
+                    <a rel="noopener noreferrer" href="#tabs-7" role="tab" data-toggle="tab">{% trans "Finding Templates" %} ({{ finding_templates|length }})</a>
                 </li>
             {% endif %}
             {% if languages %}
                 <li role="presentation">
-                    <a href="#tabs-8" role="tab" data-toggle="tab">{% trans "Languages" %} ({{ languages|length }})</a>
+                    <a rel="noopener noreferrer" href="#tabs-8" role="tab" data-toggle="tab">{% trans "Languages" %} ({{ languages|length }})</a>
                 </li>
             {% endif %}
             {% if app_analysis %}
                 <li role="presentation">
-                    <a href="#tabs-9" role="tab" data-toggle="tab">{% trans "Application Technolgies" %} ({{ app_analysis|length }})</a>
+                    <a rel="noopener noreferrer" href="#tabs-9" role="tab" data-toggle="tab">{% trans "Application Technolgies" %} ({{ app_analysis|length }})</a>
                 </li>
             {% endif %}
             {% if tagged_findings or tagged_finding_templates or tagged_products or tagged_tests or tagged_endpoints or tagged_engagements %}
                 <li role="presentation" {% if activetab == 'tagged' %}class="active"{% endif %}>
-                    <a href="#tabs-10" role="tab" data-toggle="tab">Tagged
+                    <a rel="noopener noreferrer" href="#tabs-10" role="tab" data-toggle="tab">Tagged
                         ({{ tagged_findings|length }}, {{ tagged_products|length }}, {{ tagged_engagements|length }}, {{ tagged_tests|length }}, {{ tagged_endpoints|length }},
                         {{ tagged_finding_templates|length }})
                     </a>
@@ -94,7 +94,7 @@
             {% endif %}
             {% if generic %}
                 <li role="presentation" {% if activetab == 'generic' %}class="active"{% endif %}>
-                    <a href="#tabs-11" role="tab" data-toggle="tab">Experimental ({{ generic|length }})</a>
+                    <a rel="noopener noreferrer" href="#tabs-11" role="tab" data-toggle="tab">Experimental ({{ generic|length }})</a>
                 </li>
             {% endif %}
         </ul>
@@ -123,26 +123,26 @@
                             {% if vulnerability_id.id %}
                             <tr>
                                 <td>
-                                    <a class="search-finding" href="{% url 'view_finding' vulnerability_id.finding.id %}">
+                                    <a rel="noopener noreferrer" class="search-finding" href="{% url 'view_finding' vulnerability_id.finding.id %}">
                                         {{ vulnerability_id.vulnerability_id }}</a>
                                 </td>
                                 <td>
-                                    <a href="{% url 'view_product' vulnerability_id.finding.test.engagement.product.id %}">
+                                    <a rel="noopener noreferrer" href="{% url 'view_product' vulnerability_id.finding.test.engagement.product.id %}">
                                         {{ vulnerability_id.finding.test.engagement.product.name }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=vulnerability_id.finding.test.engagement.product.tags.all %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'view_engagement' vulnerability_id.finding.test.engagement.id %}">
+                                    <a rel="noopener noreferrer" href="{% url 'view_engagement' vulnerability_id.finding.test.engagement.id %}">
                                         {{ vulnerability_id.finding.test.engagement.name }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=vulnerability_id.finding.test.engagement.tags.all %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'view_test' vulnerability_id.finding.test.id %}">
+                                    <a rel="noopener noreferrer" href="{% url 'view_test' vulnerability_id.finding.test.id %}">
                                         {{ vulnerability_id.finding.test }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=vulnerability_id.finding.test.tags.all %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'view_finding' vulnerability_id.finding.id %}">
+                                    <a rel="noopener noreferrer" href="{% url 'view_finding' vulnerability_id.finding.id %}">
                                         {{ vulnerability_id.finding.title }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=vulnerability_id.finding.tags.all %}
                                 </td>
@@ -168,7 +168,7 @@
                             {% if product.id %}
                             <tr>
                                 <td>
-                                    <a class="search-finding" href="{% url 'view_product' product.id %}">{{ product.name }}</a>
+                                    <a rel="noopener noreferrer" class="search-finding" href="{% url 'view_product' product.id %}">{{ product.name }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=product.tags.all %}
                                 </td>
                                 <td>{{ product.description|truncatechars_html:150|markdown_render }}</td>
@@ -196,11 +196,11 @@
                             {% if engagement.id %}
                             <tr>
                                 <td>
-                                    <a class="search-finding" href="{% url 'view_engagement' engagement.id %}">{{ engagement.name }}</a>
+                                    <a rel="noopener noreferrer" class="search-finding" href="{% url 'view_engagement' engagement.id %}">{{ engagement.name }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=engagement.tags.all %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'view_product' engagement.product.id %}">{{ engagement.product.name }}</a>
+                                    <a rel="noopener noreferrer" href="{% url 'view_product' engagement.product.id %}">{{ engagement.product.name }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=engagement.product.tags.all %}
                                 </td>
                                 <td>{{ engagement.target_start|date }} - {{ engagement.target_end|date }}</td>
@@ -230,15 +230,15 @@
                             {% if test.id %}
                             <tr>
                                 <td>
-                                    <a class="search-finding" href="{% url 'view_test' test.id %}">{{ test }}</a>
+                                    <a rel="noopener noreferrer" class="search-finding" href="{% url 'view_test' test.id %}">{{ test }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=test.tags.all %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'view_product' test.engagement.product.id %}">{{ test.engagement.product.name }}</a>
+                                    <a rel="noopener noreferrer" href="{% url 'view_product' test.engagement.product.id %}">{{ test.engagement.product.name }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=test.engagement.product.tags.all %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement.name }}</a>
+                                    <a rel="noopener noreferrer" href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement.name }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=test.engagement.tags.all %}
                                 </td>
                                 <td>{{ test.engagement.target_start|date }} - {{ test.engagement.target_end|date }}</td>
@@ -264,12 +264,12 @@
                         {% for e in endpoints %}
                             <tr>
                                 <td>
-                                    <a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="{% trans "Endpoint is broken. Check documentation to look for fix process" %}" >&#128681;</span>{% endif %}</a>
+                                    <a rel="noopener noreferrer" href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="{% trans "Endpoint is broken. Check documentation to look for fix process" %}" >&#128681;</span>{% endif %}</a>
                                     {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                 </td>
                                 {% if e.product %}
                                     <td>
-                                        <a href="{% url 'view_product' e.product.id %}">{{ e.product.name }}</a>
+                                        <a rel="noopener noreferrer" href="{% url 'view_product' e.product.id %}">{{ e.product.name }}</a>
                                         {% include "dojo/snippets/tags.html" with tags=e.product.tags.all %}
                                     </td>
                                 {% else %}
@@ -277,7 +277,7 @@
                                 {% endif %}
                                 <td>
                                   {% if e.active_finding_count > 0 %}
-                                  <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.active_finding_count }}</a>
+                                  <a rel="noopener noreferrer" href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.active_finding_count }}</a>
                                   {% else %}
                                   {% trans "No Open, Active Findings" %}
                                   {% endif %}
@@ -301,7 +301,7 @@
                         {% for finding_template in finding_templates %}
                             <tr>
                                 <td>
-                                    <a class="search-finding" href="{% url 'edit_template' finding_template.id %}">{{ finding_template.title }}</a>
+                                    <a rel="noopener noreferrer" class="search-finding" href="{% url 'edit_template' finding_template.id %}">{{ finding_template.title }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=finding_template.tags.all %}
                                 </td>
                                 <td>{{ finding_template.description }}</td>
@@ -327,7 +327,7 @@
                             <tr>
                                <td>{{ lang.language.language }}</td>
                                 <td>
-                                    <a class="search-finding" href="{% url 'view_product' lang.product.id %}">{{ lang.product.name }}</a>
+                                    <a rel="noopener noreferrer" class="search-finding" href="{% url 'view_product' lang.product.id %}">{{ lang.product.name }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=lang.product.tags.all %}
                                 </td>
                             </tr>
@@ -352,7 +352,7 @@
                             <tr>
                                <td>{{ app.name }}</td>
                                 <td>
-                                    <a class="search-finding" href="{% url 'view_product' app.product.id %}">{{ app.product.name }}</a>
+                                    <a rel="noopener noreferrer" class="search-finding" href="{% url 'view_product' app.product.id %}">{{ app.product.name }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=app.product.tags.all %}
                                 </td>
                             </tr>
@@ -378,7 +378,7 @@
                                 <tr>
                                     <td>{% trans "Test" %}</td>
                                     <td>
-                                        <a class="search-finding" href="{% url 'view_test' test.id %}">{{ test }}</a>
+                                        <a rel="noopener noreferrer" class="search-finding" href="{% url 'view_test' test.id %}">{{ test }}</a>
                                         {% include "dojo/snippets/tags.html" with tags=test.tags.all %}
                                     </td>
                                 </tr>
@@ -387,7 +387,7 @@
                         {% for finding in tagged_findings %}
                             <tr>
                                 <td>{% trans "Finding" %}</td>
-                                <td><a class="search-finding"
+                                <td><a rel="noopener noreferrer" class="search-finding"
                                        href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
                                 </td>
                             </tr>
@@ -396,7 +396,7 @@
                             <tr>
                                 <td>{% trans "Finding Template" %}</td>
                                 <td>
-                                    <a class="search-finding" href="{% url 'edit_template' finding_template.id %}">{{ finding_template.title }}</a>
+                                    <a rel="noopener noreferrer" class="search-finding" href="{% url 'edit_template' finding_template.id %}">{{ finding_template.title }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=finding_template.tags.all %}
                                 </td>
                             </tr>
@@ -405,7 +405,7 @@
                             <tr>
                                 <td>{% trans "Product" %}</td>
                                 <td>
-                                    <a class="search-finding" href="{% url 'view_product' product.id %}">{{ product.name }}</a>
+                                    <a rel="noopener noreferrer" class="search-finding" href="{% url 'view_product' product.id %}">{{ product.name }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=product.tags.all %}
                                 </td>
                             </tr>
@@ -414,7 +414,7 @@
                             <tr>
                                 <td>{% trans "Endpoint" %}</td>
                                 <td>
-                                    <a class="search-finding" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
+                                    <a rel="noopener noreferrer" class="search-finding" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
                                     {% include "dojo/snippets/tags.html" with tags=endpoint.tags.all %}
                                 </td>
                             </tr>
@@ -423,7 +423,7 @@
                             <tr>
                                 <td>{% trans "Engagement" %}</td>
                                 <td>
-                                    <a class="search-finding" href="{% url 'view_engagement' eng.id %}">{{ eng }}</a>
+                                    <a rel="noopener noreferrer" class="search-finding" href="{% url 'view_engagement' eng.id %}">{{ eng }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=eng.tags.all %}
                                 </td>
                             </tr>
@@ -454,26 +454,26 @@
                             {% if result.object.id %}
                                 <tr>
                                     <td>
-                                        <a href="{{result.url}}" title="{{result.title}}">
+                                        <a rel="noopener noreferrer" href="{{result.url}}" title="{{result.title}}">
                                             <span>
                                                 {{ result.object.id }}
                                             </span>
                                         </a>
                                     </td>
                                     <td>
-                                        <a href="{{result.url}}" title="{{result.title}}">
+                                        <a rel="noopener noreferrer" href="{{result.url}}" title="{{result.title}}">
                                             {{ result.object| class_name }}
                                         </a>
                                     </td>
                                     <td>
-                                        <a href="{{result.url}}" title="{{result.title}}">
+                                        <a rel="noopener noreferrer" href="{{result.url}}" title="{{result.title}}">
                                             {% comment %} a{{ result.meta.engagement__product__name }}b {% endcomment %}
                                             {% firstof result.meta.finding__test__engagement__product__name result.meta.test__engagement__product__name result.meta.engagement__product__name result.meta.product__name result.object.name %}
                                         </a>
                                     </td>
                                     <td class="centered">
                                         {% if result.meta.severity_display %}
-                                        <a href="{{result.url}}" title="{{result.title}}">
+                                        <a rel="noopener noreferrer" href="{{result.url}}" title="{{result.title}}">
                                                 <span class="label severity severity-{{ result.meta.severity }}">
                                                     {{ result.meta.severity_display }}
                                                 </span>
@@ -481,7 +481,7 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <a href="{{result.url}}" title="{{result.title}}">
+                                        <a rel="noopener noreferrer" href="{{result.url}}" title="{{result.title}}">
                                             {{ result.title }}
                                         </a>
                                     </td>
@@ -494,7 +494,7 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="{{result.url}}" title="{{result.title}}">
+                                        <a rel="noopener noreferrer" href="{{result.url}}" title="{{result.title}}">
                                             <span style="white-space: nowrap;">{{ result.meta.jira_issue__jira_key }}</span>
                                         </a>
                                     </td>
@@ -514,7 +514,7 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="{{request.csp_nonce}}">
         {% comment %} django filters do no support a "full_text" query field which is not a field of the model
         so we have to inject it clientside to qavoid duplicating the whole form with hardcoded fields etc. {% endcomment %}
         $(function () {

@@ -29,7 +29,7 @@
     <div class="row navbar-fixed-top">
         <div class="col-md-12">
             <h2>{% blocktrans with start_date=start_date.date end_date=end_date.date%}{{ name }} for {{ start_date }} - {{ end_date }}{% endblocktrans %}
-                <a class="btn close pull-right" href="{% url 'metrics' %}" aria-hidden="true">&times;</a>
+                <a rel="noopener noreferrer" class="btn close pull-right" href="{% url 'metrics' %}" aria-hidden="true">&times;</a>
                 <div class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
@@ -38,12 +38,12 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
-                            <a href="{% url 'metrics' %}?view=dashboard&type=Finding">
+                            <a rel="noopener noreferrer" href="{% url 'metrics' %}?view=dashboard&type=Finding">
                                 <i class="fa-solid fa-file-lines"></i> {% trans "Measures Findings" %}
                             </a>
                         </li>
                         <li role="presentation">
-                            <a href="{% url 'metrics' %}?view=dashboard&type=Endpoint">
+                            <a rel="noopener noreferrer" href="{% url 'metrics' %}?view=dashboard&type=Endpoint">
                                 <i class="fa-solid fa-file-lines"></i> {% trans "Measure Affected Endpoints" %}
                             </a>
                         </li>
@@ -185,7 +185,7 @@
     {% block metrics %}
         <script src="{% static "dojo/js/metrics.js" %}"></script>
     {% endblock metrics %}
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         $(function () {
             setInterval(function () {
                 window.location.reload();

@@ -18,19 +18,19 @@
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                             {% if "Finding_Add"|has_global_permission and not add_from_template and not apply_template %}
-                                <a href="{% url 'add_template' %}" class="btn btn-primary"
+                                <a rel="noopener noreferrer" href="{% url 'add_template' %}" class="btn btn-primary"
                                    title="Add Finding Template">
                                     <i class="fa-solid fa-plus"></i>
                                 </a>
                             {% endif %}
                             {% if add_from_template %}
-                                <a href="{% url 'view_test' tid %}" class="btn btn-danger"
+                                <a rel="noopener noreferrer" href="{% url 'view_test' tid %}" class="btn btn-danger"
                                    title="Cancel add from template">
                                     <i class="fa-solid fa-ban"></i> Cancel
                                 </a>
                             {% endif %}
                             {% if apply_template %}
-                                <a href="{% url 'view_finding' fid %}" class="btn btn-danger"
+                                <a rel="noopener noreferrer" href="{% url 'view_finding' fid %}" class="btn btn-danger"
                                    title="Cancel apply template">
                                     <i class="fa-solid fa-ban"></i> Cancel
                                 </a>
@@ -70,7 +70,7 @@
                             <tr>
                                 <td>
                                     {% if finding.cwe > 0 %}
-                                        <a target="_blank"
+                                        <a rel="noopener noreferrer" target="_blank"
                                            href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
                                             <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe }}
                                         </a>
@@ -79,7 +79,7 @@
                                 <td>{{ finding.template_match }}</td>
                                 <td>
                                     {% if add_from_template %}
-                                        <a href="{% url 'add_temp_finding' tid finding.id %}"
+                                        <a rel="noopener noreferrer" href="{% url 'add_temp_finding' tid finding.id %}"
                                            class="template-popover" data-placement="auto bottom" data-toggle="popover"
                                            data-trigger="hover" title="{{ finding.title|truncatechars_html:100 }}"
                                            data-content="{{ finding.description|truncatechars_html:500 }}">
@@ -87,7 +87,7 @@
                                             {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                                         </a>
                                     {% elif apply_template %}
-                                        <a href="{% url 'choose_finding_template_options' finding.id fid %}"
+                                        <a rel="noopener noreferrer" href="{% url 'choose_finding_template_options' finding.id fid %}"
                                            class="template-popover" data-placement="auto bottom" data-toggle="popover"
                                            data-trigger="hover" title="{{ finding.title|truncatechars_html:100 }}"
                                            data-content="{{ finding.description|truncatechars_html:500 }}">
@@ -96,7 +96,7 @@
                                         </a>
                                     {% else %}
                                         {% if "dojo.change_finding_template"|has_configuration_permission:request %}
-                                        <a title="{{ finding.title }}" href="{% url 'edit_template' finding.id %}">
+                                        <a rel="noopener noreferrer" title="{{ finding.title }}" href="{% url 'edit_template' finding.id %}">
                                             {{ finding.title }}
                                             {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                                         </a>
@@ -110,14 +110,14 @@
                                 {% else %}<p>{% endif %}{{ finding.severity }}</p></td>
                                 {% if add_from_template %}
                                     <td nowrap="nowrap">
-                                        <a href="{% url 'add_temp_finding' tid finding.id %}"
+                                        <a rel="noopener noreferrer" href="{% url 'add_temp_finding' tid finding.id %}"
                                            class="btn btn-success btn-sm">
                                             Use This Template
                                         </a>
                                     </td>
                                 {% elif apply_template %}
                                     <td nowrap="nowrap">
-                                        <a href="{% url 'choose_finding_template_options' finding.id fid %}"
+                                        <a rel="noopener noreferrer" href="{% url 'choose_finding_template_options' finding.id fid %}"
                                            class="btn btn-success btn-sm">
                                             Use This Template
                                         </a>
@@ -125,7 +125,7 @@
                                 {% else %}
                                     <td nowrap="nowrap">
                                         {% if "Finding_Edit"|has_global_permission %}
-                                        <a href="{% url 'edit_template' finding.id %}"
+                                        <a rel="noopener noreferrer" href="{% url 'edit_template' finding.id %}"
                                             class="btn btn-sm btn-secondary">Edit</a>
                                         {% endif %}
                                         {% if "Finding_Delete"|has_global_permission %}
@@ -157,7 +157,7 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         $(function () {
             $('button.template-delete').on('click', function (e) {
                 return confirm('Are you sure you want to delete this template?')

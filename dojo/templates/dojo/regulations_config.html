@@ -17,7 +17,7 @@
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
-                                        <a href="{% url 'add_tool_type' %}">
+                                        <a rel="noopener noreferrer" href="{% url 'add_tool_type' %}">
                                             <i class="fa-solid fa-plus"></i> Add Tool Configuration
                                         </a>
                                     </li>
@@ -45,7 +45,7 @@
                         {% for conf in confs %}
                             <tr>
                                 <td>
-                                    <a href="{% url 'edit_tool_type' conf.id %}"><b>{{ conf.name }}</b></a>
+                                    <a rel="noopener noreferrer" href="{% url 'edit_tool_type' conf.id %}"><b>{{ conf.name }}</b></a>
                                 </td>
                                 <td>
                                         {{ conf.description }}

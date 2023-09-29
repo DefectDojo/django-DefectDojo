@@ -92,7 +92,7 @@
         <link rel="stylesheet" href="{% static "datatables.net-bs/css/dataTables.bootstrap.min.css" %}">
         <link rel="stylesheet" href="{% static "datatables.net-buttons-bs/css/buttons.bootstrap.min.css" %}">
 
-        <style>
+        <style nonce="{{request.csp_nonce}}">
             {% block add_styles %}
             {% endblock %}
         </style>
@@ -109,7 +109,7 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </button>
-                        <a class="navbar-brand" href="{% url 'home' %}">
+                        <a rel="noopener noreferrer" class="navbar-brand" href="{% url 'home' %}">
                         {% block header_logo %}
                             <img src="{% static "dojo/img/logo.png" %}" alt="DefectDojo Logo" width="240"/>
                         {% endblock %}
@@ -137,7 +137,7 @@
                                 <!-- /input-group -->
                             </li>
                             <li class="dropdown">
-                                <a class="dropdown-toggle dropdown-toggle-alerts dropdown-toggle-h{{ alert_count }}" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="{{ alert_count }} Alerts">
+                                <a rel="noopener noreferrer" class="dropdown-toggle dropdown-toggle-alerts dropdown-toggle-h{{ alert_count }}" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="{{ alert_count }} Alerts">
                                     <i class="fa-solid fa-bell fa-fw"></i>
                                     <span id="alert_count" class="badge badge-count badge-count{{ alert_count }}">{{ alert_count }}</span>
                                     <i class="fa-solid fa-caret-down"></i>
@@ -148,7 +148,7 @@
                             </li>
                         {% endif %}
                         <li class="dropdown">
-                            <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="User Menu">
+                            <a rel="noopener noreferrer" class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="User Menu">
                                 <i class="fa-solid fa-user fa-fw"></i>
                                 <i class="fa-solid fa-caret-down"></i>
                             </a>
@@ -156,14 +156,14 @@
                                 {% block settings-dropdown-items %}
                                     {% if request.user.is_authenticated %}
                                         <li>
-                                            <a href="{% url 'view_profile' %}">
+                                            <a rel="noopener noreferrer" href="{% url 'view_profile' %}">
                                                 <i class="fa-solid fa-user fa-fw"></i> 
                                                 {{ request.user.username }}
                                             </a>
                                         </li>
                                         {% if API_TOKENS_ENABLED %}
                                           <li>
-                                              <a href="{% url 'api_v2_key' %}">
+                                              <a rel="noopener noreferrer" href="{% url 'api_v2_key' %}">
                                                 <i class="fa-solid fa-key fa-fw"></i>
                                                   {% trans "API v2 Key" %}
                                               </a>
@@ -171,19 +171,19 @@
                                         {% endif %}
                                     {% endif %}
                                     <li>
-                                        <a href="{% url 'api_v2_schema' %}" target="_blank">
+                                        <a rel="noopener noreferrer" href="{% url 'api_v2_schema' %}" target="_blank">
                                             <i class="fa-solid fa-book fa-fw" title="OpenAPI v2 Docs"></i>
                                             {% trans "API v2 OpenAPI2 Docs (Deprecated)" %}
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="{% url 'swagger-ui_oa3' %}" target="_blank">
+                                        <a rel="noopener noreferrer" href="{% url 'swagger-ui_oa3' %}" target="_blank">
                                             <i class="fa-solid fa-book fa-fw" title="OpenAPI v3 Docs"></i>
                                             {% trans "API v2 OpenAPI3 Docs" %}
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="{{ DOCUMENTATION_URL }}" target="_blank">
+                                        <a rel="noopener noreferrer" href="{{ DOCUMENTATION_URL }}" target="_blank">
                                             <i class="fa-solid fa-circle-question fa-fw"></i>
                                             {% trans "Documentation" %}
                                         </a>
@@ -192,14 +192,14 @@
                                 {% if request.user.is_authenticated %}
                                     {% if SAML2_LOGOUT_URL != '' %}
                                         <li>
-                                            <a href="{{ SAML2_LOGOUT_URL }}">
+                                            <a rel="noopener noreferrer" href="{{ SAML2_LOGOUT_URL }}">
                                                 <i class="fa-solid fa-right-from-bracket fa-fw"></i>
                                                 {% trans "SAML Logout" %}
                                             </a>
                                         </li>
                                     {% endif %}
                                     <li>
-                                        <a href="{% url 'logout' %}">
+                                        <a rel="noopener noreferrer" href="{% url 'logout' %}">
                                             <i class="fa-solid fa-right-from-bracket fa-fw"></i>
                                             {% trans "Logout" %}
                                         </a>
@@ -218,38 +218,38 @@
                                 <ul class="nav" id="side-menu">
                                     {% block sidebar-items %}
                                         <li>
-                                            <a href="{% url 'dashboard' %}" aria-disabled="true" aria-expanded="false" aria-label="Dashboard">
+                                            <a rel="noopener noreferrer" href="{% url 'dashboard' %}" aria-disabled="true" aria-expanded="false" aria-label="Dashboard">
                                                 <i class="fa-solid fa-gauge fa-fw"></i>
                                                 <span>{% trans "Dashboard" %}</span>
                                             </a>
                                         </li>
                                         <li>
-                                            <a id="product-side-menu" href="{% url 'product' %}" aria-expanded="false" aria-label="Products">
+                                            <a rel="noopener noreferrer" id="product-side-menu" href="{% url 'product' %}" aria-expanded="false" aria-label="Products">
                                                 <i class="fa-solid fa-list-ul fa-fw"></i>
                                                 <span>{% trans "Products" %}</span>
                                                 <span class="glyphicon arrow"></span>
                                             </a>
                                             <ul class="nav nav-second-level">
                                                 <li>
-                                                    <a href="{% url 'product' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'product' %}">
                                                         {% trans "All Products" %}
                                                     </a>
                                                 </li>
                                                 {% if request.user|can_add_product %}
                                                     <li>
-                                                        <a href="{% url 'new_product' %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'new_product' %}">
                                                             {% trans "Add Product" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
                                                 <li>
-                                                    <a href="{% url 'product_type' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'product_type' %}">
                                                         {% trans "All Product Types" %}
                                                     </a>
                                                 </li>
                                                 {% if "Product_Type_Add"|has_global_permission %}
                                                     <li>
-                                                        <a id="pop-out-add-product-type" href="{% url 'add_product_type' %}">
+                                                        <a rel="noopener noreferrer" id="pop-out-add-product-type" href="{% url 'add_product_type' %}">
                                                             {% trans "Add Product Type" %}
                                                         </a>
                                                     </li>
@@ -258,34 +258,34 @@
                                             <!-- /.nav-second-level -->
                                         </li>
                                         <li>
-                                            <a href="{% url 'engagement' %}" aria-expanded="false" aria-label="Engagements">
+                                            <a rel="noopener noreferrer" href="{% url 'engagement' %}" aria-expanded="false" aria-label="Engagements">
                                                 <i class="fa-solid fa-inbox fa-fw"></i>
                                                 <span>{% trans "Engagements" %}</span>
                                                 <span class="glyphicon arrow"></span>
                                             </a>
                                             <ul class="nav nav-second-level">
                                                 <li>
-                                                    <a href="{% url 'active_engagements' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'active_engagements' %}">
                                                         {% trans "Active Engagements" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'all_engagements' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'all_engagements' %}">
                                                         {% trans "All Engagements" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'engagements_all' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'engagements_all' %}">
                                                         {% trans "Engagements by Product" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'test_type' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'test_type' %}">
                                                         {% trans "Test Types" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'dev_env' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'dev_env' %}">
                                                         {% trans "Environments" %}
                                                     </a>
                                                 </li>
@@ -293,35 +293,35 @@
                                             <!-- /.nav-second-level -->
                                         </li>
                                         <li>
-                                            <a href="{% url 'open_findings' %}" aria-expanded="false" aria-label="Findings">
+                                            <a rel="noopener noreferrer" href="{% url 'open_findings' %}" aria-expanded="false" aria-label="Findings">
                                                 <i class="fa-solid fa-bug fa-fw"></i>
                                                 <span>{% trans "Findings" %}</span>
                                                 <span class="glyphicon arrow"></span>
                                             </a>
                                             <ul class="nav nav-second-level">
                                                 <li>
-                                                    <a href="{% url 'open_findings' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'open_findings' %}">
                                                         {% trans "Open Findings" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'all_findings' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'all_findings' %}">
                                                         {% trans "All Findings" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'closed_findings' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'closed_findings' %}">
                                                         {% trans "Closed Findings" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'accepted_findings' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'accepted_findings' %}">
                                                         {% trans "Risk Accepted Findings" %}
                                                     </a>
                                                 </li>
                                                 {% if "Finding_View"|has_global_permission %}
                                                     <li>
-                                                        <a href="{% url 'templates' %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'templates' %}">
                                                             {% trans "Finding Templates" %}
                                                         </a>
                                                     </li>
@@ -330,48 +330,48 @@
                                             <!-- /.nav-second-level -->
                                         </li>
                                         <li>
-                                            <a href="{% url 'components' %}" id="product_component_view" aria-expanded="false"  aria-label="Components">
+                                            <a rel="noopener noreferrer" href="{% url 'components' %}" id="product_component_view" aria-expanded="false"  aria-label="Components">
                                                 <i class="fa-solid fa-table-cells-large fa-fw"></i>
                                                 <span>{% trans "Components" %}</span>
                                             </a>
                                             <ul class="nav nav-second-level">
                                                 <li>
-                                                    <a href="{% url 'components' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'components' %}">
                                                         {% trans "All Components" %}
                                                     </a>
                                                 </li>
                                             </ul>
                                         </li>
                                         <li>
-                                            <a href="{% url 'endpoint' %}" aria-expanded="false" aria-label="Endpoints">
+                                            <a rel="noopener noreferrer" href="{% url 'endpoint' %}" aria-expanded="false" aria-label="Endpoints">
                                                 <i class="fa-solid fa-sitemap fa-fw"></i>
                                                 <span>{% trans "Endpoints" %}</span>
                                                 <span class="glyphicon arrow"></span>
                                             </a>
                                             <ul class="nav nav-second-level">
                                                 <li>
-                                                    <a href="{% url 'endpoint' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'endpoint' %}">
                                                         {% trans "All Endpoints" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'endpoint_host' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'endpoint_host' %}">
                                                         {% trans "All Hosts" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'vulnerable_endpoints' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'vulnerable_endpoints' %}">
                                                         {% trans "Vulnerable Endpoints" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'vulnerable_endpoint_hosts' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'vulnerable_endpoint_hosts' %}">
                                                         {% trans "Vulnerable Hosts" %}
                                                     </a>
                                                 </li>
                                                 {% if request.user.is_superuser %}
                                                     <li>
-                                                        <a href="{% url 'endpoint_migrate' %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'endpoint_migrate' %}">
                                                             {% trans "Migrate Endpoints" %}
                                                         </a>
                                                     </li>
@@ -379,7 +379,7 @@
                                             </ul>
                                         </li>
                                         <li>
-                                            <a href="{% url 'report_builder' %}" aria-expanded="false" aria-label="Reports">
+                                            <a rel="noopener noreferrer" href="{% url 'report_builder' %}" aria-expanded="false" aria-label="Reports">
                                                 <i class="fa-solid fa-file-lines fa-fw"></i>
                                                 <span>{% trans "Reports" %}</span>
                                                 <span class="glyphicon arrow"></span>
@@ -387,39 +387,39 @@
                                             <!-- /.nav-second-level -->
                                         </li>
                                         <li>
-                                            <a href="{% url 'metrics' %}?date=5&view=dashboard" aria-expanded="false" aria-label="Metrics">
+                                            <a rel="noopener noreferrer" href="{% url 'metrics' %}?date=5&view=dashboard" aria-expanded="false" aria-label="Metrics">
                                                 <i class="fa-solid fa-chart-column fa-fw"></i>
                                                 <span>{% trans "Metrics" %}</span>
                                                 <span class="glyphicon arrow"></span>
                                             </a>
                                             <ul class="nav nav-second-level">
                                                 <li>
-                                                    <a href="{% url 'metrics' %}?date=5&view=dashboard">
+                                                    <a rel="noopener noreferrer" href="{% url 'metrics' %}?date=5&view=dashboard">
                                                         {% trans "Metrics Dashboard" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'critical_product_metrics' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'critical_product_metrics' %}">
                                                         {% trans "Critical Product Metrics" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'metrics_product_type' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'metrics_product_type' %}">
                                                         {% trans "Product Type Metrics" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'product_type_counts' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'product_type_counts' %}">
                                                         {% trans "Product Type Counts" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'simple_metrics' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'simple_metrics' %}">
                                                         {% trans "Simple Metrics" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'engineer_metrics' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'engineer_metrics' %}">
                                                         {% trans "Engineer Metrics" %}
                                                     </a>
                                                 </li>
@@ -428,7 +428,7 @@
                                         </li>
                                         {% if "auth.view_user"|has_configuration_permission:request or "auth.view_group"|has_configuration_permission:request %}
                                             <li>
-                                                <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users" id="id_user_menu">
+                                                <a rel="noopener noreferrer" href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users" id="id_user_menu">
                                                     <i class="fa-solid fa-user fa-fw"></i>
                                                     <span>{% trans "Users" %}</span>
                                                     <span class="glyphicon arrow"></span>
@@ -436,14 +436,14 @@
                                                 <ul class="nav nav-second-level">
                                                     {% if "auth.view_user"|has_configuration_permission:request %}
                                                         <li>    
-                                                            <a href="{% url 'users' %}">
+                                                            <a rel="noopener noreferrer" href="{% url 'users' %}">
                                                                 {% trans "Users" %}
                                                             </a>
                                                         </li>
                                                     {% endif %}
                                                     {% if "auth.view_group"|has_configuration_permission:request %}
                                                         <li>
-                                                            <a href="{% url 'groups' %}"  id="id_group_menu">
+                                                            <a rel="noopener noreferrer" href="{% url 'groups' %}"  id="id_group_menu">
                                                                 {% trans "Groups" %}
                                                             </a>
                                                         </li>
@@ -453,7 +453,7 @@
                                         {% endif %}
                                         {% if system_settings.enable_calendar %}
                                         <li>
-                                            <a href="{% url 'engagement_calendar' %}" aria-disabled="true" aria-expanded="false" aria-label="Calendar">
+                                            <a rel="noopener noreferrer" href="{% url 'engagement_calendar' %}" aria-disabled="true" aria-expanded="false" aria-label="Calendar">
                                                 <i class="fa-solid fa-calendar-days fa-fw"></i>
                                                 <span>{% trans "Calendar" %}</span>
                                             </a>
@@ -462,7 +462,7 @@
                                         {% if system_settings.enable_questionnaires %}
                                             {% if "dojo.view_engagement_survey"|has_configuration_permission:request or "dojo.view_question"|has_configuration_permission:request %}
                                                 <li>
-                                                    <a href="#">
+                                                    <a rel="noopener noreferrer" href="#">
                                                         <i class="fa-solid fa-house-medical-flag fa-fw"></i>
                                                         <span>{% trans "Questionnaires" %}</span>
                                                         <span class="glyphicon arrow"></span>
@@ -470,14 +470,14 @@
                                                     <ul class="nav nav-second-level">
                                                         {% if "dojo.view_engagement_survey"|has_configuration_permission:request  %}
                                                             <li>
-                                                                <a href="{% url 'questionnaire' %}">
+                                                                <a rel="noopener noreferrer" href="{% url 'questionnaire' %}">
                                                                     {% trans "All Questionnaires" %}
                                                                 </a>
                                                             </li>
                                                         {% endif %}
                                                         {% if "dojo.view_question"|has_configuration_permission:request %}
                                                             <li>
-                                                                <a href="{% url 'questions' %}">
+                                                                <a rel="noopener noreferrer" href="{% url 'questions' %}">
                                                                     {% trans "All Questions" %}
                                                                 </a>
                                                             </li>
@@ -488,87 +488,87 @@
                                             {% endif %}
                                         {% endif %}
                                         <li id="menu_configuration">
-                                            <a href="#" aria-expanded="false" aria-label="Configuration">
+                                            <a rel="noopener noreferrer" href="#" aria-expanded="false" aria-label="Configuration">
                                                 <i class="fa-solid fa-gear fa-fw"></i>
                                                 <span>{% trans "Configuration" %}</span>
                                             </a>
                                             <ul class="nav nav-second-level nav-up">
                                                 {% if "dojo.change_announcement"|has_configuration_permission:request %}
                                                     <li>
-                                                        <a href="{% url 'configure_announcement' %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'configure_announcement' %}">
                                                             {% trans "Announcement" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
                                                 {% if system_settings.enable_credentials and "dojo.view_cred_user"|has_configuration_permission:request %}
                                                     <li>
-                                                        <a href="{% url 'cred' %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'cred' %}">
                                                             {% trans "Credential Manager" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
                                                 {% if system_settings.enable_github  and "dojo.view_github_conf"|has_configuration_permission:request%}
                                                     <li>
-                                                        <a href="{% url 'github' %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'github' %}">
                                                             {% trans "GitHub" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
                                                 {% if system_settings.enable_jira and "dojo.view_jira_instance"|has_configuration_permission:request %}
                                                     <li>
-                                                        <a href="{% url 'jira' %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'jira' %}">
                                                             {% trans "JIRA" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
                                                 {% if "dojo.change_bannerconf"|has_configuration_permission:request %}
                                                     <li>
-                                                        <a href="{% url 'configure_banner' %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'configure_banner' %}">
                                                             {% trans "Login Banner" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
                                                 {% if "dojo.view_note_type"|has_configuration_permission:request %}
                                                     <li>
-                                                        <a href="{% url 'note_type' %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'note_type' %}">
                                                             {% trans "Note Types" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
                                                 <li>
-                                                    <a href="{% url 'notifications' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'notifications' %}">
                                                         {% trans "Notifications" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'regulations' %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'regulations' %}">
                                                         {% trans "Regulations" %}
                                                     </a>
                                                 </li>
                                                 {% if system_settings.enable_finding_sla and "dojo.view_sla_configuration"|has_configuration_permission:request %}
                                                     <li>
-                                                        <a href="{% url 'sla_config' %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'sla_config' %}">
                                                             {% trans "SLA Configuration" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
                                                 {% if request.user.is_superuser %}
                                                     <li>
-                                                        <a href="{% url 'system_settings' %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'system_settings' %}">
                                                             {% trans "System Settings" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
                                                 {% if "dojo.view_tool_configuration"|has_configuration_permission:request %}
                                                     <li>
-                                                        <a href="{% url 'tool_config' %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'tool_config' %}">
                                                             {% trans "Tool Configuration" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
                                                 {% if "dojo.view_tool_type"|has_configuration_permission:request %}
                                                     <li>
-                                                        <a href="{% url 'tool_type' %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'tool_type' %}">
                                                             {% trans "Tool Type" %}
                                                         </a>
                                                     </li>
@@ -578,14 +578,14 @@
                                     {% endblock %}
                                     {% block support-tab %}
                                         <li>
-                                            <a href="{% url 'support' %}" aria-disabled="true" aria-expanded="false" aria-label="Support">
+                                            <a rel="noopener noreferrer" href="{% url 'support' %}" aria-disabled="true" aria-expanded="false" aria-label="Support">
                                                 <i class="fa-solid fa-life-ring fa-fw"></i>
                                                 <span>{% trans "Get Support" %}</span>
                                             </a>
                                         </li>
                                     {% endblock %}
                                     <li id="min-menu">
-                                        <a href="#" id="minimize-menu" title="Expand/Collapse Menu" aria-label="Expand/Collapse Menu">
+                                        <a rel="noopener noreferrer" href="#" id="minimize-menu" title="Expand/Collapse Menu" aria-label="Expand/Collapse Menu">
                                             <i id="nav-minimize-menu-li" class="fa-solid fa-circle-right fa-fw"></i>
                                             <span>{% trans "Collapse Menu" %}</span>
                                         </a>
@@ -604,7 +604,7 @@
                     {% load announcement_banner_tags %}
                     <div role="alert" class="announcement-banner alert alert-{{ announcement.style }} {% if announcement.dismissable %}alert-dismissible{% endif %} show">
                     {% if announcement.dismissable %}
-                        <a href="{% url 'dismiss_announcement' %}" class="close" aria-label="Close">
+                        <a rel="noopener noreferrer" href="{% url 'dismiss_announcement' %}" class="close" aria-label="Close">
                             <span aria-hidden="true">×</span>
                         </a>
                     {% endif %}
@@ -634,26 +634,26 @@
                                     </h3>
                                     <ul class="nav nav-tabs horizontal-bar in">
                                         <li role="presentation"{% if product_tab.tab == 'overview' %} class="active"{% endif %}>
-                                            <a href="{% url 'view_product' product_tab.product.id %}">
+                                            <a rel="noopener noreferrer" href="{% url 'view_product' product_tab.product.id %}">
                                                 <span class="fa-solid fa-earth-americas" aria-hidden="true"></span>
                                                 <span class="hidden-xs">{% trans "Overview" %}</span>
                                             </a>
                                         </li>
                                         <li role="presentation"{% if product_tab.tab == 'components' %} class="active"{% endif %}>
-                                            <a href="{% url 'view_product_components' product_tab.product.id %}">
+                                            <a rel="noopener noreferrer" href="{% url 'view_product_components' product_tab.product.id %}">
                                                 <span class="fa-solid fa-table-cells-large" aria-hidden="true"></span>
                                                 <span class="hidden-xs">{% trans "Components" %}</span>
                                             </a>
                                         </li>
                                         <li role="presentation"{% if product_tab.tab == 'metrics' %} class="active"{% endif %}>
-                                            <a href="{% url 'view_product_metrics' product_tab.product.id %}">
+                                            <a rel="noopener noreferrer" href="{% url 'view_product_metrics' product_tab.product.id %}">
                                                 <span class="fa-solid fa-chart-column" aria-hidden="true"></span>
                                                 <span class="hidden-xs">{% trans "Metrics" %}</span>
                                             </a>
                                         </li>
                                         <!-- Engagements Tab -->
                                         <li role="presentation" class="dropdown{% if product_tab.tab == 'engagements' %} active active-color{% endif %}">
-                                            <a class="dropdown-toggle" data-toggle="dropdown" href="">
+                                            <a rel="noopener noreferrer" class="dropdown-toggle" data-toggle="dropdown" href="">
                                                 <span class="fa-solid fa-calendar-days" aria-hidden="true"></span>
                                                 <span class="hidden-xs">{% trans "Engagements" %}
                                                     {% if product_tab.engagements > 0 %} 
@@ -664,7 +664,7 @@
                                             </a>
                                             <ul class="dropdown-menu">
                                                 <li>
-                                                    <a href="{% url 'view_engagements' product_tab.product.id %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'view_engagements' product_tab.product.id %}">
                                                         <i class="fa-solid fa-calendar-days"></i>
                                                         {% trans "View Engagements" %}
                                                     </a>
@@ -672,13 +672,13 @@
                                                 {% if product_tab.product|has_object_permission:"Engagement_Add" %}
                                                     <li role="separator" class="divider"></li>
                                                     <li>
-                                                        <a href="{% url 'new_eng_for_prod' product_tab.product.id %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'new_eng_for_prod' product_tab.product.id %}">
                                                             <i class="fa-solid fa-plus"></i>
                                                             {% trans "Add New Interactive Engagement" %}
                                                         </a>
                                                     </li>
                                                     <li>
-                                                        <a href="{% url 'new_eng_for_prod_cicd' product_tab.product.id %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'new_eng_for_prod_cicd' product_tab.product.id %}">
                                                             <i class="fa-solid fa-plus"></i>
                                                             {% trans "Add New CI/CD Engagement" %}
                                                         </a>
@@ -688,7 +688,7 @@
                                         </li>
                                         <!-- Findings Tab -->
                                         <li role="presentation" class="dropdown{% if product_tab.tab == 'findings' %} active active-color{% endif %}">
-                                            <a class="dropdown-toggle" data-toggle="dropdown" href="">
+                                            <a rel="noopener noreferrer" class="dropdown-toggle" data-toggle="dropdown" href="">
                                                 <span class="fa-solid fa-bug" aria-hidden="true"></span>
                                                 <span class="hidden-xs">
                                                     {% trans "Findings" %}
@@ -700,44 +700,44 @@
                                             </a>
                                             <ul class="dropdown-menu">
                                                 <li>
-                                                    <a href="{% url 'product_open_findings' product_tab.product.id %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'product_open_findings' product_tab.product.id %}">
                                                         <i class="fa-solid fa-rectangle-list"></i>
                                                         {% trans "View Active Findings" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'product_open_findings' product_tab.product.id %}?verified=true">
+                                                    <a rel="noopener noreferrer" href="{% url 'product_open_findings' product_tab.product.id %}?verified=true">
                                                         <i class="fa-solid fa-rectangle-list"></i>
                                                         {% trans "View Active Verified Findings" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'product_open_findings' product_tab.product.id %}?severity=Critical">
+                                                    <a rel="noopener noreferrer" href="{% url 'product_open_findings' product_tab.product.id %}?severity=Critical">
                                                         <i class="fa-solid fa-triangle-exclamation"></i>
                                                         {% trans "View Critical Findings" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'product_open_findings' product_tab.product.id %}?date=2">
+                                                    <a rel="noopener noreferrer" href="{% url 'product_open_findings' product_tab.product.id %}?date=2">
                                                         <i class="fa-solid fa-calendar-days"></i>
                                                         {% trans "View Findings from Last 7 Days" %}
                                                     </a>
                                                 </li>
                                                 <li role="separator" class="divider"></li>
                                                 <li>
-                                                    <a href="{% url 'product_accepted_findings' product_tab.product.id %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'product_accepted_findings' product_tab.product.id %}">
                                                         <i class="fa-solid fa-check"></i>
                                                         {% trans "View Risk Accepted Findings" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'product_all_findings' product_tab.product.id %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'product_all_findings' product_tab.product.id %}">
                                                         <i class="fa-solid fa-magnifying-glass"></i>
                                                         {% trans "View All Findings" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'product_closed_findings' product_tab.product.id %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'product_closed_findings' product_tab.product.id %}">
                                                         <i class="fa-solid fa-fire-extinguisher"></i>
                                                         &nbsp;&nbsp;{% trans "View Closed Findings" %}
                                                     </a>
@@ -745,7 +745,7 @@
                                                 {% if product_tab.product|has_object_permission:"Finding_Add" %}
                                                     <li role="separator" class="divider"></li>
                                                     <li>
-                                                        <a href="{% url 'ad_hoc_finding' product_tab.product.id %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'ad_hoc_finding' product_tab.product.id %}">
                                                             <i class="fa-solid fa-plus"></i>
                                                             {% trans "Add New Finding" %}
                                                         </a>
@@ -753,7 +753,7 @@
                                                 {% endif %}
                                                 {% if product_tab.product|has_object_permission:"Import_Scan_Result" %}
                                                     <li>
-                                                        <a href="{% url 'import_scan_results_prod' product_tab.product.id %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'import_scan_results_prod' product_tab.product.id %}">
                                                             <i class="fa-solid fa-upload"></i>
                                                             {% trans "Import Scan Results" %}
                                                         </a>
@@ -763,7 +763,7 @@
                                         </li>
                                         <!-- Endpoints Tab -->
                                         <li role="presentation" class="dropdown{% if product_tab.tab == 'endpoints' %} active active-color{% endif %}">
-                                            <a class="dropdown-toggle" data-toggle="dropdown" href="">
+                                            <a rel="noopener noreferrer" class="dropdown-toggle" data-toggle="dropdown" href="">
                                                 <span class="fa-solid fa-sitemap" aria-hidden="true"></span>
                                                 <span class="hidden-xs">
                                                     {% trans "Endpoints" %}
@@ -775,32 +775,32 @@
                                             </a>
                                             <ul class="dropdown-menu">
                                                 <li>
-                                                    <a href="{% url 'endpoint' %}?product={{ product_tab.product.id }}">
+                                                    <a rel="noopener noreferrer" href="{% url 'endpoint' %}?product={{ product_tab.product.id }}">
                                                         <i class="fa-solid fa-rectangle-list"></i>
                                                         {% trans "View Endpoints" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'endpoint_host' %}?product={{ product_tab.product.id }}">
+                                                    <a rel="noopener noreferrer" href="{% url 'endpoint_host' %}?product={{ product_tab.product.id }}">
                                                         <i class="fa-solid fa-rectangle-list"></i>
                                                         {% trans "View Hosts" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'vulnerable_endpoints' %}?product={{ product_tab.product.id }}">
+                                                    <a rel="noopener noreferrer" href="{% url 'vulnerable_endpoints' %}?product={{ product_tab.product.id }}">
                                                         <i class="fa-solid fa-sitemap"></i>
                                                         {% trans "View Vulnerable Endpoints" %}
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ product_tab.product.id }}">
+                                                    <a rel="noopener noreferrer" href="{% url 'vulnerable_endpoint_hosts' %}?product={{ product_tab.product.id }}">
                                                         <i class="fa-solid fa-sitemap"></i>
                                                         {% trans "View Vulnerable Hosts" %}
                                                     </a>
                                                 </li>
                                                 <li role="separator" class="divider"></li>
                                                 <li>
-                                                    <a href="{% url 'product_endpoint_report' product_tab.product.id %}">
+                                                    <a rel="noopener noreferrer" href="{% url 'product_endpoint_report' product_tab.product.id %}">
                                                         <i class="fa-solid fa-file-lines"></i>
                                                         {% trans "Endpoint Report" %}
                                                     </a>
@@ -808,7 +808,7 @@
                                                 {% if product_tab.product|has_object_permission:"Endpoint_Add" %}
                                                     <li role="separator" class="divider"></li>
                                                     <li>
-                                                        <a href="{% url 'add_endpoint' product_tab.product.id %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'add_endpoint' product_tab.product.id %}">
                                                             <i class="fa-solid fa-plus"></i>
                                                             {% trans "Add New Endpoint" %}
                                                         </a>
@@ -816,7 +816,7 @@
                                                 {% endif %}
                                                 {% if product_tab.product|has_object_permission:"Endpoint_Edit" and system_settings.enable_endpoint_metadata_import %}
                                                     <li>
-                                                        <a href="{% url 'import_endpoint_meta' product_tab.product.id %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'import_endpoint_meta' product_tab.product.id %}">
                                                             <i class="fa-solid fa-upload"></i>
                                                             {% trans "Import Endpoint Meta" %}
                                                         </a>
@@ -828,14 +828,14 @@
                                         {% if system_settings.enable_benchmark %}
                                             {% if product_tab.product|has_object_permission:"Benchmark_Edit" %}
                                                 <li role="presentation" class="dropdown{% if product_tab.tab == 'benchmarks' %} active{% endif %}">
-                                                    <a class="dropdown-toggle" data-toggle="dropdown" href="">
+                                                    <a rel="noopener noreferrer" class="dropdown-toggle" data-toggle="dropdown" href="">
                                                         <span class="fa-solid fa-scale-balanced" aria-hidden="true"></span>
                                                         <span class="hidden-xs">{% trans "Benchmarks" %}</span>
                                                         <span class="caret"></span>
                                                     </a>
                                                     <ul class="dropdown-menu">
                                                         {% for bt in product_tab.benchmark_type %}
-                                                            <a title="{{ bt.name }}" href="{% url 'view_product_benchmark' product_tab.product.id bt.id %}">
+                                                            <a rel="noopener noreferrer" title="{{ bt.name }}" href="{% url 'view_product_benchmark' product_tab.product.id bt.id %}">
                                                                 <li>
                                                                     <span class="fa-solid fa-list-ul"></span>
                                                                     {{ bt.name }} {{ bt.version }}
@@ -850,40 +850,40 @@
                                         <!-- Product Settings Tab -->
                                         {% if product_tab.product|has_object_permission:"Product_Edit" or product_tab.product|has_object_permission:"Product_Delete" %}
                                             <li role="presentation" class="dropdown{% if product_tab.tab == 'settings' %} active{% endif %}">
-                                                <a class="dropdown-toggle" data-toggle="dropdown" href="">
+                                                <a rel="noopener noreferrer" class="dropdown-toggle" data-toggle="dropdown" href="">
                                                     <span class="fa-solid fa-gears" aria-hidden="true"></span>
                                                     <span class="hidden-xs">{% trans "Settings" %}</span>
                                                     <span class="caret"></span></a>
                                                 <ul class="dropdown-menu">
                                                     {% if product_tab.product|has_object_permission:"Product_Edit" %}
                                                         <li role="presentation">
-                                                            <a class="" href="{% url 'edit_product' product_tab.product.id %}">
+                                                            <a rel="noopener noreferrer" class="" href="{% url 'edit_product' product_tab.product.id %}">
                                                                 <i class="fa-solid fa-pen-to-square"></i>
                                                                 {% trans "Edit" %}
                                                             </a>
                                                         </li>
                                                         <li role="separator" class="divider"></li>
                                                         <li role="presentation">
-                                                            <a class="" href="{% url 'add_meta_data' product_tab.product.id %}">
+                                                            <a rel="noopener noreferrer" class="" href="{% url 'add_meta_data' product_tab.product.id %}">
                                                                 <i class="fa-solid fa-plus"></i>
                                                                 {% trans "Add Custom Fields" %}
                                                             </a>
                                                         </li>
                                                         <li role="presentation">
-                                                            <a title="Edit Custom Fields" href="{% url 'edit_meta_data' product_tab.product.id %}">
+                                                            <a rel="noopener noreferrer" title="Edit Custom Fields" href="{% url 'edit_meta_data' product_tab.product.id %}">
                                                                 <i class="fa-solid fa-pen-to-square"></i>
                                                                 {% trans "Edit Custom Fields" %}
                                                             </a>
                                                         </li>
                                                         <li role="separator" class="divider"></li>
                                                         <li role="presentation">
-                                                            <a class="" href="{% url 'add_api_scan_configuration' product_tab.product.id %}">
+                                                            <a rel="noopener noreferrer" class="" href="{% url 'add_api_scan_configuration' product_tab.product.id %}">
                                                                 <i class="fa-solid fa-plus"></i>
                                                                 {% trans "Add API Scan Configuration" %}
                                                             </a>
                                                         </li>
                                                         <li role="presentation">
-                                                            <a title="View API Scan Configurations" href="{% url 'view_api_scan_configurations' product_tab.product.id %}">
+                                                            <a rel="noopener noreferrer" title="View API Scan Configurations" href="{% url 'view_api_scan_configurations' product_tab.product.id %}">
                                                                 <i class="fa-solid fa-rectangle-list"></i>
                                                                 {% trans "View API Scan Configurations" %}
                                                             </a>
@@ -891,13 +891,13 @@
                                                         {% if system_settings.enable_product_tracking_files %}
                                                             <li role="separator" class="divider"></li>
                                                             <li role="presentation">
-                                                                <a class="" href="{% url 'new_object' product_tab.product.id %}">
+                                                                <a rel="noopener noreferrer" class="" href="{% url 'new_object' product_tab.product.id %}">
                                                                     <i class="fa-solid fa-plus"></i>
                                                                     {% trans "Add Product Tracking Files" %}
                                                                 </a>
                                                             </li>
                                                             <li role="presentation">
-                                                                <a href="{% url 'view_objects' product_tab.product.id %}">
+                                                                <a rel="noopener noreferrer" href="{% url 'view_objects' product_tab.product.id %}">
                                                                     <i class="fa-solid fa-rectangle-list"></i>
                                                                     {% trans "View Product Tracking Files" %}
                                                                 </a>
@@ -906,13 +906,13 @@
                                                         {% if system_settings.enable_credentials %}
                                                             <li role="separator" class="divider"></li>
                                                             <li role="presentation">
-                                                                <a href="{% url 'new_cred_product' product_tab.product.id %}">
+                                                                <a rel="noopener noreferrer" href="{% url 'new_cred_product' product_tab.product.id %}">
                                                                     <i class="fa-solid fa-plus"></i>
                                                                     {% trans "Add Credentials" %}
                                                                 </a>
                                                             </li>
                                                             <li role="presentation">
-                                                                <a href="{% url 'all_cred_product' product_tab.product.id %}">
+                                                                <a rel="noopener noreferrer" href="{% url 'all_cred_product' product_tab.product.id %}">
                                                                     <i class="fa-solid fa-rectangle-list"></i>
                                                                     {% trans "View Credentials" %}
                                                                 </a>
@@ -920,33 +920,33 @@
                                                         {% endif %}
                                                         <li role="separator" class="divider"></li>
                                                         <li role="presentation">
-                                                            <a href="{% url 'new_tool_product' product_tab.product.id %}">
+                                                            <a rel="noopener noreferrer" href="{% url 'new_tool_product' product_tab.product.id %}">
                                                                 <i class="fa-solid fa-plus"></i>
                                                                 {% trans "Add Tools" %}
                                                             </a>
                                                         </li>
                                                         <li role="presentation">
-                                                            <a href="{% url 'all_tool_product' product_tab.product.id %}">
+                                                            <a rel="noopener noreferrer" href="{% url 'all_tool_product' product_tab.product.id %}">
                                                                 <i class="fa-solid fa-rectangle-list"></i>
                                                                 {% trans "View Tools" %}
                                                             </a>
                                                         </li>
                                                         <li role="separator" class="divider"></li>
                                                         <li role="presentation">
-                                                            <a href="{% url 'add_engagement_presets' product_tab.product.id %}">
+                                                            <a rel="noopener noreferrer" href="{% url 'add_engagement_presets' product_tab.product.id %}">
                                                                 <i class="fa-solid fa-plus"></i>
                                                                 {% trans "Add Engagement Presets" %}
                                                             </a>
                                                         </li>
                                                         <li role="presentation">
-                                                            <a href="{% url 'engagement_presets' product_tab.product.id %}">
+                                                            <a rel="noopener noreferrer" href="{% url 'engagement_presets' product_tab.product.id %}">
                                                                 <i class="fa-solid fa-rectangle-list"></i>
                                                                 {% trans "View Engagement Presets" %}
                                                             </a>
                                                         </li>
                                                         <li role="separator" class="divider"></li>
                                                         <li role="presentation">
-                                                            <a href="{% url 'action_history' product_tab.product|content_type product_tab.product.id %}">
+                                                            <a rel="noopener noreferrer" href="{% url 'action_history' product_tab.product|content_type product_tab.product.id %}">
                                                                 <i class="fa-solid fa-clock-rotate-left"></i>
                                                                 {% trans "View History" %}
                                                             </a>
@@ -955,7 +955,7 @@
                                                     {% if product_tab.product|has_object_permission:"Product_Delete" %}
                                                         <li role="separator" class="divider"></li>
                                                         <li role="presentation">
-                                                            <a class="text-danger" href="{% url 'delete_product' product_tab.product.id %}">
+                                                            <a rel="noopener noreferrer" class="text-danger" href="{% url 'delete_product' product_tab.product.id %}">
                                                                 <i class="fa-solid fa-trash"></i>
                                                                 {% trans "Delete" %}
                                                             </a>
@@ -974,7 +974,7 @@
                                         <ul class="breadcrumb main">
                                             {% for crumb in request.session.dojo_breadcrumbs %}
                                                 <li class="{% if forloop.last %}active{% endif %}">
-                                                    <a class="{% if forloop.last %}active{% endif %}" href="{{ crumb.url }}">{{ crumb.title }}</a>
+                                                    <a rel="noopener noreferrer" class="{% if forloop.last %}active{% endif %}" href="{{ crumb.url }}">{{ crumb.title }}</a>
                                                 </li>
                                             {% endfor %}
                                         </ul>
@@ -1032,7 +1032,7 @@
                         <div class="row">
                             <div class="col-md-12 text-center text-">
                                 <p>
-                                    <a href="{% url 'home' %}">
+                                    <a rel="noopener noreferrer" href="{% url 'home' %}">
                                         <img class="logo" src="{% static "dojo/img/chop.png" %}" alt="{% trans "DefectDojo Chop" %}" height="45"/>
                                     </a>
                                     <br/>
@@ -1040,13 +1040,13 @@
                                     {% dojo_version %} ( {% dojo_current_hash %} )
                                 </p>
                                 <p>
-                                    Detailed DefectDojo documentation can be found in our <a
+                                    Detailed DefectDojo documentation can be found in our <a rel="noopener noreferrer"
                                         href="{% dojo_docs_url %}">GitHub Pages</a>.
                                 </p>
                                 <p>
-                                    DefectDojo is licensed under the <a
+                                    DefectDojo is licensed under the <a rel="noopener noreferrer"
                                         href="https://github.com/DefectDojo/django-DefectDojo/blob/master/LICENSE.md">3-Clause BSD
-                            License</a>. | <a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/NOTICE"> Dependencies Notice.</a>
+                            License</a>. | <a rel="noopener noreferrer" href="https://github.com/DefectDojo/django-DefectDojo/blob/master/NOTICE"> Dependencies Notice.</a>
                                 </p>
                                 <p>
                                     &copy; 2015-{% now "Y" %} DefectDojo, Inc. All rights reserved. DefectDojo is trademark of DefectDojo, Inc.
@@ -1069,7 +1069,7 @@
         <script src="{% static "dojo/js/cvsscalc31_helptext.js" %}"></script>
         <script src="{% static "dojo/js/cvsscalc31.js" %}"></script>
         <script src="{% static "dojo/js/cvss_calculator.js" %}"></script>
-        <script type="application/javascript">
+        <script type="application/javascript" nonce="{{request.csp_nonce}}">
             $(document).ready(function() {
                 $('.has-popover').hover(
                     function() { $(this).popover('show'); }, // hover
@@ -1087,16 +1087,16 @@
                             var display_description = description ? description.length < 100 ? description : description.trim().substring(0,100).trim(this) + '...': ''
                             var dropdown_alert = "alert-list" + i;
                             $('.dropdown-alerts').append('<li><div style="padding: 3px 20px;"><i class="fa-solid fa-' + htmlEscape(elem.fields.icon) +
-                                                            ' fa-fw"></i><a href="' + htmlEscape(elem.fields.url) + '" id=' + dropdown_alert +
+                                                            ' fa-fw"></i><a rel="noopener noreferrer" href="' + htmlEscape(elem.fields.url) + '" id=' + dropdown_alert +
                                                             ' title="' + htmlEscape(display_description) + '"></a><span class="pull-right text-muted small">' +
                                                         htmlEscape(elem.fields.source) + '</span></div></li><li class="divider"></li>');
                             $("#" + dropdown_alert).text(display_title);
                             });
 
                             if (data.length > 0) {
-                                $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "alerts" %}"><strong>{% trans "See All Alerts" %}</strong>' +
+                                $('.dropdown-alerts').append('<li><a rel="noopener noreferrer" class="text-center" href="{% url "alerts" %}"><strong>{% trans "See All Alerts" %}</strong>' +
                                                             '<i class="fa-solid fa-angle-right"></i></a></li>');
-                                $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "delete_alerts" %}"><strong>{% trans "Clear All Alerts" %}</strong>' +
+                                $('.dropdown-alerts').append('<li><a rel="noopener noreferrer" class="text-center" href="{% url "delete_alerts" %}"><strong>{% trans "Clear All Alerts" %}</strong>' +
                                                         '<i class="fa-solid fa-angle-right"></i></a></li>');
                             }
                             else {

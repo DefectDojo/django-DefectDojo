@@ -101,7 +101,7 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         $(function () {
             $(".chosen-select").chosen({disable_search_threshold: 10});
             $('#notification-scope').val('{{ scope }}');

@@ -20,14 +20,14 @@
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                                 {% if group|has_object_permission:"Group_Edit" %}
                                 <li>
-                                    <a class="" href="{% url 'edit_group' group.id %}">
+                                    <a rel="noopener noreferrer" class="" href="{% url 'edit_group' group.id %}">
                                         <i class="fa-solid fa-pen-to-square"></i> Edit</a>
                                 </li>
                                 {% endif %}
                                 {% if group|has_object_permission:"Group_Delete" %}
                                 <li role="separator" class="divider"></li>
                                 <li>
-                                    <a class="" href="{% url 'delete_group' group.id %}" id="deleteUser">
+                                    <a rel="noopener noreferrer" class="" href="{% url 'delete_group' group.id %}" id="deleteUser">
                                         <i class="fa-solid fa-trash"></i> Delete</a>
                                 </li>
                                 {% endif %}
@@ -45,7 +45,7 @@
                 <div class="clearfix">
                     <h4 class="pull-left">Members</h4>
                     &nbsp;
-                    <a href="https://documentation.defectdojo.com/usage/permissions/#groups" target="_blank">
+                    <a rel="noopener noreferrer" rel="noopener noreferrer" href="https://documentation.defectdojo.com/usage/permissions/#groups" target="_blank">
                         <i class="fa-solid fa-circle-question"></i></a>
                     {% if group|has_object_permission:"Group_Manage_Members" %}
                     <div class="dropdown pull-right">
@@ -56,7 +56,7 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu2">
                             <li role="presentation">
-                                <a id="addGroupMember" href="{% url 'add_group_member' group.id %}">
+                                <a rel="noopener noreferrer" id="addGroupMember" href="{% url 'add_group_member' group.id %}">
                                     <i class="fa-solid fa-plus"></i> Add Users
                                 </a>
                             </li>
@@ -81,17 +81,17 @@
                         <td>
                             <ul>
                                 <li class="dropdown" style="list-style:none;position:absolute">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageGroupMembers">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
+                                    <a rel="noopener noreferrer" href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageGroupMembers">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                     <ul class="dropdown-menu">
                                         {% if group|has_object_permission:"Group_Manage_Members" %}
                                         <li>
-                                            <a name="editGroupMember" href="{% url 'edit_group_member' member.id %}">
+                                            <a rel="noopener noreferrer" name="editGroupMember" href="{% url 'edit_group_member' member.id %}">
                                                 <i class="fa-solid fa-pen-to-square"></i>Edit</a>
                                         </li>
                                         {% endif %}
                                         {% if member|has_object_permission:"Group_Member_Delete" %}
                                         <li>
-                                            <a name="deleteGroupMember" href="{% url 'delete_group_member' member.id %}">
+                                            <a rel="noopener noreferrer" name="deleteGroupMember" href="{% url 'delete_group_member' member.id %}">
                                                 <i class="fa-solid fa-trash"></i> Delete</a>
                                         </li>
                                         {% endif %}
@@ -118,7 +118,7 @@
                 <div class="clearfix">
                     <h4 class="pull-left">Product Type Groups</h4>
                     &nbsp;
-                    <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
+                    <a rel="noopener noreferrer" rel="noopener noreferrer" href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
                         <i class="fa-solid fa-circle-question"></i></a>
                     {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
@@ -129,7 +129,7 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu2">
                             <li role="presentation">
-                                <a id="addProductTypeGroup" href="{% url 'add_product_type_group_group' group.id %}">
+                                <a rel="noopener noreferrer" id="addProductTypeGroup" href="{% url 'add_product_type_group_group' group.id %}">
                                     <i class="fa-solid fa-plus"></i> Add Product Types
                                 </a>
                             </li>
@@ -154,18 +154,18 @@
                         <td>
                             <ul>
                                 <li class="dropdown" style="list-style:none;position:absolute">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" name="dropdownManageProductTypeGroup"
+                                    <a rel="noopener noreferrer" href="#" class="dropdown-toggle" data-toggle="dropdown" name="dropdownManageProductTypeGroup"
                                        aria-expanded="true">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                     <ul class="dropdown-menu">
                                         {% if product_type_group.product_type|has_object_permission:"Product_Type_Group_Edit" %}
                                         <li>
-                                            <a name="editProductTypeGroup" href="{% url 'edit_product_type_group' product_type_group.id %}">
+                                            <a rel="noopener noreferrer" name="editProductTypeGroup" href="{% url 'edit_product_type_group' product_type_group.id %}">
                                                 <i class="fa-solid fa-pen-to-square"></i> Edit</a>
                                         </li>
                                         {% endif %}
                                         {% if product_type_group|has_object_permission:"Product_Type_Group_Delete" %}
                                         <li>
-                                            <a name="deleteProductTypeGroup" href="{% url 'delete_product_type_group' product_type_group.id %}">
+                                            <a rel="noopener noreferrer" name="deleteProductTypeGroup" href="{% url 'delete_product_type_group' product_type_group.id %}">
                                                 <i class="fa-solid fa-trash"></i> Delete</a>
                                         </li>
                                         {% endif %}
@@ -173,7 +173,7 @@
                                 </li>
                             </ul>
                         </td>
-                        <td name="member_product_type"><a href="{% url 'view_product_type' product_type_group.product_type.id %}">{{ product_type_group.product_type }}</a></td>
+                        <td name="member_product_type"><a rel="noopener noreferrer" href="{% url 'view_product_type' product_type_group.product_type.id %}">{{ product_type_group.product_type }}</a></td>
                         <td name="member_product_type_role">{{ product_type_group.role }}</td>
                     </tr>
                     {% endfor %}
@@ -192,7 +192,7 @@
                 <div class="clearfix">
                     <h4 class="pull-left">Product Groups</h4>
                     &nbsp;
-                    <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
+                    <a rel="noopener noreferrer" rel="noopener noreferrer" href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
                         <i class="fa-solid fa-circle-question"></i></a>
                     {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
@@ -203,7 +203,7 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu3">
                             <li role="presentation">
-                                <a id="addProductGroup" href="{% url 'add_product_group_group' group.id %}">
+                                <a rel="noopener noreferrer" id="addProductGroup" href="{% url 'add_product_group_group' group.id %}">
                                     <i class="fa-solid fa-plus"></i> Add Products
                                 </a>
                             </li>
@@ -228,18 +228,18 @@
                         <td>
                             <ul>
                                 <li class="dropdown" style="list-style:none;position:absolute">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" name="dropdownManageProductGroup"
+                                    <a rel="noopener noreferrer" href="#" class="dropdown-toggle" data-toggle="dropdown" name="dropdownManageProductGroup"
                                        aria-expanded="true">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                     <ul class="dropdown-menu">
                                         {% if product_group.product|has_object_permission:"Product_Group_Edit" %}
                                         <li>
-                                            <a name="editProductGroup" href="{% url 'edit_product_group' product_group.id %}">
+                                            <a rel="noopener noreferrer" name="editProductGroup" href="{% url 'edit_product_group' product_group.id %}">
                                                 <i class="fa-solid fa-pen-to-square"></i> Edit</a>
                                         </li>
                                         {% endif %}
                                         {% if product_group|has_object_permission:"Product_Group_Delete" %}
                                         <li>
-                                            <a name="deleteProductGroup" href="{% url 'delete_product_group' product_group.id %}">
+                                            <a rel="noopener noreferrer" name="deleteProductGroup" href="{% url 'delete_product_group' product_group.id %}">
                                                 <i class="fa-solid fa-trash"></i> Delete</a>
                                         </li>
                                         {% endif %}
@@ -247,7 +247,7 @@
                                 </li>
                             </ul>
                         </td>
-                        <td name="member_product"><a href="{% url 'view_product' product_group.product.id %}">{{ product_group.product }}</a></td>
+                        <td name="member_product"><a rel="noopener noreferrer" href="{% url 'view_product' product_group.product.id %}">{{ product_group.product }}</a></td>
                         <td name="member_product_role">{{ product_group.role }}</td>
                     </tr>
                     {% endfor %}

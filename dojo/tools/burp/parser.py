@@ -29,7 +29,7 @@ class BurpParser(object):
         )
 
     def get_findings(self, xml_output, test):
-        tree = etree.parse(xml_output, etree.XMLParser())
+        tree = etree.parse(xml_output, etree.XMLParser(forbid_external=True), forbid_external=True)
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):
@@ -38,61 +38,19 @@ class BurpParser(object):
             item = get_item(node, test)
             dupe_key = item.vuln_id_from_tool
             if dupe_key in items:
-                items[dupe_key].unsaved_endpoints = (
-                    items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
-                )
-                items[dupe_key].unsaved_req_resp = (
-                    items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
-                )
+                items[dupe_key].unsaved_endpoints = items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
+                items[dupe_key].unsaved_req_resp = items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
 
                 # Description details of the finding are added
-                items[dupe_key].description = (
-                    item.description + items[dupe_key].description
-                )
+                items[dupe_key].description = item.description + items[dupe_key].description
 
                 # Parameters of the finding are added
                 if item.param:
-                    items[dupe_key].param = (
-                        item.param + ", " + str(items[dupe_key].param)
-                    )
+                    items[dupe_key].param = item.param + ", " + str(items[dupe_key].param)
             else:
                 items[dupe_key] = item
 
         return list(items.values())
-
-
-def get_attrib_from_subnode(xml_node, subnode_xpath_expr, attrib_name):
-    """
-    Finds a subnode in the item node and the retrieves a value from it
-
-    @return An attribute value
-    """
-    global ETREE_VERSION
-    node = None
-
-    if ETREE_VERSION[0] <= 1 and ETREE_VERSION[1] < 3:
-        match_obj = re.search(
-            r"([^\@]+?)\[\@([^=]*?)=\'([^\']*?)\'", subnode_xpath_expr
-        )
-        if match_obj is not None:
-            node_to_find = match_obj.group(1)
-            xpath_attrib = match_obj.group(2)
-            xpath_value = match_obj.group(3)
-            for node_found in xml_node.findall(node_to_find):
-                if node_found.attrib[xpath_attrib] == xpath_value:
-                    node = node_found
-                    break
-        else:
-            node = xml_node.find(subnode_xpath_expr)
-
-    else:
-        node = xml_node.find(subnode_xpath_expr)
-
-    if node is not None:
-        return node.get(attrib_name)
-
-    return None
-
 
 def do_clean(value):
     myreturn = ""
@@ -108,9 +66,7 @@ def get_clean_base64(value):
     if value is None:
         return ""
     try:
-        return base64.b64decode(value).decode(
-            "utf-8", "replace"
-        )  # wouldn't this be cleaner than below?
+        return base64.b64decode(value).decode("utf-8", "replace")  # wouldn't this be cleaner than below?
     except UnicodeDecodeError:
         # decoding of UTF-8 fail when you have a binary payload in the HTTP response
         # so we just cut it to have only the header and add fake body
@@ -140,7 +96,7 @@ def get_item(item_node, test):
     url = item_node.get("url")
     path = item_node.findall("path")[0].text
     location = item_node.findall("location")[0].text
-    rparameter = re.search(r"(?<=\[)(.*)(\])", location)
+    rparameter = re.search(r"(\[)([^\[\]]*)(\])", location)
     parameter = None
     if rparameter:
         parameter = rparameter.group(1)
@@ -149,9 +105,7 @@ def get_item(item_node, test):
     for request_response in item_node.findall("./requestresponse"):
         request = get_clean_base64(request_response.findall("request")[0].text)
         if request_response.findall("response"):
-            response = get_clean_base64(
-                request_response.findall("response")[0].text
-            )
+            response = get_clean_base64(request_response.findall("response")[0].text)
         else:
             response = ""
             # This case happens when a request_response pair doesn't have
@@ -183,12 +137,8 @@ def get_item(item_node, test):
             )
 
         for request_response in event.findall("./requestresponse"):
-            request = get_clean_base64(
-                request_response.findall("request")[0].text
-            )
-            response = get_clean_base64(
-                request_response.findall("response")[0].text
-            )
+            request = get_clean_base64(request_response.findall("request")[0].text)
+            response = get_clean_base64(request_response.findall("response")[0].text)
             unsaved_req_resp.append({"req": request, "resp": response})
         if collab_details[0] == "HTTP":
             collab_text += (
@@ -220,9 +170,7 @@ def get_item(item_node, test):
 
     remediation_detail = do_clean(item_node.findall("remediationDetail"))
     if remediation_detail:
-        remediation = (
-            text_maker.handle(remediation_detail + "\n") + remediation
-        )
+        remediation = text_maker.handle(remediation_detail + "\n") + remediation
 
     references = do_clean(item_node.findall("references"))
     if references:
@@ -272,9 +220,7 @@ def get_item(item_node, test):
     cwes = do_clean_cwe(item_node.findall("vulnerabilityClassifications"))
     if len(cwes) > 1:
         # FIXME support more than one CWE
-        logger.debug(
-            f"more than one CWE for a finding {cwes}. NOT supported by parser API"
-        )
+        logger.debug(f"more than one CWE for a finding {cwes}. NOT supported by parser API")
     if len(cwes) > 0:
         finding.cwe = cwes[0]
     return finding

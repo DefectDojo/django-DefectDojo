@@ -23,10 +23,10 @@ class DeletePreviewModelMixin:
     )
     @action(detail=True, methods=["get"], filter_backends=[], suffix="List")
     def delete_preview(self, request, pk=None):
-        object = self.get_object()
+        my_object = self.get_object()
 
         collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-        collector.collect([object])
+        collector.collect([my_object])
         rels = collector.nested()
 
         def flatten(elem):
@@ -53,10 +53,12 @@ class DeletePreviewModelMixin:
 
 
 class QuestionSubClassFieldsMixin(object):
+    @staticmethod
     def get_queryset(self):
         return Question.objects.select_subclasses()
 
 
 class AnswerSubClassFieldsMixin(object):
+    @staticmethod
     def get_queryset(self):
         return Answer.objects.select_subclasses()

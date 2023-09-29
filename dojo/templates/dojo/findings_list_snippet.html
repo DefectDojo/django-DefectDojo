@@ -24,17 +24,17 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="downloadMenu">
                                 <li role="presentation">
-                                    <a id="report" href="{% url 'quick_report' %}?url={{ request.get_full_path }}">
+                                    <a rel="noopener noreferrer" id="report" href="{% url 'quick_report' %}?url={{ request.get_full_path }}">
                                         <i class="fa-solid fa-file-lines"></i> {% trans "Report" %}
                                     </a>
                                 </li>
                                 <li role="presentation">
-                                    <a id="csv_export" href="{% url 'csv_export' %}?url={{ request.get_full_path }}">
+                                    <a rel="noopener noreferrer" id="csv_export" href="{% url 'csv_export' %}?url={{ request.get_full_path }}">
                                         <i class="fa-solid fa-table"></i> {% trans "CSV Export" %}
                                     </a>
                                 </li>
                                 <li role="presentation">
-                                    <a id="excel_export" href="{% url 'excel_export' %}?url={{ request.get_full_path }}">
+                                    <a rel="noopener noreferrer" id="excel_export" href="{% url 'excel_export' %}?url={{ request.get_full_path }}">
                                         <i class="fa-solid fa-file-excel"></i> {% trans "Excel Export" %}
                                     </a>
                                 </li>
@@ -76,7 +76,7 @@
                                         data-toggle="tooltip"
                                         data-placement="bottom"
                                         title="Merge Findings">
-                                    <a class="white-color merge" href="#" alt="Merge Findings">
+                                    <a rel="noopener noreferrer" class="white-color merge" href="#" alt="Merge Findings">
                                         <i class="fa-solid fa-down-left-and-up-right-to-center"></i>
                                     </a>
                                 </button>
@@ -87,7 +87,7 @@
                                         data-toggle="tooltip"
                                         data-placement="bottom"
                                         title="Delete Findings">
-                                    <a class="white-color delete-bulk" href="#" alt="Delete Findings">
+                                    <a rel="noopener noreferrer" class="white-color delete-bulk" href="#" alt="Delete Findings">
                                         <i class="fa-solid fa-trash"></i>
                                     </a>
                                 </button>
@@ -282,26 +282,26 @@
                                                 aria-labelledby="dropdownMenu1"
                                                 id="select_by_severity">
                                                 <li>
-                                                    <a id="Info">{% trans "Info" %}</a>
+                                                    <a rel="noopener noreferrer" id="Info">{% trans "Info" %}</a>
                                                 </li>
                                                 <li>
-                                                    <a id="Low">{% trans "Low" %}</a>
+                                                    <a rel="noopener noreferrer" id="Low">{% trans "Low" %}</a>
                                                 </li>
                                                 <li>
-                                                    <a id="Medium">{% trans "Medium" %}</a>
+                                                    <a rel="noopener noreferrer" id="Medium">{% trans "Medium" %}</a>
                                                 </li>
                                                 <li>
-                                                    <a id="High">{% trans "High" %}</a>
+                                                    <a rel="noopener noreferrer" id="High">{% trans "High" %}</a>
                                                 </li>
                                                 <li>
-                                                    <a id="Critical">{% trans "Critical" %}</a>
+                                                    <a rel="noopener noreferrer" id="Critical">{% trans "Critical" %}</a>
                                                 </li>
                                                 <li role="separator" class="divider"></li>
                                                 <li>
-                                                    <a id="All">{% trans "All" %}</a>
+                                                    <a rel="noopener noreferrer" id="All">{% trans "All" %}</a>
                                                 </li>
                                                 <li>
-                                                    <a id="None">{% trans "None" %}</a>
+                                                    <a rel="noopener noreferrer" id="None">{% trans "None" %}</a>
                                                 </li>
                                             </ul>
                                         </div>
@@ -392,21 +392,21 @@
                                     <td>
                                         <div class="align-top">
                                             <div class="dropdown">
-                                                <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
+                                                <a rel="noopener noreferrer" href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
                                                 <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
                                                     <li>
-                                                        <a class="" href="{% url 'view_finding' finding.id %}">
+                                                        <a rel="noopener noreferrer" class="" href="{% url 'view_finding' finding.id %}">
                                                             <i class="fa-solid fa-circle-right"></i> {% trans "View" %}
                                                         </a>
                                                     </li>
                                                     {% if finding|has_object_permission:"Finding_Edit" %}
                                                         <li>
-                                                            <a class="" href="{% url 'edit_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                            <a rel="noopener noreferrer" class="" href="{% url 'edit_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                                 <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}
                                                             </a>
                                                         </li>
                                                         <li>
-                                                            <a class="" href="{% url 'copy_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}"/>
+                                                            <a rel="noopener noreferrer" class="" href="{% url 'copy_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}"/>
                                                                 <i class="fa-solid fa-copy"></i> {% trans "Copy" %}
                                                             </a>
                                                         </li>
@@ -416,13 +416,13 @@
                                                         {% user_can_clear_peer_review finding request.user as clear_peer_review %}
                                                         {% if finding|has_object_permission:"Finding_Edit" and clear_peer_review %}
                                                             <li role="presentation">
-                                                                <a href="{% url 'clear_finding_review' finding.id %}">
+                                                                <a rel="noopener noreferrer" href="{% url 'clear_finding_review' finding.id %}">
                                                                     <i class="icon-user-check"></i> {% trans "Clear Review" %}
                                                                 </a>
                                                             </li>
                                                         {% elif not finding.under_review %}
                                                             <li role="presentation">
-                                                                <a href="{% url 'request_finding_review' finding.id %}">
+                                                                <a rel="noopener noreferrer" href="{% url 'request_finding_review' finding.id %}">
                                                                     <i class="icon-user-check"></i> {% trans "Request Peer Review" %}
                                                                 </a>
                                                             </li>
@@ -430,21 +430,21 @@
                                                     {% endif %}
                                                     {% if finding|has_object_permission:"Finding_Edit" %}
                                                         <li role="presentation">
-                                                            <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                            <a rel="noopener noreferrer" href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                                 <i class="fa-solid fa-clock"></i> {% trans "Touch Finding" %}
                                                             </a>
                                                         </li>
                                                     {% endif %}
                                                     {% if finding|has_object_permission:"Finding_Add" %}
                                                         <li role="presentation">
-                                                            <a href="{% url 'mktemplate' finding.id %}">
+                                                            <a rel="noopener noreferrer" href="{% url 'mktemplate' finding.id %}">
                                                                 <i class="fa-solid fa-copy"></i> {% trans "Make Finding a Template" %}
                                                             </a>
                                                         </li>
                                                     {% endif %}
                                                     {% if finding|has_object_permission:"Finding_Edit" %}
                                                         <li role="presentation">
-                                                            <a href="{% url 'find_template_to_apply' finding.id %}">
+                                                            <a rel="noopener noreferrer" href="{% url 'find_template_to_apply' finding.id %}">
                                                                 <i class="fa-solid fa-copy"></i> {% trans "Apply Template to Finding" %}
                                                             </a>
                                                         </li>
@@ -452,13 +452,13 @@
                                                     {% if finding|has_object_permission:"Finding_Edit" %}
                                                         {% if finding.active %}
                                                             <li role="presentation">
-                                                                <a href="{% url 'close_finding' finding.id %}">
+                                                                <a rel="noopener noreferrer" href="{% url 'close_finding' finding.id %}">
                                                                     <i class="fa-solid fa-fire-extinguisher"></i> {% trans "Close Finding" %}
                                                                 </a>
                                                             </li>
                                                         {% else %}
                                                             <li role="presentation">
-                                                                <a href="{% url 'reopen_finding' finding.id %}">
+                                                                <a rel="noopener noreferrer" href="{% url 'reopen_finding' finding.id %}">
                                                                     <i class="fa-solid fa-bug"></i> {% trans "Open Finding" %}
                                                                 </a>
                                                             </li>
@@ -468,7 +468,7 @@
                                                     {% if finding|has_object_permission:"Risk_Acceptance" %}
                                                         {% if finding.risk_accepted %}
                                                             <li role="presentation">
-                                                                <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                                <a rel="noopener noreferrer" href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                                     <i class="fa-solid fa-circle-exclamation"></i> {% trans "Unaccept Risk" %}
                                                                 </a>
                                                             </li>
@@ -476,14 +476,14 @@
                                                             {% if not finding.duplicate %}
                                                                 {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
                                                                     <li role="presentation">
-                                                                        <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                                        <a rel="noopener noreferrer" href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                                             <i class="fa-solid fa-circle-exclamation"></i> {% trans "Accept Risk" %}
                                                                         </a>
                                                                     </li>
                                                                 {% endif %}
                                                                 {% if finding.test.engagement.product.enable_full_risk_acceptance %}
                                                                     <li role="presentation">
-                                                                        <a href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
+                                                                        <a rel="noopener noreferrer" href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
                                                                             <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Risk Acceptance..." %}
                                                                         </a>
                                                                     </li>
@@ -492,7 +492,7 @@
                                                         {% endif %}
                                                     {% endif %}
                                                     <li role="presentation">
-                                                        <a href="{% url 'action_history' finding|content_type finding.id %}">
+                                                        <a rel="noopener noreferrer" href="{% url 'action_history' finding|content_type finding.id %}">
                                                             <i class="fa-solid fa-clock-rotate-left"></i> {% trans "View History" %}
                                                         </a>
                                                     </li>
@@ -504,7 +504,7 @@
                                                                 <input type="hidden" label="return_url" aria-label="return_url" name="return_url" value="{{ request.get_full_path }}"/>
                                                                 <input type="hidden" label="id" aria-label="id" name="id" value="{{ finding.id }}"/>
                                                             </form>
-                                                            <a class="text-danger delete-finding" id="delete-finding-menu-{{ finding.id }}" href="#">
+                                                            <a rel="noopener noreferrer" class="text-danger delete-finding" id="delete-finding-menu-{{ finding.id }}" href="#">
                                                                 <i class="fa-solid fa-trash"></i> {% trans "Delete" %}
                                                             </a>
                                                         </li>
@@ -520,9 +520,9 @@
                                     </td>
                                     <td>
                                         {% if finding.title %}
-                                            <a title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
+                                            <a rel="noopener noreferrer" title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
                                         {% else %}
-                                            <a title="{{ finding.id }}" href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
+                                            <a rel="noopener noreferrer" title="{{ finding.id }}" href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
                                         {% endif %}
                                         {% if finding.file_path %}
                                             <i class="fa-solid fa-code has-popover dojo-sup"
@@ -562,7 +562,7 @@
                                             data-container="body"
                                             data-original-title="Most Recent Note ({{ finding.notes.count }} total)"
                                             title=""></i>
-                                            <a href="{% url 'view_finding' finding.id %}#vuln_notes"
+                                            <a rel="noopener noreferrer" href="{% url 'view_finding' finding.id %}#vuln_notes"
                                                 class="dojo-sup"
                                                 alt="{{ finding.notes.count }} note{{ finding.notes.count|pluralize }}">
                                                     ({{ finding.notes.count }})
@@ -572,7 +572,7 @@
                                     </td>
                                     <td class="nowrap">
                                         {% if finding.cwe > 0 %}
-                                            <a target="_blank" href="{{ finding.cwe|cwe_url }}">
+                                            <a rel="noopener noreferrer" target="_blank" href="{{ finding.cwe|cwe_url }}">
                                                 <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe|default:"" }}
                                             </a>
                                         {% endif %}
@@ -581,7 +581,7 @@
                                         {% with finding|first_vulnerability_id as first_vulnerability_id %}
                                             {% if first_vulnerability_id %}
                                                 {% if first_vulnerability_id|has_vulnerability_url %}
-                                                    <a target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">
+                                                    <a rel="noopener noreferrer" target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">
                                                         <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ first_vulnerability_id }}
                                                 </a>
                                                 {% else %}
@@ -613,7 +613,7 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <a target="#"
+                                        <a rel="noopener noreferrer" target="#"
                                         data-toggle="tooltip"
                                         data-placement="bottom"
                                         title="Test: {{ finding.test }}">{{ finding.found_by.all|join:", " }}</a>
@@ -625,14 +625,14 @@
                                         {% if jira_project and product_tab or not product_tab %}
                                             <td class="nowrap">
                                                 {% if finding.has_jira_group_issue %}
-                                                    <a href="{{ finding.finding_group | jira_issue_url }}"
+                                                    <a rel="noopener noreferrer" href="{{ finding.finding_group | jira_issue_url }}"
                                                     target="_blank"
                                                     alt="Jira Bug - {{ finding.finding_group | jira_key }} (group)"
                                                     data-toggle="tooltip"
                                                     data-placement="bottom"
                                                     title="{{ finding.finding_group | jira_key }} (group)">{{ finding.finding_group | jira_key }}</a>
                                                 {% elif finding.has_jira_issue %}
-                                                    <a href="{{ finding | jira_issue_url }}"
+                                                    <a rel="noopener noreferrer" href="{{ finding | jira_issue_url }}"
                                                     target="_blank"
                                                     alt="Jira Bug - {{ finding | jira_key }}"
                                                     data-toggle="tooltip"
@@ -659,13 +659,13 @@
                                     {% if 'is_finding_groups_enabled'|system_setting_enabled %}
                                         <td class="centered">
                                             {% if finding.has_finding_group %}
-                                                <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">{{ finding.finding_group.name }}</a>
+                                                <a rel="noopener noreferrer" href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">{{ finding.finding_group.name }}</a>
                                             {% endif %}
                                         </td>
                                     {% endif %}
                                     {% if show_product_column and product_tab is None %}
                                         <td>
-                                            <a href="{% url 'view_product' finding.test.engagement.product.id %}"
+                                            <a rel="noopener noreferrer" href="{% url 'view_product' finding.test.engagement.product.id %}"
                                             title="{{ finding.test.engagement }}"
                                             alt="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product }}</a>
                                         </td>
@@ -697,7 +697,7 @@
 {% endblock %}
 {% block postscript %}
     <script type="application/javascript" src="{% static "chosen-js/chosen.jquery.min.js" %}"></script>
-    <script type="application/javascript">
+    <script type="application/javascript" nonce="{{request.csp_nonce}}">
         // DataTables Setup
         $.fn.dataTable.ext.order['severity-asc'] = function (settings, col) {
             return this.api().column(col, { order: 'index' }).nodes().map(function (td, i) {
@@ -833,7 +833,7 @@
             });
         });
     </script>
-    <script type="application/javascript">
+    <script type="application/javascript" nonce="{{request.csp_nonce}}">
         var checkbox_count = 0;
         function check_checked_finding()
         {
@@ -998,7 +998,6 @@
             $('input#select_all').on('click', function (e) {
                 if ($(this).is(":checked")) {
                     $('input.select_one').prop('checked', true);
-                    console.log($('input.select_one').prop('checked', true));
                     $('div#bulk_edit_menu').removeClass('hidden');
                 }
                 else {

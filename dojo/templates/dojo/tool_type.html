@@ -21,7 +21,7 @@
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
-                                        <a href="{% url 'add_tool_type' %}">
+                                        <a rel="noopener noreferrer" href="{% url 'add_tool_type' %}">
                                             <i class="fa-solid fa-plus"></i> {% trans "Add Tool Type" %}
                                         </a>
                                     </li>
@@ -51,7 +51,7 @@
                             <tr>
                                 <td>
                                     {% if "dojo.change_tool_type"|has_configuration_permission:request %}
-                                    <a href="{% url 'edit_tool_type' conf.id %}"><b>{{ conf.name }}</b></a>
+                                    <a rel="noopener noreferrer" href="{% url 'edit_tool_type' conf.id %}"><b>{{ conf.name }}</b></a>
                                     {% else %}
                                     {{ conf.name }}
                                     {% endif %}

@@ -26,6 +26,21 @@ class AsffParser(object):
         return """AWS Security Finding Format (ASFF).
         https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-findings-format-syntax.html"""
 
+    def get_sources_id(self, item):
+        resource_id = ""
+        for i in item.get("Resources"):
+            resource_id += "source_id: " + i.get("Id") + "\n"
+        return resource_id
+
+    def get_description(self, item):
+        description = ""
+        description = description.join(
+            ["ID: ", item.get("Id"), "\n",
+             self.get_sources_id(item), "\n",
+             "AwsAccountID: ", item.get("AwsAccountId"), "\n",
+             item.get("Description")])
+        return description
+
     def get_findings(self, file, test):
         data = json.load(file)
         result = list()
@@ -33,7 +48,7 @@ class AsffParser(object):
             result.append(
                 Finding(
                     title=item.get("Title"),
-                    description=item.get("Description"),
+                    description=self.get_description(item),
                     date=dateutil.parser.parse(item.get("CreatedAt")),
                     severity=self.get_severity(item.get("Severity")),
                     active=True,  # TODO manage attribute 'RecordState'

@@ -21,14 +21,14 @@
                                 aria-labelledby="dropdownMenu1">
                                 {% if request.user|can_add_product %}
                                     <li role="presentation">
-                                        <a href="{% url 'new_product' %}">
+                                        <a rel="noopener noreferrer" href="{% url 'new_product' %}">
                                             <i class="fa-solid fa-plus"></i> Add Product
                                         </a>
                                     </li>
                                 {% endif %}
 
                                 <li role="presentation">
-                                    <a href="{% url 'product_findings_report' %}">
+                                    <a rel="noopener noreferrer" href="{% url 'product_findings_report' %}">
                                         <i class="fa-solid fa-file-lines"></i> Findings Report
                                     </a>
                                 </li>
@@ -75,61 +75,61 @@
                                 <td>
                                   <div class="pull-left">
                                     <div class="dropdown">
-                                      <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
+                                      <a rel="noopener noreferrer" href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                       <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
                                         <li role="presentation">
-                                          <a class="" href="{% url 'view_product' prod.id %}">
+                                          <a rel="noopener noreferrer" class="" href="{% url 'view_product' prod.id %}">
                                               <i class="fa-solid fa-rectangle-list"></i> View
                                           </a>
                                         </li>
                                         {% if prod|has_object_permission:"Product_Edit" %}
                                           <li role="presentation">
-                                            <a class="" href="{% url 'edit_product' prod.id %}">
+                                            <a rel="noopener noreferrer" class="" href="{% url 'edit_product' prod.id %}">
                                                 <i class="fa-solid fa-pen-to-square"></i> Edit
                                             </a>
                                           </li>
                                         {% endif %}
                                           <li role="separator" class="divider"></li>
-                                          <li><a href="{% url 'view_engagements' prod.id %}"><i class="fa-solid fa-calendar-days"></i> View Engagements</a></li>
+                                          <li><a rel="noopener noreferrer" href="{% url 'view_engagements' prod.id %}"><i class="fa-solid fa-calendar-days"></i> View Engagements</a></li>
                                         {% if prod|has_object_permission:"Engagement_Add" %}
-                                          <li><a href="{% url 'new_eng_for_prod' prod.id %}"><i class="fa-solid fa-plus"></i> Add New Engagement</a></li>
+                                          <li><a rel="noopener noreferrer" href="{% url 'new_eng_for_prod' prod.id %}"><i class="fa-solid fa-plus"></i> Add New Engagement</a></li>
                                         {% endif %}
                                           <li role="separator" class="divider"></li>
-                                          <li><a href="{% url 'product_open_findings' prod.id %}"><i class="fa-solid fa-rectangle-list"></i> View Open Findings</a></li>
-                                          <li><a href="{% url 'product_open_findings' prod.id %}?severity=Critical"><i class="fa-solid fa-triangle-exclamation"></i> View Critical Findings</a></li>
-                                          <li><a href="{% url 'product_open_findings' prod.id %}?date=2"><i class="fa-solid fa-calendar-days"></i> View Last 7 Days Findings</a></li>
+                                          <li><a rel="noopener noreferrer" href="{% url 'product_open_findings' prod.id %}"><i class="fa-solid fa-rectangle-list"></i> View Open Findings</a></li>
+                                          <li><a rel="noopener noreferrer" href="{% url 'product_open_findings' prod.id %}?severity=Critical"><i class="fa-solid fa-triangle-exclamation"></i> View Critical Findings</a></li>
+                                          <li><a rel="noopener noreferrer" href="{% url 'product_open_findings' prod.id %}?date=2"><i class="fa-solid fa-calendar-days"></i> View Last 7 Days Findings</a></li>
                                         {% if prod|has_object_permission:"Finding_Add" %}
-                                          <li><a href="{% url 'ad_hoc_finding' prod.id %}"><i class="fa-solid fa-plus"></i> Add New Finding</a></li>
+                                          <li><a rel="noopener noreferrer" href="{% url 'ad_hoc_finding' prod.id %}"><i class="fa-solid fa-plus"></i> Add New Finding</a></li>
                                         {% endif %}
                                           <li role="separator" class="divider"></li>
-                                          <li><a href="{% url 'endpoint' %}?product={{ prod.id }}"><i class="fa-solid fa-rectangle-list"></i> View Endpoints</a></li>
-                                          <li><a href="{% url 'endpoint_host' %}?product={{ prod.id }}"><i class="fa-solid fa-rectangle-list"></i> View Hosts</a></li>
-                                          <li><a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><i class="fa-solid fa-sitemap"></i> View Vulnerable Endpoints</a></li>
-                                          <li><a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><i class="fa-solid fa-sitemap"></i> View Vulnerable Hosts</a></li>
-                                          <li><a href="{% url 'product_endpoint_report' prod.id %}"><i class="fa-solid fa-file-lines"></i> Endpoint Report</a></li>
+                                          <li><a rel="noopener noreferrer" href="{% url 'endpoint' %}?product={{ prod.id }}"><i class="fa-solid fa-rectangle-list"></i> View Endpoints</a></li>
+                                          <li><a rel="noopener noreferrer" href="{% url 'endpoint_host' %}?product={{ prod.id }}"><i class="fa-solid fa-rectangle-list"></i> View Hosts</a></li>
+                                          <li><a rel="noopener noreferrer" href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><i class="fa-solid fa-sitemap"></i> View Vulnerable Endpoints</a></li>
+                                          <li><a rel="noopener noreferrer" href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><i class="fa-solid fa-sitemap"></i> View Vulnerable Hosts</a></li>
+                                          <li><a rel="noopener noreferrer" href="{% url 'product_endpoint_report' prod.id %}"><i class="fa-solid fa-file-lines"></i> Endpoint Report</a></li>
                                         {% if prod|has_object_permission:"Endpoint_Add" %}
-                                          <li><a href="{% url 'add_endpoint' prod.id %}"><i class="fa-solid fa-plus"></i> Add New Endpoint</a></li>
+                                          <li><a rel="noopener noreferrer" href="{% url 'add_endpoint' prod.id %}"><i class="fa-solid fa-plus"></i> Add New Endpoint</a></li>
                                         {% endif %}
                                         {% if prod|has_object_permission:"Product_Edit" %}
                                           <li role="separator" class="divider"></li>
                                           <li role="presentation">
-                                            <a class="" href="{% url 'add_meta_data' prod.id %}">
+                                            <a rel="noopener noreferrer" class="" href="{% url 'add_meta_data' prod.id %}">
                                                 <i class="fa-solid fa-rectangle-list"></i> Add Custom Fields
                                             </a>
                                           </li>
                                           <li role="presentation">
-                                            <a title="Edit Custom Fields" href="{% url 'edit_meta_data' prod.id %}">
+                                            <a rel="noopener noreferrer" title="Edit Custom Fields" href="{% url 'edit_meta_data' prod.id %}">
                                               <i class="fa-solid fa-pen-to-square"></i> Edit Custom Fields
                                             </a>
                                           </li>
                                           <li role="separator" class="divider"></li>
                                           <li role="presentation">
-                                              <a class="" href="{% url 'add_api_scan_configuration' prod.id %}">
+                                              <a rel="noopener noreferrer" class="" href="{% url 'add_api_scan_configuration' prod.id %}">
                                                   <i class="fa-solid fa-rectangle-list"></i> Add Scan API Configuration
                                               </a>
                                           </li>
                                           <li role="presentation">
-                                              <a title="View API Scan configurations" href="{% url 'view_api_scan_configurations' prod.id %}">
+                                              <a rel="noopener noreferrer" title="View API Scan configurations" href="{% url 'view_api_scan_configurations' prod.id %}">
                                                 <i class="fa-solid fa-clock-rotate-left"></i> View Scan API Configurations
                                               </a>
                                           </li>
@@ -138,14 +138,14 @@
                                           <li role="separator" class="divider"></li>
                                           {% if prod|has_object_permission:"Product_Tracking_Files_Add" %}
                                           <li role="presentation">
-                                            <a class="" href="{% url 'new_object' prod.id %}">
+                                            <a rel="noopener noreferrer" class="" href="{% url 'new_object' prod.id %}">
                                               <i class="fa-solid fa-rectangle-list"></i> Add Product Tracking Files
                                             </a>
                                           </li>
                                           {% endif %}
                                           {% if prod|has_object_permission:"Product_Tracking_Files_View" %}
                                           <li role="presentation">
-                                            <a href="{% url 'view_objects' prod.id %}">
+                                            <a rel="noopener noreferrer" href="{% url 'view_objects' prod.id %}">
                                               <i class="fa-solid fa-clock-rotate-left"></i> View Product Tracking Files
                                             </a>
                                           </li>
@@ -153,7 +153,7 @@
                                         {% endif %}
                                         <li role="separator" class="divider"></li>
                                         <li role="presentation">
-                                          <a href="{% url 'product_report' prod.id %}">
+                                          <a rel="noopener noreferrer" href="{% url 'product_report' prod.id %}">
                                             <i class="fa-solid fa-file-lines"></i> Product Report
                                           </a>
                                         </li>
@@ -162,7 +162,7 @@
                                             <li role="separator" class="divider"></li>
                                             {% for bt in benchmark_type %}
                                               <li role="presentation">
-                                                <a title="{{ bt.name }}" href="{% url 'view_product_benchmark' prod.id bt.id %}">
+                                                <a rel="noopener noreferrer" title="{{ bt.name }}" href="{% url 'view_product_benchmark' prod.id bt.id %}">
                                                   <span class="fa-solid fa-list-ul"></span> {{ bt.name }} {{ bt.version }}
                                                 </a>
                                               </li>
@@ -171,14 +171,14 @@
                                         {% endif %}
                                         <li role="separator" class="divider"></li>
                                         <li role="presentation">
-                                          <a href="{% url 'action_history' prod|content_type prod.id %}">
+                                          <a rel="noopener noreferrer" href="{% url 'action_history' prod|content_type prod.id %}">
                                               <i class="fa-solid fa-clock-rotate-left"></i> View History
                                           </a>
                                         </li>
                                         {% if prod|has_object_permission:"Product_Delete" %}
                                           <li role="separator" class="divider"></li>
                                           <li role="presentation">
-                                            <a class="text-danger" href="{% url 'delete_product' prod.id %}">
+                                            <a rel="noopener noreferrer" class="text-danger" href="{% url 'delete_product' prod.id %}">
                                               <i class="fa-solid fa-trash"></i> Delete
                                             </a>
                                           </li>
@@ -188,7 +188,7 @@
                                    </div>
                                 </td>
                                 <td>
-                                    <a href="{% url 'view_product' prod.id %}"><b>{{ prod.name }}</b></a>
+                                    <a rel="noopener noreferrer" href="{% url 'view_product' prod.id %}"><b>{{ prod.name }}</b></a>
                                     {% with grade=prod|product_grade %}
                                       {% if grade %}
                                         <sup><div class="tag-label {{ grade }}">{{ grade }}</div></sup>
@@ -241,16 +241,16 @@
 
                                 <td class="text-center">
                                     {% if prod.findings_count %}
-                                        <a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>
-                                        &nbsp;(<a href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}">{{ prod.findings_active_verified_count }}</a>)
+                                        <a rel="noopener noreferrer" href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>
+                                        &nbsp;(<a rel="noopener noreferrer" href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}">{{ prod.findings_active_verified_count }}</a>)
                                     {% else %}
                                         0
                                     {% endif %}
                                 </td>
                                 <td class="text-center">
                                   {% if prod.endpoint_count %}
-                                    <a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><b>{{ prod.endpoint_host_count }}</b></a> /
-                                    <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
+                                    <a rel="noopener noreferrer" href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><b>{{ prod.endpoint_host_count }}</b></a> /
+                                    <a rel="noopener noreferrer" href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
                                     {% else %}
                                       0
                                   {% endif %}
@@ -291,7 +291,7 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         $(function () {
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
@@ -311,7 +311,7 @@
             });
         });
     </script>
-    <script>
+    <script nonce="{{request.csp_nonce}}">
         // DataTables setup
         $(document).ready(function() {
             date =  new Date().toISOString().slice(0, 10);

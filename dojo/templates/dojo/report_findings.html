@@ -45,7 +45,7 @@
                     {% for finding in findings %}
                         <tr>
                             <td>
-                                <a title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                                <a rel="noopener noreferrer" title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
                                 {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                             </td>
                             <td class="nowrap">{{ finding.date }}</td>

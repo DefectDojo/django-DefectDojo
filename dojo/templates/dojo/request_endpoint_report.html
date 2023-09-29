@@ -50,11 +50,11 @@
                         {% for e in endpoints %}
                             <tr>
                                 <td>
-                                    <a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars_html:70 }}</a>
+                                    <a rel="noopener noreferrer" href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars_html:70 }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.findings_count }}</a>
+                                    <a rel="noopener noreferrer" href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.findings_count }}</a>
                                 </td>
                             </tr>
                         {% endfor %}
