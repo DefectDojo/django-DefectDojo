@@ -3,14 +3,15 @@ title: "Burp XML"
 toc_hide: true
 ---
 ### File Types
-DefectDojo parser accepts an .xml file.
+DefectDojo parser accepts Burp Issue data as an .xml file.
+To parse an HTML file instead, use this method: https://documentation.defectdojo.com/integrations/parsers/file/burp_enterprise/
 
 When the Burp report is generated, **the recommended option is Base64
 encoding both the request and response fields** - e.g. check the box
 that says \"Base64-encode requests and responses\". These fields will be
 processed and made available in the \'Finding View\' page.
 
-See Burp documentation - XML export is described under "Export Issue data".  https://portswigger.net/burp/documentation/enterprise/work-with-scan-results/generate-reports
+See also: Burp documentation - XML export is described under "Export Issue data".  https://portswigger.net/burp/documentation/enterprise/work-with-scan-results/generate-reports
 
 ### Acceptable XML Format
 All XML elements are required and will be parsed as strings.
