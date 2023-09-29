@@ -25,7 +25,7 @@ django-slack==5.19.0
 git+https://github.com/DefectDojo/django-tagging@develop#egg=django-tagging
 django-watson==1.6.3
 django-prometheus==2.3.1
-Django==4.1.10
+Django==4.1.11
 djangorestframework==3.14.0
 gunicorn==21.2.0
 html2text==2020.1.16
