@@ -20,6 +20,21 @@ class TestGovulncheckParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
+    def test_parse_new_version_findings(self):
+        testfile = open("unittests/scans/govulncheck/many_vulns_new_version.json")
+        parser = GovulncheckParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("GO-2023-1840", finding.title)
+            self.assertEqual("Info", finding.severity)
+            self.assertEqual("CVE-2023-29403", finding.cve)
+            self.assertEqual("stdlib", finding.component_name)
+            self.assertEqual("1.3.1", finding.component_version)
+            self.assertIsNotNone(finding.description)
+            self.assertEqual("https://go.dev/issue/60272", finding.references)
+
     def test_parse_many_findings(self):
         testfile = open("unittests/scans/govulncheck/many_vulns.json")
         parser = GovulncheckParser()
