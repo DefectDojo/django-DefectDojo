@@ -28,7 +28,7 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.finding.queries import get_authorized_findings
-from dojo.finding.views import get_filtered_findings
+from dojo.finding.views import BaseListFindings
 
 logger = logging.getLogger(__name__)
 
@@ -807,7 +807,12 @@ def get_findings(request):
             user_has_permission_or_403(request.user, obj, Permissions.Test_View)
 
     request.GET = QueryDict(query)
-    findings = get_filtered_findings(request, pid, eid, tid, filter_name).qs
+    list_findings = BaseListFindings(
+        filter_name=filter_name,
+        product_id=pid,
+        engagement_id=eid,
+        test_id=tid)
+    findings = list_findings.get_fully_filtered_findings(request).qs
 
     return findings, obj
 
