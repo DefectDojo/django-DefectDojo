@@ -271,28 +271,30 @@
             <div class="table-responsive">
                 <table class="table table-striped">
                     <tbody>
-                        <tr>
-                            <td style="width: 200px;"><strong>Number of Users</strong></td>
-                            <td>
-                                {{ group.users.all|length }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 200px;"><strong>Number of Product Types</strong></td>
-                            <td>
-                                {{ product_types|length }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 200px;"><strong>Number of Products</strong></td>
-                            <td>
-                                {{ products|length }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 200px;"><strong>Global role</strong></td>
-                            <td>{% if group.global_role.role %} {{ group.global_role.role }} {% endif %}</td>
-                        </tr>
+                        {% block metadata %}
+                            <tr>
+                                <td style="width: 200px;"><strong>Number of Users</strong></td>
+                                <td>
+                                    {{ group.users.all|length }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 200px;"><strong>Number of Product Types</strong></td>
+                                <td>
+                                    {{ product_types|length }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 200px;"><strong>Number of Products</strong></td>
+                                <td>
+                                    {{ products|length }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 200px;"><strong>Global role</strong></td>
+                                <td>{% if group.global_role.role %} {{ group.global_role.role }} {% endif %}</td>
+                            </tr>
+                        {% endblock metadata %}
                     </tbody>
                 </table>
             </div>
