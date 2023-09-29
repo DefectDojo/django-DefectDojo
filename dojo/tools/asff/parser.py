@@ -5,26 +5,26 @@ import dateutil
 from dojo.models import Endpoint, Finding
 
 SEVERITY_MAPPING = {
-    "INFORMATIONAL": "Info",
-    "LOW": "Low",
-    "MEDIUM": "Medium",
-    "HIGH": "High",
-    "CRITICAL": "Critical",
+    "INFORMATIONAL": "Info",  # No issue was found.
+    "LOW": "Low",  # The issue does not require action on its own.
+    "MEDIUM": "Medium",  # The issue must be addressed but not urgently.
+    "HIGH": "High",  # The issue must be addressed as a priority.
+    # The issue must be remediated immediately to avoid it escalating.
 }
 
 
 def is_private_ipv4(ip):
-    parts = ip.split('.')
+    parts = ip.split(".")
     if len(parts) != 4:
         return False
     # 10.0.0.0 to 10.255.255.255
-    if parts[0] == '10':
+    if parts[0] == "10":
         return True
     # 172.16.0.0 to 172.31.255.255
-    if parts[0] == '172' and 16 <= int(parts[1]) <= 31:
+    if parts[0] == "172" and 16 <= int(parts[1]) <= 31:
         return True
     # 192.168.0.0 to 192.168.255.255
-    if parts[0] == '192' and parts[1] == '168':
+    if parts[0] == "192" and parts[1] == "168":
         return True
     return False
 
@@ -61,7 +61,7 @@ class AsffParser(object):
                 severity=self.get_severity(item.get("Severity")),
                 active=True,  # TODO: manage attribute 'RecordState'
                 unique_id_from_tool=item.get("Id"),
-                test=test
+                test=test,
             )
 
             if "Resources" in item:
@@ -70,6 +70,18 @@ class AsffParser(object):
                     if resource["Type"] == "AwsEc2Instance" and "Details" in resource:
                         details = resource["Details"]["AwsEc2Instance"]
                         for ip in details.get("IpV4Addresses", []):
+                            # Adding only private IP addresses as endpoints:
+                            #
+                            # 1. **Stability**: In AWS, the private IP address of an EC2 instance remains consistent
+                            #    unless the instance is terminated. In contrast, public IP addresses in AWS are separate
+                            #    resources from the EC2 instances and can change (e.g., when an EC2 instance stops and starts).
+                            #
+                            # 2. **Reliability**: By focusing on private IP addresses, we reduce potential ambiguities.
+                            #    If we were to include every IP address, DefectDojo would create an endpoint for each,
+                            #    leading to potential redundancies and confusion.
+                            #
+                            # By limiting our endpoints to private IP addresses, we're ensuring that the data remains
+                            # relevant even if the AWS resources undergo changes, and we also ensure a cleaner representation.
                             if is_private_ipv4(ip):
                                 endpoints.append(Endpoint(host=ip))
                 finding.unsaved_endpoints = endpoints
