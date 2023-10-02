@@ -86,6 +86,9 @@ class BaseTestCase(unittest.TestCase):
             prefs = {"download.default_directory": cls.export_path}
             dd_driver_options.add_experimental_option("prefs", prefs)
 
+            # set the location of the chrome browser
+            dd_driver_options.binary_location = os.environ["CHROME_PATH"]
+
             # change path of chromedriver according to which directory you have chromedriver.
             print(
                 "starting chromedriver with options: ", vars(dd_driver_options), desired

@@ -19,26 +19,21 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 
-# Installing Google Chrome browser
-RUN \
-  curl -sS -o - https://dl.google.com/linux/linux_signing_key.pub | apt-key add && \
-  echo "deb [arch=amd64]  http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list && \
-  apt-get -y update && \
-  apt-get -y install \
-    google-chrome-stable=117.0.5938.132-1 \
-  && \
-  apt-get clean && \
-  rm -rf /var/lib/apt/lists && \
-  true
-
 RUN pip install --no-cache-dir selenium==4.9.0 requests
 
-# Installing Chromedriver
+# Install the latest Google Chrome stable release
+WORKDIR /opt/chrome
+RUN \
+  chrome_url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels[] | select(.channel == "Stable") | .downloads.chrome[] | select(.platform == "linux64").url') && \
+  wget $chrome_url && \
+  unzip -j chrome-linux64.zip chrome-linux64/chrome && \
+  rm -rf chrome-linux64.zip && \
+  chmod -R 0755 .
+
+# Installing the latest stable Google Chrome release
 WORKDIR /opt/chrome-driver
 RUN \
-  chrome_version=$(apt-cache show google-chrome-stable | grep Version | awk '{print $2}' | cut -d '-' -f 1) && \
-  chrome_version_blob=$(curl -k https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json | jq ".versions[] | select(.version==\"$chrome_version\")") && \
-  chromedriver_url=https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/117.0.5938.92/linux64/chromedriver-linux64.zip && \
+  chromedriver_url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels[] | select(.channel == "Stable") | .downloads.chromedriver[] | select(.platform == "linux64").url') && \
   wget $chromedriver_url && \
   unzip -j chromedriver-linux64.zip chromedriver-linux64/chromedriver && \
   rm -rf chromedriver-linux64.zip && \
