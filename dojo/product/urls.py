@@ -38,7 +38,9 @@ urlpatterns = [
         name='edit_notifications'),
     re_path(r'^product/(?P<pid>\d+)/edit_meta_data$', views.edit_meta_data,
         name='edit_meta_data'),
-    re_path(r'^product/(?P<pid>\d+)/ad_hoc_finding$', views.ad_hoc_finding,
+    re_path(
+        r'^product/(?P<product_id>\d+)/ad_hoc_finding$',
+        views.AdHocFindingView.as_view(),
         name='ad_hoc_finding'),
     re_path(r'^product/(?P<pid>\d+)/engagement_presets$', views.engagement_presets,
         name='engagement_presets'),
