@@ -22,7 +22,8 @@ from django.db.models import Q
 from dojo.models import Dojo_User, Finding_Group, Product_API_Scan_Configuration, Product_Type, Finding, Product, Test_Import, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Note_Type, Risk_Acceptance, Cred_Mapping, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
-    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, EFFORT_FOR_FIXING_CHOICES, Dojo_Group, Vulnerability_Id
+    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, EFFORT_FOR_FIXING_CHOICES, Dojo_Group, Vulnerability_Id, \
+    Test_Import_Finding_Action, IMPORT_ACTIONS
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 import tagulous
@@ -723,6 +724,8 @@ class EngagementDirectFilter(DojoFilter):
     product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
+    test__engagement__product__lifecycle = MultipleChoiceFilter(
+        choices=Product.LIFECYCLE_CHOICES, label='Product lifecycle')
     status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
                                               label="Status")
 
@@ -787,6 +790,8 @@ class EngagementFilter(DojoFilter):
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
+    engagement__product__lifecycle = MultipleChoiceFilter(
+        choices=Product.LIFECYCLE_CHOICES, label='Product lifecycle')
     engagement__status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
                                               label="Status")
 
@@ -1185,6 +1190,8 @@ class ApiFindingFilter(DojoFilter):
     title = CharFilter(lookup_expr='icontains')
     product_name = CharFilter(lookup_expr='engagement__product__name__iexact', field_name='test', label='exact product name')
     product_name_contains = CharFilter(lookup_expr='engagement__product__name__icontains', field_name='test', label='exact product name')
+    product_lifecycle = CharFilter(method=custom_filter, lookup_expr='engagement__product__lifecycle',
+                                   field_name='test__engagement__product__lifecycle', label='Comma separated list of exact product lifecycles')
     # DateRangeFilter
     created = DateRangeFilter()
     date = DateRangeFilter()
@@ -1311,6 +1318,9 @@ class FindingFilter(FindingFilterWithTags):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
+
+    test__engagement__product__lifecycle = MultipleChoiceFilter(
+        choices=Product.LIFECYCLE_CHOICES, label='Product lifecycle')
 
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.none(),
@@ -2235,6 +2245,20 @@ class TestImportFilter(DojoFilter):
 
     class Meta:
         model = Test_Import
+        fields = []
+
+
+class TestImportFindingActionFilter(DojoFilter):
+    action = MultipleChoiceFilter(choices=IMPORT_ACTIONS)
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('action', 'action'),
+        )
+    )
+
+    class Meta:
+        model = Test_Import_Finding_Action
         fields = []
 
 

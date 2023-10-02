@@ -16,9 +16,11 @@ class AwsSecurityHubParser(object):
 
     def get_findings(self, filehandle, test):
         tree = json.load(filehandle)
+        if not isinstance(tree, dict):
+            raise ValueError("Incorrect Security Hub report format")
         return self.get_items(tree, test)
 
-    def get_items(self, tree, test):
+    def get_items(self, tree: dict, test):
         items = {}
         # DefectDojo/django-DefectDojo/issues/2780
         findings = tree.get("Findings", tree.get("findings", None))
@@ -34,7 +36,7 @@ class AwsSecurityHubParser(object):
         return list(items.values())
 
 
-def get_item(finding, test):
+def get_item(finding: dict, test):
     aws_scanner_type = finding.get("ProductFields", {}).get("aws/securityhub/ProductName", "")
     finding_id = finding.get("Id", "")
     title = finding.get("Title", "")
