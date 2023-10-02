@@ -10,7 +10,7 @@ django-auditlog==2.3.0
 django-dbbackup==4.0.2
 django-environ==0.11.2
 django-filter==23.3
-django-imagekit==4.1.0
+django-imagekit==5.0.0
 # This library is very outdated, but is a pillar of DefectDojo
 # django-multiselectfield==0.1.12
 git+https://github.com/DefectDojo/django-multiselectfield@master#egg=django-multiselectfield
@@ -37,7 +37,7 @@ mysqlclient==2.1.1
 openpyxl==3.1.2
 xlrd==1.2.0
 Pillow==10.0.1  # required by django-imagekit
-psycopg2-binary==2.9.7
+psycopg2-binary==2.9.8
 cryptography==41.0.4
 python-dateutil==2.8.2
 pytz==2023.3.post1
@@ -78,7 +78,7 @@ django-ratelimit==4.1.0
 argon2-cffi==23.1.0
 blackduck==1.1.0
 pycurl==7.45.2  # Required for Celery Broker AWS (SQS) support
-boto3==1.28.54  # Required for Celery Broker AWS (SQS) support
+boto3==1.28.57  # Required for Celery Broker AWS (SQS) support
 netaddr==0.8.0
 vulners==2.1.0
 fontawesomefree==6.4.2
