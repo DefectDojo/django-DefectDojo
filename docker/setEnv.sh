@@ -31,7 +31,7 @@ function get_current {
             # Maintain the cleaner way
             symlink=$(readlink -f docker-compose.override.yml)
         fi
-        current_env=$(expr $(basename symlink) : "^docker-compose.override.\(.*\).yml$")
+        current_env=$(expr $(basename $symlink) : "^docker-compose.override.\(.*\).yml$")
     else
         current_env=release
     fi
