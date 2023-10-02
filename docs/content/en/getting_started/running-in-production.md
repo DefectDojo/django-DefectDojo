@@ -1,6 +1,6 @@
 ---
 title: "Running in production"
-description: "For use in Produciton environments, performance tweaks and backups are recommended."
+description: "For use in Production environments, performance tweaks and backups are recommended."
 draft: false
 weight: 4
 ---
@@ -79,7 +79,9 @@ You can execute the following command to see the configuration:
 `docker-compose exec celerybeat bash -c "celery -A dojo inspect stats"`
 and see what is in effect.
 
-###### Asynchronous Imports
+#### Asynchronous Import
+
+**Please note: Asynchronous Import is currently an experimental feature.  Please exercise caution with this method as results may be inconsistent.**
 
 Import and Re-Import can also be configured to handle uploads asynchronously to aid in 
 processing especially large scans. It works by batching Findings and Endpoints by a 
