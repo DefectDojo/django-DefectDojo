@@ -1,0 +1,766 @@
+[
+{
+    "SchemaVersion": "2018-10-08",
+    "Id": "arn:aws:inspector2:eu-west-1:123456789123:finding/e7dd7a6979b7ce39de463533b1e6cd44",
+    "ProductArn": "arn:aws:securityhub:eu-west-1::product/aws/inspector",
+    "ProductName": "Inspector",
+    "CompanyName": "Amazon",
+    "Region": "eu-west-1",
+    "GeneratorId": "AWSInspector",
+    "AwsAccountId": "123456789123",
+    "Types": [
+        "Software and Configuration Checks/Vulnerabilities/CVE"
+    ],
+    "FirstObservedAt": "2023-08-30T20:07:14Z",
+    "LastObservedAt": "2023-09-15T07:00:24Z",
+    "CreatedAt": "2023-08-30T20:07:14Z",
+    "UpdatedAt": "2023-09-15T07:00:24Z",
+    "Severity": {
+        "Label": "HIGH",
+        "Normalized": 70
+    },
+    "Title": "CVE-2017-9735 - org.eclipse.jetty:jetty-server, org.eclipse.jetty:jetty-util",
+    "Description": "Jetty through 9.4.x is prone to a timing channel in util/security/Password.java, which makes it easier for remote attackers to obtain access by observing elapsed times before rejection of incorrect passwords.",
+    "Remediation": {
+        "Recommendation": {
+            "Text": "Remediation is available. Please refer to the Fixed version in the vulnerability details section above.For detailed remediation guidance for each of the affected packages, refer to the vulnerabilities section of the detailed finding JSON."
+        }
+    },
+    "ProductFields": {
+        "aws/inspector/ProductVersion": "2",
+        "aws/inspector/FindingStatus": "ACTIVE",
+        "aws/inspector/inspectorScore": "7.5",
+        "aws/inspector/instanceId": "i-0asd2da21c8csd28s",
+        "aws/inspector/resources/1/resourceDetails/awsEc2InstanceDetails/platform": "UBUNTU_20_04",
+        "aws/securityhub/FindingId": "arn:aws:securityhub:eu-west-1::product/aws/inspector/arn:aws:inspector2:eu-west-1:123456789123:finding/e7dd7a6979b7ce39de463533b1e6cd44",
+        "aws/securityhub/ProductName": "Inspector",
+        "aws/securityhub/CompanyName": "Amazon"
+    },
+    "Resources": [
+        {
+            "Type": "AwsEc2Instance",
+            "Id": "arn:aws:ec2:eu-west-1:123456789123:instance/i-0asd2da21c8csd28s",
+            "Partition": "aws",
+            "Region": "eu-west-1",
+            "Tags": {
+                "OS": "Ubuntu",
+                "envtype": "production",
+                "name": "MyServer1 - new",
+                "OS-version": "18.04",
+                "department": "it",
+                "envcategory": "production",
+                "Name": "MyServer1"
+            },
+            "Details": {
+                "AwsEc2Instance": {
+                    "Type": "m5d.large",
+                    "ImageId": "ami-1234shgh268csd28s",
+                    "IpV4Addresses": [
+                        "123.123.123.123",
+                        "172.31.0.31"
+                    ],
+                    "KeyName": "MySSHkey",
+                    "IamInstanceProfileArn": "arn:aws:iam::123456789123:instance-profile/AmazonSSMRole",
+                    "VpcId": "vpc-12kk2qwe",
+                    "SubnetId": "subnet-s12u28as",
+                    "LaunchedAt": "2023-08-30T05:09:41Z"
+                }
+            }
+        }
+    ],
+    "WorkflowState": "NEW",
+    "Workflow": {
+        "Status": "NEW"
+    },
+    "RecordState": "ACTIVE",
+    "Vulnerabilities": [
+        {
+            "Id": "CVE-2017-9735",
+            "VulnerablePackages": [
+                {
+                    "Name": "org.eclipse.jetty:jetty-server",
+                    "Version": "8.1.14.v20131031",
+                    "Epoch": "0",
+                    "PackageManager": "JAR",
+                    "FilePath": "/usr/lib/jvm/java-8-oracle/lib/missioncontrol/plugins/org.eclipse.jetty.server_8.1.14.v20131031.jar",
+                    "FixedInVersion": "9.4.6.v20170531",
+                    "Remediation": "Update jetty-server to 9.4.6.v20170531"
+                },
+                {
+                    "Name": "org.eclipse.jetty:jetty-util",
+                    "Version": "8.1.14.v20131031",
+                    "Epoch": "0",
+                    "PackageManager": "JAR",
+                    "FilePath": "/usr/lib/jvm/java-8-oracle/lib/missioncontrol/plugins/org.eclipse.jetty.util_8.1.14.v20131031.jar",
+                    "FixedInVersion": "9.4.6.v20170531",
+                    "Remediation": "Update jetty-util to 9.4.6.v20170531"
+                }
+            ],
+            "Cvss": [
+                {
+                    "Version": "2.0",
+                    "BaseScore": 5,
+                    "BaseVector": "AV:N/AC:L/Au:N/C:P/I:N/A:N",
+                    "Source": "NVD"
+                },
+                {
+                    "Version": "3.1",
+                    "BaseScore": 7.5,
+                    "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                    "Source": "NVD"
+                },
+                {
+                    "Version": "3.1",
+                    "BaseScore": 7.5,
+                    "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                    "Source": "NVD"
+                }
+            ],
+            "Vendor": {
+                "Name": "NVD",
+                "Url": "https://nvd.nist.gov/vuln/detail/CVE-2017-9735",
+                "VendorSeverity": "HIGH",
+                "VendorCreatedAt": "2017-06-16T21:29:00Z",
+                "VendorUpdatedAt": "2022-03-15T14:55:00Z"
+            },
+            "ReferenceUrls": [
+                "https://lists.debian.org/debian-lts-announce/2021/05/msg00016.html",
+                "https://lists.apache.org/thread.html/053d9ce4d579b02203db18545fee5e33f35f2932885459b74d1e4272@%3Cissues.activemq.apache.org%3E",
+                "https://lists.apache.org/thread.html/36870f6c51f5bc25e6f7bb1fcace0e57e81f1524019b11f466738559@%3Ccommon-dev.hadoop.apache.org%3E",
+                "https://www.oracle.com/technetwork/security-advisory/cpuoct2019-5072832.html",
+                "https://bugs.debian.org/864631",
+                "https://www.oracle.com/security-alerts/cpuoct2020.html",
+                "https://lists.apache.org/thread.html/ff8dcfe29377088ab655fda9d585dccd5b1f07fabd94ae84fd60a7f8@%3Ccommits.pulsar.apache.org%3E",
+                "https://lists.apache.org/thread.html/519eb0fd45642dcecd9ff74cb3e71c20a4753f7d82e2f07864b5108f@%3Cdev.drill.apache.org%3E",
+                "https://www.oracle.com//security-alerts/cpujul2021.html",
+                "https://lists.apache.org/thread.html/f887a5978f5e4c62b9cfe876336628385cff429e796962649649ec8a@%3Ccommon-issues.hadoop.apache.org%3E",
+                "https://lists.apache.org/thread.html/f9bc3e55f4e28d1dcd1a69aae6d53e609a758e34d2869b4d798e13cc@%3Cissues.drill.apache.org%3E"
+            ],
+            "FixAvailable": "YES",
+            "ExploitAvailable": "YES"
+        }
+    ],
+    "FindingProviderFields": {
+        "Severity": {
+            "Label": "HIGH"
+        },
+        "Types": [
+            "Software and Configuration Checks/Vulnerabilities/CVE"
+        ]
+    }
+},
+{
+    "SchemaVersion": "2018-10-08",
+    "Id": "arn:aws:inspector2:eu-west-1:123456789123:finding/96a4d357714e4eb40e17e4a9c6171ce4",
+    "ProductArn": "arn:aws:securityhub:eu-west-1::product/aws/inspector",
+    "ProductName": "Inspector",
+    "CompanyName": "Amazon",
+    "Region": "eu-west-1",
+    "GeneratorId": "AWSInspector",
+    "AwsAccountId": "123456789123",
+    "Types": [
+        "Software and Configuration Checks/Vulnerabilities/CVE"
+    ],
+    "FirstObservedAt": "2023-08-30T20:07:14Z",
+    "LastObservedAt": "2023-09-15T07:00:24Z",
+    "CreatedAt": "2023-08-30T20:07:14Z",
+    "UpdatedAt": "2023-09-15T07:00:24Z",
+    "Severity": {
+        "Label": "MEDIUM",
+        "Normalized": 40
+    },
+    "Title": "CVE-2019-10247 - org.eclipse.jetty:jetty-server",
+    "Description": "In Eclipse Jetty version 7.x, 8.x, 9.2.27 and older, 9.3.26 and older, and 9.4.16 and older, the server running on any OS and Jetty version combination will reveal the configured fully qualified directory base resource location on the output of the 404 error for not finding a Context that matches the requested path. The default server behavior on jetty-distribution and jetty-home will include at the end of the Handler tree a DefaultHandler, which is responsible for reporting this 404 error, it presents the various configured contexts as HTML for users to click through to. This produced HTML includes output that contains the configured fully qualified directory base resource location for each context.",
+    "Remediation": {
+        "Recommendation": {
+            "Text": "Remediation is available. Please refer to the Fixed version in the vulnerability details section above.For detailed remediation guidance for each of the affected packages, refer to the vulnerabilities section of the detailed finding JSON."
+        }
+    },
+    "ProductFields": {
+        "aws/inspector/ProductVersion": "2",
+        "aws/inspector/FindingStatus": "ACTIVE",
+        "aws/inspector/inspectorScore": "5.3",
+        "aws/inspector/instanceId": "i-0asd2da21c8csd28s",
+        "aws/inspector/resources/1/resourceDetails/awsEc2InstanceDetails/platform": "UBUNTU_20_04",
+        "aws/securityhub/FindingId": "arn:aws:securityhub:eu-west-1::product/aws/inspector/arn:aws:inspector2:eu-west-1:123456789123:finding/96a4d357714e4eb40e17e4a9c6171ce4",
+        "aws/securityhub/ProductName": "Inspector",
+        "aws/securityhub/CompanyName": "Amazon"
+    },
+    "Resources": [
+        {
+            "Type": "AwsEc2Instance",
+            "Id": "arn:aws:ec2:eu-west-1:123456789123:instance/i-0asd2da21c8csd28s",
+            "Partition": "aws",
+            "Region": "eu-west-1",
+            "Tags": {
+                "Name": "MyServer1"
+            },
+            "Details": {
+                "AwsEc2Instance": {
+                    "Type": "m5d.large",
+                    "ImageId": "ami-1234shgh268csd28s",
+                    "IpV4Addresses": [
+                        "123.123.123.123",
+                        "172.31.0.31"
+                    ],
+                    "KeyName": "MySSHkey",
+                    "IamInstanceProfileArn": "arn:aws:iam::123456789123:instance-profile/AmazonSSMRole",
+                    "VpcId": "vpc-12kk2qwe",
+                    "SubnetId": "subnet-s12u28as",
+                    "LaunchedAt": "2023-08-30T05:09:41Z"
+                }
+            }
+        }
+    ],
+    "WorkflowState": "NEW",
+    "Workflow": {
+        "Status": "NEW"
+    },
+    "RecordState": "ACTIVE",
+    "Vulnerabilities": [
+        {
+            "Id": "CVE-2019-10247",
+            "VulnerablePackages": [
+                {
+                    "Name": "org.eclipse.jetty:jetty-server",
+                    "Version": "8.1.14.v20131031",
+                    "Epoch": "0",
+                    "PackageManager": "JAR",
+                    "FilePath": "/usr/lib/jvm/java-8-oracle/lib/missioncontrol/plugins/org.eclipse.jetty.server_8.1.14.v20131031.jar",
+                    "FixedInVersion": "9.4.17.v20190418",
+                    "Remediation": "Update jetty-server to 9.4.17.v20190418"
+                }
+            ],
+            "Cvss": [
+                {
+                    "Version": "2.0",
+                    "BaseScore": 5,
+                    "BaseVector": "AV:N/AC:L/Au:N/C:P/I:N/A:N",
+                    "Source": "NVD"
+                },
+                {
+                    "Version": "3.1",
+                    "BaseScore": 5.3,
+                    "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+                    "Source": "NVD"
+                },
+                {
+                    "Version": "3.1",
+                    "BaseScore": 5.3,
+                    "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+                    "Source": "NVD"
+                }
+            ],
+            "Vendor": {
+                "Name": "NVD",
+                "Url": "https://nvd.nist.gov/vuln/detail/CVE-2019-10247",
+                "VendorSeverity": "MEDIUM",
+                "VendorCreatedAt": "2019-04-22T20:29:00Z",
+                "VendorUpdatedAt": "2022-04-22T20:09:00Z"
+            },
+            "ReferenceUrls": [
+                "https://lists.apache.org/thread.html/053d9ce4d579b02203db18545fee5e33f35f2932885459b74d1e4272@%3Cissues.activemq.apache.org%3E",
+                "https://www.oracle.com/security-alerts/cpuapr2020.html",
+                "https://www.oracle.com/technetwork/security-advisory/cpuoct2019-5072832.html",
+                "https://www.oracle.com/security-alerts/cpuApr2021.html",
+                "https://www.oracle.com/security-alerts/cpuoct2020.html",
+                "https://lists.apache.org/thread.html/bcce5a9c532b386c68dab2f6b3ce8b0cc9b950ec551766e76391caa3@%3Ccommits.nifi.apache.org%3E",
+                "https://lists.apache.org/thread.html/ac51944aef91dd5006b8510b0bef337adaccfe962fb90e7af9c22db4@%3Cissues.activemq.apache.org%3E",
+                "https://www.oracle.com/security-alerts/cpujan2021.html",
+                "https://lists.debian.org/debian-lts-announce/2021/05/msg00016.html",
+                "https://lists.apache.org/thread.html/rca37935d661f4689cb4119f1b3b224413b22be161b678e6e6ce0c69b@%3Ccommits.nifi.apache.org%3E",
+                "https://www.debian.org/security/2021/dsa-4949",
+                "https://lists.apache.org/thread.html/519eb0fd45642dcecd9ff74cb3e71c20a4753f7d82e2f07864b5108f@%3Cdev.drill.apache.org%3E",
+                "https://www.oracle.com/security-alerts/cpujul2020.html",
+                "https://www.oracle.com/security-alerts/cpuapr2022.html",
+                "https://www.oracle.com/security-alerts/cpujan2020.html",
+                "https://lists.apache.org/thread.html/f9bc3e55f4e28d1dcd1a69aae6d53e609a758e34d2869b4d798e13cc@%3Cissues.drill.apache.org%3E",
+                "https://bugs.eclipse.org/bugs/show_bug.cgi?id=546577"
+            ],
+            "FixAvailable": "YES",
+            "ExploitAvailable": "NO"
+        }
+    ],
+    "FindingProviderFields": {
+        "Severity": {
+            "Label": "MEDIUM"
+        },
+        "Types": [
+            "Software and Configuration Checks/Vulnerabilities/CVE"
+        ]
+    }
+},
+{
+    "SchemaVersion": "2018-10-08",
+    "Id": "arn:aws:inspector2:eu-west-1:123456789123:finding/957fcab569b7cfd5faa067a3be3c0728",
+    "ProductArn": "arn:aws:securityhub:eu-west-1::product/aws/inspector",
+    "ProductName": "Inspector",
+    "CompanyName": "Amazon",
+    "Region": "eu-west-1",
+    "GeneratorId": "AWSInspector",
+    "AwsAccountId": "123456789123",
+    "Types": [
+        "Software and Configuration Checks/Vulnerabilities/CVE"
+    ],
+    "FirstObservedAt": "2023-08-30T20:07:14Z",
+    "LastObservedAt": "2023-09-15T07:00:24Z",
+    "CreatedAt": "2023-08-30T20:07:14Z",
+    "UpdatedAt": "2023-09-15T07:00:24Z",
+    "Severity": {
+        "Label": "MEDIUM",
+        "Normalized": 40
+    },
+    "Title": "CVE-2023-26048 - org.eclipse.jetty:jetty-server",
+    "Description": "Jetty is a java based web server and servlet engine. In affected versions servlets with multipart support (e.g. annotated with `@MultipartConfig`) that call `HttpServletRequest.getParameter()` or `HttpServletRequest.getParts()` may cause `OutOfMemoryError` when the client sends a multipart request with a part that has a name but no filename and very large content. This happens even with the default settings of `fileSizeThreshold=0` which should stream the whole part content to disk. An attacker client may send a large multipart request and cause the server to throw `OutOfMemoryError`. However, the server may be able to recover after the `OutOfMemoryError` and continue its service -- although it may take some time. This issue has been patched in versions 9.4.51, 10.0.14, and 11.0.14. Users are advised to upgrade. Users unable to upgrade may set the multipart parameter `maxRequestSize` which must be set to a non-negative value, so the whole multipart content is limited (although still read into memory).",
+    "Remediation": {
+        "Recommendation": {
+            "Text": "Remediation is available. Please refer to the Fixed version in the vulnerability details section above.For detailed remediation guidance for each of the affected packages, refer to the vulnerabilities section of the detailed finding JSON."
+        }
+    },
+    "ProductFields": {
+        "aws/inspector/ProductVersion": "2",
+        "aws/inspector/FindingStatus": "ACTIVE",
+        "aws/inspector/inspectorScore": "5.3",
+        "aws/inspector/instanceId": "i-0asd2da21c8csd28s",
+        "aws/inspector/resources/1/resourceDetails/awsEc2InstanceDetails/platform": "UBUNTU_20_04",
+        "aws/securityhub/FindingId": "arn:aws:securityhub:eu-west-1::product/aws/inspector/arn:aws:inspector2:eu-west-1:123456789123:finding/957fcab569b7cfd5faa067a3be3c0728",
+        "aws/securityhub/ProductName": "Inspector",
+        "aws/securityhub/CompanyName": "Amazon"
+    },
+    "Resources": [
+        {
+            "Type": "AwsEc2Instance",
+            "Id": "arn:aws:ec2:eu-west-1:123456789123:instance/i-0asd2da21c8csd28s",
+            "Partition": "aws",
+            "Region": "eu-west-1",
+            "Tags": {
+                "Name": "MyServer1"
+            },
+            "Details": {
+                "AwsEc2Instance": {
+                    "Type": "m5d.large",
+                    "ImageId": "ami-1234shgh268csd28s",
+                    "IpV4Addresses": [
+                        "123.123.123.123",
+                        "172.31.0.31"
+                    ],
+                    "KeyName": "MySSHkey",
+                    "IamInstanceProfileArn": "arn:aws:iam::123456789123:instance-profile/AmazonSSMRole",
+                    "VpcId": "vpc-12kk2qwe",
+                    "SubnetId": "subnet-s12u28as",
+                    "LaunchedAt": "2023-08-30T05:09:41Z"
+                }
+            }
+        }
+    ],
+    "WorkflowState": "NEW",
+    "Workflow": {
+        "Status": "NEW"
+    },
+    "RecordState": "ACTIVE",
+    "Vulnerabilities": [
+        {
+            "Id": "CVE-2023-26048",
+            "VulnerablePackages": [
+                {
+                    "Name": "org.eclipse.jetty:jetty-server",
+                    "Version": "8.1.14.v20131031",
+                    "Epoch": "0",
+                    "PackageManager": "JAR",
+                    "FilePath": "/usr/lib/jvm/java-8-oracle/lib/missioncontrol/plugins/org.eclipse.jetty.server_8.1.14.v20131031.jar",
+                    "FixedInVersion": "12.0.0.beta0",
+                    "Remediation": "Update jetty-server to 12.0.0.beta0"
+                }
+            ],
+            "Cvss": [
+                {
+                    "Version": "3.1",
+                    "BaseScore": 5.3,
+                    "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+                    "Source": "NVD"
+                },
+                {
+                    "Version": "3.1",
+                    "BaseScore": 5.3,
+                    "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+                    "Source": "NVD"
+                }
+            ],
+            "Vendor": {
+                "Name": "NVD",
+                "Url": "https://nvd.nist.gov/vuln/detail/CVE-2023-26048",
+                "VendorSeverity": "MEDIUM",
+                "VendorCreatedAt": "2023-04-18T21:15:00Z",
+                "VendorUpdatedAt": "2023-05-26T20:15:00Z"
+            },
+            "FixAvailable": "YES",
+            "ExploitAvailable": "YES"
+        }
+    ],
+    "FindingProviderFields": {
+        "Severity": {
+            "Label": "MEDIUM"
+        },
+        "Types": [
+            "Software and Configuration Checks/Vulnerabilities/CVE"
+        ]
+    }
+},
+{
+    "SchemaVersion": "2018-10-08",
+    "Id": "arn:aws:inspector2:eu-west-1:123456789123:finding/723630f6ce983dbf1b8d2a5f3d6df888",
+    "ProductArn": "arn:aws:securityhub:eu-west-1::product/aws/inspector",
+    "ProductName": "Inspector",
+    "CompanyName": "Amazon",
+    "Region": "eu-west-1",
+    "GeneratorId": "AWSInspector",
+    "AwsAccountId": "123456789123",
+    "Types": [
+        "Software and Configuration Checks/Vulnerabilities/CVE"
+    ],
+    "FirstObservedAt": "2023-08-30T20:07:14Z",
+    "LastObservedAt": "2023-09-15T07:00:24Z",
+    "CreatedAt": "2023-08-30T20:07:14Z",
+    "UpdatedAt": "2023-09-15T07:00:24Z",
+    "Severity": {
+        "Label": "HIGH",
+        "Normalized": 70
+    },
+    "Title": "CVE-2021-28165 - org.eclipse.jetty:jetty-io",
+    "Description": "In Eclipse Jetty 7.2.2 to 9.4.38, 10.0.0.alpha0 to 10.0.1, and 11.0.0.alpha0 to 11.0.1, CPU usage can reach 100% upon receiving a large invalid TLS frame.",
+    "Remediation": {
+        "Recommendation": {
+            "Text": "Remediation is available. Please refer to the Fixed version in the vulnerability details section above.For detailed remediation guidance for each of the affected packages, refer to the vulnerabilities section of the detailed finding JSON."
+        }
+    },
+    "ProductFields": {
+        "aws/inspector/ProductVersion": "2",
+        "aws/inspector/FindingStatus": "ACTIVE",
+        "aws/inspector/inspectorScore": "7.5",
+        "aws/inspector/instanceId": "i-0asd2da21c8csd28s",
+        "aws/inspector/resources/1/resourceDetails/awsEc2InstanceDetails/platform": "UBUNTU_20_04",
+        "aws/securityhub/FindingId": "arn:aws:securityhub:eu-west-1::product/aws/inspector/arn:aws:inspector2:eu-west-1:123456789123:finding/723630f6ce983dbf1b8d2a5f3d6df888",
+        "aws/securityhub/ProductName": "Inspector",
+        "aws/securityhub/CompanyName": "Amazon"
+    },
+    "Resources": [
+        {
+            "Type": "AwsEc2Instance",
+            "Id": "arn:aws:ec2:eu-west-1:123456789123:instance/i-0asd2da21c8csd28s",
+            "Partition": "aws",
+            "Region": "eu-west-1",
+            "Tags": {
+                "Name": "MyServer1"
+            },
+            "Details": {
+                "AwsEc2Instance": {
+                    "Type": "m5d.large",
+                    "ImageId": "ami-1234shgh268csd28s",
+                    "IpV4Addresses": [
+                        "123.123.123.123",
+                        "172.31.0.31"
+                    ],
+                    "KeyName": "MySSHkey",
+                    "IamInstanceProfileArn": "arn:aws:iam::123456789123:instance-profile/AmazonSSMRole",
+                    "VpcId": "vpc-12kk2qwe",
+                    "SubnetId": "subnet-s12u28as",
+                    "LaunchedAt": "2023-08-30T05:09:41Z"
+                }
+            }
+        }
+    ],
+    "WorkflowState": "NEW",
+    "Workflow": {
+        "Status": "NEW"
+    },
+    "RecordState": "ACTIVE",
+    "Vulnerabilities": [
+        {
+            "Id": "CVE-2021-28165",
+            "VulnerablePackages": [
+                {
+                    "Name": "org.eclipse.jetty:jetty-io",
+                    "Version": "8.1.14.v20131031",
+                    "Epoch": "0",
+                    "PackageManager": "JAR",
+                    "FilePath": "/usr/lib/jvm/java-8-oracle/lib/missioncontrol/plugins/org.eclipse.jetty.io_8.1.14.v20131031.jar",
+                    "FixedInVersion": "11.0.2",
+                    "Remediation": "Update jetty-io to 11.0.2"
+                }
+            ],
+            "Cvss": [
+                {
+                    "Version": "2.0",
+                    "BaseScore": 7.8,
+                    "BaseVector": "AV:N/AC:L/Au:N/C:N/I:N/A:C",
+                    "Source": "NVD"
+                },
+                {
+                    "Version": "3.1",
+                    "BaseScore": 7.5,
+                    "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                    "Source": "NVD"
+                },
+                {
+                    "Version": "3.1",
+                    "BaseScore": 7.5,
+                    "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                    "Source": "NVD"
+                }
+            ],
+            "Vendor": {
+                "Name": "NVD",
+                "Url": "https://nvd.nist.gov/vuln/detail/CVE-2021-28165",
+                "VendorSeverity": "HIGH",
+                "VendorCreatedAt": "2021-04-01T15:15:00Z",
+                "VendorUpdatedAt": "2022-07-29T17:05:00Z"
+            },
+            "ReferenceUrls": [
+                "https://lists.apache.org/thread.html/r7c40fb3a66a39b6e6c83b0454bc6917ffe6c69e3131322be9c07a1da@%3Cissues.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r6f256a1d15505f79f4050a69bb8f27b34cb353604dd2f765c9da5df7@%3Cjira.kafka.apache.org%3E",
+                "https://lists.apache.org/thread.html/r9db72e9c33b93eba45a214af588f1d553839b5c3080fc913854a49ab@%3Cnotifications.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/r520c56519b8820955a86966f499e7a0afcbcf669d6f7da59ef1eb155@%3Ccommits.pulsar.apache.org%3E",
+                "https://lists.apache.org/thread.html/ra9dd15ba8a4fb7e42c7fe948a6d6b3868fd6bbf8e3fb37fcf33b2cd0@%3Cnotifications.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/r90327f55db8f1d079f9a724aabf1f5eb3c00c1de49dc7fd04cad1ebc@%3Ccommits.pulsar.apache.org%3E",
+                "https://lists.apache.org/thread.html/r5b3693da7ecb8a75c0e930b4ca26a5f97aa0207d9dae4aa8cc65fe6b@%3Cissues.ignite.apache.org%3E",
+                "https://lists.apache.org/thread.html/rd0471252aeb3384c3cfa6d131374646d4641b80dd313e7b476c47a9c@%3Cissues.solr.apache.org%3E",
+                "https://lists.apache.org/thread.html/re0545ecced2d468c94ce4dcfa37d40a9573cc68ef5f6839ffca9c1c1@%3Ccommits.hbase.apache.org%3E",
+                "https://lists.apache.org/thread.html/rc4779abc1cface47e956cf9f8910f15d79c24477e7b1ac9be076a825@%3Cjira.kafka.apache.org%3E",
+                "https://lists.apache.org/thread.html/r002258611ed0c35b82b839d284b43db9dcdec120db8afc1c993137dc@%3Cnotifications.zookeeper.apache.org%3E",
+                "https://www.oracle.com/security-alerts/cpuoct2021.html",
+                "https://lists.apache.org/thread.html/r06d54a297cb8217c66e5190912a955fb870ba47da164002bf2baffe5@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/rb2d34abb67cdf525945fe4b821c5cdbca29a78d586ae1f9f505a311c@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/rd755dfe5f658c42704540ad7950cebd136739089c3231658e398cf38@%3Cjira.kafka.apache.org%3E",
+                "https://lists.apache.org/thread.html/rdde34d53aa80193cda016272d61e6749f8a9044ccb37a30768938f7e@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/ra21b3e6bd9669377139fe33fb46edf6fece3f31375bc42a0dcc964b2@%3Cnotifications.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/r0a241b0649beef90d422b42a26a2470d336e59e66970eafd54f9c3e2@%3Ccommits.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/r72bf813ed4737196ea3ed26494e949577be587fd5939fe8be09907c7@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/rc6c43c3180c0efe00497c73dd374cd34b62036cb67987ad42c1f2dce@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r05db8e0ef01e1280cc7543575ae0fa1c2b4d06a8b928916ef65dd2ad@%3Creviews.spark.apache.org%3E",
+                "https://www.oracle.com/security-alerts/cpujan2022.html",
+                "https://lists.apache.org/thread.html/r33eb3889ca0aa12720355e64fc2f8f1e8c0c28a4d55b3b4b8891becb@%3Ccommits.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/rfc9f51b4e21022b3cd6cb6f90791a6a6999560212e519b5f09db0aed@%3Ccommits.pulsar.apache.org%3E",
+                "https://lists.apache.org/thread.html/re3a1617d16a7367f767b8209b2151f4c19958196354b39568c532f26@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/rf1b02dfccd27b8bbc3afd119b212452fa32e9ed7d506be9357a3a7ec@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r17e26cf9a1e3cbc09522d15ece5d7c7a00cdced7641b92a22a783287@%3Cissues.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/re577736ca7da51952c910b345a500b7676ea9931c9b19709b87f292b@%3Cissues.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/r077b76cafb61520c14c87c4fc76419ed664002da0ddac5ad851ae7e7@%3Cjira.kafka.apache.org%3E",
+                "https://lists.apache.org/thread.html/r83453ec252af729996476e5839d0b28f07294959d60fea1bd76f7d81@%3Cissues.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r4abbd760d24bab2b8f1294c5c9216ae915100099c4391ad64e9ae38b@%3Cdev.hbase.apache.org%3E",
+                "https://lists.apache.org/thread.html/r81748d56923882543f5be456043c67daef84d631cf54899082058ef1@%3Cjira.kafka.apache.org%3E",
+                "https://lists.apache.org/thread.html/r694e57d74fcaa48818a03c282aecfa13ae68340c798dfcb55cb7acc7@%3Cdev.kafka.apache.org%3E",
+                "https://lists.apache.org/thread.html/r0bf3aa065abd23960fc8bdc8090d6bc00d5e391cf94ec4e1f4537ae3@%3Cjira.kafka.apache.org%3E",
+                "https://lists.apache.org/thread.html/rbba0b02a3287e34af328070dd58f7828612f96e2e64992137f4dc63d@%3Cnotifications.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/r411d75dc6bcefadaaea246549dd18e8d391a880ddf28a796f09ce152@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/rbcd7b477df55857bb6cae21fcc4404683ac98aac1a47551f0dc55486@%3Cissues.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/rb8f5a6ded384eb00608e6137e87110e7dd7d5054cc34561cb89b81af@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r4891d45625cc522fe0eb764ac50d48bcca9c0db4805ea4a998d4c225@%3Cissues.hbase.apache.org%3E",
+                "https://lists.apache.org/thread.html/raea6e820644e8c5a577f77d4e2044f8ab52183c2536b00c56738beef@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r71031d0acb1de55c9ab32f4750c50ce2f28543252e887ca03bd5621e@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r65daad30d13f7c56eb5c3d7733ad8dddbf62c469175410777a78d812@%3Cjira.kafka.apache.org%3E",
+                "https://lists.apache.org/thread.html/r6b070441871a4e6ce8bb63e190c879bb60da7c5e15023de29ebd4f9f@%3Cjira.kafka.apache.org%3E",
+                "https://www.oracle.com//security-alerts/cpujul2021.html",
+                "https://lists.apache.org/thread.html/r0f02034a33076fd7243cf3a8807d2766e373f5cb2e7fd0c9a78f97c4@%3Cissues.hbase.apache.org%3E",
+                "https://lists.apache.org/thread.html/r401b1c592f295b811608010a70792b11c91885b72af9f9410cffbe35@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r4a66bfbf62281e31bc1345ebecbfd96f35199eecd77bfe4e903e906f@%3Cissues.ignite.apache.org%3E",
+                "https://lists.apache.org/thread.html/r7bf7004c18c914fae3d5a6a0191d477e5b6408d95669b3afbf6efa36@%3Ccommits.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/r0a4797ba6ceea8074f47574a4f3cc11493d514c1fab8203ebd212add@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/rdf4fe435891e8c35e70ea5da033b4c3da78760f15a8c4212fad89d9f@%3Ccommits.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/rb1624b9777a3070135e94331a428c6653a6a1edccd56fa9fb7a547f2@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/rc907ed7b089828364437de5ed57fa062330970dc1bc5cd214b711f77@%3Ccommits.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/rfd3ff6e66b6bbcfb2fefa9f5a20328937c0369b2e142e3e1c6774743@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/rd6c1eb9a8a94b3ac8a525d74d792924e8469f201b77e1afcf774e7a6@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/ree1895a256a9db951e0d97a76222909c2e1f28c1a3d89933173deed6@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/rb66ed0b4bb74836add60dd5ddf9172016380b2aeefb7f96fe348537b@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/re6614b4fe7dbb945409daadb9e1cc73c02383df68bf9334736107a6e@%3Cdev.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/r6ce2907b2691c025250ba010bc797677ef78d5994d08507a2e5477c9@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/rd9ea411a58925cc82c32e15f541ead23cb25b4b2d57a2bdb0341536e@%3Cjira.kafka.apache.org%3E",
+                "https://lists.apache.org/thread.html/ra210e38ae0bf615084390b26ba01bb5d66c0a76f232277446ae0948a@%3Cnotifications.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/r5f172f2dd8fb02f032ef4437218fd4f610605a3dd4f2a024c1e43b94@%3Cissues.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/r5d1f16dca2e010193840068f1a1ec17b7015e91acc646607cbc0a4da@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/rb11a13e623218c70b9f2a2d0d122fdaaf905e04a2edcd23761894464@%3Cnotifications.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/rb00345f6b1620b553d2cc1acaf3017aa75cea3776b911e024fa3b187@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r03ca0b69db1e3e5f72fe484b71370d537cd711cbf334e2913332730a@%3Cissues.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r940f15db77a96f6aea92d830bc94d8d95f26cc593394d144755824da@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r2ea2f0541121f17e470a0184843720046c59d4bde6d42bf5ca6fad81@%3Cissues.solr.apache.org%3E",
+                "https://lists.apache.org/thread.html/r4b1fef117bccc7f5fd4c45fd2cabc26838df823fe5ca94bc42a4fd46@%3Cissues.ignite.apache.org%3E",
+                "https://lists.apache.org/thread.html/rdbf2a2cd1800540ae50dd78b57411229223a6172117d62b8e57596aa@%3Cissues.hbase.apache.org%3E",
+                "https://lists.apache.org/thread.html/r9fae5a4087d9ed1c9d4f0c7493b6981a4741cfb4bebb2416da638424@%3Cissues.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r0841b06b48324cfc81325de3c05a92e53f997185f9d71ff47734d961@%3Cissues.solr.apache.org%3E",
+                "https://lists.apache.org/thread.html/r111f1ce28b133a8090ca4f809a1bdf18a777426fc058dc3a16c39c66@%3Cissues.solr.apache.org%3E",
+                "https://lists.apache.org/thread.html/r6ac9e263129328c0db9940d72b4a6062e703c58918dd34bd22cdf8dd@%3Cissues.ignite.apache.org%3E",
+                "https://lists.apache.org/thread.html/r0cd1a5e3f4ad4770b44f8aa96572fc09d5b35bec149c0cc247579c42@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/rcdea97f4d3233298296aabc103c9fcefbf629425418c2b69bb16745f@%3Ccommits.pulsar.apache.org%3E",
+                "https://lists.apache.org/thread.html/r6535b2beddf0ed2d263ab64ff365a5f790df135a1a2f45786417adb7@%3Cdev.kafka.apache.org%3E",
+                "https://lists.apache.org/thread.html/rf6de4c249bd74007f5f66f683c110535f46e719d2f83a41e8faf295f@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/rf99f9a25ca24fe519c9346388f61b5b3a09be31b800bf37f01473ad7@%3Cnotifications.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/r7189bf41cb0c483629917a01cf296f9fbdbda3987084595192e3845d@%3Cissues.hbase.apache.org%3E",
+                "https://lists.apache.org/thread.html/r40136c2010fccf4fb2818a965e5d7ecca470e5f525c232ec5b8eb83a@%3Cjira.kafka.apache.org%3E",
+                "https://lists.apache.org/thread.html/r23785214d47673b811ef119ca3a40f729801865ea1e891572d15faa6@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r47a7542ab61da865fff3db0fe74bfe76c89a37b6e6d2c2a423f8baee@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r780c3c210a05c5bf7b4671303f46afc3fe56758e92864e1a5f0590d0@%3Cjira.kafka.apache.org%3E",
+                "https://lists.apache.org/thread.html/r2afc72af069a7fe89ca2de847f3ab3971cb1d668a9497c999946cd78@%3Ccommits.spark.apache.org%3E",
+                "https://www.oracle.com/security-alerts/cpuapr2022.html",
+                "https://lists.apache.org/thread.html/rbab9e67ec97591d063905bc7d4743e6a673f1bc457975fc0445ac97f@%3Cissues.hbase.apache.org%3E",
+                "https://lists.apache.org/thread.html/rbc075a4ac85e7a8e47420b7383f16ffa0af3b792b8423584735f369f@%3Cissues.solr.apache.org%3E",
+                "https://lists.apache.org/thread.html/rdfe5f1c071ba9dadba18d7fb0ff13ea6ecb33da624250c559999eaeb@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r56e5568ac73daedcb3b5affbb4b908999f03d3c1b1ada3920b01e959@%3Cdev.zookeeper.apache.org%3E",
+                "https://lists.apache.org/thread.html/rd7c8fb305a8637480dc943ba08424c8992dccad018cd1405eb2afe0e@%3Cdev.ignite.apache.org%3E",
+                "https://lists.apache.org/thread.html/ra50519652b0b7f869a14fbfb4be9758a29171d7fe561bb7e036e8449@%3Cissues.hbase.apache.org%3E",
+                "https://lists.apache.org/thread.html/r64ff94118f6c80e6c085c6e2d51bbb490eaefad0642db8c936e4f0b7@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r746434be6abff9ad321ff54ecae09e1f09c1c7c139021f40a5774090@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r9974f64723875052e02787b2a5eda689ac5247c71b827d455e5dc9a6@%3Cissues.solr.apache.org%3E",
+                "https://lists.apache.org/thread.html/rc4dbc9907b0bdd634200ac90a15283d9c143c11af66e7ec72128d020@%3Cjira.kafka.apache.org%3E",
+                "https://lists.apache.org/thread.html/r31f591a0deac927ede8ccc3eac4bb92697ee2361bf01549f9e3440ca@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/rd24d8a059233167b4a5aebda4b3534ca1d86caa8a85b10a73403ee97@%3Ccommits.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/rae8bbc5a516f3e21b8a55e61ff6ad0ced03bdbd116d2170a3eed9f5c@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r769155244ca2da2948a44091bb3bb9a56e7e1c71ecc720b8ecf281f0@%3Creviews.spark.apache.org%3E",
+                "https://www.debian.org/security/2021/dsa-4949",
+                "https://lists.apache.org/thread.html/r9b793db9f395b546e66fb9c44fe1cd75c7755029e944dfee31b8b779@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r942f4a903d0abb25ac75c592e57df98dea51350e8589269a72fd7913@%3Cissues.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/r2f2d9c3b7cc750a6763d6388bcf5db0c7b467bd8be6ac4d6aea4f0cf@%3Creviews.spark.apache.org%3E",
+                "https://lists.apache.org/thread.html/rbd9a837a18ca57ac0d9b4165a6eec95ee132f55d025666fe41099f33@%3Creviews.spark.apache.org%3E"
+            ],
+            "FixAvailable": "YES",
+            "ExploitAvailable": "YES"
+        }
+    ],
+    "FindingProviderFields": {
+        "Severity": {
+            "Label": "HIGH"
+        },
+        "Types": [
+            "Software and Configuration Checks/Vulnerabilities/CVE"
+        ]
+    }
+},
+{
+    "SchemaVersion": "2018-10-08",
+    "Id": "arn:aws:inspector2:eu-west-1:123456789123:finding/71344c6204b894be7a0c28bed223bf9b",
+    "ProductArn": "arn:aws:securityhub:eu-west-1::product/aws/inspector",
+    "ProductName": "Inspector",
+    "CompanyName": "Amazon",
+    "Region": "eu-west-1",
+    "GeneratorId": "AWSInspector",
+    "AwsAccountId": "123456789123",
+    "Types": [
+        "Software and Configuration Checks/Vulnerabilities/CVE"
+    ],
+    "FirstObservedAt": "2023-08-30T20:07:14Z",
+    "LastObservedAt": "2023-09-15T07:00:24Z",
+    "CreatedAt": "2023-08-30T20:07:14Z",
+    "UpdatedAt": "2023-09-15T07:00:24Z",
+    "Severity": {
+        "Label": "MEDIUM",
+        "Normalized": 40
+    },
+    "Title": "CVE-2023-26049 - org.eclipse.jetty:jetty-server, org.eclipse.jetty:jetty-http",
+    "Description": "Jetty is a java based web server and servlet engine. Nonstandard cookie parsing in Jetty may allow an attacker to smuggle cookies within other cookies, or otherwise perform unintended behavior by tampering with the cookie parsing mechanism. If Jetty sees a cookie VALUE that starts with `\"` (double quote), it will continue to read the cookie string until it sees a closing quote -- even if a semicolon is encountered. So, a cookie header such as: `DISPLAY_LANGUAGE=\"b; JSESSIONID=1337; c=d\"` will be parsed as one cookie, with the name DISPLAY_LANGUAGE and a value of b; JSESSIONID=1337; c=d instead of 3 separate cookies. This has security implications because if, say, JSESSIONID is an HttpOnly cookie, and the DISPLAY_LANGUAGE cookie value is rendered on the page, an attacker can smuggle the JSESSIONID cookie into the DISPLAY_LANGUAGE cookie and thereby exfiltrate it. This is significant when an intermediary is enacting some policy based on cookies, so a smuggled cookie can bypass that policy yet still ...Truncated",
+    "Remediation": {
+        "Recommendation": {
+            "Text": "Remediation is available. Please refer to the Fixed version in the vulnerability details section above.For detailed remediation guidance for each of the affected packages, refer to the vulnerabilities section of the detailed finding JSON."
+        }
+    },
+    "ProductFields": {
+        "aws/inspector/ProductVersion": "2",
+        "aws/inspector/FindingStatus": "ACTIVE",
+        "aws/inspector/inspectorScore": "5.3",
+        "aws/inspector/instanceId": "i-0asd2da21c8csd28s",
+        "aws/inspector/resources/1/resourceDetails/awsEc2InstanceDetails/platform": "UBUNTU_20_04",
+        "aws/securityhub/FindingId": "arn:aws:securityhub:eu-west-1::product/aws/inspector/arn:aws:inspector2:eu-west-1:123456789123:finding/71344c6204b894be7a0c28bed223bf9b",
+        "aws/securityhub/ProductName": "Inspector",
+        "aws/securityhub/CompanyName": "Amazon"
+    },
+    "Resources": [
+        {
+            "Type": "AwsEc2Instance",
+            "Id": "arn:aws:ec2:eu-west-1:123456789123:instance/i-0asd2da21c8csd28s",
+            "Partition": "aws",
+            "Region": "eu-west-1",
+            "Tags": {
+                "Name": "MyServer1"
+            },
+            "Details": {
+                "AwsEc2Instance": {
+                    "Type": "m5d.large",
+                    "ImageId": "ami-1234shgh268csd28s",
+                    "IpV4Addresses": [
+                        "123.123.123.123",
+                        "172.31.0.31"
+                    ],
+                    "KeyName": "MySSHkey",
+                    "IamInstanceProfileArn": "arn:aws:iam::123456789123:instance-profile/AmazonSSMRole",
+                    "VpcId": "vpc-12kk2qwe",
+                    "SubnetId": "subnet-s12u28as",
+                    "LaunchedAt": "2023-08-30T05:09:41Z"
+                }
+            }
+        }
+    ],
+    "WorkflowState": "NEW",
+    "Workflow": {
+        "Status": "NEW"
+    },
+    "RecordState": "ACTIVE",
+    "Vulnerabilities": [
+        {
+            "Id": "CVE-2023-26049",
+            "VulnerablePackages": [
+                {
+                    "Name": "org.eclipse.jetty:jetty-server",
+                    "Version": "8.1.14.v20131031",
+                    "Epoch": "0",
+                    "PackageManager": "JAR",
+                    "FilePath": "/usr/lib/jvm/java-8-oracle/lib/missioncontrol/plugins/org.eclipse.jetty.server_8.1.14.v20131031.jar",
+                    "FixedInVersion": "12.0.0.beta0",
+                    "Remediation": "Update jetty-server to 12.0.0.beta0"
+                },
+                {
+                    "Name": "org.eclipse.jetty:jetty-http",
+                    "Version": "8.1.14.v20131031",
+                    "Epoch": "0",
+                    "PackageManager": "JAR",
+                    "FilePath": "/usr/lib/jvm/java-8-oracle/lib/missioncontrol/plugins/org.eclipse.jetty.http_8.1.14.v20131031.jar",
+                    "FixedInVersion": "12.0.0.beta0",
+                    "Remediation": "Update jetty-http to 12.0.0.beta0"
+                }
+            ],
+            "Cvss": [
+                {
+                    "Version": "3.1",
+                    "BaseScore": 5.3,
+                    "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+                    "Source": "NVD"
+                },
+                {
+                    "Version": "3.1",
+                    "BaseScore": 5.3,
+                    "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+                    "Source": "NVD"
+                }
+            ],
+            "Vendor": {
+                "Name": "NVD",
+                "Url": "https://nvd.nist.gov/vuln/detail/CVE-2023-26049",
+                "VendorSeverity": "MEDIUM",
+                "VendorCreatedAt": "2023-04-18T21:15:00Z",
+                "VendorUpdatedAt": "2023-05-26T20:15:00Z"
+            },
+            "ReferenceUrls": [
+                "https://www.rfc-editor.org/rfc/rfc6265",
+                "https://www.rfc-editor.org/rfc/rfc2965"
+            ],
+            "FixAvailable": "YES",
+            "ExploitAvailable": "YES"
+        }
+    ],
+    "FindingProviderFields": {
+        "Severity": {
+            "Label": "MEDIUM"
+        },
+        "Types": [
+            "Software and Configuration Checks/Vulnerabilities/CVE"
+        ]
+    }
+}
+]
