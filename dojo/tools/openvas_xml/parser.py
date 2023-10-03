@@ -34,7 +34,7 @@ class OpenVASXMLParser(object):
             raise NamespaceErr(
                 "This doesn't seem to be a valid Greenbone OpenVAS xml file."
             )
-        report=root.find("report")
+        report = root.find("report")
         results = report.find("results")
         for result in results:
             for finding in result:
