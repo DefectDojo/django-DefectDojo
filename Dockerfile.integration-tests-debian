@@ -66,8 +66,6 @@ RUN \
 
 RUN pip install --no-cache-dir selenium==4.9.0 requests
 
-# Install dependencies for Google Chrome
-RUN apt-get -y install xvfb
 # Install the latest Google Chrome stable release
 WORKDIR /opt/chrome
 RUN \
@@ -75,8 +73,7 @@ RUN \
   wget $chrome_url && \
   unzip -j chrome-linux64.zip chrome-linux64/chrome && \
   rm -rf chrome-linux64.zip && \
-  chmod -R 0755 . && \
-  ln -s /opt/chrome/chrome /usr/local/bin/chrome
+  chmod -R 0755 .
 
 # Installing the latest stable Google Chrome release
 WORKDIR /opt/chrome-driver
