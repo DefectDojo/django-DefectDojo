@@ -26,4 +26,9 @@ else
 fi
 
 echo "Starting docker compose with profile $PROFILE in the foreground ..."
-docker-compose --profile $PROFILE --env-file ./docker/environments/$PROFILE.env up --no-deps
+
+# For Docker Compose V1 [From July 2023 Compose V1 stopped receiving updates. Reference: https://docs.docker.com/compose/reference/]
+# docker-compose --profile $PROFILE --env-file ./docker/environments/$PROFILE.env up --no-deps
+
+# Compose V2 integrates compose functions into the Docker platform, continuing to support most of the previous docker-compose features and flags. You can run Compose V2 by replacing the hyphen (-) with a space, using docker compose, instead of docker-compose.
+docker compose --profile $PROFILE --env-file ./docker/environments/$PROFILE.env up --no-deps
