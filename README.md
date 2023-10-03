@@ -41,20 +41,7 @@ Try out the demo server at [demo.defectdojo.org](https://demo.defectdojo.org)
 
 Log in with `admin / 1Defectdojo@demo#appsec`. Please note that the demo is publicly accessible and regularly reset. Do not put sensitive data in the demo.
 
-## Quick Start
-
-```sh
-git clone https://github.com/DefectDojo/django-DefectDojo
-cd django-DefectDojo
-# building
-./dc-build.sh
-# running (for other profiles besides postgres-redis look at https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md)
-./dc-up.sh postgres-redis
-# obtain admin credentials. the initializer can take up to 3 minutes to run
-# use docker-compose logs -f initializer to track progress
-docker-compose logs initializer | grep "Admin password:"
-```
-## If you are using Compose V2
+## Quick Start for Compose V2
 For Docker Compose V1 [From July 2023 Compose V1 stopped receiving updates. Reference: https://docs.docker.com/compose/reference/]
 
 Compose V2 integrates compose functions into the Docker platform, continuing to support most of the previous docker-compose features and flags. You can run Compose V2 by replacing the hyphen (-) with a space, using docker compose, instead of docker-compose.
@@ -69,6 +56,19 @@ cd django-DefectDojo
 # obtain admin credentials. the initializer can take up to 3 minutes to run
 # use docker-compose logs -f initializer to track progress
 docker compose logs initializer | grep "Admin password:"
+```
+## For older verion Composer V1
+You can run Compose V1 by adding the hyphen (-) between docker compose and edit below the files. 
+```sh
+     dc-build.sh
+     dc-down.sh
+     dc-stop.sh
+     dc-unittest.sh
+     dc-up-d.sh
+     dc-up.sh
+     docker/docker-compose-check.sh
+     docker/entrypoint-initializer.sh
+     docker/setEnv.sh
 ```
 
 
