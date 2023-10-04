@@ -57,7 +57,7 @@ cd django-DefectDojo
 # use docker-compose logs -f initializer to track progress
 docker compose logs initializer | grep "Admin password:"
 ```
-## For older verion Composer V1
+## For older verion Compose V1
 You can run Compose V1 by adding the hyphen (-) between docker compose and edit below the files. 
 ```sh
      dc-build.sh
