@@ -2,10 +2,10 @@
 # code: language=Dockerfile
 
 # The code for the build image should be identical with the code in
-# Dockerfile.nginx to use the caching mechanism of Docker.
+# Dockerfile.nginx-alpine to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.11.3-alpine3.16@sha256:9efc6e155f287eb424ede74aeff198be75ae04504b1e42e87ec9f221e7410f2d as base
+FROM python:3.11.5-alpine3.18@sha256:738ac14925d69ff88103c028573de949286c8d5c81afb202954512aa6207bbc2 as base
 FROM base as build
 WORKDIR /app
 RUN \
@@ -16,7 +16,7 @@ RUN \
     bind-tools \
     mysql-client \
     mariadb-dev \
-    postgresql14-client \
+    postgresql15-client \
     xmlsec \
     git \
     util-linux \
@@ -49,7 +49,7 @@ RUN \
     xmlsec \
     git \
     util-linux \
-    postgresql14-client \
+    postgresql15-client \
     curl-dev \
     openssl \
     # needed for integration-tests
