@@ -352,11 +352,9 @@
                       };
                       if (type === 'sort') {
                         return criticals[getDojoExportValueFromTag(data, 'i', 'data-content')]
-                      }
-                      else if (type === 'export') {
+                      } else if (type === 'export') {
                           return getDojoExportValueFromTag(data, 'i', 'data-content')
-                      }
-                      else if (data != undefined||data != null) {
+                      } else if (data != undefined||data != null) {
                           return data
                       }
                       return ""
