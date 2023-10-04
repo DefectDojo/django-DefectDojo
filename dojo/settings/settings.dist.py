@@ -1380,7 +1380,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Jfrog Xray On Demand Binary Scan": ["title", "description", "component_name", "component_version"],
     "CycloneDX Scan": ["vuln_id_from_tool", "component_name", "component_version"],
     "SSLyze Scan (JSON)": ["title", "description"],
-    "Harbor Vulnerability Scan": ["title', 'mitigation"],
+    "Harbor Vulnerability Scan": ["title", "mitigation"],
     "Rusty Hog Scan": ["file_path", "payload"],
     "StackHawk HawkScan": ["vuln_id_from_tool", "component_name", "component_version"],
     "Hydra Scan": ["title", "description"],
