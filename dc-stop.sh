@@ -13,7 +13,7 @@ fi
 # Stopping containers for all configurations
 # The environment must be provided but it doesn't make a difference which one
 
-# For Docker Compose V1 [From July 2023 Compose V1 stopped receiving updates. Reference: https://docs.docker.com/compose/reference/]
+# From July 2023 Compose V1 stopped receiving updates. Reference: https://docs.docker.com/compose/reference/
 # docker-compose --profile mysql-rabbitmq --profile postgres-redis --env-file ./docker/environments/postgres-redis.env stop $1
 
 # Compose V2 integrates compose functions into the Docker platform, continuing to support most of the previous docker-compose features and flags. You can run Compose V2 by replacing the hyphen (-) with a space, using docker compose, instead of docker-compose.
