@@ -17,12 +17,16 @@
 {% block content %}
 <form class="form-horizontal" method="post">{% csrf_token %}
     <fieldset>
-	    <legend>Default Information</legend>
-	    {% include "dojo/form_fields.html" with form=form %}
+        {% block group_form %}
+            <legend>Default Information</legend>
+            {% include "dojo/form_fields.html" with form=form %}
+        {% endblock group_form %}
     </fieldset>
     <fieldset>
-	    <legend>Global Role</legend>
-	    {% include "dojo/form_fields.html" with form=global_role_form %}
+        {% block global_role_form %}
+            <legend>Global Role</legend>
+            {% include "dojo/form_fields.html" with form=global_role_form %}
+        {% endblock global_role_form %}
     </fieldset>
     <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10">

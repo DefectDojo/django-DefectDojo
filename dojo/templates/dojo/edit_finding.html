@@ -46,6 +46,8 @@
                 <input type="hidden" name="return_url" value="{{ return_url }}" />
             {% endif %}
             {% include "dojo/form_fields.html" with form=form %}
+            {% block additional_forms %}
+            {% endblock additional_forms %}
             <span id="original_finding" class="small">
                 {% if finding.duplicate_finding %}
                     [original:

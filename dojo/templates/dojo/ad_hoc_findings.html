@@ -24,6 +24,8 @@
         <form class="form-horizontal" action="{% url 'ad_hoc_finding' pid %}" method="post">
             {% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
+            {% block additional_forms %}
+            {% endblock additional_forms %}
             {%  if jform %}
                 <h4> JIRA </h4>
                 <hr>

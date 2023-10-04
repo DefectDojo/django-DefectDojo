@@ -1380,7 +1380,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Jfrog Xray On Demand Binary Scan": ["title", "description", "component_name", "component_version"],
     "CycloneDX Scan": ["vuln_id_from_tool", "component_name", "component_version"],
     "SSLyze Scan (JSON)": ["title", "description"],
-    "Harbor Vulnerability Scan": ["title"],
+    "Harbor Vulnerability Scan": ["title', 'mitigation"],
     "Rusty Hog Scan": ["file_path", "payload"],
     "StackHawk HawkScan": ["vuln_id_from_tool", "component_name", "component_version"],
     "Hydra Scan": ["title", "description"],
@@ -1475,7 +1475,7 @@ HASHCODE_ALLOWED_FIELDS = [
     "endpoints",
     "unique_id_from_tool",
     "severity",
-    "vuln_id_from_tool",
+    "vuln_id_from_tool', 'mitigation",
 ]
 
 # Adding fields to the hash_code calculation regardless of the previous settings
