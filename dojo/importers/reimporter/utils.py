@@ -240,7 +240,8 @@ def get_or_create_engagement(engagement_id=None, engagement_name=None, product_n
 
     # not found .... create it
     if not auto_create_context:
-        raise ValueError('auto_create_context not True, unable to create non-existing engagement')
+        raise ValueError(f"""auto_create_context not True, unable to create non-existing engagement: 
+                         engagement_id: {engagement_id} engagement_name: {engagement_name}, product: {product_name}""")
     else:
         product = get_or_create_product(product_name, product_type_name, auto_create_context)
 
