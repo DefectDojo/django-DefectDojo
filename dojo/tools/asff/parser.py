@@ -2,6 +2,8 @@ import json
 
 import dateutil
 
+from netaddr import IPAddress
+
 from dojo.models import Endpoint, Finding
 
 SEVERITY_MAPPING = {
@@ -12,22 +14,6 @@ SEVERITY_MAPPING = {
     # The issue must be remediated immediately to avoid it escalating.
     "CRITICAL": "Critical",
 }
-
-
-def is_private_ipv4(ip):
-    parts = ip.split(".")
-    if len(parts) != 4:
-        return False
-    # 10.0.0.0 to 10.255.255.255
-    if parts[0] == "10":
-        return True
-    # 172.16.0.0 to 172.31.255.255
-    if parts[0] == "172" and 16 <= int(parts[1]) <= 31:
-        return True
-    # 192.168.0.0 to 192.168.255.255
-    if parts[0] == "192" and parts[1] == "168":
-        return True
-    return False
 
 
 class AsffParser(object):
@@ -61,7 +47,7 @@ class AsffParser(object):
                 references=references,
                 severity=self.get_severity(item.get("Severity")),
                 active=True,  # TODO: manage attribute 'RecordState'
-                unique_id_from_tool=item.get("Id")
+                unique_id_from_tool=item.get("Id"),
             )
 
             if "Resources" in item:
@@ -82,7 +68,7 @@ class AsffParser(object):
                             #
                             # By limiting our endpoints to private IP addresses, we're ensuring that the data remains
                             # relevant even if the AWS resources undergo changes, and we also ensure a cleaner representation.
-                            if is_private_ipv4(ip):
+                            if IPAddress(ip).is_private():
                                 endpoints.append(Endpoint(host=ip))
                 finding.unsaved_endpoints = endpoints
 
