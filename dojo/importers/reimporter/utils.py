@@ -246,7 +246,8 @@ def get_or_create_engagement(engagement_id=None, engagement_name=None, product_n
         product = get_or_create_product(product_name, product_type_name, auto_create_context)
 
         if not product:
-            raise ValueError('no product, unable to create engagement')
+            raise ValueError(f"""no product whit name: {product_name}, product_type_name: {product_type_name},
+                             auto_create_context: {auto_create_context}, unable to create engagement""")
 
         target_start = timezone.now().date()
         if (target_end is None) or (target_start > target_end):
