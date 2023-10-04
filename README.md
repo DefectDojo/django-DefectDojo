@@ -58,7 +58,7 @@ cd django-DefectDojo
 docker compose logs initializer | grep "Admin password:"
 ```
 ## For Docker Compose V1
-You can run Compose V1 by adding the hyphen (-) between docker compose and edit below the files. 
+You can run Compose V1 by editing the below files to add the hyphen (-) between `docker compose`. 
 ```sh
      dc-build.sh
      dc-down.sh
