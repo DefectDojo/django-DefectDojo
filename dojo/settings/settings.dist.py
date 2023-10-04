@@ -1475,7 +1475,8 @@ HASHCODE_ALLOWED_FIELDS = [
     "endpoints",
     "unique_id_from_tool",
     "severity",
-    "vuln_id_from_tool', 'mitigation",
+    "vuln_id_from_tool",
+    "mitigation",
 ]
 
 # Adding fields to the hash_code calculation regardless of the previous settings
