@@ -1142,7 +1142,7 @@
     <script src="{% static "clipboard/dist/clipboard.min.js" %}"></script>
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="{{request.csp_nonce}}">
         var firstID = {{findings_list.0}};
         var currentID = {{finding.id}};
         var lastID = {{findings_list_lastElement}};
@@ -1220,7 +1220,6 @@
 
             thumbnails.each(function (index) {
                 if ($(this).data('imageurl') == showing) {
-                    console.log(index, thumbnails.length)
                     if (index == thumbnails.length - 1) {
                         // at the end
                         $("img#to_replace").attr('src', $(thumbnails[0]).data('imageurl'));

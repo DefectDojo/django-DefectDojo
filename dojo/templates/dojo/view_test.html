@@ -1564,7 +1564,7 @@
     {{ block.super }}
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
-    <script type="application/javascript">
+    <script type="application/javascript" nonce="{{request.csp_nonce}}">
         {% block datatables_columns %}
             var datatables_columns = [
                 {% if test|has_object_permission:"Test_Edit" or test|has_object_permission:"Test_Delete" %}
@@ -2012,7 +2012,7 @@
                         var fseverity = data['severity'];
                         var fdate = data['date'];
                         var row = $("<tr id='added-" + fid + "' class='success'></tr>");
-                        var link = $('<a></a>');
+                        var link = $('<a rel="noopener noreferrer"></a>');
 
                         link.attr('href', "/stub_finding/" + fid + "/promote");
                         link.text($("input#quick_add_finding").val());
