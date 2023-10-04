@@ -10,6 +10,7 @@ SEVERITY_MAPPING = {
     "MEDIUM": "Medium",  # The issue must be addressed but not urgently.
     "HIGH": "High",  # The issue must be addressed as a priority.
     # The issue must be remediated immediately to avoid it escalating.
+    "CRITICAL": "Critical",
 }
 
 
