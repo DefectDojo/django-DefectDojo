@@ -4,7 +4,6 @@ toc_hide: true
 ---
 ### File Types
 DefectDojo parser accepts Chekov scan data as a .JSON file.
-https://www.checkov.io/2.Basics/CLI%20Command%20Reference.html
 
 JSON files can be created from the Chekov CLI: https://www.checkov.io/2.Basics/CLI%20Command%20Reference.html
 
