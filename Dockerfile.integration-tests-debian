@@ -34,7 +34,7 @@ RUN \
 RUN apt-file update
 COPY docker/install_chrome_dependencies.py install_chrome_dependencies.py
 RUN \
-  missing_chrome_deps=$(python install_chrome_dependencies.py) \
+  missing_chrome_deps=$(python install_chrome_dependencies.py) && \
   apt-get -y install $missing_chrome_deps
 
 # Installing the latest stable Google Chrome driver release
