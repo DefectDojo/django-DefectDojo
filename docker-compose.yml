@@ -138,8 +138,8 @@ services:
     volumes:
       - defectdojo_data:/var/lib/mysql
   postgres:
-    image: postgres:15.4-alpine@sha256:8bc3c893342c766481df5fde58fab6f1a1115b94eb56778126163305243e9709
-    profiles:
+    image: postgres:16.0-alpine@sha256:2ccd6655060d7b06c71f86094e8c7a28bdcc8a80b43baca4b1dabb29cff138a2
+    profiles: 
       - postgres-rabbitmq
       - postgres-redis
     environment:
@@ -149,15 +149,15 @@ services:
     volumes:
       - defectdojo_postgres:/var/lib/postgresql/data
   rabbitmq:
-    image: rabbitmq:3.12.4-alpine@sha256:1db3f856e6628e2ac512a91959437ca5bab5112c856fe730b6b5ff5087e5e3d0
-    profiles:
+    image: rabbitmq:3.12.6-alpine@sha256:a21880dc5e2b4581c0dd762337c7112475a2d8daba697e1c6192923ebad91739
+    profiles: 
       - mysql-rabbitmq
       - postgres-rabbitmq
     volumes:
        - defectdojo_rabbitmq:/var/lib/rabbitmq
   redis:
-    image: redis:7.2.0-alpine@sha256:fd5de2340bc46cbc2241975ab027797c350dec6fd86349e3ac384e3a41be6fee
-    profiles:
+    image: redis:7.2.1-alpine@sha256:9150d86fe2a9d03bbdb15bb9758fa5e3d24632386af8f6eb4d675ee4c976f499
+    profiles: 
       - mysql-redis
       - postgres-redis
     volumes:

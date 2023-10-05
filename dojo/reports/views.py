@@ -28,7 +28,7 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.finding.queries import get_authorized_findings
-from dojo.finding.views import get_filtered_findings
+from dojo.finding.views import BaseListFindings
 
 logger = logging.getLogger(__name__)
 
@@ -807,7 +807,12 @@ def get_findings(request):
             user_has_permission_or_403(request.user, obj, Permissions.Test_View)
 
     request.GET = QueryDict(query)
-    findings = get_filtered_findings(request, pid, eid, tid, filter_name).qs
+    list_findings = BaseListFindings(
+        filter_name=filter_name,
+        product_id=pid,
+        engagement_id=eid,
+        test_id=tid)
+    findings = list_findings.get_fully_filtered_findings(request).qs
 
     return findings, obj
 
@@ -848,10 +853,14 @@ def csv_export(request):
         if first_row:
             fields = []
             for key in dir(finding):
-                if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
-                    if callable(getattr(finding, key)) and key not in allowed_attributes:
-                        continue
-                    fields.append(key)
+                try:
+                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                        if callable(getattr(finding, key)) and key not in allowed_attributes:
+                            continue
+                        fields.append(key)
+                except Exception as exc:
+                    logger.debug('Error in attribute: ' + str(exc))
+                    continue
             fields.append('test')
             fields.append('found_by')
             fields.append('engagement_id')
@@ -867,19 +876,23 @@ def csv_export(request):
         if not first_row:
             fields = []
             for key in dir(finding):
-                if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
-                    if not callable(getattr(finding, key)):
-                        value = finding.__dict__.get(key)
-                    if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
-                        if callable(getattr(finding, key)):
-                            func = getattr(finding, key)
-                            result = func()
-                            value = result
-                        else:
-                            value = str(getattr(finding, key))
-                    if value and isinstance(value, str):
-                        value = value.replace('\n', ' NEWLINE ').replace('\r', '')
-                    fields.append(value)
+                try:
+                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                        if not callable(getattr(finding, key)):
+                            value = finding.__dict__.get(key)
+                        if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
+                            if callable(getattr(finding, key)):
+                                func = getattr(finding, key)
+                                result = func()
+                                value = result
+                            else:
+                                value = str(getattr(finding, key))
+                        if value and isinstance(value, str):
+                            value = value.replace('\n', ' NEWLINE ').replace('\r', '')
+                        fields.append(value)
+                except Exception as exc:
+                    logger.debug('Error in attribute: ' + str(exc))
+                    continue
             fields.append(finding.test.title)
             fields.append(finding.test.test_type.name)
             fields.append(finding.test.engagement.id)
@@ -934,12 +947,16 @@ def excel_export(request):
         if row_num == 1:
             col_num = 1
             for key in dir(finding):
-                if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
-                    if callable(getattr(finding, key)) and key not in allowed_attributes:
-                        continue
-                    cell = worksheet.cell(row=row_num, column=col_num, value=key)
-                    cell.font = font_bold
-                    col_num += 1
+                try:
+                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                        if callable(getattr(finding, key)) and key not in allowed_attributes:
+                            continue
+                        cell = worksheet.cell(row=row_num, column=col_num, value=key)
+                        cell.font = font_bold
+                        col_num += 1
+                except Exception as exc:
+                    logger.debug('Error in attribute: ' + str(exc))
+                    continue
             cell = worksheet.cell(row=row_num, column=col_num, value='found_by')
             cell.font = font_bold
             col_num += 1
@@ -965,20 +982,24 @@ def excel_export(request):
         if row_num > 1:
             col_num = 1
             for key in dir(finding):
-                if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
-                    if not callable(getattr(finding, key)):
-                        value = finding.__dict__.get(key)
-                    if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
-                        if callable(getattr(finding, key)):
-                            func = getattr(finding, key)
-                            result = func()
-                            value = result
-                        else:
-                            value = str(getattr(finding, key))
-                    if value and isinstance(value, datetime):
-                        value = value.replace(tzinfo=None)
-                    worksheet.cell(row=row_num, column=col_num, value=value)
-                    col_num += 1
+                try:
+                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                        if not callable(getattr(finding, key)):
+                            value = finding.__dict__.get(key)
+                        if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
+                            if callable(getattr(finding, key)):
+                                func = getattr(finding, key)
+                                result = func()
+                                value = result
+                            else:
+                                value = str(getattr(finding, key))
+                        if value and isinstance(value, datetime):
+                            value = value.replace(tzinfo=None)
+                        worksheet.cell(row=row_num, column=col_num, value=value)
+                        col_num += 1
+                except Exception as exc:
+                    logger.debug('Error in attribute: ' + str(exc))
+                    continue
             worksheet.cell(row=row_num, column=col_num, value=finding.test.test_type.name)
             col_num += 1
             worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.id)
