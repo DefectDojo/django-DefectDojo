@@ -1,8 +1,6 @@
 import requests
 import logging
 import json
-from django.core.exceptions import ValidationError
-from dojo.models import Product_API_Scan_Configuration
 
 logging.basicConfig(level=logging.WARNING)
 """

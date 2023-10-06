@@ -49,9 +49,7 @@ class WazuhParser(object):
                 else:
                     active = False
                 links = item.get("external_references")
-                title = (
-                    item.get("title") + " (version: " + package_version + ")"
-                )
+                title = item.get("title") + " (version: " + package_version + ")"
                 severity = item.get("severity", "info").capitalize()
                 if links:
                     references = ""
