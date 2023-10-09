@@ -726,6 +726,14 @@ class Product_Type(models.Model):
     """
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True, blank=True)
+    product_type_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
+                                        related_name='product_type_manager', on_delete=models.RESTRICT)
+    product_type_technical_contact = models.ForeignKey(Dojo_User, null=True, blank=True,
+                                          related_name='product_type_technical_contact', on_delete=models.RESTRICT)
+    environment_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
+                                     related_name='environment_manager', on_delete=models.RESTRICT)
+    environment_technical_contact = models.ForeignKey(Dojo_User, null=True, blank=True,
+                                     related_name='environment_technical_contact', on_delete=models.RESTRICT)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True, null=True)

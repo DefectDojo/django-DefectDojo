@@ -218,15 +218,12 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
             result_query_subjects = graph_client.query_subjects({"query": user_login, "subjectKind": ["User"]})
 
             role_assigned = {"role": Role.objects.get(id=Roles.Developer)}
-            if job_title in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[0]:
+            if (
+                job_title in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[0]
+                or job_title in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[1]
+            ):
                 role_assigned = {"role": Role.objects.get(id=Roles.Leader)}
-                Product.objects.filter(
-                    description__contains=re.sub(
-                        settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[2], "", office_location
-                    ).replace(" ", "-")
-                ).update(team_manager=user)
-            elif job_title in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[1]:
-                role_assigned = {"role": Role.objects.get(id=Roles.Leader)}
+                assign_product_type_product_to_leaders(user, job_title, office_location, role_assigned)
 
             if result_query_subjects is not None:
                 # Get user's current product types names
@@ -288,9 +285,26 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
                     clean_project_type_user(user_product_types_names, user, user_login, job_title)
 
 
+def assign_product_type_product_to_leaders(user, job_title, office_location, role_assigned):
+    conf_jobs = settings.AZURE_DEVOPS_JOBS_TITLE.split(",")
+    if job_title in conf_jobs[0]:
+        Product.objects.filter(
+            description__contains=re.sub(conf_jobs[2], "", office_location).replace(" ", "-")
+        ).update(team_manager=user)
+    elif job_title in conf_jobs[1].split("-")[0] or job_title in conf_jobs[1].split("-")[1]:
+        pts = Product_Type.objects.filter(description__contains=office_location)
+        pts.update(product_type_technical_contact=user)
+        if len(pts) > 0:
+            Product_Type_Member.objects.get_or_create(product_type=pts[0], user=user, defaults=role_assigned)
+            logger.debug(
+                "User %s become member of product type %s with the role %s",
+                user,
+                pts[0],
+                role_assigned["role"],
+            )
+
+
 def clean_project_type_user(user_product_types_names, user, user_login, job_title):
-    logger.debug(user_login.split("@")[0])
-    logger.debug(settings.AZURE_DEVOPS_USERS_EXCLUDED_TPM)
     if (
         job_title not in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[1]
         and user_login.split("@")[0] not in settings.AZURE_DEVOPS_USERS_EXCLUDED_TPM
