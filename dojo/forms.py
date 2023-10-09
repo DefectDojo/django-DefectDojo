@@ -161,7 +161,7 @@ class Product_TypeForm(forms.ModelForm):
 
     class Meta:
         model = Product_Type
-        fields = ['name', 'description', 'critical_product', 'key_product']
+        fields = ['name', 'description', 'product_type_manager', 'product_type_technical_contact', 'environment_manager', 'environment_technical_contact', 'critical_product', 'key_product']
 
 
 class Delete_Product_TypeForm(forms.ModelForm):

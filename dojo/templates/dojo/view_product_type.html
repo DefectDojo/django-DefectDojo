@@ -307,5 +307,37 @@
                 </div>
             </div>
         </div>
+        <!-- Contacts -->
+        <div class="col-md-4">
+            <div class="panel panel-default panel-default-secondary">
+                <div class="panel-heading">
+                <h3 class="panel-title"><span class="fa-solid fa-users fa-fw" aria-hidden="true"></span>{% trans "Contacts" %}</h3>
+                </div>
+                <div class="table-responsive">
+                <table class="table table-striped">
+                    <tbody>
+                    <tr>
+                        <td style="width: 160px;"><strong>{% trans "Product Type Manager" %}</strong></td>
+                        <td>{% if pt.product_type_manager != "0" %}{{ pt.product_type_manager | default:"Unknown" }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>{% trans "Product Type Technical Contact" %}</strong></td>
+                        <td>{% if pt.product_type_technical_contact != "0" %}{{ pt.product_type_technical_contact | default:"Unknown" }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>{% trans "Environment Manager" %}</strong></td>
+                        <td>{% if pt.environment_manager != "0" %}{{ pt.environment_manager | default:"Unknown" }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>{% trans "Environment Technical Contact" %}</strong></td>
+                        <td>{% if pt.environment_technical_contact != "0" %}{{ pt.environment_technical_contact | default:"Unknown" }}{% endif %}</td>
+                    </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+        <!-- end contacts -->
+
     </div>
 {% endblock %}
