@@ -61,3 +61,4 @@ services:
         mode: host
   "webhook.endpoint":
     image: mccutchen/go-httpbin:v2.10.0@sha256:c4b6cb9c0fb347f8ab1fdcdfbb4ed391ed64e32e698cbfafa09507736cfe412a
+
