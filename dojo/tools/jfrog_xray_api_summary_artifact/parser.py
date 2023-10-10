@@ -139,7 +139,7 @@ def get_item(
 
     # Add vulnerability ids
     vulnerability_ids = list()
-    if "cve" in cves[0]:
+    if cves and "cve" in cves[0]:
         vulnerability_ids.append(cves[0]["cve"])
     if "issue_id" in vulnerability:
         vulnerability_ids.append(vulnerability["issue_id"])
