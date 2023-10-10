@@ -1257,7 +1257,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Popeye Scan': ['title', 'description'],
     'Wazuh Scan': ['title'],
     'Nuclei Scan': ['title', 'cwe', 'severity'],
-    'Threagile risks report': ['title', 'cwe', 'unique_id_from_tool']
+    'Threagile risks report': ['title', 'cwe', "severity"]
 }
 
 # Override the hardcoded settings here via the env var

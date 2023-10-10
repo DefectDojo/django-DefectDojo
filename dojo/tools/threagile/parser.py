@@ -53,7 +53,8 @@ class ThreagileParser(object):
     Import ThreaAgile threatmodel risk finding in JSON format
     """
 
-    REQUIRED_FIELDS = ["category", "title", "severity", "synthetic_id", "exploitation_impact"]
+    REQUIRED_FIELDS = ["category", "title", "severity", "synthetic_id",
+                       "exploitation_impact"]
 
     def get_scan_types(self):
         return ["Threagile risks report"]
@@ -79,11 +80,12 @@ class ThreagileParser(object):
         for item in tree:
             for field in self.REQUIRED_FIELDS:
                 if field not in item.keys():
-                    raise ValueError(f"Invalid ThreAgile risks file, missing field {field}")
+                    raise ValueError(
+                        f"Invalid ThreAgile risks file, missing field {field}")
             severity = item.get("severity").capitalize()
             severity = severity if severity != "Elevated" else "High"
             finding = Finding(
-                title=item.get("category", ""),
+                title=item.get("category"),
                 cwe=RISK_TO_CWE_MAP.get(item.get("category"), None),
                 description=item.get("title"),
                 impact=item.get("exploitation_impact"),
