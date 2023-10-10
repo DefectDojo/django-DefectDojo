@@ -82,7 +82,7 @@ class ThreagileParser(object):
                 if field not in item.keys():
                     raise ValueError(
                         f"Invalid ThreAgile risks file, missing field {field}")
-            severity = item.get("severity").capitalize()
+            severity = item.get("severity", "info").capitalize()
             severity = severity if severity != "Elevated" else "High"
             finding = Finding(
                 title=item.get("category"),
