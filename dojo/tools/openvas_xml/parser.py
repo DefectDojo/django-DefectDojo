@@ -38,7 +38,6 @@ class OpenVASXMLParser(object):
         results = report.find("results")
         for result in results:
             for finding in result:
-                print(finding)
                 if finding.tag == "name":
                     title = finding.text
                     description = [f"**Name**: {finding.text}"]
