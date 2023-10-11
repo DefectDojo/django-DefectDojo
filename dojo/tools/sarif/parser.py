@@ -3,6 +3,8 @@ import logging
 import re
 import textwrap
 import dateutil.parser
+from django.utils.translation import gettext as _
+
 from dojo.tools.parser_test import ParserTest
 from dojo.models import Finding
 
@@ -220,23 +222,33 @@ def get_codeFlowsDescription(codeFlows):
             if "locations" not in threadFlow:
                 continue
 
-            description = "**Code flow:**\n"
+            description = f"**{_('Code flow')}:**\n"
+            line = 1
+
             for location in threadFlow["locations"]:
                 physicalLocation = location["location"]["physicalLocation"]
-                region = physicalLocation["region"]
-                description += (
-                    "\t" + physicalLocation["artifactLocation"]["uri"]
-                    if "byteOffset" in region
-                    else "\t"
-                    + physicalLocation["artifactLocation"]["uri"]
-                    + ":"
-                    + str(region["startLine"])
-                )
+                region = physicalLocation.get("region", {})
+                uri = physicalLocation.get("artifactLocation").get("uri")
+
+                start_line = ""
+                start_column = ""
+                snippet = ""
+
+                if "startLine" in region:
+                    start_line = f":L{str(region.get('startLine'))}"
+
                 if "startColumn" in region:
-                    description += ":" + str(region["startColumn"])
+                    start_column = f":C{str(region.get('startColumn'))}"
+
                 if "snippet" in region:
-                    description += "\t-\t" + region["snippet"]["text"]
-                description += "\n"
+                    snippet = f"\t-\t{region.get('snippet').get('text')}"
+
+                description += f"{line}. {uri}{start_line}{start_column}{snippet}\n"
+
+                if 'message' in location["location"]:
+                    description += f"\t{location.get('location', {}).get('message', {}).get('text', '')} \n"
+
+                line += 1
 
     return description
 
@@ -253,16 +265,14 @@ def get_description(result, rule):
         description += "**Snippet:**\n```{}```\n".format(get_snippet(result))
     if rule is not None:
         if "name" in rule:
-            description += "**Rule name:** {}\n".format(rule.get("name"))
+            description += f"**{_('Rule name')}:** {rule.get('name')}\n"
         shortDescription = ""
         if "shortDescription" in rule:
             shortDescription = get_message_from_multiformatMessageString(
                 rule["shortDescription"], rule
             )
             if shortDescription != message:
-                description += "**Rule short description:** {}\n".format(
-                    shortDescription
-                )
+                description += f"**{_('Rule short description')}:** {shortDescription}\n"
         if "fullDescription" in rule:
             fullDescription = get_message_from_multiformatMessageString(
                 rule["fullDescription"], rule
@@ -271,9 +281,7 @@ def get_description(result, rule):
                 fullDescription != message
                 and fullDescription != shortDescription
             ):
-                description += "**Rule full description:** {}\n".format(
-                    fullDescription
-                )
+                description += f"**{_('Rule full description')}:** {fullDescription}\n"
 
     if len(result.get("codeFlows", [])) > 0:
         description += get_codeFlowsDescription(result["codeFlows"])
@@ -420,6 +428,7 @@ def get_item(result, rules, artifacts, run_date):
 
     # manage tags provided in the report and rule and remove duplicated
     tags = list(set(get_properties_tags(rule) + get_properties_tags(result)))
+    tags = [s.removeprefix('external/cwe/') for s in tags]
     finding.tags = tags
 
     # manage fingerprints
