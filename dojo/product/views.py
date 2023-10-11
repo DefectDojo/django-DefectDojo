@@ -65,7 +65,7 @@ def product(request):
     if 'prod_type' in request.GET:
         p = request.GET.getlist('prod_type', [])
         if len(p) == 1:
-            _ = get_object_or_404(Product_Type, id=p[0])
+            get_object_or_404(Product_Type, id=p[0])
 
     prods = get_authorized_products(Permissions.Product_View)
 
@@ -1002,7 +1002,7 @@ def new_eng_for_app(request, pid, cicd=False):
 
     if request.method == 'POST':
         form = EngForm(request.POST, cicd=cicd, product=product, user=request.user)
-        _ = jira_helper.get_jira_project(product)
+        jira_helper.get_jira_project(product)
         logger.debug('new_eng_for_app')
 
         if form.is_valid():
@@ -1061,7 +1061,7 @@ def new_eng_for_app(request, pid, cicd=False):
                        product=product, user=request.user)
 
         if get_system_setting('enable_jira'):
-            _ = jira_helper.get_jira_project(product)
+            jira_helper.get_jira_project(product)
             logger.debug('showing jira-project-form')
             jira_project_form = JIRAProjectForm(target='engagement', product=product)
             logger.debug('showing jira-epic-form')

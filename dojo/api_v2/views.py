@@ -1276,9 +1276,6 @@ class FindingViewSet(
             serialized_note = serializers.NoteSerializer(
                 {"author": author, "entry": entry, "private": private}
             )
-            serializers.FindingToNotesSerializer(
-                {"finding_id": finding, "notes": [serialized_note.data]}
-            )
             return Response(
                 serialized_note.data, status=status.HTTP_201_CREATED
             )
@@ -2758,9 +2755,6 @@ class TestsViewSet(
 
             serialized_note = serializers.NoteSerializer(
                 {"author": author, "entry": entry, "private": private}
-            )
-            serializers.TestToNotesSerializer(
-                {"test_id": test, "notes": [serialized_note.data]}
             )
             return Response(
                 serialized_note.data, status=status.HTTP_201_CREATED

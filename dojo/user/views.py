@@ -181,7 +181,7 @@ def delete_alerts(request):
     alerts = Alerts.objects.filter(user_id=request.user)
 
     if request.method == 'POST':
-        _ = request.POST.getlist('alert_select')
+        request.POST.getlist('alert_select')
         alerts.filter().delete()
         messages.add_message(request,
                                         messages.SUCCESS,

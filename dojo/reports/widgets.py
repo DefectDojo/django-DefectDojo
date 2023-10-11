@@ -28,7 +28,7 @@ class CustomReportJsonForm(forms.Form):
     def clean_json(self):
         jdata = self.cleaned_data['json']
         try:
-            _ = json.loads(jdata)
+            json.loads(jdata)
         except:
             raise forms.ValidationError("Invalid data in json")
         return jdata

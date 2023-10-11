@@ -660,7 +660,7 @@ class MergeFindings(forms.ModelForm):
         help_text="The action to take on the merged finding. Set the findings to inactive or delete the findings.")
 
     def __init__(self, *args, **kwargs):
-        _ = kwargs.pop('finding')
+        kwargs.pop('finding')
         findings = kwargs.pop('findings')
         super(MergeFindings, self).__init__(*args, **kwargs)
 
@@ -3014,7 +3014,6 @@ class TextQuestionForm(QuestionForm):
             initial=initial_answer,
         )
 
-        self.fields['answer']
 
     def save(self):
         if not self.is_valid():

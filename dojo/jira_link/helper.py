@@ -785,7 +785,7 @@ def add_jira_issue(obj, *args, **kwargs):
         j_issue.jira_creation = timezone.now()
         j_issue.jira_change = timezone.now()
         j_issue.save()
-        _ = jira.issue(new_issue.id)
+        jira.issue(new_issue.id)
 
         logger.info('Created the following jira issue for %d:%s', obj.id, to_str_typed(obj))
 
