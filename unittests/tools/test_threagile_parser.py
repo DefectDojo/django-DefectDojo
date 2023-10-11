@@ -28,7 +28,7 @@ class TestThreAgileParser(DojoTestCase):
             self.assertEqual("\u003cb\u003eUnguarded Direct Datastore Access\u003c/b\u003e of \u003cb\u003ePoliciesRegoStorage\u003c/b\u003e by \u003cb\u003eEnergon\u003c/b\u003e via \u003cb\u003eEnergonToPolicyRegoFileStorage\u003c/b\u003e", finding.description)
             self.assertEqual("High", finding.severity)
             self.assertEqual("unguarded-direct-datastore-access@energon-ta>energontopolicyregofilestorage@energon-ta@policies-rego-storage-ta", finding.unique_id_from_tool)
-            self.assertEqual("501", finding.cwe)
+            self.assertEqual(501, finding.cwe)
             self.assertEqual("medium", finding.impact)
             self.assertEqual("policies-rego-storage-ta", finding.component_name)
 
@@ -58,7 +58,7 @@ class TestThreAgileParser(DojoTestCase):
             parser = ThreagileParser()
             findings = parser.get_findings(testfile, Test())
             finding = findings[4]
-            self.assertTrue(finding.mitigated)
+            self.assertTrue(finding.is_mitigated)
             self.assertEqual("some-runtime", finding.component_name)
 
     def test_false_positive_is_false_positive(self):
