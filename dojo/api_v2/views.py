@@ -597,9 +597,6 @@ class EngagementViewSet(
             serialized_note = serializers.NoteSerializer(
                 {"author": author, "entry": entry, "private": private}
             )
-            serializers.EngagementToNotesSerializer(
-                {"engagement_id": engagement, "notes": [serialized_note.data]}
-            )
             return Response(
                 serialized_note.data, status=status.HTTP_201_CREATED
             )

@@ -265,11 +265,6 @@ def view_cred_engagement_test(request, tid, ttid):
         title="Credential Manager", top_level=False, request=request)
     cred_type = "Test"
     edit_link = None
-    reverse(
-        'view_cred_engagement_test', args=(
-            tid,
-            cred.id,
-        ))
     delete_link = reverse(
         'delete_cred_test', args=(
             tid,

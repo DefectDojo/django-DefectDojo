@@ -558,8 +558,6 @@ class AddFindingView(View):
             return request, True, push_to_jira
         else:
             add_field_errors_to_response(context["jform"])
-
-<<<<<<< HEAD
         return request, False, False
 
     def process_forms(self, request: HttpRequest, test: Test, context: dict):
@@ -583,33 +581,6 @@ class AddFindingView(View):
             finding.save(push_to_jira=push_to_jira)
             # Save the burp req resp
             if "request" in context["form"].cleaned_data or "response" in context["form"].cleaned_data:
-=======
-                    if not new_jira_issue_key:
-                        jira_helper.finding_unlink_jira(request, new_finding)
-
-                    elif new_jira_issue_key != new_finding.jira_issue.jira_key:
-                        jira_helper.finding_unlink_jira(request, new_finding)
-                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
-                else:
-                    logger.debug('finding has no jira issue yet')
-                    if new_jira_issue_key:
-                        logger.debug('finding has no jira issue yet, but jira issue specified in request. trying to link.')
-                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
-
-            finding_helper.save_vulnerability_ids(new_finding, form.cleaned_data['vulnerability_ids'].split())
-
-            new_finding.save(push_to_jira=push_to_jira)
-            create_notification(event='other',
-                                title=_('Addition of %(title)s') % {'title': new_finding.title},
-                                finding=new_finding,
-                                description=_('Finding "%(title)s" was added by %(user)s') % {
-                                    'title': new_finding.title, 'user': request.user
-                                },
-                                url=request.build_absolute_uri(reverse('view_finding', args=(new_finding.id,))),
-                                icon="exclamation-triangle")
-
-            if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
->>>>>>> d79dcddf1 (Adds ruff linter and fixes unused vars errors)
                 burp_rr = BurpRawRequestResponse(
                     finding=finding,
                     burpRequestBase64=base64.b64encode(context["form"].cleaned_data["request"].encode()),

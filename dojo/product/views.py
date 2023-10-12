@@ -601,6 +601,10 @@ def view_product_metrics(request, pid):
             open_objs_by_severity[v.severity] += 1
 
     for a in filters.get('accepted', None):
+        if view == 'Finding':
+            pass
+        elif view == 'Endpoint':
+            pass
         iso_cal = a.date.isocalendar()
         x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
         y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
@@ -881,7 +885,7 @@ def edit_product(request, pid):
         jira_project = jira_helper.get_jira_project(product)
         if form.is_valid():
             form.save()
-            _ = request.POST.getlist('tags')
+            request.POST.getlist('tags')
             messages.add_message(request,
                                  messages.SUCCESS,
                                  _('Product updated successfully.'),
@@ -1346,8 +1350,6 @@ class AdHocFindingView(View):
             finding_helper.add_endpoints(finding, context["form"])
             # Save the finding at the end and return
             finding.save()
-
-<<<<<<< HEAD
             return finding, request, True
         else:
             add_error_message_to_response("The form has errors, please correct them below.")
@@ -1393,44 +1395,17 @@ class AdHocFindingView(View):
                 messages.add_message(
                     request, messages.SUCCESS, jira_message, extra_tags="alert-success"
                 )
-=======
-            new_finding.save()
-            # Push to jira?
-            push_to_jira = False
-            if jform and jform.is_valid():
-                # Push to Jira?
-                logger.debug('jira form valid')
-                push_to_jira = push_all_jira_issues or jform.cleaned_data.get('push_to_jira')
-
-                # if the jira issue key was changed, update database
-                new_jira_issue_key = jform.cleaned_data.get('jira_issue')
-                if new_finding.has_jira_issue:
->>>>>>> d79dcddf1 (Adds ruff linter and fixes unused vars errors)
 
             return request, True, push_to_jira
         else:
             add_field_errors_to_response(context["jform"])
 
-<<<<<<< HEAD
         return request, False, False
 
     def process_github_form(self, request: HttpRequest, finding: Finding, context: dict):
         if "githubform-push_to_github" not in request.POST:
             return request, True
-=======
-                    if not new_jira_issue_key:
-                        jira_helper.finding_unlink_jira(request, new_finding)
 
-                    elif new_jira_issue_key != new_finding.jira_issue.jira_key:
-                        jira_helper.finding_unlink_jira(request, new_finding)
-                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
-                else:
-                    logger.debug('finding has no jira issue yet')
-                    if new_jira_issue_key:
-                        logger.debug(
-                            'finding has no jira issue yet, but jira issue specified in request. trying to link.')
-                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
->>>>>>> d79dcddf1 (Adds ruff linter and fixes unused vars errors)
 
         if context["gform"].is_valid():
             add_external_issue(finding, 'github')
