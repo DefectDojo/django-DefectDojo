@@ -139,5 +139,5 @@ ENV \
   DD_UWSGI_NUM_OF_THREADS="2"
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
 
-FROM django as django-unittests
+FROM django-debian as django-unittests
 COPY unittests/ ./unittests/
