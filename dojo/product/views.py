@@ -1370,7 +1370,7 @@ class AdHocFindingView(View):
             # if the jira issue key was changed, update database
             new_jira_issue_key = context["jform"].cleaned_data.get('jira_issue')
             if finding.has_jira_issue:
-                jira_issue = finding.jira_issue
+                jira_issue = finding.jira_issue # noqa: F841
                 # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
                 # instead of on the public jira issue key.
                 # I have no idea why, but it means we have to retrieve the issue from JIRA to get the internal JIRA id.
@@ -1395,7 +1395,6 @@ class AdHocFindingView(View):
                 messages.add_message(
                     request, messages.SUCCESS, jira_message, extra_tags="alert-success"
                 )
-
             return request, True, push_to_jira
         else:
             add_field_errors_to_response(context["jform"])
@@ -1405,8 +1404,6 @@ class AdHocFindingView(View):
     def process_github_form(self, request: HttpRequest, finding: Finding, context: dict):
         if "githubform-push_to_github" not in request.POST:
             return request, True
-
-
         if context["gform"].is_valid():
             add_external_issue(finding, 'github')
 

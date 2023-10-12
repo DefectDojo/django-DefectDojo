@@ -3014,7 +3014,6 @@ class TextQuestionForm(QuestionForm):
             initial=initial_answer,
         )
 
-
     def save(self):
         if not self.is_valid():
             raise forms.ValidationError('form is not valid')

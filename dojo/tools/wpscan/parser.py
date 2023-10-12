@@ -120,7 +120,7 @@ class WpscanParser(object):
 
         # manage interesting interesting_findings
         for interesting_finding in tree.get("interesting_findings", []):
-            references = self.generate_references(
+            references = self.generate_references( # noqa: F841
                 interesting_finding["references"]
             )
             description = "\n".join(
