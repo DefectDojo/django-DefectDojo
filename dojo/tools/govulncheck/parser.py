@@ -44,50 +44,74 @@ class GovulncheckParser:
         except Exception:
             raise ValueError("Invalid JSON format")
         else:
-            if data["Vulns"]:
-                list_vulns = data["Vulns"]
-                for cve, elems in groupby(
-                    list_vulns, key=lambda vuln: vuln["OSV"]["aliases"][0]
-                ):
-                    first_elem = list(islice(elems, 1))
-                    d = {
-                        "cve": cve,
-                        "severity": SEVERITY,
-                        "title": first_elem[0]["OSV"]["id"],
-                        "component_name": first_elem[0]["OSV"]["affected"][0][
-                            "package"
-                        ]["name"],
-                        "component_version": self.get_version(
-                            data, first_elem[0]["RequireSink"]
-                        ),
-                    }
-                    d["references"] = first_elem[0]["OSV"]["references"][0][
-                        "url"
-                    ]
-                    d["url"] = first_elem[0]["OSV"]["affected"][0][
-                        "database_specific"
-                    ]["url"]
-                    d["unique_id_from_tool"] = first_elem[0]["OSV"]["id"]
-                    vuln_methods = set(
-                        first_elem[0]["OSV"]["affected"][0][
-                            "ecosystem_specific"
-                        ]["imports"][0]["symbols"]
-                    )
-                    impact = set(
-                        self.get_location(data, first_elem[0]["CallSink"])
-                    )
-                    for elem in elems:
-                        impact.update(
-                            self.get_location(data, elem["CallSink"])
+            if isinstance(data, dict):
+                if data["Vulns"]:
+                    list_vulns = data["Vulns"]
+                    for cve, elems in groupby(
+                        list_vulns, key=lambda vuln: vuln["OSV"]["aliases"][0]
+                    ):
+                        first_elem = list(islice(elems, 1))
+                        d = {
+                            "cve": cve,
+                            "severity": SEVERITY,
+                            "title": first_elem[0]["OSV"]["id"],
+                            "component_name": first_elem[0]["OSV"]["affected"][0][
+                                "package"
+                            ]["name"],
+                            "component_version": self.get_version(
+                                data, first_elem[0]["RequireSink"]
+                            ),
+                        }
+                        d["references"] = first_elem[0]["OSV"]["references"][0][
+                            "url"
+                        ]
+                        d["url"] = first_elem[0]["OSV"]["affected"][0][
+                            "database_specific"
+                        ]["url"]
+                        d["unique_id_from_tool"] = first_elem[0]["OSV"]["id"]
+                        vuln_methods = set(
+                            first_elem[0]["OSV"]["affected"][0][
+                                "ecosystem_specific"
+                            ]["imports"][0]["symbols"]
                         )
-                        vuln_methods.update(
-                            elem["OSV"]["affected"][0]["ecosystem_specific"][
-                                "imports"
-                            ][0]["symbols"]
+                        impact = set(
+                            self.get_location(data, first_elem[0]["CallSink"])
                         )
-                    d["impact"] = "; ".join(impact) if impact else None
-                    d[
-                        "description"
-                    ] = f"Vulnerable functions: {'; '.join(vuln_methods)}"
-                    findings.append(Finding(**d))
+                        for elem in elems:
+                            impact.update(
+                                self.get_location(data, elem["CallSink"])
+                            )
+                            vuln_methods.update(
+                                elem["OSV"]["affected"][0]["ecosystem_specific"][
+                                    "imports"
+                                ][0]["symbols"]
+                            )
+                        d["impact"] = "; ".join(impact) if impact else None
+                        d[
+                            "description"
+                        ] = f"Vulnerable functions: {'; '.join(vuln_methods)}"
+                        findings.append(Finding(**d))
+            elif isinstance(data, list):
+                for elem in data:
+                    if 'osv' in elem.keys():
+                        cve = elem["osv"]["aliases"][0]
+                        d = {
+                            "cve": cve,
+                            "severity": SEVERITY,
+                            "title": elem["osv"]["id"],
+                            "component_name": elem["osv"]["affected"][0]["package"]["name"],
+                            "component_version": elem["osv"]["schema_version"]
+                        }
+                        d["references"] = elem["osv"]["references"][0]["url"]
+                        d["url"] = elem["osv"]["database_specific"]["url"]
+                        d["unique_id_from_tool"] = elem["osv"]["id"]
+                        vuln_methods = set(
+                            elem["osv"]["affected"][0][
+                                "ecosystem_specific"
+                            ]["imports"][0].get("symbols", [])
+                        )
+                        d[
+                            "description"
+                        ] = f"Vulnerable functions: {'; '.join(vuln_methods)}"
+                        findings.append(Finding(**d))
             return findings

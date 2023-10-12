@@ -473,7 +473,7 @@
               {%  if prod.revenue > 0 %}
                 {% if prod.revenue < 1000000 %}{{ prod.revenue|intcomma }}{% else %}{{ prod.revenue|intword }}{% endif %}
               {% else %}
-                {{ prod.user_records|notspecified }}
+                {{ prod.revenue|notspecified }}
               {% endif %}
             </td>
           </tr>
