@@ -216,17 +216,15 @@ def get_snippet(result):
 def get_codeFlowsDescription(codeFlows):
     description = ""
     for codeFlow in codeFlows:
-        if "threadFlows" not in codeFlow:
-            continue
-        for threadFlow in codeFlow["threadFlows"]:
+        for threadFlow in codeFlow.get('threadFlows', []):
             if "locations" not in threadFlow:
                 continue
 
             description = f"**{_('Code flow')}:**\n"
             line = 1
 
-            for location in threadFlow["locations"]:
-                physicalLocation = location["location"]["physicalLocation"]
+            for location in threadFlow.get('locations', []):
+                physicalLocation = location.get('location', {}).get('physicalLocation', {})
                 region = physicalLocation.get("region", {})
                 uri = physicalLocation.get("artifactLocation").get("uri")
 
@@ -245,8 +243,14 @@ def get_codeFlowsDescription(codeFlows):
 
                 description += f"{line}. {uri}{start_line}{start_column}{snippet}\n"
 
-                if 'message' in location["location"]:
-                    description += f"\t{location.get('location', {}).get('message', {}).get('text', '')} \n"
+                if 'message' in location.get('location', {}):
+                    message_field = location.get('location', {}).get('message', {})
+                    if 'markdown' in message_field:
+                        message = message_field.get('markdown', '')
+                    else:
+                        message = message_field.get('text', '')
+
+                    description += f"\t{message}\n"
 
                 line += 1
 
