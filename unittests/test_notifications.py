@@ -1,5 +1,7 @@
 from .dojo_test_case import DojoTestCase
-from dojo.models import Product, User, Notifications
+from dojo.models import Product, Engagement, User, Notifications
+from django.utils import timezone
+from unittest.mock import patch
 
 
 class TestNotifications(DojoTestCase):
@@ -55,3 +57,14 @@ class TestNotifications(DojoTestCase):
         self.assertEqual('slack' in merged_notifications.other, True)  # default alert from global
         self.assertEqual(len(merged_notifications.other), 3)
         self.assertEqual(merged_notifications.other, {'alert', 'mail', 'slack'})
+
+
+class TestNotificationTriggers(DojoTestCase):
+    fixtures = ['dojo_testdata.json']
+
+    @patch('dojo.notifications.helper.process_notifications')
+    def test_engagement_added(self, mock):
+        prod = Product.objects.first()
+        Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now())
+        self.assertTrue(mock.called)
+        self.assertEqual(mock.call_args.args[0], 'engagement_added')
