@@ -286,6 +286,7 @@ def get_roles_with_permissions():
             Permissions.Test_View,
             Permissions.Test_Edit,
             Permissions.Finding_View,
+            Permissions.Finding_Edit,
             Permissions.Finding_Group_View,
             Permissions.Endpoint_View,
             Permissions.Component_View,
