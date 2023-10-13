@@ -1,6 +1,8 @@
 from unittest.mock import patch
 
-from dojo.models import DEFAULT_NOTIFICATION, Notifications, Product, User
+from django.utils import timezone
+
+from dojo.models import DEFAULT_NOTIFICATION, Engagement, Notifications, Product, User
 from dojo.notifications.helper import create_notification, send_alert_notification
 
 from .dojo_test_case import DojoTestCase
@@ -102,3 +104,14 @@ class TestNotifications(DojoTestCase):
             create_notification(event="user_mentioned", title="user_mentioned", recipients=['admin'])
             self.assertEqual(mock.call_count, last_count + 1)
         last_count = mock.call_count
+
+
+class TestNotificationTriggers(DojoTestCase):
+    fixtures = ['dojo_testdata.json']
+
+    @patch('dojo.notifications.helper.process_notifications')
+    def test_engagement_added(self, mock):
+        prod = Product.objects.first()
+        Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now())
+        self.assertTrue(mock.called)
+        self.assertEqual(mock.call_args.args[0], 'engagement_added')
