@@ -2227,6 +2227,10 @@ class Finding(models.Model):
     out_of_scope = models.BooleanField(default=False,
                                        verbose_name=_('Out Of Scope'),
                                        help_text=_("Denotes if this flaw falls outside the scope of the test and/or engagement."))
+    risk_pending = models.BooleanField(default=False,
+                                       null=True,
+                                       verbose_name=_('Risk Pending'),
+                                       help_text=_("Denotes if this finding has been marked as an pending risk."))
     risk_accepted = models.BooleanField(default=False,
                                        verbose_name=_('Risk Accepted'),
                                        help_text=_("Denotes if this finding has been marked as an accepted risk."))

@@ -321,7 +321,6 @@ env = environ.Env(
     DD_CREATE_CLOUD_BANNER=(bool, True),
 )
 
-
 def generate_url(scheme, double_slashes, user, password, host, port, path, params):
     result_list = []
     result_list.append(scheme)
@@ -1827,4 +1826,15 @@ AUDITLOG_DISABLE_ON_RAW_SAVE = False
 #  You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
 ADDITIONAL_HEADERS = env("DD_ADDITIONAL_HEADERS")
 # Dictates whether cloud banner is created or not
-CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
+CREATE_CLOUD_BANNER = env('DD_CREATE_CLOUD_BANNER')
+# Risk Acceptance
+RISK_ACCEPTANCE = True
+ROLE_ALLOWED_TO_ACCEPT_RISKS=["Owner"],
+
+# job: puesto de trabajo para saber que persona pueden hacer la solicitude del riesgo
+RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY={
+    "low": {"number_acceptors": 0, "roles": ["Developer", "Mainteiner"], "jobs": ["PROVEEDOR", "INGENIERO/A SOFTWARE", "LIDER CENTRO DE EXCELENCIA", "LIDER LINEA DE CONOCIMIEN"]},
+    "medium": {"number_acceptors": 1, "roles": ["Owner"], "jobs": ["LIDER CENTRO DE EXCELENCI"]},
+    "high": {"number_acceptors": 2, "roles": ["Owner"], "jobs": ["LIDER CENTRO DE EXCELENCI"]},
+    "critical": {"number_acceptors": 2, "roles": ["Owner"], "jobs": ["LIDER LINEA DE CONOCIMIEN"]},
+}

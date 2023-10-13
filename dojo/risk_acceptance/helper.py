@@ -107,6 +107,15 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
     post_jira_comments(risk_acceptance, [finding], unaccepted_message_creator)
 
 
+def add_findings_to_risk_pending(risk_pending, findings):
+    for finding in findings:
+        if not finding.duplicate or finding.risk_pending:
+            finding.risk_pending = True
+            finding.save(dedupe_option=False)
+    risk_pending.save()
+    post_jira_comments(risk_pending, findings, accepted_message_creator)
+
+
 def add_findings_to_risk_acceptance(risk_acceptance, findings):
     for finding in findings:
         if not finding.duplicate or finding.risk_accepted:

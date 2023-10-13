@@ -24,7 +24,7 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import EngagementFilter, EngagementDirectFilter, EngagementTestFilter
 from dojo.forms import CheckForm, \
-    UploadThreatForm, RiskAcceptanceForm, NoteForm, DoneForm, \
+    UploadThreatForm, RiskAcceptanceForm, RiskPendingForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
     CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm, \
     EditRiskAcceptanceForm
@@ -43,6 +43,7 @@ from functools import reduce
 from django.db.models.query import Prefetch, QuerySet
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
+import dojo.risk_acceptance.risk_pending as rp_helper
 from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.finding.helper import NOT_ACCEPTED_FINDINGS_QUERY
 from django.views.decorators.vary import vary_on_cookie
@@ -845,6 +846,7 @@ def complete_checklist(request, eid):
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
 def add_risk_acceptance(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
+    form = None
     finding = None
     if fid:
         finding = get_object_or_404(Finding, id=fid)
@@ -853,7 +855,14 @@ def add_risk_acceptance(request, eid, fid=None):
         raise PermissionDenied()
 
     if request.method == 'POST':
-        form = RiskAcceptanceForm(request.POST, request.FILES)
+        if settings.RISK_ACCEPTANCE:
+            if rp_helper.rule_risk_acceptance_according_to_critical(finding, "Developer"):
+                form = RiskPendingForm(request.POST, request.FILES)
+            else:
+                form = RiskAcceptanceForm(request.POST, request.FILES)
+        else:
+            form = RiskAcceptanceForm(request.POST, request.FILES)
+
         if form.is_valid():
             # first capture notes param as it cannot be saved directly as m2m
             notes = None
@@ -894,8 +903,16 @@ def add_risk_acceptance(request, eid, fid=None):
 
             return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
     else:
-        risk_acceptance_title_suggestion = 'Accept: %s' % finding
-        form = RiskAcceptanceForm(initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
+        if settings.RISK_ACCEPTANCE:
+            if rp_helper.rule_risk_acceptance_according_to_critical(finding, "Developer"):
+                risk_acceptance_title_suggestion = 'Accept: %s' % finding
+                form = RiskPendingForm(initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
+            else:
+                risk_acceptance_title_suggestion = 'Accept: %s' % finding
+                form = RiskAcceptanceForm(initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
+        else:
+            risk_acceptance_title_suggestion = 'Accept: %s' % finding
+            form = RiskAcceptanceForm(initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
 
     finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
 
