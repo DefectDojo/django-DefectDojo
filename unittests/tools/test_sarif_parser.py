@@ -57,10 +57,10 @@ class TestSarifParser(DojoTestCase):
 **Rule short description:** A variable was used without being initialized.
 **Rule full description:** A variable was used without being initialized. This can result in runtime errors such as null reference exceptions.
 **Code flow:**
-1. collections/list.h:15\t-\tint *ptr;
+1. collections/list.h:L15\t-\tint *ptr;
 \tVariable `ptr` declared.
-2. collections/list.h:15\t-\toffset = (y + z) * q + 1;
-3. collections/list.h:25\t-\tadd_core(ptr, offset, val)"""
+2. collections/list.h:L15\t-\toffset = (y + z) * q + 1;
+3. collections/list.h:L25\t-\tadd_core(ptr, offset, val)"""
         self.assertEqual(description, item.description)
         self.assertEqual(datetime.datetime(2016, 7, 16, 14, 19, 1, tzinfo=datetime.timezone.utc), item.date)
         for finding in findings:
