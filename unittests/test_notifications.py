@@ -1,5 +1,5 @@
 from .dojo_test_case import DojoTestCase
-from dojo.models import Product, Engagement, User, Notifications
+from dojo.models import Product, Product_Type, Engagement, User, Notifications
 from django.utils import timezone
 from unittest.mock import patch
 
@@ -61,6 +61,14 @@ class TestNotifications(DojoTestCase):
 
 class TestNotificationTriggers(DojoTestCase):
     fixtures = ['dojo_testdata.json']
+
+    @patch('dojo.notifications.helper.process_notifications')
+    def test_products(self, mock):
+        with self.subTest('product_added'):
+            prod_type = Product_Type.objects.first()
+            Product.objects.create(prod_type=prod_type, name='prod name')
+            self.assertEqual(mock.call_count, 5)
+            self.assertEqual(mock.call_args_list[-1].args[0], 'product_added')
 
     @patch('dojo.notifications.helper.process_notifications')
     def test_engagements(self, mock):

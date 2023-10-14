@@ -16,6 +16,8 @@ from django.db import DEFAULT_DB_ALIAS, connection
 from django.db.models import Sum, Count, Q, Max, Prefetch, F, OuterRef, Subquery
 from django.db.models.expressions import Value
 from django.db.models.query import QuerySet
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.http import HttpResponseRedirect, Http404, JsonResponse, HttpRequest
 from django.shortcuts import render, get_object_or_404
@@ -776,10 +778,6 @@ def new_product(request, ptid=None):
                                               description=description)
                         except:
                             logger.info('Labels cannot be created - they may already exists')
-
-            create_notification(event='product_added', title=product.name,
-                                product=product,
-                                url=reverse('view_product', args=(product.id,)))
 
             if not error:
                 return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
@@ -1874,3 +1872,12 @@ def add_product_group(request, pid):
         'form': group_form,
         'product_tab': product_tab,
     })
+
+
+@receiver(post_save, sender=Product)
+def product_post_save(sender, instance, created, **kwargs):
+    if created:
+        create_notification(event='product_added',
+                            title=instance.name,
+                            product=instance,
+                            url=reverse('view_product', args=(instance.id,)))
