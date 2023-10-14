@@ -110,8 +110,9 @@ class TestNotificationTriggers(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
     @patch('dojo.notifications.helper.process_notifications')
-    def test_engagement_added(self, mock):
-        prod = Product.objects.first()
-        Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now())
-        self.assertTrue(mock.called)
-        self.assertEqual(mock.call_args.args[0], 'engagement_added')
+    def test_engagements(self, mock):
+        with self.subTest('engagement_added'):
+            prod = Product.objects.first()
+            Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now())
+            self.assertEqual(mock.call_count, 5)
+            self.assertEqual(mock.call_args_list[-1].args[0], 'engagement_added')

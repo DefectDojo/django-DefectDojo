@@ -1763,15 +1763,6 @@ def user_post_save(sender, instance, created, **kwargs):
         instance.save()
 
 
-@receiver(post_save, sender=Engagement)
-def engagement_post_Save(sender, instance, created, **kwargs):
-    if created:
-        engagement = instance
-        title = 'Engagement created for ' + str(engagement.product) + ': ' + str(engagement.name)
-        create_notification(event='engagement_added', title=title, engagement=engagement, product=engagement.product,
-                            url=reverse('view_engagement', args=(engagement.id,)))
-
-
 def is_safe_url(url):
     try:
         # available in django 3+
