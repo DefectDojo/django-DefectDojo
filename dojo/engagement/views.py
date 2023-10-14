@@ -12,6 +12,8 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError, PermissionDenied
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 from django.urls import reverse, Resolver404
 from django.db.models import Q, Count
 from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponse, FileResponse, QueryDict
@@ -1425,3 +1427,12 @@ def excel_export(request):
     )
     response['Content-Disposition'] = 'attachment; filename=engagements.xlsx'
     return response
+
+
+@receiver(post_save, sender=Engagement)
+def engagement_post_save(sender, instance, created, **kwargs):
+    if created:
+        engagement = instance
+        title = 'Engagement created for ' + str(engagement.product) + ': ' + str(engagement.name)
+        create_notification(event='engagement_added', title=title, engagement=engagement, product=engagement.product,
+                            url=reverse('view_engagement', args=(engagement.id,)))
