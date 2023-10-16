@@ -20,6 +20,7 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertEqual("Informational", finding.severity)
             self.assertTrue(finding.is_mitigated)
             self.assertFalse(finding.active)
+            self.assertEqual("https://docs.aws.amazon.com/console/securityhub/IAM.5/remediation", finding.references)
 
     def test_one_finding_active(self):
         with open(get_unit_tests_path() + sample_path("config_one_finding_active.json")) as test_file:
@@ -58,7 +59,11 @@ class TestAwsSecurityHubParser(DojoTestCase):
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(5, len(findings))
             finding = findings[0]
-            self.assertIn("CVE-2022-3643", finding.title)
+            self.assertEqual("CVE-2022-3643 - kernel - Resource: i-11111111111111111", finding.title)
+            self.assertEqual("Resource: i-11111111111111111", finding.impact)
+            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual("CVE-2022-3643", finding.unsaved_vulnerability_ids[0])
+            self.assertEqual("- Update kernel-4.14.301\n\t- yum update kernel\n", finding.mitigation)
 
     def test_inspector_ec2_with_no_vulnerabilities(self):
         with open(get_unit_tests_path() + sample_path("inspector_ec2_cve_no_vulnerabilities.json")) as test_file:
@@ -76,3 +81,19 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertFalse(finding.is_mitigated)
             self.assertTrue(finding.active)
             self.assertIn("GHSA-p98r-538v-jgw5", finding.title)
+            self.assertSetEqual({"CVE-2023-34256", "GHSA-p98r-538v-jgw5"}, set(finding.unsaved_vulnerability_ids))
+            self.assertEqual("https://github.com/bottlerocket-os/bottlerocket/security/advisories/GHSA-p98r-538v-jgw5", finding.references)
+
+    def test_inspector_ecr(self):
+        with open(get_unit_tests_path() + sample_path("inspector_ecr.json")) as test_file:
+            parser = AwsSecurityHubParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(7, len(findings))
+
+            finding = findings[0]
+            self.assertEqual("Medium", finding.severity)
+            self.assertFalse(finding.is_mitigated)
+            self.assertTrue(finding.active)
+            self.assertEqual("CVE-2023-2650 - openssl - Image: repo-os/sha256:af965ef68c78374a5f987fce98c0ddfa45801df2395bf012c50b863e65978d74", finding.title)
+            self.assertIn("repo-os/sha256:af965ef68c78374a5f987fce98c0ddfa45801df2395bf012c50b863e65978d74", finding.impact)
+            self.assertIn("Repository: repo-os", finding.impact)
