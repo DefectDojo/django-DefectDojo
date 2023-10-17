@@ -113,7 +113,7 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
         if report_finding.get("FQDN"):
             endpoint = Endpoint.from_uri(report_finding.get("FQDN"))
         elif report_finding.get("DNS"):
-            endpoint = Endpoint.from_uri(report_finding.get("DNS"))
+            endpoint = Endpoint(host=report_finding.get("DNS"))
         else:
             endpoint = Endpoint(host=report_finding["IP"])
 
