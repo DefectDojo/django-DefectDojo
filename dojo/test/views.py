@@ -599,7 +599,7 @@ class AddFindingView(View):
                 description=_('Finding "%(title)s" was added by %(user)s') % {
                     'title': finding.title, 'user': request.user
                 },
-                url=request.build_absolute_uri(reverse('view_finding', args=(finding.id,))),
+                url=reverse("view_finding", args=(finding.id,)),
                 icon="exclamation-triangle")
             # Add a success message
             messages.add_message(
