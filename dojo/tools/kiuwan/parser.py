@@ -59,7 +59,7 @@ class KiuwanParser(object):
             findingdict["line_number"] = row["Line number"]
             findingdict["description"] = (
                 "**Vulnerability type** : "
-                + row["Vulnerability type"]
+                + row["Software characteristic"]
                 + "\n\n"
                 + "**CWE Scope** : "
                 + row["CWE Scope"]
