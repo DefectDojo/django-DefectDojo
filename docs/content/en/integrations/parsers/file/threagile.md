@@ -1,11 +1,15 @@
 ---
-title: "AWS Prowler V3"
+title: "Threagile"
 toc_hide: true
 ---
 
 ### File Types
 DefectDojo parser accepts a .json file.  
-JSON reports are created from the Threagile tool (default name `risks.json`) using the following command: ` docker run --rm -it -v "$(pwd)":/app/work threagile/threagile -verbose -model /app/work/threagile.yaml -output /app/work`
+JSON reports are created from the Threagile tool (default name `risks.json`) using the following command: 
+
+```shell
+docker run --rm -it -v "$(pwd)":/app/work threagile/threagile -verbose -model /app/work/threagile.yaml -output /app/work
+``` 
 
 
 ### Acceptable JSON Format
@@ -81,4 +85,4 @@ Parser expects an array of finding.  All properties are strings. Required fields
 ~~~
 
 ### Sample Scan Data
-Unit tests of AWS Prowler V3 JSON can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/aws_prowler_v3.
+You can run a sample model and download some sample risk data from here(https://run.threagile.io/)
