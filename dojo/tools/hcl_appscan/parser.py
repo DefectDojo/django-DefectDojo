@@ -22,59 +22,62 @@ class HCLAppScanParser(object):
                 "This doesn't seem to be a valid HCLAppScan xml file."
             )
         report = root.find("issue-group")
-        for finding in report:
-            description = ""
-            for item in finding:
-                match item.tag:
-                    case 'severity':
-                        severity = item.text
-                    case 'cwe':
-                        cwe = item.text
-                    case 'remediation':
-                        remediation = item.text
-                    case 'advisory':
-                        advisory = item.text
-                    case 'issue-type-name':
-                        issuetypename = item.text
-                        description = description + "Issue-Type-Name: " + issuetypename + "\n"
-                    case 'location':
-                        location = item.text
-                        description = description + "Location: " + location + "\n"
-                    case 'domain':
-                        domain = item.text
-                        description = description + "Domain: " + domain + "\n"
-                    case 'element':
-                        element = item.text
-                        description = description + "Element: " + element + "\n"
-                    case 'element-type':
-                        elementtype = item.text
-                        description = description + "ElementType: " + elementtype + "\n"
-                    case 'path':
-                        path = item.text
-                        description = description + "Path: " + path + "\n"
-                    case 'scheme':
-                        scheme = item.text
-                        description = description + "Scheme: " + scheme + "\n"
-                    case 'host':
-                        host = item.text
-                        description = description + "Host: " + host + "\n"
-                    case 'port':
-                        port = item.text
-                        description = description + "Port: " + port + "\n"
-                    case 'asoc-issue-id':
-                        asocissueid = item.text
-            finding = Finding(
-                title=str(issuetypename + "_" + domain + "_" + path),
-                description=description,
-                severity=severity,
-                cwe=cwe,
-                mitigation="Remediation: " + remediation + "\nAdvisory: " + advisory,
-                dynamic_finding=True,
-                static_finding=False,
-                unique_id_from_tool=asocissueid
-            )
-            findings.append(finding)
-            finding.unsaved_endpoints = list()
-            endpoint = Endpoint(host=host, port=port)
-            finding.unsaved_endpoints.append(endpoint)
-        return findings
+        if report is not None:
+            for finding in report:
+                description = ""
+                for item in finding:
+                    match item.tag:
+                        case 'severity':
+                            severity = item.text
+                        case 'cwe':
+                            cwe = item.text
+                        case 'remediation':
+                            remediation = item.text
+                        case 'advisory':
+                            advisory = item.text
+                        case 'issue-type-name':
+                            issuetypename = item.text
+                            description = description + "Issue-Type-Name: " + issuetypename + "\n"
+                        case 'location':
+                            location = item.text
+                            description = description + "Location: " + location + "\n"
+                        case 'domain':
+                            domain = item.text
+                            description = description + "Domain: " + domain + "\n"
+                        case 'element':
+                            element = item.text
+                            description = description + "Element: " + element + "\n"
+                        case 'element-type':
+                            elementtype = item.text
+                            description = description + "ElementType: " + elementtype + "\n"
+                        case 'path':
+                            path = item.text
+                            description = description + "Path: " + path + "\n"
+                        case 'scheme':
+                            scheme = item.text
+                            description = description + "Scheme: " + scheme + "\n"
+                        case 'host':
+                            host = item.text
+                            description = description + "Host: " + host + "\n"
+                        case 'port':
+                            port = item.text
+                            description = description + "Port: " + port + "\n"
+                        case 'asoc-issue-id':
+                            asocissueid = item.text
+                finding = Finding(
+                    title=str(issuetypename + "_" + domain + "_" + path),
+                    description=description,
+                    severity=severity,
+                    cwe=cwe,
+                    mitigation="Remediation: " + remediation + "\nAdvisory: " + advisory,
+                    dynamic_finding=True,
+                    static_finding=False,
+                    unique_id_from_tool=asocissueid
+                )
+                findings.append(finding)
+                finding.unsaved_endpoints = list()
+                endpoint = Endpoint(host=host, port=port)
+                finding.unsaved_endpoints.append(endpoint)
+            return findings
+        else:
+            return findings
