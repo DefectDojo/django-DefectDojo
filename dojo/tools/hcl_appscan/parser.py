@@ -13,19 +13,6 @@ class HCLAppScanParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import XML output of HCL AppScan."
 
-    def convert_cvss_score(self, raw_value):
-        val = float(raw_value)
-        if val == 0.0:
-            return "Info"
-        elif val < 4.0:
-            return "Low"
-        elif val < 7.0:
-            return "Medium"
-        elif val < 9.0:
-            return "High"
-        else:
-            return "Critical"
-
     def get_findings(self, file, test):
         findings = []
         tree = ET.parse(file)
