@@ -35,7 +35,7 @@ class EdgescanAPI(object):
             url = f"{self.url}/api/v1/vulnerabilities/export.json?c[asset_id_in]={asset_ids}&c[status]=open"
         else:
             url = f"{self.url}/api/v1/vulnerabilities/export.json?c[status]=open"
-        
+
         if self.options and "date" in self.options:
             url += f"&c[date_opened_after]={self.options['date']}"
 
