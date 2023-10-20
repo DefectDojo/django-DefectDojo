@@ -66,3 +66,18 @@ class TestMobSFParser(DojoTestCase):
         testfile.close()
         self.assertEqual(11, len(findings))
         # TODO add more checks dedicated to this file
+
+    def test_parse_file_mobsf_3_7_9(self):
+        test = Test()
+        engagement = Engagement()
+        engagement.product = Product()
+        test.engagement = engagement
+        testfile = open("unittests/scans/mobsf/mobsf_3_7_9.json")
+        parser = MobSFParser()
+        findings = parser.get_findings(testfile, test)
+        testfile.close()
+        self.assertEqual(2, len(findings))
+        self.assertEqual(findings[0].title, "The Binary May Contain the Following Insecure API(s) _memcpy , _strlen")
+        self.assertEqual(findings[1].title, "The Binary May Use _malloc Function Instead of Calloc")
+        self.assertEqual(findings[0].severity, "High")
+        self.assertEqual(findings[1].severity, "High")
