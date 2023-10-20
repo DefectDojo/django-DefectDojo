@@ -139,7 +139,7 @@ class MobSFParser(object):
                                 "file_path": details["name"]
                             }
                             mobsf_findings.append(mobsf_item)
-            elif type(data["binary_analysis"]["findings"]) is dict:
+            elif data["binary_analysis"].get("findings"):
                 for binary_analysis_type, details in list(data["binary_analysis"]["findings"].items()):
                     # "findings":{
                     #     "Binary makes use of insecure API(s)":{
