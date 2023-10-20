@@ -75,7 +75,7 @@ class LowercaseValidator(object):
 
 class SymbolValidator(object):
     def validate(self, password, user=None):
-        contains_special_character = re.findall(r'[()[\]{}|\\`~!@#$%^&*_\-+=;:\'\",<>./?]', password)
+        contains_special_character = re.findall(r'[()[]{}|\`~!@#$%^&*_\-+=;:\'\",<>./?]', password)
         if not contains_special_character and get_system_setting('special_character_required'):
             raise ValidationError(
                 self.get_help_text(),
@@ -85,7 +85,7 @@ class SymbolValidator(object):
 
     def get_help_text(self):
         return gettext('The password must contain at least 1 special character, ' +
-            r'()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?.')
+            r'''()[]{}|`~!@#$%^&*_-+=;:'",<>./?.''')
 
 
 class DojoCommonPasswordValidator(CommonPasswordValidator):
