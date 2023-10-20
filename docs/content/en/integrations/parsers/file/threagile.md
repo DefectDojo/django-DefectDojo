@@ -85,4 +85,4 @@ Parser expects an array of finding.  All properties are strings. Required fields
 ~~~
 
 ### Sample Scan Data
-You can run a sample model and download some sample risk data from here(https://run.threagile.io/)
+You can run a sample model and download some sample risk data from [here](https://run.threagile.io/)
