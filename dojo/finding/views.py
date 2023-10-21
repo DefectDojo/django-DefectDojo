@@ -1445,7 +1445,7 @@ def reopen_finding(request, fid):
         finding=finding,
         description='The finding "%s" was reopened by %s'
         % (finding.title, request.user),
-        url=request.build_absolute_uri(reverse("view_test", args=(finding.test.id,))),
+        url=reverse("view_finding", args=(finding.id,)),
     )
     return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
 
