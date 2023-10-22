@@ -6,16 +6,18 @@ from collections import OrderedDict
 from datetime import date, datetime, timedelta
 from math import ceil
 
+from auditlog.models import LogEntry
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.aggregates import StringAgg
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS, connection
 from django.db.models import Count, F, Max, OuterRef, Prefetch, Q, Subquery, Sum
 from django.db.models.expressions import Value
 from django.db.models.query import QuerySet
-from django.db.models.signals import post_save
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.http import Http404, HttpRequest, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -1016,7 +1018,6 @@ def delete_product(request, pid):
         if 'id' in request.POST and str(product.id) == request.POST['id']:
             form = DeleteProductForm(request.POST, instance=product)
             if form.is_valid():
-                product_type = product.prod_type
                 if get_setting("ASYNC_OBJECT_DELETE"):
                     async_del = async_delete()
                     async_del.delete(product)
@@ -1028,13 +1029,6 @@ def delete_product(request, pid):
                                      messages.SUCCESS,
                                      message,
                                      extra_tags='alert-success')
-                create_notification(event='other',
-                                    title=_('Deletion of %(name)s') % {'name': product.name},
-                                    product_type=product_type,
-                                    description=_('The product "%(name)s" was deleted by %(user)s') % {
-                                        'name': product.name, 'user': request.user},
-                                    url=reverse('product'),
-                                    icon="exclamation-triangle")
                 logger.debug('delete_product: POST RETURN')
                 return HttpResponseRedirect(reverse('product'))
             else:
@@ -2003,3 +1997,22 @@ def product_post_save(sender, instance, created, **kwargs):
                             title=instance.name,
                             product=instance,
                             url=reverse('view_product', args=(instance.id,)))
+
+
+@receiver(post_delete, sender=Product)
+def product_post_delete(sender, instance, **kwargs):
+    if get_system_setting('enable_auditlog'):
+        le = LogEntry.objects.get(
+                action=LogEntry.Action.DELETE,
+                content_type=ContentType.objects.get(app_label='dojo', model='product'),
+                object_id=instance.id
+        )
+        description = _('The product "%(name)s" was deleted by %(user)s') % {
+                            'name': instance.name, 'user': le.actor}
+    else:
+        description = _('The product "%(name)s" was deleted') % {'name': instance.name}
+    create_notification(event='product_deleted',  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
+                        title=_('Deletion of %(name)s') % {'name': instance.name},
+                        description=description,
+                        url=reverse('product'),
+                        icon="exclamation-triangle")
