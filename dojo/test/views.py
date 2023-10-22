@@ -28,7 +28,7 @@ from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Test, 
     Finding_Template, Cred_Mapping, Test_Import, Product_API_Scan_Configuration, Test_Import_Finding_Action
 
 from dojo.tools.factory import get_choices_sorted, get_scan_types_sorted
-from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
+from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_tag_notifications, get_system_setting, \
     Product_Tab, is_scan_file_too_large, get_words_for_field, get_setting, async_delete, redirect_to_return_url_or_else, calculate_grade
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
@@ -194,7 +194,7 @@ class ViewTest(View):
             # Make a notification for this actions
             url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
             title = f"Test: {test.test_type.name} on {test.engagement.product.name}"
-            process_notifications(request, new_note, url, title)
+            process_tag_notifications(request, new_note, url, title)
             messages.add_message(
                 request,
                 messages.SUCCESS,
