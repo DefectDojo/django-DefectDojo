@@ -117,7 +117,7 @@ from dojo.utils import (
     get_system_setting,
     get_words_for_field,
     match_finding_to_existing_findings,
-    process_notifications,
+    process_tag_notifications,
     redirect,
     redirect_to_return_url_or_else,
     reopen_external_issue,
@@ -716,7 +716,7 @@ class ViewFinding(View):
                 reverse("view_finding", args=(finding.id,))
             )
             title = f"Finding: {finding.title}"
-            process_notifications(request, new_note, url, title)
+            process_tag_notifications(request, new_note, url, title)
             # Add a message to the request
             messages.add_message(
                 request, messages.SUCCESS, "Note saved.", extra_tags="alert-success"

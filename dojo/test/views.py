@@ -75,7 +75,7 @@ from dojo.utils import (
     get_setting,
     get_system_setting,
     get_words_for_field,
-    process_notifications,
+    process_tag_notifications,
     redirect_to_return_url_or_else,
 )
 
@@ -230,7 +230,7 @@ class ViewTest(View):
             # Make a notification for this actions
             url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
             title = f"Test: {test.test_type.name} on {test.engagement.product.name}"
-            process_notifications(request, new_note, url, title)
+            process_tag_notifications(request, new_note, url, title)
             messages.add_message(
                 request,
                 messages.SUCCESS,

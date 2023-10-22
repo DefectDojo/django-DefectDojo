@@ -1381,7 +1381,7 @@ def reopen_external_issue(find, note, external_issue_provider, **kwargs):
         reopen_external_issue_github(find, note, prod, eng)
 
 
-def process_notifications(request, note, parent_url, parent_title):
+def process_tag_notifications(request, note, parent_url, parent_title):
     regex = re.compile(r'(?:\A|\s)@(\w+)\b')
 
     usernames_to_check = set(un.lower() for un in regex.findall(note.entry))  # noqa: C401
