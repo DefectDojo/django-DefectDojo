@@ -3,6 +3,7 @@ from dojo.models import Product, Product_Type, Engagement, User, Notifications, 
 from dojo.notifications.helper import create_notification, send_alert_notification
 from django.utils import timezone
 from unittest.mock import patch
+from crum import get_current_user
 
 
 class TestNotifications(DojoTestCase):
@@ -60,7 +61,7 @@ class TestNotifications(DojoTestCase):
         self.assertEqual(merged_notifications.other, {'alert', 'mail', 'slack'})
 
     @patch('dojo.notifications.helper.send_alert_notification', wraps=send_alert_notification)
-    def test_other_notifications(self, mock):
+    def test_non_default_other_notifications(self, mock):
         notif, _ = Notifications.objects.get_or_create(user=User.objects.get(username='admin'))
 
         with self.subTest('do not notify other'):
@@ -86,9 +87,15 @@ class TestNotificationTriggers(DojoTestCase):
     def test_products(self, mock):
         with self.subTest('product_added'):
             prod_type = Product_Type.objects.first()
-            Product.objects.create(prod_type=prod_type, name='prod name')
+            prod = Product.objects.create(prod_type=prod_type, name='prod name')
             self.assertEqual(mock.call_count, 5)
             self.assertEqual(mock.call_args_list[-1].args[0], 'product_added')
+
+        with self.subTest('product_deleted'):
+            prod.delete()
+            self.assertEqual(mock.call_count, 7)
+            self.assertEqual(mock.call_args_list[-1].args[0], 'product_deleted')
+            self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The product "prod name" was deleted by {get_current_user()}')
 
     @patch('dojo.notifications.helper.process_notifications')
     def test_engagements(self, mock):
