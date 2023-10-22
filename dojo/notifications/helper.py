@@ -2,6 +2,7 @@ import logging
 
 import requests
 from django.conf import settings
+from django.core.exceptions import FieldDoesNotExist
 from django.core.mail import EmailMessage
 from django.db.models import Count, Prefetch, Q
 from django.template import TemplateDoesNotExist
@@ -182,8 +183,8 @@ def process_notifications(event, notifications=None, **kwargs):
         logger.debug('Sending Mail Notification')
         send_mail_notification(event, notifications.user, **kwargs)
 
-    if 'alert' in getattr(notifications, event, None):
-        logger.debug('Sending Alert')
+    if 'alert' in getattr(notifications, event, getattr(notifications, 'other')):
+        logger.debug(f'Sending Alert to {notifications.user}')
         send_alert_notification(event, notifications.user, **kwargs)
 
 
@@ -314,13 +315,18 @@ def send_alert_notification(event, user=None, *args, **kwargs):
     try:
         # no need to differentiate between user/no user
         icon = kwargs.get('icon', 'info-circle')
+        try:
+            source = Notifications._meta.get_field(event).verbose_name.title()[:100]
+        except FieldDoesNotExist:
+            source = event.replace("_", " ").title()[:100]
+        logger.debug(f'Souce: {source}')
         alert = Alerts(
             user_id=user,
             title=kwargs.get('title')[:250],
             description=create_notification_message(event, user, 'alert', *args, **kwargs)[:2000],
             url=kwargs.get('url', reverse('alerts')),
             icon=icon[:25],
-            source=Notifications._meta.get_field(event).verbose_name.title()[:100]
+            source=source,
         )
         # relative urls will fail validation
         alert.clean_fields(exclude=['url'])
