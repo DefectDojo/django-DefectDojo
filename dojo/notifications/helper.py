@@ -7,11 +7,12 @@ from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext as _
+from django.core.exceptions import FieldDoesNotExist
 
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
-from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
+from dojo.models import Notifications, DEFAULT_NOTIFICATION, Dojo_User, Alerts, UserContactInfo, System_Settings
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
 
 logger = logging.getLogger(__name__)
@@ -176,8 +177,8 @@ def process_notifications(event, notifications=None, **kwargs):
         logger.debug('Sending Mail Notification')
         send_mail_notification(event, notifications.user, **kwargs)
 
-    if 'alert' in getattr(notifications, event, None):
-        logger.debug('Sending Alert')
+    if 'alert' in getattr(notifications, event, getattr(notifications, 'other')):
+        logger.debug(f'Sending Alert to {notifications.user}')
         send_alert_notification(event, notifications.user, **kwargs)
 
 
@@ -307,14 +308,19 @@ def send_alert_notification(event, user=None, *args, **kwargs):
     logger.debug('sending alert notification to %s', user)
     try:
         # no need to differentiate between user/no user
-        icon = kwargs.get('icon', 'info-circle')
+        icon = kwargs.get('icon', 'info-circle')    
+        try:
+            source = Notifications._meta.get_field(event).verbose_name.title()[:100]
+        except FieldDoesNotExist:
+            source = event.replace("_", " ").title()[:100]
+        logger.debug(f'Souce: {source}')
         alert = Alerts(
             user_id=user,
             title=kwargs.get('title')[:250],
             description=create_notification_message(event, user, 'alert', *args, **kwargs)[:2000],
             url=kwargs.get('url', reverse('alerts')),
             icon=icon[:25],
-            source=Notifications._meta.get_field(event).verbose_name.title()[:100]
+            source=source,
         )
         # relative urls will fail validation
         alert.clean_fields(exclude=['url'])

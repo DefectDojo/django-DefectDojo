@@ -1,5 +1,6 @@
 from .dojo_test_case import DojoTestCase
-from dojo.models import Product, Product_Type, Engagement, User, Notifications
+from dojo.models import Product, Product_Type, Engagement, User, Notifications, Alerts, DEFAULT_NOTIFICATION
+from dojo.notifications.helper import create_notification, send_alert_notification
 from django.utils import timezone
 from unittest.mock import patch
 
@@ -57,6 +58,25 @@ class TestNotifications(DojoTestCase):
         self.assertEqual('slack' in merged_notifications.other, True)  # default alert from global
         self.assertEqual(len(merged_notifications.other), 3)
         self.assertEqual(merged_notifications.other, {'alert', 'mail', 'slack'})
+
+    @patch('dojo.notifications.helper.send_alert_notification', wraps=send_alert_notification)
+    def test_other_notifications(self, mock):
+        notif, _ = Notifications.objects.get_or_create(user=User.objects.get(username='admin'))
+
+        with self.subTest('do not notify other'):
+            notif.other = ()  # no alert
+            notif.save()
+            create_notification(event="dummy_bar_event", recipients=['admin'])
+            self.assertEqual(mock.call_count, 0)
+
+        with self.subTest('notify other'):
+            notif.other = DEFAULT_NOTIFICATION  # alert only
+            notif.save()
+            create_notification(event="dummy_foo_event", title="title_for_dummy_foo_event", description="description_for_dummy_foo_event", recipients=['admin'])
+            self.assertEqual(mock.call_count, 1)
+            self.assertEqual(mock.call_args_list[0].args[0], 'dummy_foo_event')
+            alert = Alerts.objects.get(title='title_for_dummy_foo_event')
+            self.assertEqual(alert.source, "Dummy Foo Event")
 
 
 class TestNotificationTriggers(DojoTestCase):
