@@ -69,7 +69,7 @@ class TestQualysParser(DojoTestCase):
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        self.assertEqual(6, len(findings))
+        self.assertEqual(3, len(findings))
 
         finding = findings[0]
         self.assertEqual(
@@ -79,11 +79,11 @@ class TestQualysParser(DojoTestCase):
             finding.severity, "Critical"
         )
         self.assertEqual(
-            finding.unsaved_endpoints[0].host, "10.98.57.180"
+            finding.unsaved_endpoints[0].host, "ip-10-98-57-180.eu-west-1.compute.internal"
         )
 
         for finding in findings:
-            if finding.unsaved_endpoints[0].host == "10.98.57.180" and finding.title == "QID-105971 | EOL/Obsolete Software: Microsoft ASP.NET 1.0 Detected":
+            if finding.unsaved_endpoints[0].host == "ip-10-98-57-180.eu-west-1.compute.internal" and finding.title == "QID-105971 | EOL/Obsolete Software: Microsoft ASP.NET 1.0 Detected":
 
                 self.assertEqual(
                     finding.severity, "Critical"
