@@ -12,7 +12,7 @@ from django.core.exceptions import FieldDoesNotExist
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
-from dojo.models import Notifications, DEFAULT_NOTIFICATION, Dojo_User, Alerts, UserContactInfo, System_Settings
+from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
 
 logger = logging.getLogger(__name__)
@@ -308,7 +308,7 @@ def send_alert_notification(event, user=None, *args, **kwargs):
     logger.debug('sending alert notification to %s', user)
     try:
         # no need to differentiate between user/no user
-        icon = kwargs.get('icon', 'info-circle')    
+        icon = kwargs.get('icon', 'info-circle')
         try:
             source = Notifications._meta.get_field(event).verbose_name.title()[:100]
         except FieldDoesNotExist:
