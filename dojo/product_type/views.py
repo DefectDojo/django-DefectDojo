@@ -1,7 +1,11 @@
 import logging
 
+from auditlog.models import LogEntry
 from django.contrib.admin.utils import NestedObjects
+from django.contrib.contenttypes.models import ContentType
 from django.db import DEFAULT_DB_ALIAS
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 from django.contrib import messages
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -12,7 +16,7 @@ from dojo.forms import Product_TypeForm, Delete_Product_TypeForm, Add_Product_Ty
     Edit_Product_Type_MemberForm, Delete_Product_Type_MemberForm, Add_Product_Type_GroupForm, \
     Edit_Product_Type_Group_Form, Delete_Product_Type_GroupForm
 from dojo.models import Product_Type, Product_Type_Member, Role, Product_Type_Group
-from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs, get_setting, async_delete
+from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs, get_setting, async_delete, get_system_setting
 from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
@@ -87,9 +91,6 @@ def add_product_type(request):
                                  messages.SUCCESS,
                                  _('Product type added successfully.'),
                                  extra_tags='alert-success')
-            create_notification(event='product_type_added', title=product_type.name,
-                                product_type=product_type,
-                                url=reverse('view_product_type', args=(product_type.id,)))
             return HttpResponseRedirect(reverse('product_type'))
     add_breadcrumb(title=page_name, top_level=False, request=request)
 
@@ -136,12 +137,6 @@ def delete_product_type(request, ptid):
                                      messages.SUCCESS,
                                      message,
                                      extra_tags='alert-success')
-                create_notification(event='other',
-                                title='Deletion of %s' % product_type.name,
-                                no_users=True,
-                                description='The product type "%s" was deleted by %s' % (product_type.name, request.user),
-                                url=request.build_absolute_uri(reverse('product_type')),
-                                icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('product_type'))
 
     rels = [_('Previewing the relationships has been disabled.'), '']
@@ -396,3 +391,32 @@ def delete_product_type_group(request, groupid):
         'groupid': groupid,
         'form': groupform
     })
+
+
+@receiver(post_save, sender=Product_Type)
+def product_type_post_save(sender, instance, created, **kwargs):
+    if created:
+        create_notification(event='product_type_added',
+                            title=instance.name,
+                            product_type=instance,
+                            url=reverse('view_product_type', args=(instance.id,)))
+
+
+@receiver(post_delete, sender=Product_Type)
+def product_type_post_delete(sender, instance, **kwargs):
+    if get_system_setting('enable_auditlog'):
+        le = LogEntry.objects.get(
+                action=LogEntry.Action.DELETE,
+                content_type=ContentType.objects.get(app_label='dojo', model='product_type'),
+                object_id=instance.id
+        )
+        description = _('The product type "%(name)s" was deleted by %(user)s') % {
+                            'name': instance.name, 'user': le.actor}
+    else:
+        description = _('The product type "%(name)s" was deleted') % {'name': instance.name}
+    create_notification(event='product_type_deleted',  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
+                        title=_('Deletion of %(name)s') % {'name': instance.name},
+                        description=description,
+                        no_users=True,
+                        url=reverse('product_type'),
+                        icon="exclamation-triangle")
