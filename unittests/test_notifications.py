@@ -1,9 +1,6 @@
-from unittest.mock import patch
-
-from crum import get_current_user
 from django.utils import timezone
 
-from dojo.models import DEFAULT_NOTIFICATION, Alerts, Engagement, Notifications, Product, Product_Type, User
+from dojo.models import DEFAULT_NOTIFICATION, Alerts, Endpoint, Engagement, Notifications, Product, Product_Type, User
 from dojo.notifications.helper import create_notification, send_alert_notification
 
 from .dojo_test_case import DojoTestCase
@@ -176,7 +173,7 @@ class TestNotificationTriggers(DojoTestCase):
     def test_products(self, mock):
         with self.subTest('product_added'):
             prod_type = Product_Type.objects.first()
-            prod = Product.objects.create(prod_type=prod_type, name='prod name')
+            prod, _ = Product.objects.get_or_create(prod_type=prod_type, name='prod name')
             self.assertEqual(mock.call_count, 5)
             self.assertEqual(mock.call_args_list[-1].args[0], 'product_added')
 
@@ -193,3 +190,22 @@ class TestNotificationTriggers(DojoTestCase):
             Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now())
             self.assertEqual(mock.call_count, 5)
             self.assertEqual(mock.call_args_list[-1].args[0], 'engagement_added')
+
+    @patch('dojo.notifications.helper.process_notifications')
+    def test_endpoints(self, mock):
+        prod_type = Product_Type.objects.first()
+        prod1, _ = Product.objects.get_or_create(prod_type=prod_type, name='prod name 1')
+        Endpoint.objects.get_or_create(product=prod1, host='host1')
+        prod2, _ = Product.objects.get_or_create(prod_type=prod_type, name='prod name 2')
+        endpoint2, _ = Endpoint.objects.get_or_create(product=prod2, host='host2')
+
+        with self.subTest('endpoint_deleted by product'):  # in case of product removal, we are not notifing about removal
+            prod1.delete()
+            for call in mock.call_args_list:
+                self.assertNotEqual(call.args[0], 'endpoint_deleted')
+
+        with self.subTest('endpoint_deleted itself'):
+            endpoint2.delete()
+            self.assertEqual(mock.call_count, 14)
+            self.assertEqual(mock.call_args_list[-1].args[0], 'endpoint_deleted')
+            self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The endpoint "host2" was deleted by {get_current_user()}')
