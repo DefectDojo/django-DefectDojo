@@ -856,7 +856,7 @@ def add_risk_acceptance(request, eid, fid=None):
 
     if request.method == 'POST':
         if settings.RISK_ACCEPTANCE:
-            if rp_helper.rule_risk_acceptance_according_to_critical(finding, "Developer"):
+            if rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user.global_role.role.name):
                 form = RiskPendingForm(request.POST, request.FILES)
             else:
                 form = RiskAcceptanceForm(request.POST, request.FILES)
@@ -904,12 +904,18 @@ def add_risk_acceptance(request, eid, fid=None):
             return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
     else:
         if settings.RISK_ACCEPTANCE:
-            if rp_helper.rule_risk_acceptance_according_to_critical(finding, "Developer"):
+            if rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user.global_role.role.name):
                 risk_acceptance_title_suggestion = 'Accept: %s' % finding
-                form = RiskPendingForm(initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
+                form = RiskPendingForm(
+                    initial={'owner': request.user,
+                             'name': risk_acceptance_title_suggestion,
+                             'accepted_by': rp_helper.get_contacts(eng, finding.severity, request.user.id)})
             else:
                 risk_acceptance_title_suggestion = 'Accept: %s' % finding
-                form = RiskAcceptanceForm(initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
+                form = RiskAcceptanceForm(
+                    initial={'owner': request.user,
+                             'name': risk_acceptance_title_suggestion,
+                             'accepted_by': rp_helper.get_contacts(eng, finding.severity, request.user.id)})
         else:
             risk_acceptance_title_suggestion = 'Accept: %s' % finding
             form = RiskAcceptanceForm(initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})

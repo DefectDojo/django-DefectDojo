@@ -709,11 +709,11 @@ class RiskPendingForm(forms.ModelForm):
     recommendation = forms.ChoiceField(choices=Risk_Acceptance.TREATMENT_CHOICES, initial=Risk_Acceptance.TREATMENT_ACCEPT, widget=forms.RadioSelect, label="Security Recommendation")
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False, help_text="Description of the engagement and details regarding the engagement.")
-    # accepted_by = forms.CharField(max_length=255, required=False) # Todo guarde usuario logeado.
     accepted_by = forms.ModelMultipleChoiceField(
-        queryset=Dojo_User.objects.all(), required=True,
+        queryset=Dojo_User.objects.all(),
+        required=True,
         widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
-        help_text=('selecione los aceptadores')
+        help_text=('select acceptors depending on the severity of the risk')
     )
     path = forms.FileField(label="Proof", required=False, widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}))
     expiration_date = forms.DateTimeField(required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
@@ -743,8 +743,23 @@ class RiskPendingForm(forms.ModelForm):
         self.fields['accepted_by'].disable = True
         self.fields['expiration_date_warned'].disabled = True
         self.fields['expiration_date_handled'].disabled = True
-        self.fields['owner'].disabled = True
+        # self.fields['owner'].disabled = True
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
+    
+    def clean(self):
+        data = self.cleaned_data
+        if "accepted_by" in data.keys():
+            accepted_by = data["accepted_by"]
+            contacts = accepted_by.values()
+            contact = [contact["username"] for contact in contacts]
+            data["accepted_by"] = contact
+        else:
+            raise ValidationError("Accepted_by key no found")
+        return data
+
+
+
+    
     
 class RiskAcceptanceForm(EditRiskAcceptanceForm):
     # path = forms.FileField(label="Proof", required=False, widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}))
@@ -756,6 +771,11 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
     notes = forms.CharField(required=False, max_length=2400,
                             widget=forms.Textarea,
                             label='Notes')
+    accepted_by = forms.ModelMultipleChoiceField(
+        queryset=Dojo_User.objects.all(),
+        widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
+        help_text=('select acceptors depending on the severity of the risk')
+    )
 
     class Meta:
         model = Risk_Acceptance
@@ -771,6 +791,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
             self.fields['expiration_date'].initial = expiration_date
         # self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
+        self.fields['reactivate_expired'].disabled = True
 
 
 class BaseManageFileFormSet(forms.BaseModelFormSet):

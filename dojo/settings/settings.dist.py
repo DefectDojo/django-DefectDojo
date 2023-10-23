@@ -1833,8 +1833,24 @@ ROLE_ALLOWED_TO_ACCEPT_RISKS=["Owner"],
 
 # job: puesto de trabajo para saber que persona pueden hacer la solicitude del riesgo
 RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY={
-    "low": {"number_acceptors": 0, "roles": ["Developer", "Mainteiner"], "jobs": ["PROVEEDOR", "INGENIERO/A SOFTWARE", "LIDER CENTRO DE EXCELENCIA", "LIDER LINEA DE CONOCIMIEN"]},
-    "medium": {"number_acceptors": 1, "roles": ["Owner"], "jobs": ["LIDER CENTRO DE EXCELENCI"]},
-    "high": {"number_acceptors": 2, "roles": ["Owner"], "jobs": ["LIDER CENTRO DE EXCELENCI"]},
-    "critical": {"number_acceptors": 2, "roles": ["Owner"], "jobs": ["LIDER LINEA DE CONOCIMIEN"]},
+    "Low": {
+        "number_acceptors": 0,
+        "roles": ["Developer", "Mainteiner"],
+        "type_contacts": [],
+        "jobs": ["PROVEEDOR", "INGENIERO/A SOFTWARE", "LIDER CENTRO DE EXCELENCIA", "LIDER LINEA DE CONOCIMIEN"]},
+    "Medium": {
+        "number_acceptors": 1,
+        "roles": ["Owner"],
+        "type_contacts": ["Product Type Technical Contact"],
+        "jobs": ["LIDER CENTRO DE EXCELENCI"]},
+    "High": {
+        "number_acceptors": 2,
+        "type_contacts": ["Product Type Manager", "Product Type Technical Contact"],
+        "roles": ["Owner"],
+        "jobs": ["LIDER CENTRO DE EXCELENCI"]},
+    "Critical": {
+        "number_acceptors": 2,
+        "roles": ["Owner"],
+        "type_contacts": ["Environment Manager", "Environment Technical Contact"],
+        "jobs": ["LIDER LINEA DE CONOCIMIEN"]},
 }
