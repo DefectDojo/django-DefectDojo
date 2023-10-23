@@ -170,6 +170,19 @@ class TestNotificationTriggers(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
     @patch('dojo.notifications.helper.process_notifications')
+    def test_product_types(self, mock):
+        with self.subTest('product_type_added'):
+            prod_type = Product_Type.objects.create(name='notif prod type')
+            self.assertEqual(mock.call_count, 4)
+            self.assertEqual(mock.call_args_list[-1].args[0], 'product_type_added')
+
+        with self.subTest('product_type_deleted'):
+            prod_type.delete()
+            self.assertEqual(mock.call_count, 5)
+            self.assertEqual(mock.call_args_list[-1].args[0], 'produc_type_deleted')
+            self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The product type "notif prod type" was deleted by {get_current_user()}')
+
+    @patch('dojo.notifications.helper.process_notifications')
     def test_products(self, mock):
         with self.subTest('product_added'):
             prod_type = Product_Type.objects.first()
