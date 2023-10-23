@@ -175,12 +175,14 @@ class TestNotificationTriggers(DojoTestCase):
             prod_type = Product_Type.objects.create(name='notif prod type')
             self.assertEqual(mock.call_count, 4)
             self.assertEqual(mock.call_args_list[-1].args[0], 'product_type_added')
+            self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/product/type/{prod_type.id}')
 
         with self.subTest('product_type_deleted'):
             prod_type.delete()
             self.assertEqual(mock.call_count, 5)
             self.assertEqual(mock.call_args_list[-1].args[0], 'produc_type_deleted')
             self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The product type "notif prod type" was deleted by {get_current_user()}')
+            self.assertEqual(mock.call_args_list[-1].kwargs['url'], '/product/type')
 
     @patch('dojo.notifications.helper.process_notifications')
     def test_products(self, mock):
@@ -189,20 +191,23 @@ class TestNotificationTriggers(DojoTestCase):
             prod, _ = Product.objects.get_or_create(prod_type=prod_type, name='prod name')
             self.assertEqual(mock.call_count, 5)
             self.assertEqual(mock.call_args_list[-1].args[0], 'product_added')
+            self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/product/{prod.id}')
 
         with self.subTest('product_deleted'):
             prod.delete()
             self.assertEqual(mock.call_count, 7)
             self.assertEqual(mock.call_args_list[-1].args[0], 'product_deleted')
             self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The product "prod name" was deleted by {get_current_user()}')
+            self.assertEqual(mock.call_args_list[-1].kwargs['url'], '/product')
 
     @patch('dojo.notifications.helper.process_notifications')
     def test_engagements(self, mock):
         with self.subTest('engagement_added'):
             prod = Product.objects.first()
-            Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now())
+            eng = Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now())
             self.assertEqual(mock.call_count, 5)
             self.assertEqual(mock.call_args_list[-1].args[0], 'engagement_added')
+            self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/engagement/{eng.id}')
 
     @patch('dojo.notifications.helper.process_notifications')
     def test_endpoints(self, mock):
@@ -222,3 +227,4 @@ class TestNotificationTriggers(DojoTestCase):
             self.assertEqual(mock.call_count, 14)
             self.assertEqual(mock.call_args_list[-1].args[0], 'endpoint_deleted')
             self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The endpoint "host2" was deleted by {get_current_user()}')
+            self.assertEqual(mock.call_args_list[-1].kwargs['url'], '/endpoint')
