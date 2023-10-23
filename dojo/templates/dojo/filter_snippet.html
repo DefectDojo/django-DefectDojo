@@ -11,7 +11,6 @@
     {{ form.media.js }}
 {% endblock %}
 <div class="filter-set">
-    {{form_id}}
     <form method="get" {% if form_id %}id="{{form_id}}"{% endif %} class="{{ request.path|slugify }}-filters form-inline dojo-filter-set">
         {% for field in form.hidden_fields %}
             {{ field }}
