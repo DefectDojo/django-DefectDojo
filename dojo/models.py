@@ -2227,6 +2227,10 @@ class Finding(models.Model):
     out_of_scope = models.BooleanField(default=False,
                                        verbose_name=_('Out Of Scope'),
                                        help_text=_("Denotes if this flaw falls outside the scope of the test and/or engagement."))
+    acceptances_confirmed = models.IntegerField(default=0,
+                                       null=True,
+                                       verbose_name=_('Acceptances confirmed'),
+                                       help_text=_("number of confirmed acceptances for finding"))
     risk_pending = models.BooleanField(default=False,
                                        null=True,
                                        verbose_name=_('Risk Pending'),
@@ -2767,6 +2771,8 @@ class Finding(models.Model):
             status += ['Duplicate']
         if self.risk_accepted:
             status += ['Risk Accepted']
+        if self.risk_pending:
+            status += ['<span style="color: red;">Risk_pending</span>']
         if not len(status):
             status += ['Initial']
 
@@ -3412,6 +3418,7 @@ class Risk_Acceptance(models.Model):
     notes = models.ManyToManyField(Notes, editable=False)
     created = models.DateTimeField(auto_now_add=True, null=False)
     updated = models.DateTimeField(auto_now=True, editable=False)
+    acceptances_confirmed = models.IntegerField(default=0, blank=True, null=True, help_text=_('acceptances confirmed for temporary risk approval'))
 
     def __str__(self):
         return str(self.name)

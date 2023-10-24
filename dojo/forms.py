@@ -757,10 +757,6 @@ class RiskPendingForm(forms.ModelForm):
             raise ValidationError("Accepted_by key no found")
         return data
 
-
-
-    
-    
 class RiskAcceptanceForm(EditRiskAcceptanceForm):
     # path = forms.FileField(label="Proof", required=False, widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}))
     # expiration_date = forms.DateTimeField(required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))

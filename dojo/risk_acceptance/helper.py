@@ -109,9 +109,13 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
 
 def add_findings_to_risk_pending(risk_pending, findings):
     for finding in findings:
-        if not finding.duplicate or finding.risk_pending:
+        if not finding.duplicate:
+            # if finding cumple con el numero de aceptadores necesarios (acceptances_confirmed)
+            # si se cumple entonces pone el findigin.actve = False
             finding.risk_pending = True
+            finding.risk_accepted = True
             finding.save(dedupe_option=False)
+            risk_pending.accepted_findings.add(finding)
     risk_pending.save()
     post_jira_comments(risk_pending, findings, accepted_message_creator)
 

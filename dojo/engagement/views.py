@@ -893,7 +893,10 @@ def add_risk_acceptance(request, eid, fid=None):
 
             findings = form.cleaned_data['accepted_findings']
 
-            risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+            if settings.RISK_ACCEPTANCE:
+                risk_acceptance = ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
+            else:
+                risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
 
             messages.add_message(
                 request,
