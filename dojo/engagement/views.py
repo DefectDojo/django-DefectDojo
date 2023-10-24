@@ -848,6 +848,7 @@ def add_risk_acceptance(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
     form = None
     finding = None
+    risk_pending = False
     if fid:
         finding = get_object_or_404(Finding, id=fid)
 
@@ -856,7 +857,8 @@ def add_risk_acceptance(request, eid, fid=None):
 
     if request.method == 'POST':
         if settings.RISK_ACCEPTANCE:
-            if rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user.global_role.role.name):
+            risk_pending = rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user.global_role.role.name)
+            if risk_pending:
                 form = RiskPendingForm(request.POST, request.FILES)
             else:
                 form = RiskAcceptanceForm(request.POST, request.FILES)
@@ -893,7 +895,7 @@ def add_risk_acceptance(request, eid, fid=None):
 
             findings = form.cleaned_data['accepted_findings']
 
-            if settings.RISK_ACCEPTANCE:
+            if settings.RISK_ACCEPTANCE is True and risk_acceptance is True:
                 risk_acceptance = ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
             else:
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)

@@ -2769,10 +2769,10 @@ class Finding(models.Model):
             status += ['Out Of Scope']
         if self.duplicate:
             status += ['Duplicate']
-        if self.risk_accepted:
-            status += ['Risk Accepted']
         if self.risk_pending:
-            status += ['<span style="color: red;">Risk_pending</span>']
+            status += ['Risk pending']
+        elif self.risk_accepted:
+            status += ['Risk Accepted']
         if not len(status):
             status += ['Initial']
 

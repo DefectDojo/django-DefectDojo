@@ -48,6 +48,8 @@ def rule_risk_acceptance_according_to_critical(severity, user_rol: str):
     risk_rule = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY.get(severity)
     view_risk_pending = False
     if risk_rule:
-        if risk_rule.get("number_acceptors") != 0 or user_rol not in risk_rule.get("roles"):
+        if risk_rule.get("number_acceptors") == 0 and user_rol in risk_rule.get("roles"):
+            view_risk_pending = False
+        elif risk_rule.get("number_acceptors") != 0 and user_rol not in risk_rule.get("roles"):
             view_risk_pending = True
     return view_risk_pending

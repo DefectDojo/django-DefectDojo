@@ -1842,15 +1842,15 @@ RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY={
         "number_acceptors": 1,
         "roles": ["Owner"],
         "type_contacts": ["Product Type Technical Contact"],
-        "jobs": ["LIDER CENTRO DE EXCELENCI"]},
+        "jobs": ["LIDER CENTRO DE EXCELENCIA"]},
     "High": {
         "number_acceptors": 2,
         "type_contacts": ["Product Type Manager", "Product Type Technical Contact"],
         "roles": ["Owner"],
-        "jobs": ["LIDER CENTRO DE EXCELENCI"]},
+        "jobs": ["LIDER CENTRO DE EXCELENCIA"]},
     "Critical": {
         "number_acceptors": 2,
         "roles": ["Owner"],
         "type_contacts": ["Environment Manager", "Environment Technical Contact"],
-        "jobs": ["LIDER LINEA DE CONOCIMIEN"]},
+        "jobs": ["LIDER LINEA DE CONOCIMIENTO"]},
 }
