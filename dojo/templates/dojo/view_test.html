@@ -858,397 +858,401 @@
                     class="table-striped tablesorter-bootstrap table table-condensed table-hover">
                     <thead>
                         <tr>
-                            {% if test|has_object_permission:"Test_Edit" or test|has_object_permission:"Test_Delete" %}
-                                <th class="centered" title="Select all visible findings.">
-                                    <div class="dropdown">
-                                        <button class="btn btn-primary dropdown-toggle"
-                                                type="button"
-                                                id="dropdownMenu1"
-                                                data-toggle="dropdown"
-                                                aria-haspopup="true"
-                                                aria-expanded="true"
-                                                aria-label="Severity Filter">
-                                            <form class="inline-form" action="#">
-                                                <input type="checkbox"
-                                                    name="select_all"
-                                                    label="select_all"
-                                                    aria-label="select_all"
-                                                    id="select_all"/>
-                                            </form>
-                                            <span class="caret"></span>
-                                        </button>
-                                        <ul class="dropdown-menu"
-                                            aria-labelledby="dropdownMenu1"
-                                            id="select_by_severity">
-                                            <li>
-                                                <a id="Info">{% trans "Info" %}</a>
-                                            </li>
-                                            <li>
-                                                <a id="Low">{% trans "Low" %}</a>
-                                            </li>
-                                            <li>
-                                                <a id="Medium">{% trans "Medium" %}</a>
-                                            </li>
-                                            <li>
-                                                <a id="High">{% trans "High" %}</a>
-                                            </li>
-                                            <li>
-                                                <a id="Critical">{% trans "Critical" %}</a>
-                                            </li>
-                                            <li role="separator" class="divider">
-                                            </li>
-                                            <li>
-                                                <a id="All">{% trans "All" %}</a>
-                                            </li>
-                                            <li>
-                                                <a id="None">{% trans "None" %}</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </th>
-                            {% endif %}
-                            <th></th>
-                            <th class="centered severity-sort">
-                                {% trans "Severity" %}
-                            </th>
-                            <th>
-                                {% trans "Name" %}
-                            </th>
-                            <th>
-                                {% trans "CWE" %}
-                            </th>
-                            <th>
-                                {% trans "Vulnerability Id" %}
-                            </th>
-                            <th>
-                                {% trans "Date" %}
-                            </th>
-                            <th>
-                                {% trans "Age" %}
-                            </th>
-                            {% if system_settings.enable_finding_sla %}
-                                <th>
-                                    {% trans "SLA" %}
-                                </th>
-                            {% endif %}
-                            <th>
-                                {% trans "Reporter" %}
-                            </th>
-                            <th>
-                                {% trans "Status" %}
-                            </th>
-                            {% if system_settings.enable_jira %}
-                                {% if jira_project and product_tab or not product_tab %}
-                                    <th>
-                                        {% trans "Jira" %}
-                                    </th>
-                                    <th>
-                                        {% trans "Jira Age" %}
-                                    </th>
-                                    <th>
-                                        {% trans "Jira Change" %}
+                            {% block header %}
+                                {% if test|has_object_permission:"Test_Edit" or test|has_object_permission:"Test_Delete" %}
+                                    <th class="centered" title="Select all visible findings.">
+                                        <div class="dropdown">
+                                            <button class="btn btn-primary dropdown-toggle"
+                                                    type="button"
+                                                    id="dropdownMenu1"
+                                                    data-toggle="dropdown"
+                                                    aria-haspopup="true"
+                                                    aria-expanded="true"
+                                                    aria-label="Severity Filter">
+                                                <form class="inline-form" action="#">
+                                                    <input type="checkbox"
+                                                        name="select_all"
+                                                        label="select_all"
+                                                        aria-label="select_all"
+                                                        id="select_all"/>
+                                                </form>
+                                                <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu"
+                                                aria-labelledby="dropdownMenu1"
+                                                id="select_by_severity">
+                                                <li>
+                                                    <a id="Info">{% trans "Info" %}</a>
+                                                </li>
+                                                <li>
+                                                    <a id="Low">{% trans "Low" %}</a>
+                                                </li>
+                                                <li>
+                                                    <a id="Medium">{% trans "Medium" %}</a>
+                                                </li>
+                                                <li>
+                                                    <a id="High">{% trans "High" %}</a>
+                                                </li>
+                                                <li>
+                                                    <a id="Critical">{% trans "Critical" %}</a>
+                                                </li>
+                                                <li role="separator" class="divider">
+                                                </li>
+                                                <li>
+                                                    <a id="All">{% trans "All" %}</a>
+                                                </li>
+                                                <li>
+                                                    <a id="None">{% trans "None" %}</a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </th>
                                 {% endif %}
-                            {% endif %}
-                            {% if 'is_finding_groups_enabled'|system_setting_enabled %}
-                                <th>
-                                    {% trans "Group" %}
+                                <th></th>
+                                <th class="centered severity-sort">
+                                    {% trans "Severity" %}
                                 </th>
-                            {% endif %}
-                            <th>
-                                {% trans "Planned Remediation" %}
-                            </th>
+                                <th>
+                                    {% trans "Name" %}
+                                </th>
+                                <th>
+                                    {% trans "CWE" %}
+                                </th>
+                                <th>
+                                    {% trans "Vulnerability Id" %}
+                                </th>
+                                <th>
+                                    {% trans "Date" %}
+                                </th>
+                                <th>
+                                    {% trans "Age" %}
+                                </th>
+                                {% if system_settings.enable_finding_sla %}
+                                    <th>
+                                        {% trans "SLA" %}
+                                    </th>
+                                {% endif %}
+                                <th>
+                                    {% trans "Reporter" %}
+                                </th>
+                                <th>
+                                    {% trans "Status" %}
+                                </th>
+                                {% if system_settings.enable_jira %}
+                                    {% if jira_project and product_tab or not product_tab %}
+                                        <th>
+                                            {% trans "Jira" %}
+                                        </th>
+                                        <th>
+                                            {% trans "Jira Age" %}
+                                        </th>
+                                        <th>
+                                            {% trans "Jira Change" %}
+                                        </th>
+                                    {% endif %}
+                                {% endif %}
+                                {% if 'is_finding_groups_enabled'|system_setting_enabled %}
+                                    <th>
+                                        {% trans "Group" %}
+                                    </th>
+                                {% endif %}
+                                <th>
+                                    {% trans "Planned Remediation" %}
+                                </th>
+                            {% endblock header %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for finding in findings %}
                             <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
-                                {% if test|has_object_permission:"Test_Edit" or test|has_object_permission:"Test_Delete" %}
-                                    <td class="centered">
-                                        <form action="#">
-                                            <input type="checkbox"
-                                                name="select_{{ finding.id }}"
-                                                id="{{ finding.id }}"
-                                                label="select_one"
-                                                aria-label="select_one"
-                                                class="select_one {{ finding.severity }}"/>
-                                        </form>
-                                    </td>
-                                {% endif %}
-                                <td class="nowrap">
-                                    <div class="align-top">
-                                        <div class="dropdown">
-                                            <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
-                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                                                <li>
-                                                    <a class="" href="{% url 'view_finding' finding.id %}">
-                                                        <i class="fa-solid fa-circle-right"></i> {% trans "View" %}
-                                                    </a>
-                                                </li>
-                                                {% if finding|has_object_permission:"Finding_Edit" %}
+                                {% block body %}
+                                    {% if test|has_object_permission:"Test_Edit" or test|has_object_permission:"Test_Delete" %}
+                                        <td class="centered">
+                                            <form action="#">
+                                                <input type="checkbox"
+                                                    name="select_{{ finding.id }}"
+                                                    id="{{ finding.id }}"
+                                                    label="select_one"
+                                                    aria-label="select_one"
+                                                    class="select_one {{ finding.severity }}"/>
+                                            </form>
+                                        </td>
+                                    {% endif %}
+                                    <td class="nowrap">
+                                        <div class="align-top">
+                                            <div class="dropdown">
+                                                <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
+                                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
                                                     <li>
-                                                        <a class=""
-                                                        href="{% url 'edit_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                            <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}
+                                                        <a class="" href="{% url 'view_finding' finding.id %}">
+                                                            <i class="fa-solid fa-circle-right"></i> {% trans "View" %}
                                                         </a>
                                                     </li>
-                                                    <li>
-                                                        <a class="" href="{% url 'copy_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}"/>
-                                                            <i class="fa-solid fa-copy"></i> {% trans "Copy" %}
-                                                        </a>
-                                                    </li>
-                                                    <li class="divider"></li>
-                                                {% endif %}
-                                                {% if finding|has_object_permission:"Finding_View" %}
-                                                    {% user_can_clear_peer_review finding request.user as clear_peer_review %}
-                                                    {% if finding|has_object_permission:"Finding_Edit" and clear_peer_review %}
-                                                        <li role="presentation">
-                                                            <a href="{% url 'clear_finding_review' finding.id %}">
-                                                                <i class="icon-user-check"></i> {% trans "Clear Review" %}
+                                                    {% if finding|has_object_permission:"Finding_Edit" %}
+                                                        <li>
+                                                            <a class=""
+                                                            href="{% url 'edit_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                                <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}
                                                             </a>
                                                         </li>
-                                                    {% elif not finding.under_review %}
+                                                        <li>
+                                                            <a class="" href="{% url 'copy_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}"/>
+                                                                <i class="fa-solid fa-copy"></i> {% trans "Copy" %}
+                                                            </a>
+                                                        </li>
+                                                        <li class="divider"></li>
+                                                    {% endif %}
+                                                    {% if finding|has_object_permission:"Finding_View" %}
+                                                        {% user_can_clear_peer_review finding request.user as clear_peer_review %}
+                                                        {% if finding|has_object_permission:"Finding_Edit" and clear_peer_review %}
+                                                            <li role="presentation">
+                                                                <a href="{% url 'clear_finding_review' finding.id %}">
+                                                                    <i class="icon-user-check"></i> {% trans "Clear Review" %}
+                                                                </a>
+                                                            </li>
+                                                        {% elif not finding.under_review %}
+                                                            <li role="presentation">
+                                                                <a href="{% url 'request_finding_review' finding.id %}">
+                                                                    <i class="icon-user-check"></i> {% trans "Request Peer Review" %}
+                                                                </a>
+                                                            </li>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                    {% if finding|has_object_permission:"Finding_Edit" %}
                                                         <li role="presentation">
-                                                            <a href="{% url 'request_finding_review' finding.id %}">
-                                                                <i class="icon-user-check"></i> {% trans "Request Peer Review" %}
+                                                            <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                                <i class="fa-solid fa-clock"></i> {% trans "Touch Finding" %}
                                                             </a>
                                                         </li>
                                                     {% endif %}
-                                                {% endif %}
-                                                {% if finding|has_object_permission:"Finding_Edit" %}
-                                                    <li role="presentation">
-                                                        <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                            <i class="fa-solid fa-clock"></i> {% trans "Touch Finding" %}
-                                                        </a>
-                                                    </li>
-                                                {% endif %}
-                                                {% if finding|has_object_permission:"Finding_Add" %}
-                                                    <li role="presentation">
-                                                        <a href="{% url 'mktemplate' finding.id %}">
-                                                            <i class="fa-solid fa-copy"></i> {% trans "Make Finding a Template" %}
-                                                        </a>
-                                                    </li>
-                                                {% endif %}
-                                                {% if finding|has_object_permission:"Finding_Edit" %}
-                                                    <li role="presentation">
-                                                        <a href="{% url 'find_template_to_apply' finding.id %}">
-                                                            <i class="fa-solid fa-copy"></i> {% trans "Apply Template to Finding" %}
-                                                        </a>
-                                                    </li>
-                                                    {% if finding.active %}
+                                                    {% if finding|has_object_permission:"Finding_Add" %}
                                                         <li role="presentation">
-                                                            <a href="{% url 'close_finding' finding.id %}">
-                                                                <i class="fa-solid fa-fire-extinguisher"></i> {% trans "Close Finding" %}
-                                                            </a>
-                                                        </li>
-                                                    {% else %}
-                                                        <li role="presentation">
-                                                            <a href="{% url 'reopen_finding' finding.id %}">
-                                                                <i class="fa-solid fa-bug"></i> {% trans "Open Finding" %}
+                                                            <a href="{% url 'mktemplate' finding.id %}">
+                                                                <i class="fa-solid fa-copy"></i> {% trans "Make Finding a Template" %}
                                                             </a>
                                                         </li>
                                                     {% endif %}
-                                                {% endif %}
-                                                {% if finding|has_object_permission:"Risk_Acceptance" %}
-                                                    {% if finding.risk_accepted %}
+                                                    {% if finding|has_object_permission:"Finding_Edit" %}
                                                         <li role="presentation">
-                                                            <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                                <i class="fa-solid fa-circle-exclamation"></i> {% trans "Unaccept Risk" %}
+                                                            <a href="{% url 'find_template_to_apply' finding.id %}">
+                                                                <i class="fa-solid fa-copy"></i> {% trans "Apply Template to Finding" %}
                                                             </a>
                                                         </li>
-                                                    {% else %}
-                                                        {% if not finding.duplicate %}
-                                                            {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
-                                                                <li role="presentation">
-                                                                    <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                                        <i class="fa-solid fa-circle-exclamation"></i> {% trans "Accept Risk" %}
-                                                                    </a>
-                                                                </li>
-                                                            {% endif %}
-                                                            {% if finding.test.engagement.product.enable_full_risk_acceptance %}
-                                                                <li role="presentation">
-                                                                    <a href
-                                                                    {% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}>
-                                                                        <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Risk Acceptance..." %}
-                                                                    </a>
-                                                                </li>
+                                                        {% if finding.active %}
+                                                            <li role="presentation">
+                                                                <a href="{% url 'close_finding' finding.id %}">
+                                                                    <i class="fa-solid fa-fire-extinguisher"></i> {% trans "Close Finding" %}
+                                                                </a>
+                                                            </li>
+                                                        {% else %}
+                                                            <li role="presentation">
+                                                                <a href="{% url 'reopen_finding' finding.id %}">
+                                                                    <i class="fa-solid fa-bug"></i> {% trans "Open Finding" %}
+                                                                </a>
+                                                            </li>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                    {% if finding|has_object_permission:"Risk_Acceptance" %}
+                                                        {% if finding.risk_accepted %}
+                                                            <li role="presentation">
+                                                                <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                                    <i class="fa-solid fa-circle-exclamation"></i> {% trans "Unaccept Risk" %}
+                                                                </a>
+                                                            </li>
+                                                        {% else %}
+                                                            {% if not finding.duplicate %}
+                                                                {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
+                                                                    <li role="presentation">
+                                                                        <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                                            <i class="fa-solid fa-circle-exclamation"></i> {% trans "Accept Risk" %}
+                                                                        </a>
+                                                                    </li>
+                                                                {% endif %}
+                                                                {% if finding.test.engagement.product.enable_full_risk_acceptance %}
+                                                                    <li role="presentation">
+                                                                        <a href
+                                                                        {% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}>
+                                                                            <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Risk Acceptance..." %}
+                                                                        </a>
+                                                                    </li>
+                                                                {% endif %}
                                                             {% endif %}
                                                         {% endif %}
                                                     {% endif %}
-                                                {% endif %}
-                                                <li class="divider"></li>
-                                                <li role="presentation">
-                                                    <a href="{% url 'action_history' finding|content_type finding.id %}">
-                                                        <i class="fa-solid fa-clock-rotate-left"></i> {% trans "View History" %}
-                                                    </a>
-                                                </li>
-                                                {% if finding|has_object_permission:"Finding_Delete" %}
                                                     <li class="divider"></li>
-                                                    <li>
-                                                        <form method="post"
-                                                            action="{% url 'delete_finding' finding.id %}"
-                                                            style="display: inline"
-                                                            class="form-inline form"
-                                                            id="delete-finding-menu-{{ finding.id }}-form">
-                                                            {% csrf_token %}
-                                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
-                                                            <input type="hidden" name="id" value="{{ finding.id }}"/>
-                                                        </form>
-                                                        <a class="text-danger delete-finding"
-                                                        id="delete-finding-menu-{{ finding.id }}"
-                                                        href="#">
-                                                            <i class="fa-solid fa-trash"></i> {% trans "Delete" %}
+                                                    <li role="presentation">
+                                                        <a href="{% url 'action_history' finding|content_type finding.id %}">
+                                                            <i class="fa-solid fa-clock-rotate-left"></i> {% trans "View History" %}
                                                         </a>
                                                     </li>
-                                                {% endif %}
-                                            </ul>
+                                                    {% if finding|has_object_permission:"Finding_Delete" %}
+                                                        <li class="divider"></li>
+                                                        <li>
+                                                            <form method="post"
+                                                                action="{% url 'delete_finding' finding.id %}"
+                                                                style="display: inline"
+                                                                class="form-inline form"
+                                                                id="delete-finding-menu-{{ finding.id }}-form">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
+                                                                <input type="hidden" name="id" value="{{ finding.id }}"/>
+                                                            </form>
+                                                            <a class="text-danger delete-finding"
+                                                            id="delete-finding-menu-{{ finding.id }}"
+                                                            href="#">
+                                                                <i class="fa-solid fa-trash"></i> {% trans "Delete" %}
+                                                            </a>
+                                                        </li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <td class="centered severity-sort" data-severity="{{ finding.severity_display }}">
-                                    <span class="label severity severity-{{ finding.severity }}">
-                                        {{ finding.severity_display }}
-                                    </span>
-                                </td>
-                                <td>
-                                    {% if finding.title %}
-                                        <a title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
-                                    {% else %}
-                                        <a title="{{ finding.id }}" href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
-                                    {% endif %}
-                                    {% if finding.file_path %}
-                                        <i class="fa-solid fa-code has-popover dojo-sup"
-                                        data-trigger="hover"
-                                        data-content="{{ finding.file_path }}"
-                                        data-placement="right"
-                                        data-container="body"
-                                        data-original-title="Files"
-                                        title=""></i>
-                                    {% endif %}
-                                    {% if finding.endpoints.all %}
-                                        <i class="fa-solid fa-sitemap has-popover dojo-sup" data-html="true" data-trigger="hover" data-content="
-                                        {% for endpoint_status in finding.status_finding.all %}
-                                            {% if endpoint_status.mitigated %} &#10003; {{ endpoint_status.endpoint }}
-                                                <br/>
-                                            {% else %}
-                                                    &#10005; {{ endpoint_status.endpoint }}
-                                                    <br/>
-                                            {% endif %}
-                                        {% endfor %}
-                                        " data-placement="right" data-container="body" data-original-title="Endpoints ({{ finding.active_endpoint_count }} Active, {{ finding.mitigated_endpoint_count }} Mitigated)" title=""></i>
-                                    {% endif %}
-                                    {% if finding.component_name %}
-                                        <i class="fa-solid fa-file has-popover dojo-sup"
-                                        data-trigger="hover"
-                                        data-placement="right"
-                                        data-content="{{ finding.component_name }} - {{ finding.component_version }}"
-                                        data-container="body"
-                                        data-original-title="Component"
-                                        title=""></i>
-                                    {% endif %}
-                                    {% if finding.notes.all %}
-                                        <i class="glyphicon glyphicon-comment has-popover dojo-sup"
-                                        data-trigger="hover"
-                                        data-content="{{ finding.notes.all.0 }}"
-                                        data-placement="left"
-                                        data-container="body"
-                                        data-original-title="Most Recent Note ({{ finding.notes.count }} total)"
-                                        title=""></i>
-                                        <a href="{% url 'view_finding' finding.id %}#vuln_notes"
-                                            class="dojo-sup"
-                                            alt="{{ finding.notes.count }} note{{ finding.notes.count|pluralize }}">
-                                                ({{ finding.notes.count }})
-                                        </a>
-                                    {% endif %}
-                                    {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
-                                </td>
-                                <td class="nowrap">
-                                    {% if finding.cwe > 0 %}
-                                        <a target="_blank"
-                                        href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
-                                            <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe }}
-                                        </a>
-                                    {% endif %}
-                                </td>
-                                <td class="nowrap">
-                                    {% with finding|first_vulnerability_id as first_vulnerability_id %}
-                                        {% if first_vulnerability_id %}
-                                            {% if first_vulnerability_id|has_vulnerability_url %}
-                                                <a target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">
-                                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ first_vulnerability_id|default:"" }}
-                                                </a>
-                                            {% else %}
-                                                {{ first_vulnerability_id }}
-                                            {% endif %}
-                                        {% endif %}
-                                    {% endwith %}
-                                </td>
-                                <td class="nowrap">
-                                    {{ finding.date }}
-                                </td>
-                                <td>
-                                    {{ finding.age }}
-                                </td>
-                                {% if system_settings.enable_finding_sla %}
+                                    </td>
+                                    <td class="centered severity-sort" data-severity="{{ finding.severity_display }}">
+                                        <span class="label severity severity-{{ finding.severity }}">
+                                            {{ finding.severity_display }}
+                                        </span>
+                                    </td>
                                     <td>
-                                        {{ finding|finding_sla }}
+                                        {% if finding.title %}
+                                            <a title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
+                                        {% else %}
+                                            <a title="{{ finding.id }}" href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
+                                        {% endif %}
+                                        {% if finding.file_path %}
+                                            <i class="fa-solid fa-code has-popover dojo-sup"
+                                            data-trigger="hover"
+                                            data-content="{{ finding.file_path }}"
+                                            data-placement="right"
+                                            data-container="body"
+                                            data-original-title="Files"
+                                            title=""></i>
+                                        {% endif %}
+                                        {% if finding.endpoints.all %}
+                                            <i class="fa-solid fa-sitemap has-popover dojo-sup" data-html="true" data-trigger="hover" data-content="
+                                            {% for endpoint_status in finding.status_finding.all %}
+                                                {% if endpoint_status.mitigated %} &#10003; {{ endpoint_status.endpoint }}
+                                                    <br/>
+                                                {% else %}
+                                                        &#10005; {{ endpoint_status.endpoint }}
+                                                        <br/>
+                                                {% endif %}
+                                            {% endfor %}
+                                            " data-placement="right" data-container="body" data-original-title="Endpoints ({{ finding.active_endpoint_count }} Active, {{ finding.mitigated_endpoint_count }} Mitigated)" title=""></i>
+                                        {% endif %}
+                                        {% if finding.component_name %}
+                                            <i class="fa-solid fa-file has-popover dojo-sup"
+                                            data-trigger="hover"
+                                            data-placement="right"
+                                            data-content="{{ finding.component_name }} - {{ finding.component_version }}"
+                                            data-container="body"
+                                            data-original-title="Component"
+                                            title=""></i>
+                                        {% endif %}
+                                        {% if finding.notes.all %}
+                                            <i class="glyphicon glyphicon-comment has-popover dojo-sup"
+                                            data-trigger="hover"
+                                            data-content="{{ finding.notes.all.0 }}"
+                                            data-placement="left"
+                                            data-container="body"
+                                            data-original-title="Most Recent Note ({{ finding.notes.count }} total)"
+                                            title=""></i>
+                                            <a href="{% url 'view_finding' finding.id %}#vuln_notes"
+                                                class="dojo-sup"
+                                                alt="{{ finding.notes.count }} note{{ finding.notes.count|pluralize }}">
+                                                    ({{ finding.notes.count }})
+                                            </a>
+                                        {% endif %}
+                                        {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                                     </td>
-                                {% endif %}
-                                <td>
-                                    {% if finding.reporter.get_full_name and finding.reporter.get_full_name.strip %}
-                                        {{ finding.reporter.get_full_name }}
-                                    {% else %}
-                                        {{ finding.reporter }}
-                                    {% endif %}
-                                </td>
-                                <td class="nowrap">
-                                    {{ finding|finding_display_status|safe }}&nbsp;{{ finding|import_history }}
-                                </td>
-                                {% if system_settings.enable_jira %}
-                                    {% if jira_project and product_tab or not product_tab %}
-                                        <td class="nowrap">
-                                            {% if finding.has_jira_group_issue %}
-                                                <a href="{{ finding.finding_group | jira_issue_url }}"
-                                                target="_blank"
-                                                alt="Jira Bug - {{ finding.finding_group | jira_key }} (group)"
-                                                data-toggle="tooltip"
-                                                data-placement="bottom"
-                                                title="{{ finding.finding_group | jira_key }} (group)">{{ finding.finding_group | jira_key }}</a>
-                                            {% elif finding.has_jira_issue %}
-                                                <a href="{{ finding | jira_issue_url }}"
-                                                target="_blank"
-                                                alt="Jira Bug - {{ finding | jira_key }}"
-                                                data-toggle="tooltip"
-                                                data-placement="bottom"
-                                                title="{{ finding | jira_key }}">{{ finding | jira_key }}</a>
-                                            {% endif %}
-                                        </td>
-                                        <td class="nowrap">
-                                            {% if finding.has_jira_group_issue %}
-                                                {{ finding.finding_group | jira_creation | timesince }}
-                                            {% else %}
-                                                {{ finding | jira_creation | timesince }}
-                                            {% endif %}
-                                        </td>
-                                        <td class="nowrap">
-                                            {% if finding.has_jira_group_issue %}
-                                                {{ finding.finding_group | jira_change | timesince }}
-                                            {% else %}
-                                                {{ finding | jira_change | timesince }}
-                                            {% endif %}
-                                        </td>
-                                    {% endif %}
-                                {% endif %}
-                                {% if 'is_finding_groups_enabled'|system_setting_enabled %}
-                                    <td class="centered">
-                                        {% if finding.has_finding_group %}
-                                            <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">{{ finding.finding_group.name }}</a>
+                                    <td class="nowrap">
+                                        {% if finding.cwe > 0 %}
+                                            <a target="_blank"
+                                            href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
+                                                <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe }}
+                                            </a>
                                         {% endif %}
                                     </td>
-                                {% endif %}
-                                <td class="nowrap">
-                                    {% if finding.planned_remediation_date %}{{ finding.planned_remediation_date }}{% endif %}
-                                </td>
+                                    <td class="nowrap">
+                                        {% with finding|first_vulnerability_id as first_vulnerability_id %}
+                                            {% if first_vulnerability_id %}
+                                                {% if first_vulnerability_id|has_vulnerability_url %}
+                                                    <a target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">
+                                                        <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ first_vulnerability_id|default:"" }}
+                                                    </a>
+                                                {% else %}
+                                                    {{ first_vulnerability_id }}
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                    <td class="nowrap">
+                                        {{ finding.date }}
+                                    </td>
+                                    <td>
+                                        {{ finding.age }}
+                                    </td>
+                                    {% if system_settings.enable_finding_sla %}
+                                        <td>
+                                            {{ finding|finding_sla }}
+                                        </td>
+                                    {% endif %}
+                                    <td>
+                                        {% if finding.reporter.get_full_name and finding.reporter.get_full_name.strip %}
+                                            {{ finding.reporter.get_full_name }}
+                                        {% else %}
+                                            {{ finding.reporter }}
+                                        {% endif %}
+                                    </td>
+                                    <td class="nowrap">
+                                        {{ finding|finding_display_status|safe }}&nbsp;{{ finding|import_history }}
+                                    </td>
+                                    {% if system_settings.enable_jira %}
+                                        {% if jira_project and product_tab or not product_tab %}
+                                            <td class="nowrap">
+                                                {% if finding.has_jira_group_issue %}
+                                                    <a href="{{ finding.finding_group | jira_issue_url }}"
+                                                    target="_blank"
+                                                    alt="Jira Bug - {{ finding.finding_group | jira_key }} (group)"
+                                                    data-toggle="tooltip"
+                                                    data-placement="bottom"
+                                                    title="{{ finding.finding_group | jira_key }} (group)">{{ finding.finding_group | jira_key }}</a>
+                                                {% elif finding.has_jira_issue %}
+                                                    <a href="{{ finding | jira_issue_url }}"
+                                                    target="_blank"
+                                                    alt="Jira Bug - {{ finding | jira_key }}"
+                                                    data-toggle="tooltip"
+                                                    data-placement="bottom"
+                                                    title="{{ finding | jira_key }}">{{ finding | jira_key }}</a>
+                                                {% endif %}
+                                            </td>
+                                            <td class="nowrap">
+                                                {% if finding.has_jira_group_issue %}
+                                                    {{ finding.finding_group | jira_creation | timesince }}
+                                                {% else %}
+                                                    {{ finding | jira_creation | timesince }}
+                                                {% endif %}
+                                            </td>
+                                            <td class="nowrap">
+                                                {% if finding.has_jira_group_issue %}
+                                                    {{ finding.finding_group | jira_change | timesince }}
+                                                {% else %}
+                                                    {{ finding | jira_change | timesince }}
+                                                {% endif %}
+                                            </td>
+                                        {% endif %}
+                                    {% endif %}
+                                    {% if 'is_finding_groups_enabled'|system_setting_enabled %}
+                                        <td class="centered">
+                                            {% if finding.has_finding_group %}
+                                                <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">{{ finding.finding_group.name }}</a>
+                                            {% endif %}
+                                        </td>
+                                    {% endif %}
+                                    <td class="nowrap">
+                                        {% if finding.planned_remediation_date %}{{ finding.planned_remediation_date }}{% endif %}
+                                    </td>
+                                {% endblock body %}
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -1555,36 +1559,14 @@
         <i class="fa-solid fa-lightbulb"></i> <strong>{% trans "ProTip!" %}</strong> {% trans "Type" %}s <kbd>e</kbd> {% trans "to edit this test. Type" %} <kbd>a</kbd> {% trans "to add a finding to this test." %}
     </div>
 {% endblock %}
+
 {% block postscript %}
     {{ block.super }}
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
-    <script type="text/javascript">
-        // DataTables setup
-        $.fn.dataTable.ext.order['severity-asc'] = function (settings, col) {
-            return this.api().column(col, { order: 'index' }).nodes().map(function (td, i) {
-                var severity = $(td).data('severity');
-                switch (severity) {
-                    case 'Info':
-                        return 1;
-                    case 'Low':
-                        return 2;
-                    case 'Medium':
-                        return 3;
-                    case 'High':
-                        return 4;
-                    case 'Critical':
-                        return 5;
-                    default:
-                        return 1;
-                }
-            });
-        };
-
-        $(document).ready(function(){
-            date =  new Date().toISOString().slice(0, 10);
-            var fileDated = 'Findings_List_' + date;
-            var columns = [
+    <script type="application/javascript">
+        {% block datatables_columns %}
+            var datatables_columns = [
                 {% if test|has_object_permission:"Test_Edit" or test|has_object_permission:"Test_Delete" %}
                     { "data": "checkbox" },
                 {% endif %}
@@ -1614,6 +1596,34 @@
                 {% endif %}
                 { "data": "planned_remediation_date"}
             ];
+        {% endblock datatables_columns %}
+    </script>
+    <script type="text/javascript">
+        // DataTables setup
+        $.fn.dataTable.ext.order['severity-asc'] = function (settings, col) {
+            return this.api().column(col, { order: 'index' }).nodes().map(function (td, i) {
+                var severity = $(td).data('severity');
+                switch (severity) {
+                    case 'Info':
+                        return 1;
+                    case 'Low':
+                        return 2;
+                    case 'Medium':
+                        return 3;
+                    case 'High':
+                        return 4;
+                    case 'Critical':
+                        return 5;
+                    default:
+                        return 1;
+                }
+            });
+        };
+
+        $(document).ready(function(){
+            date =  new Date().toISOString().slice(0, 10);
+            var fileDated = 'Findings_List_' + date;
+            var columns = datatables_columns;
 
             // Filter the list of items to display based on what is shown.
             var disallowed_entries = new Set(["dropdown", "action"]);

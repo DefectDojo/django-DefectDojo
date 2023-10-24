@@ -1,6 +1,6 @@
 import json
 
-from dojo.models import Endpoint, Finding
+from dojo.models import Finding
 
 
 class WhispersParser(object):
@@ -52,9 +52,7 @@ class WhispersParser(object):
                         "Supply the new secret through a placeholder to avoid disclosing "
                         "sensitive information in code."
                     ),
-                    references=Endpoint.from_uri(
-                        "https://cwe.mitre.org/data/definitions/798.html"
-                    ),
+                    references="https://cwe.mitre.org/data/definitions/798.html",
                     cwe=798,
                     severity=self.SEVERITY_MAP.get(
                         vuln.get("severity"), "Info"

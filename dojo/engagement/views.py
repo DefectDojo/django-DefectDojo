@@ -575,7 +575,7 @@ def add_tests(request, eid):
 
 # Cant use the easy decorator because of the potential for either eid/pid being used
 def import_scan_results(request, eid=None, pid=None):
-    environment = Development_Environment.objects.get(name='Development')
+    environment = Development_Environment.objects.filter(name='Development').first()  # If 'Development' was removed, None is used
     engagement = None
     form = ImportScanForm(initial={'environment': environment})
     cred_form = CredMappingForm()

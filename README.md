@@ -70,9 +70,7 @@ Navigate to <http://localhost:8080>.
 
 * [Docker / Docker Compose](readme-docs/DOCKER.md)
 * [SaaS](https://www.defectdojo.com/pricing) - Includes Support & Supports the Project
-* [AWS AMI ](https://aws.amazon.com/marketplace/pp/prodview-m2a25gr67xbzk) - Supports the Project
-* [godojo](https://github.com/DefectDojo/godojo)
-
+* [AWS AMI](https://aws.amazon.com/marketplace/pp/prodview-m2a25gr67xbzk) - Supports the Project
 
 ## Community, Getting Involved, and Updates
 

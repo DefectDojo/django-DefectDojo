@@ -30,46 +30,47 @@ class AnchoreCTLPoliciesParser:
         items = list()
         try:
             for image in data:
-                for result in image["detail"]:
-                    try:
-                        gate = result["gate"]
-                        description = result["description"]
-                        policy_id = result["policyId"]
-                        status = result["status"]
-                        image_name = result["tag"]
-                        trigger_id = result["triggerId"]
-                        repo, tag = image_name.split(":", 2)
-                        severity = map_gate_action_to_severity(status)
-                        vulnerability_id = extract_vulnerability_id(trigger_id)
-                        title = (
-                            policy_id
-                            + " - gate|"
-                            + gate
-                            + " - trigger|"
-                            + trigger_id
-                        )
-                        find = Finding(
-                            title=title,
-                            test=test,
-                            description=description,
-                            severity=severity,
-                            references="Policy ID: {}\nTrigger ID: {}".format(
-                                policy_id, trigger_id
-                            ),
-                            file_path=search_filepath(description),
-                            component_name=repo,
-                            component_version=tag,
-                            date=find_date,
-                            static_finding=True,
-                            dynamic_finding=False,
-                        )
-                        if vulnerability_id:
-                            find.unsaved_vulnerability_ids = [vulnerability_id]
-                        items.append(find)
-                    except (KeyError, IndexError) as err:
-                        raise ValueError(
-                            "Invalid format: {} key not found".format(err)
-                        )
+                if image['detail'] is not None:
+                    for result in image["detail"]:
+                        try:
+                            gate = result["gate"]
+                            description = result["description"]
+                            policy_id = result["policyId"]
+                            status = result["status"]
+                            image_name = result["tag"]
+                            trigger_id = result["triggerId"]
+                            repo, tag = image_name.split(":", 2)
+                            severity = map_gate_action_to_severity(status)
+                            vulnerability_id = extract_vulnerability_id(trigger_id)
+                            title = (
+                                policy_id
+                                + " - gate|"
+                                + gate
+                                + " - trigger|"
+                                + trigger_id
+                            )
+                            find = Finding(
+                                title=title,
+                                test=test,
+                                description=description,
+                                severity=severity,
+                                references="Policy ID: {}\nTrigger ID: {}".format(
+                                    policy_id, trigger_id
+                                ),
+                                file_path=search_filepath(description),
+                                component_name=repo,
+                                component_version=tag,
+                                date=find_date,
+                                static_finding=True,
+                                dynamic_finding=False,
+                            )
+                            if vulnerability_id:
+                                find.unsaved_vulnerability_ids = [vulnerability_id]
+                            items.append(find)
+                        except (KeyError, IndexError) as err:
+                            raise ValueError(
+                                "Invalid format: {} key not found".format(err)
+                            )
         except AttributeError as err:
             # import empty policies without error (e.g. policies or images
             # objects are not a dictionary)

@@ -194,7 +194,13 @@ schema_view = get_schema_view(
     patterns=api_v2_urls,
 )
 
-urlpatterns = [
+urlpatterns = []
+
+# sometimes urlpatterns needed be added from local_settings.py before other URLs of core dojo
+if hasattr(settings, 'PRELOAD_URL_PATTERNS'):
+    urlpatterns += settings.PRELOAD_URL_PATTERNS
+
+urlpatterns += [
     # action history
     re_path(r'^%shistory/(?P<cid>\d+)/(?P<oid>\d+)$' % get_system_setting('url_prefix'), views.action_history, name='action_history'),
     re_path(r'^%s' % get_system_setting('url_prefix'), include(ur)),

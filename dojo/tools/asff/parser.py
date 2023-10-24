@@ -30,11 +30,19 @@ class AsffParser(object):
         data = json.load(file)
         result = list()
         for item in data:
+            if item.get("Remediation"):
+                mitigation = item.get("Remediation").get("Recommendation").get("Text")
+                references = item.get("Remediation").get("Recommendation").get("Url")
+            else:
+                mitigation = None
+                references = None
             result.append(
                 Finding(
                     title=item.get("Title"),
                     description=item.get("Description"),
                     date=dateutil.parser.parse(item.get("CreatedAt")),
+                    mitigation=mitigation,
+                    references=references,
                     severity=self.get_severity(item.get("Severity")),
                     active=True,  # TODO manage attribute 'RecordState'
                     unique_id_from_tool=item.get("Id"),
