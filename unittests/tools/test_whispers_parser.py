@@ -5,6 +5,20 @@ from dojo.models import Test
 
 class TestWhispersParser(TestCase):
 
+    def test_whispers_parser_severity_map(self):
+        fixtures = [
+            "unittests/scans/whispers/whispers_one_vul.json",  # v2.1 format
+            "unittests/scans/whispers/whispers_one_vul_v2.2.json",  # v2.2 format
+        ]
+        expected_severity = "High"
+
+        for fixture in fixtures:
+            testfile = open(fixture)
+            parser = WhispersParser()
+            findings = parser.get_findings(testfile, Test())
+            testfile.close()
+            self.assertEqual(expected_severity, findings[0].severity)
+
     def test_whispers_parser_with_no_vuln_has_no_findings(self):
         testfile = open("unittests/scans/whispers/whispers_zero_vul.json")
         parser = WhispersParser()
