@@ -895,7 +895,7 @@ def add_risk_acceptance(request, eid, fid=None):
 
             findings = form.cleaned_data['accepted_findings']
 
-            if settings.RISK_ACCEPTANCE is True and risk_acceptance is True:
+            if settings.RISK_ACCEPTANCE is True and risk_pending is True:
                 risk_acceptance = ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
             else:
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
@@ -914,13 +914,13 @@ def add_risk_acceptance(request, eid, fid=None):
                 form = RiskPendingForm(
                     initial={'owner': request.user,
                              'name': risk_acceptance_title_suggestion,
-                             'accepted_by': rp_helper.get_contacts(eng, finding.severity, request.user.id)})
+                             'accepted_by': rp_helper.get_contacts(eng, finding.severity, request.user)})
             else:
                 risk_acceptance_title_suggestion = 'Accept: %s' % finding
                 form = RiskAcceptanceForm(
                     initial={'owner': request.user,
                              'name': risk_acceptance_title_suggestion,
-                             'accepted_by': rp_helper.get_contacts(eng, finding.severity, request.user.id)})
+                             'accepted_by': rp_helper.get_contacts(eng, finding.severity, request.user)})
         else:
             risk_acceptance_title_suggestion = 'Accept: %s' % finding
             form = RiskAcceptanceForm(initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})

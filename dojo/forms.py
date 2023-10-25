@@ -788,6 +788,17 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
         # self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
         self.fields['reactivate_expired'].disabled = True
+    
+    def clean(self):
+        data = self.cleaned_data
+        if "accepted_by" in data.keys():
+            accepted_by = data["accepted_by"]
+            contacts = accepted_by.values()
+            contact = [contact["username"] for contact in contacts]
+            data["accepted_by"] = contact
+        else:
+            raise ValidationError("Accepted_by key no found")
+        return data
 
 
 class BaseManageFileFormSet(forms.BaseModelFormSet):

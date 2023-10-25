@@ -20,7 +20,7 @@ def get_number_acceptance_risk(finding):
     return 1
 
 
-def get_contacts(engagement: Engagement, finding_serverity: str, user_id: int):
+def get_contacts(engagement: Engagement, finding_serverity: str, user):
     rule = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY.get(finding_serverity)
     product_type = engagement.product.get_product_type
     contacts = rule.get("type_contacts")
@@ -39,7 +39,7 @@ def get_contacts(engagement: Engagement, finding_serverity: str, user_id: int):
             raise ValueError(f"Contact {contact} not found")
     # if severity is low load default acceptanced_by = user.id 
     if contact_list == []:
-        contact_list.append(user_id)
+        contact_list.append(user.id)
 
     return contact_list
 

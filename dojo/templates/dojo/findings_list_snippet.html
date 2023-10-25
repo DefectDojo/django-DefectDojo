@@ -485,10 +485,17 @@
                                                                         </li>
                                                                     {% endif %}
                                                                     {% if finding.test.engagement.product.enable_full_risk_acceptance %}
-                                                                        <li role="presentation">
-                                                                            <a rel="noopener noreferrer" href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
-                                                                                <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Risk Acceptance..." %}
-                                                                            </a>
+                                                                        {% if finding.risk_pending and finding|has_risk_acceptance_permission is False%}
+                                                                            <li role="presentation">
+                                                                                <a rel="noopener noreferrer" href="#" disabled>
+                                                                                    <i class="fa-solid fa-circle-exclamation" style="color: grey"></i> <span style="color: grey"> {% trans "Add Risk Acceptance..." %}<span>
+                                                                                </a>
+                                                                        {% else %}
+                                                                            <li role="presentation">
+                                                                                <a rel="noopener noreferrer" href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
+                                                                                    <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Risk Acceptance..." %}
+                                                                                </a>
+                                                                        {% endif %}
                                                                         </li>
                                                                     {% endif %}
                                                                 {% endif %}

@@ -1,11 +1,25 @@
 from django import template
+from django.conf import settings
 import crum
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_global_permission, user_has_permission, \
     user_has_configuration_permission as configuration_permission
+from dojo.models import Finding
 from dojo.request_cache import cache_for_request
 
 register = template.Library()
+
+@register.filter
+def has_risk_acceptance_permission(finding: Finding):
+    result = False
+    user = crum.get_current_user()
+    rule = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY.get(finding.severity)
+    if rule:
+        if user.global_role.role.name in rule["roles"]:
+            result = True
+        return result
+    else:
+        raise ValueError("user does not have permissions configured")
 
 
 @register.filter
