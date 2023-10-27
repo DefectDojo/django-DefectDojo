@@ -531,7 +531,7 @@ class AddFindingView(View):
             # if the jira issue key was changed, update database
             new_jira_issue_key = context["jform"].cleaned_data.get('jira_issue')
             if finding.has_jira_issue:
-                jira_issue = finding.jira_issue # noqa: F841
+                jira_issue = finding.jira_issue  # noqa: F841
                 # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
                 # instead of on the public jira issue key.
                 # I have no idea why, but it means we have to retrieve the issue from JIRA to get the internal JIRA id.
