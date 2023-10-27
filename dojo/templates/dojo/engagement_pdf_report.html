@@ -385,6 +385,11 @@
     {{ block.super }}
     <script src="{{ host }}{% static "jquery/dist/jquery.min.js" %}"></script>
     <!-- Flot Charts JavaScript -->
+    <script src="{{ host }}{% static "flot/excanvas.min.js" %}"></script>
+    <script src="{{ host }}{% static "flot/jquery.flot.js" %}"></script>
+    <script src="{{ host }}{% static "flot/jquery.flot.resize.js" %}"></script>
+    <script src="{{ host }}{% static "flot/jquery.flot.time.js" %}"></script>
+    <script src="{{ host }}{% static "flot/jquery.flot.stack.js" %}"></script>
     <script src="{{ host }}{% static "dojo/js/metrics.js" %}"></script>
     <script type="text/javascript">
         $(function () {
