@@ -21,4 +21,4 @@ jobs:
         python-version: '3.x'
 
     - name: Check for file changes using Python
-      run: python .github/workflow/scripts/git_protect.py $GITHUB_BASE_REF $GITHUB_HEAD_REF
+      run: python .github/scripts/git_protect.py $GITHUB_BASE_REF $GITHUB_HEAD_REF
