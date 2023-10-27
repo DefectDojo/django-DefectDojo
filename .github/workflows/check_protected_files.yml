@@ -1,0 +1,19 @@
+name: Check For Protected File Changes
+
+on: [pull_request] # Trigger the workflow on pull request events
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Check for file changes using Python
+      run: python .github/workflow/scripts/git_protect.py $GITHUB_BASE_REF $GITHUB_HEAD_REF
