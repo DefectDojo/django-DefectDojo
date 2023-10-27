@@ -1,5 +1,5 @@
 We greatly appreciate all of our
-[contributors](https://github.com/DefectDojo/django-DefectDojo/graphs/contributors).
+[contributorz](https://github.com/DefectDojo/django-DefectDojo/graphs/contributors).
 
 We would also like to highlight the contributions from Michael Dong and Fatimah
 Zohra who contributed to DefectDojo before it was open source.
