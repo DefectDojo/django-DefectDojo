@@ -303,6 +303,11 @@
 {% block postscript %}
     {{ block.super }}
     <!-- Flot Charts JavaScript -->
+    <script src="{% static "flot/excanvas.min.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.time.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
     {% block metrics %}
         <script src="{% static "dojo/js/metrics.js" %}"></script>
     {% endblock metrics %}
