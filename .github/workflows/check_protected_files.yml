@@ -1,6 +1,11 @@
 name: Check For Protected File Changes
 
-on: [pull_request] # Trigger the workflow on pull request events
+on:
+    workflow_dispatch:
+    push:
+      branches:
+        - master
+        - dev
 
 jobs:
   check:
