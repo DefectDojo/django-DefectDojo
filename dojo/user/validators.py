@@ -36,7 +36,7 @@ class MaxLengthValidator(object):
 
 class NumberValidator(object):
     def validate(self, password, user=None):
-        if not re.findall('\d', password) and get_system_setting('number_character_required'):  # noqa W605
+        if not re.findall(r'\d', password) and get_system_setting('number_character_required'):
             raise ValidationError(
                 self.get_help_text(),
                 code='password_no_number')
@@ -75,7 +75,7 @@ class LowercaseValidator(object):
 
 class SymbolValidator(object):
     def validate(self, password, user=None):
-        contains_special_character = re.findall('[()[\]{}|\\`~!@#$%^&*_\-+=;:\'\",<>./?]', password)  # noqa W605
+        contains_special_character = re.findall(r'[(){}\[\]|~!@#$%^&*_\-+=;:\'",\`<>\./?]', password)
         if not contains_special_character and get_system_setting('special_character_required'):
             raise ValidationError(
                 self.get_help_text(),
@@ -85,7 +85,7 @@ class SymbolValidator(object):
 
     def get_help_text(self):
         return gettext('The password must contain at least 1 special character, ' +
-            '()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?.')  # noqa W605
+            '''()[]{}|`~!@#$%^&*_-+=;:'",<>./?.''')
 
 
 class DojoCommonPasswordValidator(CommonPasswordValidator):
