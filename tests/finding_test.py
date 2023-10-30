@@ -173,7 +173,7 @@ class FindingTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element(By.XPATH, "//input[@value='Add Note']").click()
 
-        # Assert ot the query to dtermine status of failure
+        # Assert ot the query to determine status of failure
         self.assertTrue(self.is_success_message_present(text='Note saved.'))
 
     def test_mark_finding_for_review(self):
@@ -185,7 +185,7 @@ class FindingTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
         driver.find_element(By.ID, "dropdownMenu1").click()
-        # Click on `Request Peer Reveiw`
+        # Click on `Request Peer Review`
         driver.find_element(By.LINK_TEXT, "Request Peer Review").click()
         # select Reviewer
         # Let's make the first user in the list a reviewer
@@ -318,7 +318,7 @@ class FindingTest(BaseTestCase):
         # Click on `Close Finding`
         driver.find_element(By.LINK_TEXT, "Accept Risk").click()
         # Query the site to determine if the finding has been added
-        # Assert ot the query to dtermine status of failure
+        # Assert ot the query to determine status of failure
         self.assertTrue(self.is_success_message_present(text='Finding risk accepted.'))
         # Check to see if the endpoint was mitigated
         # Select and click on the particular finding to edit
@@ -398,14 +398,14 @@ class FindingTest(BaseTestCase):
         self.assertNoConsoleErrors()
         # Query the site to determine if the finding has been added
 
-        # Assert ot the query to dtermine status of failure
+        # Assert ot the query to determine status of failure
         self.assertTrue(self.is_text_present_on_page(text='App Vulnerable to XSS'))
 
     @on_exception_html_source_logger
     def test_create_finding_from_template(self):
         driver = self.driver
         # Navigate to All Finding page
-        # goto engagemnent list (and wait for javascript to load)
+        # goto engagement list (and wait for javascript to load)
         self.goto_all_engagements_overview(driver)
 
         # Select a previously created engagement title
@@ -481,6 +481,30 @@ class FindingTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='ZAP Scan processed a total of 4 findings'))
 
+    def test_create_finding_template(self):
+        # Go to add a new template
+        driver = self.driver
+        self.goto_add_template(driver)
+        # Enter Title
+        driver.find_element(By.ID, "id_title").send_keys("Template for App Vulnerable to XSS")
+        # Select List replace
+        driver.find_element(By.ID, "id_list_replace").click()
+        # Enter Findings to replace
+        driver.find_element(By.ID, "id_findings_to_replace").send_keys("App Vulnerable to XSS")
+        # Save Template
+        driver.find_element(By.NAME, "add_template").click()
+        # Template created successfully
+        self.assertTrue(self.is_text_present_on_page(text='Template created successfully.'))
+
+
+    def test_check_if_template_applied(self):
+        # Go to all findings
+        driver = self.driver
+        self.goto_all_findings_list(driver)
+        # Check if the template is applied
+        self.assertTrue(self.is_text_present_on_page(text="Template for App Vulnerable to XSS"))
+
+
     @on_exception_html_source_logger
     def test_delete_finding(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
@@ -492,7 +516,7 @@ class FindingTest(BaseTestCase):
         self.goto_all_findings_list(driver)
 
         # Select and click on the particular finding to edit
-        driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
+        driver.find_element(By.LINK_TEXT, "Template for App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
         driver.find_element(By.ID, "dropdownMenu1").click()
         # Click on `Delete Finding`
@@ -516,7 +540,7 @@ def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=
     suite.addTest(BaseTestCase('test_login'))
     set_suite_settings(suite, jira=jira, github=github, block_execution=block_execution)
 
-    # Add each test the the suite to be run
+    # Add each test the suite to be run
     # success and failure is output by the test
     suite.addTest(BaseTestCase('delete_finding_template_if_exists'))
     suite.addTest(ProductTest('test_create_product'))
@@ -546,6 +570,8 @@ def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=
     suite.addTest(FindingTest('test_apply_template_to_a_finding'))
     suite.addTest(FindingTest('test_create_finding_from_template'))
     suite.addTest(FindingTest('test_import_scan_result'))
+    suite.addTest(FindingTest('test_create_finding_template'))
+    suite.addTest(FindingTest('test_check_if_template_applied'))
     suite.addTest(FindingTest('test_delete_finding'))
     suite.addTest(FindingTest('test_delete_finding_template'))
     suite.addTest(ProductTest('test_delete_product'))

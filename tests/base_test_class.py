@@ -215,6 +215,10 @@ class BaseTestCase(unittest.TestCase):
     def goto_all_engagements_by_product_overview(self, driver):
         return self.goto_engagements_internal(driver, "engagements_all")
 
+    def goto_add_template(self, driver):
+        driver.get(self.base_url + "template/add")
+        return driver
+
     def goto_engagements_internal(self, driver, rel_url):
         driver.get(self.base_url + rel_url)
         self.wait_for_datatable_if_content("no_engagements", "engagements_wrapper")
