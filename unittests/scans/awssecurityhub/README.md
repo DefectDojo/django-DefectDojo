@@ -10,7 +10,7 @@ To keep some order, let's keep them prefixed with the names of the services that
 
 * `inspector_ec2_`: findings from AWS Inspector with results of scanning EC2 instances
 
-* `inspector_ecr_`: findings from AWS Inspector with results of Enhanced ECR Scanning
+* `inspector_ecr_`: findings from AWS Inspector with results of Enhanced ECR Scanning, currently contains 7 findings with vulnerabilities associated with 8 different values of `PackageManager`
 
 * `inspector_lambda_`: findings from AWS Inspector with results of scanning Lambdas
 
