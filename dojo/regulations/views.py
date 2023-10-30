@@ -16,7 +16,7 @@ from dojo.authorization.authorization import user_has_configuration_permission_o
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized('dojo.add_regulation', 'superuser')
+@user_is_configuration_authorized('dojo.add_regulation')
 def new_regulation(request):
     if request.method == 'POST':
         tform = RegulationForm(request.POST, instance=Regulation())
@@ -34,11 +34,11 @@ def new_regulation(request):
                   {'form': tform})
 
 
-@user_is_configuration_authorized('dojo.change_regulation', 'superuser')
+@user_is_configuration_authorized('dojo.change_regulation')
 def edit_regulations(request, ttid):
     regulation = Regulation.objects.get(pk=ttid)
     if request.method == 'POST' and request.POST.get('delete'):
-        user_has_configuration_permission_or_403(request.user, 'dojo.delete_regulation', 'superuser')
+        user_has_configuration_permission_or_403(request.user, 'dojo.delete_regulation')
         Regulation.objects.filter(pk=ttid).delete()
         messages.add_message(request,
                              messages.SUCCESS,

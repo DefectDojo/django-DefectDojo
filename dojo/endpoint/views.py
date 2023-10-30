@@ -32,9 +32,17 @@ logger = logging.getLogger(__name__)
 def process_endpoints_view(request, host_view=False, vulnerable=False):
 
     if vulnerable:
-        endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
-                                     finding__duplicate=False, finding__out_of_scope=False)
-        endpoints = endpoints.filter(endpoint_status__mitigated=False)
+        endpoints = Endpoint.objects.filter(
+            finding__active=True,
+            finding__verified=True,
+            finding__out_of_scope=False,
+            finding__mitigated__isnull=True,
+            finding__false_p=False,
+            finding__duplicate=False,
+            status_endpoint__mitigated=False,
+            status_endpoint__false_positive=False,
+            status_endpoint__out_of_scope=False,
+            status_endpoint__risk_accepted=False)
     else:
         endpoints = Endpoint.objects.all()
 
@@ -116,12 +124,12 @@ def process_endpoint_view(request, eid, host_view=False):
         endpoints = endpoint.host_endpoints()
         endpoint_metadata = None
         all_findings = endpoint.host_findings()
-        active_findings = endpoint.host_active_findings()
+        active_verified_findings = endpoint.host_active_verified_findings()
     else:
         endpoints = None
         endpoint_metadata = dict(endpoint.endpoint_meta.values_list('name', 'value'))
-        all_findings = endpoint.findings()
-        active_findings = endpoint.active_findings()
+        all_findings = endpoint.findings.all()
+        active_verified_findings = endpoint.active_verified_findings()
 
     if all_findings:
         start_date = timezone.make_aware(datetime.combine(all_findings.last().date, datetime.min.time()))
@@ -137,14 +145,14 @@ def process_endpoint_view(request, eid, host_view=False):
     # closed_findings is needed as a parameter for get_periods_counts, but they are not relevant in the endpoint view
     closed_findings = Finding.objects.none()
 
-    monthly_counts = get_period_counts(active_findings, all_findings, closed_findings, None, months_between, start_date,
+    monthly_counts = get_period_counts(all_findings, closed_findings, None, months_between, start_date,
                                        relative_delta='months')
 
-    paged_findings = get_page_items(request, active_findings, 25)
+    paged_findings = get_page_items(request, active_verified_findings, 25)
 
     vulnerable = False
 
-    if active_findings.count() != 0:
+    if active_verified_findings.count() != 0:
         vulnerable = True
 
     product_tab = Product_Tab(endpoint.product, "Host" if host_view else "Endpoint", tab="endpoints")
@@ -220,7 +228,7 @@ def delete_endpoint(request, eid):
                                     title='Deletion of %s' % endpoint,
                                     product=product,
                                     description='The endpoint "%s" was deleted by %s' % (endpoint, request.user),
-                                    url=request.build_absolute_uri(reverse('endpoint')),
+                                    url=reverse('endpoint'),
                                     icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
 

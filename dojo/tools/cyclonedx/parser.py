@@ -11,7 +11,8 @@ LOGGER = logging.getLogger(__name__)
 
 
 class CycloneDXParser(object):
-    """CycloneDX is a lightweight software bill of materials (SBOM) standard designed for use in application security contexts and supply chain component analysis.
+    """CycloneDX is a lightweight software bill of materials (SBOM) standard designed for use in application security
+    contexts and supply chain component analysis.
     https://www.cyclonedx.org/
     """
 
@@ -29,19 +30,27 @@ class CycloneDXParser(object):
         root = nscan.getroot()
         namespace = self.get_namespace(root)
         if not namespace.startswith("{http://cyclonedx.org/schema/bom/"):
-            raise ValueError(f"This doesn't seem to be a valid CyclonDX BOM XML file. Namespace={namespace}")
+            raise ValueError(
+                f"This doesn't seem to be a valid CycloneDX BOM XML file. Namespace={namespace}"
+            )
         ns = {
-            "b": namespace.replace("{", "").replace("}", ""),  # we accept whatever the version
+            "b": namespace.replace("{", "").replace(
+                "}", ""
+            ),  # we accept whatever the version
             "v": "http://cyclonedx.org/schema/ext/vulnerability/1.0",
         }
         # get report date
         report_date = None
-        report_date_raw = root.findtext("b:metadata/b:timestamp", namespaces=ns)
+        report_date_raw = root.findtext(
+            "b:metadata/b:timestamp", namespaces=ns
+        )
         if report_date_raw:
             report_date = dateutil.parser.parse(report_date_raw)
         bom_refs = {}
         findings = []
-        for component in root.findall("b:components/b:component", namespaces=ns):
+        for component in root.findall(
+            "b:components/b:component", namespaces=ns
+        ):
             component_name = component.findtext(f"{namespace}name")
             component_version = component.findtext(f"{namespace}version")
             # save a ref
@@ -51,7 +60,9 @@ class CycloneDXParser(object):
                     "version": component_version,
                 }
             # for each vulnerabilities add a finding
-            for vulnerability in component.findall("v:vulnerabilities/v:vulnerability", namespaces=ns):
+            for vulnerability in component.findall(
+                "v:vulnerabilities/v:vulnerability", namespaces=ns
+            ):
                 finding_vuln = self.manage_vulnerability_legacy(
                     vulnerability,
                     ns,
@@ -63,13 +74,23 @@ class CycloneDXParser(object):
                 findings.append(finding_vuln)
 
         # manage adhoc vulnerabilities
-        for vulnerability in root.findall("v:vulnerabilities/v:vulnerability", namespaces=ns):
-            finding_vuln = self.manage_vulnerability_legacy(vulnerability, ns, bom_refs, report_date)
+        for vulnerability in root.findall(
+            "v:vulnerabilities/v:vulnerability", namespaces=ns
+        ):
+            finding_vuln = self.manage_vulnerability_legacy(
+                vulnerability, ns, bom_refs, report_date
+            )
             findings.append(finding_vuln)
 
         # manage adhoc vulnerabilities (compatible with 1.4 of the spec)
-        for vulnerability in root.findall("b:vulnerabilities/b:vulnerability", namespaces=ns):
-            findings.extend(self._manage_vulnerability_xml(vulnerability, ns, bom_refs, report_date))
+        for vulnerability in root.findall(
+            "b:vulnerabilities/b:vulnerability", namespaces=ns
+        ):
+            findings.extend(
+                self._manage_vulnerability_xml(
+                    vulnerability, ns, bom_refs, report_date
+                )
+            )
 
         return findings
 
@@ -80,9 +101,11 @@ class CycloneDXParser(object):
         else:
             dupes[dupe_key] = finding
 
-    def get_cwes(self, node, namespaces):
+    def get_cwes(self, node, prefix, namespaces):
         cwes = []
-        for cwe in node.findall("v:cwes/v:cwe", namespaces):
+        for cwe in node.findall(
+            prefix + ":cwes/" + prefix + ":cwe", namespaces
+        ):
             if cwe.text.isdigit():
                 cwes.append(int(cwe.text))
         return cwes
@@ -94,19 +117,30 @@ class CycloneDXParser(object):
             raw_vector = "CVSS:3.1/" + raw_vector
         try:
             return CVSS3(raw_vector)
-        except:
-            LOGGER.exception(f"error while parsing vector CVSS v3 {raw_vector}")
+        except BaseException:
+            LOGGER.exception(
+                f"error while parsing vector CVSS v3 {raw_vector}"
+            )
             return None
 
     def manage_vulnerability_legacy(
-        self, vulnerability, ns, bom_refs, report_date, component_name=None, component_version=None
+        self,
+        vulnerability,
+        ns,
+        bom_refs,
+        report_date,
+        component_name=None,
+        component_version=None,
     ):
         ref = vulnerability.attrib["ref"]
         vuln_id = vulnerability.findtext("v:id", namespaces=ns)
 
-        severity = vulnerability.findtext("v:ratings/v:rating/v:severity", namespaces=ns)
+        severity = vulnerability.findtext(
+            "v:ratings/v:rating/v:severity", namespaces=ns
+        )
         description = vulnerability.findtext("v:description", namespaces=ns)
-        # by the schema, only id and ref are mandatory, even the severity is optional
+        # by the schema, only id and ref are mandatory, even the severity is
+        # optional
         if not description:
             description = "\n".join(
                 [
@@ -121,17 +155,14 @@ class CycloneDXParser(object):
             component_name = bom["name"]
             component_version = bom["version"]
 
-        if severity is None:
-            severity = "Medium"
-        if "Unknown" == severity:
-            severity = "Info"
-        if "None" == severity:
-            severity = "Info"
+        severity = self.fix_severity(severity)
         references = ""
-        for adv in vulnerability.findall("v:advisories/v:advisory", namespaces=ns):
+        for adv in vulnerability.findall(
+            "v:advisories/v:advisory", namespaces=ns
+        ):
             references += f"{adv.text}\n"
         finding = Finding(
-            title=vuln_id,
+            title=f"{component_name}:{component_version} | {vuln_id}",
             description=description,
             severity=severity,
             references=references,
@@ -143,24 +174,35 @@ class CycloneDXParser(object):
         if report_date:
             finding.date = report_date
         mitigation = ""
-        for recommend in vulnerability.findall("v:recommendations/v:recommendation", namespaces=ns):
+        for recommend in vulnerability.findall(
+            "v:recommendations/v:recommendation", namespaces=ns
+        ):
             mitigation += f"{recommend.text}\n"
         if mitigation != "":
             finding.mitigation = mitigation
 
         # manage CVSS
-        for rating in vulnerability.findall("v:ratings/v:rating", namespaces=ns):
+        for rating in vulnerability.findall(
+            "v:ratings/v:rating", namespaces=ns
+        ):
             if "CVSSv3" == rating.findtext("v:method", namespaces=ns):
                 raw_vector = rating.findtext("v:vector", namespaces=ns)
+                severity = rating.findtext("v:severity", namespaces=ns)
                 cvssv3 = self._get_cvssv3(raw_vector)
                 if cvssv3:
                     finding.cvssv3 = cvssv3.clean_vector()
+                    if severity:
+                        finding.severity = self.fix_severity(severity)
+                    else:
+                        finding.severity = cvssv3.severities()[0]
 
         # if there is some CWE
-        cwes = self.get_cwes(vulnerability, ns)
+        cwes = self.get_cwes(vulnerability, "v", ns)
         if len(cwes) > 1:
             # FIXME support more than one CWE
-            LOGGER.debug(f"more than one CWE for a finding {cwes}. NOT supported by parser API")
+            LOGGER.debug(
+                f"more than one CWE for a finding {cwes}. NOT supported by parser API"
+            )
         if len(cwes) > 0:
             finding.cwe = cwes[0]
 
@@ -174,7 +216,13 @@ class CycloneDXParser(object):
         return finding
 
     def _manage_vulnerability_xml(
-        self, vulnerability, ns, bom_refs, report_date, component_name=None, component_version=None
+        self,
+        vulnerability,
+        ns,
+        bom_refs,
+        report_date,
+        component_name=None,
+        component_version=None,
     ):
         vuln_id = vulnerability.findtext("b:id", namespaces=ns)
 
@@ -182,47 +230,56 @@ class CycloneDXParser(object):
         detail = vulnerability.findtext("b:detail", namespaces=ns)
         if detail:
             if description:
-                description += f'\n{detail}'
+                description += f"\n{detail}"
             else:
-                description = f'\n{detail}'
+                description = f"\n{detail}"
 
-        severity = vulnerability.findtext("b:ratings/b:rating/b:severity", namespaces=ns)
-        if severity is None:
-            severity = "Medium"
-        else:
-            severity = self.fix_severity(severity)
+        severity = vulnerability.findtext(
+            "b:ratings/b:rating/b:severity", namespaces=ns
+        )
+        severity = self.fix_severity(severity)
 
         references = ""
-        for advisory in vulnerability.findall("b:advisories/b:advisory", namespaces=ns):
+        for advisory in vulnerability.findall(
+            "b:advisories/b:advisory", namespaces=ns
+        ):
             title = advisory.findtext("b:title", namespaces=ns)
             if title:
-                references += f'**Title:** {title}\n'
+                references += f"**Title:** {title}\n"
             url = advisory.findtext("b:url", namespaces=ns)
             if url:
-                references += f'**URL:** {url}\n'
-            references += '\n'
+                references += f"**URL:** {url}\n"
+            references += "\n"
 
         vulnerability_ids = list()
         # set id as first vulnerability id
         if vuln_id:
             vulnerability_ids.append(vuln_id)
         # check references to see if we have other vulnerability ids
-        for reference in vulnerability.findall("b:references/b:reference", namespaces=ns):
+        for reference in vulnerability.findall(
+            "b:references/b:reference", namespaces=ns
+        ):
             vulnerability_id = reference.findtext("b:id", namespaces=ns)
             if vulnerability_id:
                 vulnerability_ids.append(vulnerability_id)
 
         # for all component affected
         findings = []
-        for target in vulnerability.findall("b:affects/b:target", namespaces=ns):
+        for target in vulnerability.findall(
+            "b:affects/b:target", namespaces=ns
+        ):
             ref = target.find("b:ref", namespaces=ns)
-            component_name, component_version = self._get_component(bom_refs, ref.text)
+            component_name, component_version = self._get_component(
+                bom_refs, ref.text
+            )
 
             finding = Finding(
                 title=f"{component_name}:{component_version} | {vuln_id}",
                 description=description,
                 severity=severity,
-                mitigation=vulnerability.findtext("b:recommendation", namespaces=ns),
+                mitigation=vulnerability.findtext(
+                    "b:recommendation", namespaces=ns
+                ),
                 references=references,
                 component_name=component_name,
                 component_version=component_version,
@@ -239,21 +296,59 @@ class CycloneDXParser(object):
                 finding.date = report_date
 
             # manage CVSS
-            for rating in vulnerability.findall("b:ratings/b:rating", namespaces=ns):
-                if "CVSSv3" == rating.findtext("b:method", namespaces=ns):
+            for rating in vulnerability.findall(
+                "b:ratings/b:rating", namespaces=ns
+            ):
+                method = rating.findtext("b:method", namespaces=ns)
+                if "CVSSv3" == method or "CVSSv31" == method:
                     raw_vector = rating.findtext("b:vector", namespaces=ns)
+                    severity = rating.findtext("b:severity", namespaces=ns)
                     cvssv3 = self._get_cvssv3(raw_vector)
                     if cvssv3:
                         finding.cvssv3 = cvssv3.clean_vector()
-                        finding.severity = cvssv3.severities()[0]
+                        if severity:
+                            finding.severity = self.fix_severity(severity)
+                        else:
+                            finding.severity = cvssv3.severities()[0]
 
-            # if there is some CWE
-            cwes = self.get_cwes(vulnerability, ns)
+            # if there is some CWE. Check both for old namespace and for 1.4
+            cwes = self.get_cwes(vulnerability, "v", ns)
+            if not cwes:
+                cwes = self.get_cwes(vulnerability, "b", ns)
             if len(cwes) > 1:
                 # FIXME support more than one CWE
-                LOGGER.debug(f"more than one CWE for a finding {cwes}. NOT supported by parser API")
+                LOGGER.debug(
+                    f"more than one CWE for a finding {cwes}. NOT supported by parser API"
+                )
             if len(cwes) > 0:
                 finding.cwe = cwes[0]
+
+            # Check for mitigation
+            analysis = vulnerability.findall("b:analysis", namespaces=ns)
+            if analysis and len(analysis) == 1:
+                state = analysis[0].findtext("b:state", namespaces=ns)
+                if state:
+                    if (
+                        "resolved" == state
+                        or "resolved_with_pedigree" == state
+                        or "not_affected" == state
+                    ):
+                        finding.is_mitigated = True
+                        finding.active = False
+                    elif "false_positive" == state:
+                        finding.false_p = True
+                        finding.active = False
+                    if not finding.active:
+                        detail = analysis[0].findtext(
+                            "b:detail", namespaces=ns
+                        )
+                        if detail:
+                            finding.mitigation = (
+                                finding.mitigation
+                                + "\n**This vulnerability is mitigated and/or suppressed:** {}\n".format(
+                                    detail
+                                )
+                            )
 
             findings.append(finding)
 
@@ -273,12 +368,18 @@ class CycloneDXParser(object):
     def _get_findings_json(self, file, test):
         """Load a CycloneDX file in JSON format"""
         data = json.load(file)
+
+        # Parse timestamp to get the report date
+        report_date = None
+        if data.get("metadata") and data.get("metadata").get("timestamp"):
+            report_date = dateutil.parser.parse(
+                data.get("metadata").get("timestamp")
+            )
+
         # for each component we keep data
         components = {}
-        for component in data.get("components", []):
-            # according to specification 1.4, 'bom-ref' is mandatory but some tools don't provide it
-            if "bom-ref" in component:
-                components[component["bom-ref"]] = component
+        self._flatten_components(data.get("components", []), components)
+
         # for each vulnerabilities create one finding by component affected
         findings = []
         for vulnerability in data.get("vulnerabilities", []):
@@ -286,9 +387,9 @@ class CycloneDXParser(object):
             detail = vulnerability.get("detail")
             if detail:
                 if description:
-                    description += f'\n{detail}'
+                    description += f"\n{detail}"
                 else:
-                    description = f'\n{detail}'
+                    description = f"\n{detail}"
 
             # if we have ratings we keep the first one
             # better than always 'Medium'
@@ -300,20 +401,23 @@ class CycloneDXParser(object):
                 severity = "Medium"
 
             references = ""
-            advisories = vulnerability.get('advisories', [])
+            advisories = vulnerability.get("advisories", [])
             for advisory in advisories:
-                title = advisory.get('title')
+                title = advisory.get("title")
                 if title:
-                    references += f'**Title:** {title}\n'
-                url = advisory.get('url')
+                    references += f"**Title:** {title}\n"
+                url = advisory.get("url")
                 if url:
-                    references += f'**URL:** {url}\n'
-                references += '\n'
+                    references += f"**URL:** {url}\n"
+                references += "\n"
 
-            # for each component affected we create a finding if the "affects" node is here
+            # for each component affected we create a finding if the "affects"
+            # node is here
             for affect in vulnerability.get("affects", []):
                 reference = affect["ref"]  # required by the specification
-                component_name, component_version = self._get_component(components, reference)
+                component_name, component_version = self._get_component(
+                    components, reference
+                )
                 finding = Finding(
                     title=f"{component_name}:{component_version} | {vulnerability.get('id')}",
                     test=test,
@@ -328,19 +432,29 @@ class CycloneDXParser(object):
                     vuln_id_from_tool=vulnerability.get("id"),
                 )
 
+                if report_date:
+                    finding.date = report_date
+
                 ratings = vulnerability.get("ratings", [])
                 for rating in ratings:
-                    if rating.get("method") == "CVSSv3":
+                    if (
+                        rating.get("method") == "CVSSv3"
+                        or rating.get("method") == "CVSSv31"
+                    ):
                         raw_vector = rating["vector"]
                         cvssv3 = self._get_cvssv3(raw_vector)
+                        severity = rating.get("severity")
                         if cvssv3:
                             finding.cvssv3 = cvssv3.clean_vector()
-                            finding.severity = cvssv3.severities()[0]
+                            if severity:
+                                finding.severity = self.fix_severity(severity)
+                            else:
+                                finding.severity = cvssv3.severities()[0]
 
                 vulnerability_ids = list()
                 # set id as first vulnerability id
-                if vulnerability.get('id'):
-                    vulnerability_ids.append(vulnerability.get('id'))
+                if vulnerability.get("id"):
+                    vulnerability_ids.append(vulnerability.get("id"))
                 # check references to see if we have other vulnerability ids
                 for reference in vulnerability.get("references", []):
                     vulnerability_id = reference.get("id")
@@ -349,17 +463,71 @@ class CycloneDXParser(object):
                 if vulnerability_ids:
                     finding.unsaved_vulnerability_ids = vulnerability_ids
 
+                # if there is some CWE
+                cwes = vulnerability.get("cwes")
+                if cwes and len(cwes) > 1:
+                    # FIXME support more than one CWE
+                    LOGGER.debug(
+                        f"more than one CWE for a finding {cwes}. NOT supported by parser API"
+                    )
+                if cwes and len(cwes) > 0:
+                    finding.cwe = cwes[0]
+
+                # Check for mitigation
+                analysis = vulnerability.get("analysis")
+                if analysis:
+                    state = analysis.get("state")
+                    if state:
+                        if (
+                            "resolved" == state
+                            or "resolved_with_pedigree" == state
+                            or "not_affected" == state
+                        ):
+                            finding.is_mitigated = True
+                            finding.active = False
+                        elif "false_positive" == state:
+                            finding.false_p = True
+                            finding.active = False
+                        if not finding.active:
+                            detail = analysis.get("detail")
+                            if detail:
+                                finding.mitigation = (
+                                    finding.mitigation
+                                    + "\n**This vulnerability is mitigated and/or suppressed:** {}\n".format(
+                                        detail
+                                    )
+                                )
+
                 findings.append(finding)
         return findings
+
+    def _flatten_components(self, components, flatted_components):
+        for component in components:
+            if "components" in component:
+                self._flatten_components(
+                    component.get("components", []), flatted_components
+                )
+            # according to specification 1.4, 'bom-ref' is mandatory but some
+            # tools don't provide it
+            if "bom-ref" in component:
+                flatted_components[component["bom-ref"]] = component
+        return None
 
     def _get_component(self, components, reference):
         if reference not in components:
             LOGGER.warning(f"reference:{reference} not found in the BOM")
             return (None, None)
-        return (components[reference]["name"], components[reference]["version"])
+        if "version" not in components[reference]:
+            return (components[reference]["name"], None)
+        return (
+            components[reference]["name"],
+            components[reference]["version"],
+        )
 
     def fix_severity(self, severity):
         severity = severity.capitalize()
-        if "Unknown" == severity or "None" == severity:
+        if severity is None:
+            severity = "Medium"
+        elif "Unknown" == severity or "None" == severity:
             severity = "Info"
         return severity

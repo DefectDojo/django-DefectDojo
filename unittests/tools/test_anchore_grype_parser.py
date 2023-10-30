@@ -31,6 +31,7 @@ class TestAnchoreGrypeParser(DojoTestCase):
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual("libgnutls-openssl27", finding.component_name)
                 self.assertEqual("3.6.7-4+deb10u5", finding.component_version)
+                self.assertEqual("/var/lib/dpkg/status", finding.file_path)
                 found = True
                 break
         self.assertTrue(found)

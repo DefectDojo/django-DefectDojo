@@ -35,7 +35,7 @@ def dev_env(request):
         'name_words': name_words})
 
 
-@user_is_configuration_authorized('dojo.add_development_environment', 'staff')
+@user_is_configuration_authorized('dojo.add_development_environment')
 def add_dev_env(request):
     form = Development_EnvironmentForm()
     if request.method == 'POST':
@@ -56,7 +56,7 @@ def add_dev_env(request):
     })
 
 
-@user_is_configuration_authorized('dojo.change_development_environment', 'staff')
+@user_is_configuration_authorized('dojo.change_development_environment')
 def edit_dev_env(request, deid):
     de = get_object_or_404(Development_Environment, pk=deid)
     form1 = Development_EnvironmentForm(instance=de)
@@ -72,7 +72,7 @@ def edit_dev_env(request, deid):
                 extra_tags='alert-success')
             return HttpResponseRedirect(reverse('dev_env'))
     if request.method == 'POST' and request.POST.get('delete_dev_env'):
-        user_has_configuration_permission_or_403(request.user, 'dojo.delete_development_environment', 'staff')
+        user_has_configuration_permission_or_403(request.user, 'dojo.delete_development_environment')
         form2 = Delete_Dev_EnvironmentForm(request.POST, instance=de)
         if form2.is_valid():
             try:

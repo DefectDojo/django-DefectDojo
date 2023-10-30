@@ -1,0 +1,7 @@
+{
+    "run_timestamp": 1663583567,
+    "run_at": "2022-09-19T10:32:47Z",
+    "kubernetes_cis_version": "1.6.0",
+    "docker_cis_version": "1.2.0",
+    "items": []
+}

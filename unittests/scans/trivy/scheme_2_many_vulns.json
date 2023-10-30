@@ -20,6 +20,7 @@
         {
           "VulnerabilityID": "CVE-2020-15999",
           "PkgName": "freetype",
+          "PkgPath": "app/libs/freetype-2.9.1-r2",
           "InstalledVersion": "2.9.1-r2",
           "FixedVersion": "2.9.1-r3",
           "Layer": {
@@ -72,6 +73,7 @@
         {
           "VulnerabilityID": "CVE-2020-28196",
           "PkgName": "krb5-libs",
+          "PkgPath": "app/libs/krb5-libs-1.15.5-r0",
           "InstalledVersion": "1.15.5-r0",
           "FixedVersion": "1.15.5-r1",
           "Layer": {
@@ -115,6 +117,7 @@
         {
           "VulnerabilityID": "CVE-2019-12900",
           "PkgName": "libbz2",
+          "PkgPath": "app/libs/libbz2-1.0.6-r6",
           "InstalledVersion": "1.0.6-r6",
           "FixedVersion": "1.0.6-r7",
           "Layer": {
@@ -177,6 +180,7 @@
         {
           "VulnerabilityID": "CVE-2018-11771",
           "PkgName": "org.apache.commons:commons-compress",
+          "PkgPath": "app/libs/commons-compress-1.14",
           "InstalledVersion": "1.14",
           "FixedVersion": "1.18",
           "Layer": {
@@ -230,6 +234,7 @@
         {
           "VulnerabilityID": "CVE-2018-1324",
           "PkgName": "org.apache.commons:commons-compress",
+          "PkgPath": "app/libs/commons-compress-1.14",
           "InstalledVersion": "1.14",
           "FixedVersion": "1.16",
           "Layer": {

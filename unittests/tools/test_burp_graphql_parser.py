@@ -22,7 +22,7 @@ class TestBurpGraphQLParser(DojoTestCase):
             self.assertIn("remediation 1", findings[0].mitigation)
             self.assertIn("issue description 1", findings[0].impact)
             self.assertIn("issue remediation 1", findings[0].mitigation)
-            self.assertEquals('High', findings[0].severity)
+            self.assertEqual('High', findings[0].severity)
             self.assertEqual(1, len(findings[0].unsaved_endpoints))
             self.assertEqual('www.test.com', findings[0].unsaved_endpoints[0].host)
             self.assertEqual('path', findings[0].unsaved_endpoints[0].path)
@@ -61,6 +61,12 @@ class TestBurpGraphQLParser(DojoTestCase):
             with self.assertRaises(ValueError):
                 parser = BurpGraphQLParser()
                 findings = parser.get_findings(test_file, Test())
+
+    def test_burp_null_request_segments(self):
+        with open(path.join(path.dirname(__file__), "../scans/burp_graphql/null_request_segments.json")) as test_file:
+            parser = BurpGraphQLParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(1, len(findings))
 
     def test_burp_null_data(self):
         with open(path.join(path.dirname(__file__), "../scans/burp_graphql/null_data.json")) as test_file:

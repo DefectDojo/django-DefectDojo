@@ -6,6 +6,7 @@ def globalize_vars(request):
     # return the value you want as a dictionnary. you may add multiple values in there.
     return {'SHOW_LOGIN_FORM': settings.SHOW_LOGIN_FORM,
             'FORGOT_PASSWORD': settings.FORGOT_PASSWORD,
+            'FORGOT_USERNAME': settings.FORGOT_USERNAME,
             'CLASSIC_AUTH_ENABLED': settings.CLASSIC_AUTH_ENABLED,
             'AUTH0_ENABLED': settings.AUTH0_OAUTH2_ENABLED,
             'GOOGLE_ENABLED': settings.GOOGLE_OAUTH_ENABLED,
@@ -17,12 +18,13 @@ def globalize_vars(request):
             'AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS': settings.AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS,
             'KEYCLOAK_ENABLED': settings.KEYCLOAK_OAUTH2_ENABLED,
             'SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT': settings.SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT,
-            'GITHUB_ENABLED': settings.GITHUB_OAUTH2_ENABLED,
             'GITHUB_ENTERPRISE_ENABLED': settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED,
             'SAML2_ENABLED': settings.SAML2_ENABLED,
             'SAML2_LOGIN_BUTTON_TEXT': settings.SAML2_LOGIN_BUTTON_TEXT,
             'SAML2_LOGOUT_URL': settings.SAML2_LOGOUT_URL,
-            'DOCUMENTATION_URL': settings.DOCUMENTATION_URL}
+            'DOCUMENTATION_URL': settings.DOCUMENTATION_URL,
+            'API_TOKENS_ENABLED': settings.API_TOKENS_ENABLED,
+            }
 
 
 def bind_system_settings(request):
@@ -36,3 +38,14 @@ def bind_alert_count(request):
         if request.user.is_authenticated:
             return {'alert_count': Alerts.objects.filter(user_id=request.user).count()}
     return {}
+
+
+def bind_announcement(request):
+    from dojo.models import UserAnnouncement
+    try:
+        if request.user.is_authenticated:
+            user_announcement = UserAnnouncement.objects.select_related('announcement').get(user=request.user)
+            return {'announcement': user_announcement.announcement}
+        return {}
+    except Exception:
+        return {}

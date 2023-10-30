@@ -1,0 +1,25 @@
+{
+    "Issues":[
+        {
+            "issue_type":{
+                "name":"TLS certificate",
+                "description_html":null,
+                "remediation_html":null,
+                "vulnerability_classifications_html":"<ul>\n<li><a href=\"https://cwe.mitre.org/data/definitions/295.html\">CWE-295: Improper Certificate Validation</a></li>\n<li><a href=\"https://cwe.mitre.org/data/definitions/326.html\">CWE-326: Inadequate Encryption Strength</a></li>\n<li><a href=\"https://cwe.mitre.org/data/definitions/327.html\">CWE-327: Use of a Broken or Risky Cryptographic Algorithm</a></li>\n</ul>",
+                "references_html":"<ul><li><a href=\"https://wiki.mozilla.org/Security/Server_Side_TLS\">SSL/TLS Configuration Guide</a></li></ul>"
+            },
+            "description_html":null,
+            "remediation_html":null,
+            "severity":"medium",
+            "path":"/",
+            "origin":"https://verysecretcompany.domain",
+            "serial_number":"0000000000000000000000",
+            "evidence":[
+                {
+                    "request_index":0,
+                    "request_segments":null
+                }
+            ]
+        }
+    ]
+}

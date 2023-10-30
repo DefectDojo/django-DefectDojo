@@ -59,13 +59,13 @@ class ImportReimportMixin(object):
         self.zap_sample2_filename = self.scans_path + 'zap/2_zap_sample_0_and_new_endpoint.xml'
         self.zap_sample3_filename = self.scans_path + 'zap/3_zap_sampl_0_and_different_severities.xml'
 
-        self.anchore_file_name = self.scans_path + 'anchore/one_vuln_many_files.json'
+        self.anchore_file_name = self.scans_path + 'anchore_engine/one_vuln_many_files.json'
         self.scan_type_anchore = 'Anchore Engine Scan'
 
         self.acunetix_file_name = self.scans_path + 'acunetix/one_finding.xml'
         self.scan_type_acunetix = 'Acunetix Scan'
 
-        self.gitlab_dep_scan_components_filename = self.scans_path + 'gitlab_dep_scan/gl-dependency-scanning-report-many-vuln.json'
+        self.gitlab_dep_scan_components_filename = f'{self.scans_path}gitlab_dep_scan/gl-dependency-scanning-report-many-vuln_v15.json'
         self.scan_type_gtlab_dep_scan = 'GitLab Dependency Scanning Report'
 
         self.sonarqube_file_name1 = self.scans_path + 'sonarqube/sonar-6-findings.html'
@@ -76,6 +76,7 @@ class ImportReimportMixin(object):
         self.veracode_same_hash_code_different_unique_id = self.scans_path + 'veracode/many_findings_same_hash_code_different_unique_id.xml'
         self.veracode_same_unique_id_different_hash_code = self.scans_path + 'veracode/many_findings_same_unique_id_different_hash_code.xml'
         self.veracode_different_hash_code_different_unique_id = self.scans_path + 'veracode/many_findings_different_hash_code_different_unique_id.xml'
+        self.veracode_mitigated_findings = self.scans_path + 'veracode/mitigated_finding.xml'
         self.scan_type_veracode = 'Veracode Scan'
 
         self.clair_few_findings = self.scans_path + 'clair/few_vuln.json'
@@ -90,7 +91,7 @@ class ImportReimportMixin(object):
 
         self.nuclei_empty = self.scans_path + 'nuclei/empty.jsonl'
 
-        self.gitlab_dast_file_name = self.scans_path + 'gitlab_dast/gitlab_dast_one_vul.json'
+        self.gitlab_dast_file_name = f'{self.scans_path}gitlab_dast/gitlab_dast_one_vul_v15.json'
         self.scan_type_gitlab_dast = 'GitLab DAST Report'
 
         self.anchore_grype_file_name = self.scans_path + 'anchore_grype/check_all_fields.json'
@@ -369,6 +370,43 @@ class ImportReimportMixin(object):
 
         return test_id
 
+    # import veracode and then reimport veracode again
+    # - reimport, findings stay the same, stay active
+    # - active = True, verified = True
+    # - existing findings with verified is true should stay verified
+    def test_import_veracode_reimport_veracode_active_verified_mitigated(self):
+        logger.debug('reimporting exact same original veracode mitigated xml report again')
+
+        import_veracode_many_findings = self.import_scan_with_params(self.veracode_mitigated_findings, scan_type=self.scan_type_veracode,
+                                                                     verified=True, forceActive=True, forceVerified=True)
+
+        test_id = import_veracode_many_findings['test']
+
+        notes_count_before = self.db_notes_count()
+
+        # reimport exact same report
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=0, closed=1, reactivated=0, untouched=0):
+            reimport_veracode_mitigated_findings = self.reimport_scan_with_params(test_id, self.veracode_mitigated_findings, scan_type=self.scan_type_veracode)
+
+        test_id = reimport_veracode_mitigated_findings['test']
+        self.assertEqual(test_id, test_id)
+
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+
+        # reimported count must match count in veracode report
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(1, findings)
+
+        # inversely, we should see no findings with verified=False
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(0, findings)
+
+        # reimporting the exact same scan shouldn't create any notes, but there will be a new mitigated note
+        self.assertEqual(notes_count_before, self.db_notes_count() - 1)
+        mitigated_findings = self.get_test_findings_api(test_id, is_mitigated=True)
+        self.assert_finding_count_json(1, mitigated_findings)
+
     # import 0 and then reimport 0 again
     # - reimport, findings stay the same, stay active
     # - active = True, verified = Trie
@@ -436,11 +474,11 @@ class ImportReimportMixin(object):
         # reimported count must match count in xml report
         # we set verified=False in this reimport, but currently DD does not update this flag, so it's still True from previous import
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(4, findings)
+        self.assert_finding_count_json(0, findings)
 
         # inversely, we should see no findings with verified=False
         findings = self.get_test_findings_api(test_id, verified=False)
-        self.assert_finding_count_json(0, findings)
+        self.assert_finding_count_json(4, findings)
 
         # reimporting the exact same scan shouldn't modify the number of endpoints
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
@@ -477,11 +515,11 @@ class ImportReimportMixin(object):
         # reimported count must match count in sonar report
         # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(6, findings)
+        self.assert_finding_count_json(0, findings)
 
         # inversely, we should see no findings with verified=False
         findings = self.get_test_findings_api(test_id, verified=False)
-        self.assert_finding_count_json(0, findings)
+        self.assert_finding_count_json(6, findings)
 
         # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())
@@ -512,11 +550,11 @@ class ImportReimportMixin(object):
         # reimported count must match count in sonar report
         # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(4, findings)
+        self.assert_finding_count_json(0, findings)
 
         # inversely, we should see no findings with verified=False
         findings = self.get_test_findings_api(test_id, verified=False)
-        self.assert_finding_count_json(0, findings)
+        self.assert_finding_count_json(4, findings)
 
         # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())
@@ -548,7 +586,7 @@ class ImportReimportMixin(object):
         # (reimport doesn't unverify findings that ware previously verified)
         # (the mitigated finding stays verified)
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(6, findings)
+        self.assert_finding_count_json(0, findings)
 
         # one mitigated (the one previously imported which has changed unique_id_from_tool)
         findings = self.get_test_findings_api(test_id, is_mitigated=True)
@@ -556,7 +594,7 @@ class ImportReimportMixin(object):
 
         # one verified False (the new one, as reimport was done with verified false)
         findings = self.get_test_findings_api(test_id, verified=False)
-        self.assert_finding_count_json(1, findings)
+        self.assert_finding_count_json(7, findings)
 
         # one added note for mitigated finding
         self.assertEqual(notes_count_before + 1, self.db_notes_count())
@@ -586,11 +624,11 @@ class ImportReimportMixin(object):
 
         # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(4, findings)
+        self.assert_finding_count_json(0, findings)
 
         # inversely, we should see no findings with verified=False
         findings = self.get_test_findings_api(test_id, verified=False)
-        self.assert_finding_count_json(0, findings)
+        self.assert_finding_count_json(4, findings)
 
         # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())
@@ -620,11 +658,11 @@ class ImportReimportMixin(object):
 
         # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(4, findings)
+        self.assert_finding_count_json(0, findings)
 
         # inversely, we should see no findings with verified=False
         findings = self.get_test_findings_api(test_id, verified=False)
-        self.assert_finding_count_json(0, findings)
+        self.assert_finding_count_json(4, findings)
 
         # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())
@@ -655,11 +693,11 @@ class ImportReimportMixin(object):
 
         # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(4, findings)
+        self.assert_finding_count_json(0, findings)
 
         # The new finding has verified=false
         findings = self.get_test_findings_api(test_id, verified=False)
-        self.assert_finding_count_json(1, findings)
+        self.assert_finding_count_json(5, findings)
 
         # 1 added note for the migitated finding
         self.assertEqual(notes_count_before + 1, self.db_notes_count())
@@ -702,10 +740,10 @@ class ImportReimportMixin(object):
 
         # verified findings must be equal to those in report 0
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(4, findings)
+        self.assert_finding_count_json(0, findings)
 
         findings = self.get_test_findings_api(test_id, verified=False)
-        self.assert_finding_count_json(1, findings)
+        self.assert_finding_count_json(5, findings)
 
         # the updated scan report has
         # - 1 new finding
@@ -776,10 +814,10 @@ class ImportReimportMixin(object):
 
         # verified findings must be equal to those in report 0
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(4 + 1, findings)
+        self.assert_finding_count_json(0, findings)
 
         findings = self.get_test_findings_api(test_id, verified=False)
-        self.assert_finding_count_json(0, findings)
+        self.assert_finding_count_json(5, findings)
 
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
 
@@ -928,10 +966,11 @@ class ImportReimportMixin(object):
 
         # verified findings must be equal to those in report 0
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(4 + 2, findings)
+        self.assert_finding_count_json(0 + 0, findings)
 
+        # unverified findings must be equal to those in report 0
         findings = self.get_test_findings_api(test_id, verified=False)
-        self.assert_finding_count_json(0, findings)
+        self.assert_finding_count_json(4 + 2, findings)
 
         # the updated scan report has
         # - 2 new findings, 2 new endpoints, 2 + 2 new endpoint statuses active, 3 + 3 endpoint statues mitigated due to zap1+2 closed
@@ -961,10 +1000,10 @@ class ImportReimportMixin(object):
         self.assertEqual(test_id, test_id)
 
         findings = self.get_test_findings_api(test_id, verified=False)
-        self.assert_finding_count_json(0, findings)
+        self.assert_finding_count_json(5, findings)
 
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(5, findings)
+        self.assert_finding_count_json(0, findings)
 
         mitigated = 0
         not_mitigated = 0
@@ -975,7 +1014,7 @@ class ImportReimportMixin(object):
             else:
                 not_mitigated += 1
         self.assertEqual(mitigated, 0)
-        self.assertEqual(not_mitigated, 5)
+        self.assertEqual(not_mitigated, 0)
 
     # some parsers generate 1 finding for each vulnerable file for each vulnerability
     # i.e
@@ -1320,11 +1359,11 @@ class ImportReimportMixin(object):
         # reimported count must match count in xml report
         # we set verified=False in this reimport, but currently DD does not update this flag, so it's still True from previous import
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(1, findings)
+        self.assert_finding_count_json(0, findings)
 
         # inversely, we should see no findings with verified=False
         findings = self.get_test_findings_api(test_id, verified=False)
-        self.assert_finding_count_json(0, findings)
+        self.assert_finding_count_json(1, findings)
 
     def test_import_nuclei_emptyc(self):
         """This test do a basic import of Nuclei report with no vulnerability
@@ -1361,9 +1400,9 @@ class ImportReimportMixin(object):
 
         test = self.get_test_api(test_id)['id']
         finding = Finding.objects.filter(test__engagement_id=1, test=test).first()
-        self.assertEqual(finding.endpoint_status.count(), 1)
+        self.assertEqual(finding.status_finding.count(), 1)
 
-        original_date = finding.endpoint_status.first().date
+        original_date = finding.status_finding.first().date
 
         self.assertEqual(endpoint_count_before + 1, self.db_endpoint_count())
         self.assertEqual(endpoint_status_count_before_active + 1, self.db_endpoint_status_count(mitigated=False))
@@ -1379,9 +1418,9 @@ class ImportReimportMixin(object):
         self.assert_finding_count_json(1, findings)
 
         finding = Finding.objects.filter(test__engagement_id=1, test=test).first()
-        self.assertEqual(finding.endpoint_status.count(), 1)
+        self.assertEqual(finding.status_finding.count(), 1)
 
-        reimported_date = finding.endpoint_status.first().date
+        reimported_date = finding.status_finding.first().date
         self.assertEqual(original_date, reimported_date)
 
         self.assertEqual(endpoint_count_before + 1, self.db_endpoint_count())
@@ -1449,124 +1488,114 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
 
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
-        self.assertEqual(import0['statistics'],
-        {'after': {'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-         'low': {'active': 3, 'verified': 3, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 3},
-         'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-         'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-         'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-         'total': {'active': 4, 'verified': 4, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4}}})
+        self.assertEqual(import0['statistics'], {
+            'after': {
+                'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'low': {'active': 3, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 3},
+                'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
+                'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4}
+            }
+        })
 
         test_id = import0['test']
         reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename)
 
-        self.assertEqual(reimport1['statistics'],
-        {
-            'before': {
-                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'low': {'active': 3, 'verified': 3, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 3},
-                    'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'total': {'active': 4, 'verified': 4, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4}
-            },
-            'delta': {
-                'created': {
-                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'low': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-                    'medium': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'total': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1}
-                },
-                'closed': {
-                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'low': {'active': 0, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 1},
-                    'medium': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'total': {'active': 0, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 1}
-                },
-                'reactivated': {
-                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'low': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'medium': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'total': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0}
-                },
-                'left untouched': {
-                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0}, 'low': {'active': 2, 'verified': 2, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 2},
-                    'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'total': {'active': 3, 'verified': 3, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 3}
-                }
-            },
+        self.assertEqual(reimport1['statistics'], {
             'after': {
-                'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'low': {'active': 3, 'verified': 4, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 4},
-                'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-                'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'total': {'active': 4, 'verified': 5, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
+                'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                'low': {'active': 3, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 4, 'verified': 0},
+                'medium': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
+                'total': {'active': 4, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 5, 'verified': 0}},
+            'before': {
+                'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                'low': {'active': 3, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 3, 'verified': 0},
+                'medium': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
+                'total': {'active': 4, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 4, 'verified': 0}},
+            'delta': {
+                'closed': {
+                    'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'low': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
+                    'medium': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'total': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0}},
+                'created': {
+                    'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'low': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
+                    'medium': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'total': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0}},
+                'left untouched': {
+                    'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'low': {'active': 2, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 2, 'verified': 0},
+                    'medium': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
+                    'total': {'active': 3, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 3, 'verified': 0}},
+                'reactivated': {
+                    'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'low': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'medium': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'total': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0}}
             }
         })
 
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, closed=1, reactivated=1, untouched=3):
             reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
-        self.assertEqual(reimport0['statistics'],
-        {
-            'before': {
-                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'low': {'active': 3, 'verified': 4, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 4},
-                    'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'total': {'active': 4, 'verified': 5, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
-            },
-            'delta': {
-                'created': {
-                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'low': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'medium': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'total': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0}
-                },
-                'closed': {
-                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'low': {'active': 0, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 1},
-                    'medium': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'total': {'active': 0, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 1}
-                },
-                'reactivated': {
-                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'low': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-                    'medium': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'total': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1}
-                },
-                'left untouched': {
-                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'low': {'active': 2, 'verified': 2, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 2},
-                    'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'total': {'active': 3, 'verified': 3, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 3}
-                }
-            },
+        self.assertEqual(reimport0['statistics'], {
             'after': {
-                'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'low': {'active': 3, 'verified': 4, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 4},
-                'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-                'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'total': {'active': 4, 'verified': 5, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
+                'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                'low': {'active': 3, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 4, 'verified': 0},
+                'medium': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
+                'total': {'active': 4, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 5, 'verified': 0}},
+            'before': {
+                'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                'low': {'active': 3, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 4, 'verified': 0},
+                'medium': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
+                'total': {'active': 4, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 5, 'verified': 0}},
+            'delta': {
+                'closed': {
+                    'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'low': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
+                    'medium': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'total': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0}},
+                'created': {
+                    'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'low': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'medium': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'total': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0}},
+                'left untouched': {
+                    'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'low': {'active': 2, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 2, 'verified': 0},
+                    'medium': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
+                    'total': {'active': 3, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 3, 'verified': 0}},
+                'reactivated': {
+                    'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'low': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
+                    'medium': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
+                    'total': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0}}
             }
         })
 
@@ -1577,60 +1606,59 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
 
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
-        self.assertEqual(import0['statistics'],
-        {'after': {'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-         'low': {'active': 3, 'verified': 3, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 3},
-         'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-         'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-         'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-         'total': {'active': 4, 'verified': 4, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4}}})
+        self.assertEqual(import0['statistics'], {
+            'after': {
+                'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'low': {'active': 3, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 3},
+                'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
+                'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4}
+            }
+        })
 
         test_id = import0['test']
 
         reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename)
 
-        print(reimport1)
-        self.assertEqual(reimport1['statistics'],
-        {
+        self.assertEqual(reimport1['statistics'], {
             'before': {
-                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'low': {'active': 3, 'verified': 3, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 3},
-                    'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'total': {'active': 4, 'verified': 4, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4}
+                'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'low': {'active': 3, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 3},
+                'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
+                'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4}
             },
             'after': {
                 'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'low': {'active': 3, 'verified': 4, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 4},
-                'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
+                'low': {'active': 3, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 4},
+                'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
                 'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
                 'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'total': {'active': 4, 'verified': 5, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
+                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
             }
         })
 
         with assertTestImportModelsCreated(self, reimports=0, affected_findings=0, closed=0, reactivated=0, untouched=0):
             reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
-        print(reimport0)
-        self.assertEqual(reimport0['statistics'],
-        {
+        self.assertEqual(reimport0['statistics'], {
             'before': {
-                    'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'low': {'active': 3, 'verified': 4, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 4},
-                    'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-                    'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                    'total': {'active': 4, 'verified': 5, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
+                'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'low': {'active': 3, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 4},
+                'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
+                'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
+                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
             },
             'after': {
                 'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'low': {'active': 3, 'verified': 4, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 4},
-                'medium': {'active': 1, 'verified': 1, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
+                'low': {'active': 3, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 4},
+                'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
                 'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
                 'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'total': {'active': 4, 'verified': 5, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
+                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
             }
         })
     # Reimport tests to test Scan_Date logic (usecase not supported on UI)
@@ -1766,11 +1794,26 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         test = Test.objects.get(id=response.url.split('/')[-1])
         return {'test': test.id}
 
-    def import_scan_with_params_ui(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, scan_date=None, service=None):
+    def import_scan_with_params_ui(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=False,
+                                   push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, scan_date=None, service=None,
+                                   forceActive=False, forceVerified=False):
+
+        activePayload = "not_specified"
+        if forceActive:
+            activePayload = "force_to_true"
+        elif not active:
+            activePayload = "force_to_false"
+
+        verifiedPayload = "not_specified"
+        if forceVerified:
+            verifiedPayload = "force_to_true"
+        elif not verified:
+            verifiedPayload = "force_to_false"
+
         payload = {
                 "minimum_severity": minimum_severity,
-                "active": active,
-                "verified": verified,
+                "active": activePayload,
+                "verified": verifiedPayload,
                 "scan_type": scan_type,
                 "file": open(get_unit_tests_path() + filename),
                 "environment": 1,
@@ -1795,11 +1838,19 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
 
         return self.import_scan_ui(engagement, payload)
 
-    def reimport_scan_with_params_ui(self, test_id, filename, scan_type='ZAP Scan', minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True, scan_date=None):
+    def reimport_scan_with_params_ui(self, test_id, filename, scan_type='ZAP Scan', minimum_severity='Low', active=True, verified=False, push_to_jira=None, tags=None, close_old_findings=True, scan_date=None):
+        # Mimic old functionality for active/verified to avoid breaking tests
+        activePayload = "force_to_true"
+        if not active:
+            activePayload = "force_to_false"
+        verifiedPayload = "force_to_true"
+        if not verified:
+            verifiedPayload = "force_to_false"
+
         payload = {
                 "minimum_severity": minimum_severity,
-                "active": active,
-                "verified": verified,
+                "active": activePayload,
+                "verified": verifiedPayload,
                 "scan_type": scan_type,
                 "file": open(get_unit_tests_path() + filename),
                 "version": "1.0.1",

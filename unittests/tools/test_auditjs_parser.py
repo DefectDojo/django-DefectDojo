@@ -68,3 +68,12 @@ class TestAuditJSParser(DojoTestCase):
             self.assertTrue(
                 "Invalid JSON format. Are you sure you used --json option ?" in str(context.exception)
             )
+
+    def test_auditjs_parser_with_package_name_has_namespace(self):
+        testfile = open("unittests/scans/auditjs/auditjs_with_package_namespace.json")
+        parser = AuditJSParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+
+        self.assertEqual(1, len(findings))
+        self.assertEqual("%40next/env", findings[0].component_name)

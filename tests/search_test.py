@@ -16,11 +16,11 @@ class SearchTests(BaseTestCase):
         driver.find_element(By.ID, "simple_search").send_keys('finding')
         driver.find_element(By.ID, "simple_search_submit").click()
 
-    def test_search_cve(self):
+    def test_search_vulnerability_id(self):
         # very basic search test to see if it doesn't 500
         driver = self.goto_some_page()
         driver.find_element(By.ID, "simple_search").clear()
-        driver.find_element(By.ID, "simple_search").send_keys('cve:CVE-2020-12345')
+        driver.find_element(By.ID, "simple_search").send_keys('vulnerability_id:CVE-2020-12345')
         driver.find_element(By.ID, "simple_search_submit").click()
 
         driver.find_element(By.ID, "simple_search").clear()
@@ -96,7 +96,7 @@ def suite():
     suite.addTest(BaseTestCase('test_login'))
     suite.addTest(BaseTestCase('disable_block_execution'))
     suite.addTest(SearchTests('test_search'))
-    suite.addTest(SearchTests('test_search_cve'))
+    suite.addTest(SearchTests('test_search_vulnerability_id'))
     suite.addTest(SearchTests('test_search_tag'))
     suite.addTest(SearchTests('test_search_product_tag'))
     suite.addTest(SearchTests('test_search_engagement_tag'))

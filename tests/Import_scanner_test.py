@@ -29,7 +29,7 @@ class ScannerTest(BaseTestCase):
     def test_check_test_file(self):
         missing_tests = ['MISSING TEST FOLDER']
         for tool in self.tools:
-            if(tool not in self.tests):
+            if tool not in self.tests:
                 missing_tests += [tool]
 
         missing_tests += ['\nNO TEST FILES']
@@ -52,8 +52,7 @@ class ScannerTest(BaseTestCase):
 
     def test_check_for_doc(self):
         driver = self.driver
-        driver.get('https://defectdojo.github.io/django-DefectDojo/integrations/import/')
-
+        driver.get('https://documentation.defectdojo.com/integrations/import/')
         integration_index = integration_text.index('Integrations') + len('Integrations') + 1
         usage_index = integration_text.index('Usage Examples') - len('Models') - 2
         integration_text = integration_text[integration_index:usage_index].lower()

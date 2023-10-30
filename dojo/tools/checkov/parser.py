@@ -4,7 +4,6 @@ from dojo.models import Finding
 
 
 class CheckovParser(object):
-
     def get_scan_types(self):
         return ["Checkov Scan"]
 
@@ -15,11 +14,11 @@ class CheckovParser(object):
         return "Import JSON reports of Infrastructure as Code vulnerabilities."
 
     def get_findings(self, json_output, test):
-        findings = list()
+        findings = []
         if json_output:
             deserialized = self.parse_json(json_output)
             for tree in deserialized:
-                check_type = tree['check_type']
+                check_type = tree.get("check_type", "")
                 findings += self.get_items(tree, test, check_type)
 
         return findings
@@ -38,21 +37,22 @@ class CheckovParser(object):
         try:
             data = json_output.read()
             try:
-                deserialized = json.loads(str(data, 'utf-8'))
-            except:
+                deserialized = json.loads(str(data, "utf-8"))
+            except BaseException:
                 deserialized = json.loads(data)
-        except:
-            raise Exception("Invalid format")
+        except BaseException:
+            raise ValueError("Invalid format")
 
-        if type(deserialized) is not list:
-            return [deserialized]
-        else:
-            return deserialized
+        return (
+            [deserialized] if not isinstance(
+                deserialized, list) else deserialized
+        )
 
     def get_items(self, tree, test, check_type):
         items = []
 
-        for node in tree['results']['failed_checks']:
+        failed_checks = tree.get("results", {}).get("failed_checks", [])
+        for node in failed_checks:
             item = get_item(node, test, check_type)
             if item:
                 items.append(item)
@@ -61,51 +61,42 @@ class CheckovParser(object):
 
 
 def get_item(vuln, test, check_type):
-    title = ''
-    if 'check_name' in vuln:
-        title = vuln['check_name']
-    else:
-        title = 'check_name not found'
+    title = (
+        vuln["check_name"] if "check_name" in vuln else "check_name not found"
+    )
+    description = f"Check Type: {check_type}\n"
+    if "check_id" in vuln:
+        description += f"Check Id: {vuln['check_id']}\n"
+    if "check_name" in vuln:
+        description += f"{vuln['check_name']}\n"
 
-    description = 'Check Type: {}\n'.format(check_type)
-    if 'check_id' in vuln:
-        description += 'Check Id: {}\n'.format(vuln['check_id'])
-    if 'check_name' in vuln:
-        description += '{}\n'.format(vuln['check_name'])
-
-    file_path = None
-    if 'file_path' in vuln:
-        file_path = vuln['file_path']
-
+    file_path = vuln["file_path"] if "file_path" in vuln else None
     source_line = None
-    if 'file_line_range' in vuln:
-        lines = vuln['file_line_range']
+    if "file_line_range" in vuln:
+        lines = vuln["file_line_range"]
         source_line = lines[0]
 
     resource = None
-    if 'resource' in vuln:
-        resource = vuln['resource']
+    if "resource" in vuln:
+        resource = vuln["resource"]
 
-    # Checkov doesn't define severities. Sine the findings are
-    # vulnerabilities, we set them to Medium
-    severity = 'Medium'
+    severity = "Medium"
+    if "severity" in vuln and vuln["severity"] is not None:
+        severity = vuln["severity"].capitalize()
 
-    mitigation = ''
+    mitigation = ""
 
-    references = ''
-    if 'guideline' in vuln:
-        references = vuln['guideline']
-
-    finding = Finding(title=title,
-                      test=test,
-                      description=description,
-                      severity=severity,
-                      mitigation=mitigation,
-                      references=references,
-                      file_path=file_path,
-                      line=source_line,
-                      component_name=resource,
-                      static_finding=True,
-                      dynamic_finding=False)
-
-    return finding
+    references = vuln["guideline"] if "guideline" in vuln else ""
+    return Finding(
+        title=title,
+        test=test,
+        description=description,
+        severity=severity,
+        mitigation=mitigation,
+        references=references,
+        file_path=file_path,
+        line=source_line,
+        component_name=resource,
+        static_finding=True,
+        dynamic_finding=False,
+    )

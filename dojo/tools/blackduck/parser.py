@@ -27,7 +27,9 @@ class BlackduckParser(object):
     def normalize_findings(self, filename):
         importer = BlackduckImporter()
 
-        findings = sorted(importer.parse_findings(filename), key=lambda f: f.vuln_id)
+        findings = sorted(
+            importer.parse_findings(filename), key=lambda f: f.vuln_id
+        )
         return findings
 
     def ingest_findings(self, normalized_findings, test):
@@ -42,33 +44,36 @@ class BlackduckParser(object):
             impact = i.impact
             references = self.format_reference(i)
 
-            dupe_key = hashlib.md5("{} | {}".format(title, i.vuln_source)
-                .encode("utf-8")) \
-                .hexdigest()
+            dupe_key = hashlib.md5(
+                "{} | {}".format(title, i.vuln_source).encode("utf-8")
+            ).hexdigest()
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
                 if finding.description:
-                    finding.description += "Vulnerability ID: {}\n {}\n".format(
-                        vulnerability_id, i.vuln_source)
+                    finding.description += (
+                        "Vulnerability ID: {}\n {}\n".format(
+                            vulnerability_id, i.vuln_source
+                        )
+                    )
                 dupes[dupe_key] = finding
             else:
                 dupes[dupe_key] = True
-
-                finding = Finding(title=title,
-                                  cwe=int(cwe),
-                                  test=test,
-                                  description=description,
-                                  severity=severity,
-                                  mitigation=mitigation,
-                                  impact=impact,
-                                  references=references,
-                                  url=i.url,
-                                  file_path=i.locations,
-                                  component_name=i.component_name,
-                                  component_version=i.component_version,
-                                  static_finding=True
-                                  )
+                finding = Finding(
+                    title=title,
+                    cwe=int(cwe),
+                    test=test,
+                    description=description,
+                    severity=severity,
+                    mitigation=mitigation,
+                    impact=impact,
+                    references=references,
+                    url=i.url,
+                    file_path=i.locations,
+                    component_name=i.component_name,
+                    component_version=i.component_version,
+                    static_finding=True,
+                )
                 if vulnerability_id:
                     finding.unsaved_vulnerability_ids = [vulnerability_id]
 
@@ -77,7 +82,7 @@ class BlackduckParser(object):
         return dupes.values()
 
     def format_title(self, i):
-        if (i.channel_version_origin_id is not None):
+        if i.channel_version_origin_id is not None:
             component_title = i.channel_version_origin_id
         else:
             component_title = i.component_origin_id
@@ -95,9 +100,13 @@ class BlackduckParser(object):
 
     def format_mitigation(self, i):
         mitigation = "Remediation status: {}\n".format(i.remediation_status)
-        mitigation += "Remediation target date: {}\n".format(i.remediation_target_date)
-        mitigation += "Remdediation actual date: {}\n".format(i.remediation_actual_date)
-        mitigation += "Remdediation comment: {}\n".format(i.remediation_comment)
+        mitigation += "Remediation target date: {}\n".format(
+            i.remediation_target_date
+        )
+        mitigation += "Remediation actual date: {}\n".format(
+            i.remediation_actual_date
+        )
+        mitigation += "Remediation comment: {}\n".format(i.remediation_comment)
 
         return mitigation
 

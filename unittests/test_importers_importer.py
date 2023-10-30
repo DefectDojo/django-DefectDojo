@@ -19,7 +19,7 @@ from dojo.utils import get_object_or_none
 
 logger = logging.getLogger(__name__)
 
-NPM_AUDIT_NO_VULN_FILENAME = 'scans/npm_audit_sample/no_vuln.json'
+NPM_AUDIT_NO_VULN_FILENAME = 'scans/npm_audit/no_vuln.json'
 NPM_AUDIT_SCAN_TYPE = 'NPM Audit Scan'
 
 ACUNETIX_AUDIT_ONE_VULN_FILENAME = 'scans/acunetix/one_finding.xml'
@@ -126,7 +126,7 @@ class TestDojoDefaultImporter(DojoTestCase):
 
     def test_import_scan_without_test_scan_type(self):
         # GitLabSastParser implements get_tests but report has no scanner name
-        scan = open(get_unit_tests_path() + "/scans/gitlab_sast/gl-sast-report-1-vuln.json")
+        scan = open(f"{get_unit_tests_path()}/scans/gitlab_sast/gl-sast-report-1-vuln_v15.json")
         scan_type = GitlabSastParser().get_scan_types()[0]
 
         user, _ = User.objects.get_or_create(username="admin")

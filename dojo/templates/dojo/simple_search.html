@@ -5,11 +5,11 @@
 
 {% block content %}
     {{ block.super }}
-    <h2> {{ name }} <i class="fa fa-question-circle has-popover" data-trigger="hover"
+    <h2> {{ name }} <i class="fa-solid fa-circle-question has-popover" data-trigger="hover"
                        data-content="{% blocktrans %}This simple search function will return results whose findings or finding templates
                                      title, URL, description, endpoints, tags, references, languages or technologies contain the search query and products whose
                                      name, tags or description contain the search query.</br> Advanced search operators: (Restrict results to a certain type) product:,
-                                     engagement:, finding:, endpoint:, tag:, language: or technology:.
+                                     engagement:, finding:, endpoint:, tag:, language:, technology: or vulnerability_id:.
                                      test-tags shows findings in tests that are tagged with provided tag, similar for engagement-tags and product-tags.
                                      After submitting the search query, tabbed results will be displayed. The findings tab will have the possibility to
                                      to perform more finegrained filtering on status fields, test type, etc.{% endblocktrans %}"
@@ -24,7 +24,7 @@
                         placeholder="{% trans "Search" %}..." value="{{clean_query}}">
                 <span class="input-group-btn">
                     <button class="btn btn-primary" type="submit" aria-label="Search">
-                        <i class="fa fa-search"></i>
+                        <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
                 </span>
             </div>
@@ -44,44 +44,49 @@
                     <a href="#tabs-1" role="tab" data-toggle="tab">{% trans "Findings" %} ({{ findings.paginator.count }})</a>
                 </li>
             {% endif %}
+            {% if vulnerability_ids %}
+                <li role="presentation" {% if activetab == 'vulnerability_ids' %}class="active"{% endif %}>
+                    <a href="#tabs-2" role="tab" data-toggle="tab">{% trans "Vulnerability Ids" %} ({{ vulnerability_ids|length }})</a>
+                </li>
+            {% endif %}
             {% if products %}
                 <li role="presentation" {% if activetab == 'products' %}class="active"{% endif %}>
-                    <a href="#tabs-2" role="tab" data-toggle="tab">{% trans "Products" %} ({{ products|length }})</a>
+                    <a href="#tabs-3" role="tab" data-toggle="tab">{% trans "Products" %} ({{ products|length }})</a>
                 </li>
             {% endif %}
             {% if engagements %}
                 <li role="presentation" {% if activetab == 'engagements' %}class="active"{% endif %}>
-                    <a href="#tabs-3" role="tab" data-toggle="tab">{% trans "Engagements" %} ({{ engagements|length }})</a>
+                    <a href="#tabs-4" role="tab" data-toggle="tab">{% trans "Engagements" %} ({{ engagements|length }})</a>
                 </li>
             {% endif %}
             {% if tests %}
                 <li role="presentation" {% if activetab == 'tests' %}class="active"{% endif %}>
-                    <a href="#tabs-4" role="tab" data-toggle="tab">{% trans "Tests" %} ({{ tests|length }})</a>
+                    <a href="#tabs-5" role="tab" data-toggle="tab">{% trans "Tests" %} ({{ tests|length }})</a>
                 </li>
             {% endif %}
             {% if endpoints %}
                 <li role="presentation" {% if activetab == 'endpoints' %}class="active"{% endif %}>
-                    <a href="#tabs-5" role="tab" data-toggle="tab">{% trans "Endpoints" %} ({{ endpoints|length }})</a>
+                    <a href="#tabs-6" role="tab" data-toggle="tab">{% trans "Endpoints" %} ({{ endpoints|length }})</a>
                 </li>
             {% endif %}
             {% if finding_templates %}
                 <li role="presentation">
-                    <a href="#tabs-6" role="tab" data-toggle="tab">{% trans "Finding Templates" %} ({{ finding_templates|length }})</a>
+                    <a href="#tabs-7" role="tab" data-toggle="tab">{% trans "Finding Templates" %} ({{ finding_templates|length }})</a>
                 </li>
             {% endif %}
             {% if languages %}
                 <li role="presentation">
-                    <a href="#tabs-7" role="tab" data-toggle="tab">{% trans "Languages" %} ({{ languages|length }})</a>
+                    <a href="#tabs-8" role="tab" data-toggle="tab">{% trans "Languages" %} ({{ languages|length }})</a>
                 </li>
             {% endif %}
             {% if app_analysis %}
                 <li role="presentation">
-                    <a href="#tabs-8" role="tab" data-toggle="tab">{% trans "Application Technolgies" %} ({{ app_analysis|length }})</a>
+                    <a href="#tabs-9" role="tab" data-toggle="tab">{% trans "Application Technolgies" %} ({{ app_analysis|length }})</a>
                 </li>
             {% endif %}
             {% if tagged_findings or tagged_finding_templates or tagged_products or tagged_tests or tagged_endpoints or tagged_engagements %}
                 <li role="presentation" {% if activetab == 'tagged' %}class="active"{% endif %}>
-                    <a href="#tabs-9" role="tab" data-toggle="tab">Tagged
+                    <a href="#tabs-10" role="tab" data-toggle="tab">Tagged
                         ({{ tagged_findings|length }}, {{ tagged_products|length }}, {{ tagged_engagements|length }}, {{ tagged_tests|length }}, {{ tagged_endpoints|length }},
                         {{ tagged_finding_templates|length }})
                     </a>
@@ -89,7 +94,7 @@
             {% endif %}
             {% if generic %}
                 <li role="presentation" {% if activetab == 'generic' %}class="active"{% endif %}>
-                    <a href="#tabs-10" role="tab" data-toggle="tab">Experimental ({{ generic|length }})</a>
+                    <a href="#tabs-11" role="tab" data-toggle="tab">Experimental ({{ generic|length }})</a>
                 </li>
             {% endif %}
         </ul>
@@ -101,9 +106,56 @@
                     {% include "dojo/findings_list_snippet.html" with form_id="custom_search_filter" %}
                 </div>
             {% endif %}
+            {% if vulnerability_ids %}
+                <div role="tabpanel" class="table-responsive tab-pane  {% if activetab == 'vulnerability_ids' %}active{% endif %}" id="tabs-2">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>{% trans "Vulnerability Id" %}</th>
+                            <th>{% trans "Product" %}</th>
+                            <th>{% trans "Engagement" %}</th>
+                            <th>{% trans "Test" %}</th>
+                            <th>{% trans "Finding" %}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for vulnerability_id in vulnerability_ids %}
+                            {% if vulnerability_id.id %}
+                            <tr>
+                                <td>
+                                    <a class="search-finding" href="{% url 'view_finding' vulnerability_id.finding.id %}">
+                                        {{ vulnerability_id.vulnerability_id }}</a>
+                                </td>
+                                <td>
+                                    <a href="{% url 'view_product' vulnerability_id.finding.test.engagement.product.id %}">
+                                        {{ vulnerability_id.finding.test.engagement.product.name }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=vulnerability_id.finding.test.engagement.product.tags.all %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'view_engagement' vulnerability_id.finding.test.engagement.id %}">
+                                        {{ vulnerability_id.finding.test.engagement.name }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=vulnerability_id.finding.test.engagement.tags.all %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'view_test' vulnerability_id.finding.test.id %}">
+                                        {{ vulnerability_id.finding.test }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=vulnerability_id.finding.test.tags.all %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'view_finding' vulnerability_id.finding.id %}">
+                                        {{ vulnerability_id.finding.title }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=vulnerability_id.finding.tags.all %}
+                                </td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
             {% if products %}
-                <div role="tabpanel" class="table-responsive tab-pane  {% if activetab == 'products' %}active{% endif %}" id="tabs-2">
-                    <table class="table table-bordered table-striped">
+                <div role="tabpanel" class="table-responsive tab-pane  {% if activetab == 'products' %}active{% endif %}" id="tabs-3">
+                    <table class="table table-striped">
                         <thead>
                         <tr>
                             <th>{% trans "Name" %}</th>
@@ -117,7 +169,7 @@
                             <tr>
                                 <td>
                                     <a class="search-finding" href="{% url 'view_product' product.id %}">{{ product.name }}</a>
-                                    {% include "dojo/snippets/tags.html" with tags=product.tags.alll %}
+                                    {% include "dojo/snippets/tags.html" with tags=product.tags.all %}
                                 </td>
                                 <td>{{ product.description|truncatechars_html:150|markdown_render }}</td>
                             </tr>
@@ -128,8 +180,8 @@
                 </div>
             {% endif %}
             {% if engagements %}
-                <div role="tabpanel" class="table-responsive tab-pane {% if activetab == 'engagements' %}active{% endif %}" id="tabs-3">
-                    <table class="table table-bordered table-striped">
+                <div role="tabpanel" class="table-responsive tab-pane {% if activetab == 'engagements' %}active{% endif %}" id="tabs-4">
+                    <table class="table table-striped">
                         <thead>
                         <tr>
                             <th>{% trans "Type" %}</th>
@@ -145,11 +197,11 @@
                             <tr>
                                 <td>
                                     <a class="search-finding" href="{% url 'view_engagement' engagement.id %}">{{ engagement.name }}</a>
-                                    {% include "dojo/snippets/tags.html" with tags=engagement.tags.alll %}
+                                    {% include "dojo/snippets/tags.html" with tags=engagement.tags.all %}
                                 </td>
                                 <td>
                                     <a href="{% url 'view_product' engagement.product.id %}">{{ engagement.product.name }}</a>
-                                    {% include "dojo/snippets/tags.html" with tags=engagement.product.tags.alll %}
+                                    {% include "dojo/snippets/tags.html" with tags=engagement.product.tags.all %}
                                 </td>
                                 <td>{{ engagement.target_start|date }} - {{ engagement.target_end|date }}</td>
                                 <td>{{ engagement.status }}</td>
@@ -161,8 +213,8 @@
                 </div>
             {% endif %}
             {% if tests %}
-                <div role="tabpanel" class="table-responsive tab-pane  {% if activetab == 'tests' %}active{% endif %}" id="tabs-4">
-                    <table class="table table-bordered table-striped">
+                <div role="tabpanel" class="table-responsive tab-pane  {% if activetab == 'tests' %}active{% endif %}" id="tabs-5">
+                    <table class="table table-striped">
                         <thead>
                         <tr>
                             <th>{% trans "Title" %}</th>
@@ -179,7 +231,7 @@
                             <tr>
                                 <td>
                                     <a class="search-finding" href="{% url 'view_test' test.id %}">{{ test }}</a>
-                                    {% include "dojo/snippets/tags.html" with tags=test.tags.alll %}
+                                    {% include "dojo/snippets/tags.html" with tags=test.tags.all %}
                                 </td>
                                 <td>
                                     <a href="{% url 'view_product' test.engagement.product.id %}">{{ test.engagement.product.name }}</a>
@@ -199,8 +251,8 @@
                 </div>
             {% endif %}
             {% if endpoints %}
-                <div role="tabpanel" class="table-responsive tab-pane {% if activetab == 'endpoints' %}active{% endif %}" id="tabs-5">
-                    <table class="table table-bordered table-striped">
+                <div role="tabpanel" class="table-responsive tab-pane {% if activetab == 'endpoints' %}active{% endif %}" id="tabs-6">
+                    <table class="table table-striped">
                         <thead>
                         <tr>
                             <th>{% trans "Endpoint" %}</th>
@@ -212,7 +264,7 @@
                         {% for e in endpoints %}
                             <tr>
                                 <td>
-                                    <a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="{% trans "Endpoint is broken. Check documentation for look for fix process" %}" >&#128681;</span>{% endif %}</a>
+                                    <a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="{% trans "Endpoint is broken. Check documentation to look for fix process" %}" >&#128681;</span>{% endif %}</a>
                                     {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                 </td>
                                 {% if e.product %}
@@ -237,8 +289,8 @@
                 </div>
             {% endif %}
             {% if finding_templates %}
-                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-6">
-                    <table class="table table-bordered table-striped">
+                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-7">
+                    <table class="table table-striped">
                         <thead>
                         <tr>
                             <th>{% trans "Title" %}</th>
@@ -262,8 +314,8 @@
             {% if languages %}
             <div role="tabpanel"
                  class="table-responsive tab-pane"
-                 id="tabs-7">
-                    <table class="table table-bordered table-striped">
+                 id="tabs-8">
+                    <table class="table table-striped">
                         <thead>
                         <tr>
                             <th>{% trans "Language" %}</th>
@@ -287,8 +339,8 @@
             {% if app_analysis %}
             <div role="tabpanel"
                  class="table-responsive tab-pane"
-                 id="tabs-8">
-                    <table class="table table-bordered table-striped">
+                 id="tabs-9">
+                    <table class="table table-striped">
                         <thead>
                         <tr>
                             <th>{% trans "Technology" %}</th>
@@ -312,8 +364,8 @@
             {% if tagged_findings or tagged_finding_templates or tagged_products or tagged_tests or tagged_endpoints or tagged_engagements %}
                 <div role="tabpanel"
                      class="table-responsive tab-pane {% if activetab == 'tagged' %}active{% endif %}"
-                     id="tabs-9">
-                    <table class="table table-bordered table-striped">
+                     id="tabs-10">
+                    <table class="table table-striped">
                         <thead>
                         <tr>
                             <th>{% trans "Type" %}</th>
@@ -362,7 +414,7 @@
                             <tr>
                                 <td>{% trans "Endpoint" %}</td>
                                 <td>
-                                    <a class="search-finding" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
+                                    <a class="search-finding" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
                                     {% include "dojo/snippets/tags.html" with tags=endpoint.tags.all %}
                                 </td>
                             </tr>
@@ -382,8 +434,8 @@
             {% endif %}
             {% if generic %}
                 <div role="tabpanel" class="table-responsive tab-pane {% if activetab == 'generic' %}active{% endif %}"
-                     id="tabs-10">
-                    <table class="table table-bordered table-striped">
+                     id="tabs-11">
+                    <table class="table table-striped">
                         <thead>
                         <tr>
                             <th>{% trans "ID" %}</th>
@@ -391,7 +443,6 @@
                             <th>{% trans "Product" %}</th>
                             <th>{% trans "Severity" %}</th>
                             <th>{% trans "Title" %}</th>
-                            <th>{% trans "Vulnerability Id" %}</th>
                             <th>{% trans "Description" %}</th>
                             <th>{% trans "JIRA" %}</th>
                             <th>{% trans "Rank" %}</th>
@@ -417,33 +468,22 @@
                                     <td>
                                         <a href="{{result.url}}" title="{{result.title}}">
                                             {% comment %} a{{ result.meta.engagement__product__name }}b {% endcomment %}
-                                            {% firstof result.meta.test__engagement__product__name result.meta.engagement__product__name result.meta.product__name result.object.name %}
+                                            {% firstof result.meta.finding__test__engagement__product__name result.meta.test__engagement__product__name result.meta.engagement__product__name result.meta.product__name result.object.name %}
                                         </a>
                                     </td>
                                     <td class="centered">
+                                        {% if result.meta.severity_display %}
                                         <a href="{{result.url}}" title="{{result.title}}">
-                                            {% if result.meta.severity_display %}
                                                 <span class="label severity severity-{{ result.meta.severity }}">
                                                     {{ result.meta.severity_display }}
                                                 </span>
-                                            {% else %}
-                                                {% trans "None" %}
-                                            {% endif %}
                                         </a>
+                                        {% endif %}
                                     </td>
                                     <td>
                                         <a href="{{result.url}}" title="{{result.title}}">
                                             {{ result.title }}
                                         </a>
-                                    </td>
-                                    <td class="nowrap">
-                                        {% if result.meta.cve|has_vulnerability_url %}
-                                            <a target="_blank" href="{{ result.meta.cve|vulnerability_url }}">
-                                                <i class="fa fa-external-link"></i> {{ result.meta.cve|default:"" }}
-                                            </a>
-                                        {% else %}
-                                            {{ result.meta.cve }}
-                                        {% endif %}
                                     </td>
                                     <td width="50%">
                                         {% comment %} {{ result.content }} {% endcomment %}

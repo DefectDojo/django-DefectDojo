@@ -109,7 +109,7 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
 
 def add_findings_to_risk_acceptance(risk_acceptance, findings):
     for finding in findings:
-        if not finding.duplicate:
+        if not finding.duplicate or finding.risk_accepted:
             finding.active = False
             finding.risk_accepted = True
             finding.save(dedupe_option=False)
@@ -133,7 +133,7 @@ def expiration_handler(*args, **kwargs):
     try:
         system_settings = System_Settings.objects.get()
     except System_Settings.DoesNotExist:
-        logger.warn("Unable to get system_settings, skipping risk acceptance expiration job")
+        logger.warning("Unable to get system_settings, skipping risk acceptance expiration job")
 
     risk_acceptances = get_expired_risk_acceptances_to_handle()
 

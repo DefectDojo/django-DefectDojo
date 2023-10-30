@@ -1,0 +1,3300 @@
+{
+	"Calls": {
+		"Functions": {
+			"1": {
+				"ID": 1,
+				"Name": "main",
+				"RecvType": "",
+				"PkgPath": "github.com/jharper-sec/evil-app",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/test_parser/evil-app/main.go",
+					"Offset": 77,
+					"Line": 9,
+					"Column": 6
+				},
+				"CallSites": null
+			},
+			"10": {
+				"ID": 10,
+				"Name": "startGracefulShutdownInternal",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 171852,
+					"Line": 5054,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 11,
+						"Name": "startGracefulShutdownInternal",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 221922,
+							"Line": 6655,
+							"Column": 36
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 23,
+						"Name": "startGracefulShutdownInternal",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 178469,
+							"Line": 5269,
+							"Column": 36
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 33,
+						"Name": "startGracefulShutdownInternal",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 185976,
+							"Line": 5482,
+							"Column": 34
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 17,
+						"Name": "startGracefulShutdownInternal",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 158048,
+							"Line": 4633,
+							"Column": 38
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"11": {
+				"ID": 11,
+				"Name": "startPush$1",
+				"RecvType": "",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 221157,
+					"Line": 6637,
+					"Column": 24
+				},
+				"CallSites": [
+					{
+						"Parent": 12,
+						"Name": "t46",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 166581,
+							"Line": 4892,
+							"Column": 47
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"12": {
+				"ID": 12,
+				"Name": "startFrameWrite",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 165708,
+					"Line": 4869,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 13,
+						"Name": "startFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 169720,
+							"Line": 4992,
+							"Column": 22
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 13,
+						"Name": "startFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 169966,
+							"Line": 5002,
+							"Column": 22
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 13,
+						"Name": "startFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 170218,
+							"Line": 5010,
+							"Column": 23
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 13,
+						"Name": "startFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 170292,
+							"Line": 5015,
+							"Column": 22
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"13": {
+				"ID": 13,
+				"Name": "scheduleFrameWrite",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 169479,
+					"Line": 4983,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 14,
+						"Name": "scheduleFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 179737,
+							"Line": 5307,
+							"Column": 23
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 3,
+						"Name": "scheduleFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 172112,
+							"Line": 5066,
+							"Column": 23
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 20,
+						"Name": "scheduleFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 165472,
+							"Line": 4863,
+							"Column": 23
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 24,
+						"Name": "scheduleFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 169044,
+							"Line": 4970,
+							"Column": 23
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 32,
+						"Name": "scheduleFrameWrite",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 177189,
+							"Line": 5225,
+							"Column": 23
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"14": {
+				"ID": 14,
+				"Name": "processSettings",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 178812,
+					"Line": 5283,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 15,
+						"Name": "processSettings",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 174586,
+							"Line": 5150,
+							"Column": 28
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"15": {
+				"ID": 15,
+				"Name": "processFrame",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 174215,
+					"Line": 5137,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 16,
+						"Name": "processFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 173540,
+							"Line": 5110,
+							"Column": 24
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"16": {
+				"ID": 16,
+				"Name": "processFrameFromReader",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 172677,
+					"Line": 5085,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 17,
+						"Name": "processFrameFromReader",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 157289,
+							"Line": 4607,
+							"Column": 33
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"17": {
+				"ID": 17,
+				"Name": "serve",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 155022,
+					"Line": 4536,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 6,
+						"Name": "serve",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 142548,
+							"Line": 4190,
+							"Column": 10
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"18": {
+				"ID": 18,
+				"Name": "http2ConfigureServer$1",
+				"RecvType": "",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 135485,
+					"Line": 3997,
+					"Column": 18
+				},
+				"CallSites": [
+					{
+						"Parent": 19,
+						"Name": "t131",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+							"Offset": 59380,
+							"Line": 1899,
+							"Column": 7
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"19": {
+				"ID": 19,
+				"Name": "serve",
+				"RecvType": "*net/http.conn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+					"Offset": 57194,
+					"Line": 1842,
+					"Column": 16
+				},
+				"CallSites": [
+					{
+						"Parent": 5,
+						"Name": "serve",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+							"Offset": 98382,
+							"Line": 3102,
+							"Column": 3
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"2": {
+				"ID": 2,
+				"Name": "canonicalHeader",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 152110,
+					"Line": 4429,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 40,
+						"Name": "canonicalHeader",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 192142,
+							"Line": 5658,
+							"Column": 29
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 41,
+						"Name": "canonicalHeader",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 195704,
+							"Line": 5768,
+							"Column": 35
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"20": {
+				"ID": 20,
+				"Name": "writeFrame",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 163322,
+					"Line": 4805,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 21,
+						"Name": "writeFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 202533,
+							"Line": 6022,
+							"Column": 15
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 29,
+						"Name": "writeFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 172350,
+							"Line": 5076,
+							"Column": 15
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 30,
+						"Name": "writeFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 176003,
+							"Line": 5193,
+							"Column": 15
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 31,
+						"Name": "writeFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 223023,
+							"Line": 6683,
+							"Column": 15
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 17,
+						"Name": "writeFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 155354,
+							"Line": 4548,
+							"Column": 15
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 17,
+						"Name": "writeFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 156878,
+							"Line": 4594,
+							"Column": 17
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"21": {
+				"ID": 21,
+				"Name": "sendWindowUpdate32",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 202327,
+					"Line": 6010,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 22,
+						"Name": "sendWindowUpdate32",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 202192,
+							"Line": 6003,
+							"Column": 24
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 22,
+						"Name": "sendWindowUpdate32",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 202250,
+							"Line": 6006,
+							"Column": 23
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 27,
+						"Name": "sendWindowUpdate32",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 185555,
+							"Line": 5465,
+							"Column": 25
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 27,
+						"Name": "sendWindowUpdate32",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 185590,
+							"Line": 5466,
+							"Column": 25
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"22": {
+				"ID": 22,
+				"Name": "sendWindowUpdate",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 201786,
+					"Line": 5994,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 23,
+						"Name": "sendWindowUpdate",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 178633,
+							"Line": 5275,
+							"Column": 22
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 27,
+						"Name": "sendWindowUpdate",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 183929,
+							"Line": 5423,
+							"Column": 22
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 27,
+						"Name": "sendWindowUpdate",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 185145,
+							"Line": 5453,
+							"Column": 24
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 28,
+						"Name": "sendWindowUpdate",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 201518,
+							"Line": 5985,
+							"Column": 21
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 28,
+						"Name": "sendWindowUpdate",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 201713,
+							"Line": 5989,
+							"Column": 22
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 17,
+						"Name": "sendWindowUpdate",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 155924,
+							"Line": 4561,
+							"Column": 22
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"23": {
+				"ID": 23,
+				"Name": "closeStream",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 177854,
+					"Line": 5248,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 24,
+						"Name": "closeStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 168588,
+							"Line": 4953,
+							"Column": 18
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 24,
+						"Name": "closeStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 168829,
+							"Line": 4960,
+							"Column": 19
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 24,
+						"Name": "closeStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 168888,
+							"Line": 4963,
+							"Column": 18
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 25,
+						"Name": "closeStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 177763,
+							"Line": 5243,
+							"Column": 17
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 26,
+						"Name": "closeStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 154478,
+							"Line": 4510,
+							"Column": 17
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"24": {
+				"ID": 24,
+				"Name": "wroteFrame",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 167392,
+					"Line": 4919,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 12,
+						"Name": "wroteFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 166859,
+							"Line": 4905,
+							"Column": 16
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 17,
+						"Name": "wroteFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 156932,
+							"Line": 4596,
+							"Column": 17
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 17,
+						"Name": "wroteFrame",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 157222,
+							"Line": 4603,
+							"Column": 19
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"25": {
+				"ID": 25,
+				"Name": "processResetStream",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 177234,
+					"Line": 5229,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 15,
+						"Name": "processResetStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 174874,
+							"Line": 5160,
+							"Column": 31
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"26": {
+				"ID": 26,
+				"Name": "closeAllStreamsOnConnClose",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 154379,
+					"Line": 4507,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 17,
+						"Name": "closeAllStreamsOnConnClose",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 155097,
+							"Line": 4540,
+							"Column": 2
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"27": {
+				"ID": 27,
+				"Name": "processData",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 181854,
+					"Line": 5372,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 15,
+						"Name": "processData",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 174812,
+							"Line": 5158,
+							"Column": 24
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"28": {
+				"ID": 28,
+				"Name": "noteBodyRead",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 201440,
+					"Line": 5983,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 17,
+						"Name": "noteBodyRead",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 157461,
+							"Line": 4616,
+							"Column": 19
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"29": {
+				"ID": 29,
+				"Name": "resetStream",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 172282,
+					"Line": 5074,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 24,
+						"Name": "resetStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 168494,
+							"Line": 4951,
+							"Column": 18
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 16,
+						"Name": "resetStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 173652,
+							"Line": 5118,
+							"Column": 17
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 17,
+						"Name": "resetStream",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 156842,
+							"Line": 4591,
+							"Column": 19
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"3": {
+				"ID": 3,
+				"Name": "goAway",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 171943,
+					"Line": 5058,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 10,
+						"Name": "goAway",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 171896,
+							"Line": 5055,
+							"Column": 11
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 16,
+						"Name": "goAway",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 172833,
+							"Line": 5090,
+							"Column": 13
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 16,
+						"Name": "goAway",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 173710,
+							"Line": 5121,
+							"Column": 12
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 16,
+						"Name": "goAway",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 173871,
+							"Line": 5125,
+							"Column": 12
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 17,
+						"Name": "goAway",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 157829,
+							"Line": 4628,
+							"Column": 15
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"30": {
+				"ID": 30,
+				"Name": "processPing",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 175373,
+					"Line": 5175,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 15,
+						"Name": "processPing",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 174762,
+							"Line": 5156,
+							"Column": 24
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"31": {
+				"ID": 31,
+				"Name": "startPush",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 220342,
+					"Line": 6616,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 17,
+						"Name": "startPush",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 158146,
+							"Line": 4638,
+							"Column": 17
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"32": {
+				"ID": 32,
+				"Name": "processWindowUpdate",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 176099,
+					"Line": 5197,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 15,
+						"Name": "processWindowUpdate",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 174712,
+							"Line": 5154,
+							"Column": 32
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"33": {
+				"ID": 33,
+				"Name": "processGoAway",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 185691,
+					"Line": 5475,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 15,
+						"Name": "processGoAway",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 174986,
+							"Line": 5164,
+							"Column": 26
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"34": {
+				"ID": 34,
+				"Name": "ServeHTTP",
+				"RecvType": "*net/http.ServeMux",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+					"Offset": 77607,
+					"Line": 2478,
+					"Column": 22
+				},
+				"CallSites": [
+					{
+						"Parent": 35,
+						"Name": "t15",
+						"RecvType": "net/http.Handler",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+							"Offset": 93472,
+							"Line": 2947,
+							"Column": 19
+						},
+						"Resolved": false
+					},
+					{
+						"Parent": 37,
+						"Name": "handler",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 199219,
+							"Line": 5908,
+							"Column": 9
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"35": {
+				"ID": 35,
+				"Name": "ServeHTTP",
+				"RecvType": "net/http.serverHandler",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+					"Offset": 92722,
+					"Line": 2926,
+					"Column": 25
+				},
+				"CallSites": [
+					{
+						"Parent": 36,
+						"Name": "ServeHTTP",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+							"Offset": 111643,
+							"Line": 3556,
+							"Column": 15
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 19,
+						"Name": "ServeHTTP",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+							"Offset": 62418,
+							"Line": 1991,
+							"Column": 36
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"36": {
+				"ID": 36,
+				"Name": "ServeHTTP",
+				"RecvType": "net/http.initALPNRequest",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+					"Offset": 111370,
+					"Line": 3545,
+					"Column": 26
+				},
+				"CallSites": [
+					{
+						"Parent": 37,
+						"Name": "handler",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 199219,
+							"Line": 5908,
+							"Column": 9
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"37": {
+				"ID": 37,
+				"Name": "runHandler",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 198603,
+					"Line": 5887,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 38,
+						"Name": "runHandler",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 191505,
+							"Line": 5638,
+							"Column": 2
+						},
+						"Resolved": true
+					},
+					{
+						"Parent": 11,
+						"Name": "runHandler",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 222932,
+							"Line": 6679,
+							"Column": 3
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"38": {
+				"ID": 38,
+				"Name": "processHeaders",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 187453,
+					"Line": 5527,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 15,
+						"Name": "processHeaders",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 174646,
+							"Line": 5152,
+							"Column": 27
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"39": {
+				"ID": 39,
+				"Name": "serveFile",
+				"RecvType": "",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/fs.go",
+					"Offset": 16934,
+					"Line": 587,
+					"Column": 6
+				},
+				"CallSites": [
+					{
+						"Parent": 4,
+						"Name": "serveFile",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/fs.go",
+							"Offset": 24223,
+							"Line": 850,
+							"Column": 11
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"4": {
+				"ID": 4,
+				"Name": "ServeHTTP",
+				"RecvType": "*net/http.fileHandler",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/fs.go",
+					"Offset": 24067,
+					"Line": 844,
+					"Column": 23
+				},
+				"CallSites": [
+					{
+						"Parent": 34,
+						"Name": "t5",
+						"RecvType": "net/http.Handler",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+							"Offset": 77830,
+							"Line": 2487,
+							"Column": 13
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"40": {
+				"ID": 40,
+				"Name": "processTrailerHeaders",
+				"RecvType": "*net/http.http2stream",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 191578,
+					"Line": 5642,
+					"Column": 24
+				},
+				"CallSites": [
+					{
+						"Parent": 38,
+						"Name": "processTrailerHeaders",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 188789,
+							"Line": 5559,
+							"Column": 34
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"41": {
+				"ID": 41,
+				"Name": "newWriterAndRequest",
+				"RecvType": "*net/http.http2serverConn",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 194292,
+					"Line": 5731,
+					"Column": 28
+				},
+				"CallSites": [
+					{
+						"Parent": 38,
+						"Name": "newWriterAndRequest",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 190523,
+							"Line": 5608,
+							"Column": 40
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"5": {
+				"ID": 5,
+				"Name": "Serve",
+				"RecvType": "*net/http.Server",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+					"Offset": 96944,
+					"Line": 3040,
+					"Column": 20
+				},
+				"CallSites": [
+					{
+						"Parent": 7,
+						"Name": "Serve",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+							"Offset": 95140,
+							"Line": 2999,
+							"Column": 18
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"6": {
+				"ID": 6,
+				"Name": "ServeConn",
+				"RecvType": "*net/http.http2Server",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+					"Offset": 137942,
+					"Line": 4079,
+					"Column": 23
+				},
+				"CallSites": [
+					{
+						"Parent": 18,
+						"Name": "ServeConn",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/h2_bundle.go",
+							"Offset": 136015,
+							"Line": 4013,
+							"Column": 17
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"7": {
+				"ID": 7,
+				"Name": "ListenAndServe",
+				"RecvType": "*net/http.Server",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+					"Offset": 94921,
+					"Line": 2987,
+					"Column": 20
+				},
+				"CallSites": [
+					{
+						"Parent": 9,
+						"Name": "ListenAndServe",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+							"Offset": 103014,
+							"Line": 3255,
+							"Column": 30
+						},
+						"Resolved": true
+					}
+				]
+			},
+			"8": {
+				"ID": 8,
+				"Name": "Open",
+				"RecvType": "net/http.Dir",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/fs.go",
+					"Offset": 2176,
+					"Line": 71,
+					"Column": 14
+				},
+				"CallSites": [
+					{
+						"Parent": 39,
+						"Name": "fs",
+						"RecvType": "net/http.FileSystem",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/fs.go",
+							"Offset": 17318,
+							"Line": 598,
+							"Column": 19
+						},
+						"Resolved": false
+					},
+					{
+						"Parent": 39,
+						"Name": "fs",
+						"RecvType": "net/http.FileSystem",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/go/go/src/net/http/fs.go",
+							"Offset": 18208,
+							"Line": 640,
+							"Column": 21
+						},
+						"Resolved": false
+					}
+				]
+			},
+			"9": {
+				"ID": 9,
+				"Name": "ListenAndServe",
+				"RecvType": "",
+				"PkgPath": "net/http",
+				"Pos": {
+					"Filename": "/home/dtimoshenko/go/go/src/net/http/server.go",
+					"Offset": 102883,
+					"Line": 3253,
+					"Column": 6
+				},
+				"CallSites": [
+					{
+						"Parent": 1,
+						"Name": "ListenAndServe",
+						"RecvType": "",
+						"Pos": {
+							"Filename": "/home/dtimoshenko/test_parser/evil-app/main.go",
+							"Offset": 480,
+							"Line": 22,
+							"Column": 21
+						},
+						"Resolved": true
+					}
+				]
+			}
+		},
+		"Entries": [
+			1
+		]
+	},
+	"Imports": {
+		"Packages": {
+			"1": {
+				"ID": 1,
+				"Name": "syscall",
+				"Path": "syscall",
+				"Module": 1,
+				"ImportedBy": [
+					2,
+					4,
+					5,
+					7,
+					8,
+					15,
+					19,
+					22,
+					31
+				]
+			},
+			"10": {
+				"ID": 10,
+				"Name": "driver",
+				"Path": "database/sql/driver",
+				"Module": 1,
+				"ImportedBy": [
+					11,
+					20,
+					22
+				]
+			},
+			"11": {
+				"ID": 11,
+				"Name": "sql",
+				"Path": "database/sql",
+				"Module": 1,
+				"ImportedBy": [
+					22,
+					60
+				]
+			},
+			"12": {
+				"ID": 12,
+				"Name": "json",
+				"Path": "encoding/json",
+				"Module": 1,
+				"ImportedBy": [
+					60
+				]
+			},
+			"13": {
+				"ID": 13,
+				"Name": "hex",
+				"Path": "encoding/hex",
+				"Module": 1,
+				"ImportedBy": [
+					20,
+					45,
+					46
+				]
+			},
+			"14": {
+				"ID": 14,
+				"Name": "big",
+				"Path": "math/big",
+				"Module": 1,
+				"ImportedBy": [
+					15,
+					32,
+					33,
+					36,
+					37,
+					38,
+					41,
+					44,
+					45,
+					46,
+					47
+				]
+			},
+			"15": {
+				"ID": 15,
+				"Name": "rand",
+				"Path": "crypto/rand",
+				"Module": 1,
+				"ImportedBy": [
+					20,
+					41,
+					42,
+					47,
+					54,
+					57
+				]
+			},
+			"16": {
+				"ID": 16,
+				"Name": "godebug",
+				"Path": "internal/godebug",
+				"Module": 1,
+				"ImportedBy": [
+					17,
+					19,
+					46,
+					57
+				]
+			},
+			"17": {
+				"ID": 17,
+				"Name": "intern",
+				"Path": "internal/intern",
+				"Module": 1,
+				"ImportedBy": [
+					18
+				]
+			},
+			"18": {
+				"ID": 18,
+				"Name": "netip",
+				"Path": "net/netip",
+				"Module": 1,
+				"ImportedBy": [
+					19
+				]
+			},
+			"19": {
+				"ID": 19,
+				"Name": "net",
+				"Path": "net",
+				"Module": 1,
+				"ImportedBy": [
+					20,
+					29,
+					30,
+					46,
+					47,
+					48,
+					56,
+					57
+				]
+			},
+			"2": {
+				"ID": 2,
+				"Name": "time",
+				"Path": "time",
+				"Module": 1,
+				"ImportedBy": [
+					3,
+					6,
+					7,
+					8,
+					10,
+					11,
+					15,
+					19,
+					20,
+					22,
+					24,
+					32,
+					33,
+					34,
+					45,
+					46,
+					47,
+					48,
+					51,
+					57
+				]
+			},
+			"20": {
+				"ID": 20,
+				"Name": "uuid",
+				"Path": "github.com/google/uuid",
+				"Module": 3,
+				"ImportedBy": [
+					60
+				]
+			},
+			"21": {
+				"ID": 21,
+				"Name": "url",
+				"Path": "net/url",
+				"Module": 1,
+				"ImportedBy": [
+					22,
+					46,
+					56,
+					57,
+					59
+				]
+			},
+			"22": {
+				"ID": 22,
+				"Name": "sqlite3",
+				"Path": "github.com/mattn/go-sqlite3",
+				"Module": 2,
+				"ImportedBy": [
+					60
+				]
+			},
+			"23": {
+				"ID": 23,
+				"Name": "ioutil",
+				"Path": "io/ioutil",
+				"Module": 1,
+				"ImportedBy": [
+					39,
+					60
+				]
+			},
+			"24": {
+				"ID": 24,
+				"Name": "log",
+				"Path": "log",
+				"Module": 1,
+				"ImportedBy": [
+					25,
+					57
+				]
+			},
+			"25": {
+				"ID": 25,
+				"Name": "bidi",
+				"Path": "vendor/golang.org/x/text/unicode/bidi",
+				"Module": 1,
+				"ImportedBy": [
+					27,
+					28
+				]
+			},
+			"26": {
+				"ID": 26,
+				"Name": "norm",
+				"Path": "vendor/golang.org/x/text/unicode/norm",
+				"Module": 1,
+				"ImportedBy": [
+					28
+				]
+			},
+			"27": {
+				"ID": 27,
+				"Name": "bidirule",
+				"Path": "vendor/golang.org/x/text/secure/bidirule",
+				"Module": 1,
+				"ImportedBy": [
+					28
+				]
+			},
+			"28": {
+				"ID": 28,
+				"Name": "idna",
+				"Path": "vendor/golang.org/x/net/idna",
+				"Module": 1,
+				"ImportedBy": [
+					30,
+					56,
+					57
+				]
+			},
+			"29": {
+				"ID": 29,
+				"Name": "textproto",
+				"Path": "net/textproto",
+				"Module": 1,
+				"ImportedBy": [
+					30,
+					48,
+					54,
+					57
+				]
+			},
+			"3": {
+				"ID": 3,
+				"Name": "context",
+				"Path": "context",
+				"Module": 1,
+				"ImportedBy": [
+					10,
+					11,
+					19,
+					22,
+					47,
+					48,
+					57
+				]
+			},
+			"30": {
+				"ID": 30,
+				"Name": "httpguts",
+				"Path": "vendor/golang.org/x/net/http/httpguts",
+				"Module": 1,
+				"ImportedBy": [
+					57
+				]
+			},
+			"31": {
+				"ID": 31,
+				"Name": "filepath",
+				"Path": "path/filepath",
+				"Module": 1,
+				"ImportedBy": [
+					46,
+					54,
+					57,
+					59,
+					60
+				]
+			},
+			"32": {
+				"ID": 32,
+				"Name": "asn1",
+				"Path": "encoding/asn1",
+				"Module": 1,
+				"ImportedBy": [
+					33,
+					45,
+					46
+				]
+			},
+			"33": {
+				"ID": 33,
+				"Name": "cryptobyte",
+				"Path": "vendor/golang.org/x/crypto/cryptobyte",
+				"Module": 1,
+				"ImportedBy": [
+					38,
+					46,
+					47
+				]
+			},
+			"34": {
+				"ID": 34,
+				"Name": "embed",
+				"Path": "embed",
+				"Module": 1,
+				"ImportedBy": [
+					35
+				]
+			},
+			"35": {
+				"ID": 35,
+				"Name": "nistec",
+				"Path": "crypto/internal/nistec",
+				"Module": 1,
+				"ImportedBy": [
+					36
+				]
+			},
+			"36": {
+				"ID": 36,
+				"Name": "elliptic",
+				"Path": "crypto/elliptic",
+				"Module": 1,
+				"ImportedBy": [
+					38,
+					46,
+					47
+				]
+			},
+			"37": {
+				"ID": 37,
+				"Name": "bbig",
+				"Path": "crypto/internal/boring/bbig",
+				"Module": 1,
+				"ImportedBy": [
+					38,
+					41
+				]
+			},
+			"38": {
+				"ID": 38,
+				"Name": "ecdsa",
+				"Path": "crypto/ecdsa",
+				"Module": 1,
+				"ImportedBy": [
+					46,
+					47
+				]
+			},
+			"39": {
+				"ID": 39,
+				"Name": "cpu",
+				"Path": "vendor/golang.org/x/sys/cpu",
+				"Module": 1,
+				"ImportedBy": [
+					40
+				]
+			},
+			"4": {
+				"ID": 4,
+				"Name": "unix",
+				"Path": "internal/syscall/unix",
+				"Module": 1,
+				"ImportedBy": [
+					7,
+					8,
+					15
+				]
+			},
+			"40": {
+				"ID": 40,
+				"Name": "chacha20poly1305",
+				"Path": "vendor/golang.org/x/crypto/chacha20poly1305",
+				"Module": 1,
+				"ImportedBy": [
+					47
+				]
+			},
+			"41": {
+				"ID": 41,
+				"Name": "rsa",
+				"Path": "crypto/rsa",
+				"Module": 1,
+				"ImportedBy": [
+					46,
+					47
+				]
+			},
+			"42": {
+				"ID": 42,
+				"Name": "ed25519",
+				"Path": "crypto/ed25519",
+				"Module": 1,
+				"ImportedBy": [
+					46,
+					47
+				]
+			},
+			"43": {
+				"ID": 43,
+				"Name": "curve25519",
+				"Path": "vendor/golang.org/x/crypto/curve25519",
+				"Module": 1,
+				"ImportedBy": [
+					47
+				]
+			},
+			"44": {
+				"ID": 44,
+				"Name": "dsa",
+				"Path": "crypto/dsa",
+				"Module": 1,
+				"ImportedBy": [
+					46
+				]
+			},
+			"45": {
+				"ID": 45,
+				"Name": "pkix",
+				"Path": "crypto/x509/pkix",
+				"Module": 1,
+				"ImportedBy": [
+					46
+				]
+			},
+			"46": {
+				"ID": 46,
+				"Name": "x509",
+				"Path": "crypto/x509",
+				"Module": 1,
+				"ImportedBy": [
+					47
+				]
+			},
+			"47": {
+				"ID": 47,
+				"Name": "tls",
+				"Path": "crypto/tls",
+				"Module": 1,
+				"ImportedBy": [
+					48,
+					57
+				]
+			},
+			"48": {
+				"ID": 48,
+				"Name": "httptrace",
+				"Path": "net/http/httptrace",
+				"Module": 1,
+				"ImportedBy": [
+					57
+				]
+			},
+			"49": {
+				"ID": 49,
+				"Name": "mime",
+				"Path": "mime",
+				"Module": 1,
+				"ImportedBy": [
+					54,
+					57
+				]
+			},
+			"5": {
+				"ID": 5,
+				"Name": "execenv",
+				"Path": "internal/syscall/execenv",
+				"Module": 1,
+				"ImportedBy": [
+					8
+				]
+			},
+			"50": {
+				"ID": 50,
+				"Name": "flate",
+				"Path": "compress/flate",
+				"Module": 1,
+				"ImportedBy": [
+					51
+				]
+			},
+			"51": {
+				"ID": 51,
+				"Name": "gzip",
+				"Path": "compress/gzip",
+				"Module": 1,
+				"ImportedBy": [
+					57
+				]
+			},
+			"52": {
+				"ID": 52,
+				"Name": "hpack",
+				"Path": "vendor/golang.org/x/net/http2/hpack",
+				"Module": 1,
+				"ImportedBy": [
+					57
+				]
+			},
+			"53": {
+				"ID": 53,
+				"Name": "quotedprintable",
+				"Path": "mime/quotedprintable",
+				"Module": 1,
+				"ImportedBy": [
+					54
+				]
+			},
+			"54": {
+				"ID": 54,
+				"Name": "multipart",
+				"Path": "mime/multipart",
+				"Module": 1,
+				"ImportedBy": [
+					57
+				]
+			},
+			"55": {
+				"ID": 55,
+				"Name": "internal",
+				"Path": "net/http/internal",
+				"Module": 1,
+				"ImportedBy": [
+					57
+				]
+			},
+			"56": {
+				"ID": 56,
+				"Name": "httpproxy",
+				"Path": "vendor/golang.org/x/net/http/httpproxy",
+				"Module": 1,
+				"ImportedBy": [
+					57
+				]
+			},
+			"57": {
+				"ID": 57,
+				"Name": "http",
+				"Path": "net/http",
+				"Module": 1,
+				"ImportedBy": [
+					60
+				]
+			},
+			"58": {
+				"ID": 58,
+				"Name": "parse",
+				"Path": "text/template/parse",
+				"Module": 1,
+				"ImportedBy": [
+					59
+				]
+			},
+			"59": {
+				"ID": 59,
+				"Name": "template",
+				"Path": "text/template",
+				"Module": 1,
+				"ImportedBy": [
+					60
+				]
+			},
+			"6": {
+				"ID": 6,
+				"Name": "fs",
+				"Path": "io/fs",
+				"Module": 1,
+				"ImportedBy": [
+					8,
+					23,
+					31,
+					34,
+					46,
+					57,
+					59
+				]
+			},
+			"60": {
+				"ID": 60,
+				"Name": "main",
+				"Path": "github.com/jharper-sec/evil-app",
+				"Module": 4,
+				"ImportedBy": null
+			},
+			"7": {
+				"ID": 7,
+				"Name": "poll",
+				"Path": "internal/poll",
+				"Module": 1,
+				"ImportedBy": [
+					8,
+					19
+				]
+			},
+			"8": {
+				"ID": 8,
+				"Name": "os",
+				"Path": "os",
+				"Module": 1,
+				"ImportedBy": [
+					9,
+					15,
+					16,
+					19,
+					20,
+					23,
+					24,
+					31,
+					39,
+					46,
+					47,
+					49,
+					54,
+					56,
+					57,
+					59,
+					60
+				]
+			},
+			"9": {
+				"ID": 9,
+				"Name": "fmt",
+				"Path": "fmt",
+				"Module": 1,
+				"ImportedBy": [
+					10,
+					11,
+					12,
+					13,
+					14,
+					20,
+					21,
+					22,
+					24,
+					25,
+					26,
+					28,
+					29,
+					32,
+					33,
+					43,
+					45,
+					46,
+					47,
+					49,
+					50,
+					51,
+					52,
+					53,
+					54,
+					55,
+					56,
+					57,
+					58,
+					59,
+					60
+				]
+			}
+		},
+		"Entries": [
+			60
+		]
+	},
+	"Requires": {
+		"Modules": {
+			"1": {
+				"ID": 1,
+				"Path": "stdlib",
+				"Version": "v1.19.0",
+				"Replace": 0,
+				"RequiredBy": [
+					2,
+					3,
+					4
+				]
+			},
+			"2": {
+				"ID": 2,
+				"Path": "github.com/mattn/go-sqlite3",
+				"Version": "v1.14.6",
+				"Replace": 0,
+				"RequiredBy": [
+					4
+				]
+			},
+			"3": {
+				"ID": 3,
+				"Path": "github.com/google/uuid",
+				"Version": "v1.2.0",
+				"Replace": 0,
+				"RequiredBy": [
+					4
+				]
+			},
+			"4": {
+				"ID": 4,
+				"Path": "github.com/jharper-sec/evil-app",
+				"Version": "",
+				"Replace": 0,
+				"RequiredBy": null
+			}
+		},
+		"Entries": [
+			4
+		]
+	},
+	"Vulns": [
+		{
+			"OSV": {
+				"id": "GO-2022-1144",
+				"published": "2022-12-08T19:01:21Z",
+				"modified": "2022-12-08T19:01:21Z",
+				"aliases": [
+					"CVE-2022-41717"
+				],
+				"details": "An attacker can cause excessive memory growth in a Go server accepting HTTP/2 requests.\n\nHTTP/2 server connections contain a cache of HTTP header keys sent by the client. While the total number of entries in this cache is capped, an attacker sending very large keys can cause the server to allocate approximately 64 MiB per open connection.",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.9"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.4"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-1144"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "net/http",
+									"symbols": [
+										"ListenAndServe",
+										"ListenAndServeTLS",
+										"Serve",
+										"ServeTLS",
+										"Server.ListenAndServe",
+										"Server.ListenAndServeTLS",
+										"Server.Serve",
+										"Server.ServeTLS",
+										"http2Server.ServeConn",
+										"http2serverConn.canonicalHeader"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/56350"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/455717"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/455635"
+					},
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/L_3rmdT0BMU/m/yZDrXjIiBQAJ"
+					}
+				]
+			},
+			"Symbol": "ListenAndServe",
+			"PkgPath": "net/http",
+			"ModPath": "stdlib",
+			"CallSink": 9,
+			"ImportSink": 57,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-1144",
+				"published": "2022-12-08T19:01:21Z",
+				"modified": "2022-12-08T19:01:21Z",
+				"aliases": [
+					"CVE-2022-41717"
+				],
+				"details": "An attacker can cause excessive memory growth in a Go server accepting HTTP/2 requests.\n\nHTTP/2 server connections contain a cache of HTTP header keys sent by the client. While the total number of entries in this cache is capped, an attacker sending very large keys can cause the server to allocate approximately 64 MiB per open connection.",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.9"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.4"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-1144"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "net/http",
+									"symbols": [
+										"ListenAndServe",
+										"ListenAndServeTLS",
+										"Serve",
+										"ServeTLS",
+										"Server.ListenAndServe",
+										"Server.ListenAndServeTLS",
+										"Server.Serve",
+										"Server.ServeTLS",
+										"http2Server.ServeConn",
+										"http2serverConn.canonicalHeader"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/56350"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/455717"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/455635"
+					},
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/L_3rmdT0BMU/m/yZDrXjIiBQAJ"
+					}
+				]
+			},
+			"Symbol": "Server.ListenAndServe",
+			"PkgPath": "net/http",
+			"ModPath": "stdlib",
+			"CallSink": 7,
+			"ImportSink": 57,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-1144",
+				"published": "2022-12-08T19:01:21Z",
+				"modified": "2022-12-08T19:01:21Z",
+				"aliases": [
+					"CVE-2022-41717"
+				],
+				"details": "An attacker can cause excessive memory growth in a Go server accepting HTTP/2 requests.\n\nHTTP/2 server connections contain a cache of HTTP header keys sent by the client. While the total number of entries in this cache is capped, an attacker sending very large keys can cause the server to allocate approximately 64 MiB per open connection.",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.9"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.4"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-1144"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "net/http",
+									"symbols": [
+										"ListenAndServe",
+										"ListenAndServeTLS",
+										"Serve",
+										"ServeTLS",
+										"Server.ListenAndServe",
+										"Server.ListenAndServeTLS",
+										"Server.Serve",
+										"Server.ServeTLS",
+										"http2Server.ServeConn",
+										"http2serverConn.canonicalHeader"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/56350"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/455717"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/455635"
+					},
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/L_3rmdT0BMU/m/yZDrXjIiBQAJ"
+					}
+				]
+			},
+			"Symbol": "Server.Serve",
+			"PkgPath": "net/http",
+			"ModPath": "stdlib",
+			"CallSink": 5,
+			"ImportSink": 57,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-1144",
+				"published": "2022-12-08T19:01:21Z",
+				"modified": "2022-12-08T19:01:21Z",
+				"aliases": [
+					"CVE-2022-41717"
+				],
+				"details": "An attacker can cause excessive memory growth in a Go server accepting HTTP/2 requests.\n\nHTTP/2 server connections contain a cache of HTTP header keys sent by the client. While the total number of entries in this cache is capped, an attacker sending very large keys can cause the server to allocate approximately 64 MiB per open connection.",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.9"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.4"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-1144"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "net/http",
+									"symbols": [
+										"ListenAndServe",
+										"ListenAndServeTLS",
+										"Serve",
+										"ServeTLS",
+										"Server.ListenAndServe",
+										"Server.ListenAndServeTLS",
+										"Server.Serve",
+										"Server.ServeTLS",
+										"http2Server.ServeConn",
+										"http2serverConn.canonicalHeader"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/56350"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/455717"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/455635"
+					},
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/L_3rmdT0BMU/m/yZDrXjIiBQAJ"
+					}
+				]
+			},
+			"Symbol": "http2Server.ServeConn",
+			"PkgPath": "net/http",
+			"ModPath": "stdlib",
+			"CallSink": 6,
+			"ImportSink": 57,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-1144",
+				"published": "2022-12-08T19:01:21Z",
+				"modified": "2022-12-08T19:01:21Z",
+				"aliases": [
+					"CVE-2022-41717"
+				],
+				"details": "An attacker can cause excessive memory growth in a Go server accepting HTTP/2 requests.\n\nHTTP/2 server connections contain a cache of HTTP header keys sent by the client. While the total number of entries in this cache is capped, an attacker sending very large keys can cause the server to allocate approximately 64 MiB per open connection.",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.9"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.4"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-1144"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "net/http",
+									"symbols": [
+										"ListenAndServe",
+										"ListenAndServeTLS",
+										"Serve",
+										"ServeTLS",
+										"Server.ListenAndServe",
+										"Server.ListenAndServeTLS",
+										"Server.Serve",
+										"Server.ServeTLS",
+										"http2Server.ServeConn",
+										"http2serverConn.canonicalHeader"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/56350"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/455717"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/455635"
+					},
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/L_3rmdT0BMU/m/yZDrXjIiBQAJ"
+					}
+				]
+			},
+			"Symbol": "http2serverConn.canonicalHeader",
+			"PkgPath": "net/http",
+			"ModPath": "stdlib",
+			"CallSink": 2,
+			"ImportSink": 57,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-1143",
+				"published": "2022-12-07T16:08:45Z",
+				"modified": "2022-12-07T16:08:45Z",
+				"aliases": [
+					"CVE-2022-41720"
+				],
+				"details": "On Windows, restricted files can be accessed via os.DirFS and http.Dir.\n\nThe os.DirFS function and http.Dir type provide access to a tree of files rooted at a given directory. These functions permit access to Windows device files under that root. For example, os.DirFS(\"C:/tmp\").Open(\"COM1\") opens the COM1 device. Both os.DirFS and http.Dir only provide read-only filesystem access.\n\nIn addition, on Windows, an os.DirFS for the directory (the root of the current drive) can permit a maliciously crafted path to escape from the drive and access any path on the system.\n\nWith fix applied, the behavior of os.DirFS(\"\") has changed. Previously, an empty root was treated equivalently to \"/\", so os.DirFS(\"\").Open(\"tmp\") would open the path \"/tmp\". This now returns an error.",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.9"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.4"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-1143"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "os",
+									"goos": [
+										"windows"
+									],
+									"symbols": [
+										"DirFS",
+										"dirFS.Open",
+										"dirFS.Stat"
+									]
+								},
+								{
+									"path": "net/http",
+									"goos": [
+										"windows"
+									],
+									"symbols": [
+										"Dir.Open",
+										"ServeFile",
+										"fileHandler.ServeHTTP",
+										"fileTransport.RoundTrip"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/56694"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/455716"
+					},
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/L_3rmdT0BMU/m/yZDrXjIiBQAJ"
+					}
+				]
+			},
+			"Symbol": "Dir.Open",
+			"PkgPath": "net/http",
+			"ModPath": "stdlib",
+			"CallSink": 8,
+			"ImportSink": 57,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-1143",
+				"published": "2022-12-07T16:08:45Z",
+				"modified": "2022-12-07T16:08:45Z",
+				"aliases": [
+					"CVE-2022-41720"
+				],
+				"details": "On Windows, restricted files can be accessed via os.DirFS and http.Dir.\n\nThe os.DirFS function and http.Dir type provide access to a tree of files rooted at a given directory. These functions permit access to Windows device files under that root. For example, os.DirFS(\"C:/tmp\").Open(\"COM1\") opens the COM1 device. Both os.DirFS and http.Dir only provide read-only filesystem access.\n\nIn addition, on Windows, an os.DirFS for the directory (the root of the current drive) can permit a maliciously crafted path to escape from the drive and access any path on the system.\n\nWith fix applied, the behavior of os.DirFS(\"\") has changed. Previously, an empty root was treated equivalently to \"/\", so os.DirFS(\"\").Open(\"tmp\") would open the path \"/tmp\". This now returns an error.",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.9"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.4"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-1143"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "os",
+									"goos": [
+										"windows"
+									],
+									"symbols": [
+										"DirFS",
+										"dirFS.Open",
+										"dirFS.Stat"
+									]
+								},
+								{
+									"path": "net/http",
+									"goos": [
+										"windows"
+									],
+									"symbols": [
+										"Dir.Open",
+										"ServeFile",
+										"fileHandler.ServeHTTP",
+										"fileTransport.RoundTrip"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/56694"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/455716"
+					},
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/L_3rmdT0BMU/m/yZDrXjIiBQAJ"
+					}
+				]
+			},
+			"Symbol": "fileHandler.ServeHTTP",
+			"PkgPath": "net/http",
+			"ModPath": "stdlib",
+			"CallSink": 4,
+			"ImportSink": 57,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-0969",
+				"published": "2022-09-12T20:23:06Z",
+				"modified": "2022-11-21T19:50:45Z",
+				"aliases": [
+					"CVE-2022-27664"
+				],
+				"details": "HTTP/2 server connections can hang forever waiting for a clean shutdown that was preempted by a fatal error. This condition can be exploited by a malicious client to cause a denial of service.",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.6"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.1"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-0969"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "net/http",
+									"symbols": [
+										"ListenAndServe",
+										"ListenAndServeTLS",
+										"Serve",
+										"ServeTLS",
+										"Server.ListenAndServe",
+										"Server.ListenAndServeTLS",
+										"Server.Serve",
+										"Server.ServeTLS",
+										"http2Server.ServeConn",
+										"http2serverConn.goAway"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/x49AQzIVX-s"
+					},
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/54658"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/428735"
+					}
+				]
+			},
+			"Symbol": "ListenAndServe",
+			"PkgPath": "net/http",
+			"ModPath": "stdlib",
+			"CallSink": 9,
+			"ImportSink": 57,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-0969",
+				"published": "2022-09-12T20:23:06Z",
+				"modified": "2022-11-21T19:50:45Z",
+				"aliases": [
+					"CVE-2022-27664"
+				],
+				"details": "HTTP/2 server connections can hang forever waiting for a clean shutdown that was preempted by a fatal error. This condition can be exploited by a malicious client to cause a denial of service.",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.6"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.1"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-0969"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "net/http",
+									"symbols": [
+										"ListenAndServe",
+										"ListenAndServeTLS",
+										"Serve",
+										"ServeTLS",
+										"Server.ListenAndServe",
+										"Server.ListenAndServeTLS",
+										"Server.Serve",
+										"Server.ServeTLS",
+										"http2Server.ServeConn",
+										"http2serverConn.goAway"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/x49AQzIVX-s"
+					},
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/54658"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/428735"
+					}
+				]
+			},
+			"Symbol": "Server.ListenAndServe",
+			"PkgPath": "net/http",
+			"ModPath": "stdlib",
+			"CallSink": 7,
+			"ImportSink": 57,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-0969",
+				"published": "2022-09-12T20:23:06Z",
+				"modified": "2022-11-21T19:50:45Z",
+				"aliases": [
+					"CVE-2022-27664"
+				],
+				"details": "HTTP/2 server connections can hang forever waiting for a clean shutdown that was preempted by a fatal error. This condition can be exploited by a malicious client to cause a denial of service.",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.6"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.1"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-0969"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "net/http",
+									"symbols": [
+										"ListenAndServe",
+										"ListenAndServeTLS",
+										"Serve",
+										"ServeTLS",
+										"Server.ListenAndServe",
+										"Server.ListenAndServeTLS",
+										"Server.Serve",
+										"Server.ServeTLS",
+										"http2Server.ServeConn",
+										"http2serverConn.goAway"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/x49AQzIVX-s"
+					},
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/54658"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/428735"
+					}
+				]
+			},
+			"Symbol": "Server.Serve",
+			"PkgPath": "net/http",
+			"ModPath": "stdlib",
+			"CallSink": 5,
+			"ImportSink": 57,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-0969",
+				"published": "2022-09-12T20:23:06Z",
+				"modified": "2022-11-21T19:50:45Z",
+				"aliases": [
+					"CVE-2022-27664"
+				],
+				"details": "HTTP/2 server connections can hang forever waiting for a clean shutdown that was preempted by a fatal error. This condition can be exploited by a malicious client to cause a denial of service.",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.6"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.1"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-0969"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "net/http",
+									"symbols": [
+										"ListenAndServe",
+										"ListenAndServeTLS",
+										"Serve",
+										"ServeTLS",
+										"Server.ListenAndServe",
+										"Server.ListenAndServeTLS",
+										"Server.Serve",
+										"Server.ServeTLS",
+										"http2Server.ServeConn",
+										"http2serverConn.goAway"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/x49AQzIVX-s"
+					},
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/54658"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/428735"
+					}
+				]
+			},
+			"Symbol": "http2Server.ServeConn",
+			"PkgPath": "net/http",
+			"ModPath": "stdlib",
+			"CallSink": 6,
+			"ImportSink": 57,
+			"RequireSink": 1
+		},
+		{
+			"OSV": {
+				"id": "GO-2022-0969",
+				"published": "2022-09-12T20:23:06Z",
+				"modified": "2022-11-21T19:50:45Z",
+				"aliases": [
+					"CVE-2022-27664"
+				],
+				"details": "HTTP/2 server connections can hang forever waiting for a clean shutdown that was preempted by a fatal error. This condition can be exploited by a malicious client to cause a denial of service.",
+				"affected": [
+					{
+						"package": {
+							"name": "stdlib",
+							"ecosystem": "Go"
+						},
+						"ranges": [
+							{
+								"type": "SEMVER",
+								"events": [
+									{
+										"introduced": "0"
+									},
+									{
+										"fixed": "1.18.6"
+									},
+									{
+										"introduced": "1.19.0"
+									},
+									{
+										"fixed": "1.19.1"
+									}
+								]
+							}
+						],
+						"database_specific": {
+							"url": "https://pkg.go.dev/vuln/GO-2022-0969"
+						},
+						"ecosystem_specific": {
+							"imports": [
+								{
+									"path": "net/http",
+									"symbols": [
+										"ListenAndServe",
+										"ListenAndServeTLS",
+										"Serve",
+										"ServeTLS",
+										"Server.ListenAndServe",
+										"Server.ListenAndServeTLS",
+										"Server.Serve",
+										"Server.ServeTLS",
+										"http2Server.ServeConn",
+										"http2serverConn.goAway"
+									]
+								}
+							]
+						}
+					}
+				],
+				"references": [
+					{
+						"type": "WEB",
+						"url": "https://groups.google.com/g/golang-announce/c/x49AQzIVX-s"
+					},
+					{
+						"type": "REPORT",
+						"url": "https://go.dev/issue/54658"
+					},
+					{
+						"type": "FIX",
+						"url": "https://go.dev/cl/428735"
+					}
+				]
+			},
+			"Symbol": "http2serverConn.goAway",
+			"PkgPath": "net/http",
+			"ModPath": "stdlib",
+			"CallSink": 3,
+			"ImportSink": 57,
+			"RequireSink": 1
+		}
+	],
+	"Modules": [
+		{
+			"Path": "github.com/google/uuid",
+			"Version": "v1.2.0",
+			"Dir": "",
+			"Replace": null
+		},
+		{
+			"Path": "github.com/jharper-sec/evil-app",
+			"Version": "",
+			"Dir": "",
+			"Replace": null
+		},
+		{
+			"Path": "github.com/mattn/go-sqlite3",
+			"Version": "v1.14.6",
+			"Dir": "",
+			"Replace": null
+		},
+		{
+			"Path": "stdlib",
+			"Version": "v1.19.0",
+			"Dir": "",
+			"Replace": null
+		}
+	]
+}

@@ -1,0 +1,73 @@
+{
+    "summary": {
+        "types": {
+            "filecontent": 5,
+            "filesize": 0,
+            "filename": 0,
+            "warnings": 0,
+            "ignores": 0
+        }
+    },
+    "results": [
+        {
+            "filename": "talisman_report/talisman_reports/data/report.json",
+            "failure_list": [
+                {
+                    "type": "filecontent",
+                    "message": "Expected file to not to contain hex encoded texts such as: aws_secret=\\\"AKIAIMNOJVGFDXXXE4UI\\\"\",\"commits\":...",
+                    "commits": [],
+                    "severity": "high"
+                },
+                {
+                    "type": "filecontent",
+                    "message": "Expected file to not to contain hex encoded texts such as: aws_secret=\\\"AKIAIMNOJVGFDXXXE4MA\\\"\",\"commits\":...",
+                    "commits": [],
+                    "severity": "high"
+                },
+                {
+                    "type": "filecontent",
+                    "message": "Potential secret pattern : {\"summary\":{\"types\":{\"filecontent\":2,\"filesize\":0,\"filename\":0,\"warnings\":0,\"ignores\":0}},\"results\":[{\"filename\":\"talisman/tools/gitleaks/findings.txt\",\"failure_list\":[{\"type\":\"filecontent\",\"message\":\"Potential secret pattern : aws_secret=\\\"AKIAIMNOJVGFDXXXE4UI\\\"\",\"commits\":[\"ccb9316f83ec989ec3e565dba290b2041491799e\"],\"severity\":\"low\"}],\"warning_list\":[],\"ignore_list\":[]},{\"filename\":\"README.md\",\"failure_list\":[{\"type\":\"filecontent\",\"message\":\"Potential secret pattern : aws_secret=\\\"AKIAIMNOJVGFDXXXE4MA\\\"\",\"commits\":[\"ccb9316f83ec989ec3e565dba290b2041491799e\"",
+                    "commits": [
+                        "4261e6743687ca774c35d969531fee48b2a4b70d"
+                    ],
+                    "severity": "low"
+                }
+            ],
+            "warning_list": [],
+            "ignore_list": []
+        },
+        {
+            "filename": "README.md",
+            "failure_list": [
+                {
+                    "type": "filecontent",
+                    "message": "Potential secret pattern : aws_secret=\"AKIAIMNOJVGFDXXXE4MA\"",
+                    "commits": [
+                        "320de646d26477d2ec547e5af1c3251a5484efa9",
+                        "4261e6743687ca774c35d969531fee48b2a4b70d",
+                        "ccb9316f83ec989ec3e565dba290b2041491799e"
+                    ],
+                    "severity": "low"
+                }
+            ],
+            "warning_list": [],
+            "ignore_list": []
+        },
+        {
+            "filename": "talisman/tools/gitleaks/findings.txt",
+            "failure_list": [
+                {
+                    "type": "filecontent",
+                    "message": "Potential secret pattern : aws_secret=\"AKIAIMNOJVGFDXXXE4UI\"",
+                    "commits": [
+                        "4261e6743687ca774c35d969531fee48b2a4b70d",
+                        "ccb9316f83ec989ec3e565dba290b2041491799e"
+                    ],
+                    "severity": "low"
+                }
+            ],
+            "warning_list": [],
+            "ignore_list": []
+        }
+    ]
+}

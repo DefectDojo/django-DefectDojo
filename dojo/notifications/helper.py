@@ -1,15 +1,18 @@
-import requests
 import logging
+import requests
+
 from django.core.mail import EmailMessage
-from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
+from django.db.models import Q, Count, Prefetch
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
-from django.db.models import Q, Count, Prefetch
 from django.urls import reverse
-from dojo.celery import app
-from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
+from django.utils.translation import gettext as _
+
 from dojo.authorization.roles_permissions import Permissions
+from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
+from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
+from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +26,9 @@ def create_notification(event=None, **kwargs):
         logger.debug('creating notifications for recipients: %s', kwargs['recipients'])
         for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True, product=None):
             # kwargs.update({'user': recipient_notifications.user})
+            logger.debug('Sent notification to %s', recipient_notifications.user)
             process_notifications(event, recipient_notifications, **kwargs)
+
     else:
         logger.debug('creating system notifications for event: %s', event)
         # send system notifications to all admin users
@@ -58,7 +63,7 @@ def create_notification(event=None, **kwargs):
 
         # System notifications
         try:
-            system_notifications = Notifications.objects.get(user=None)
+            system_notifications = Notifications.objects.get(user=None, template=False)
         except Exception:
             system_notifications = Notifications()
 
@@ -113,23 +118,23 @@ def create_notification(event=None, **kwargs):
 def create_description(event, *args, **kwargs):
     if "description" not in kwargs.keys():
         if event == 'product_added':
-            kwargs["description"] = "Product " + kwargs['title'] + " has been created successfully."
+            kwargs["description"] = _('Product %(title)s has been created successfully.' % {'title': kwargs['title']})
         elif event == 'product_type_added':
-            kwargs["description"] = "Product Type " + kwargs['title'] + " has been created successfully."
+            kwargs["description"] = _('Product Type %(title)s has been created successfully.' % {'title': kwargs['title']})
         else:
-            kwargs["description"] = "Event " + str(event) + " has occurred."
+            kwargs["description"] = _('Event %(event)s  has occurred.' % {'event': str(event)})
 
     return kwargs["description"]
 
 
 def create_notification_message(event, user, notification_type, *args, **kwargs):
-    template = 'notifications/%s.tpl' % event.replace('/', '')
-    kwargs.update({'type': notification_type})
+    template = f"notifications/{notification_type}/{event.replace('/', '')}.tpl"
     kwargs.update({'user': user})
 
     notification_message = None
     try:
         notification_message = render_to_string(template, kwargs)
+        logger.debug("Rendering from the template %s", template)
     except TemplateDoesNotExist:
         logger.debug('template not found or not implemented yet: %s', template)
     except Exception as e:
@@ -137,7 +142,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     finally:
         if not notification_message:
             kwargs["description"] = create_description(event, *args, **kwargs)
-            notification_message = render_to_string('notifications/other.tpl', kwargs)
+            notification_message = render_to_string(f"notifications/{notification_type}/other.tpl", kwargs)
 
     return notification_message if notification_message else ''
 
@@ -263,8 +268,11 @@ def send_msteams_notification(event, user=None, *args, **kwargs):
 @app.task
 def send_mail_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
-
-    if user:
+    email_from_address = get_system_setting('email_from')
+    # Attempt to get the "to" address
+    if "recipient" in kwargs:
+        address = kwargs.get("recipient")
+    elif user:
         address = user.email
     else:
         address = get_system_setting('mail_notifications_to')
@@ -272,26 +280,25 @@ def send_mail_notification(event, user=None, *args, **kwargs):
     logger.debug('notification email for user %s to %s', user, address)
 
     try:
-        subject = '%s notification' % get_system_setting('team_name')
+        subject = f"{get_system_setting('team_name')} notification"
         if 'title' in kwargs:
-            subject += ': %s' % kwargs['title']
+            subject += f": {kwargs['title']}"
 
         email = EmailMessage(
             subject,
             create_notification_message(event, user, 'mail', *args, **kwargs),
-            get_system_setting('email_from'),
+            email_from_address,
             [address],
-            headers={"From": "{}".format(get_system_setting('email_from'))}
+            headers={"From": f"{email_from_address}"},
         )
         email.content_subtype = 'html'
         logger.debug('sending email alert')
-        # logger.info(create_notification_message(event, 'mail'))
+        # logger.info(create_notification_message(event, user, 'mail', *args, **kwargs))
         email.send(fail_silently=False)
 
     except Exception as e:
         logger.exception(e)
         log_alert(e, "Email Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
-        pass
 
 
 def send_alert_notification(event, user=None, *args, **kwargs):
@@ -374,7 +381,14 @@ def notify_test_created(test):
                         url=reverse('view_test', args=(test.id,)))
 
 
-def notify_scan_added(test, updated_count, new_findings, findings_mitigated=[], findings_reactivated=[], findings_untouched=[]):
+def notify_scan_added(test, updated_count, new_findings=[], findings_mitigated=[], findings_reactivated=[], findings_untouched=[]):
+    logger.debug("Scan added notifications")
+
+    new_findings = sorted(list(new_findings), key=lambda x: x.numerical_severity)
+    findings_mitigated = sorted(list(findings_mitigated), key=lambda x: x.numerical_severity)
+    findings_reactivated = sorted(list(findings_reactivated), key=lambda x: x.numerical_severity)
+    findings_untouched = sorted(list(findings_untouched), key=lambda x: x.numerical_severity)
+
     title = 'Created/Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
     create_notification(event='scan_added', title=title, findings_new=new_findings, findings_mitigated=findings_mitigated, findings_reactivated=findings_reactivated,
                         finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=findings_untouched,

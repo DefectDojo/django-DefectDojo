@@ -1,10 +1,10 @@
 {
     "artifacts": [{
             "general": {
-                "name": "component/open-liberty:21.0.0.3-1-full-alpine-java8-openj9",
-                "component_id": "component/open-liberty:21.0.0.3-1-full-alpine-java8-openj9",
+                "name": "artifact1:1.0",
+                "component_id": "artifact1:1.0",
                 "pkg_type": "Docker",
-                "path": "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/",
+                "path": "artifact_path/artifact1/1.0/",
                 "sha256": "eaab06c0a28618bfb65481bf31bce7d6dd3a15dac528297690111c202a1cd468"
             },
             "issues": [{
@@ -21,7 +21,7 @@
                         }
                     ],
                     "created": "2021-11-18T00:00:00.412Z",
-                    "impact_path": ["default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20"]
+                    "impact_path": ["artifact_path/artifact1/1.0/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20"]
                 }, {
                     "summary": "In order to decrypt SM2 encrypted data an application is expected to call the API function EVP_PKEY_decrypt(). Typically an application will call this function twice. The first time, on entry, the \"out\" parameter can be NULL and, on exit, the \"outlen\" parameter is populated with the buffer size required to hold the decrypted plaintext. The application can then allocate a sufficiently sized buffer and call EVP_PKEY_decrypt() again, but this time passing a non-NULL value for the \"out\" parameter. A bug in the implementation of the SM2 decryption code means that the calculation of the buffer size required to hold the plaintext returned by the first call to EVP_PKEY_decrypt() can be smaller than the actual size required by the second call. This can lead to a buffer overflow when EVP_PKEY_decrypt() is called by the application a second time with a buffer that is too small. A malicious attacker who is able present SM2 content for decryption to an application could cause attacker chosen data to overflow the buffer by up to a maximum of 62 bytes altering the contents of other data held after the buffer, possibly changing application behaviour or causing the application to crash. The location of the buffer is application dependent but is typically heap allocated. Fixed in OpenSSL 1.1.1l (Affected 1.1.1-1.1.1k).",
                     "description": "In order to decrypt SM2 encrypted data an application is expected to call the API function EVP_PKEY_decrypt(). Typically an application will call this function twice. The first time, on entry, the \"out\" parameter can be NULL and, on exit, the \"outlen\" parameter is populated with the buffer size required to hold the decrypted plaintext. The application can then allocate a sufficiently sized buffer and call EVP_PKEY_decrypt() again, but this time passing a non-NULL value for the \"out\" parameter. A bug in the implementation of the SM2 decryption code means that the calculation of the buffer size required to hold the plaintext returned by the first call to EVP_PKEY_decrypt() can be smaller than the actual size required by the second call. This can lead to a buffer overflow when EVP_PKEY_decrypt() is called by the application a second time with a buffer that is too small. A malicious attacker who is able present SM2 content for decryption to an application could cause attacker chosen data to overflow the buffer by up to a maximum of 62 bytes altering the contents of other data held after the buffer, possibly changing application behaviour or causing the application to crash. The location of the buffer is application dependent but is typically heap allocated. Fixed in OpenSSL 1.1.1l (Affected 1.1.1-1.1.1k).",
@@ -36,7 +36,7 @@
                         }
                     ],
                     "created": "2021-08-25T00:00:00.649Z",
-                    "impact_path": ["default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:libcrypto1.1:1.1.1k-r0", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:libssl1.1:1.1.1k-r0", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__cbc330c4d62cdcdac9408f3fc679b06fc8a22b08638c8f25720f3cd621f52fb6.tar.gz/3.12:openssl:1.1.1k-r0"]
+                    "impact_path": ["artifact_path/artifact1/1.0/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:libcrypto1.1:1.1.1k-r0", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:libssl1.1:1.1.1k-r0", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__cbc330c4d62cdcdac9408f3fc679b06fc8a22b08638c8f25720f3cd621f52fb6.tar.gz/3.12:openssl:1.1.1k-r0"]
                 }, {
                     "summary": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the hash_init function",
                     "description": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the hash_init function",
@@ -51,7 +51,7 @@
                         }
                     ],
                     "created": "2021-11-18T00:00:00.439Z",
-                    "impact_path": ["default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20"]
+                    "impact_path": ["artifact_path/artifact1/1.0/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20"]
                 }, {
                     "summary": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the clrvar function",
                     "description": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the clrvar function",
@@ -66,7 +66,7 @@
                         }
                     ],
                     "created": "2021-11-18T00:00:00.907Z",
-                    "impact_path": ["default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20"]
+                    "impact_path": ["artifact_path/artifact1/1.0/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20"]
                 }, {
                     "summary": "A NULL pointer dereference in Busybox's hush applet leads to denial of service when processing a crafted shell command, due to missing validation after a \\x03 delimiter character. This may be used for DoS under very rare conditions of filtered command input.",
                     "description": "A NULL pointer dereference in Busybox's hush applet leads to denial of service when processing a crafted shell command, due to missing validation after a \\x03 delimiter character. This may be used for DoS under very rare conditions of filtered command input.",
@@ -81,7 +81,7 @@
                         }
                     ],
                     "created": "2021-11-18T00:00:00.346Z",
-                    "impact_path": ["default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20"]
+                    "impact_path": ["artifact_path/artifact1/1.0/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20"]
                 }, {
                     "summary": "An out-of-bounds heap read in Busybox's unlzma applet leads to information leak and denial of service when crafted LZMA-compressed input is decompressed. This can be triggered by any applet/format that",
                     "description": "An out-of-bounds heap read in Busybox's unlzma applet leads to information leak and denial of service when crafted LZMA-compressed input is decompressed. This can be triggered by any applet/format that",
@@ -96,7 +96,7 @@
                         }
                     ],
                     "created": "2021-11-18T00:00:00.781Z",
-                    "impact_path": ["default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20"]
+                    "impact_path": ["artifact_path/artifact1/1.0/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20"]
                 }, {
                     "summary": "An issue was discovered in ncurses through v6.2-1. _nc_captoinfo in captoinfo.c has a heap-based buffer overflow.",
                     "description": "An issue was discovered in ncurses through v6.2-1. _nc_captoinfo in captoinfo.c has a heap-based buffer overflow.",
@@ -111,7 +111,7 @@
                         }
                     ],
                     "created": "2021-10-11T00:00:00.115Z",
-                    "impact_path": ["default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__cbc330c4d62cdcdac9408f3fc679b06fc8a22b08638c8f25720f3cd621f52fb6.tar.gz/3.12:ncurses-terminfo-base:6.2_p20200523-r0", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__cbc330c4d62cdcdac9408f3fc679b06fc8a22b08638c8f25720f3cd621f52fb6.tar.gz/3.12:ncurses-libs:6.2_p20200523-r0"]
+                    "impact_path": ["artifact_path/artifact1/1.0/sha256__cbc330c4d62cdcdac9408f3fc679b06fc8a22b08638c8f25720f3cd621f52fb6.tar.gz/3.12:ncurses-terminfo-base:6.2_p20200523-r0", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__cbc330c4d62cdcdac9408f3fc679b06fc8a22b08638c8f25720f3cd621f52fb6.tar.gz/3.12:ncurses-libs:6.2_p20200523-r0"]
                 }, {
                     "summary": "OpenSSL crypto/evp/e_aes.c aes_xts_cipher() Function Improper Key Handling Chosen Ciphertext Content Manipulation Weakness",
                     "description": "OpenSSL contains a flaw in the aes_xts_cipher() function in crypto/evp/e_aes.c that is triggered as the function did not enforce usage of two identical keys. This may allow a context-dependent attacker to conduct a chosen ciphertext attack and potentially manipulate ciphertext that results in plaintext blocks containing arbitrary, attacker-controlled values.",
@@ -123,7 +123,7 @@
                         }
                     ],
                     "created": "2020-09-09T00:00:00.121Z",
-                    "impact_path": ["default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__cbc330c4d62cdcdac9408f3fc679b06fc8a22b08638c8f25720f3cd621f52fb6.tar.gz/3.12:openssl:1.1.1k-r0"]
+                    "impact_path": ["artifact_path/artifact1/1.0/sha256__cbc330c4d62cdcdac9408f3fc679b06fc8a22b08638c8f25720f3cd621f52fb6.tar.gz/3.12:openssl:1.1.1k-r0"]
                 }, {
                     "summary": "ASN.1 strings are represented internally within OpenSSL as an ASN1_STRING structure which contains a buffer holding the string data and a field holding the buffer length. This contrasts with normal C strings which are repesented as a buffer for the string data which is terminated with a NUL (0) byte. Although not a strict requirement, ASN.1 strings that are parsed using OpenSSL's own \"d2i\" functions (and other similar parsing functions) as well as any string whose value has been set with the ASN1_STRING_set() function will additionally NUL terminate the byte array in the ASN1_STRING structure. However, it is possible for applications to directly construct valid ASN1_STRING structures which do not NUL terminate the byte array by directly setting the \"data\" and \"length\" fields in the ASN1_STRING array. This can also happen by using the ASN1_STRING_set0() function. Numerous OpenSSL functions that print ASN.1 data have been found to assume that the ASN1_STRING byte array will be NUL terminated, even though this is not guaranteed for strings that have been directly constructed. Where an application requests an ASN.1 structure to be printed, and where that ASN.1 structure contains ASN1_STRINGs that have been directly constructed by the application without NUL terminating the \"data\" field, then a read buffer overrun can occur. The same thing can also occur during name constraints processing of certificates (for example if a certificate has been directly constructed by the application instead of loading it via the OpenSSL parsing functions, and the certificate contains non NUL terminated ASN1_STRING structures). It can also occur in the X509_get1_email(), X509_REQ_get1_email() and X509_get1_ocsp() functions. If a malicious actor can cause an application to directly construct an ASN1_STRING and then process it through one of the affected OpenSSL functions then this issue could be hit. This might result in a crash (causing a Denial of Service attack). It could also result in the disclosure of private memory contents (such",
                     "description": "ASN.1 strings are represented internally within OpenSSL as an ASN1_STRING structure which contains a buffer holding the string data and a field holding the buffer length. This contrasts with normal C strings which are repesented as a buffer for the string data which is terminated with a NUL (0) byte. Although not a strict requirement, ASN.1 strings that are parsed using OpenSSL's own \"d2i\" functions (and other similar parsing functions) as well as any string whose value has been set with the ASN1_STRING_set() function will additionally NUL terminate the byte array in the ASN1_STRING structure. However, it is possible for applications to directly construct valid ASN1_STRING structures which do not NUL terminate the byte array by directly setting the \"data\" and \"length\" fields in the ASN1_STRING array. This can also happen by using the ASN1_STRING_set0() function. Numerous OpenSSL functions that print ASN.1 data have been found to assume that the ASN1_STRING byte array will be NUL terminated, even though this is not guaranteed for strings that have been directly constructed. Where an application requests an ASN.1 structure to be printed, and where that ASN.1 structure contains ASN1_STRINGs that have been directly constructed by the application without NUL terminating the \"data\" field, then a read buffer overrun can occur. The same thing can also occur during name constraints processing of certificates (for example if a certificate has been directly constructed by the application instead of loading it via the OpenSSL parsing functions, and the certificate contains non NUL terminated ASN1_STRING structures). It can also occur in the X509_get1_email(), X509_REQ_get1_email() and X509_get1_ocsp() functions. If a malicious actor can cause an application to directly construct an ASN1_STRING and then process it through one of the affected OpenSSL functions then this issue could be hit. This might result in a crash (causing a Denial of Service attack). It could also result in the disclosure of private memory contents (such",
@@ -138,7 +138,7 @@
                         }
                     ],
                     "created": "2021-08-25T00:00:00.038Z",
-                    "impact_path": ["default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__cbc330c4d62cdcdac9408f3fc679b06fc8a22b08638c8f25720f3cd621f52fb6.tar.gz/3.12:openssl:1.1.1k-r0", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:libcrypto1.1:1.1.1k-r0", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:libssl1.1:1.1.1k-r0"]
+                    "impact_path": ["artifact_path/artifact1/1.0/sha256__cbc330c4d62cdcdac9408f3fc679b06fc8a22b08638c8f25720f3cd621f52fb6.tar.gz/3.12:openssl:1.1.1k-r0", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:libcrypto1.1:1.1.1k-r0", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:libssl1.1:1.1.1k-r0"]
                 }, {
                     "summary": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the handle_special function",
                     "description": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the handle_special function",
@@ -153,7 +153,7 @@
                         }
                     ],
                     "created": "2021-11-18T00:00:00.033Z",
-                    "impact_path": ["default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20"]
+                    "impact_path": ["artifact_path/artifact1/1.0/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20"]
                 }, {
                     "summary": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the next_input_file function",
                     "description": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the next_input_file function",
@@ -168,7 +168,7 @@
                         }
                     ],
                     "created": "2021-11-18T00:00:00.381Z",
-                    "impact_path": ["default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20"]
+                    "impact_path": ["artifact_path/artifact1/1.0/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20"]
                 }, {
                     "summary": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the nvalloc function",
                     "description": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the nvalloc function",
@@ -183,7 +183,7 @@
                         }
                     ],
                     "created": "2021-11-18T00:00:00.937Z",
-                    "impact_path": ["default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20"]
+                    "impact_path": ["artifact_path/artifact1/1.0/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20"]
                 }, {
                     "summary": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the getvar_i function",
                     "description": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the getvar_i function",
@@ -198,7 +198,7 @@
                         }
                     ],
                     "created": "2021-11-18T00:00:00.850Z",
-                    "impact_path": ["default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20"]
+                    "impact_path": ["artifact_path/artifact1/1.0/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20"]
                 }, {
                     "summary": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the getvar_s function",
                     "description": "A use-after-free in Busybox's awk applet leads to denial of service and possibly code execution when processing a crafted awk pattern in the getvar_s function",
@@ -213,7 +213,7 @@
                         }
                     ],
                     "created": "2021-11-18T00:00:00.970Z",
-                    "impact_path": ["default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20"]
+                    "impact_path": ["artifact_path/artifact1/1.0/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:busybox:1.31.1-r20", "default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__339de151aab4bc06eed8409daae147c408478cb538dacb90cc63f19ad4eba80b.tar.gz/3.12:ssl_client:1.31.1-r20"]
                 }, {
                     "issue_id": "XRAY-124116",
                     "summary": "OpenSSL crypto/rc5/rc5_skey.c RC5_32_set_key() Function Key Initialization Stack Buffer Overflow",
@@ -227,7 +227,7 @@
                         }
                     ],
                     "created": "2020-09-09T00:00:00.937Z",
-                    "impact_path": ["default/component/open-liberty/21.0.0.3-1-full-alpine-java8-openj9/sha256__cbc330c4d62cdcdac9408f3fc679b06fc8a22b08638c8f25720f3cd621f52fb6.tar.gz/3.12:openssl:1.1.1k-r0"]
+                    "impact_path": ["artifact_path/artifact1/1.0/sha256__cbc330c4d62cdcdac9408f3fc679b06fc8a22b08638c8f25720f3cd621f52fb6.tar.gz/3.12:openssl:1.1.1k-r0"]
                 }
             ],
             "licenses": [{

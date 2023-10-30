@@ -10,9 +10,10 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.http import Http404, HttpResponseForbidden, HttpResponse, QueryDict
+from django.http import Http404, HttpResponse, QueryDict
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
+from django.core.exceptions import PermissionDenied
 
 from dojo.filters import ReportFindingFilter, EndpointReportFilter, \
     EndpointFilter
@@ -27,7 +28,7 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.finding.queries import get_authorized_findings
-from dojo.finding.views import get_filtered_findings
+from dojo.finding.views import BaseListFindings
 
 logger = logging.getLogger(__name__)
 
@@ -114,9 +115,9 @@ def custom_report(request):
                            "finding_images": finding_images,
                            "user_id": request.user.id})
         else:
-            return HttpResponseForbidden()
+            raise PermissionDenied()
     else:
-        return HttpResponseForbidden()
+        raise PermissionDenied()
 
 
 def report_findings(request):
@@ -564,9 +565,8 @@ def generate_report(request, obj, host_view=False):
                    'title': report_title,
                    'host': report_url_resolver(request),
                    'user_id': request.user.id}
-    elif type(obj).__name__ == "QuerySet" or type(obj).__name__ == "CastTaggedQuerySet":
-        findings = ReportFindingFilter(request.GET,
-                                             queryset=prefetch_related_findings_for_report(obj).distinct())
+    elif type(obj).__name__ in ["QuerySet", "CastTaggedQuerySet", "TagulousCastTaggedQuerySet"]:
+        findings = ReportFindingFilter(request.GET, queryset=prefetch_related_findings_for_report(obj).distinct())
         report_name = 'Finding'
         report_type = 'Finding'
         template = 'dojo/finding_pdf_report.html'
@@ -744,7 +744,7 @@ def get_findings(request):
              'false_positive', 'inactive']
     # request.path = url
     obj_name = obj_id = view = query = None
-    path_items = list(filter(None, re.split('/|\?', url))) # noqa W605
+    path_items = list(filter(None, re.split(r'/|\?', url)))
 
     try:
         finding_index = path_items.index('finding')
@@ -807,7 +807,12 @@ def get_findings(request):
             user_has_permission_or_403(request.user, obj, Permissions.Test_View)
 
     request.GET = QueryDict(query)
-    findings = get_filtered_findings(request, pid, eid, tid, filter_name).qs
+    list_findings = BaseListFindings(
+        filter_name=filter_name,
+        product_id=pid,
+        engagement_id=eid,
+        test_id=tid)
+    findings = list_findings.get_fully_filtered_findings(request).qs
 
     return findings, obj
 
@@ -830,21 +835,33 @@ def get_foreign_keys():
         'mitigated_by', 'reporter', 'review_requested_by', 'sonarqube_issue', 'test']
 
 
+def get_attributes():
+    return ["sla_age", "sla_deadline", "sla_days_remaining"]
+
+
 def csv_export(request):
     findings, obj = get_findings(request)
-
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=findings.csv'
-
     writer = csv.writer(response)
-
+    allowed_attributes = get_attributes()
+    excludes_list = get_excludes()
+    allowed_foreign_keys = get_attributes()
     first_row = True
+
     for finding in findings:
         if first_row:
             fields = []
             for key in dir(finding):
-                if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
+                try:
+                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                        if callable(getattr(finding, key)) and key not in allowed_attributes:
+                            continue
+                        fields.append(key)
+                except Exception as exc:
+                    logger.error('Error in attribute: ' + str(exc))
                     fields.append(key)
+                    continue
             fields.append('test')
             fields.append('found_by')
             fields.append('engagement_id')
@@ -860,13 +877,24 @@ def csv_export(request):
         if not first_row:
             fields = []
             for key in dir(finding):
-                if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
-                    value = finding.__dict__.get(key)
-                    if key in get_foreign_keys() and getattr(finding, key):
-                        value = str(getattr(finding, key))
-                    if value and isinstance(value, str):
-                        value = value.replace('\n', ' NEWLINE ').replace('\r', '')
-                    fields.append(value)
+                try:
+                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                        if not callable(getattr(finding, key)):
+                            value = finding.__dict__.get(key)
+                        if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
+                            if callable(getattr(finding, key)):
+                                func = getattr(finding, key)
+                                result = func()
+                                value = result
+                            else:
+                                value = str(getattr(finding, key))
+                        if value and isinstance(value, str):
+                            value = value.replace('\n', ' NEWLINE ').replace('\r', '')
+                        fields.append(value)
+                except Exception as exc:
+                    logger.error('Error in attribute: ' + str(exc))
+                    fields.append("Value not supported")
+                    continue
             fields.append(finding.test.title)
             fields.append(finding.test.test_type.name)
             fields.append(finding.test.engagement.id)
@@ -907,23 +935,31 @@ def csv_export(request):
 
 def excel_export(request):
     findings, obj = get_findings(request)
-
     workbook = Workbook()
     workbook.iso_dates = True
     worksheet = workbook.active
     worksheet.title = 'Findings'
-
     font_bold = Font(bold=True)
+    allowed_attributes = get_attributes()
+    excludes_list = get_excludes()
+    allowed_foreign_keys = get_attributes()
 
     row_num = 1
     for finding in findings:
         if row_num == 1:
             col_num = 1
             for key in dir(finding):
-                if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
+                try:
+                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                        if callable(getattr(finding, key)) and key not in allowed_attributes:
+                            continue
+                        cell = worksheet.cell(row=row_num, column=col_num, value=key)
+                        cell.font = font_bold
+                        col_num += 1
+                except Exception as exc:
+                    logger.error('Error in attribute: ' + str(exc))
                     cell = worksheet.cell(row=row_num, column=col_num, value=key)
-                    cell.font = font_bold
-                    col_num += 1
+                    continue
             cell = worksheet.cell(row=row_num, column=col_num, value='found_by')
             cell.font = font_bold
             col_num += 1
@@ -949,14 +985,25 @@ def excel_export(request):
         if row_num > 1:
             col_num = 1
             for key in dir(finding):
-                if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
-                    value = finding.__dict__.get(key)
-                    if key in get_foreign_keys() and getattr(finding, key):
-                        value = str(getattr(finding, key))
-                    if value and isinstance(value, datetime):
-                        value = value.replace(tzinfo=None)
-                    worksheet.cell(row=row_num, column=col_num, value=value)
-                    col_num += 1
+                try:
+                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                        if not callable(getattr(finding, key)):
+                            value = finding.__dict__.get(key)
+                        if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
+                            if callable(getattr(finding, key)):
+                                func = getattr(finding, key)
+                                result = func()
+                                value = result
+                            else:
+                                value = str(getattr(finding, key))
+                        if value and isinstance(value, datetime):
+                            value = value.replace(tzinfo=None)
+                        worksheet.cell(row=row_num, column=col_num, value=value)
+                        col_num += 1
+                except Exception as exc:
+                    logger.error('Error in attribute: ' + str(exc))
+                    worksheet.cell(row=row_num, column=col_num, value="Value not supported")
+                    continue
             worksheet.cell(row=row_num, column=col_num, value=finding.test.test_type.name)
             col_num += 1
             worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.id)

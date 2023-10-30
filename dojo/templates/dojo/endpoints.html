@@ -11,11 +11,11 @@
                     <h3 class="has-filters">
                         {{ name }}
                         <div class="dropdown pull-right">
-                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                             {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Add" %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-wrench"></span>
+                                <span class="fa-solid fa-screwdriver-wrench"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
@@ -26,7 +26,7 @@
                                       {% else %}
                                         <a href="{% url 'add_product_endpoint' %}">
                                       {% endif %}
-                                            <i class="fa fa-plus"></i> New Endpoint
+                                            <i class="fa-solid fa-plus"></i> New Endpoint
                                         </a>
                                     </li>
                             </ul>
@@ -54,7 +54,7 @@
                         {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Delete" %}
 						<button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Endpoint">
 								<a class="white-color delete-bulk" href="#" alt="Delete Endpoints">
-								<i class="fa fa-trash"></i>
+								<i class="fa-solid fa-trash"></i>
 								</a>
 						</button>
                         {% endif %}
@@ -70,18 +70,21 @@
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <tr>
                             {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
-                            <th class="hidden-sm centered" title="Select all visible endpoint." id="bulk_edit">
+                            <th class="centered" title="Select all visible endpoint." id="bulk_edit">
                                 <form class="inline-form centered" action="#">
                                     <input type="checkbox" title="Select All" name="select_all" id="select_all"></input>
                                 </form>
                             </th>
                             {% endif %}
                             {% if host_view %}
+                                {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}    
                                 <th>{% dojo_sort request 'Host' 'host' %}</th>
                             {% else %}
+                                {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}    
                                 <th>{% dojo_sort request 'Endpoint' 'endpoint' %}</th>
                             {% endif %}
                             {% if not product_tab %}
+                                {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}    
                                 <th>{% dojo_sort request 'Product' 'product' 'asc' %}</th>
                             {% endif %}
 							<th class="text-center" nowrap="nowrap">Active Verified Findings</th>
@@ -91,7 +94,7 @@
                         {% for e in endpoints %}
                             <tr>
                                 {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
-                                <td class="hidden-sm centered">
+                                <td class="centered">
                                     <form action="#">
                                         <input type="checkbox" title= "Select_{{ e.id }}" name="select_{{ e.id }}"
                                                id="{{ e.id }}"  class="select_one {{ e.id }}"></input>
@@ -102,22 +105,22 @@
                                   <td><a href="{% url 'view_endpoint_host' e.id %}">{{ e.host }}</a>
                                 {% else %}
                                 <td>
-                                  <a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
+                                  <a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
                                 {% endif %}
                                   {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                 </td>
                                 {% if not product_tab %}
                                   <td>
                                     <a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a>
-                                    {% include "dojo/snippets/tags.html" with tags=e.product.tags.alll %}
+                                    {% include "dojo/snippets/tags.html" with tags=e.product.tags.all %}
                                   </td>
                                 {% endif %}
                                 <td class="text-center">
                                   {% if host_view %}
-                                      {{ e.host_active_findings_count }}
+                                      {{ e.host_active_verified_findings_count }}
                                   {% else %}
-                                    {% if e.active_findings_count > 0 %}
-                                      <a href="{% url 'verified_findings' %}?endpoints={{ e.id }}">{{ e.active_findings_count }}</a>
+                                    {% if e.active_verified_findings_count > 0 %}
+                                      <a href="{% url 'verified_findings' %}?endpoints={{ e.id }}">{{ e.active_verified_findings_count }}</a>
                                     {% else %}
                                       0
                                     {% endif %}
@@ -130,7 +133,7 @@
                                     {% if e.mitigated %}
                                       Mitigated
                                     {% else %}
-                                      {% if e.active_findings_count > 0 %}
+                                      {% if e.active_verified_findings_count > 0 %}
                                         Vulnerable
                                       {% else %}
                                         No active verified findings
@@ -147,9 +150,9 @@
                 </div>
             {% else %}
                 {% if host_view %}
-                    <h5> No hosts </h5>
+                  <div id="no_hosts"><p class="text-center">No hosts found.</p></div>
                 {% else %}
-                    <h5> No endpoints </h5>
+                  <div id="no_endpoints"><p class="text-center">No endpoints found.</p></div>
                 {% endif %}
             {% endif %}
         </div>

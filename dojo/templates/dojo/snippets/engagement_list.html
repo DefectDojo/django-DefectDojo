@@ -6,21 +6,21 @@
         <div class="panel-heading">
             <h4> {% if status == "open" %}Active{% elif status == "paused" %}Paused {% else %}Closed{% endif %} Engagements ({{ count }})
                 <div class="dropdown pull-right">
-                    <button id="show-filters-{{status}}" data-toggle="collapse" data-target="#the-filters-{{status}}" class="btn btn-primary toggle-filters" aria-label="Filter"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                    <button id="show-filters-{{status}}" data-toggle="collapse" data-target="#the-filters-{{status}}" class="btn btn-primary toggle-filters" aria-label="Filter"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" aria-label="Add Engagement"
                     data-toggle="dropdown" aria-expanded="true">
-                <span class="fa fa-bars"></span>
+                <span class="fa-solid fa-bars"></span>
                 <span class="caret"></span>
             </button>
           <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                             <li role="presentation">
                                 <a class="" href="{% url 'new_eng_for_prod' prod.id %}">
-                                    <i class="fa fa-plus"></i> Add New Interactive Engagement
+                                    <i class="fa-solid fa-plus"></i> Add New Interactive Engagement
                                 </a>
                             </li>
                             <li role="presentation">
                                 <a class="" href="{% url 'new_eng_for_prod_cicd' prod.id %}">
-                                    <i class="fa fa-plus"></i> Add New CI/CD Engagement
+                                    <i class="fa-solid fa-plus"></i> Add New CI/CD Engagement
                                 </a>
                             </li>
                     </ul>
@@ -64,26 +64,31 @@
                     <td class="nowrap">
                       <div class="align-top">
                         <div class="dropdown">
-                          <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
+                          <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
                           <ul class="dropdown-menu">
                              <li>
                                <a class="" href="{% url 'view_engagement' eng.id %}">
-                                 <i class="fa fa-list-alt"></i> View
+                                 <i class="fa-solid fa-rectangle-list"></i> View
                              </li>
                              {% if eng|has_object_permission:"Engagement_Edit" %}
                              <li>
                                <a class="" href="{% url 'edit_engagement' eng.id %}">
-                                 <i class="fa fa-pencil-square-o"></i> Edit
+                                 <i class="fa-solid fa-pen-to-square"></i> Edit
                                </a>
                             </li>
+                            <li>
+                              <a class="" href="{% url 'copy_engagement' eng.id %}">
+                                <i class="fa-solid fa-copy"></i> Copy
+                              </a>
+                           </li>
                             <li>
                               </a>
                               {% if status == "open" or status == "paused" %}
                               <a class="" href="{% url 'close_engagement' eng.id %}">
-                                <i class="fa fa-close"></i> Close
+                                <i class="fa-solid fa-xmark"></i> Close
                               {% else %}
                               <a class="" href="{% url 'reopen_engagement' eng.id %}">
-                                <i class="fa fa-undo"></i> Reopen
+                                <i class="fa-solid fa-rotate-left"></i> Reopen
                               </a>
                               {% endif %}
                               </a>
@@ -93,54 +98,54 @@
                             {% if eng|has_object_permission:"Test_Add" %}
                             <li role="presentation">
                                 <a class="" href="{% url 'add_tests' eng.id %}">
-                                    <i class="fa fa-plus"></i> Add Tests
+                                    <i class="fa-solid fa-plus"></i> Add Tests
                                 </a>
                             </li>
                             {% endif %}
                             {% if eng|has_object_permission:"Import_Scan_Result" %}
                             <li role="presentation">
                                 <a class="" href="{% url 'import_scan_results' eng.id %}">
-                                    <i class="fa fa-upload"></i> Import Scan Results
+                                    <i class="fa-solid fa-upload"></i> Import Scan Results
                                 </a>
                             </li>
                             {% endif %}
                             <li class="divider"></li>
                             <li role="presentation">
                               <a href="{% url 'engagement_open_findings' eng.id %}">
-                                <i class="fa fa-file-text-o"></i> View Active Findings
+                                <i class="fa-solid fa-file-lines"></i> View Active Findings
                               </a>
                             </li>
                             <li role="presentation">
                               <a href="{% url 'engagement_verified_findings' eng.id %}">
-                                <i class="fa fa-file-text-o"></i> View Active and Verified Findings
+                                <i class="fa-solid fa-file-lines"></i> View Active and Verified Findings
                               </a>
                             </li>
                             <li role="presentation">
                               <a href="{% url 'engagement_closed_findings' eng.id %}">
-                                <i class="fa fa-file-text-o"></i> View Mitigated Findings
+                                <i class="fa-solid fa-file-lines"></i> View Mitigated Findings
                               </a>
                             </li>
                             <li role="presentation">
                                 <a href="{% url 'engagement_accepted_findings' eng.id %}">
-                                    <i class="fa fa-file-text-o"></i> View Accepted Findings
+                                    <i class="fa-solid fa-file-lines"></i> View Accepted Findings
                                 </a>
                               </li>
                             <li role="presentation">
                               <a href="{% url 'engagement_all_findings' eng.id %}">
-                                  <i class="fa fa-file-text-o"></i> View All Findings
+                                  <i class="fa-solid fa-file-lines"></i> View All Findings
                               </a>
                             </li>
                               <li class="divider"></li>
                             <li role="presentation">
                               <a href="{% url 'engagement_report' eng.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
-                                  <i class="fa fa-file-text-o"></i> Engagement Report
+                                  <i class="fa-solid fa-file-lines"></i> Engagement Report
                               </a>
                             </li>
                             {% if eng|has_object_permission:"Engagement_Delete" %}
                             <li class="divider"></li>
                             <li>
                               <a class="text-danger" href="{% url 'delete_engagement' eng.id %}">
-                                  <i class="fa fa-trash-o"></i> Delete Engagement
+                                  <i class="fa-solid fa-trash"></i> Delete Engagement
                               </a>
                             </li>
                             {% endif %}
@@ -207,11 +212,11 @@
                       {% if eng.count_tests %}
                       <div class="dropdown">
                         <a href="{% url 'view_engagement' eng.id %}#tests">{{ eng.count_tests }}</a>
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
                         <ul class="dropdown-menu">
                           <li>
                             <a>
-                              <i class="fa fa-info"></i>
+                              <i class="fa-solid fa-circle-info"></i>
                               {% if eng.test_set.all|length %}
                                 Recent tests
                               {% else %}
@@ -223,13 +228,13 @@
                           {% for test in eng.test_set.all %}
                             <li>
                               <a href="{% url 'view_test' test.id %}">
-                                <i class="fa fa-list-alt"></i> {{test}}, {{test.updated}}
+                                <i class="fa-solid fa-rectangle-list"></i> {{test}}, {{test.updated}}
                               </a>
                             </li>
                           {% endfor %}
                           <li>
                             <a href="{% url 'view_engagement' eng.id %}#tests">
-                              <i class="fa fa-globe"></i> View all {{ eng.count_tests }} tests...
+                              <i class="fa-solid fa-earth-americas"></i> View all {{ eng.count_tests }} tests...
                             </a>
                           </li>
                         </ul>

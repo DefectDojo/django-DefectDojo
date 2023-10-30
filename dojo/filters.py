@@ -2,7 +2,7 @@ import collections
 from drf_spectacular.types import OpenApiTypes
 
 from drf_spectacular.utils import extend_schema_field
-from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, FALSE_POSITIVE_FINDINGS_QUERY, INACTIVE_FINDINGS_QUERY, OPEN_FINDINGS_QUERY, OUT_OF_SCOPE_FINDINGS_QUERY, VERIFIED_FINDINGS_QUERY, UNDER_REVIEW_QUERY
+from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, NOT_ACCEPTED_FINDINGS_QUERY, WAS_ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, FALSE_POSITIVE_FINDINGS_QUERY, INACTIVE_FINDINGS_QUERY, OPEN_FINDINGS_QUERY, OUT_OF_SCOPE_FINDINGS_QUERY, VERIFIED_FINDINGS_QUERY, UNDER_REVIEW_QUERY
 import logging
 from datetime import timedelta, datetime
 from django import forms
@@ -10,18 +10,20 @@ from django.apps import apps
 from auditlog.models import LogEntry
 from django.conf import settings
 import six
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
     BooleanFilter, NumberFilter, DateFilter
 from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate
+from django.db.models import JSONField
 import pytz
 from django.db.models import Q
 from dojo.models import Dojo_User, Finding_Group, Product_API_Scan_Configuration, Product_Type, Finding, Product, Test_Import, Test_Type, \
-    Endpoint, Development_Environment, Finding_Template, Note_Type, \
+    Endpoint, Development_Environment, Finding_Template, Note_Type, Risk_Acceptance, Cred_Mapping, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
-    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, Dojo_Group, Vulnerability_Id
+    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, EFFORT_FOR_FIXING_CHOICES, Dojo_Group, Vulnerability_Id, \
+    Test_Import_Finding_Action, IMPORT_ACTIONS
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 import tagulous
@@ -110,7 +112,7 @@ class FindingStatusFilter(ChoiceFilter):
         return qs.filter(UNDER_REVIEW_QUERY)
 
     options = {
-        '': (_('Any'), any),
+        None: (_('Any'), any),
         0: (_('Open'), open),
         1: (_('Verified'), verified),
         2: (_('Out Of Scope'), out_of_scope),
@@ -137,7 +139,69 @@ class FindingStatusFilter(ChoiceFilter):
         try:
             value = int(value)
         except (ValueError, TypeError):
-            value = ''
+            value = None
+        return self.options[value][1](self, qs, self.field_name)
+
+
+class FindingSLAFilter(ChoiceFilter):
+    def any(self, qs, name):
+        return qs
+
+    def satisfies_sla(self, qs, name):
+        non_sla_violations = [finding.id for finding in qs if not finding.violates_sla]
+        return Finding.objects.filter(id__in=non_sla_violations)
+
+    def violates_sla(self, qs, name):
+        sla_violations = [finding.id for finding in qs if finding.violates_sla]
+        return Finding.objects.filter(id__in=sla_violations)
+
+    options = {
+        None: (_('Any'), any),
+        0: (_('False'), satisfies_sla),
+        1: (_('True'), violates_sla),
+    }
+
+    def __init__(self, *args, **kwargs):
+        kwargs['choices'] = [
+            (key, value[0]) for key, value in six.iteritems(self.options)]
+        super(FindingSLAFilter, self).__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            value = None
+        return self.options[value][1](self, qs, self.field_name)
+
+
+class ProductSLAFilter(ChoiceFilter):
+    def any(self, qs, name):
+        return qs
+
+    def satisfies_sla(self, qs, name):
+        non_sla_violations = [product.id for product in qs if not product.violates_sla]
+        return Product.objects.filter(id__in=non_sla_violations)
+
+    def violates_sla(self, qs, name):
+        sla_violations = [product.id for product in qs if product.violates_sla]
+        return Product.objects.filter(id__in=sla_violations)
+
+    options = {
+        None: (_('Any'), any),
+        0: (_('False'), satisfies_sla),
+        1: (_('True'), violates_sla),
+    }
+
+    def __init__(self, *args, **kwargs):
+        kwargs['choices'] = [
+            (key, value[0]) for key, value in six.iteritems(self.options)]
+        super(ProductSLAFilter, self).__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            value = None
         return self.options[value][1](self, qs, self.field_name)
 
 
@@ -206,7 +270,7 @@ def get_tags_label_from_model(model):
         return 'Tags (Unknown)'
 
 
-def get_finding_filter_fields(metrics=False, similar=False):
+def get_finding_filterset_fields(metrics=False, similar=False):
     fields = []
 
     if similar:
@@ -363,7 +427,7 @@ class FindingFilterWithTags(DojoFilter):
 
 class DateRangeFilter(ChoiceFilter):
     options = {
-        '': (_('Any date'), lambda qs, name: qs.all()),
+        None: (_('Any date'), lambda qs, name: qs.all()),
         1: (_('Today'), lambda qs, name: qs.filter(**{
             '%s__year' % name: now().year,
             '%s__month' % name: now().month,
@@ -403,13 +467,75 @@ class DateRangeFilter(ChoiceFilter):
         try:
             value = int(value)
         except (ValueError, TypeError):
-            value = ''
+            value = None
+        return self.options[value][1](qs, self.field_name)
+
+
+class DateRangeOmniFilter(ChoiceFilter):
+    options = {
+        None: (_('Any date'), lambda qs, name: qs.all()),
+        1: (_('Today'), lambda qs, name: qs.filter(**{
+            '%s__year' % name: now().year,
+            '%s__month' % name: now().month,
+            '%s__day' % name: now().day
+        })),
+        2: (_('Next 7 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=7)),
+        })),
+        3: (_('Next 30 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=30)),
+        })),
+        4: (_('Next 90 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=90)),
+        })),
+        5: (_('Past 7 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() - timedelta(days=7)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+        })),
+        6: (_('Past 30 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() - timedelta(days=30)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+        })),
+        7: (_('Past 90 days'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() - timedelta(days=90)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+        })),
+        8: (_('Current month'), lambda qs, name: qs.filter(**{
+            '%s__year' % name: now().year,
+            '%s__month' % name: now().month
+        })),
+        9: (_('Past year'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() - timedelta(days=365)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+        })),
+        10: (_('Current year'), lambda qs, name: qs.filter(**{
+            '%s__year' % name: now().year,
+        })),
+        11: (_('Next year'), lambda qs, name: qs.filter(**{
+            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
+            '%s__lt' % name: _truncate(now() + timedelta(days=365)),
+        })),
+    }
+
+    def __init__(self, *args, **kwargs):
+        kwargs['choices'] = [
+            (key, value[0]) for key, value in six.iteritems(self.options)]
+        super(DateRangeOmniFilter, self).__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            value = None
         return self.options[value][1](qs, self.field_name)
 
 
 class ReportBooleanFilter(ChoiceFilter):
     options = {
-        '': (_('Either'), lambda qs, name: qs.all()),
+        None: (_('Either'), lambda qs, name: qs.all()),
         1: (_('Yes'), lambda qs, name: qs.filter(**{
             '%s' % name: True
         })),
@@ -427,7 +553,7 @@ class ReportBooleanFilter(ChoiceFilter):
         try:
             value = int(value)
         except (ValueError, TypeError):
-            value = ''
+            value = None
         return self.options[value][1](qs, self.field_name)
 
 
@@ -438,19 +564,16 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
 
     def accepted(self, qs, name):
         # return qs.filter(risk_acceptance__isnull=False)
-        from dojo.finding.views import ACCEPTED_FINDINGS_QUERY
         return qs.filter(ACCEPTED_FINDINGS_QUERY)
 
     def not_accepted(self, qs, name):
-        from dojo.finding.views import NOT_ACCEPTED_FINDINGS_QUERY
         return qs.filter(NOT_ACCEPTED_FINDINGS_QUERY)
 
     def was_accepted(self, qs, name):
-        from dojo.finding.views import WAS_ACCEPTED_FINDINGS_QUERY
         return qs.filter(WAS_ACCEPTED_FINDINGS_QUERY)
 
     options = {
-        '': (_('Either'), any),
+        None: (_('Either'), any),
         1: (_('Yes'), accepted),
         2: (_('No'), not_accepted),
         3: (_('Was'), was_accepted),
@@ -465,7 +588,7 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
         try:
             value = int(value)
         except (ValueError, TypeError):
-            value = ''
+            value = None
         return self.options[value][1](self, qs, self.field_name)
 
 
@@ -521,7 +644,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
         return self.past_x_days(qs, name, 365)
 
     options = {
-        '': (_('Past 30 days'), past_thirty_days),
+        None: (_('Past 30 days'), past_thirty_days),
         1: (_('Past 7 days'), past_seven_days),
         2: (_('Past 90 days'), past_ninety_days),
         3: (_('Current month'), current_month),
@@ -549,7 +672,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
         try:
             value = int(value)
         except (ValueError, TypeError):
-            value = ''
+            value = None
         return self.options[value][1](self, qs, self.field_name)
 
 
@@ -601,6 +724,8 @@ class EngagementDirectFilter(DojoFilter):
     product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
+    test__engagement__product__lifecycle = MultipleChoiceFilter(
+        choices=Product.LIFECYCLE_CHOICES, label='Product lifecycle')
     status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
                                               label="Status")
 
@@ -622,6 +747,8 @@ class EngagementDirectFilter(DojoFilter):
     )
 
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
+
+    has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -663,6 +790,8 @@ class EngagementFilter(DojoFilter):
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
+    engagement__product__lifecycle = MultipleChoiceFilter(
+        choices=Product.LIFECYCLE_CHOICES, label='Product lifecycle')
     engagement__status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
                                               label="Status")
 
@@ -684,6 +813,8 @@ class EngagementFilter(DojoFilter):
     )
 
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
+
+    has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -770,18 +901,19 @@ class ApiEngagementFilter(DojoFilter):
     product__prod_type = NumberInFilter(field_name='product__prod_type', lookup_expr='in')
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Tag name contains')
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
-                             help_text='Comma seperated list of exact tags')
-    product__tags__name = CharFieldInFilter(field_name='product__tags__name',
+                             help_text='Comma separated list of exact tags')
+    product__tags = CharFieldInFilter(field_name='product__tags__name',
                                             lookup_expr='in',
-                                            help_text='Comma seperated list of exact tags present on product')
+                                            help_text='Comma separated list of exact tags present on product')
 
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Not Tag name contains', exclude='True')
     not_tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
-                                 help_text='Comma seperated list of exact tags not present on model', exclude='True')
-    not_product__tags__name = CharFieldInFilter(field_name='product__tags__name',
+                                 help_text='Comma separated list of exact tags not present on model', exclude='True')
+    not_product__tags = CharFieldInFilter(field_name='product__tags__name',
                                                 lookup_expr='in',
-                                                help_text='Comma seperated list of exact tags not present on product',
+                                                help_text='Comma separated list of exact tags not present on product',
                                                 exclude='True')
+    has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -811,6 +943,7 @@ class ApiEngagementFilter(DojoFilter):
 
 class ProductFilter(DojoFilter):
     name = CharFilter(lookup_expr='icontains', label="Product Name")
+    name_exact = CharFilter(field_name='name', lookup_expr='iexact', label="Exact Product Name")
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
@@ -905,10 +1038,15 @@ class ProductFilter(DojoFilter):
 
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
 
+    outside_of_sla = ProductSLAFilter(label="Outside of SLA")
+
+    has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
             ('name', 'name'),
+            ('name_exact', 'name_exact'),
             ('prod_type__name', 'prod_type__name'),
             ('business_criticality', 'business_criticality'),
             ('platform', 'platform'),
@@ -919,6 +1057,7 @@ class ProductFilter(DojoFilter):
         ),
         field_labels={
             'name': 'Product Name',
+            'name_exact': 'Exact Product Name',
             'prod_type__name': 'Product Type',
             'business_criticality': 'Business Criticality',
             'platform': 'Platform ',
@@ -943,7 +1082,7 @@ class ProductFilter(DojoFilter):
 
     class Meta:
         model = Product
-        fields = ['name', 'prod_type', 'business_criticality', 'platform', 'lifecycle', 'origin', 'external_audience',
+        fields = ['name', 'name_exact', 'prod_type', 'business_criticality', 'platform', 'lifecycle', 'origin', 'external_audience',
                   'internet_accessible', 'tags']
 
 
@@ -953,6 +1092,7 @@ class ApiProductFilter(DojoFilter):
     internet_accessible = BooleanFilter(field_name='internet_accessible')
     # CharFilter
     name = CharFilter(lookup_expr='icontains')
+    name_exact = CharFilter(field_name='name', lookup_expr='iexact')
     description = CharFilter(lookup_expr='icontains')
     business_criticality = CharFilter(method=custom_filter, field_name='business_criticality')
     platform = CharFilter(method=custom_filter, field_name='platform')
@@ -971,11 +1111,13 @@ class ApiProductFilter(DojoFilter):
 
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
-                             help_text='Comma seperated list of exact tags')
+                             help_text='Comma separated list of exact tags')
 
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Not Tag name contains', exclude='True')
     not_tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
-                                 help_text='Comma seperated list of exact tags not present on product', exclude='True')
+                                 help_text='Comma separated list of exact tags not present on product', exclude='True')
+    has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
+    outside_of_sla = extend_schema_field(OpenApiTypes.NUMBER)(ProductSLAFilter())
 
     # DateRangeFilter
     created = DateRangeFilter()
@@ -1027,6 +1169,7 @@ class ApiFindingFilter(DojoFilter):
     under_defect_review = BooleanFilter(field_name='under_defect_review')
     under_review = BooleanFilter(field_name='under_review')
     verified = BooleanFilter(field_name='verified')
+    has_jira = BooleanFilter(field_name='jira_issue', lookup_expr='isnull', exclude=True)
     # CharFilter
     component_version = CharFilter(lookup_expr='icontains')
     component_name = CharFilter(lookup_expr='icontains')
@@ -1042,9 +1185,13 @@ class ApiFindingFilter(DojoFilter):
     references = CharFilter(lookup_expr='icontains')
     severity = CharFilter(method=custom_filter, field_name='severity')
     severity_justification = CharFilter(lookup_expr='icontains')
-    step_to_reproduce = CharFilter(lookup_expr='icontains')
+    steps_to_reproduce = CharFilter(lookup_expr='icontains')
     unique_id_from_tool = CharFilter(lookup_expr='icontains')
     title = CharFilter(lookup_expr='icontains')
+    product_name = CharFilter(lookup_expr='engagement__product__name__iexact', field_name='test', label='exact product name')
+    product_name_contains = CharFilter(lookup_expr='engagement__product__name__icontains', field_name='test', label='exact product name')
+    product_lifecycle = CharFilter(method=custom_filter, lookup_expr='engagement__product__lifecycle',
+                                   field_name='test__engagement__product__lifecycle', label='Comma separated list of exact product lifecycles')
     # DateRangeFilter
     created = DateRangeFilter()
     date = DateRangeFilter()
@@ -1070,6 +1217,7 @@ class ApiFindingFilter(DojoFilter):
     test__test_type = NumberInFilter(field_name='test__test_type', lookup_expr='in', label='Test Type')
     test__engagement = NumberInFilter(field_name='test__engagement', lookup_expr='in')
     test__engagement__product = NumberInFilter(field_name='test__engagement__product', lookup_expr='in')
+    test__engagement__product__prod_type = NumberInFilter(field_name='test__engagement__product__prod_type', lookup_expr='in')
     finding_group = NumberInFilter(field_name='finding_group', lookup_expr='in')
 
     # ReportRiskAcceptanceFilter
@@ -1077,27 +1225,29 @@ class ApiFindingFilter(DojoFilter):
 
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Tag name contains')
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
-                             help_text='Comma seperated list of exact tags')
-    test__tags = CharFieldInFilter(field_name='test__tags__name', lookup_expr='in',
-                                   help_text='Comma seperated list of exact tags present on test')
-    test__engagement__tags = CharFieldInFilter(field_name='test__engagement__tags', lookup_expr='in',
-                                               help_text='Comma seperated list of exact tags present on engagement')
-    test__engagement__product__tags__name = CharFieldInFilter(field_name='test__engagement__product__tags__name',
-                                                              lookup_expr='in',
-                                                              help_text='Comma seperated list of exact tags present on product')
+                             help_text='Comma separated list of exact tags')
+    test__tags = CharFieldInFilter(field_name='test__tags__name', lookup_expr='in', help_text='Comma separated list of exact tags present on test')
+    test__engagement__tags = CharFieldInFilter(field_name='test__engagement__tags__name', lookup_expr='in',
+                                               help_text='Comma separated list of exact tags present on engagement')
+    test__engagement__product__tags = CharFieldInFilter(
+        field_name='test__engagement__product__tags__name',
+        lookup_expr='in',
+        help_text='Comma separated list of exact tags present on product')
 
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Not Tag name contains', exclude='True')
     not_tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
-                                 help_text='Comma seperated list of exact tags not present on model', exclude='True')
-    not_test__tags = CharFieldInFilter(field_name='test__tags__name', lookup_expr='in',
-                                       help_text='Comma seperated list of exact tags not present on test', exclude='True')
-    not_test__engagement__tags = CharFieldInFilter(field_name='test__engagement__tags', lookup_expr='in',
-                                                   help_text='Comma seperated list of exact tags not present on engagement',
+                                 help_text='Comma separated list of exact tags not present on model', exclude='True')
+    not_test__tags = CharFieldInFilter(field_name='test__tags__name', lookup_expr='in', help_text='Comma separated list of exact tags present on test')
+    not_test__engagement__tags = CharFieldInFilter(field_name='test__engagement__tags__name', lookup_expr='in',
+                                                   help_text='Comma separated list of exact tags not present on engagement',
                                                    exclude='True')
-    not_test__engagement__product__tags__name = CharFieldInFilter(field_name='test__engagement__product__tags__name',
-                                                                  lookup_expr='in',
-                                                                  help_text='Comma seperated list of exact tags not present on product',
-                                                                  exclude='True')
+    not_test__engagement__product__tags = CharFieldInFilter(
+        field_name='test__engagement__product__tags__name',
+        lookup_expr='in',
+        help_text='Comma separated list of exact tags not present on product',
+        exclude='True')
+    has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
+    outside_of_sla = extend_schema_field(OpenApiTypes.NUMBER)(ProductSLAFilter())
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1132,7 +1282,7 @@ class ApiFindingFilter(DojoFilter):
     class Meta:
         model = Finding
         exclude = ['url', 'thread_id', 'notes', 'files',
-                   'line', 'endpoint_status', 'cve']
+                   'line', 'cve']
 
 
 class FindingFilter(FindingFilterWithTags):
@@ -1152,6 +1302,9 @@ class FindingFilter(FindingFilterWithTags):
     is_mitigated = ReportBooleanFilter()
     mitigated = DateRangeFilter(label="Mitigated Date")
 
+    planned_remediation_date = DateRangeOmniFilter()
+    planned_remediation_version = CharFilter(lookup_expr='icontains', label=_('Planned remediation version'))
+
     file_path = CharFilter(lookup_expr='icontains')
     param = CharFilter(lookup_expr='icontains')
     payload = CharFilter(lookup_expr='icontains')
@@ -1166,6 +1319,9 @@ class FindingFilter(FindingFilterWithTags):
         queryset=Product_Type.objects.none(),
         label="Product Type")
 
+    test__engagement__product__lifecycle = MultipleChoiceFilter(
+        choices=Product.LIFECYCLE_CHOICES, label='Product lifecycle')
+
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.none(),
         label="Product")
@@ -1174,6 +1330,8 @@ class FindingFilter(FindingFilterWithTags):
         label="Engagement")
 
     endpoints__host = CharFilter(lookup_expr='icontains', label="Endpoint Host")
+
+    service = CharFilter(lookup_expr='icontains')
 
     test = ModelMultipleChoiceFilter(
         queryset=Test.objects.none(),
@@ -1197,7 +1355,10 @@ class FindingFilter(FindingFilterWithTags):
     risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
+    effort_for_fixing = MultipleChoiceFilter(choices=EFFORT_FOR_FIXING_CHOICES)
+
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
+    endpoints = NumberFilter(widget=HiddenInput())
 
     if get_system_setting('enable_jira'):
         has_jira_issue = BooleanFilter(field_name='jira_issue',
@@ -1261,6 +1422,10 @@ class FindingFilter(FindingFilterWithTags):
 
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
 
+    outside_of_sla = FindingSLAFilter(label="Outside of SLA")
+
+    has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -1273,6 +1438,7 @@ class FindingFilter(FindingFilterWithTags):
             ('title', 'title'),
             ('test__engagement__product__name',
              'test__engagement__product__name'),
+            ('service', 'service'),
         ),
         field_labels={
             'numerical_severity': 'Severity',
@@ -1286,13 +1452,13 @@ class FindingFilter(FindingFilterWithTags):
 
     class Meta:
         model = Finding
-        fields = get_finding_filter_fields()
+        fields = get_finding_filterset_fields()
 
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoints', 'references',
                    'thread_id', 'notes', 'scanner_confidence',
                    'numerical_severity', 'line', 'duplicate_finding',
-                   'hash_code', 'endpoint_status',
+                   'hash_code',
                    'reviewers',
                    'created', 'files', 'sla_start_date', 'cvssv3',
                    'severity_justification', 'steps_to_reproduce']
@@ -1353,7 +1519,7 @@ class SimilarFindingFilter(FindingFilter):
     class Meta(FindingFilter.Meta):
         model = Finding
         # slightly different fields from FindingFilter, but keep the same ordering for UI consistency
-        fields = get_finding_filter_fields(similar=True)
+        fields = get_finding_filterset_fields(similar=True)
 
     def __init__(self, data=None, *args, **kwargs):
         self.user = None
@@ -1480,11 +1646,11 @@ class TemplateFindingFilter(DojoFilter):
 class ApiTemplateFindingFilter(DojoFilter):
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Tag name contains')
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
-                             help_text='Comma seperated list of exact tags')
+                             help_text='Comma separated list of exact tags')
 
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Not Tag name contains', exclude='True')
     not_tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
-                                 help_text='Comma seperated list of exact tags not present on model', exclude='True')
+                                 help_text='Comma separated list of exact tags not present on model', exclude='True')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1527,7 +1693,7 @@ class MetricsFindingFilter(FindingFilter):
 
     class Meta(FindingFilter.Meta):
         model = Finding
-        fields = get_finding_filter_fields(metrics=True)
+        fields = get_finding_filterset_fields(metrics=True)
 
 
 class MetricsEndpointFilter(FilterSet):
@@ -1694,6 +1860,8 @@ class EndpointFilter(DojoFilter):
 
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
 
+    has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -1716,17 +1884,19 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['endpoint_status']
+        exclude = ['findings']
 
 
 class ApiEndpointFilter(DojoFilter):
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Tag name contains')
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
-                             help_text='Comma seperated list of exact tags')
+                             help_text='Comma separated list of exact tags')
 
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Not Tag name contains', exclude='True')
     not_tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
-                                 help_text='Comma seperated list of exact tags not present on model', exclude='True')
+                                 help_text='Comma separated list of exact tags not present on model', exclude='True')
+    has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -1738,6 +1908,24 @@ class ApiEndpointFilter(DojoFilter):
     class Meta:
         model = Endpoint
         fields = ['id', 'protocol', 'userinfo', 'host', 'port', 'path', 'query', 'fragment', 'product']
+
+
+class ApiRiskAcceptanceFilter(DojoFilter):
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('name', 'name'),
+        ),
+    )
+
+    class Meta:
+        model = Risk_Acceptance
+        fields = [
+            'name', 'accepted_findings', 'recommendation', 'recommendation_details',
+            'decision', 'decision_details', 'accepted_by', 'owner', 'expiration_date',
+            'expiration_date_warned', 'expiration_date_handled', 'reactivate_expired',
+            'restart_sla_expired', 'notes',
+        ]
 
 
 class EngagementTestFilter(DojoFilter):
@@ -1768,6 +1956,8 @@ class EngagementTestFilter(DojoFilter):
     )
 
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
+
+    has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1803,23 +1993,24 @@ class EngagementTestFilter(DojoFilter):
 class ApiTestFilter(DojoFilter):
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Tag name contains')
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
-                             help_text='Comma seperated list of exact tags')
-    engagement__tags = CharFieldInFilter(field_name='engagement__tags', lookup_expr='in',
-                                               help_text='Comma seperated list of exact tags present on engagement')
-    engagement__product__tags__name = CharFieldInFilter(field_name='engagement__product__tags__name',
+                             help_text='Comma separated list of exact tags')
+    engagement__tags = CharFieldInFilter(field_name='engagement__tags__name', lookup_expr='in',
+                                               help_text='Comma separated list of exact tags present on engagement')
+    engagement__product__tags = CharFieldInFilter(field_name='engagement__product__tags__name',
                                                               lookup_expr='in',
-                                                              help_text='Comma seperated list of exact tags present on product')
+                                                              help_text='Comma separated list of exact tags present on product')
 
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Not Tag name contains', exclude='True')
     not_tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
-                                 help_text='Comma seperated list of exact tags not present on model', exclude='True')
-    not_engagement__tags = CharFieldInFilter(field_name='engagement__tags', lookup_expr='in',
-                                                   help_text='Comma seperated list of exact tags not present on engagement',
+                                 help_text='Comma separated list of exact tags not present on model', exclude='True')
+    not_engagement__tags = CharFieldInFilter(field_name='engagement__tags__name', lookup_expr='in',
+                                                   help_text='Comma separated list of exact tags not present on engagement',
                                                    exclude='True')
-    not_engagement__product__tags__name = CharFieldInFilter(field_name='engagement__product__tags__name',
+    not_engagement__product__tags = CharFieldInFilter(field_name='engagement__product__tags__name',
                                                                   lookup_expr='in',
-                                                                  help_text='Comma seperated list of exact tags not present on product',
+                                                                  help_text='Comma separated list of exact tags not present on product',
                                                                   exclude='True')
+    has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1850,21 +2041,27 @@ class ApiTestFilter(DojoFilter):
                      'target_end', 'notes', 'percent_complete',
                      'actual_time', 'engagement', 'version',
                      'branch_tag', 'build_id', 'commit_hash',
-                     'api_scan_configuration']
+                     'api_scan_configuration', 'scan_type']
 
 
 class ApiAppAnalysisFilter(DojoFilter):
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Tag name contains')
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
-                             help_text='Comma seperated list of exact tags')
+                             help_text='Comma separated list of exact tags')
 
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Not Tag name contains', exclude='True')
     not_tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
-                                 help_text='Comma seperated list of exact tags not present on model', exclude='True')
+                                 help_text='Comma separated list of exact tags not present on model', exclude='True')
 
     class Meta:
         model = App_Analysis
         fields = ['product', 'name', 'user', 'version']
+
+
+class ApiCredentialsFilter(DojoFilter):
+    class Meta:
+        model = Cred_Mapping
+        fields = '__all__'
 
 
 class EndpointReportFilter(DojoFilter):
@@ -1899,7 +2096,7 @@ class EndpointReportFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['product', 'endpoint_status']
+        exclude = ['product']
 
 
 class ReportFindingFilter(FindingFilterWithTags):
@@ -1928,8 +2125,8 @@ class ReportFindingFilter(FindingFilterWithTags):
         model = Finding
         # exclude sonarqube issue as by default it will show all without checking permissions
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
-                   'endpoint', 'references', 'test', 'sonarqube_issue',
-                   'thread_id', 'notes', 'endpoints', 'endpoint_status',
+                   'references', 'test', 'sonarqube_issue',
+                   'thread_id', 'notes', 'endpoints',
                    'numerical_severity', 'reporter', 'last_reviewed',
                    'jira_creation', 'jira_change', 'files']
 
@@ -1992,51 +2189,27 @@ class UserFilter(DojoFilter):
     username = CharFilter(lookup_expr='icontains')
     email = CharFilter(lookup_expr='icontains')
 
-    if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-        o = OrderingFilter(
-            # tuple-mapping retains order
-            fields=(
-                ('username', 'username'),
-                ('last_name', 'last_name'),
-                ('first_name', 'first_name'),
-                ('email', 'email'),
-                ('is_active', 'is_active'),
-                ('is_superuser', 'is_superuser'),
-                ('last_login', 'last_login'),
-            ),
-            field_labels={
-                'username': 'User Name',
-                'is_active': 'Active',
-                'is_superuser': 'Superuser',
-            }
-        )
-    else:
-        o = OrderingFilter(
-            # tuple-mapping retains order
-            fields=(
-                ('username', 'username'),
-                ('last_name', 'last_name'),
-                ('first_name', 'first_name'),
-                ('email', 'email'),
-                ('is_active', 'is_active'),
-                ('is_staff', 'is_staff'),
-                ('is_superuser', 'is_superuser'),
-                ('last_login', 'last_login'),
-            ),
-            field_labels={
-                'username': 'User Name',
-                'is_active': 'Active',
-                'is_staff': 'Staff',
-                'is_superuser': 'Superuser',
-            }
-        )
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('username', 'username'),
+            ('last_name', 'last_name'),
+            ('first_name', 'first_name'),
+            ('email', 'email'),
+            ('is_active', 'is_active'),
+            ('is_superuser', 'is_superuser'),
+            ('last_login', 'last_login'),
+        ),
+        field_labels={
+            'username': 'User Name',
+            'is_active': 'Active',
+            'is_superuser': 'Superuser',
+        }
+    )
 
     class Meta:
         model = Dojo_User
-        if settings.FEATURE_CONFIGURATION_AUTHORIZATION:
-            fields = ['is_superuser', 'is_active', 'first_name', 'last_name', 'username', 'email']
-        else:
-            fields = ['is_staff', 'is_superuser', 'is_active', 'first_name', 'last_name', 'username', 'email']
+        fields = ['is_superuser', 'is_active', 'first_name', 'last_name', 'username', 'email']
 
 
 class GroupFilter(DojoFilter):
@@ -2075,6 +2248,20 @@ class TestImportFilter(DojoFilter):
         fields = []
 
 
+class TestImportFindingActionFilter(DojoFilter):
+    action = MultipleChoiceFilter(choices=IMPORT_ACTIONS)
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('action', 'action'),
+        )
+    )
+
+    class Meta:
+        model = Test_Import_Finding_Action
+        fields = []
+
+
 class LogEntryFilter(DojoFilter):
     from auditlog.models import LogEntry
 
@@ -2090,6 +2277,14 @@ class LogEntryFilter(DojoFilter):
         model = LogEntry
         exclude = ['content_type', 'object_pk', 'object_id', 'object_repr',
                    'changes', 'additional_data', 'remote_addr']
+        filter_overrides = {
+            JSONField: {
+                'filter_class': CharFilter,
+                'extra': lambda f: {
+                    'lookup_expr': 'icontains',
+                }
+            }
+        }
 
 
 class ProductTypeFilter(DojoFilter):
@@ -2186,7 +2381,7 @@ class QuestionTypeFilter(ChoiceFilter):
         return qs.filter(polymorphic_ctype=ContentType.objects.get_for_model(ChoiceQuestion))
 
     options = {
-        '': (_('Any'), any),
+        None: (_('Any'), any),
         1: (_('Text Question'), text_question),
         2: (_('Choice Question'), choice_question),
     }
@@ -2200,7 +2395,7 @@ class QuestionTypeFilter(ChoiceFilter):
         try:
             value = int(value)
         except (ValueError, TypeError):
-            value = ''
+            value = None
         return self.options[value][1](self, qs, self.options[value][0])
 
 

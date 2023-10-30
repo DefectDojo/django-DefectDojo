@@ -13,8 +13,14 @@ Findings:
 {% for finding in finding_group.findings.all %}
 - [{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]{% endfor %}
 
+{% if finding_group.test.engagement.branch_tag %}
 *Branch/Tag:* {{ finding_group.test.engagement.branch_tag }}
+{% endif %}
 
+{% if finding_group.test.engagement.build_id %}
 *BuildID:* {{ finding_group.test.engagement.build_id }}
+{% endif %}
 
+{% if finding_group.test.engagement.commit_hash %}
 *Commit hash:* {{ finding_group.test.engagement.commit_hash }}
+{% endif %}

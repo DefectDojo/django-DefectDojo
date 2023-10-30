@@ -8,6 +8,7 @@ import sys
 import os
 from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 from product_test import ProductTest, WaitForPageLoad
+from user_test import UserTest
 from pathlib import Path
 import time
 
@@ -189,7 +190,6 @@ class FindingTest(BaseTestCase):
         # select Reviewer
         # Let's make the first user in the list a reviewer
         # set select element style from 'none' to 'inline'
-
         try:
             WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_reviewers')))
         except TimeoutException:
@@ -202,8 +202,8 @@ class FindingTest(BaseTestCase):
         Select(element).select_by_value(reviewer_option.get_attribute("value"))
         # Add Review notes
         driver.find_element(By.ID, "id_entry").clear()
-        driver.find_element(By.ID, "id_entry").send_keys("This is to be reveiwed critically. Make sure it is well handled.")
-        # Click 'Mark for reveiw'
+        driver.find_element(By.ID, "id_entry").send_keys("This is to be reviewed critically. Make sure it is well handled.")
+        # Click 'Mark for review'
         driver.find_element(By.NAME, "submit").click()
         # Query the site to determine if the finding has been added
 
@@ -502,7 +502,8 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='Finding deleted successfully'))
+        # self.assertTrue(self.is_success_message_present(text='Finding deleted successfully')) # there's no alert when deleting this way
+        self.assertTrue(self.is_text_present_on_page(text='Finding deleted successfully'))
         # check that user was redirect back to url where it came from based on return_url
 
     def test_list_components(self):
@@ -520,6 +521,7 @@ def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=
     suite.addTest(BaseTestCase('delete_finding_template_if_exists'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ProductTest('test_add_product_finding'))
+    suite.addTest(UserTest('test_create_user_with_writer_global_role'))
     suite.addTest(FindingTest('test_list_findings_all'))
     suite.addTest(FindingTest('test_list_findings_open'))
     suite.addTest(FindingTest('test_quick_report'))
@@ -547,6 +549,7 @@ def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=
     suite.addTest(FindingTest('test_delete_finding'))
     suite.addTest(FindingTest('test_delete_finding_template'))
     suite.addTest(ProductTest('test_delete_product'))
+    suite.addTest(UserTest('test_user_with_writer_role_delete'))
     return suite
 
 

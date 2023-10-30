@@ -16,20 +16,20 @@ class TestMobSFParser(DojoTestCase):
         testfile.close()
         self.assertEqual(18, len(findings))
         item = findings[0]
-        self.assertEquals('android.permission.WRITE_EXTERNAL_STORAGE', item.title)
-        self.assertEquals('High', item.severity)
+        self.assertEqual('android.permission.WRITE_EXTERNAL_STORAGE', item.title)
+        self.assertEqual('High', item.severity)
         item = findings[2]
-        self.assertEquals('android.permission.INTERNET', item.title)
-        self.assertEquals('Info', item.severity)
+        self.assertEqual('android.permission.INTERNET', item.title)
+        self.assertEqual('Info', item.severity)
         item = findings[10]
-        self.assertEquals('Symbols are stripped', item.title)
-        self.assertEquals('Info', item.severity)
-        self.assertEquals('lib/armeabi-v7a/libdivajni.so', item.file_path)
-        self.assertEquals(7, item.nb_occurences)
+        self.assertEqual('Symbols are stripped', item.title)
+        self.assertEqual('Info', item.severity)
+        self.assertEqual('lib/armeabi-v7a/libdivajni.so', item.file_path)
+        self.assertEqual(7, item.nb_occurences)
         item = findings[17]
-        self.assertEquals('Loading Native Code (Shared Library)', item.title)
-        self.assertEquals('Info', item.severity)
-        self.assertEquals(1, item.nb_occurences)
+        self.assertEqual('Loading Native Code (Shared Library)', item.title)
+        self.assertEqual('Info', item.severity)
+        self.assertEqual(1, item.nb_occurences)
 
     def test_parse_file2(self):
         test = Test()

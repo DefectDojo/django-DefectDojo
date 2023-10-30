@@ -4,7 +4,6 @@ from dojo.models import Finding
 
 
 class RubocopParser:
-
     ID = "Rubocop Scan"
 
     # possible values are:

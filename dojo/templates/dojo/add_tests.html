@@ -12,6 +12,9 @@
     {{ block.super }}
 
     <h3> Add Tests</h3>
+    <p>
+        <a href="https://defectdojo.github.io/django-DefectDojo/integrations/importing/">Documentation</a>
+    </p>
     <form class="form-horizontal" action="{% url 'add_tests' eid%}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         {% include "dojo/form_fields.html" with form=cred_form %}

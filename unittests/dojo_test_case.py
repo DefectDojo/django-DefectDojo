@@ -1,21 +1,24 @@
-import os
-from django.utils import timezone
-from vcr_unittest import VCRTestCase
-from dojo.models import DojoMeta, Product_Type, Test_Type, User, Endpoint, Notes, Finding, Endpoint_Status, Test, JIRA_Issue, JIRA_Project, \
-                        Product
-from dojo.models import System_Settings, Engagement
-from django.urls import reverse
-from rest_framework.test import APITestCase, APIClient
-from rest_framework.authtoken.models import Token
+import copy
 import json
-from django.test import TestCase
+import logging
+import os
+import pprint
 from itertools import chain
+
+from django.test import TestCase
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.http import urlencode
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient, APITestCase
+from vcr_unittest import VCRTestCase
+
 from dojo.jira_link import helper as jira_helper
 from dojo.jira_link.views import get_custom_field
-import logging
-import pprint
-import copy
-from django.utils.http import urlencode
+from dojo.models import (SEVERITIES, DojoMeta, Endpoint, Endpoint_Status,
+                         Engagement, Finding, JIRA_Issue, JIRA_Project, Notes,
+                         Product, Product_Type, System_Settings, Test,
+                         Test_Type, User)
 
 logger = logging.getLogger(__name__)
 
@@ -29,12 +32,20 @@ class DojoTestUtilsMixin(object):
     def get_test_admin(self, *args, **kwargs):
         return User.objects.get(username='admin')
 
-    def system_settings(self, enable_jira=False, enable_jira_web_hook=False, disable_jira_webhook_secret=False, jira_webhook_secret=None):
+    def system_settings(
+        self,
+        enable_jira=False,
+        enable_jira_web_hook=False,
+        disable_jira_webhook_secret=False,
+        jira_webhook_secret=None,
+        enable_product_tag_inehritance=False,
+    ):
         ss = System_Settings.objects.get()
         ss.enable_jira = enable_jira
         ss.enable_jira_web_hook = enable_jira_web_hook
         ss.disable_jira_webhook_secret = disable_jira_webhook_secret
         ss.jira_webhook_secret = jira_webhook_secret
+        ss.enable_product_tag_inheritance = enable_product_tag_inehritance
         ss.save()
 
     def create_product_type(self, name, *args, description='dummy description', **kwargs):
@@ -42,10 +53,10 @@ class DojoTestUtilsMixin(object):
         product_type.save()
         return product_type
 
-    def create_product(self, name, *args, description='dummy description', prod_type=None, **kwargs):
+    def create_product(self, name, *args, description='dummy description', prod_type=None, tags=[], **kwargs):
         if not prod_type:
             prod_type = Product_Type.objects.first()
-        product = Product(name=name, description=description, prod_type=prod_type)
+        product = Product(name=name, description=description, prod_type=prod_type, tags=tags)
         product.save()
         return product
 
@@ -143,7 +154,10 @@ class DojoTestUtilsMixin(object):
             'jira-project-form-jira_instance': 2,
             'jira-project-form-enable_engagement_epic_mapping': 'on',
             'jira-project-form-push_notes': 'on',
-            'jira-project-form-product_jira_sla_notification': 'on'
+            'jira-project-form-product_jira_sla_notification': 'on',
+            'jira-project-form-custom_fields': 'null',
+            'sla_configuration': 1
+
         }
 
     def get_new_product_without_jira_project_data(self):
@@ -151,6 +165,7 @@ class DojoTestUtilsMixin(object):
             'name': 'new product',
             'description': 'new description',
             'prod_type': 1,
+            'sla_configuration': 1
             # 'project_key': 'IFFF',
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
@@ -167,7 +182,10 @@ class DojoTestUtilsMixin(object):
             'jira-project-form-jira_instance': 2,
             'jira-project-form-enable_engagement_epic_mapping': 'on',
             'jira-project-form-push_notes': 'on',
-            'jira-project-form-product_jira_sla_notification': 'on'
+            'jira-project-form-product_jira_sla_notification': 'on',
+            'jira-project-form-custom_fields': 'null',
+            'sla_configuration': 1
+
         }
 
     def get_product_with_jira_project_data2(self, product):
@@ -179,7 +197,10 @@ class DojoTestUtilsMixin(object):
             'jira-project-form-jira_instance': 2,
             'jira-project-form-enable_engagement_epic_mapping': 'on',
             'jira-project-form-push_notes': 'on',
-            'jira-project-form-product_jira_sla_notification': 'on'
+            'jira-project-form-product_jira_sla_notification': 'on',
+            'jira-project-form-custom_fields': 'null',
+            'sla_configuration': 1
+
         }
 
     def get_product_with_empty_jira_project_data(self, product):
@@ -187,6 +208,9 @@ class DojoTestUtilsMixin(object):
             'name': product.name,
             'description': product.description,
             'prod_type': product.prod_type.id,
+            'sla_configuration': 1,
+
+            'jira-project-form-custom_fields': 'null',
             # 'project_key': 'IFFF',
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
@@ -318,6 +342,11 @@ class DojoTestUtilsMixin(object):
         updated = jira_helper.get_jira_updated(finding)
         return updated
 
+    def get_jira_comments(self, finding_id):
+        finding = Finding.objects.get(id=finding_id)
+        comments = jira_helper.get_jira_comments(finding)
+        return comments
+
     def get_jira_issue_updated_map(self, test_id):
         findings = Test.objects.get(id=test_id).finding_set.all()
         updated_map = {}
@@ -331,7 +360,7 @@ class DojoTestUtilsMixin(object):
         findings = Test.objects.get(id=test_id).finding_set.all()
         for finding in findings:
             logger.debug('finding!')
-            self.assertEquals(jira_helper.get_jira_updated(finding), updated_map[finding.id])
+            self.assertEqual(jira_helper.get_jira_updated(finding), updated_map[finding.id])
 
     def assert_jira_updated_map_changed(self, test_id, updated_map):
         findings = Test.objects.get(id=test_id).finding_set.all()
@@ -383,6 +412,10 @@ class DojoTestCase(TestCase, DojoTestUtilsMixin):
     def __init__(self, *args, **kwargs):
         TestCase.__init__(self, *args, **kwargs)
 
+    def common_check_finding(self, finding):
+        self.assertIn(finding.severity, SEVERITIES)
+        finding.clean()
+
 
 class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
@@ -422,10 +455,10 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         # print('test.content: ', response.content)
         return json.loads(response.content)
 
-    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True,
+    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=False,
                                 push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None, engagement_name=None,
                                 product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None,
-                                scan_date=None, service=None):
+                                scan_date=None, service=None, forceActive=True, forceVerified=True):
         payload = {
                 "minimum_severity": minimum_severity,
                 "active": active,
@@ -474,7 +507,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         return self.import_scan(payload, expected_http_status_code)
 
-    def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None,
+    def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=False, push_to_jira=None,
                                   tags=None, close_old_findings=True, group_by=None, engagement_name=None, scan_date=None,
                                   product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None):
         payload = {
