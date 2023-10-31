@@ -228,7 +228,7 @@ def delete_endpoint(request, eid):
                                     title='Deletion of %s' % endpoint,
                                     product=product,
                                     description='The endpoint "%s" was deleted by %s' % (endpoint, request.user),
-                                    url=request.build_absolute_uri(reverse('endpoint')),
+                                    url=reverse('endpoint'),
                                     icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
 
