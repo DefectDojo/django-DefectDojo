@@ -32,24 +32,24 @@ class MSDefenderAPI:
         self.aadToken = jsonResponse["access_token"]
 
     def get_findings(self):
-        page = 0
         results = []
+        headers = {"Authorization": 'Bearer ' + self.aadToken}
+        endpoint = "https://api.securitycenter.microsoft.com/api/vulnerabilities/machinesVulnerabilities"
         while True:
-            endpoint = 'https://api.securitycenter.microsoft.com/api/vulnerabilities/machinesVulnerabilities?$skip=' + str(page)
-            headers = {"Authorization": 'Bearer ' + self.aadToken}
-            json_output = requests.get(endpoint, headers=headers).json()
-            if "error" in json_output:
-                if json_output["error"]["code"] == "TooManyRequests":
-                    import time
-                    time.sleep(60)  # If you make too many requests per minute, the API lets you wait for 60 seconds.
-                elif json_output["error"]["code"] == "ResourceNotFound":
-                    pass
-                else:
-                    break
-            else:
+            response = requests.get(endpoint, headers=headers)
+            if response.status_code == 200:
+                json_output=response.json()
                 if json_output["value"] == []:
                     break
                 else:
                     results = results + json_output["value"]
-            page += 10000
+                    endpoint = json_output["@odata.nextLink"]
+            elif response.status_code == 429:  # "TooManyRequests"
+                pass
+            else:
+                raise ConnectionError(
+                    "API might mot be avilable at the moment. Error ".format(
+                        response.status_code
+                    )
+                )
         return results
