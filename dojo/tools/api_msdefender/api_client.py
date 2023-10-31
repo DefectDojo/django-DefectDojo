@@ -41,7 +41,7 @@ class MSDefenderAPI:
             if "error" in json_output:
                 if json_output["error"]["code"] == "TooManyRequests":
                     import time
-                    time.sleep(60) #If you make too many requests per minute, the API lets you wait for 60 seconds.
+                    time.sleep(60)  # If you make too many requests per minute, the API lets you wait for 60 seconds.
                 elif json_output["error"]["code"] == "ResourceNotFound":
                     pass
                 else:

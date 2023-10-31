@@ -39,10 +39,12 @@ class ApiMSDefenderParser(object):
                 description=description,
                 static_finding=False,
                 dynamic_finding=True,
-                vuln_id_from_tool=vulnerability["id"],
+                unique_id_from_tool=vulnerability["id"],
             )
             if vulnerability['fixingKbId'] is not None:
                 finding.mitigation = vulnerability['fixingKbId']
+            if vulnerability['cveId'] is not None:
+                finding.cve = vulnerability['cveId']
 
             findings.append(finding)
         return findings

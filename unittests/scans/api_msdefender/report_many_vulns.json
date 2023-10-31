@@ -1,0 +1,46 @@
+{
+    "@odata.context": "https://api-eu.securitycenter.windows.com/api/asfDto)",
+    "value": [
+      {
+        "id": "fjeiwofjweoifjwefo-_-CVE-1234-5678-_-packagvendor-_-tools-_-1.2.3.4-_-",
+        "cveId": "CVE-1234-5678",
+        "machineId": "fjeiwofjweoifjwefo",
+        "fixingKbId": null,
+        "productName": "tools",
+        "productVendor": "packagvendor",
+        "productVersion": "1.2.3.4",
+        "severity": "Low"
+      },
+      {
+        "id": "fjeiwofjweoifjwefo-_-CVE-1234-56788-_-packagvendor-_-tools-_-1.2.3.4-_-",
+        "cveId": "CVE-1234-56788",
+        "machineId": "fjeiwofjweoifjwefo",
+        "fixingKbId": null,
+        "productName": "tools",
+        "productVendor": "packagvendor",
+        "productVersion": "1.2.3.4",
+        "severity": "High"
+      },
+      {
+        "id": "fjeiwofjweoifjwefo-_-CVE-5678-9887-_-packagvendor-_-tools-_-1.2.3.4-_-",
+        "cveId": "CVE-5678-9887",
+        "machineId": "fjeiwofjweoifjwefo",
+        "fixingKbId": null,
+        "productName": "tools",
+        "productVendor": "packagvendor",
+        "productVersion": "1.2.3.4",
+        "severity": "Medium"
+      },
+      {
+        "id": "fjeiwofjweoifjwefo-_-CVE-5678-8888-_-packagvendor-_-tools-_-1.2.3.4-_-",
+        "cveId": "CVE-5678-8888",
+        "machineId": "fjeiwofjweoifjwefo",
+        "fixingKbId": null,
+        "productName": "tools",
+        "productVendor": "packagvendor",
+        "productVersion": "1.2.3.4",
+        "severity": "Medium"
+      }
+    ],
+    "@odata.nextLink": "https://apiofazure?$skip=10000"
+  }
