@@ -1030,6 +1030,26 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                 'Finding removed successfully from risk acceptance.',
                 extra_tags='alert-success')
 
+        if 'risk_accept_pending' in request.POST:
+            finding = get_object_or_404(Finding,
+                                        pk=request.POST['risk_accept_finding_id'])
+            response=rp_helper.risk_acceptante_pending(eng, finding, risk_acceptance)
+
+            if response.status == "OK":
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    response.message,
+                    extra_tags='alert-success')
+            else:
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    response.message,
+                    extra_tags='alert-warning')
+
+                
+
         if 'replace_file' in request.POST:
             replace_form = ReplaceRiskAcceptanceProofForm(
                 request.POST, request.FILES, instance=risk_acceptance)
@@ -1138,6 +1158,19 @@ def delete_risk_acceptance(request, eid, raid):
     eng = get_object_or_404(Engagement, pk=eid)
 
     ra_helper.delete(eng, risk_acceptance)
+
+    messages.add_message(
+        request,
+        messages.SUCCESS,
+        'Risk acceptance deleted successfully.',
+        extra_tags='alert-success')
+    return HttpResponseRedirect(reverse("view_engagement", args=(eng.id, )))
+
+
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
+def risk_acceptance_pending(request, eid, raid):
+    risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
+    eng = get_object_or_404(Engagement, pk=eid)
 
     messages.add_message(
         request,

@@ -2290,6 +2290,12 @@ class Finding(models.Model):
                                      on_delete=models.RESTRICT,
                                      verbose_name=_('Mitigated By'),
                                      help_text=_("Documents who has marked this flaw as fixed."))
+    accepted_by = models.CharField(max_length=200,
+                                   default="",
+                                   null=True,
+                                   blank=True,
+                                   verbose_name=_('Accepted By'),
+                                   help_text=_("The person that accepts the risk, can be outside of DefectDojo."))
     reporter = models.ForeignKey(Dojo_User,
                                  editable=False,
                                  default=1,

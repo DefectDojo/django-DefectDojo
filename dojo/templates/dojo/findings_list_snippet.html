@@ -485,7 +485,7 @@
                                                                         </li>
                                                                     {% endif %}
                                                                     {% if finding.test.engagement.product.enable_full_risk_acceptance %}
-                                                                        {% if finding.risk_pending and finding|has_risk_acceptance_permission is False%}
+                                                                        {% if finding.risk_pending %}
                                                                             <li role="presentation">
                                                                                 <a rel="noopener noreferrer" href="#" disabled>
                                                                                     <i class="fa-solid fa-circle-exclamation" style="color: grey"></i> <span style="color: grey"> {% trans "Add Risk Acceptance..." %}<span>

@@ -2,7 +2,10 @@ import logging
 from typing import List
 from django.conf import settings
 from dataclasses import dataclass
-from dojo.models import Engagement 
+from utils.response import Response
+from dojo.models import Engagement, Risk_Acceptance, Finding
+import dojo.risk_acceptance.risk_pending as rp_helper
+import crum
 logger = logging.getLogger(__name__)
 
 
@@ -18,6 +21,43 @@ def get_abuse_control():
 def get_number_acceptance_risk(finding):
     # TODO: number acceptaciones 
     return 1
+
+def risk_acceptante_pending(eng: Engagement, finding: Finding, risk_acceptance: Risk_Acceptance):
+    user = crum.get_current_user()
+    status = "Failed"
+    message = "Cannot perform action"
+    for finding in risk_acceptance.accepted_findings.all():
+        if finding.risk_pending:
+            if is_permissions_risk_accept(eng, finding.severity, user):
+                number_of_acceptors_required = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY\
+                    .get(finding.severity).get("number_acceptors")
+                if finding.acceptances_confirmed == number_of_acceptors_required:
+                    logger.warning("All necessary acceptances have already been made")
+                    message = "All necessary acceptances have already been made"
+                    break
+                if finding.acceptances_confirmed < number_of_acceptors_required:
+                    finding.acceptances_confirmed += 1
+                    if finding.accepted_by is None:
+                        finding.accepted_by = user.username
+                    else:
+                        if user.username in finding.accepted_by:
+                            logger.warning("User already accepts the risk")
+                            message = "User already accepts the risk"
+                            break
+                        finding.accepted_by += ", " + user.username
+                    message = "Finding Accept successfully from risk acceptance."
+                    status = "OK"
+                    finding.save()
+                    if finding.acceptances_confirmed == number_of_acceptors_required:
+                        finding.risk_pending = False
+                        finding.risk_accepted = True
+                        finding.active = False
+                        finding.save()
+                else:
+                    raise ValueError(f"Error number of accepttors{finding.acceptances_confirmed} \
+                                     < number of acceptors required {number_of_acceptors_required}")
+    
+    return Response(status=status, message=message)
 
 
 def get_contacts(engagement: Engagement, finding_serverity: str, user):
@@ -43,6 +83,13 @@ def get_contacts(engagement: Engagement, finding_serverity: str, user):
 
     return contact_list
 
+def is_permissions_risk_accept(engagement: Engagement, finding_serverity: str, user):
+    contacts = get_contacts(engagement, finding_serverity, user)
+    contacts_ids = [contact.id for contact in contacts]
+    if user.id in contacts_ids:
+        # has the permissions
+        return True
+    return False
 
 def rule_risk_acceptance_according_to_critical(severity, user_rol: str):
     risk_rule = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY.get(severity)
