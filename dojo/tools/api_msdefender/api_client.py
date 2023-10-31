@@ -40,11 +40,12 @@ class MSDefenderAPI:
             json_output = requests.get(endpoint, headers=headers).json()
             if "error" in json_output:
                 if json_output["error"]["code"] == "TooManyRequests":
-                    print(json_output)
                     import time
                     time.sleep(60)
             else:
-                results = results + json_output["value"]
-                print(json_output['@odata.nextLink'])
+                if json_output["value"] == []:
+                    break
+                else:
+                    results = results + json_output["value"]
             page += 10000
         return results
