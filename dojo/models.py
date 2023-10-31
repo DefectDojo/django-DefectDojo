@@ -2888,78 +2888,78 @@ class Finding(models.Model):
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
 
         from dojo.finding import helper as finding_helper
+
+        if not user:
+            from dojo.utils import get_current_user
+            user = get_current_user()
+
+        # Title Casing
+        from titlecase import titlecase
+        self.title = titlecase(self.title[:511])
+
+        # Assign the numerical severity for correct sorting order
+        self.numerical_severity = Finding.get_numerical_severity(self.severity)
+
+        # Synchronize cvssv3 score using cvssv3 vector
+        if self.cvssv3:
+            try:
+                cvss_object = CVSS3(self.cvssv3)
+                # use the environmental score, which is the most refined score
+                self.cvssv3_score = cvss_object.scores()[2]
+            except Exception as ex: 
+                logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
+
+        # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
+        # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
+        if dedupe_option:
+            if (self.hash_code is not None):
+                deduplicationLogger.debug("Hash_code already computed for finding")
+            else:
+                self.hash_code = self.compute_hash_code()
+                deduplicationLogger.debug("Hash_code computed for finding: %s", self.hash_code)
+
+        if self.pk is None:
+            # We enter here during the first call from serializers.py
+            from dojo.utils import apply_cwe_to_template
+            self = apply_cwe_to_template(self)
+
+            if (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
+                self.static_finding = True
+                self.dynamic_finding = False
+            elif (self.file_path is not None):
+                self.static_finding = True
+
+            # because we have reduced the number of (super()).save() calls, the helper is no longer called for new findings
+            # so we call it manually
+            finding_helper.update_finding_status(self, user, changed_fields={'id': (None, None)})
+
+        else:
+            # logger.debug('setting static / dynamic in save')
+            # need to have an id/pk before we can access endpoints
+            if (self.file_path is not None) and (self.endpoints.count() == 0):
+                self.static_finding = True
+                self.dynamic_finding = False
+            elif (self.file_path is not None):
+                self.static_finding = True
+
+        logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
         
         try:
-            
             with transaction.atomic():
-
-                if not user:
-                    from dojo.utils import get_current_user
-                    user = get_current_user()
-
-                # Title Casing
-                from titlecase import titlecase
-                self.title = titlecase(self.title[:511])
-
-                # Assign the numerical severity for correct sorting order
-                self.numerical_severity = Finding.get_numerical_severity(self.severity)
-
-                # Synchronize cvssv3 score using cvssv3 vector
-                if self.cvssv3:
-                    try:
-                        cvss_object = CVSS3(self.cvssv3)
-                        # use the environmental score, which is the most refined score
-                        self.cvssv3_score = cvss_object.scores()[2]
-                    except Exception as ex: 
-                        logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
-
-                # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
-                # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
-                if dedupe_option:
-                    if (self.hash_code is not None):
-                        deduplicationLogger.debug("Hash_code already computed for finding")
-                    else:
-                        self.hash_code = self.compute_hash_code()
-                        deduplicationLogger.debug("Hash_code computed for finding: %s", self.hash_code)
-
-                if self.pk is None:
-                    # We enter here during the first call from serializers.py
-                    from dojo.utils import apply_cwe_to_template
-                    self = apply_cwe_to_template(self)
-
-                    if (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
-                        self.static_finding = True
-                        self.dynamic_finding = False
-                    elif (self.file_path is not None):
-                        self.static_finding = True
-
-                    # because we have reduced the number of (super()).save() calls, the helper is no longer called for new findings
-                    # so we call it manually
-                    finding_helper.update_finding_status(self, user, changed_fields={'id': (None, None)})
-
-                else:
-                    # logger.debug('setting static / dynamic in save')
-                    # need to have an id/pk before we can access endpoints
-                    if (self.file_path is not None) and (self.endpoints.count() == 0):
-                        self.static_finding = True
-                        self.dynamic_finding = False
-                    elif (self.file_path is not None):
-                        self.static_finding = True
-
-                logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
                 super(Finding, self).save(*args, **kwargs)
-
-                self.found_by.add(self.test.test_type)
-
-                # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
-                if dedupe_option or issue_updater_option or product_grading_option or push_to_jira:
-                    finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
-                        issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
-                else:
-                    logger.debug('no options selected that require finding post processing')
-                    
         except Exception as ex:
             logger.error(f'AN ERRROR HAS OCURRED {ex}')
+
+        self.found_by.add(self.test.test_type)
+
+        # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
+        if dedupe_option or issue_updater_option or product_grading_option or push_to_jira:
+            finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
+                issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
+        else:
+            logger.debug('no options selected that require finding post processing')
+                    
+        
 
     # Check if a mandatory field is empty. If it's the case, fill it with "no <fieldName> given"
     def clean(self):
