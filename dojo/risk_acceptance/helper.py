@@ -116,6 +116,12 @@ def add_findings_to_risk_pending(risk_pending, findings):
             finding.save(dedupe_option=False)
             risk_pending.accepted_findings.add(finding)
     risk_pending.save()
+    title = f"{risk_pending.TREATMENT_TRANSLATIONS.get(risk_pending.recommendation)} is requested:  {str(risk_pending.engagement.name)}"
+    create_notification(event='risk_acceptance_request', title=title, risk_acceptance=risk_pending, accepted_findings=risk_pending.accepted_findings,
+    reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
+    product=risk_pending.engagement.product,
+    recipients=eval(risk_pending.accepted_by),
+    url=reverse('view_risk_acceptance', args=(risk_pending.engagement.id, risk_pending.id, )))
     post_jira_comments(risk_pending, findings, accepted_message_creator)
 
 

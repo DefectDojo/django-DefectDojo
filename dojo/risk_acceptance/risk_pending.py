@@ -3,7 +3,9 @@ from typing import List
 from django.conf import settings
 from dataclasses import dataclass
 from utils.response import Response
+from django.urls import reverse
 from dojo.models import Engagement, Risk_Acceptance, Finding
+from dojo.risk_acceptance.helper import create_notification
 import dojo.risk_acceptance.risk_pending as rp_helper
 import crum
 logger = logging.getLogger(__name__)
@@ -21,6 +23,8 @@ def get_abuse_control():
 def get_number_acceptance_risk(finding):
     # TODO: number acceptaciones 
     return 1
+
+
 
 def risk_acceptante_pending(eng: Engagement, finding: Finding, risk_acceptance: Risk_Acceptance):
     user = crum.get_current_user()
@@ -53,12 +57,19 @@ def risk_acceptante_pending(eng: Engagement, finding: Finding, risk_acceptance: 
                         finding.risk_accepted = True
                         finding.active = False
                         finding.save()
+                        # Send notification
+                        title = f"Request is accepted:  {str(risk_acceptance.engagement.product)} : {str(risk_acceptance.engagement.name)}"
+                        create_notification(event='risk_acceptance_request', title=title, risk_acceptance=risk_acceptance, accepted_findings=risk_acceptance.accepted_findings,
+                        reactivated_findings=risk_acceptance.accepted_findings, engagement=risk_acceptance.engagement,
+                        product=risk_acceptance.engagement.product,
+                        recipients=[risk_acceptance.owner.get_username()],
+                        url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
+
                 else:
                     raise ValueError(f"Error number of accepttors{finding.acceptances_confirmed} \
                                      < number of acceptors required {number_of_acceptors_required}")
     
     return Response(status=status, message=message)
-
 
 def get_contacts(engagement: Engagement, finding_serverity: str, user):
     rule = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY.get(finding_serverity)

@@ -3791,7 +3791,9 @@ class Notifications(models.Model):
     risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
         verbose_name=_('Risk Acceptance Expiration'),
         help_text=_('Get notified of (upcoming) Risk Acceptance expiries'))
-
+    risk_acceptance_request = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
+        verbose_name=_('Risk Acceptance Request'),
+        help_text=_('Send notification to the contacts of the product type'))
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['user', 'product'], name="notifications_user_product")
