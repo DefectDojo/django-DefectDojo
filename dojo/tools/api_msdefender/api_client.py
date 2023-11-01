@@ -11,7 +11,7 @@ class MSDefenderAPI:
     """
 
     def __init__(self, tool_config):
-        if tool_config.authentication_type == "Password":
+        if tool_config.authentication_type == "Username/Password":
             self.base_url = "https://login.microsoftonline.com/%s/oauth2/token" % (tool_config.extras)
             body = {
                 'resource': 'https://api.securitycenter.microsoft.com',

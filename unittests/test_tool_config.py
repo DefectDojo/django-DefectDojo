@@ -12,7 +12,7 @@ class TestApiScanConfigEntry(DojoTestCase):
 
     def test_base(self):
         acsh = get_api_scan_configuration_hints()
-        self.assertEqual(len(acsh), 6, acsh)
+        self.assertEqual(len(acsh), 7, acsh)
 
         i = 0
         with self.subTest('BlackDuck API'):
@@ -60,8 +60,8 @@ class TestApiScanConfigEntry(DojoTestCase):
         acsh = get_api_scan_configuration_hints()
         self.assertEqual(acsh[1]['tool_types'].count(), 0)
         self.assertEqual(acsh[1]['tool_configurations'].count(), 0)
-        self.assertEqual(acsh[4]['tool_types'].count(), 1)
-        self.assertEqual(acsh[4]['tool_configurations'].count(), 1)
+        self.assertEqual(acsh[5]['tool_types'].count(), 1)
+        self.assertEqual(acsh[5]['tool_configurations'].count(), 1)
 
     def test_has_functions(self):
         for parser_name, parser in PARSERS.items():
