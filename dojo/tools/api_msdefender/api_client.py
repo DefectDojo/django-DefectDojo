@@ -41,6 +41,8 @@ class MSDefenderAPI:
                 json_output = response.json()
                 if json_output["value"] == []:
                     break
+                elif json_output.get("@odata.nextLink") is None:
+                    break
                 else:
                     results = results + json_output["value"]
                     endpoint = json_output["@odata.nextLink"]

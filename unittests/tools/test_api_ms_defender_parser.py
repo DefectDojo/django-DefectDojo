@@ -11,8 +11,8 @@ class TestAPIMSDefenderAPIParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(4, len(findings))
         finding = findings[2]
-        self.assertEqual("High", finding.severity)
-        self.assertEqual("fjeiwofjweoifjwefo-_-CVE-1234-56788-_-packagvendor-_-tools-_-1.2.3.4-_-", finding.title)
+        self.assertEqual("Medium", finding.severity)
+        self.assertEqual("fjeiwofjweoifjwefo-_-CVE-5678-9887-_-packagvendor-_-tools-_-1.2.3.4-_-", finding.title)
 
     def test_parse_one_finding(self):
         testfile = open("unittests/scans/api_msdefender/report_one_vuln.json")

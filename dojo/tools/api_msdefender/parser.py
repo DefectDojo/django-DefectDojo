@@ -1,3 +1,4 @@
+import json
 from dojo.models import Finding
 from .importer import MSDefenderApiImporter
 
@@ -23,9 +24,16 @@ class ApiMSDefenderParser(object):
         return "MSDefender API"
 
     def get_findings(self, file, test):
+        if file:
+            loadedjson = json.load(file)
+            data = loadedjson['value']
+        else:
+            data = MSDefenderApiImporter().get_findings(test)
+        return self.process_vulnerabilities(test, data)
+
+    def process_vulnerabilities(self, file, test):
         findings = []
-        report = MSDefenderApiImporter().get_findings(test)
-        for vulnerability in report:
+        for vulnerability in test:
             description = ""
             description += "cveId: " + str(vulnerability['cveId']) + "\n"
             description += "machineId: " + str(vulnerability['machineId']) + "\n"
