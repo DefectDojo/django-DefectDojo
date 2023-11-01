@@ -23,7 +23,7 @@ class MSDefenderApiImporter(object):
             # Double check of config
             if config.product != product:
                 raise ValidationError(
-                    f'API Scan Configuration for "{self.config_id}" and Product do not match. '
+                    "API Scan Configuration for MSDefender API and Product do not match. "
                     f'Product: "{product.name}" ({product.id}), config.product: "{config.product.name}" ({config.product.id})'
                 )
         else:
@@ -36,13 +36,13 @@ class MSDefenderApiImporter(object):
             elif configs.count() > 1:
                 raise ValidationError(
                     "More than one Product API Scan Configuration has been configured, but none of them has been "
-                    "chosen. Please specify at Test which one should be used. "
+                    "chosen.\nPlease specify at Test which one should be used. "
                     f'Product: "{product.name}" ({product.id})'
                 )
             else:
                 raise ValidationError(
-                    "There are no API Scan Configurations for this Product. Please add at least one API Scan "
-                    f'Configuration for "{self.config_id}" to this Product. '
+                    "There are no API Scan Configurations for this Product.\n"
+                    "Please add at least one API Scan Configuration for MSDefender API to this Product. "
                     f'Product: "{product.name}" ({product.id})'
                 )
 
