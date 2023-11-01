@@ -23,6 +23,11 @@ class ApiMSDefenderParser(object):
     def requires_tool_type(self, scan_type):
         return "MSDefender API"
 
+    def api_scan_configuration_hint(self):
+        return (
+            "Do not set anything here."
+        )
+
     def get_findings(self, file, test):
         if file:
             loadedjson = json.load(file)

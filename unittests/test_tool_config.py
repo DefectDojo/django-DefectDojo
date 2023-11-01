@@ -39,6 +39,12 @@ class TestApiScanConfigEntry(DojoTestCase):
             self.assertEqual(acsh[i]['hint'], 'the field <b>Service key 1</b> has to be set with the Edgescan asset id.')
 
         i += 1
+        with self.subTest('MSDefender API'):
+            self.assertEqual(acsh[i]['name'], 'MSDefender API')
+            self.assertEqual(acsh[i]['tool_type_name'], 'MSDefender API')
+            self.assertEqual(acsh[i]['hint'], 'Do not set anything here.')
+
+        i += 1
         with self.subTest('SonarQube'):
             self.assertEqual(acsh[i]['name'], 'SonarQube API Import')
             self.assertEqual(acsh[i]['tool_type_name'], 'SonarQube')
