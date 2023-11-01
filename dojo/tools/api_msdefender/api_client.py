@@ -38,7 +38,7 @@ class MSDefenderAPI:
         while True:
             response = requests.get(endpoint, headers=headers)
             if response.status_code == 200:
-                json_output=response.json()
+                json_output = response.json()
                 if json_output["value"] == []:
                     break
                 else:
@@ -48,7 +48,7 @@ class MSDefenderAPI:
                 pass
             else:
                 raise ConnectionError(
-                    "API might mot be avilable at the moment. Error ".format(
+                    "API might mot be avilable at the moment. Error {}".format(
                         response.status_code
                     )
                 )
