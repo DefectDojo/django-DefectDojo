@@ -1,5 +1,5 @@
 import json
-from dojo.models import Finding
+from dojo.models import Finding, Endpoint
 from .importer import MSDefenderApiImporter
 
 
@@ -45,8 +45,8 @@ class ApiMSDefenderParser(object):
         self.dictformachinelist = {}
         i = 0
         for machines in machinelist:
-            self.dictformachinelist[machines['id']]=i
-            i+=1
+            self.dictformachinelist[machines['id']] = i
+            i += 1
 
     def returnlistfromtranslator(self, machineid, machinelist):
         return machinelist[self.dictformachinelist[machineid]]
@@ -100,4 +100,7 @@ class ApiMSDefenderParser(object):
                 finding.cve = vulnerability['cveId']
 
             findings.append(finding)
+            finding.unsaved_endpoints = list()
+            endpoint = Endpoint(host=str(machine['id']))
+            finding.unsaved_endpoints.append(endpoint)
         return findings
