@@ -34,6 +34,7 @@ class MSDefenderAPI:
 
     def get_findings(self):
         results = []
+        vulnerabilities = []
         headers = {"Authorization": 'Bearer ' + self.aadToken}
         endpoint = "https://api.securitycenter.microsoft.com/api/vulnerabilities/machinesVulnerabilities"
         while True:
@@ -43,10 +44,10 @@ class MSDefenderAPI:
                 if json_output["value"] == []:
                     break
                 elif json_output.get("@odata.nextLink") is None:
-                    results = results + json_output["value"]
+                    vulnerabilities = vulnerabilities + json_output["value"]
                     break
                 else:
-                    results = results + json_output["value"]
+                    vulnerabilities = vulnerabilities + json_output["value"]
                     endpoint = json_output["@odata.nextLink"]
             elif response.status_code == 429:  # "TooManyRequests"
                 pass
@@ -56,4 +57,30 @@ class MSDefenderAPI:
                         response.status_code
                     )
                 )
+        results.append(vulnerabilities)
+        machines = []
+        endpoint = "https://api.securitycenter.microsoft.com/api/machines"
+        while True:
+            response = requests.get(endpoint, headers=headers)
+            if response.status_code == 200:
+                json_output = response.json()
+                if json_output["value"] == []:
+                    break
+                elif json_output.get("@odata.nextLink") is None:
+                    machines = machines + json_output["value"]
+                    break
+                else:
+                    machines = machines + json_output["value"]
+                    endpoint = json_output["@odata.nextLink"]
+            elif response.status_code == 429:  # "TooManyRequests"
+                pass
+            else:
+                raise ConnectionError(
+                    "API might mot be avilable at the moment. Error {}".format(
+                        response.status_code
+                    )
+                )
+        results.append(machines)
+        print(results)
+        print(len(results))
         return results
