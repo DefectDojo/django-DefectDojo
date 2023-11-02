@@ -42,6 +42,7 @@ class MSDefenderAPI:
                 if json_output["value"] == []:
                     break
                 elif json_output.get("@odata.nextLink") is None:
+                    results = results + json_output["value"]
                     break
                 else:
                     results = results + json_output["value"]
