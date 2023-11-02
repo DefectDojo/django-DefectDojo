@@ -2,7 +2,6 @@ import json
 import urllib.request
 import urllib.parse
 import requests
-from dojo.utils import prepare_for_view
 
 
 class MSDefenderAPI:
@@ -11,12 +10,14 @@ class MSDefenderAPI:
     """
 
     def __init__(self, tool_config):
-        if tool_config.authentication_type == "Username/Password":
+        if tool_config.authentication_type == "Password":
+            self.user_name = tool_config.username
+            self.password = tool_config.password
             self.base_url = "https://login.microsoftonline.com/%s/oauth2/token" % (tool_config.extras)
             body = {
                 'resource': 'https://api.securitycenter.microsoft.com',
-                'client_id': tool_config.username,
-                'client_secret': prepare_for_view(tool_config.password),
+                'client_id': self.user_name,
+                'client_secret': self.password,
                 'grant_type': 'client_credentials'
             }
         else:
