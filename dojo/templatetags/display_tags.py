@@ -712,6 +712,14 @@ def finding_display_status(finding):
     # add urls for some statuses
     # outputs html, so make sure to escape user provided fields
     display_status = finding.status()
+    if 'Risk Rejected' in display_status:
+        ra = finding.risk_acceptance
+        if ra:
+            url = reverse('view_risk_acceptance', args=(finding.test.engagement.id, ra.id, ))
+            info = ra.name_and_expiration_info
+            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Rejected"><span style="color: red;">Risk Rejected</span></a>'
+            display_status = display_status.replace('Risk Rejected', link)
+
     if 'Risk pending' in display_status:
         ra = finding.risk_acceptance
         if ra:

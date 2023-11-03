@@ -112,7 +112,7 @@ def add_findings_to_risk_pending(risk_pending, findings):
         if not finding.duplicate:
             # if finding cumple con el numero de aceptadores necesarios (acceptances_confirmed)
             # si se cumple entonces pone el findigin.actve = False
-            finding.risk_pending = True
+            finding.risk_status = "Risk Pending"
             finding.save(dedupe_option=False)
             risk_pending.accepted_findings.add(finding)
     risk_pending.save()

@@ -2130,6 +2130,11 @@ class Test_Import_Finding_Action(TimeStampedModel):
 
 class Finding(models.Model):
 
+    STATUS_CHOICES = (('Risk Pending', 'Risk Pending'),
+                      ('Risk Rejected', 'Risk Rejected'),
+                      ('Risk Accepted', 'Risk Accepted'),
+                      ('Risk Active', 'Risk Active'))
+
     title = models.CharField(max_length=511,
                              verbose_name=_('Title'),
                              help_text=_("A short description of the flaw."))
@@ -2231,10 +2236,12 @@ class Finding(models.Model):
                                        null=True,
                                        verbose_name=_('Acceptances confirmed'),
                                        help_text=_("number of confirmed acceptances for finding"))
-    risk_pending = models.BooleanField(default=False,
+    risk_status = models.CharField(default="Risk Active",
                                        null=True,
-                                       verbose_name=_('Risk Pending'),
-                                       help_text=_("Denotes if this finding has been marked as an pending risk."))
+                                       verbose_name=_('Risk Status'),
+                                       choices=STATUS_CHOICES,
+                                       max_length=20,
+                                       help_text=_("Denotes the type of finding status, (pending, rejected)."))
     risk_accepted = models.BooleanField(default=False,
                                        verbose_name=_('Risk Accepted'),
                                        help_text=_("Denotes if this finding has been marked as an accepted risk."))
@@ -2775,8 +2782,10 @@ class Finding(models.Model):
             status += ['Out Of Scope']
         if self.duplicate:
             status += ['Duplicate']
-        if self.risk_pending:
+        if self.risk_status == "Risk Pending":
             status += ['Risk pending']
+        if self.risk_status == "Risk Rejected":
+            status += ['Risk Rejected']
         elif self.risk_accepted:
             status += ['Risk Accepted']
         if not len(status):

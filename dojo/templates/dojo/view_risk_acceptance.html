@@ -170,6 +170,7 @@
                     <th>Name</th>
                     <th>Date</th>
                     <th>Active</th>
+                    <th>Status</th>
                     <th>Accept by</th>
                     <th>Actions</th>
                 </thead>
@@ -185,6 +186,7 @@
                                title="{{ finding.title }}">{{ finding.title|truncatechars_html:140 }}</a></td>
                         <td>{{ finding.date }}</td>
                         <td>{{ finding.active }}</td>
+                        <td>{{ finding.risk_status }}</td>
                         <td> <span style="color: green;">{{ finding.accepted_by}} </span></td>
                         <td>
                             {% if engagement|has_object_permission:"Risk_Acceptance" and finding|has_risk_acceptance_permission%}
@@ -194,7 +196,9 @@
                                     <input class="btn btn-sm btn-warning" type="submit" name="remove_finding"
                                            value="Remove"/>
                                     <input type="hidden" name="risk_accept_finding_id" value="{{ finding.id }}"/>
-                                    <input class="btn btn-success" type="submit" name="risk_accept_pending"
+                                    <input class="btn btn-sm btn-danger" type="submit" name="risk_accept_decline"
+                                           value="Decline"/>
+                                    <input class="btn btn-sm btn-success" type="submit" name="risk_accept_pending"
                                            value="Accept"/>
                                 </form>
                             {% else %}

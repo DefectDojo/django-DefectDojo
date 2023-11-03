@@ -24,50 +24,64 @@ def get_number_acceptance_risk(finding):
     # TODO: number acceptaciones 
     return 1
 
+def risk_acceptance_decline(eng: Engagement, finding: Finding, risk_acceptance: Risk_Acceptance):
+    status = "Failed"
+    message = "Cannot perform action"
+    if finding.risk_status in ["Risk Active", "Risk Pending"]:
+        finding.accepted_by = ""
+        finding.acceptances_confirmed = 0
+        finding.active = True
+        finding.risk_accepted = False
+        finding.risk_status = "Risk Rejected"
+        finding.save()
+        status = "OK"
+        message = "Risk Rejected"
+    return Response(status=status, message=message)
 
 
 def risk_acceptante_pending(eng: Engagement, finding: Finding, risk_acceptance: Risk_Acceptance):
     user = crum.get_current_user()
     status = "Failed"
     message = "Cannot perform action"
-    for finding in risk_acceptance.accepted_findings.all():
-        if finding.risk_pending:
-            if is_permissions_risk_accept(eng, finding.severity, user):
-                number_of_acceptors_required = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY\
-                    .get(finding.severity).get("number_acceptors")
-                if finding.acceptances_confirmed == number_of_acceptors_required:
-                    logger.warning("All necessary acceptances have already been made")
-                    message = "All necessary acceptances have already been made"
-                    break
-                if finding.acceptances_confirmed < number_of_acceptors_required:
-                    finding.acceptances_confirmed += 1
-                    if finding.accepted_by is None:
-                        finding.accepted_by = user.username
-                    else:
-                        if user.username in finding.accepted_by:
-                            logger.warning("User already accepts the risk")
-                            message = "User already accepts the risk"
-                            break
-                        finding.accepted_by += ", " + user.username
-                    message = "Finding Accept successfully from risk acceptance."
-                    status = "OK"
-                    finding.save()
-                    if finding.acceptances_confirmed == number_of_acceptors_required:
-                        finding.risk_pending = False
-                        finding.risk_accepted = True
-                        finding.active = False
-                        finding.save()
-                        # Send notification
-                        title = f"Request is accepted:  {str(risk_acceptance.engagement.product)} : {str(risk_acceptance.engagement.name)}"
-                        create_notification(event='risk_acceptance_request', title=title, risk_acceptance=risk_acceptance, accepted_findings=risk_acceptance.accepted_findings,
-                        reactivated_findings=risk_acceptance.accepted_findings, engagement=risk_acceptance.engagement,
-                        product=risk_acceptance.engagement.product,
-                        recipients=[risk_acceptance.owner.get_username()],
-                        url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
-
+    if finding.risk_status in ["Risk Pending", "Risk Rejected"]:
+        if is_permissions_risk_accept(eng, finding.severity, user):
+            number_of_acceptors_required = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY\
+                .get(finding.severity).get("number_acceptors")
+            if finding.acceptances_confirmed == number_of_acceptors_required:
+                logger.warning("All necessary acceptances have already been made")
+                message = "All necessary acceptances have already been made"
+            if finding.acceptances_confirmed < number_of_acceptors_required:
+                finding.acceptances_confirmed += 1
+                if finding.accepted_by is None or finding.accepted_by == "":
+                    finding.accepted_by = user.username
                 else:
-                    raise ValueError(f"Error number of accepttors{finding.acceptances_confirmed} \
-                                     < number of acceptors required {number_of_acceptors_required}")
+                    if user.username in finding.accepted_by:
+                        logger.warning("User already accepts the risk")
+                        message = "User already accepts the risk"
+                    finding.accepted_by += ", " + user.username
+                message = "Finding Accept successfully from risk acceptance."
+                status = "OK"
+                if finding.risk_status == "Risk Rejected":
+                    finding.risk_status = "Risk Pending"
+                finding.save()
+                if finding.acceptances_confirmed == number_of_acceptors_required:
+                    finding.risk_status = "Risk Accepted"
+                    finding.risk_accepted = True
+                    finding.active = False
+                    finding.save()
+                    # Send notification
+                    title = f"Request is accepted:  {str(risk_acceptance.engagement.product)} : {str(risk_acceptance.engagement.name)}"
+                    create_notification(event='risk_acceptance_request', title=title, risk_acceptance=risk_acceptance, accepted_findings=risk_acceptance.accepted_findings,
+                    reactivated_findings=risk_acceptance.accepted_findings, engagement=risk_acceptance.engagement,
+                    product=risk_acceptance.engagement.product,
+                    recipients=[risk_acceptance.owner.get_username()],
+                    url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
+
+            else:
+                raise ValueError(f"Error number of accepttors{finding.acceptances_confirmed} \
+                                    < number of acceptors required {number_of_acceptors_required}")
+    else:
+        message = "The risk is already accepted"
     
     return Response(status=status, message=message)
 

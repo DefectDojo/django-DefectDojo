@@ -472,7 +472,8 @@ def view_engagement(request, eid):
             'creds': creds,
             'cred_eng': cred_eng,
             'network': network,
-            'preset_test_type': preset_test_type
+            'preset_test_type': preset_test_type,
+            'risk_pending': settings.RISK_ACCEPTANCE
         })
 
 
@@ -848,7 +849,10 @@ def add_risk_acceptance(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
     form = None
     finding = None
-    risk_pending = False
+    # risk status == 0 - > risk normal
+    # risk status == 1 - > risk pending
+    # risk status == 2 - > Risk Rejected
+    risk_status = "Risk Active"
     if fid:
         finding = get_object_or_404(Finding, id=fid)
 
@@ -857,8 +861,8 @@ def add_risk_acceptance(request, eid, fid=None):
 
     if request.method == 'POST':
         if settings.RISK_ACCEPTANCE:
-            risk_pending = rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user.global_role.role.name)
-            if risk_pending:
+            risk_status = rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user.global_role.role.name)
+            if risk_status:
                 form = RiskPendingForm(request.POST, request.FILES)
             else:
                 form = RiskAcceptanceForm(request.POST, request.FILES)
@@ -895,7 +899,7 @@ def add_risk_acceptance(request, eid, fid=None):
 
             findings = form.cleaned_data['accepted_findings']
 
-            if settings.RISK_ACCEPTANCE is True and risk_pending is True:
+            if settings.RISK_ACCEPTANCE is True and risk_status:
                 risk_acceptance = ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
             else:
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
@@ -913,14 +917,14 @@ def add_risk_acceptance(request, eid, fid=None):
                 risk_acceptance_title_suggestion = 'Accept: %s' % finding
                 form = RiskPendingForm(
                     initial={'owner': request.user,
-                             'name': risk_acceptance_title_suggestion,
-                             'accepted_by': rp_helper.get_contacts(eng, finding.severity, request.user)})
+                            'name': risk_acceptance_title_suggestion,
+                            'accepted_by': rp_helper.get_contacts(eng, finding.severity, request.user)})
             else:
                 risk_acceptance_title_suggestion = 'Accept: %s' % finding
                 form = RiskAcceptanceForm(
                     initial={'owner': request.user,
-                             'name': risk_acceptance_title_suggestion,
-                             'accepted_by': rp_helper.get_contacts(eng, finding.severity, request.user)})
+                            'name': risk_acceptance_title_suggestion,
+                            'accepted_by': rp_helper.get_contacts(eng, finding.severity, request.user)})
         else:
             risk_acceptance_title_suggestion = 'Accept: %s' % finding
             form = RiskAcceptanceForm(initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
@@ -1034,6 +1038,10 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             finding = get_object_or_404(Finding,
                                         pk=request.POST['risk_accept_finding_id'])
             response=rp_helper.risk_acceptante_pending(eng, finding, risk_acceptance)
+        if 'risk_accept_decline' in request.POST:
+            finding = get_object_or_404(Finding,
+                                        pk=request.POST['risk_accept_finding_id'])
+            response=rp_helper.risk_acceptance_decline(eng, finding, risk_acceptance)
 
             if response.status == "OK":
                 messages.add_message(
