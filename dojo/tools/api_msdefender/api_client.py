@@ -81,6 +81,4 @@ class MSDefenderAPI:
                     )
                 )
         results.append(machines)
-        print(results)
-        print(len(results))
         return results
