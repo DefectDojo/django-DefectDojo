@@ -26,7 +26,13 @@ class NucleiParser(object):
         return "Import JSON output for nuclei scan report."
 
     def get_findings(self, filename, test):
-        data = [json.loads(line) for line in filename]
+        try:
+            data = []
+            content = json.load(filename)
+            for template in content:
+                data.append(template)
+        except ValueError as err:
+            data = [json.loads(line) for line in filename]
         if len(data) == 0:
             return []
 
