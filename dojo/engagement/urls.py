@@ -23,7 +23,7 @@ urlpatterns = [
     re_path(r'^engagement/(?P<eid>\d+)/add_tests$', views.add_tests,
         name='add_tests'),
     re_path(r'^engagement/(?P<eid>\d+)/import_scan_results$',
-        views.import_scan_results, name='import_scan_results'),
+        views.ImportScanResultsView.as_view(), name='import_scan_results'),
     re_path(r'^engagement/(?P<eid>\d+)/close$', views.close_eng,
         name='close_engagement'),
     re_path(r'^engagement/(?P<eid>\d+)/reopen$', views.reopen_eng,
