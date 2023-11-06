@@ -226,3 +226,6 @@ class TestNucleiParser(DojoTestCase):
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
         self.assertEqual(5, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("Info", finding.severity)
