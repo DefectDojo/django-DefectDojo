@@ -1,0 +1,45 @@
+name: Check For Modifications to Protected Files
+
+on:
+  pull_request_target:
+
+jobs:
+  check-if-protected-files-are-modified:
+    permissions: write-all
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Check for file changes using git-protect
+        run: |
+          python .github/scripts/git_protect.py ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} --comment-only &> output.txt
+
+      - name: Post a comment back to the PR if protected files have changed
+        if: ${{ always() }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+
+            fs.readFile('output.txt', 'utf8', (err, data) => {
+                if (err) {
+                    console.error('Error reading the file:', err);
+                    return;
+                }
+                github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: data
+              })
+            });
