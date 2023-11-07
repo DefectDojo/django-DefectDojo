@@ -35,7 +35,7 @@
         "ipAddresses": [
           {
             "ipAddress": "1.1.1.1",
-            "macAddress": "123123123",
+            "macAddress": "00-B0-D0-63-C2-26",
             "type": null,
             "operationalStatus": "Unknown"
           }
@@ -75,14 +75,14 @@
         "managedByStatus": "Unknown",
         "ipAddresses": [
           {
-            "ipAddress": "asfdasdf",
-            "macAddress": "asdfasdfasdf",
+            "ipAddress": "1.2.3.4",
+            "macAddress": "00-B0-D0-63-C2-26",
             "type": "Ethernet",
             "operationalStatus": "Up"
           },
           {
-            "ipAddress": "asdfsadfasfd",
-            "macAddress": "asdfasdfasfd",
+            "ipAddress": "1.2.3.5",
+            "macAddress": "00-B0-D0-63-C2-26",
             "type": "Ethernet",
             "operationalStatus": "Up"
           }

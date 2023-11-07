@@ -1458,6 +1458,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'KubeHunter Scan': DEDUPE_ALGO_HASH_CODE,
     'kube-bench Scan': DEDUPE_ALGO_HASH_CODE,
     'Threagile risks report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    'MSDefender API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
 }
 
 # Override the hardcoded settings here via the env var

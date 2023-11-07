@@ -1,6 +1,3 @@
-import json
-import urllib.request
-import urllib.parse
 import requests
 
 
@@ -26,10 +23,8 @@ class MSDefenderAPI:
                     tool_config.authentication_type
                 )
             )
-        data = urllib.parse.urlencode(body).encode("utf-8")
-        req = urllib.request.Request(self.base_url, data)
-        response = urllib.request.urlopen(req)
-        jsonResponse = json.loads(response.read())
+        response = requests.post(self.base_url, body)
+        jsonResponse = response.json()
         self.aadToken = jsonResponse["access_token"]
 
     def get_findings(self):
@@ -53,9 +48,7 @@ class MSDefenderAPI:
                 pass
             else:
                 raise ConnectionError(
-                    "API might mot be avilable at the moment. Error {}".format(
-                        response.status_code
-                    )
+                    f'API might mot be avilable at the moment. {response.status_code} - {response.content.decode("utf-8")}'
                 )
         results.append(vulnerabilities)
         machines = []
@@ -76,9 +69,7 @@ class MSDefenderAPI:
                 pass
             else:
                 raise ConnectionError(
-                    "API might mot be avilable at the moment. Error {}".format(
-                        response.status_code
-                    )
+                    f'API might mot be avilable at the moment. {response.status_code} - {response.content.decode("utf-8")}'
                 )
         results.append(machines)
         return results

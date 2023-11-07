@@ -39,23 +39,12 @@ class ApiMSDefenderParser(object):
             data.append(machinedata)
         else:
             data = MSDefenderApiImporter().get_findings(test)
-        return self.process_vulnerabilities(test, data)
+        return self.process_vulnerabilities(data)
 
-    def machinelisttranslator(self, machinelist):
-        self.dictformachinelist = {}
-        i = 0
-        for machines in machinelist:
-            self.dictformachinelist[machines['id']] = i
-            i += 1
-
-    def returnlistfromtranslator(self, machineid, machinelist):
-        return machinelist[self.dictformachinelist[machineid]]
-
-    def process_vulnerabilities(self, file, test):
-        self.machinelisttranslator(machinelist=test[1])
+    def process_vulnerabilities(self, data):
         findings = []
-        for vulnerability in test[0]:
-            machine = self.returnlistfromtranslator(machineid=vulnerability['machineId'], machinelist=test[1])
+        for vulnerability in data[0]:
+            machine = list(filter(lambda m: m['id'] == vulnerability['machineId'], data[1]))[0]
             description = ""
             description += "cveId: " + str(vulnerability['cveId']) + "\n"
             description += "machineId: " + str(vulnerability['machineId']) + "\n"
@@ -86,8 +75,13 @@ class ApiMSDefenderParser(object):
             description += "machine Info: osArchitecture: " + str(machine['osArchitecture']) + "\n"
             description += "machine Info: managedBy: " + str(machine['managedBy']) + "\n"
             description += "machine Info: ipAddresses: " + str(machine['ipAddresses']) + "\n"
+            title = str(vulnerability['cveId'])
+            if str(machine['computerDnsName']) != "null":
+                title = title + "_" + str(machine['computerDnsName'])
+            if str(machine['osPlatform']) != "null":
+                title = title + "_" + str(machine['osPlatform'])
             finding = Finding(
-                title=vulnerability["id"],
+                title=title + "_" + vulnerability["machineId"],
                 severity=vulnerability['severity'],
                 description=description,
                 static_finding=False,
