@@ -220,6 +220,24 @@ class TestNotificationTriggers(DojoTestCase):
             self.assertEqual(mock.call_args_list[-1].args[0], 'engagement_added')
             self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/engagement/{eng.id}')
 
+        prod_type = Product_Type.objects.first()
+        prod1, _ = Product.objects.get_or_create(prod_type=prod_type, name='prod name 1')
+        _ = Engagement.objects.create(product=prod1, target_start=timezone.now(), target_end=timezone.now(), lead=User.objects.get(username='admin'))
+        prod2, _ = Product.objects.get_or_create(prod_type=prod_type, name='prod name 2')
+        eng2 = Engagement.objects.create(product=prod2, name="Testing engagement", target_start=timezone.now(), target_end=timezone.now(), lead=User.objects.get(username='admin'))
+
+        with self.subTest('engagement_deleted by product'):  # in case of product removal, we are not notifing about removal
+            prod1.delete()
+            for call in mock.call_args_list:
+                self.assertNotEqual(call.args[0], 'engagement_deleted')
+
+        with self.subTest('engagement_deleted itself'):
+            eng2.delete()
+            self.assertEqual(mock.call_count, 28)
+            self.assertEqual(mock.call_args_list[-1].args[0], 'engagement_deleted')
+            self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The engagement "Testing engagement" was deleted by {get_current_user()}')
+            self.assertEqual(mock.call_args_list[-1].kwargs['url'], '/product/5')
+
     @patch('dojo.notifications.helper.process_notifications')
     def test_endpoints(self, mock):
         prod_type = Product_Type.objects.first()
@@ -249,7 +267,7 @@ class TestNotificationTriggers(DojoTestCase):
         eng2 = Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now(), lead=User.objects.get(username='admin'))
         test2 = Test.objects.create(engagement=eng2, target_start=timezone.now(), target_end=timezone.now(), test_type_id=Test_Type.objects.first().id)
 
-        with self.subTest('test_deleted by engagement'):  # in case of product removal, we are not notifing about removal
+        with self.subTest('test_deleted by engagement'):  # in case of engagement removal, we are not notifing about removal
             eng1.delete()
             for call in mock.call_args_list:
                 self.assertNotEqual(call.args[0], 'test_deleted')

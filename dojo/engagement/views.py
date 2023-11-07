@@ -8,20 +8,23 @@ from tempfile import NamedTemporaryFile
 from time import strftime
 from typing import List, Tuple
 
+from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Count, Q
 from django.db.models.query import Prefetch, QuerySet
-from django.db.models.signals import post_save
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.http import FileResponse, HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import Resolver404, reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
@@ -363,14 +366,6 @@ def delete_engagement(request, eid):
                     messages.SUCCESS,
                     message,
                     extra_tags='alert-success')
-                create_notification(event='other',
-                                    title=f'Deletion of {engagement.name}',
-                                    product=product,
-                                    description=f'The engagement "{engagement.name}" was deleted by {request.user}',
-                                    url=request.build_absolute_uri(reverse('view_engagements', args=(product.id, ))),
-                                    recipients=[engagement.lead],
-                                    icon="exclamation-triangle")
-
                 return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
 
     rels = ['Previewing the relationships has been disabled.', '']
@@ -1727,7 +1722,28 @@ def excel_export(request):
 @receiver(post_save, sender=Engagement)
 def engagement_post_save(sender, instance, created, **kwargs):
     if created:
-        engagement = instance
-        title = 'Engagement created for ' + str(engagement.product) + ': ' + str(engagement.name)
-        create_notification(event='engagement_added', title=title, engagement=engagement, product=engagement.product,
-                            url=reverse('view_engagement', args=(engagement.id,)))
+        title = 'Engagement created for ' + str(instance.product) + ': ' + str(instance.name)
+        create_notification(event='engagement_added', title=title, engagement=instance, product=instance.product,
+                            url=reverse('view_engagement', args=(instance.id,)))
+
+
+@receiver(post_delete, sender=Engagement)
+def engagement_post_delete(sender, instance, using, origin, **kwargs):
+    if instance == origin:
+        if get_system_setting('enable_auditlog'):
+            le = LogEntry.objects.get(
+                    action=LogEntry.Action.DELETE,
+                    content_type=ContentType.objects.get(app_label='dojo', model='engagement'),
+                    object_id=instance.id
+            )
+            description = _('The engagement "%(name)s" was deleted by %(user)s') % {
+                                'name': instance.name, 'user': le.actor}
+        else:
+            description = _('The engagement "%(name)s" was deleted') % {'name': instance.name}
+        create_notification(event='engagement_deleted',  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
+                            title=_('Deletion of %(name)s') % {'name': instance.name},
+                            description=description,
+                            product=instance.product,
+                            url=reverse('view_product', args=(instance.product.id, )),
+                            recipients=[instance.lead],
+                            icon="exclamation-triangle")
