@@ -97,7 +97,7 @@ class MSDefenderAPI:
             )
         else:
             raise Exception(
-                "Connection failed both vulnerabilities and machines endpoints (error: {} - {})".format(
+                "Connection failed both vulnerabilities and machines endpoints (error: {} - {} and error: {} - {})".format(
                     vulnerabilities.status_code,
                     vulnerabilities.content.decode("utf-8"),
                     machines.status_code,
