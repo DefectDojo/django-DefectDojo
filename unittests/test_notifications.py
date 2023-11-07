@@ -180,7 +180,7 @@ class TestNotificationTriggers(DojoTestCase):
         with self.subTest('product_type_deleted'):
             prod_type.delete()
             self.assertEqual(mock.call_count, 5)
-            self.assertEqual(mock.call_args_list[-1].args[0], 'produc_type_deleted')
+            self.assertEqual(mock.call_args_list[-1].args[0], 'product_type_deleted')
             self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The product type "notif prod type" was deleted by {get_current_user()}')
             self.assertEqual(mock.call_args_list[-1].kwargs['url'], '/product/type')
 
