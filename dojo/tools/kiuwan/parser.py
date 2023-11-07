@@ -59,7 +59,7 @@ class KiuwanParser(object):
             findingdict["line_number"] = row["Line number"]
             findingdict["description"] = (
                 "**Vulnerability type** : "
-                + row["Vulnerability type"]
+                + row["Software characteristic"]
                 + "\n\n"
                 + "**CWE Scope** : "
                 + row["CWE Scope"]
@@ -92,7 +92,7 @@ class KiuwanParser(object):
 
             finding.title = findingdict["title"]
             finding.file_path = findingdict["file"]
-            finding.line = findingdict["line_number"]
+            finding.line = findingdict["line_number"] if findingdict["line_number"] != "" else None
             finding.description = findingdict["description"]
             finding.references = "Not provided!"
             finding.mitigation = "Not provided!"
