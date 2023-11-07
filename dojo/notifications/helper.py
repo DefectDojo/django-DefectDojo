@@ -171,15 +171,15 @@ def process_notifications(event, notifications=None, **kwargs):
     msteams_enabled = get_system_setting('enable_msteams_notifications')
     mail_enabled = get_system_setting('enable_mail_notifications')
 
-    if slack_enabled and 'slack' in getattr(notifications, event):
+    if slack_enabled and 'slack' in getattr(notifications, event, getattr(notifications, 'other')):
         logger.debug('Sending Slack Notification')
         send_slack_notification(event, notifications.user, **kwargs)
 
-    if msteams_enabled and 'msteams' in getattr(notifications, event):
+    if msteams_enabled and 'msteams' in getattr(notifications, event, getattr(notifications, 'other')):
         logger.debug('Sending MSTeams Notification')
         send_msteams_notification(event, notifications.user, **kwargs)
 
-    if mail_enabled and 'mail' in getattr(notifications, event):
+    if mail_enabled and 'mail' in getattr(notifications, event, getattr(notifications, 'other')):
         logger.debug('Sending Mail Notification')
         send_mail_notification(event, notifications.user, **kwargs)
 
