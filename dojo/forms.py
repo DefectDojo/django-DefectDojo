@@ -704,7 +704,7 @@ class RiskPendingForm(forms.ModelForm):
     name = forms.CharField(max_length=255, required=True)
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.none(), required=True,
-        widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
+        widget=forms.widgets.SelectMultiple(attrs={'size': 1}), # Todo: Select Multiple 
         help_text=('Active, verified findings listed, please select to add findings.'))
     recommendation = forms.ChoiceField(choices=Risk_Acceptance.TREATMENT_CHOICES, initial=Risk_Acceptance.TREATMENT_ACCEPT, widget=forms.RadioSelect, label="Security Recommendation")
     description = forms.CharField(widget=forms.Textarea(attrs={}),
@@ -740,10 +740,8 @@ class RiskPendingForm(forms.ModelForm):
             # logger.debug('setting default expiration_date: %s', expiration_date)
             self.fields['expiration_date'].initial = expiration_date
         # self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
-        self.fields['accepted_by'].disable = True
         self.fields['expiration_date_warned'].disabled = True
         self.fields['expiration_date_handled'].disabled = True
-        # self.fields['owner'].disabled = True
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
     
     def clean(self):
@@ -762,7 +760,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
     # expiration_date = forms.DateTimeField(required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.none(), required=True,
-        widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
+        widget=forms.widgets.Select(attrs={'size': 10}),
         help_text=('Active, verified findings listed, please select to add findings.'))
     notes = forms.CharField(required=False, max_length=2400,
                             widget=forms.Textarea,

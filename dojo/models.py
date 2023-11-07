@@ -3874,6 +3874,7 @@ class Alerts(models.Model):
     url = models.URLField(max_length=2000, null=True, blank=True)
     source = models.CharField(max_length=100, default='Generic')
     icon = models.CharField(max_length=25, default='icon-user-check')
+    color_icon = models.CharField(max_length=10, null=True, blank=True, default="#262626")
     user_id = models.ForeignKey(Dojo_User, null=True, editable=False, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True, null=False)
 

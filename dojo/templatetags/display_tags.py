@@ -899,6 +899,16 @@ def product_findings(product, findings):
 def class_name(value):
     return value.__class__.__name__
 
+@register.filter
+def status_style_color(status: str):
+    dict_style_color = {
+        "Risk Pending": f'<span style="color:blue">{status}</span>',
+        "Risk Accepted": f'<span style="color:green">{status}</span>',
+        "Risk Rejected": f'<span style="color:red">{status}</span>',
+        "Risk Active": f'<span style="color:gray">{status}</span>',
+    }
+    return mark_safe(dict_style_color.get(status, f'<span>{status}</span>'))
+
 
 @register.filter(needs_autoescape=True)
 def jira_project_tag(product_or_engagement, autoescape=True):

@@ -121,6 +121,8 @@ def add_findings_to_risk_pending(risk_pending, findings):
     reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
     product=risk_pending.engagement.product,
     recipients=eval(risk_pending.accepted_by),
+    icon="bell",
+    color_icon="#1B30DE",
     url=reverse('view_risk_acceptance', args=(risk_pending.engagement.id, risk_pending.id, )))
     post_jira_comments(risk_pending, findings, accepted_message_creator)
 

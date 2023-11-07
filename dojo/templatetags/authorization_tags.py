@@ -9,6 +9,8 @@ from dojo.request_cache import cache_for_request
 
 register = template.Library()
 
+
+
 @register.filter
 def has_risk_acceptance_permission(finding: Finding):
     result = False

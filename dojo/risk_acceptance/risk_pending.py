@@ -27,7 +27,10 @@ def get_number_acceptance_risk(finding):
 def risk_acceptance_decline(eng: Engagement, finding: Finding, risk_acceptance: Risk_Acceptance):
     status = "Failed"
     message = "Cannot perform action"
-    if finding.risk_status in ["Risk Active", "Risk Pending"]:
+    if finding.risk_status == "Risk Rejected":
+        status = "Failed"
+        message = "Risk is already rejected"
+    if finding.risk_status in ["Risk Accepted", "Risk Pending"]:
         finding.accepted_by = ""
         finding.acceptances_confirmed = 0
         finding.active = True
@@ -36,6 +39,14 @@ def risk_acceptance_decline(eng: Engagement, finding: Finding, risk_acceptance: 
         finding.save()
         status = "OK"
         message = "Risk Rejected"
+        title = f"Rejected request:  {str(risk_acceptance.engagement.product)} : {str(risk_acceptance.engagement.name)}"
+        create_notification(event='risk_acceptance_request', title=title, risk_acceptance=risk_acceptance, accepted_findings=risk_acceptance.accepted_findings,
+        reactivated_findings=risk_acceptance.accepted_findings, engagement=risk_acceptance.engagement,
+        product=risk_acceptance.engagement.product,
+        icon="times-circle",
+        color_icon="#B90C0C",
+        recipients=[risk_acceptance.owner.get_username()],
+        url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
     return Response(status=status, message=message)
 
 
@@ -74,6 +85,8 @@ def risk_acceptante_pending(eng: Engagement, finding: Finding, risk_acceptance: 
                     create_notification(event='risk_acceptance_request', title=title, risk_acceptance=risk_acceptance, accepted_findings=risk_acceptance.accepted_findings,
                     reactivated_findings=risk_acceptance.accepted_findings, engagement=risk_acceptance.engagement,
                     product=risk_acceptance.engagement.product,
+                    icon="check-circle",
+                    color_icon="#096C11",
                     recipients=[risk_acceptance.owner.get_username()],
                     url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
 

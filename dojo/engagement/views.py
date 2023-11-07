@@ -849,9 +849,6 @@ def add_risk_acceptance(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
     form = None
     finding = None
-    # risk status == 0 - > risk normal
-    # risk status == 1 - > risk pending
-    # risk status == 2 - > Risk Rejected
     risk_status = "Risk Active"
     if fid:
         finding = get_object_or_404(Finding, id=fid)
