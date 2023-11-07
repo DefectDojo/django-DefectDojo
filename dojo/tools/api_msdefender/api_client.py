@@ -10,7 +10,8 @@ class MSDefenderAPI:
         if tool_config.authentication_type == "Password":
             self.user_name = tool_config.username
             self.password = tool_config.password
-            self.base_url = "https://login.microsoftonline.com/%s/oauth2/token" % (tool_config.extras)
+            self.tenantID = tool_config.extras
+            self.base_url = "https://login.microsoftonline.com/%s/oauth2/token" % (self.tenantID)
             body = {
                 'resource': 'https://api.securitycenter.microsoft.com',
                 'client_id': self.user_name,
@@ -73,3 +74,33 @@ class MSDefenderAPI:
                 )
         results.append(machines)
         return results
+
+    def test_connection(self):
+        headers = {"Authorization": 'Bearer ' + self.aadToken}
+        vulnerabilities = requests.get("https://api.securitycenter.microsoft.com/api/vulnerabilities/machinesVulnerabilities", headers=headers)
+        machines = requests.get("https://api.securitycenter.microsoft.com/api/machines", headers=headers)
+        if vulnerabilities.status_code == 200 and machines.status_code == 200:
+            return f'You have access to the vulnerabilities of Tenant "{self.tenantID}"'
+        elif vulnerabilities.status_code != 200 and machines.status_code == 200:
+            raise Exception(
+                "Connection failed to vulnerabilities endpoint (error: {} - {})".format(
+                    vulnerabilities.status_code,
+                    vulnerabilities.content.decode("utf-8"),
+                )
+            )
+        elif vulnerabilities.status_code == 200 and machines.status_code != 200:
+            raise Exception(
+                "Connection failed to machines endpoint (error: {} - {})".format(
+                    machines.status_code,
+                    machines.content.decode("utf-8"),
+                )
+            )
+        else:
+            raise Exception(
+                "Connection failed both vulnerabilities and machines endpoints (error: {} - {})".format(
+                    vulnerabilities.status_code,
+                    vulnerabilities.content.decode("utf-8"),
+                    machines.status_code,
+                    machines.content.decode("utf-8"),
+                )
+            )
