@@ -6,12 +6,16 @@ from datetime import datetime
 from functools import reduce
 from typing import Tuple
 
+from auditlog.models import LogEntry
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Count, Q, QuerySet
 from django.db.models.query import Prefetch
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import Resolver404, reverse
@@ -322,7 +326,6 @@ def delete_test(request, tid):
         if 'id' in request.POST and str(test.id) == request.POST['id']:
             form = DeleteTestForm(request.POST, instance=test)
             if form.is_valid():
-                product = test.engagement.product
                 if get_setting("ASYNC_OBJECT_DELETE"):
                     async_del = async_delete()
                     async_del.delete(test)
@@ -334,13 +337,6 @@ def delete_test(request, tid):
                                      messages.SUCCESS,
                                      message,
                                      extra_tags='alert-success')
-                create_notification(event='other',
-                                    title=_(f"Deletion of {test.title}"),
-                                    product=product,
-                                    description=_(f'The test "{test.title}" was deleted by {request.user}'),
-                                    url=request.build_absolute_uri(reverse('view_engagement', args=(eng.id, ))),
-                                    recipients=[test.engagement.lead],
-                                    icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
 
     rels = ['Previewing the relationships has been disabled.', '']
@@ -624,6 +620,8 @@ class AddFindingView(View):
                 )
                 burp_rr.clean()
                 burp_rr.save()
+            # TODO this notification might be moved to "@receiver(post_save, sender=Finding)" method as many other notifications
+            # However, it is not migrated because it could generate too much noise, we keep it here only for findings created by hand in WebUI
             # Create a notification
             create_notification(
                 event='other',
@@ -1084,3 +1082,25 @@ class ReImportScanResultsView(View):
             return self.failure_redirect(context)
         # Otherwise return the user back to the engagement (if present) or the product
         return self.success_redirect(context)
+
+
+@receiver(post_delete, sender=Test)
+def test_post_delete(sender, instance, using, origin, **kwargs):
+    if instance == origin:
+        if get_system_setting('enable_auditlog'):
+            le = LogEntry.objects.get(
+                    action=LogEntry.Action.DELETE,
+                    content_type=ContentType.objects.get(app_label='dojo', model='test'),
+                    object_id=instance.id
+            )
+            description = _('The test "%(name)s" was deleted by %(user)s') % {
+                                'name': str(instance), 'user': le.actor}
+        else:
+            description = _('The test "%(name)s" was deleted') % {'name': str(instance)}
+        create_notification(event='test_deleted',  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
+                            title=_('Deletion of %(name)s') % {'name': str(instance)},
+                            description=description,
+                            product=instance.engagement.product,
+                            url=reverse('view_engagement', args=(instance.engagement.id, )),
+                            recipients=[instance.engagement.lead],
+                            icon="exclamation-triangle")
