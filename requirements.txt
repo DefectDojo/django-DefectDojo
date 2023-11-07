@@ -25,7 +25,7 @@ django-slack==5.19.0
 git+https://github.com/DefectDojo/django-tagging@develop#egg=django-tagging
 django-watson==1.6.3
 django-prometheus==2.3.1
-Django==4.1.11
+Django==4.2.7
 djangorestframework==3.14.0
 gunicorn==21.2.0
 html2text==2020.1.16
@@ -46,7 +46,7 @@ redis==5.0.1
 requests==2.31.0
 sqlalchemy==2.0.21  # Required by Celery broker transport
 supervisor==4.2.5
-urllib3==1.26.17
+urllib3==2.0.7
 uWSGI==2.0.22
 vobject==0.9.6.1
 whitenoise==5.2.0
@@ -95,7 +95,7 @@ opentelemetry-exporter-otlp-proto-http==1.19.0
 opentelemetry-instrumentation-wsgi==0.40b0
 opentelemetry-proto==1.19.0
 opentelemetry-semantic-conventions==0.40b0
-opentelemetry-instrumentation==0.40b0
+opentelemetry-instrumentation==0.41b0
 #Pinning Dependencies
 azure-core==1.27.1
 MarkupSafe==2.1.3
