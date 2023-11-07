@@ -99,7 +99,7 @@ def can_be_pushed_to_jira(obj, form=None):
         # findings or groups already having an existing jira issue can always be pushed
         return True, None, None
 
-    if type(obj) == Finding:
+    if type(obj) is Finding:
         if form:
             active = form['active'].value()
             verified = form['verified'].value()
@@ -122,7 +122,7 @@ def can_be_pushed_to_jira(obj, form=None):
             if jira_minimum_threshold and jira_minimum_threshold > Finding.get_number_severity(severity):
                 logger.debug('Finding below the minimum JIRA severity threshold (%s).' % System_Settings.objects.get().jira_minimum_severity)
                 return False, 'Finding below the minimum JIRA severity threshold (%s).' % System_Settings.objects.get().jira_minimum_severity, 'below_minimum_threshold'
-    elif type(obj) == Finding_Group:
+    elif type(obj) is Finding_Group:
         if not obj.findings.all():
             return False, '%s cannot be pushed to jira as it is empty.' % to_str_typed(obj), 'error_empty'
         if 'Active' not in obj.status():
@@ -521,10 +521,10 @@ def get_labels(obj):
             labels.append(prod_name_label)
 
     if system_settings.add_vulnerability_id_to_jira_label or jira_project and jira_project.add_vulnerability_id_to_jira_label:
-        if type(obj) == Finding and obj.vulnerability_ids:
+        if type(obj) is Finding and obj.vulnerability_ids:
             for id in obj.vulnerability_ids:
                 labels.append(id)
-        elif type(obj) == Finding_Group:
+        elif type(obj) is Finding_Group:
             for finding in obj.findings.all():
                 for id in finding.vulnerability_ids:
                     labels.append(id)
@@ -540,7 +540,7 @@ def get_tags(obj):
         if obj_tags:
             for tag in obj_tags:
                 tags.append(str(tag.name.replace(' ', '-')))
-    if type(obj) == Finding_Group:
+    if type(obj) is Finding_Group:
         for finding in obj.findings.all():
             obj_tags = finding.tags.all()
             if obj_tags:
@@ -554,10 +554,10 @@ def get_tags(obj):
 def jira_summary(obj):
     summary = ''
 
-    if type(obj) == Finding:
+    if type(obj) is Finding:
         summary = obj.title
 
-    if type(obj) == Finding_Group:
+    if type(obj) is Finding_Group:
         summary = obj.name
 
     return summary.replace('\r', '').replace('\n', '')[:255]
@@ -584,9 +584,9 @@ def jira_priority(obj):
 
 
 def jira_environment(obj):
-    if type(obj) == Finding:
+    if type(obj) is Finding:
         return "\n".join([str(endpoint) for endpoint in obj.endpoints.all()])
-    elif type(obj) == Finding_Group:
+    elif type(obj) is Finding_Group:
         return "\n".join([jira_environment(finding) for finding in obj.findings.all()])
     else:
         return ''
@@ -715,7 +715,7 @@ def add_jira_issue(obj, *args, **kwargs):
 
     obj_can_be_pushed_to_jira, error_message, error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
-        if type(obj) == Finding and obj.duplicate and not obj.active:
+        if type(obj) is Finding and obj.duplicate and not obj.active:
             logger.warning("%s will not be pushed to JIRA as it's a duplicate finding", to_str_typed(obj))
         else:
             log_jira_alert(error_message, obj)
@@ -762,7 +762,7 @@ def add_jira_issue(obj, *args, **kwargs):
 
         # Upload dojo finding screenshots to Jira
         findings = [obj]
-        if type(obj) == Finding_Group:
+        if type(obj) is Finding_Group:
             findings = obj.findings.all()
 
         for find in findings:
@@ -884,7 +884,7 @@ def update_jira_issue(obj, *args, **kwargs):
 
         # Upload dojo finding screenshots to Jira
         findings = [obj]
-        if type(obj) == Finding_Group:
+        if type(obj) is Finding_Group:
             findings = obj.findings.all()
 
         for find in findings:
