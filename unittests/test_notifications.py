@@ -1,5 +1,5 @@
 from .dojo_test_case import DojoTestCase
-from dojo.models import Product, Product_Type, Engagement, User, Notifications, Alerts, DEFAULT_NOTIFICATION, Endpoint
+from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, User, Notifications, Alerts, DEFAULT_NOTIFICATION, Endpoint
 from dojo.notifications.helper import create_notification, send_alert_notification
 from django.utils import timezone
 from unittest.mock import patch
@@ -142,3 +142,24 @@ class TestNotificationTriggers(DojoTestCase):
             self.assertEqual(mock.call_args_list[-1].args[0], 'endpoint_deleted')
             self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The endpoint "host2" was deleted by {get_current_user()}')
             self.assertEqual(mock.call_args_list[-1].kwargs['url'], '/endpoint')
+
+    @patch('dojo.notifications.helper.process_notifications')
+    def test_tests(self, mock):
+        prod_type = Product_Type.objects.first()
+        prod, _ = Product.objects.get_or_create(prod_type=prod_type, name='prod name')
+        eng1 = Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now(), lead=User.objects.get(username='admin'))
+        Test.objects.create(engagement=eng1, target_start=timezone.now(), target_end=timezone.now(), test_type_id=Test_Type.objects.first().id)
+        eng2 = Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now(), lead=User.objects.get(username='admin'))
+        test2 = Test.objects.create(engagement=eng2, target_start=timezone.now(), target_end=timezone.now(), test_type_id=Test_Type.objects.first().id)
+
+        with self.subTest('test_deleted by engagement'):  # in case of product removal, we are not notifing about removal
+            eng1.delete()
+            for call in mock.call_args_list:
+                self.assertNotEqual(call.args[0], 'test_deleted')
+
+        with self.subTest('test_deleted itself'):
+            test2.delete()
+            self.assertEqual(mock.call_count, 16)
+            self.assertEqual(mock.call_args_list[-1].args[0], 'test_deleted')
+            self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The test "BURP Scan" was deleted by {get_current_user()}')
+            self.assertEqual(mock.call_args_list[-1].kwargs['url'], '/engagement/8')

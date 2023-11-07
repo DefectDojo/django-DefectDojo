@@ -5,12 +5,16 @@ from dojo.importers.utils import construct_imported_message
 import logging
 import operator
 import base64
+from auditlog.models import LogEntry
+from django.contrib.contenttypes.models import ContentType
 from datetime import datetime
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.urls import reverse, Resolver404
 from django.db.models import Q, QuerySet, Count
+from django.dispatch import receiver
+from django.db.models.signals import post_delete
 from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
@@ -298,13 +302,6 @@ def delete_test(request, tid):
                                      messages.SUCCESS,
                                      message,
                                      extra_tags='alert-success')
-                create_notification(event='other',
-                                    title=_('Deletion of %(title)s') % {"title": test.title},
-                                    product=product,
-                                    description=_('The test "%(title)s" was deleted by %(user)s') % {"title": test.title, "user": request.user},
-                                    url=request.build_absolute_uri(reverse('view_engagement', args=(eng.id, ))),
-                                    recipients=[test.engagement.lead],
-                                    icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
 
     rels = ['Previewing the relationships has been disabled.', '']
@@ -590,6 +587,8 @@ class AddFindingView(View):
                 )
                 burp_rr.clean()
                 burp_rr.save()
+            # TODO this notification might be moved to "@receiver(post_save, sender=Finding)" method as many other notifications
+            # However, it is not migrated because it could generate too much noise, we keep it here only for findings created by hand in WebUI
             # Create a notification
             create_notification(
                 event='other',
@@ -895,3 +894,25 @@ def re_import_scan_results(request, tid):
                    'jform': jform,
                    'scan_types': get_scan_types_sorted(),
                    })
+
+
+@receiver(post_delete, sender=Test)
+def test_post_delete(sender, instance, using, origin, **kwargs):
+    if instance == origin:
+        if get_system_setting('enable_auditlog'):
+            le = LogEntry.objects.get(
+                    action=LogEntry.Action.DELETE,
+                    content_type=ContentType.objects.get(app_label='dojo', model='test'),
+                    object_id=instance.id
+            )
+            description = _('The test "%(name)s" was deleted by %(user)s') % {
+                                'name': str(instance), 'user': le.actor}
+        else:
+            description = _('The test "%(name)s" was deleted') % {'name': str(instance)}
+        create_notification(event='test_deleted',  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
+                            title=_('Deletion of %(name)s') % {'name': str(instance)},
+                            description=description,
+                            product=instance.engagement.product,
+                            url=reverse('view_engagement', args=(instance.engagement.id, )),
+                            recipients=[instance.engagement.lead],
+                            icon="exclamation-triangle")
