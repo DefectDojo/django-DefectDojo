@@ -28,7 +28,7 @@ class NucleiParser(object):
     def get_findings(self, filename, test):
         filecontent = filename.read()
         data = []
-        if filecontent == "":
+        if filecontent == "" or len(filecontent) == 0:
             return []
         elif filecontent[0] == "[":
             content = json.loads(filecontent)
