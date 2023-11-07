@@ -132,6 +132,7 @@ def add_findings_to_risk_acceptance(risk_acceptance, findings):
         if not finding.duplicate or finding.risk_accepted:
             finding.active = False
             finding.risk_accepted = True
+            finding.risk_status = "Risk Accepted"
             finding.save(dedupe_option=False)
             risk_acceptance.accepted_findings.add(finding)
     risk_acceptance.save()

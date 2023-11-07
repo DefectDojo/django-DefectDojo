@@ -49,6 +49,24 @@ def risk_acceptance_decline(eng: Engagement, finding: Finding, risk_acceptance: 
         url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
     return Response(status=status, message=message)
 
+def risk_accepted_succesfully(eng: Engagement,
+                              finding: Finding,
+                              risk_acceptance: Risk_Acceptance,
+                              send_notification: bool = True):
+    finding.risk_status = "Risk Accepted"
+    finding.risk_accepted = True
+    finding.active = False
+    finding.save()
+    # Send notification
+    if send_notification:
+        title = f"Request is accepted:  {str(risk_acceptance.engagement.product)} : {str(risk_acceptance.engagement.name)}"
+        create_notification(event='risk_acceptance_request', title=title, risk_acceptance=risk_acceptance, accepted_findings=risk_acceptance.accepted_findings,
+        reactivated_findings=risk_acceptance.accepted_findings, engagement=risk_acceptance.engagement,
+        product=risk_acceptance.engagement.product,
+        icon="check-circle",
+        color_icon="#096C11",
+        recipients=[risk_acceptance.owner.get_username()],
+        url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
 
 def risk_acceptante_pending(eng: Engagement, finding: Finding, risk_acceptance: Risk_Acceptance):
     user = crum.get_current_user()
@@ -58,6 +76,11 @@ def risk_acceptante_pending(eng: Engagement, finding: Finding, risk_acceptance: 
         if is_permissions_risk_accept(eng, finding.severity, user):
             number_of_acceptors_required = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY\
                 .get(finding.severity).get("number_acceptors")
+            if number_of_acceptors_required == 0:
+                risk_accepted_succesfully(eng, finding, risk_acceptance, send_notification=False)
+                message = "Finding Accept successfully from risk acceptance."
+                status = "OK"
+                return Response(status=status, message=message)
             if finding.acceptances_confirmed == number_of_acceptors_required:
                 logger.warning("All necessary acceptances have already been made")
                 message = "All necessary acceptances have already been made"
@@ -76,19 +99,7 @@ def risk_acceptante_pending(eng: Engagement, finding: Finding, risk_acceptance: 
                     finding.risk_status = "Risk Pending"
                 finding.save()
                 if finding.acceptances_confirmed == number_of_acceptors_required:
-                    finding.risk_status = "Risk Accepted"
-                    finding.risk_accepted = True
-                    finding.active = False
-                    finding.save()
-                    # Send notification
-                    title = f"Request is accepted:  {str(risk_acceptance.engagement.product)} : {str(risk_acceptance.engagement.name)}"
-                    create_notification(event='risk_acceptance_request', title=title, risk_acceptance=risk_acceptance, accepted_findings=risk_acceptance.accepted_findings,
-                    reactivated_findings=risk_acceptance.accepted_findings, engagement=risk_acceptance.engagement,
-                    product=risk_acceptance.engagement.product,
-                    icon="check-circle",
-                    color_icon="#096C11",
-                    recipients=[risk_acceptance.owner.get_username()],
-                    url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
+                    risk_accepted_succesfully(eng, finding, risk_acceptance) 
 
             else:
                 raise ValueError(f"Error number of accepttors{finding.acceptances_confirmed} \
@@ -117,7 +128,7 @@ def get_contacts(engagement: Engagement, finding_serverity: str, user):
             raise ValueError(f"Contact {contact} not found")
     # if severity is low load default acceptanced_by = user.id 
     if contact_list == []:
-        contact_list.append(user.id)
+        contact_list.append(user)
 
     return contact_list
 

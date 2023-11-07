@@ -697,7 +697,7 @@ class EditRiskAcceptanceForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
         self.fields['expiration_date_warned'].disabled = True
-        self.fields['expiration_date_handled'].disabled = True
+        # self.fields['expiration_date_handled'].disabled = True
 
 # Nuew Form for developer rol
 class RiskPendingForm(forms.ModelForm):
@@ -760,7 +760,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
     # expiration_date = forms.DateTimeField(required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.none(), required=True,
-        widget=forms.widgets.Select(attrs={'size': 10}),
+        widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
         help_text=('Active, verified findings listed, please select to add findings.'))
     notes = forms.CharField(required=False, max_length=2400,
                             widget=forms.Textarea,
@@ -773,7 +773,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
 
     class Meta:
         model = Risk_Acceptance
-        fields = '__all__'
+        exclude = ['acceptances_confirmed', 'expiration_date_handled']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
