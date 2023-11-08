@@ -9,9 +9,11 @@ from dojo.models import (
     Notifications,
     Product,
     Product_Type,
+    System_Settings,
     Test,
     Test_Type,
     User,
+    enable_disable_auditlog,
 )
 from dojo.notifications.helper import create_notification, send_alert_notification
 
@@ -318,16 +320,22 @@ class TestNotificationTriggers(DojoTestCase):
 
     @patch('dojo.notifications.helper.process_notifications')
     def test_auditlog_on_off(self, mock):
+        ss = System_Settings.objects.get()
+        original_auditlog = ss.enable_auditlog
+
         with self.subTest('enable_auditlog'):
-            self.system_settings(enable_auditlog=True)
+            ss.enable_auditlog = True
+            ss.save()
+            enable_disable_auditlog(enable=True)
             prod_type = Product_Type.objects.create(name='notif prod type')
             prod_type.delete()
             self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The product type "notif prod type" was deleted by {get_current_user()}')
 
         with self.subTest('disable_auditlog'):
-            self.system_settings(enable_auditlog=False)
+            enable_disable_auditlog(enable=False)
             prod_type = Product_Type.objects.create(name='notif prod type')
             prod_type.delete()
             self.assertEqual(mock.call_args_list[-1].kwargs['description'], 'The product type "notif prod type" was deleted')
 
-        self.system_settings(enable_auditlog=True)
+        ss.enable_auditlog = original_auditlog
+        enable_disable_auditlog(enable=original_auditlog)
