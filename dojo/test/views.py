@@ -6,16 +6,12 @@ from datetime import datetime
 from functools import reduce
 from typing import Tuple
 
-from auditlog.models import LogEntry
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Count, Q, QuerySet
 from django.db.models.query import Prefetch
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import Resolver404, reverse
@@ -1082,25 +1078,3 @@ class ReImportScanResultsView(View):
             return self.failure_redirect(context)
         # Otherwise return the user back to the engagement (if present) or the product
         return self.success_redirect(context)
-
-
-@receiver(post_delete, sender=Test)
-def test_post_delete(sender, instance, using, origin, **kwargs):
-    if instance == origin:
-        if get_system_setting('enable_auditlog'):
-            le = LogEntry.objects.get(
-                    action=LogEntry.Action.DELETE,
-                    content_type=ContentType.objects.get(app_label='dojo', model='test'),
-                    object_id=instance.id
-            )
-            description = _('The test "%(name)s" was deleted by %(user)s') % {
-                                'name': str(instance), 'user': le.actor}
-        else:
-            description = _('The test "%(name)s" was deleted') % {'name': str(instance)}
-        create_notification(event='test_deleted',  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
-                            title=_('Deletion of %(name)s') % {'name': str(instance)},
-                            description=description,
-                            product=instance.engagement.product,
-                            url=reverse('view_engagement', args=(instance.engagement.id, )),
-                            recipients=[instance.engagement.lead],
-                            icon="exclamation-triangle")

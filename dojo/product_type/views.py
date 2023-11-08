@@ -1,14 +1,10 @@
 import logging
 
-from auditlog.models import LogEntry
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
-from django.contrib.contenttypes.models import ContentType
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
-from django.db.models.signals import post_delete, post_save
-from django.dispatch import receiver
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -29,7 +25,6 @@ from dojo.forms import (
     Product_TypeForm,
 )
 from dojo.models import Product_Type, Product_Type_Group, Product_Type_Member, Role
-from dojo.notifications.helper import create_notification
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import (
     get_authorized_groups_for_product_type,
@@ -41,7 +36,6 @@ from dojo.utils import (
     async_delete,
     get_page_items,
     get_setting,
-    get_system_setting,
     is_title_in_breadcrumbs,
 )
 
@@ -409,32 +403,3 @@ def delete_product_type_group(request, groupid):
         'groupid': groupid,
         'form': groupform
     })
-
-
-@receiver(post_save, sender=Product_Type)
-def product_type_post_save(sender, instance, created, **kwargs):
-    if created:
-        create_notification(event='product_type_added',
-                            title=instance.name,
-                            product_type=instance,
-                            url=reverse('view_product_type', args=(instance.id,)))
-
-
-@receiver(post_delete, sender=Product_Type)
-def product_type_post_delete(sender, instance, **kwargs):
-    if get_system_setting('enable_auditlog'):
-        le = LogEntry.objects.get(
-                action=LogEntry.Action.DELETE,
-                content_type=ContentType.objects.get(app_label='dojo', model='product_type'),
-                object_id=instance.id
-        )
-        description = _('The product type "%(name)s" was deleted by %(user)s') % {
-                            'name': instance.name, 'user': le.actor}
-    else:
-        description = _('The product type "%(name)s" was deleted') % {'name': instance.name}
-    create_notification(event='product_type_deleted',  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
-                        title=_('Deletion of %(name)s') % {'name': instance.name},
-                        description=description,
-                        no_users=True,
-                        url=reverse('product_type'),
-                        icon="exclamation-triangle")
