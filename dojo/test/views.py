@@ -616,8 +616,10 @@ class AddFindingView(View):
                 )
                 burp_rr.clean()
                 burp_rr.save()
+
             # TODO this notification might be moved to "@receiver(post_save, sender=Finding)" method as many other notifications
-            # However, it is not migrated because it could generate too much noise, we keep it here only for findings created by hand in WebUI
+            # However, it hasn't been migrated because it could generate too much noise, we keep it here only for findings created by hand in WebUI
+
             # Create a notification
             create_notification(
                 event='other',
