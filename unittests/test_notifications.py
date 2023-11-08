@@ -289,10 +289,10 @@ class TestNotificationTriggers(DojoTestCase):
 
         with self.subTest('test_deleted itself'):
             test2.delete()
-            self.assertEqual(mock.call_count, 16)
+            self.assertEqual(mock.call_count, 17)
             self.assertEqual(mock.call_args_list[-1].args[0], 'test_deleted')
             self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The test "BURP Scan" was deleted by {get_current_user()}')
-            self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/engagement/{end2.id}')
+            self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/engagement/{eng2.id}')
 
     @patch('dojo.notifications.helper.process_notifications')
     def test_finding_groups(self, mock):
@@ -313,5 +313,5 @@ class TestNotificationTriggers(DojoTestCase):
             fg2.delete()
             self.assertEqual(mock.call_count, 16)
             self.assertEqual(mock.call_args_list[-1].args[0], 'finding_group_deleted')
-            self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The test "fg test" was deleted by {get_current_user()}')
-            self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/engagement/{test2.id}')
+            self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The finding group "fg test" was deleted by {get_current_user()}')
+            self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/test/{test2.id}')
