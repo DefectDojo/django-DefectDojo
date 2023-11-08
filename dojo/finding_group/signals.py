@@ -12,7 +12,6 @@ from dojo.notifications.helper import create_notification
 
 @receiver(post_delete, sender=Finding_Group)
 def finding_group_post_delete(sender, instance, using, origin, **kwargs):
-    print(f"xxx: sender {sender}, instance {instance}, using {using}, origin {origin}")
     if instance == origin:
         if get_system_setting('enable_auditlog'):
             le = LogEntry.objects.get(
