@@ -32,6 +32,7 @@ from dojo.models import (
     Test,
     Test_Type,
     User,
+    enable_disable_auditlog,
 )
 
 logger = logging.getLogger(__name__)
@@ -53,6 +54,7 @@ class DojoTestUtilsMixin:
         disable_jira_webhook_secret=False,
         jira_webhook_secret=None,
         enable_product_tag_inehritance=False,
+        enable_auditlog=True,
     ):
         ss = System_Settings.objects.get()
         ss.enable_jira = enable_jira
@@ -60,6 +62,8 @@ class DojoTestUtilsMixin:
         ss.disable_jira_webhook_secret = disable_jira_webhook_secret
         ss.jira_webhook_secret = jira_webhook_secret
         ss.enable_product_tag_inheritance = enable_product_tag_inehritance
+        ss.enable_auditlog = enable_auditlog
+        enable_disable_auditlog(enable=enable_auditlog)
         ss.save()
 
     def create_product_type(self, name, *args, description='dummy description', **kwargs):
