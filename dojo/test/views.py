@@ -372,7 +372,7 @@ def copy_test(request, tid):
                 messages.SUCCESS,
                 'Test Copied successfully.',
                 extra_tags='alert-success')
-            create_notification(event='copy_test',  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
+            create_notification(event='test_copied',  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                                 title=f'Copying of {test.title}',
                                 description=f'The test "{test.title}" was copied by {request.user} to {engagement.name}',
                                 product=product,
@@ -622,7 +622,7 @@ class AddFindingView(View):
 
             # Create a notification
             create_notification(
-                event='other',
+                event='finding_added',
                 title=_(f'Addition of {finding.title}'),
                 finding=finding,
                 description=_(f'Finding "{finding.title}" was added by {request.user}'),

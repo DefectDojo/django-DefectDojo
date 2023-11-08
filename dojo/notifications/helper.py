@@ -319,7 +319,6 @@ def send_alert_notification(event, user=None, *args, **kwargs):
             source = Notifications._meta.get_field(event).verbose_name.title()[:100]
         except FieldDoesNotExist:
             source = event.replace("_", " ").title()[:100]
-        logger.debug(f'Souce: {source}')
         alert = Alerts(
             user_id=user,
             title=kwargs.get('title')[:250],
