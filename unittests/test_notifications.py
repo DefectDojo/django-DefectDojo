@@ -1,6 +1,5 @@
 from .dojo_test_case import DojoTestCase
-from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Endpoint, Finding_Group, User, Notifications, Alerts,
-    DEFAULT_NOTIFICATION, enable_disable_auditlog, System_Settings
+from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Endpoint, Finding_Group, User, Notifications, Alerts, DEFAULT_NOTIFICATION, enable_disable_auditlog, System_Settings
 from dojo.notifications.helper import create_notification, send_alert_notification
 from django.utils import timezone
 from unittest.mock import patch

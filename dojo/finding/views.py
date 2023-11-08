@@ -1162,7 +1162,7 @@ class DeleteFinding(View):
 
             # Send a notification that the finding had been deleted
             create_notification(
-                event="delete_finding",
+                event="finding_deleted",
                 title=f"Deletion of {finding.title}",
                 description=f'The finding "{finding.title}" was deleted by {request.user}',
                 product=product,
@@ -1284,7 +1284,7 @@ def close_finding(request, fid):
                 # However, it hasn't been migrated because it could generate too much noise, we keep it here only for findings created by hand in WebUI
 
                 create_notification(
-                    event="close_finding",
+                    event="finding_closed",
                     title="Closing of %s" % finding.title,
                     finding=finding,
                     description='The finding "%s" was closed by %s'
@@ -1452,7 +1452,7 @@ def reopen_finding(request, fid):
     # However, it hasn't been migrated because it could generate too much noise, we keep it here only for findings created by hand in WebUI
 
     create_notification(
-        event="reopen_finding",
+        event="finding_reopened",
         title="Reopening of %s" % finding.title,
         finding=finding,
         description='The finding "%s" was reopened by %s'
@@ -1511,7 +1511,7 @@ def copy_finding(request, fid):
                 extra_tags="alert-success",
             )
             create_notification(
-                event="copy_finding",  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
+                event="finding_copied",  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                 title="Copying of %s" % finding.title,
                 description='The finding "%s" was copied by %s to %s'
                 % (finding.title, request.user, test.title),

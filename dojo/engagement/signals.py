@@ -23,12 +23,12 @@ def engagement_pre_save(sender, instance, **kwargs):
     old = sender.objects.filter(pk=instance.pk).first()
     if old and instance.status != old.status:
         if instance.status in ["Cancelled", "Completed"]:
-            create_notification(event='close_engagement',
+            create_notification(event='engagement_closed',
                                 title=_('Closure of %s') % instance.name,
                                 description=_('The engagement "%s" was closed') % (instance.name),
                                 engagement=instance, url=reverse('engagement_all_findings', args=(instance.id, )))
         elif instance.status in ["In Progress"]:
-            create_notification(event='reopen_engagement',
+            create_notification(event='engagement_reopened',
                                 title=_('Reopening of %s') % instance.name,
                                 engagement=instance,
                                 description=_('The engagement "%s" was reopened') % (instance.name),
