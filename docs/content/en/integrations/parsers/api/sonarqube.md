@@ -13,7 +13,7 @@ Extras field separated by commas (e.g. `BUG,VULNERABILITY,CODE_SMELL`). When usi
 SonarCloud, you must also specify the Organization ID in the Extras field as follows
 `OrgID=sonarcloud-organzation-ID`. If also specifying issue type filters, please 
 seperate the items in the Extras field by a vertical bar as follows
-`BUG,VULNERABILITY,CODE_SMEL|OrgID=sonarcloud-organzation-ID`
+`BUG,VULNERABILITY,CODE_SMELL|OrgID=sonarcloud-organzation-ID`
 
 In "Add API Scan Configuration"
 -   `Service key 1` must
