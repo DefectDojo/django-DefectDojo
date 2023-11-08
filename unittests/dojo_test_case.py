@@ -18,7 +18,7 @@ from dojo.jira_link.views import get_custom_field
 from dojo.models import (SEVERITIES, DojoMeta, Endpoint, Endpoint_Status,
                          Engagement, Finding, JIRA_Issue, JIRA_Project, Notes,
                          Product, Product_Type, System_Settings, Test,
-                         SLA_Configuration, Test_Type, User)
+                         SLA_Configuration, Test_Type, User, enable_disable_auditlog)
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +39,7 @@ class DojoTestUtilsMixin(object):
         disable_jira_webhook_secret=False,
         jira_webhook_secret=None,
         enable_product_tag_inehritance=False,
+        enable_auditlog=True,
     ):
         ss = System_Settings.objects.get()
         ss.enable_jira = enable_jira
@@ -46,6 +47,8 @@ class DojoTestUtilsMixin(object):
         ss.disable_jira_webhook_secret = disable_jira_webhook_secret
         ss.jira_webhook_secret = jira_webhook_secret
         ss.enable_product_tag_inheritance = enable_product_tag_inehritance
+        ss.enable_auditlog = enable_auditlog
+        enable_disable_auditlog(enable=enable_auditlog)
         ss.save()
 
     def create_product_type(self, name, *args, description='dummy description', **kwargs):
