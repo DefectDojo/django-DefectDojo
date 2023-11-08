@@ -1,5 +1,5 @@
 from .dojo_test_case import DojoTestCase
-from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Endpoint, User, Notifications, Alerts, DEFAULT_NOTIFICATION
+from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Endpoint, Finding_Group, User, Notifications, Alerts, DEFAULT_NOTIFICATION
 from dojo.notifications.helper import create_notification, send_alert_notification
 from django.utils import timezone
 from unittest.mock import patch
@@ -195,3 +195,25 @@ class TestNotificationTriggers(DojoTestCase):
             self.assertEqual(mock.call_args_list[-1].args[0], 'test_deleted')
             self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The test "BURP Scan" was deleted by {get_current_user()}')
             self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/engagement/{end2.id}')
+
+    @patch('dojo.notifications.helper.process_notifications')
+    def test_finding_groups(self, mock):
+        prod_type = Product_Type.objects.first()
+        prod, _ = Product.objects.get_or_create(prod_type=prod_type, name='prod name')
+        eng, _ = Engagement.objects.get_or_create(product=prod, target_start=timezone.now(), target_end=timezone.now(), lead=User.objects.get(username='admin'))
+        test1, _ = Test.objects.get_or_create(engagement=eng, target_start=timezone.now(), target_end=timezone.now(), test_type_id=Test_Type.objects.first().id)
+        Finding_Group.objects.get_or_create(test=test1, creator=User.objects.get(username='admin'))
+        test2, _ = Test.objects.get_or_create(engagement=eng, target_start=timezone.now(), target_end=timezone.now(), test_type_id=Test_Type.objects.first().id)
+        fg2, _ = Finding_Group.objects.get_or_create(test=test2, name="fg test", creator=User.objects.get(username='admin'))
+
+        with self.subTest('test_deleted by engagement'):  # in case of engagement removal, we are not notifing about removal
+            test1.delete()
+            for call in mock.call_args_list:
+                self.assertNotEqual(call.args[0], 'finding_group_deleted')
+
+        with self.subTest('test_deleted itself'):
+            fg2.delete()
+            self.assertEqual(mock.call_count, 16)
+            self.assertEqual(mock.call_args_list[-1].args[0], 'finding_group_deleted')
+            self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The test "fg test" was deleted by {get_current_user()}')
+            self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/engagement/{test2.id}')
