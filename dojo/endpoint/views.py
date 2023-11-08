@@ -1,9 +1,7 @@
 import logging
-from auditlog.models import LogEntry
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
-from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -12,9 +10,6 @@ from django.utils import timezone
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Q, QuerySet, Count
-from django.dispatch import receiver
-from django.db.models.signals import post_delete
-from django.utils.translation import gettext as _
 
 from dojo.endpoint.utils import clean_hosts_run, endpoint_meta_import
 from dojo.filters import EndpointFilter
@@ -22,8 +17,7 @@ from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm, ImportEndpointMetaForm
 from dojo.models import Product, Endpoint, Finding, DojoMeta, Endpoint_Status
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, Product_Tab, calculate_grade, redirect, \
-    add_error_message_to_response, is_scan_file_too_large, get_system_setting
-from dojo.notifications.helper import create_notification
+    add_error_message_to_response, is_scan_file_too_large
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_permission_or_403
@@ -518,23 +512,3 @@ def import_endpoint_meta(request, pid):
         'product_tab': product_tab,
         'form': form,
     })
-
-
-@receiver(post_delete, sender=Endpoint)
-def endpoint_post_delete(sender, instance, using, origin, **kwargs):
-    if instance == origin:
-        if get_system_setting('enable_auditlog'):
-            le = LogEntry.objects.get(
-                    action=LogEntry.Action.DELETE,
-                    content_type=ContentType.objects.get(app_label='dojo', model='endpoint'),
-                    object_id=instance.id
-            )
-            description = _('The endpoint "%(name)s" was deleted by %(user)s') % {
-                                'name': str(instance), 'user': le.actor}
-        else:
-            description = _('The endpoint "%(name)s" was deleted') % {'name': str(instance)}
-        create_notification(event='endpoint_deleted',  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
-                            title=_('Deletion of %(name)s') % {'name': str(instance)},
-                            description=description,
-                            url=reverse('endpoint'),
-                            icon="exclamation-triangle")

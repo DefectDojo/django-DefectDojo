@@ -6,23 +6,18 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 from tempfile import NamedTemporaryFile
 
-from auditlog.models import LogEntry
 from datetime import datetime
 import operator
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError, PermissionDenied
-from django.dispatch import receiver
-from django.db.models.signals import pre_save, post_save, post_delete
 from django.urls import reverse, Resolver404
 from django.db.models import Q, Count
 from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponse, FileResponse, QueryDict
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
-from django.utils.translation import gettext as _
 from time import strftime
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
@@ -1409,50 +1404,3 @@ def excel_export(request):
     )
     response['Content-Disposition'] = 'attachment; filename=engagements.xlsx'
     return response
-
-
-@receiver(post_save, sender=Engagement)
-def engagement_post_save(sender, instance, created, **kwargs):
-    if created:
-        title = 'Engagement created for ' + str(instance.product) + ': ' + str(instance.name)
-        create_notification(event='engagement_added', title=title, engagement=instance, product=instance.product,
-                            url=reverse('view_engagement', args=(instance.id,)))
-
-
-@receiver(pre_save, sender=Engagement)
-def engagement_pre_save(sender, instance, **kwargs):
-    old = sender.objects.filter(pk=instance.pk).first()
-    if old and instance.status != old.status:
-        if instance.status in ["Cancelled", "Completed"]:
-            create_notification(event='close_engagement',
-                                title=_('Closure of %s') % instance.name,
-                                description=_('The engagement "%s" was closed') % (instance.name),
-                                engagement=instance, url=reverse('engagement_all_findings', args=(instance.id, )))
-        elif instance.status in ["In Progress"]:
-            create_notification(event='reopen_engagement',
-                                title=_('Reopening of %s') % instance.name,
-                                engagement=instance,
-                                description=_('The engagement "%s" was reopened') % (instance.name),
-                                url=reverse('view_engagement', args=(instance.id, )))
-
-
-@receiver(post_delete, sender=Engagement)
-def engagement_post_delete(sender, instance, using, origin, **kwargs):
-    if instance == origin:
-        if get_system_setting('enable_auditlog'):
-            le = LogEntry.objects.get(
-                    action=LogEntry.Action.DELETE,
-                    content_type=ContentType.objects.get(app_label='dojo', model='engagement'),
-                    object_id=instance.id
-            )
-            description = _('The engagement "%(name)s" was deleted by %(user)s') % {
-                                'name': instance.name, 'user': le.actor}
-        else:
-            description = _('The engagement "%(name)s" was deleted') % {'name': instance.name}
-        create_notification(event='engagement_deleted',  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
-                            title=_('Deletion of %(name)s') % {'name': instance.name},
-                            description=description,
-                            product=instance.product,
-                            url=reverse('view_product', args=(instance.product.id, )),
-                            recipients=[instance.lead],
-                            icon="exclamation-triangle")
