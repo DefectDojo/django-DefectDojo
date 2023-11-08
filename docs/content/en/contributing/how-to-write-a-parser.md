@@ -328,5 +328,7 @@ Please add a new .md file in [`docs/content/en/integrations/parsers`] with the d
 * Acceptable File Type(s) - please include how to generate this type of file from the related tool, as some tools have multiple methods or require specific commands.
 * An example unit test block, if applicable.
 * A link to the relevant unit tests folder so that users can quickly navigate there from Documentation.
+* A link to the scanner itself - (e.g. github or vendor link)
 
 Here is an example of a completed Parser documentation page: https://defectdojo.github.io/django-DefectDojo/integrations/parsers/file/awssecurityhub/
+
