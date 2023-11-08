@@ -1,5 +1,5 @@
 from .dojo_test_case import DojoTestCase
-from dojo.models import Product, Product_Type, Engagement, User, Notifications, Alerts, DEFAULT_NOTIFICATION, Endpoint
+from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Endpoint, User, Notifications, Alerts, DEFAULT_NOTIFICATION
 from dojo.notifications.helper import create_notification, send_alert_notification
 from django.utils import timezone
 from unittest.mock import patch
@@ -139,7 +139,7 @@ class TestNotificationTriggers(DojoTestCase):
             self.assertEqual(mock.call_count, 28)
             self.assertEqual(mock.call_args_list[-1].args[0], 'engagement_deleted')
             self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The engagement "Testing engagement" was deleted by {get_current_user()}')
-            self.assertEqual(mock.call_args_list[-1].kwargs['url'], '/product/5')
+            self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/product/{prod2.id}')
 
     @patch('dojo.notifications.helper.process_notifications')
     def test_endpoints(self, mock):
@@ -180,4 +180,4 @@ class TestNotificationTriggers(DojoTestCase):
             self.assertEqual(mock.call_count, 16)
             self.assertEqual(mock.call_args_list[-1].args[0], 'test_deleted')
             self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The test "BURP Scan" was deleted by {get_current_user()}')
-            self.assertEqual(mock.call_args_list[-1].kwargs['url'], '/engagement/8')
+            self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/engagement/{end2.id}')
