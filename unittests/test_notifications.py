@@ -220,6 +220,20 @@ class TestNotificationTriggers(DojoTestCase):
             self.assertEqual(mock.call_args_list[-1].args[0], 'engagement_added')
             self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/engagement/{eng.id}')
 
+        with self.subTest('close_engagement'):
+            eng.status = "Completed"
+            eng.save()
+            self.assertEqual(mock.call_count, 10)
+            self.assertEqual(mock.call_args_list[-1].args[0], 'close_engagement')
+            self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/engagement/{eng.id}/finding/all')
+
+        with self.subTest('reopen_engagement'):
+            eng.status = "In Progress"
+            eng.save()
+            self.assertEqual(mock.call_count, 15)
+            self.assertEqual(mock.call_args_list[-1].args[0], 'reopen_engagement')
+            self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/engagement/{eng.id}')
+
         prod_type = Product_Type.objects.first()
         prod1, _ = Product.objects.get_or_create(prod_type=prod_type, name='prod name 1')
         _ = Engagement.objects.create(product=prod1, target_start=timezone.now(), target_end=timezone.now(), lead=User.objects.get(username='admin'))
@@ -233,7 +247,7 @@ class TestNotificationTriggers(DojoTestCase):
 
         with self.subTest('engagement_deleted itself'):
             eng2.delete()
-            self.assertEqual(mock.call_count, 28)
+            self.assertEqual(mock.call_count, 38)
             self.assertEqual(mock.call_args_list[-1].args[0], 'engagement_deleted')
             self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The engagement "Testing engagement" was deleted by {get_current_user()}')
             self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/product/{prod2.id}')

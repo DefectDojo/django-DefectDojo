@@ -18,7 +18,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Count, Q
 from django.db.models.query import Prefetch, QuerySet
-from django.db.models.signals import post_delete, post_save
+from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
 from django.http import FileResponse, HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
@@ -284,10 +284,6 @@ def edit_engagement(request, eid):
             engagement = form.save(commit=False)
             if (new_status == "Cancelled" or new_status == "Completed"):
                 engagement.active = False
-                create_notification(event='close_engagement',
-                        title=f'Closure of {engagement.name}',
-                        description=f'The engagement "{engagement.name}" was closed',
-                        engagement=engagement, url=reverse('engagement_all_findings', args=(engagement.id, ))),
             else:
                 engagement.active = True
             engagement.save()
@@ -401,8 +397,8 @@ def copy_engagement(request, eid):
                 messages.SUCCESS,
                 'Engagement Copied successfully.',
                 extra_tags='alert-success')
-            create_notification(event='other',
-                                title=f'Copying of {engagement.name}',
+            create_notification(event='copy_engagement',  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
+                                title='Copying of %s' % engagement.name,
                                 description=f'The engagement "{engagement.name}" was copied by {request.user}',
                                 product=product,
                                 url=request.build_absolute_uri(reverse('view_engagement', args=(engagement_copy.id, ))),
@@ -1135,10 +1131,6 @@ def close_eng(request, eid):
         messages.SUCCESS,
         'Engagement closed successfully.',
         extra_tags='alert-success')
-    create_notification(event='close_engagement',
-                        title=f'Closure of {eng.name}',
-                        description=f'The engagement "{eng.name}" was closed',
-                        engagement=eng, url=reverse('engagement_all_findings', args=(eng.id, ))),
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
@@ -1151,11 +1143,6 @@ def reopen_eng(request, eid):
         messages.SUCCESS,
         'Engagement reopened successfully.',
         extra_tags='alert-success')
-    create_notification(event='other',
-                        title=f'Reopening of {eng.name}',
-                        engagement=eng,
-                        description=f'The engagement "{eng.name}" was reopened',
-                        url=reverse('view_engagement', args=(eng.id, ))),
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
@@ -1725,6 +1712,23 @@ def engagement_post_save(sender, instance, created, **kwargs):
         title = 'Engagement created for ' + str(instance.product) + ': ' + str(instance.name)
         create_notification(event='engagement_added', title=title, engagement=instance, product=instance.product,
                             url=reverse('view_engagement', args=(instance.id,)))
+
+
+@receiver(pre_save, sender=Engagement)
+def engagement_pre_save(sender, instance, **kwargs):
+    old = sender.objects.filter(pk=instance.pk).first()
+    if old and instance.status != old.status:
+        if instance.status in ["Cancelled", "Completed"]:
+            create_notification(event='close_engagement',
+                                title=_('Closure of %s') % instance.name,
+                                description=_('The engagement "%s" was closed') % (instance.name),
+                                engagement=instance, url=reverse('engagement_all_findings', args=(instance.id, )))
+        elif instance.status in ["In Progress"]:
+            create_notification(event='reopen_engagement',
+                                title=_('Reopening of %s') % instance.name,
+                                engagement=instance,
+                                description=_('The engagement "%s" was reopened') % (instance.name),
+                                url=reverse('view_engagement', args=(instance.id, )))
 
 
 @receiver(post_delete, sender=Engagement)
