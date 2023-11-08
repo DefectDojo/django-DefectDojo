@@ -496,14 +496,12 @@ class FindingTest(BaseTestCase):
         # Template created successfully
         self.assertTrue(self.is_text_present_on_page(text='Template created successfully.'))
 
-
     def test_check_if_template_applied(self):
         # Go to all findings
         driver = self.driver
         self.goto_all_findings_list(driver)
         # Check if the template is applied
         self.assertTrue(self.is_text_present_on_page(text="Template for App Vulnerable to XSS"))
-
 
     @on_exception_html_source_logger
     def test_delete_finding(self):
