@@ -1156,9 +1156,13 @@ class DeleteFinding(View):
                 "Finding deleted successfully.",
                 extra_tags="alert-success",
             )
+
+            # TODO this notification might be moved to "@receiver(post_delete, sender=Finding)" method as many other notifications
+            # However, it hasn't been migrated because it could generate too much noise, we keep it here only for findings created by hand in WebUI
+
             # Send a notification that the finding had been deleted
             create_notification(
-                event="other",
+                event="delete_finding",
                 title=f"Deletion of {finding.title}",
                 description=f'The finding "{finding.title}" was deleted by {request.user}',
                 product=product,
@@ -1275,8 +1279,12 @@ def close_finding(request, fid):
                     "Finding closed.",
                     extra_tags="alert-success",
                 )
+
+                # TODO this notification might be moved to "@receiver(pre_save, sender=Finding)" method as many other notifications
+                # However, it hasn't been migrated because it could generate too much noise, we keep it here only for findings created by hand in WebUI
+
                 create_notification(
-                    event="other",
+                    event="close_finding",
                     title="Closing of %s" % finding.title,
                     finding=finding,
                     description='The finding "%s" was closed by %s'
@@ -1439,8 +1447,12 @@ def reopen_finding(request, fid):
     messages.add_message(
         request, messages.SUCCESS, "Finding Reopened.", extra_tags="alert-success"
     )
+
+    # TODO this notification might be moved to "@receiver(pre_save, sender=Finding)" method as many other notifications
+    # However, it hasn't been migrated because it could generate too much noise, we keep it here only for findings created by hand in WebUI
+
     create_notification(
-        event="other",
+        event="reopen_finding",
         title="Reopening of %s" % finding.title,
         finding=finding,
         description='The finding "%s" was reopened by %s'
@@ -1499,7 +1511,7 @@ def copy_finding(request, fid):
                 extra_tags="alert-success",
             )
             create_notification(
-                event="other",
+                event="copy_finding",  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                 title="Copying of %s" % finding.title,
                 description='The finding "%s" was copied by %s to %s'
                 % (finding.title, request.user, test.title),
@@ -1676,7 +1688,7 @@ def request_finding_review(request, fid):
             logger.debug(f"Asking {reviewers_string} for review")
 
             create_notification(
-                event="review_requested",
+                event="review_requested",  # TODO - if 'review_requested' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                 title="Finding review requested",
                 requested_by=user,
                 note=new_note,
