@@ -227,14 +227,14 @@ class TestNotificationTriggers(DojoTestCase):
             eng.status = "Completed"
             eng.save()
             self.assertEqual(mock.call_count, 10)
-            self.assertEqual(mock.call_args_list[-1].args[0], 'close_engagement')
+            self.assertEqual(mock.call_args_list[-1].args[0], 'engagement_closed')
             self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/engagement/{eng.id}/finding/all')
 
         with self.subTest('reopen_engagement'):
             eng.status = "In Progress"
             eng.save()
             self.assertEqual(mock.call_count, 15)
-            self.assertEqual(mock.call_args_list[-1].args[0], 'reopen_engagement')
+            self.assertEqual(mock.call_args_list[-1].args[0], 'engagement_reopened')
             self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/engagement/{eng.id}')
 
         prod_type = Product_Type.objects.first()
