@@ -1510,6 +1510,9 @@ class Endpoint(models.Model):
                                  help_text=_("The communication protocol/scheme such as 'http', 'ftp', 'dns', etc."))
     userinfo = models.CharField(null=True, blank=True, max_length=500,
                               help_text=_("User info as 'alice', 'bob', etc."))
+    endpointid = models.CharField(null=True, blank=True, max_length=500,
+                            help_text=_("Sometimes it is more useful to add an ID as the endpoint due to changing IP addresses. "
+                                        "For example if a vulnerability scanner is rolled out on a client which changes the IP address each day (e.g. Wazuh agent)"))
     host = models.CharField(null=True, blank=True, max_length=500,
                             help_text=_("The host name or IP address. It must not include the port number. "
                                       "For example '127.0.0.1', 'localhost', 'yourdomain.com'."))
