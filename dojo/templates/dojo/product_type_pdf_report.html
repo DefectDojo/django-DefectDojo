@@ -204,29 +204,51 @@
 
                         {% include "dojo/snippets/endpoints.html" with finding=finding destination="Report" %}
 
-                        <h6>CVSS v3</h6>
-                        <pre>{{ finding.cvssv3 }}</pre>
+                        {% if finding.cvssv3 %}
+                            <h6>CVSS v3</h6>
+                            <pre>{{ finding.cvssv3|markdown_render }}</pre>
+                        {% endif %}
 
                         <h6>Description</h6>
-                        <pre>{{ finding.description }}</pre>
+                        <pre>{{ finding.description|markdown_render }}</pre>
 
-                        <h6>Mitigation</h6>
-                        <pre>{{ finding.mitigation }}</pre>
+                        {% if finding.mitigation %}
+                            <h6>Mitigation</h6>
+                            <pre>{{ finding.mitigation|markdown_render }}</pre>
+                        {% endif %}
+
                         {% if finding.get_report_requests %}
                             <h5>Sample Request(s): Displaying {{finding.get_report_requests.count}} of {{finding.burprawrequestresponse_set.count}}</h5>
                             {% for req in finding.get_report_requests %}
-                                <h6>Request {{forloop.counter}} </h6>
-                                <pre>{{ req.get_request }}</pre>
-                                {% if req.get_response %}
+                            <h6>Request {{forloop.counter}} </h6>
+                            <pre class="raw_request">{{ req.get_request }}</pre>
+                                {% if req.get_response != "" %}
                                 <h6>Response {{forloop.counter}}</h6>
-                                <pre>{{ req.get_response|truncatechars_html:800 }}</pre>
+                                <pre class="raw_request">{{ req.get_response|truncatechars_html:800 }}</pre>
                                 {% endif %}
                             {% endfor %}
                         {% endif %}
-                        <h6>Impact</h6>
-                        <pre>{{ finding.impact }}</pre>
-                        <h6>References</h6>
-                        <pre>{{ finding.references }}</pre>
+
+                        {% if finding.impact %}
+                            <h6>Impact</h6>
+                            <pre>{{ finding.impact|markdown_render }}</pre>
+                        {% endif %}
+                        
+                        {% if finding.steps_to_reproduce %}
+                            <h6>Steps to Reproduce</h6>
+                            <pre>{{ finding.steps_to_reproduce|markdown_render }}</pre>
+                        {% endif %}
+
+                        {% if finding.severity_justification %}
+                            <h6>Severity Justification</h6>
+                            <pre>{{ finding.severity_justification|markdown_render }}</pre>
+                        {% endif %}
+
+                        {% if finding.references %}
+                            <h6>References</h6>
+                            <pre>{{ finding.references|markdown_render }}</pre>
+                        {% endif %} 
+                        
                         {% if include_finding_images %}
                             {% include "dojo/snippets/file_images.html" with size='original' obj=finding format="HTML" %}
                         {% endif %}
