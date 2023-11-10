@@ -1257,7 +1257,9 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Popeye Scan': ['title', 'description'],
     'Wazuh Scan': ['title'],
     'Nuclei Scan': ['title', 'cwe', 'severity'],
-    'Threagile risks report': ['title', 'cwe', "severity"]
+    'KubeHunter Scan': ['title', 'description'],
+    'kube-bench Scan': ['title', 'vuln_id_from_tool', 'description'],
+    'Threagile risks report': ['title', 'cwe', "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1452,7 +1454,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Wpscan': DEDUPE_ALGO_HASH_CODE,
     'Popeye Scan': DEDUPE_ALGO_HASH_CODE,
     'Nuclei Scan': DEDUPE_ALGO_HASH_CODE,
-    'Threagile risks report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE
+    'KubeHunter Scan': DEDUPE_ALGO_HASH_CODE,
+    'kube-bench Scan': DEDUPE_ALGO_HASH_CODE,
+    'Threagile risks report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var

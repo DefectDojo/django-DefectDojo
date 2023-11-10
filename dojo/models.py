@@ -3794,7 +3794,7 @@ class Notifications(models.Model):
     sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
         verbose_name=_('SLA breach'),
         help_text=_('Get notified of (upcoming) SLA breaches'))
-    risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
+    risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
         verbose_name=_('Risk Acceptance Expiration'),
         help_text=_('Get notified of (upcoming) Risk Acceptance expiries'))
 
@@ -4299,6 +4299,7 @@ def enable_disable_auditlog(enable=True):
         auditlog.register(Endpoint)
         auditlog.register(Engagement)
         auditlog.register(Finding)
+        auditlog.register(Product_Type)
         auditlog.register(Product)
         auditlog.register(Test)
         auditlog.register(Risk_Acceptance)
@@ -4310,6 +4311,7 @@ def enable_disable_auditlog(enable=True):
         auditlog.unregister(Endpoint)
         auditlog.unregister(Engagement)
         auditlog.unregister(Finding)
+        auditlog.unregister(Product_Type)
         auditlog.unregister(Product)
         auditlog.unregister(Test)
         auditlog.unregister(Risk_Acceptance)
