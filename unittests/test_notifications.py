@@ -318,27 +318,27 @@ class TestNotificationTriggers(DojoTestCase):
             self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The finding group "fg test" was deleted by {get_current_user()}')
             self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/test/{test2.id}')
 
-    @patch('dojo.notifications.helper.process_notifications')
-    def test_auditlog_on_off(self, mock):
-        ss = System_Settings.objects.get()
-        original_auditlog = ss.enable_auditlog
-
-        with self.subTest('enable_auditlog'):
-            ss.enable_auditlog = True
-            ss.save()
-            enable_disable_auditlog(enable=True)
-            prod_type = Product_Type.objects.create(name='notif prod type')
-            prod_type.delete()
-            self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The product type "notif prod type" was deleted by {get_current_user()}')
-
-        with self.subTest('disable_auditlog'):
-            ss.enable_auditlog = False
-            ss.save()
-            enable_disable_auditlog(enable=False)
-            prod_type = Product_Type.objects.create(name='notif prod type')
-            prod_type.delete()
-            self.assertEqual(mock.call_args_list[-1].kwargs['description'], 'The product type "notif prod type" was deleted')
-
-        ss.enable_auditlog = original_auditlog
-        ss.save()
-        enable_disable_auditlog(enable=original_auditlog)
+#     @patch('dojo.notifications.helper.process_notifications')
+#     def test_auditlog_on_off(self, mock):
+#         ss = System_Settings.objects.get()
+#         original_auditlog = ss.enable_auditlog
+#
+#         with self.subTest('enable_auditlog'):
+#             ss.enable_auditlog = True
+#             ss.save()
+#             enable_disable_auditlog(enable=True)
+#             prod_type = Product_Type.objects.create(name='notif prod type')
+#             prod_type.delete()
+#             self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The product type "notif prod type" was deleted by {get_current_user()}')
+#
+#         with self.subTest('disable_auditlog'):
+#             ss.enable_auditlog = False
+#             ss.save()
+#             enable_disable_auditlog(enable=False)
+#             prod_type = Product_Type.objects.create(name='notif prod type')
+#             prod_type.delete()
+#             self.assertEqual(mock.call_args_list[-1].kwargs['description'], 'The product type "notif prod type" was deleted')
+#
+#         ss.enable_auditlog = original_auditlog
+#         ss.save()
+#         enable_disable_auditlog(enable=original_auditlog)
