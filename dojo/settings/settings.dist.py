@@ -1260,7 +1260,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'KubeHunter Scan': ['title', 'description'],
     'kube-bench Scan': ['title', 'vuln_id_from_tool', 'description'],
     'Threagile risks report': ['title', 'cwe', "severity"],
-    'MSDefender API': ['unique_id_from_tool'],
+    'MSDefender API': ['title','unique_id_from_tool'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1458,7 +1458,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'KubeHunter Scan': DEDUPE_ALGO_HASH_CODE,
     'kube-bench Scan': DEDUPE_ALGO_HASH_CODE,
     'Threagile risks report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
-    'MSDefender API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'MSDefender API': DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var

@@ -1,4 +1,6 @@
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util import Retry
 
 
 class MSDefenderAPI:
@@ -29,49 +31,43 @@ class MSDefenderAPI:
         self.aadToken = jsonResponse["access_token"]
 
     def get_findings(self):
+        retry_strategy = Retry(
+            total=5,  # Maximum number of retries
+            status_forcelist=[429, 500, 502, 503, 504],  # HTTP status codes to retry on
+            backoff_factor=2
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        session = requests.Session()
+        session.mount('https://', adapter)
         results = []
         vulnerabilities = []
         headers = {"Authorization": 'Bearer ' + self.aadToken}
         endpoint = "https://api.securitycenter.microsoft.com/api/vulnerabilities/machinesVulnerabilities"
         while True:
-            response = requests.get(endpoint, headers=headers)
-            if response.status_code == 200:
-                json_output = response.json()
-                if json_output["value"] == []:
-                    break
-                elif json_output.get("@odata.nextLink") is None:
-                    vulnerabilities = vulnerabilities + json_output["value"]
-                    break
-                else:
-                    vulnerabilities = vulnerabilities + json_output["value"]
-                    endpoint = json_output["@odata.nextLink"]
-            elif response.status_code == 429:  # "TooManyRequests"
-                pass
+            response = session.get(endpoint, headers=headers)
+            json_output = response.json()
+            if json_output["value"] == []:
+                break
+            elif json_output.get("@odata.nextLink") is None:
+                vulnerabilities = vulnerabilities + json_output["value"]
+                break
             else:
-                raise ConnectionError(
-                    f'API might mot be avilable at the moment. {response.status_code} - {response.content.decode("utf-8")}'
-                )
+                vulnerabilities = vulnerabilities + json_output["value"]
+                endpoint = json_output["@odata.nextLink"]
         results.append(vulnerabilities)
         machines = []
         endpoint = "https://api.securitycenter.microsoft.com/api/machines"
         while True:
-            response = requests.get(endpoint, headers=headers)
-            if response.status_code == 200:
-                json_output = response.json()
-                if json_output["value"] == []:
-                    break
-                elif json_output.get("@odata.nextLink") is None:
-                    machines = machines + json_output["value"]
-                    break
-                else:
-                    machines = machines + json_output["value"]
-                    endpoint = json_output["@odata.nextLink"]
-            elif response.status_code == 429:  # "TooManyRequests"
-                pass
+            response = session.get(endpoint, headers=headers)
+            json_output = response.json()
+            if json_output["value"] == []:
+                break
+            elif json_output.get("@odata.nextLink") is None:
+                machines = machines + json_output["value"]
+                break
             else:
-                raise ConnectionError(
-                    f'API might mot be avilable at the moment. {response.status_code} - {response.content.decode("utf-8")}'
-                )
+                machines = machines + json_output["value"]
+                endpoint = json_output["@odata.nextLink"]
         results.append(machines)
         return results
 
