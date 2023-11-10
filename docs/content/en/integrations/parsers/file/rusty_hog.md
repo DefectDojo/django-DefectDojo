@@ -10,3 +10,6 @@ DefectDojo currently supports the parsing of the following Rusty Hog JSON output
 - Duroc Hog: Scans for secrets in directories, files, and archives.
 - Gottingen Hog: Scans for secrets in a JIRA issue.
 - Essex Hog: Scans for secrets in a Confluence page.
+
+RustyHog scans only one target at a time. This is not efficient if you want to scan all targets (e.g. all JIRA tickets) and upload each single report to DefectDojo.
+[Rusty-Hog-Wrapper](https://github.com/manuel-sommer/Rusty-Hog-Wrapper) deals with this and scans a whole JIRA Project or Confluence Space, merges the findings into a valid file which can be uploaded to DefectDojo. (This is no official recommendation from DefectDojo, but rather a pointer in a direction on how to use this vulnerability scanner in a more efficient way.)
