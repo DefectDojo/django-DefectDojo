@@ -19,7 +19,7 @@ class TestAPIMSDefenderAPIParser(DojoTestCase):
         self.assertEqual("CVE-5678-9887_None_Other_wjeriowerjoiewrjoweirjeowij", finding.title)
         for endpoint in finding.unsaved_endpoints:
             endpoint.clean()
-        self.assertEqual("wjeriowerjoiewrjoweirjeowij", finding.unsaved_endpoints[0].host)
+        self.assertEqual("1.1.1.1", finding.unsaved_endpoints[0].host)
 
     def test_parse_one_finding(self):
         filelist = []
@@ -36,7 +36,7 @@ class TestAPIMSDefenderAPIParser(DojoTestCase):
         self.assertEqual("CVE-1234-5678", finding.cve)
         for endpoint in finding.unsaved_endpoints:
             endpoint.clean()
-        self.assertEqual("fjweoifjewiofjweoifjeowifjowei", finding.unsaved_endpoints[0].host)
+        self.assertEqual("afjweiofwejfio.com", finding.unsaved_endpoints[0].host)
 
     def test_parse_no_finding(self):
         filelist = []

@@ -95,8 +95,12 @@ class ApiMSDefenderParser(object):
                     finding.cve = vulnerability['cveId']
                 findings.append(finding)
                 finding.unsaved_endpoints = list()
-                endpoint = Endpoint(host=str(machine['id']))
-                finding.unsaved_endpoints.append(endpoint)
+                if machine['computerDnsName'] is not None:
+                    finding.unsaved_endpoints.append(Endpoint(host=str(machine['computerDnsName'])))
+                if machine['lastIpAddress'] is not None:
+                    finding.unsaved_endpoints.append(Endpoint(host=str(machine['lastIpAddress'])))
+                if machine['lastExternalIpAddress'] is not None:
+                    finding.unsaved_endpoints.append(Endpoint(host=str(machine['lastExternalIpAddress'])))
             except IndexError:
                 description = ""
                 description += "cveId: " + str(vulnerability['cveId']) + "\n"
