@@ -1260,7 +1260,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'KubeHunter Scan': ['title', 'description'],
     'kube-bench Scan': ['title', 'vuln_id_from_tool', 'description'],
     'Threagile risks report': ['title', 'cwe', "severity"],
-    'MSDefender API': ['title','unique_id_from_tool'],
+    'MSDefender API': ['title', 'unique_id_from_tool'],
 }
 
 # Override the hardcoded settings here via the env var
