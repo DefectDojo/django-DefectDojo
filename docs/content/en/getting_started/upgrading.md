@@ -74,7 +74,7 @@ If you have installed DefectDojo on "iron" and wish to upgrade the installation,
 
 ## Upgrading to DefectDojo Version 2.28.x.
 
-There are no special instruction for upgrading to 2.27.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.28.0) for the contents of the release.
+There are no special instruction for upgrading to 2.28.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.28.0) for the contents of the release.
 
 ## Upgrading to DefectDojo Version 2.27.x.
 
