@@ -1,0 +1,38 @@
+{
+    "[0. Info]": {
+        "Date": "2023/11/13 - 22:26:04",
+        "URL": "https://asfasdfasdfgqmc.gov.ph"
+    },
+    "[HTTP Response Headers]": {
+        "": ""
+    },
+    "[1. Missing HTTP Security Headers]": [
+        "Cache-Control",
+        "Clear-Site-Data",
+        "Content-Type",
+        "Cross-Origin-Embedder-Policy",
+        "Cross-Origin-Opener-Policy",
+        "Cross-Origin-Resource-Policy",
+        "Content-Security-Policy",
+        "NEL",
+        "Permissions-Policy",
+        "Referrer-Policy",
+        "Strict-Transport-Security",
+        "X-Content-Type-Options",
+        "X-Permitted-Cross-Domain-Policies",
+        "X-Frame-Options",
+        "X-Frame-Options"
+    ],
+    "[2. Fingerprint HTTP Response Headers]": [
+        "Nothing to report, all seems OK!"
+    ],
+    "[3. Deprecated HTTP Response Headers/Protocols and Insecure Values]": [
+        "Nothing to report, all seems OK!"
+    ],
+    "[4. Empty HTTP Response Headers Values]": [
+        "Nothing to report, all seems OK!"
+    ],
+    "[5. Browser Compatibility for Enabled HTTP Security Headers]": {
+        "No HTTP security headers are enabled.": ""
+    }
+}%
