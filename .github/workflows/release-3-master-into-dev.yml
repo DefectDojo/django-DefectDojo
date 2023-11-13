@@ -60,7 +60,7 @@ jobs:
           ---
           There are no special instruction for upgrading to $minorv.x. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/${{ github.event.inputs.release_number_dev }}) for the contents of the release.
           EOD
-        if: endsWith(github.event.inputs.release_number_new, ".0")
+        if: endsWith(github.event.inputs.release_number_new, '.0')
 
       - name: Check numbers
         run: |
