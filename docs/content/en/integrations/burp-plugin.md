@@ -5,6 +5,9 @@ draft: false
 weight: 8
 ---
 
+**Please note: The DefectDojo Burp Plugin has been sunset and is no longer a supported feature.**
+
+Burp is still a supported tool, and all the results from it can be imported into DefectDojo. Burp can produce XML reports and these can be uploaded to DefectDojo using the graphical user interface or the API. Our documentation at https://documentation.defectdojo.com/integrations/parsers/file/burp/ describes this usage.
 
 This is Burp Plugin to export findings directly to DefectDojo.
 
