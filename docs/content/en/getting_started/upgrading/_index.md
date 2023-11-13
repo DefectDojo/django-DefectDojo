@@ -5,7 +5,7 @@ draft: false
 weight: 5
 ---
 
-# Docker-compose
+## Docker-compose
 
 When you deploy a vanilla docker-compose, it will create a persistent
 volume for your MySQL database. As long as your volume is there, you
@@ -66,8 +66,8 @@ first.
 
 Then replace the first step of the above generic upgrade method for docker-compose with: `docker-compose build`
 
-# godojo installations
+## godojo installations
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
 
-# Upgrade notes for each release
+## Upgrade notes for each release
