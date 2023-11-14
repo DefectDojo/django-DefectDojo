@@ -60,7 +60,7 @@ jobs:
         run: |
           minorv=$(echo ${{ github.event.inputs.release_number_dev }} | cut -d '.' -f -2)
           patchv=$(echo ${{ github.event.inputs.release_number_dev }} | cut -d '-' -f -1)
-          # touch docs/content/en/getting_started/upgrading/$minorv.md
+          touch docs/content/en/getting_started/upgrading/$minorv.md
           echo -n "---
           title: 'Upgrading to DefectDojo Version $minorv.x'
           toc_hide: true
