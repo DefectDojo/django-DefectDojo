@@ -1,5 +1,5 @@
 import json
-from dojo.models import Finding, Endpoint
+from dojo.models import Finding
 
 
 class HumbleParser(object):
@@ -14,22 +14,48 @@ class HumbleParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "JSON output of Humble scan."
 
-    def return_finding(self, test, finding, url=None):
-        print("TODO")
-
     def get_findings(self, filename, test):
         items = []
         try:
             data = json.load(filename)
         except ValueError as err:
             data = {}
-        if data != {} and data[0].get("url") is not None:
-            for item in data:
-                url = item["url"]
-                for finding in item["report"]:
-                    items.append(self.return_finding(test=test, finding=finding, url=url))
-            return items
-        else:
-            for finding in data:
-                items.append(self.return_finding(test=test, finding=finding))
-            return items
+        if data != {}:
+            url = data['[0. Info]']['URL']
+            for content in data['[1. Missing HTTP Security Headers]']:
+                if content != "Nothing to report, all seems OK!":
+                    finding = Finding(title=url + "_missing_" + str(content),
+                        test=test,
+                        description="This security Header is missing: " + content,
+                        severity="Medium",
+                        static_finding=False,
+                        dynamic_finding=True)
+                    items.append(finding)
+            for content in data['[2. Fingerprint HTTP Response Headers]']:
+                if content != "Nothing to report, all seems OK!":
+                    finding = Finding(title=url + "_fingerprint_" + str(content),
+                        test=test,
+                        description="This fingerprint HTTP Response Header is available. Please remove it: " + content,
+                        severity="Medium",
+                        static_finding=False,
+                        dynamic_finding=True)
+                    items.append(finding)
+            for content in data['[3. Deprecated HTTP Response Headers/Protocols and Insecure Values]']:
+                if content != "Nothing to report, all seems OK!":
+                    finding = Finding(title=url + "_deprecatedheader_" + str(content),
+                        test=test,
+                        description="This deprecated HTTP Response Header is available. Please remove it: " + content,
+                        severity="Medium",
+                        static_finding=False,
+                        dynamic_finding=True)
+                    items.append(finding)
+            for content in data['[4. Empty HTTP Response Headers Values]']:
+                if content != "Nothing to report, all seems OK!":
+                    finding = Finding(title=url + "_emptyhttpresponse_" + str(content),
+                        test=test,
+                        description="This empty HTTP Response Header value is available. Please remove it: " + content,
+                        severity="Medium",
+                        static_finding=False,
+                        dynamic_finding=True)
+                    items.append(finding)
+        return items
