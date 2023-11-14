@@ -53,13 +53,13 @@ jobs:
       - name: Create upgrade notes to documentation
         run: |
           minorv=$(echo ${{ github.event.inputs.release_number_dev }} | cut -d '.' -f -2)
-          cat > docs/content/en/getting_started/upgrading/$minorv.md <<EOD
-          ---
-          title: "Upgrading to DefectDojo Version $minorv.x"
+          patchv=$(echo ${{ github.event.inputs.release_number_dev }} | cut -d '-' -f -1)
+          echo "---
+          title: 'Upgrading to DefectDojo Version $minorv.x'
           toc_hide: true
           ---
-          There are no special instruction for upgrading to $minorv.x. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/${{ github.event.inputs.release_number_dev }}) for the contents of the release.
-          EOD
+          There are no special instruction for upgrading to $minorv.x. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/$patchv) for the contents of the release.
+          " > docs/content/en/getting_started/upgrading/$minorv.md
         if: endsWith(github.event.inputs.release_number_dev, '.0-dev')
 
       - name: Check numbers
