@@ -50,10 +50,18 @@ jobs:
           CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml | head -1)
           sed -ri "0,/version/s/version: \S+/$(echo "version: $CURRENT_CHART_VERSION" | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')-dev/" helm/defectdojo/Chart.yaml
       
+      - name: Check numbers
+        run: |
+          grep version dojo/__init__.py
+          grep appVersion helm/defectdojo/Chart.yaml
+          grep version components/package.json
+
       - name: Create upgrade notes to documentation
         run: |
           minorv=$(echo ${{ github.event.inputs.release_number_dev }} | cut -d '.' -f -2)
           patchv=$(echo ${{ github.event.inputs.release_number_dev }} | cut -d '-' -f -1)
+          mkdir -p docs/content/en/getting_started/upgrading
+          touch docs/content/en/getting_started/upgrading/$minorv.md
           echo "---
           title: 'Upgrading to DefectDojo Version $minorv.x'
           toc_hide: true
@@ -62,12 +70,6 @@ jobs:
           " > docs/content/en/getting_started/upgrading/$minorv.md
         if: endsWith(github.event.inputs.release_number_dev, '.0-dev')
 
-      - name: Check numbers
-        run: |
-          grep version dojo/__init__.py
-          grep appVersion helm/defectdojo/Chart.yaml
-          grep version components/package.json
-      
       - name: Push version changes
         uses: stefanzweifel/git-auto-commit-action@v5.0.0
         with:
