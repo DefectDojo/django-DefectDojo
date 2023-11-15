@@ -322,7 +322,7 @@ The default https port is 8443.
 
 To change the port:
 - update `nginx.conf`
-- update `docker-compose.override.https.yml` or set DD_PORT in the environment)
+- update `docker-compose.override.https.yml` or set DD_TLS_PORT in the environment)
 - restart the application
 
 NB: some third party software may require to change the exposed port in Dockerfile.nginx as they use docker-compose declarations to discover which ports to map when publishing the application.

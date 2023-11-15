@@ -9,11 +9,18 @@ class WhispersParser(object):
     """
 
     SEVERITY_MAP = {
+        # Whispers 2.1
         "BLOCKER": "Critical",
         "CRITICAL": "High",
         "MAJOR": "Medium",
         "MINOR": "Low",
         "INFO": "Info",
+        # Whispers 2.2
+        "Critical": "Critical",
+        "High": "High",
+        "Medium": "Medium",
+        "Low": "Low",
+        "Info": "Info",
     }
 
     @staticmethod

@@ -2983,20 +2983,41 @@ class Finding(models.Model):
                 'url': reverse('view_finding', args=(self.id,))}]
         return bc
 
+    def get_valid_request_response_pairs(self):
+        empty_value = base64.b64encode("".encode())
+        # Get a list of all req/resp pairs
+        all_req_resps = self.burprawrequestresponse_set.all()
+        # Filter away those that do not have any contents
+        valid_req_resps = all_req_resps.exclude(
+            burpRequestBase64__exact=empty_value,
+            burpResponseBase64__exact=empty_value,
+        )
+
+        return valid_req_resps
+
     def get_report_requests(self):
-        if self.burprawrequestresponse_set.count() >= 3:
-            return self.burprawrequestresponse_set.all()[0:3]
-        elif self.burprawrequestresponse_set.count() > 0:
-            return self.burprawrequestresponse_set.all()
+        # Get the list of request response pairs that are non empty
+        request_response_pairs = self.get_valid_request_response_pairs()
+        # Determine how many to return
+        if request_response_pairs.count() >= 3:
+            return request_response_pairs[0:3]
+        elif request_response_pairs.count() > 0:
+            return request_response_pairs
 
     def get_request(self):
-        if self.burprawrequestresponse_set.count() > 0:
-            reqres = self.burprawrequestresponse_set().first()
+        # Get the list of request response pairs that are non empty
+        request_response_pairs = self.get_valid_request_response_pairs()
+        # Determine what to return
+        if request_response_pairs.count() > 0:
+            reqres = request_response_pairs.first()
         return base64.b64decode(reqres.burpRequestBase64)
 
     def get_response(self):
-        if self.burprawrequestresponse_set.count() > 0:
-            reqres = self.burprawrequestresponse_set.first()
+        # Get the list of request response pairs that are non empty
+        request_response_pairs = self.get_valid_request_response_pairs()
+        # Determine what to return
+        if request_response_pairs.count() > 0:
+            reqres = request_response_pairs.first()
         res = base64.b64decode(reqres.burpResponseBase64)
         # Removes all blank lines
         res = re.sub(r'\n\s*\n', '\n', res)
@@ -3779,7 +3800,7 @@ class Notifications(models.Model):
     sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
         verbose_name=_('SLA breach'),
         help_text=_('Get notified of (upcoming) SLA breaches'))
-    risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
+    risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
         verbose_name=_('Risk Acceptance Expiration'),
         help_text=_('Get notified of (upcoming) Risk Acceptance expiries'))
 
@@ -4284,6 +4305,7 @@ def enable_disable_auditlog(enable=True):
         auditlog.register(Endpoint)
         auditlog.register(Engagement)
         auditlog.register(Finding)
+        auditlog.register(Product_Type)
         auditlog.register(Product)
         auditlog.register(Test)
         auditlog.register(Risk_Acceptance)
@@ -4295,6 +4317,7 @@ def enable_disable_auditlog(enable=True):
         auditlog.unregister(Endpoint)
         auditlog.unregister(Engagement)
         auditlog.unregister(Finding)
+        auditlog.unregister(Product_Type)
         auditlog.unregister(Product)
         auditlog.unregister(Test)
         auditlog.unregister(Risk_Acceptance)
