@@ -15,7 +15,6 @@
         "Permissions-Policy": "interest-cohort=()",
         "Pragma": "no-cache",
         "Referrer-Policy": "strict-origin",
-        "Set-Cookie": "8caa9ddc6c754d479548a7ce5ac1adbd=t2l01hama41hfcpn38puuhfbjo; path=/; HttpOnly, BIGipServerPool_gqmc=919077386.47873.0000; path=/; Httponly; Secure, TS01cefe6e=01eecca7b203023b1263e1cdfac41fe36c7a6cc4f07b7373afac56e5205f2af6e164c6ed8f9523e967dc229dce1122fd9d5f287c6d08455ec6aa42d9987e2e8ce5d3bb4656e121044701094be65114d1dd5e46997e; Path=/;",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomain$",
         "Transfer-Encoding": "chunked",
         "Vary": "Accept-Encoding",

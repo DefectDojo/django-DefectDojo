@@ -1,5 +1,5 @@
 import json
-from dojo.models import Finding
+from dojo.models import Finding, Endpoint
 
 
 class HumbleParser(object):
@@ -31,6 +31,9 @@ class HumbleParser(object):
                         static_finding=False,
                         dynamic_finding=True)
                     items.append(finding)
+                    finding.unsaved_endpoints = list()
+                    endpoint = Endpoint(host=url)
+                    finding.unsaved_endpoints.append(endpoint)
             for content in data['[2. Fingerprint HTTP Response Headers]']:
                 if content != "Nothing to report, all seems OK!":
                     finding = Finding(title=url + "_fingerprint_" + str(content),
@@ -40,6 +43,9 @@ class HumbleParser(object):
                         static_finding=False,
                         dynamic_finding=True)
                     items.append(finding)
+                    finding.unsaved_endpoints = list()
+                    endpoint = Endpoint(host=url)
+                    finding.unsaved_endpoints.append(endpoint)
             for content in data['[3. Deprecated HTTP Response Headers/Protocols and Insecure Values]']:
                 if content != "Nothing to report, all seems OK!":
                     finding = Finding(title=url + "_deprecatedheader_" + str(content),
@@ -49,6 +55,9 @@ class HumbleParser(object):
                         static_finding=False,
                         dynamic_finding=True)
                     items.append(finding)
+                    finding.unsaved_endpoints = list()
+                    endpoint = Endpoint(host=url)
+                    finding.unsaved_endpoints.append(endpoint)
             for content in data['[4. Empty HTTP Response Headers Values]']:
                 if content != "Nothing to report, all seems OK!":
                     finding = Finding(title=url + "_emptyhttpresponse_" + str(content),
@@ -58,4 +67,7 @@ class HumbleParser(object):
                         static_finding=False,
                         dynamic_finding=True)
                     items.append(finding)
+                    finding.unsaved_endpoints = list()
+                    endpoint = Endpoint(host=url)
+                    finding.unsaved_endpoints.append(endpoint)
         return items
