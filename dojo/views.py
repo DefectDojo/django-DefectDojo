@@ -16,6 +16,7 @@ from dojo.forms import ManageFileFormSet
 from dojo.utils import get_page_items, Product_Tab, get_system_setting
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403, user_has_configuration_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
+from dojo.settings.settings import ENABLE_AUDITLOG
 
 
 logger = logging.getLogger(__name__)
@@ -98,7 +99,7 @@ def action_history(request, cid, oid):
     log_entry_filter = LogEntryFilter(request.GET, queryset=history)
     paged_history = get_page_items(request, log_entry_filter.qs, 25)
 
-    if not get_system_setting('enable_auditlog'):
+    if not ENABLE_AUDITLOG:
         messages.add_message(
             request,
             messages.WARNING,

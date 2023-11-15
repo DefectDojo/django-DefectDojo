@@ -29,6 +29,7 @@ services:
     environment:
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
+      DD_ENABLE_AUDITLOG: False
   nginx:
     volumes:
       - './dojo/static/dojo:/usr/share/nginx/html/static/dojo'
