@@ -78,11 +78,11 @@ with connections[DEFAULT_DB_ALIAS].cursor() as c:
     try:
         c.execute('select * from dojo_system_settings limit 1')
     except ProgrammingError as e:
-        if str(e).startswith('relation "dojo_system_settings" does not exist'):
+        err_msg = str(e)
+        if "does not exist" in err_msg or "doesn't exist" in err_msg:
             print('Django has not been initialized. Nothing to check.')
             exit(0)
         else:
-            print(str(e))
             raise
     raw_row = dictfetchall(c)[0]
 if 'enable_auditlog' in raw_row:  # db is not migrated yet
