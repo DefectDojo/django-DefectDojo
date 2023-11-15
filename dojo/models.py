@@ -4279,6 +4279,7 @@ class ChoiceAnswer(Answer):
         else:
             return 'No Response'
 
+
 if ENABLE_AUDITLOG:
     # Register for automatic logging to database
     logger.info('enabling audit logging')
