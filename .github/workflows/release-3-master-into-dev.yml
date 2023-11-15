@@ -60,9 +60,11 @@ jobs:
         run: |
           minorv=$(echo ${{ github.event.inputs.release_number_dev }} | cut -d '.' -f -2)
           patchv=$(echo ${{ github.event.inputs.release_number_dev }} | cut -d '-' -f -1)
+          weight=$(date +%Y%m%d)
           echo -n "---
           title: 'Upgrading to DefectDojo Version $minorv.x'
           toc_hide: true
+          weight: -$weight
           ---
           There are no special instruction for upgrading to $minorv.x. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/$patchv) for the contents of the release.
           " > docs/content/en/getting_started/upgrading/$minorv.md
