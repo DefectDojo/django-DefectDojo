@@ -2041,7 +2041,7 @@ class ApiTestFilter(DojoFilter):
                      'target_end', 'notes', 'percent_complete',
                      'actual_time', 'engagement', 'version',
                      'branch_tag', 'build_id', 'commit_hash',
-                     'api_scan_configuration']
+                     'api_scan_configuration', 'scan_type']
 
 
 class ApiAppAnalysisFilter(DojoFilter):

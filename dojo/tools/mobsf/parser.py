@@ -139,6 +139,25 @@ class MobSFParser(object):
                                 "file_path": details["name"]
                             }
                             mobsf_findings.append(mobsf_item)
+            elif data["binary_analysis"].get("findings"):
+                for binary_analysis_type, details in list(data["binary_analysis"]["findings"].items()):
+                    # "findings":{
+                    #     "Binary makes use of insecure API(s)":{
+                    #         "detailed_desc":"The binary may contain the following insecure API(s) _memcpy\n, _strlen\n",
+                    #         "severity":"high",
+                    #         "cvss":6,
+                    #         "cwe":"CWE-676: Use of Potentially Dangerous Function",
+                    #         "owasp-mobile":"M7: Client Code Quality",
+                    #         "masvs":"MSTG-CODE-8"
+                    #     },
+                    mobsf_item = {
+                        "category": "Binary Analysis",
+                        "title": details["detailed_desc"],
+                        "severity": details["severity"].replace("good", "info").title(),
+                        "description": details["detailed_desc"],
+                        "file_path": None
+                    }
+                    mobsf_findings.append(mobsf_item)
             else:
                 for binary_analysis_type, details in list(data["binary_analysis"].items()):
                     # "Binary makes use of insecure API(s)":{
