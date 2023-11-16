@@ -55,6 +55,7 @@ steps:
       export DD_DATABASE_NAME=test_defectdojo
       export DD_SECRET_KEY='.'
 
+      python manage.py migrate
       python manage.py makemigrations dojo --merge
       python manage.py migrate
 
