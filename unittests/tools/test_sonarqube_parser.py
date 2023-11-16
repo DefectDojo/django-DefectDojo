@@ -491,5 +491,3 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(True, item.static_finding)
         self.assertEqual(bool, type(item.dynamic_finding))
         self.assertEqual(False, item.dynamic_finding)
-
-
