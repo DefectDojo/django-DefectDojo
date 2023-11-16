@@ -13,7 +13,7 @@ steps:
   - task: connect-agent@2
     displayName: "Hosted agent"
     inputs:
-      hostedAgentService: hosted-agent-cnx
+      hostedAgentService: $(hostedAgentService)
 
   - bash: |
       echo "docker volume"
