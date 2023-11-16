@@ -125,7 +125,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   mysql:
-    image: mysql:5.7.44@sha256:880063e8acda81825f0b946eff47c45235840480da03e71a22113ebafe166a3d
+    image: mysql:5.7.44@sha256:f566819f2eee3a60cf5ea6c8b7d1bfc9de62e34268bf62dc34870c4fca8a85d1
     profiles:
       - mysql-rabbitmq
       - mysql-redis
