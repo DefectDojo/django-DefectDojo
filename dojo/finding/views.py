@@ -967,6 +967,9 @@ class EditFinding(View):
             new_finding.last_reviewed = timezone.now()
             new_finding.last_reviewed_by = request.user
             new_finding.tags = context["form"].cleaned_data["tags"]
+            # Handle verified date
+            if new_finding.verified is True and new_finding.verified_date is None:
+                new_finding.verified_date = timezone.now()
             # Handle group related things
             if "group" in context["form"].cleaned_data:
                 finding_group = context["form"].cleaned_data["group"]
@@ -1338,6 +1341,8 @@ def defect_finding_review(request, fid):
             else:
                 finding.active = True
                 finding.verified = True
+                if finding.verified_date is None:
+                    finding.verified_date = now
                 finding.mitigated = None
                 finding.mitigated_by = None
                 finding.is_mitigated = False
@@ -2084,6 +2089,8 @@ def promote_to_finding(request, fid):
             new_finding.duplicate = False
             new_finding.mitigated = None
             new_finding.verified = True
+            if new_finding.verified_date is None:
+                new_finding.verified_date = timezone.now()
             new_finding.out_of_scope = False
 
             new_finding.save()
@@ -2774,6 +2781,8 @@ def finding_bulk_update_all(request, pid=None):
                             # logger.debug('setting status from bulk edit form: %s', form)
                             find.active = form.cleaned_data["active"]
                             find.verified = form.cleaned_data["verified"]
+                            if find.verified is True and find.verified_date is None:
+                                find.verified_date = timezone.now()
                             find.false_p = form.cleaned_data["false_p"]
                             find.out_of_scope = form.cleaned_data["out_of_scope"]
                             find.is_mitigated = form.cleaned_data["is_mitigated"]

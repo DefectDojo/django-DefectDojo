@@ -307,6 +307,7 @@ def get_finding_filterset_fields(metrics=False, similar=False):
                 'status',
                 'active',
                 'verified',
+                'verified_date',
                 'duplicate',
                 'is_mitigated',
                 'out_of_scope',
@@ -1199,6 +1200,7 @@ class ApiFindingFilter(DojoFilter):
     jira_change = DateRangeFilter(field_name='jira_issue__jira_change')
     last_reviewed = DateRangeFilter()
     mitigated = DateRangeFilter()
+    verified_date = DateRangeFilter()
     # NumberInFilter
     cwe = NumberInFilter(field_name='cwe', lookup_expr='in')
     defect_review_requested_by = NumberInFilter(field_name='defect_review_requested_by', lookup_expr='in')
@@ -1276,6 +1278,7 @@ class ApiFindingFilter(DojoFilter):
             ('under_defect_review', 'under_defect_review'),
             ('under_review', 'under_review'),
             ('verified', 'verified'),
+            ('verified_date', 'verified_date')
         ),
     )
 
@@ -1301,6 +1304,7 @@ class FindingFilter(FindingFilterWithTags):
     duplicate = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
     mitigated = DateRangeFilter(label="Mitigated Date")
+    verified_date = DateRangeFilter(label="Verified Date")
 
     planned_remediation_date = DateRangeOmniFilter()
     planned_remediation_version = CharFilter(lookup_expr='icontains', label=_('Planned remediation version'))
@@ -1432,6 +1436,7 @@ class FindingFilter(FindingFilterWithTags):
             ('numerical_severity', 'numerical_severity'),
             ('date', 'date'),
             ('mitigated', 'mitigated'),
+            ('verified_date', 'verified_date'),
             ('risk_acceptance__created__date',
              'risk_acceptance__created__date'),
             ('last_reviewed', 'last_reviewed'),
@@ -1445,6 +1450,7 @@ class FindingFilter(FindingFilterWithTags):
             'date': 'Date',
             'risk_acceptance__created__date': 'Acceptance Date',
             'mitigated': 'Mitigated Date',
+            'verified_date': 'Verified Date',
             'title': 'Finding Name',
             'test__engagement__product__name': 'Product Name',
         }
@@ -2110,6 +2116,7 @@ class ReportFindingFilter(FindingFilterWithTags):
     active = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
     mitigated = DateRangeFilter(label="Mitigated Date")
+    verified_date = DateRangeFilter(label="Verified Date")
     verified = ReportBooleanFilter()
     false_p = ReportBooleanFilter(label="False Positive")
     risk_acceptance = ReportRiskAcceptanceFilter(

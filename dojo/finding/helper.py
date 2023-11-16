@@ -59,6 +59,7 @@ pre_save_changed.connect(
         "id",
         "active",
         "verified",
+        "verified_date",
         "false_p",
         "is_mitigated",
         "mitigated",

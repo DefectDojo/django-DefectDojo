@@ -2203,6 +2203,11 @@ class Finding(models.Model):
     verified = models.BooleanField(default=False,
                                    verbose_name=_('Verified'),
                                    help_text=_("Denotes if this flaw has been manually verified by the tester."))
+    verified_date = models.DateTimeField(editable=False,
+                                     null=True,
+                                     blank=True,
+                                     verbose_name=_('Verification Date'),
+                                     help_text=_("Stores the date when finding was verified."))
     false_p = models.BooleanField(default=False,
                                   verbose_name=_('False Positive'),
                                   help_text=_("Denotes if this flaw has been deemed a false positive by the tester."))
@@ -2456,6 +2461,7 @@ class Finding(models.Model):
             models.Index(fields=['out_of_scope']),
             models.Index(fields=['false_p']),
             models.Index(fields=['verified']),
+            models.Index(fields=['verified_date']),
             models.Index(fields=['mitigated']),
             models.Index(fields=['active']),
             models.Index(fields=['numerical_severity']),

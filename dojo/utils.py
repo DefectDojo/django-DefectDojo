@@ -522,6 +522,7 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.is_mitigated = new_finding.is_mitigated
     existing_finding.active = new_finding.active
     existing_finding.verified = new_finding.verified
+    existing_finding.verified_date = new_finding.verified_date
     existing_finding.notes.create(author=existing_finding.reporter,
                                     entry="This finding has been automatically re-opened as it was found in recent scans.")
     existing_finding.save()
