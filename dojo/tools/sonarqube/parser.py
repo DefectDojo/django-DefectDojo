@@ -288,7 +288,7 @@ class SonarQubeParser(object):
             find.nb_occurences = find.nb_occurences + 1
 
     def convert_sonar_severity(self, sonar_severity):
-        sev = sonar_severity.trim().lower()
+        sev = sonar_severity.lower()
         if sev == "blocker":
             return "Critical"
         elif sev == "critical":
