@@ -72,8 +72,11 @@ def risk_acceptante_pending(eng: Engagement, finding: Finding, risk_acceptance: 
     user = crum.get_current_user()
     status = "Failed"
     message = "Cannot perform action"
+    if user.is_superuser is True:
+        finding.accepted_by = "root"
+        risk_accepted_succesfully(eng, finding, risk_acceptance)
     if finding.risk_status in ["Risk Pending", "Risk Rejected"]:
-        if is_permissions_risk_accept(eng, finding.severity, user):
+        if is_permissions_risk_acceptance(eng, finding.severity, user):
             number_of_acceptors_required = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY\
                 .get(finding.severity).get("number_acceptors")
             if number_of_acceptors_required == 0:
@@ -132,7 +135,7 @@ def get_contacts(engagement: Engagement, finding_serverity: str, user):
 
     return contact_list
 
-def is_permissions_risk_accept(engagement: Engagement, finding_serverity: str, user):
+def is_permissions_risk_acceptance(engagement: Engagement, finding_serverity: str, user):
     contacts = get_contacts(engagement, finding_serverity, user)
     contacts_ids = [contact.id for contact in contacts]
     if user.id in contacts_ids:
@@ -140,7 +143,10 @@ def is_permissions_risk_accept(engagement: Engagement, finding_serverity: str, u
         return True
     return False
 
-def rule_risk_acceptance_according_to_critical(severity, user_rol: str):
+def rule_risk_acceptance_according_to_critical(severity, request):
+    if request.user.global_role.role is None:
+        raise ValueError("The user does not have a role associated") 
+    user_rol = request.user.global_role.role.name
     risk_rule = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY.get(severity)
     view_risk_pending = False
     if risk_rule:

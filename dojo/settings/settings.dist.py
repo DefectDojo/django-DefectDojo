@@ -1835,22 +1835,22 @@ ROLE_ALLOWED_TO_ACCEPT_RISKS=["Owner"],
 RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY={
     "Low": {
         "number_acceptors": 0,
-        "roles": ["Developer", "Mainteiner"],
+        "roles": ["Developer", "Reader"],
         "type_contacts": [],
         "jobs": ["PROVEEDOR", "INGENIERO/A SOFTWARE", "LIDER CENTRO DE EXCELENCIA", "LIDER LINEA DE CONOCIMIEN"]},
     "Medium": {
         "number_acceptors": 1,
-        "roles": ["Owner"],
+        "roles": ["Reader"],
         "type_contacts": ["Product Type Technical Contact"],
         "jobs": ["LIDER CENTRO DE EXCELENCIA"]},
     "High": {
         "number_acceptors": 2,
         "type_contacts": ["Product Type Manager", "Product Type Technical Contact"],
-        "roles": ["Owner"],
+        "roles": ["Reader"],
         "jobs": ["LIDER CENTRO DE EXCELENCIA"]},
     "Critical": {
         "number_acceptors": 2,
-        "roles": ["Owner"],
+        "roles": ["Reader"],
         "type_contacts": ["Environment Manager", "Environment Technical Contact"],
         "jobs": ["LIDER LINEA DE CONOCIMIENTO"]},
 }

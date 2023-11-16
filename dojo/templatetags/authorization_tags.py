@@ -15,6 +15,8 @@ register = template.Library()
 def has_risk_acceptance_permission(finding: Finding):
     result = False
     user = crum.get_current_user()
+    if user.is_superuser is True:
+        return True
     rule = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY.get(finding.severity)
     if rule:
         if user.global_role.role.name in rule["roles"]:
