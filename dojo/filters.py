@@ -2112,6 +2112,7 @@ class ReportFindingFilter(FindingFilterWithTags):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
+    test__engagement__product__lifecycle = MultipleChoiceFilter(choices=Product.LIFECYCLE_CHOICES, label="Product Lifecycle")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     active = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
@@ -2125,6 +2126,7 @@ class ReportFindingFilter(FindingFilterWithTags):
     duplicate = ReportBooleanFilter()
     duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())
     out_of_scope = ReportBooleanFilter()
+    outside_of_sla = FindingSLAFilter(label="Outside of SLA")
 
     file_path = CharFilter(lookup_expr='icontains')
 
