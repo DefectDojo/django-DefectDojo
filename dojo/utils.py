@@ -105,6 +105,7 @@ def do_false_positive_history(finding, *args, **kwargs):
             find.false_p = True
             find.active = False
             find.verified = False
+            find.verified_false = None
             super(Finding, find).save(*args, **kwargs)
         except Exception as e:
             deduplicationLogger.debug(str(e))
@@ -494,6 +495,7 @@ def set_duplicate(new_finding, existing_finding):
     new_finding.duplicate = True
     new_finding.active = False
     new_finding.verified = False
+    new_finding.verified_date = None
     new_finding.duplicate_finding = existing_finding
 
     # Make sure transitive duplication is flattened

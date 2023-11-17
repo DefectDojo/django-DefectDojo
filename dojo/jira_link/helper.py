@@ -1544,6 +1544,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 logger.debug("Marking related finding of {} as false-positive".format(jira_issue.jira_key))
                 finding.active = False
                 finding.verified = False
+                finding.verified_date = None
                 finding.mitigated = None
                 finding.is_mitigated = False
                 finding.false_p = True

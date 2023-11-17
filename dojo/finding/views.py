@@ -1644,6 +1644,7 @@ def request_finding_review(request, fid):
             finding.notes.add(new_note)
             finding.active = True
             finding.verified = False
+            finding.verified_date = None
             finding.is_mitigated = False
             finding.under_review = True
             finding.review_requested_by = user
@@ -2783,6 +2784,8 @@ def finding_bulk_update_all(request, pid=None):
                             find.verified = form.cleaned_data["verified"]
                             if find.verified is True and find.verified_date is None:
                                 find.verified_date = timezone.now()
+                            elif find.verified is False and find.verified_date is not None:
+                                find.verified_date = None
                             find.false_p = form.cleaned_data["false_p"]
                             find.out_of_scope = form.cleaned_data["out_of_scope"]
                             find.is_mitigated = form.cleaned_data["is_mitigated"]
@@ -3196,6 +3199,7 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
     duplicate.duplicate = True
     duplicate.active = False
     duplicate.verified = False
+    duplicate.verified_date = None
     # make sure we don't create circular or transitive duplicates
     if original.duplicate:
         duplicate.duplicate_finding = original.duplicate_finding

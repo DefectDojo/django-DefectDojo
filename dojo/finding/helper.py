@@ -121,7 +121,8 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
             pass
 
     if is_new_finding or 'verified' in changed_fields:
-        pass
+        if new_state_finding.verified is False:
+            new_state_finding.verified_date = None
 
     if is_new_finding or 'false_p' in changed_fields or 'out_of_scope' in changed_fields:
         # existing behaviour is that false_p or out_of_scope implies mitigated
@@ -131,6 +132,7 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
             new_state_finding.is_mitigated = True
             new_state_finding.active = False
             new_state_finding.verified = False
+            new_state_finding.verified_date = None
 
     # always reset some fields if the finding is not a duplicate
     if not new_state_finding.duplicate:
