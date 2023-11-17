@@ -51,13 +51,20 @@ a {
   color: #546474;
 }
 
+.btn-in-footer{
+    background-color: #546474!important;
+    color: #fff;
+}
+
 .panel-default .btn-primary {
+    background-color: transparent!important;
     border-style: none!important;
     color: #fff!important;
     border: 1px solid #fff!important;
 }
 
 .panel-default .btn-primary:hover {
+    background-color: transparent!important;
     color: #fff!important;
     border: 1px solid #fff!important;
 }
