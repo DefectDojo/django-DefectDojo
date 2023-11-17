@@ -65,7 +65,7 @@ jobs:
           title: 'Upgrading to DefectDojo Version $minorv.x'
           toc_hide: true
           weight: -$weight
-          description: no special instruction
+          description: No special instructions.
           ---
           There are no special instruction for upgrading to $minorv.x. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/$patchv) for the contents of the release.
           " > docs/content/en/getting_started/upgrading/$minorv.md
