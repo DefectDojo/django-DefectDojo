@@ -216,3 +216,16 @@ class TestNucleiParser(DojoTestCase):
             self.assertEqual(4, finding.references.count("\n"))
             self.assertEqual("favicon-detect", finding.vuln_id_from_tool)
             self.assertEqual("asp.net-favicon", finding.component_name)
+
+    def test_parse_many_findings_v3(self):
+        testfile = open("unittests/scans/nuclei/multiple_v3.json")
+        parser = NucleiParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(5, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("Info", finding.severity)
