@@ -27,6 +27,8 @@ class NucleiParser(object):
 
     def get_findings(self, filename, test):
         filecontent = filename.read()
+        if isinstance(filecontent, bytes):
+            filecontent = filecontent.decode("utf-8")
         data = []
         if filecontent == "" or len(filecontent) == 0:
             return []
