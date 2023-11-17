@@ -141,7 +141,7 @@ def get_provider(vulnerabiity):
     return ""
 
 
-def get_etx(vulnerability):
+def get_ext(vulnerability):
     if "EXT" in vulnerability:
         return vulnerability["EXT"]
     return ""
@@ -179,7 +179,7 @@ def get_item(vulnerability, test):
 
     extra_desc += get_provider(vulnerability)
     component_name, mitigation, impact = get_component(vulnerability)
-    component_version = get_etx(vulnerability)
+    component_version = get_ext(vulnerability)
 
     # The 'id' field is empty? (at least in my sample file)
     if vulnerability_ids:
