@@ -31,4 +31,3 @@ class TestJfrogXrayOnDemandBinaryScanParser(DojoTestCase):
             self.assertEqual(0, decode_cwe_number(""))
         with self.subTest(val="cwe-1"):
             self.assertEqual(1, decode_cwe_number("cwe-1"))
-
