@@ -1,28 +1,41 @@
 # DefectDojo
 
 <table>
-   <tr styl="margin: 0; position: absolute; top: 50%; -ms-transform: translateY(-50%); transform: translateY(-50%);">
-     <th><a href="https://opensourcesecurityindex.io/" target="_blank" rel="noopener">
-         <img style="width: 282px; height: 56px" src="https://opensourcesecurityindex.io/badge.svg"
-           alt="Open Source Security Index - Fastest Growing Open Source Security Projects" width="282" height="56" />
-       </a></th>
-     <th>
-       <p><a href="https://www.owasp.org/index.php/OWASP_DefectDojo_Project"><img
-             src="https://img.shields.io/badge/owasp-flagship%20project-orange.svg" alt="OWASP Flagship"></a> <a
-           href="https://github.com/DefectDojo/django-DefectDojo"><img
-             src="https://img.shields.io/github/release/DefectDojo/django-DefectDojo.svg" alt="GitHub release"></a> <a
-           href="https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ"><img
-             src="https://img.shields.io/badge/youtube-subscribe-%23c4302b.svg" alt="YouTube Subscribe"></a> <img
-           src="https://img.shields.io/twitter/follow/defectdojo.svg?style=social&amp;label=Follow" alt="Twitter Follow">
-       </p>
-       <p><a href="https://github.com/DefectDojo/django-DefectDojo/actions"><img
-             src="https://github.com/DefectDojo/django-DefectDojo/actions/workflows/unit-tests.yml/badge.svg?branch=master"
-             alt="Unit Tests"></a><a href="https://github.com/DefectDojo/django-DefectDojo/actions"><img
-             src="https://github.com/DefectDojo/django-DefectDojo/actions/workflows/integration-tests.yml/badge.svg?branch=master"
-             alt="Integration Tests"></a> <a href="https://bestpractices.coreinfrastructure.org/projects/2098"><img
-             src="https://bestpractices.coreinfrastructure.org/projects/2098/badge" alt="CII Best Practices"></a></p>
-     </th>
-   </tr>
+    <tr styl="margin: 0; position: absolute; top: 50%; -ms-transform: translateY(-50%); transform: translateY(-50%);">
+        <th>
+            <a href="https://opensourcesecurityindex.io/" target="_blank" rel="noopener">
+                <img style="width: 282px; height: 56px" src="https://opensourcesecurityindex.io/badge.svg"
+                alt="Open Source Security Index - Fastest Growing Open Source Security Projects" width="282" height="56" />
+            </a>
+        </th>
+        <th>
+            <p>
+                <a href="https://www.owasp.org/index.php/OWASP_DefectDojo_Project">
+                    <img src="https://img.shields.io/badge/owasp-flagship%20project-orange.svg" alt="OWASP Flagship">
+                </a>
+                <a href="https://github.com/DefectDojo/django-DefectDojo">
+                    <img src="https://img.shields.io/github/release/DefectDojo/django-DefectDojo.svg" alt="GitHub release">
+                </a>
+                <a href="https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ">
+                    <img src="https://img.shields.io/badge/youtube-subscribe-%23c4302b.svg" alt="YouTube Subscribe">
+                </a>
+                <a href="https://twitter.com/defectdojo/">
+                    <img src="https://img.shields.io/twitter/follow/defectdojo.svg?style=social&amp;label=Follow" alt="Twitter Follow">
+                </a>
+            </p>
+            <p>
+                <a href="https://github.com/DefectDojo/django-DefectDojo/actions">
+                    <img src="https://github.com/DefectDojo/django-DefectDojo/actions/workflows/unit-tests.yml/badge.svg?branch=master" alt="Unit Tests">
+                </a>
+                <a href="https://github.com/DefectDojo/django-DefectDojo/actions">
+                    <img src="https://github.com/DefectDojo/django-DefectDojo/actions/workflows/integration-tests.yml/badge.svg?branch=master" alt="Integration Tests">
+                </a>
+                <a href="https://bestpractices.coreinfrastructure.org/projects/2098">
+                    <img src="https://bestpractices.coreinfrastructure.org/projects/2098/badge" alt="CII Best Practices">
+                </a>
+            </p>
+        </th>
+    </tr>
  </table>
 
 ![Screenshot of DefectDojo](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/screenshot1.png)
@@ -88,7 +101,7 @@ Navigate to `http://localhost:8080` to see your new instance!
 * Authentication options:
     * [OAuth2/SAML2](https://documentation.defectdojo.com/integrations/social-authentication/)
     * [LDAP](https://documentation.defectdojo.com/integrations/ldap-authentication/)
-* [Parsers](https://documentation.defectdojo.com/integrations/parsers/)
+* [Supported tools](https://documentation.defectdojo.com/integrations/parsers/)
 
 ## Supported Installation Options
 
@@ -140,7 +153,7 @@ Moderators can help you with pull requests or feedback on dev ideas:
 ## Hall of Fame
 
 * Valentijn Scholten ([@valentijnscholten](https://github.com/valentijnscholten) |
-  [sponsor](https://github.com/sponsors/valentijnscholten) |
+  [Sponsor](https://github.com/sponsors/valentijnscholten) |
   [LinkedIn](https://www.linkedin.com/in/valentijn-scholten/)) - Valentijn served as a core moderator for 3 years.
   Valentijn’s contributions were numerous and extensive. He overhauled, improved, and optimized many parts of the
   codebase. He consistently fielded questions, provided feedback on pull requests, and provided a helping hand wherever
