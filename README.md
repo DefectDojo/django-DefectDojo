@@ -12,7 +12,7 @@
             <p>
                 <a href="https://www.owasp.org/index.php/OWASP_DefectDojo_Project"><img src="https://img.shields.io/badge/owasp-flagship%20project-orange.svg" alt="OWASP Flagship"></a>
                 <a href="https://github.com/DefectDojo/django-DefectDojo"><img src="https://img.shields.io/github/release/DefectDojo/django-DefectDojo.svg" alt="GitHub release"></a>
-                <a href="https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ"><img src="https://img.shields.io/badge/youtube-subscribe-%23c4302b.svg" alt="YouTube Subscribe">>
+                <a href="https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ"><img src="https://img.shields.io/badge/youtube-subscribe-%23c4302b.svg" alt="YouTube Subscribe"></a>
                 <a href="https://twitter.com/defectdojo/"><img src="https://img.shields.io/twitter/follow/defectdojo.svg?style=social&amp;label=Follow" alt="Twitter Follow"></a>
             </p>
             <p>
