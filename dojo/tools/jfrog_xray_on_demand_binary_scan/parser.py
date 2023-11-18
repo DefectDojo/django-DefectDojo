@@ -10,7 +10,7 @@ class JfrogXrayOnDemandBinaryScanParser(object):
     """jfrog_xray_scan JSON reports"""
 
     def get_scan_types(self):
-        return ["Jfrog Xray On Demand Binary Scan"]
+        return ["JFrog Xray On Demand Binary Scan"]
 
     def get_label_for_scan_types(self, scan_type):
         return scan_type
