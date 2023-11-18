@@ -84,7 +84,7 @@ def get_severity_justification(vulnerability):
     if extended_information:
         remediation += get_remediation(extended_information)
         if "short_description" in extended_information:
-            severity_desc = "**short description**\n"
+            severity_desc = "**Short description**\n"
             severity_desc += extended_information["short_description"] + "\n"
         if "full_description" in extended_information:
             severity_desc = "**Full description**\n"
