@@ -132,9 +132,9 @@ def get_version_vulnerability(vulnerability):
     return "None"
 
 
-def get_provider(vulnerabiity):
-    if "component_versions" in vulnerabiity:
-        provider = vulnerabiity.get("component_versions").get("more_details").get("provider")
+def get_provider(vulnerability):
+    if "component_versions" in vulnerability:
+        provider = vulnerability.get("component_versions").get("more_details").get("provider")
         if provider:
             provider += f"\n**Provider:** {provider}"
             return provider
