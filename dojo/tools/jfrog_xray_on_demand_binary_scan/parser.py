@@ -90,7 +90,7 @@ def get_severity_justification(vulnerability):
             severity_desc = "**full description**\n"
             severity_desc += extended_information["full_description"] + "\n"
         if "jfrog_research_severity" in extended_information:
-            severity_desc = "**jfrog research severity**\n"
+            severity_desc = "**JFrog research severity**\n"
             severity_desc += extended_information["jfrog_research_severity"] + "\n"
         if "jfrog_research_severity_reasons" in extended_information:
             severity_desc = "**jfrog research severity reasons**\n"
