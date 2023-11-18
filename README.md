@@ -27,34 +27,44 @@
 
 ![Screenshot of DefectDojo](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/screenshot1.png)
 
-[DefectDojo](https://www.defectdojo.com/) is a DevSecOps, ASPM (application security posture management), and vulnerability management tool.
-DefectDojo ​​orchestrates end-to-end security testing, vulnerability tracking, deduplication, remediation, and reporting.
+[DefectDojo](https://www.defectdojo.com/) is a DevSecOps, ASPM (application security posture management), and
+vulnerability management tool.  DefectDojo orchestrates end-to-end security testing, vulnerability tracking,
+deduplication, remediation, and reporting.
 
 ## Demo
 
 Try out the demo server at [demo.defectdojo.org](https://demo.defectdojo.org)
 
-Log in with username `admin` and password `1Defectdojo@demo#appsec`. Please note that the demo is publicly accessible and regularly reset. Do not put sensitive data in the demo.
+Log in with username `admin` and password `1Defectdojo@demo#appsec`. Please note that the demo is publicly accessible
+and regularly reset. Do not put sensitive data in the demo.
 
 ## Quick Start for Compose V2
+
 From July 2023 Compose V1 [stopped receiving updates](https://docs.docker.com/compose/reference/).
 
-Compose V2 integrates compose functions into the Docker platform, continuing to support most of the previous docker-compose features and flags. You can run Compose V2 by replacing the hyphen (-) with a space, using `docker compose`, instead of `docker-compose`.
+Compose V2 integrates compose functions into the Docker platform, continuing to support most of the previous
+docker-compose features and flags. You can run Compose V2 by replacing the hyphen (-) with a space, using `docker compose`,
+instead of `docker-compose`.
 
 ```sh
 git clone https://github.com/DefectDojo/django-DefectDojo
 cd django-DefectDojo
-# building
+
+# Building Docker images
 ./dc-build.sh
-# running (for other profiles besides postgres-redis look at https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md)
+
+# Running the application (for other profiles besides postgres-redis see  
+# https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md)
 ./dc-up.sh postgres-redis
-# obtain admin credentials. the initializer can take up to 3 minutes to run
-# use docker compose logs -f initializer to track progress
+
+# Obtain admin credentials. The initializer can take up to 3 minutes to run.
+# Use docker compose logs -f initializer to track its progress.
 docker compose logs initializer | grep "Admin password:"
 ```
 
 ## For Docker Compose V1
-You can run Compose V1 by editing the below files to add the hyphen (-) between `docker compose`. 
+
+You can run Compose V1 by editing the files below to add the hyphen (-) between `docker compose`. 
 ```sh
      dc-build.sh
      dc-down.sh
@@ -67,16 +77,18 @@ You can run Compose V1 by editing the below files to add the hyphen (-) between 
      docker/setEnv.sh
 ```
 
-Navigate to `http://localhost:8080` to see your new instance.
-
+Navigate to `http://localhost:8080` to see your new instance!
 
 ## Documentation
 
-- [Official Docs](https://documentation.defectdojo.com/) ([latest](https://documentation.defectdojo.com/) | [dev](https://documentation.defectdojo.com/dev))
-- [REST APIs](https://documentation.defectdojo.com/integrations/api-v2-docs/)
-- [Client APIs and Wrappers](https://documentation.defectdojo.com/integrations/api-v2-docs/#clients--api-wrappers)
-- [Authentication Options](readme-docs/AVAILABLE-PLUGINS.md)
-- [Parsers](https://documentation.defectdojo.com/integrations/parsers/)
+* [Official Docs](https://documentation.defectdojo.com/)
+    * [Docs for our `dev` branch](https://documentation.defectdojo.com/dev/)
+* [REST APIs](https://documentation.defectdojo.com/integrations/api-v2-docs/)
+* [Client APIs and Wrappers](https://documentation.defectdojo.com/integrations/api-v2-docs/#clients--api-wrappers)
+* Authentication options:
+    * [OAuth2/SAML2](https://documentation.defectdojo.com/integrations/social-authentication/)
+    * [LDAP](https://documentation.defectdojo.com/integrations/ldap-authentication/)
+* [Parsers](https://documentation.defectdojo.com/integrations/parsers/)
 
 ## Supported Installation Options
 
@@ -91,8 +103,10 @@ Navigate to `http://localhost:8080` to see your new instance.
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/Twitter_Logo.png" alt="Twitter" height="50"/>](https://twitter.com/defectdojo)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/YouTube-Emblem.png" alt="Youtube" height="50"/>](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ)
 
-[Join the OWASP Slack community](https://owasp.org/slack/invite) and participate in the discussion! You can find us in our channel there, [#defectdojo](https://owasp.slack.com/channels/defectdojo).
-Follow DefectDojo on [Twitter](https://twitter.com/defectdojo), [LinkedIn](https://www.linkedin.com/company/defectdojo), and [YouTube](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ) for project updates!
+[Join the OWASP Slack community](https://owasp.org/slack/invite) and participate in the discussion! You can find us in
+our channel there, [#defectdojo](https://owasp.slack.com/channels/defectdojo). Follow DefectDojo on
+[Twitter](https://twitter.com/defectdojo), [LinkedIn](https://www.linkedin.com/company/defectdojo), and
+[YouTube](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ) for project updates!
 
 ## Contributing
 
@@ -124,6 +138,7 @@ Moderators can help you with pull requests or feedback on dev ideas:
 
 
 ## Hall of Fame
+
 * Valentijn Scholten ([@valentijnscholten](https://github.com/valentijnscholten) |
   [sponsor](https://github.com/sponsors/valentijnscholten) |
   [LinkedIn](https://www.linkedin.com/in/valentijn-scholten/)) - Valentijn served as a core moderator for 3 years.
@@ -137,7 +152,6 @@ Moderators can help you with pull requests or feedback on dev ideas:
   wrote some of Dojo's core functionality.
 * Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) – Jay was a DefectDojo maintainer for years. He performed Dojo's first
   UI overhaul, optimized code structure/features, and added numerous enhancements.
-
 
 ## Security
 
