@@ -205,7 +205,6 @@ def get_item(vulnerability, test):
     finding = Finding(
         title=title,
         cwe=cwe,
-        test=test,
         severity_justification=severity_justification,
         severity=severity,
         description=(vulnerability["summary"] + extra_desc).strip(),
