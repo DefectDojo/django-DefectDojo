@@ -111,7 +111,8 @@ Alternatively, for information please email info@defectdojo.com
 
 DefectDojo is maintained by:
 * Greg Anderson ([@devGregA](https://github.com/devgrega) | [LinkedIn](https://www.linkedin.com/in/g-anderson/))
-* Matt Tesauro ([@mtesauro](https://github.com/mtesauro) | [LinkedIn](https://www.linkedin.com/in/matttesauro/) | [@matt_tesauro](https://twitter.com/matt_tesauro))
+* Matt Tesauro ([@mtesauro](https://github.com/mtesauro) | [LinkedIn](https://www.linkedin.com/in/matttesauro/) |
+  [@matt_tesauro](https://twitter.com/matt_tesauro))
 
 Core Moderators can help you with pull requests or feedback on dev ideas:
 * Cody Maffucci ([@Maffooch](https://github.com/maffooch) | [LinkedIn](https://www.linkedin.com/in/cody-maffucci))
@@ -123,12 +124,19 @@ Moderators can help you with pull requests or feedback on dev ideas:
 
 
 ## Hall of Fame
-* Valentijn Scholten ([@valentijnscholten](https://github.com/valentijnscholten) | [sponsor](https://github.com/sponsors/valentijnscholten) | [LinkedIn](https://www.linkedin.com/in/valentijn-scholten/)) - Valentijn served as a core moderator for 3 years. Valentijn’s contributions were numerous and extensive. He overhauled, improved, and optimized many parts of the codebase. He consistently fielded questions, provided feedback on pull requests, and provided a helping hand wherever it was needed.
-* Fred Blaise ([@madchap](https://github.com/madchap) | [LinkedIn](https://www.linkedin.com/in/fredblaise/)) - Fred served as a core moderator during a critical time for DefectDojo. He contributed code, helped the team stay organized, and architected important policies and procedures.
-* Charles Neill ([@ccneill](https://twitter.com/ccneill)) – Charles served as a
-    DefectDojo Maintainer for years and wrote some of Dojo's core functionality.
-* Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) – Jay was a DefectDojo
-  maintainer for years. He performed Dojo's first UI overhaul, optimized code structure/features, and added numerous enhancements.
+* Valentijn Scholten ([@valentijnscholten](https://github.com/valentijnscholten) |
+  [sponsor](https://github.com/sponsors/valentijnscholten) |
+  [LinkedIn](https://www.linkedin.com/in/valentijn-scholten/)) - Valentijn served as a core moderator for 3 years.
+  Valentijn’s contributions were numerous and extensive. He overhauled, improved, and optimized many parts of the
+  codebase. He consistently fielded questions, provided feedback on pull requests, and provided a helping hand wherever
+  it was needed.
+* Fred Blaise ([@madchap](https://github.com/madchap) | [LinkedIn](https://www.linkedin.com/in/fredblaise/)) - Fred
+  served as a core moderator during a critical time for DefectDojo. He contributed code, helped the team stay organized,
+  and architected important policies and procedures.
+* Charles Neill ([@ccneill](https://twitter.com/ccneill)) – Charles served as a DefectDojo Maintainer for years and
+  wrote some of Dojo's core functionality.
+* Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) – Jay was a DefectDojo maintainer for years. He performed Dojo's first
+  UI overhaul, optimized code structure/features, and added numerous enhancements.
 
 
 ## Security
