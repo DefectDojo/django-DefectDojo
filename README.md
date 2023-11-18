@@ -11,7 +11,7 @@
         <th>
             <p>
                 <a href="https://www.owasp.org/index.php/OWASP_DefectDojo_Project"><img src="https://img.shields.io/badge/owasp-flagship%20project-orange.svg" alt="OWASP Flagship"></a>
-                <a href="https://github.com/DefectDojo/django-DefectDojo"><img src="https://img.shields.io/github/release/DefectDojo/django-DefectDojo.svg" alt="GitHub release"></a>
+                <a href="https://github.com/DefectDojo/django-DefectDojo/releases/latest"><img src="https://img.shields.io/github/release/DefectDojo/django-DefectDojo.svg" alt="GitHub release"></a>
                 <a href="https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ"><img src="https://img.shields.io/badge/youtube-subscribe-%23c4302b.svg" alt="YouTube Subscribe"></a>
                 <a href="https://twitter.com/defectdojo/"><img src="https://img.shields.io/twitter/follow/defectdojo.svg?style=social&amp;label=Follow" alt="Twitter Follow"></a>
             </p>
@@ -32,7 +32,7 @@ deduplication, remediation, and reporting.
 
 ## Demo
 
-Try out the demo server at [demo.defectdojo.org](https://demo.defectdojo.org)
+Try out DefectDojo on our demo server at [demo.defectdojo.org](https://demo.defectdojo.org)
 
 Log in with username `admin` and password `1Defectdojo@demo#appsec`. Please note that the demo is publicly accessible
 and regularly reset. Do not put sensitive data in the demo.
@@ -42,17 +42,18 @@ and regularly reset. Do not put sensitive data in the demo.
 From July 2023 Compose V1 [stopped receiving updates](https://docs.docker.com/compose/reference/).
 
 Compose V2 integrates compose functions into the Docker platform, continuing to support most of the previous
-docker-compose features and flags. You can run Compose V2 by replacing the hyphen (-) with a space, using `docker compose`,
-instead of `docker-compose`.
+docker-compose features and flags. You can run Compose V2 by replacing the hyphen (-) with a space, using
+`docker compose` instead of `docker-compose`.
 
 ```sh
+# Clone the project
 git clone https://github.com/DefectDojo/django-DefectDojo
 cd django-DefectDojo
 
 # Building Docker images
 ./dc-build.sh
 
-# Running the application (for other profiles besides postgres-redis see  
+# Run the application (for other profiles besides postgres-redis see  
 # https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md)
 ./dc-up.sh postgres-redis
 
@@ -111,7 +112,7 @@ our channel there, [#defectdojo](https://owasp.slack.com/channels/defectdojo). F
 
 :warning: We have instituted a [feature freeze](https://github.com/DefectDojo/django-DefectDojo/discussions/8002) on v2
 of DefectDojo as we begin work on v3. Please see our [contributing guidelines](readme-docs/CONTRIBUTING.md) for more
-information. 
+information. Check out our latest update on v3 [here](https://github.com/DefectDojo/django-DefectDojo/discussions/8974).
 
 ## Pro Edition
 [Upgrade to DefectDojo Pro](https://www.defectdojo.com/pricing) today to take your DevSecOps to 11. DefectDojo Pro is
@@ -149,8 +150,8 @@ Moderators can help you with pull requests or feedback on dev ideas:
   and architected important policies and procedures.
 * Charles Neill ([@ccneill](https://twitter.com/ccneill)) – Charles served as a DefectDojo Maintainer for years and
   wrote some of Dojo's core functionality.
-* Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) – Jay was a DefectDojo maintainer for years. He performed Dojo's first
-  UI overhaul, optimized code structure/features, and added numerous enhancements.
+* Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) – Jay was a DefectDojo maintainer for years. He performed DefectDojo's
+  first UI overhaul, optimized code structure/features, and added numerous enhancements.
 
 ## Security
 
