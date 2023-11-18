@@ -18,6 +18,8 @@ class BundlerAuditParser(object):
 
     def get_findings(self, filename, test):
         lines = filename.read()
+        if isinstance(lines, bytes):
+            lines = lines.decode("utf-8")
         dupes = dict()
         find_date = datetime.now()
         warnings = lines.split("\n\n")
