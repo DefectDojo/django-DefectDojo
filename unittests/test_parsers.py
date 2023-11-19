@@ -69,7 +69,7 @@ class TestParsers(DojoTestCase):
                         read_true = False
                         for line in task.stdout:
                             if read_true is True:
-                                if '"utf-8"' in str(line) and i <= 4:
+                                if ('"utf-8"' in str(line) or "'utf-8'" in str(line) or '"utf-8-sig"' in str(line) or "'utf-8-sig'" in str(line)) and i <= 4:
                                     read_true = False
                                     i = 0
                                 elif i > 4:
