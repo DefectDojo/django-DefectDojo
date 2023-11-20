@@ -20,24 +20,25 @@ class JfrogXrayOnDemandBinaryScanParser(object):
 
     def get_findings(self, json_output, test):
         tree = json.load(json_output)
-        return self.get_items(tree, test)
+        return self.get_items(tree)
 
-    def get_items(self, tree, test):
+    def get_items(self, tree):
         items = {}
         for data in tree:
             if "vulnerabilities" in data:
                 vulnerability_tree = data["vulnerabilities"]
 
                 for node in vulnerability_tree:
-                    item = get_item(node, test)
+                    item_set = get_item_set(node)
 
-                    title_cve = "No CVE"
-                    if "cves" in node:
-                        if "cve" in node["cves"][0]:
-                            title_cve = node["cves"][0]["cve"]
+                    for item in item_set:
+                        title_cve = "No CVE"
+                        if "cves" in node:
+                            if "cve" in node["cves"][0]:
+                                title_cve = node["cves"][0]["cve"]
 
-                    unique_key = node.get("issue_id", "") + node.get("summary", "") + title_cve
-                    items[unique_key] = item
+                        unique_key = item.title + node.get("issue_id", "") + node.get("summary", "") + title_cve
+                        items[unique_key] = item
 
         return list(items.values())
 
@@ -105,30 +106,25 @@ def get_severity_justification(vulnerability):
     return severity_desc, remediation
 
 
-def get_component(vulnerability):
+def process_component(component):
     mitigation = ""
-    package = ""
     impact = "**Impact paths**\n\n- "
-    if "components" in vulnerability:
-        components = vulnerability["components"]
-        package = next(iter(components))
-        component = components[package]
-        fixed_versions = component.get("fixed_versions")
-        if fixed_versions:
-            mitigation = "**Versions containing a fix:**\n\n- "
-            mitigation = mitigation + "\n- ".join(fixed_versions)
-        if "impact_paths" in component:
-            refs = []
-            impact_paths_l1 = component["impact_paths"]
-            for impact_paths_l2 in impact_paths_l1:
-                for item in impact_paths_l2:
-                    if "component_id" in item:
-                        refs.append(item["component_id"])
-                    if "full_path" in item:
-                        refs.append(item["full_path"])
-            if refs:
-                impact += "\n- ".join(sorted(set(refs)))
-        return package, mitigation, impact
+    fixed_versions = component.get("fixed_versions")
+    if fixed_versions:
+        mitigation = "**Versions containing a fix:**\n\n- "
+        mitigation = mitigation + "\n- ".join(fixed_versions)
+    if "impact_paths" in component:
+        refs = []
+        impact_paths_l1 = component["impact_paths"]
+        for impact_paths_l2 in impact_paths_l1:
+            for item in impact_paths_l2:
+                if "component_id" in item:
+                    refs.append(item["component_id"])
+                if "full_path" in item:
+                    refs.append(item["full_path"])
+        if refs:
+            impact += "\n- ".join(sorted(set(refs)))
+    return mitigation, impact
 
 
 def get_version_vulnerability(vulnerability):
@@ -166,7 +162,9 @@ def get_vuln_id_from_tool(vulnerability):
     return None
 
 
-def get_item(vulnerability, test):
+def get_item_set(vulnerability):
+    item_set = []
+
     severity_justification, remediation = get_severity_justification(vulnerability)
     severity = get_severity(vulnerability)
     references = get_references(vulnerability)
@@ -191,47 +189,49 @@ def get_item(vulnerability, test):
             cvssv3 = CVSS3(cvss_v3).clean_vector()
 
     extra_desc += get_provider(vulnerability)
-    component_name, mitigation, impact = get_component(vulnerability)
-    component_version = get_ext(vulnerability)
+    for component_name, component in vulnerability.get("components", {}).items():
+        mitigation, impact = process_component(component)
+        component_version = get_ext(vulnerability)
 
-    # The 'id' field is empty? (at least in my sample file)
-    if vulnerability_ids:
-        if vulnerability.get("id"):
-            title = (
-                vulnerability["id"]
-                + " - "
-                + str(vulnerability_ids[0])
-                + " - "
-                + component_name
-                + ":"
-                + component_version
-            )
+        # The 'id' field is empty? (at least in my sample file)
+        if vulnerability_ids:
+            if vulnerability.get("id"):
+                title = (
+                    vulnerability["id"]
+                    + " - "
+                    + str(vulnerability_ids[0])
+                    + " - "
+                    + component_name
+                    + ":"
+                    + component_version
+                )
+            else:
+                title = str(vulnerability_ids[0]) + " - " + component_name + ":" + component_version
         else:
-            title = str(vulnerability_ids[0]) + " - " + component_name + ":" + component_version
-    else:
-        if vulnerability.get("id"):
-            title = vulnerability["id"] + " - " + component_name + ":" + component_version
-        else:
-            title = "No CVE - " + component_name + ":" + component_version
+            if vulnerability.get("id"):
+                title = vulnerability["id"] + " - " + component_name + ":" + component_version
+            else:
+                title = "No CVE - " + component_name + ":" + component_version
 
-    # create the finding object
-    finding = Finding(
-        title=title,
-        cwe=cwe,
-        severity_justification=severity_justification,
-        severity=severity,
-        description=(vulnerability["summary"] + extra_desc).strip(),
-        mitigation=mitigation + remediation,
-        component_name=component_name,
-        component_version=component_version,
-        impact=impact,
-        references=references,
-        file_path=vulnerability.get("source_comp_id"),
-        static_finding=True,
-        dynamic_finding=False,
-        cvssv3=cvssv3,
-        vuln_id_from_tool=vuln_id_from_tool,
-    )
-    if vulnerability_ids:
-        finding.unsaved_vulnerability_ids = vulnerability_ids
-    return finding
+        # create the finding object
+        finding = Finding(
+            title=title,
+            cwe=cwe,
+            severity_justification=severity_justification,
+            severity=severity,
+            description=(vulnerability["summary"] + extra_desc).strip(),
+            mitigation=mitigation + remediation,
+            component_name=component_name,
+            component_version=component_version,
+            impact=impact,
+            references=references,
+            file_path=vulnerability.get("source_comp_id"),
+            static_finding=True,
+            dynamic_finding=False,
+            cvssv3=cvssv3,
+            vuln_id_from_tool=vuln_id_from_tool,
+        )
+        if vulnerability_ids:
+            finding.unsaved_vulnerability_ids = vulnerability_ids
+        item_set.append(finding)
+    return item_set
