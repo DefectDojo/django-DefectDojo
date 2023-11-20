@@ -107,11 +107,10 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
     post_jira_comments(risk_acceptance, [finding], unaccepted_message_creator)
 
 
-def add_findings_to_risk_pending(risk_pending, findings):
+def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
     for finding in findings:
-        if not finding.duplicate:
-            # if finding cumple con el numero de aceptadores necesarios (acceptances_confirmed)
-            # si se cumple entonces pone el findigin.actve = False
+        add_severity_to_risk_acceptance(risk_pending, finding.severity)
+        if not finding.duplicate: # TODO: Revisar tema cuando Finding Estan duplicados
             finding.risk_status = "Risk Pending"
             finding.save(dedupe_option=False)
             risk_pending.accepted_findings.add(finding)
@@ -127,9 +126,17 @@ def add_findings_to_risk_pending(risk_pending, findings):
     post_jira_comments(risk_pending, findings, accepted_message_creator)
 
 
-def add_findings_to_risk_acceptance(risk_acceptance, findings):
+def add_severity_to_risk_acceptance(risk_acceptance: Risk_Acceptance, severity: str):
+    if risk_acceptance.severity is None:
+        risk_acceptance.severity = severity
+        risk_acceptance.save()
+
+
+def add_findings_to_risk_acceptance(risk_acceptance: Risk_Acceptance, findings):
+    # add severity to risk_acceptance
     for finding in findings:
         if not finding.duplicate or finding.risk_accepted:
+            add_severity_to_risk_acceptance(risk_acceptance, finding.severity)
             finding.active = False
             finding.risk_accepted = True
             finding.risk_status = "Risk Accepted"

@@ -1829,28 +1829,24 @@ ADDITIONAL_HEADERS = env("DD_ADDITIONAL_HEADERS")
 CREATE_CLOUD_BANNER = env('DD_CREATE_CLOUD_BANNER')
 # Risk Acceptance
 RISK_ACCEPTANCE = True
-ROLE_ALLOWED_TO_ACCEPT_RISKS=["Owner"],
-
+# Role that allows unrestricted acceptance of risk
+ROLE_ALLOWED_TO_ACCEPT_RISKS=["Maintainer"]
 # job: puesto de trabajo para saber que persona pueden hacer la solicitude del riesgo
 RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY={
     "Low": {
         "number_acceptors": 0,
         "roles": ["Developer", "Reader"],
-        "type_contacts": [],
-        "jobs": ["PROVEEDOR", "INGENIERO/A SOFTWARE", "LIDER CENTRO DE EXCELENCIA", "LIDER LINEA DE CONOCIMIEN"]},
+        "type_contacts": []},
     "Medium": {
         "number_acceptors": 1,
         "roles": ["Reader"],
-        "type_contacts": ["Product Type Technical Contact"],
-        "jobs": ["LIDER CENTRO DE EXCELENCIA"]},
+        "type_contacts": ["Product Type Technical Contact"]},
     "High": {
         "number_acceptors": 2,
         "type_contacts": ["Product Type Manager", "Product Type Technical Contact"],
-        "roles": ["Reader"],
-        "jobs": ["LIDER CENTRO DE EXCELENCIA"]},
+        "roles": ["Reader"]},
     "Critical": {
         "number_acceptors": 2,
         "roles": ["Reader"],
-        "type_contacts": ["Environment Manager", "Environment Technical Contact"],
-        "jobs": ["LIDER LINEA DE CONOCIMIENTO"]},
+        "type_contacts": ["Environment Manager", "Environment Technical Contact"]},
 }

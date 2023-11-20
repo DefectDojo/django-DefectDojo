@@ -3397,6 +3397,11 @@ class Risk_Acceptance(models.Model):
         (TREATMENT_TRANSFER, 'Transfer (The risk is transferred to a 3rd party)'),
     ]
 
+    SEVERITY_CHOICES = [("Critial", "Critical"),
+                        ("Hight", "Hight"),
+                        ("Medium", "Medium"),
+                        ("Low", "Low")]
+
     TREATMENT_TRANSLATIONS = {
         'A': 'Accept (The risk is acknowledged, yet remains)',
         'V': 'Avoid (Do not engage with whatever creates the risk)',
@@ -3408,6 +3413,11 @@ class Risk_Acceptance(models.Model):
     name = models.CharField(max_length=300, null=False, blank=False, help_text=_("Descriptive name which in the future may also be used to group risk acceptances together across engagements and products"))
 
     accepted_findings = models.ManyToManyField(Finding)
+    severity = models.CharField(choices=SEVERITY_CHOICES,
+                                max_length=10,
+                                null=True,
+                                blank=True,
+                                help_text=_("type of severity admitted"))
 
     recommendation = models.CharField(choices=TREATMENT_CHOICES, max_length=2, null=False, default=TREATMENT_FIX, help_text=_("Recommendation from the security team."), verbose_name=_('Security Recommendation'))
 
@@ -3433,7 +3443,6 @@ class Risk_Acceptance(models.Model):
     notes = models.ManyToManyField(Notes, editable=False)
     created = models.DateTimeField(auto_now_add=True, null=False)
     updated = models.DateTimeField(auto_now=True, editable=False)
-    acceptances_confirmed = models.IntegerField(default=0, blank=True, null=True, help_text=_('acceptances confirmed for temporary risk approval'))
 
     def __str__(self):
         return str(self.name)

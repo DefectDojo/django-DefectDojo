@@ -75,9 +75,7 @@
                         <th>Date</th>
                         <th>Recommended Acceptors</th>
                         <th>Name</th>
-                        <th>Acceptances Confirmed</th>
                         <th>Decision</th>
-                        <!-- <th>Decision Details</th> -->
                         <th>Expiration</th>
                         <th>Expiration handled</th>
                         <th>Findings</th>
@@ -96,7 +94,6 @@
                         <td>{{ risk_acceptance.created|date }}</td>
                         <td>{{ risk_acceptance.accepted_by }}</td>
                         <td>{{ risk_acceptance.name }}</td>
-                        <td>{{ risk_acceptance.acceptances_confirmed}}</td>
                         <td>{{ risk_acceptance.get_decision_display|default_if_none:"" }}</td>
                         <!-- <td>{{ risk_acceptance.decision_details|default_if_none:""| truncatechars_html:100 }}</td> -->
                         <td>
@@ -190,7 +187,7 @@
                         {% comment %} <td><span style="color: {{ finding.risk_status|status_style_color.color }}">{{ finding.risk_status|status_style_color.text }}</span></td> {% endcomment %}
                         <td> <span style="color: green;">{{ finding.accepted_by}} </span></td>
                         <td>
-                            {% if engagement|has_object_permission:"Risk_Acceptance" and finding|has_risk_acceptance_permission%}
+                            {% if engagement|has_object_permission:"Risk_Acceptance_Edit" and engagement|has_risk_acceptance_permission:finding%}
                                 <form method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="remove_finding_id" value="{{ finding.id }}"/>
