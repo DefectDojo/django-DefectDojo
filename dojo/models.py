@@ -37,7 +37,7 @@ import tagulous.admin
 from django.db.models import JSONField
 import hyperlink
 from cvss import CVSS3
-from dojo.settings.settings import SLA_BUSINESS_DAYS, ENABLE_AUDITLOG
+from django.conf import settings
 
 
 logger = logging.getLogger(__name__)
@@ -2753,7 +2753,7 @@ class Finding(models.Model):
 
     def _age(self, start_date):
         from dojo.utils import get_work_days
-        if SLA_BUSINESS_DAYS:
+        if settings.SLA_BUSINESS_DAYS:
             if self.mitigated:
                 days = get_work_days(self.date, self.mitigated.date())
             else:
@@ -4280,7 +4280,7 @@ class ChoiceAnswer(Answer):
             return 'No Response'
 
 
-if ENABLE_AUDITLOG:
+if settings.ENABLE_AUDITLOG:
     # Register for automatic logging to database
     logger.info('enabling audit logging')
     auditlog.register(Dojo_User, exclude_fields=['password'])
