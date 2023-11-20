@@ -108,31 +108,32 @@ def get_severity_justification(vulnerability):
 def get_component(vulnerability):
     mitigation = ""
     package = ""
-    impact = "**Impact paths**\n"
+    impact = "**Impact paths**\n\n- "
     if "components" in vulnerability:
         components = vulnerability["components"]
         package = next(iter(components))
         component = components[package]
         fixed_versions = component.get("fixed_versions")
         if fixed_versions:
-            mitigation = "**Versions containing a fix:**\n- "
+            mitigation = "**Versions containing a fix:**\n\n- "
             mitigation = mitigation + "\n- ".join(fixed_versions)
         if "impact_paths" in component:
+            refs = []
             impact_paths_l1 = component["impact_paths"]
             for impact_paths_l2 in impact_paths_l1:
                 for item in impact_paths_l2:
                     if "component_id" in item:
-                        component_id = item["component_id"]
-                        impact = impact + "\n" + component_id
+                        refs.append(item["component_id"])
                     if "full_path" in item:
-                        full_path = item["full_path"]
-                        impact = impact + "\n" + full_path
+                        refs.append(item["full_path"])
+            if refs:
+                impact += "\n- ".join(sorted(set(refs)))
         return package, mitigation, impact
 
 
 def get_version_vulnerability(vulnerability):
     if "vulnerable_versions" in vulnerability["component_versions"]:
-        extra_desc = "\n**Versions that are vulnerable:**\n- "
+        extra_desc = "\n**Versions that are vulnerable:**\n\n- "
         extra_desc += "\n- ".join(vulnerability["component_versions"]["vulnerable_versions"])
         return extra_desc
     return "None"
