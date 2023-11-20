@@ -37,7 +37,6 @@ import tagulous.admin
 from django.db.models import JSONField
 import hyperlink
 from cvss import CVSS3
-from django.conf import settings
 
 
 logger = logging.getLogger(__name__)
