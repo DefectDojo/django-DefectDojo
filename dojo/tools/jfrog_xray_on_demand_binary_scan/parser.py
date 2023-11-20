@@ -32,9 +32,9 @@ class JfrogXrayOnDemandBinaryScanParser(object):
                     item = get_item(node, test)
 
                     title_cve = "No CVE"
-                    if "cves" in tree:
-                        if "cve" in tree["cves"][0]:
-                            title_cve = tree["cve"]
+                    if "cves" in node:
+                        if "cve" in node["cves"][0]:
+                            title_cve = node["cves"][0]["cve"]
 
                     unique_key = node.get("issue_id", "") + node.get("summary", "") + title_cve
                     items[unique_key] = item
@@ -49,7 +49,7 @@ def decode_cwe_number(value):
     return int(match[0].rsplit("-")[1])
 
 
-def get_servery(vulnerability):
+def get_severity(vulnerability):
     if "severity" in vulnerability:
         if vulnerability["severity"] == "Unknown":
             severity = "Info"
@@ -66,7 +66,11 @@ def get_references(vulnerability):
         references = vulnerability["references"]
         for reference in references:
             ref += reference + "\n"
-    return ref
+    if ref:
+        return ref
+    else:
+        return None
+
 
 
 def get_remediation(extended_information):
@@ -97,37 +101,39 @@ def get_severity_justification(vulnerability):
             for item in extended_information["jfrog_research_severity_reasons"]:
                 severity_desc += item["name"] + "\n" if item.get("name") else ""
                 severity_desc += item["description"] + "\n" if item.get("description") else ""
+                severity_desc += "Is positive: " + str(item["is_positive"]) + "\n" if item.get("is_positive") else ""
     return severity_desc, remediation
 
 
 def get_component(vulnerability):
     mitigation = ""
-    gav = ""
+    package = ""
     impact = "**Impact paths**\n"
     if "components" in vulnerability:
         components = vulnerability["components"]
-        gav = next(iter(components))
-        component = components[gav]
+        package = next(iter(components))
+        component = components[package]
         fixed_versions = component.get("fixed_versions")
         if fixed_versions:
-            mitigation = "**Versions containing a fix:**\n"
-            mitigation = mitigation + "\n".join(fixed_versions)
+            mitigation = "**Versions containing a fix:**\n- "
+            mitigation = mitigation + "\n- ".join(fixed_versions)
         if "impact_paths" in component:
-            impact_paths = component["impact_paths"][0]
-            for item in impact_paths:
-                if "component_id" in item:
-                    component_id = item["component_id"]
-                    impact = impact + "\n" + component_id
-                if "full_path" in item:
-                    full_path = item["full_path"]
-                    impact = impact + "\n" + full_path
-        return gav, mitigation, impact
+            impact_paths_l1 = component["impact_paths"]
+            for impact_paths_l2 in impact_paths_l1:
+                for item in impact_paths_l2:
+                    if "component_id" in item:
+                        component_id = item["component_id"]
+                        impact = impact + "\n" + component_id
+                    if "full_path" in item:
+                        full_path = item["full_path"]
+                        impact = impact + "\n" + full_path
+        return package, mitigation, impact
 
 
 def get_version_vulnerability(vulnerability):
     if "vulnerable_versions" in vulnerability["component_versions"]:
-        extra_desc = "\n**Versions that are vulnerable:**\n"
-        extra_desc += "\n".join(vulnerability["component_versions"]["vulnerable_versions"])
+        extra_desc = "\n**Versions that are vulnerable:**\n- "
+        extra_desc += "\n- ".join(vulnerability["component_versions"]["vulnerable_versions"])
         return extra_desc
     return "None"
 
@@ -153,11 +159,17 @@ def get_cve(vulnerability):
         return cves
     return []
 
+def get_vuln_id_from_tool(vulnerability):
+    if "issue_id" in vulnerability:
+        return vulnerability["issue_id"]
+    return None
+
 
 def get_item(vulnerability, test):
     severity_justification, remediation = get_severity_justification(vulnerability)
-    severity = get_servery(vulnerability)
+    severity = get_severity(vulnerability)
     references = get_references(vulnerability)
+    vuln_id_from_tool = get_vuln_id_from_tool(vulnerability)
     vulnerability_ids = list()
     cwe = None
     cvssv3 = None
@@ -172,10 +184,10 @@ def get_item(vulnerability, test):
         # take only the first one for now, limitation of DD model.
         if len(cves[0].get("cwe", [])) > 0:
             cwe = decode_cwe_number(cves[0].get("cwe", [])[0])
-        if "cvss_v3" in cves[0]:
-            cvss_v3 = cves[0]["cvss_v3"]
+        if "cvss_v3_vector" in cves[0]:
+            cvss_v3 = cves[0]["cvss_v3_vector"]
             # this dedicated package will clean the vector
-            cvssv3 = CVSS3.from_rh_vector(cvss_v3).clean_vector()
+            cvssv3 = CVSS3(cvss_v3).clean_vector()
 
     extra_desc += get_provider(vulnerability)
     component_name, mitigation, impact = get_component(vulnerability)
@@ -217,6 +229,7 @@ def get_item(vulnerability, test):
         static_finding=True,
         dynamic_finding=False,
         cvssv3=cvssv3,
+        vuln_id_from_tool=vuln_id_from_tool,
     )
     if vulnerability_ids:
         finding.unsaved_vulnerability_ids = vulnerability_ids

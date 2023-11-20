@@ -31,3 +31,17 @@ class TestJfrogXrayOnDemandBinaryScanParser(DojoTestCase):
             self.assertEqual(0, decode_cwe_number(""))
         with self.subTest(val="cwe-1"):
             self.assertEqual(1, decode_cwe_number("cwe-1"))
+
+    def test_parse_file_with_many_vulns_docker(self):
+        testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/many_vulns_docker.json")
+        parser = JfrogXrayOnDemandBinaryScanParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(2, len(findings))
+
+    def test_parse_file_with_many_vulns_pypi(self):
+        testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/many_vulns_pypi.json")
+        parser = JfrogXrayOnDemandBinaryScanParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(84, len(findings))
