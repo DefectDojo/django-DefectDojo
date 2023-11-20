@@ -1,6 +1,7 @@
 import logging
 import csv
 import re
+from django.views import View
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from tempfile import NamedTemporaryFile
@@ -573,31 +574,77 @@ def add_tests(request, eid):
     })
 
 
-# Cant use the easy decorator because of the potential for either eid/pid being used
-def import_scan_results(request, eid=None, pid=None):
-    environment = Development_Environment.objects.filter(name='Development').first()  # If 'Development' was removed, None is used
-    engagement = None
-    form = ImportScanForm(initial={'environment': environment})
-    cred_form = CredMappingForm()
-    finding_count = 0
-    jform = None
-    user = request.user
+class ImportScanResultsView(View):
+    def get(self, request, eid=None, pid=None):
+        environment = Development_Environment.objects.filter(name='Development').first()
+        engagement = None
+        form = ImportScanForm(initial={'environment': environment})
+        cred_form = CredMappingForm()
+        jform = None
+        user = request.user
 
-    if eid:
-        engagement = get_object_or_404(Engagement, id=eid)
-        engagement_or_product = engagement
-        cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
-    elif pid:
-        product = get_object_or_404(Product, id=pid)
-        engagement_or_product = product
-    else:
-        raise Exception('Either Engagement or Product has to be provided')
+        if eid:
+            engagement = get_object_or_404(Engagement, id=eid)
+            engagement_or_product = engagement
+            cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
+        elif pid:
+            product = get_object_or_404(Product, id=pid)
+            engagement_or_product = product
+        else:
+            raise Exception('Either Engagement or Product has to be provided')
 
-    user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
+        user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
 
-    push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
+        push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
+        custom_breadcrumb = None
+        title = "Import Scan Results"
+        if engagement:
+            product_tab = Product_Tab(engagement.product, title=title, tab="engagements")
+            product_tab.setEngagement(engagement)
+        else:
+            custom_breadcrumb = {"", ""}
+            product_tab = Product_Tab(product, title=title, tab="findings")
 
-    if request.method == "POST":
+        if jira_helper.get_jira_project(engagement_or_product):
+            jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
+
+        form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
+        form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id)
+
+        return render(request,
+        'dojo/import_scan_results.html',
+        {'form': form,
+         'product_tab': product_tab,
+         'engagement_or_product': engagement_or_product,
+         'custom_breadcrumb': custom_breadcrumb,
+         'title': title,
+         'cred_form': cred_form,
+         'jform': jform,
+         'scan_types': get_scan_types_sorted(),
+         })
+
+    def post(self, request, eid=None, pid=None):
+        environment = Development_Environment.objects.filter(name='Development').first()  # If 'Development' was removed, None is used
+        engagement = None
+        form = ImportScanForm(initial={'environment': environment})
+        cred_form = CredMappingForm()
+        finding_count = 0
+        jform = None
+        user = request.user
+
+        if eid:
+            engagement = get_object_or_404(Engagement, id=eid)
+            engagement_or_product = engagement
+            cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
+        elif pid:
+            product = get_object_or_404(Product, id=pid)
+            engagement_or_product = product
+        else:
+            raise Exception('Either Engagement or Product has to be provided')
+
+        user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
+
+        push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
         form = ImportScanForm(request.POST, request.FILES)
         cred_form = CredMappingForm(request.POST)
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
@@ -722,32 +769,7 @@ def import_scan_results(request, eid=None, pid=None):
                 return HttpResponseRedirect(
                     reverse('view_test', args=(test.id, )))
 
-    prod_id = None
-    custom_breadcrumb = None
-    title = "Import Scan Results"
-    if engagement:
-        product_tab = Product_Tab(engagement.product, title=title, tab="engagements")
-        product_tab.setEngagement(engagement)
-    else:
-        custom_breadcrumb = {"", ""}
-        product_tab = Product_Tab(product, title=title, tab="findings")
-
-    if jira_helper.get_jira_project(engagement_or_product):
-        jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
-
-    form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
-    form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id)
-    return render(request,
-        'dojo/import_scan_results.html',
-        {'form': form,
-         'product_tab': product_tab,
-         'engagement_or_product': engagement_or_product,
-         'custom_breadcrumb': custom_breadcrumb,
-         'title': title,
-         'cred_form': cred_form,
-         'jform': jform,
-         'scan_types': get_scan_types_sorted(),
-         })
+        return HttpResponseRedirect(reverse('view_test', args=(test.id, )))
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')

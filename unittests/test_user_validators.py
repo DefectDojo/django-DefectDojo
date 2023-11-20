@@ -101,7 +101,7 @@ class TestUserValidators(DojoTestCase):
             self.assertFalse(form.is_valid())
             self.assertEqual(
                 form.errors['new_password'][0],
-                'The password must contain at least 1 special character, ()[]{}|\\`~!@#$%^&*_-+=;:\'",<>./?.')
+                '''The password must contain at least 1 special character, ()[]{}|`~!@#$%^&*_-+=;:'",<>./?.''')
 
     def test_validator_lowercase_character_required(self):
         with self.subTest(policy='lowercase_character_required=False'):

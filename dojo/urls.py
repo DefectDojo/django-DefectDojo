@@ -59,7 +59,8 @@ from dojo.survey.urls import urlpatterns as survey_urls
 from dojo.components.urls import urlpatterns as component_urls
 from dojo.regulations.urls import urlpatterns as regulations
 from dojo.announcement.urls import urlpatterns as announcement_urls
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from drf_spectacular.views import SpectacularSwaggerView
+from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
 
 import logging
 logger = logging.getLogger(__name__)
