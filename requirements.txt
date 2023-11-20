@@ -2,7 +2,7 @@
 asteval==0.9.31
 bleach==6.1.0
 bleach[css]
-celery==5.3.4
+celery==5.3.5
 coverage==7.3.2
 defusedxml==0.7.1
 django_celery_results==2.5.1
@@ -43,7 +43,7 @@ python-dateutil==2.8.2
 pytz==2023.3.post1
 redis==5.0.1
 requests==2.31.0
-sqlalchemy==2.0.22  # Required by Celery broker transport
+sqlalchemy==2.0.23  # Required by Celery broker transport
 supervisor==4.2.5
 urllib3==1.26.18
 uWSGI==2.0.23
@@ -78,7 +78,7 @@ django-ratelimit==4.1.0
 argon2-cffi==23.1.0
 blackduck==1.1.0
 pycurl==7.45.2  # Required for Celery Broker AWS (SQS) support
-boto3==1.28.77  # Required for Celery Broker AWS (SQS) support
+boto3==1.29.2  # Required for Celery Broker AWS (SQS) support
 netaddr==0.8.0
 vulners==2.1.1
 fontawesomefree==6.4.2
