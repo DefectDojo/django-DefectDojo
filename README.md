@@ -132,7 +132,7 @@ Core Moderators can help you with pull requests or feedback on dev ideas:
 * Cody Maffucci ([@Maffooch](https://github.com/maffooch) | [LinkedIn](https://www.linkedin.com/in/cody-maffucci))
 
 Moderators can help you with pull requests or feedback on dev ideas:
-* Damien Carol ([@damnielcarol](https://github.com/damiencarol) | [LinkedIn](https://www.linkedin.com/in/damien-carol/))
+* Damien Carol ([@damiencarol](https://github.com/damiencarol) | [LinkedIn](https://www.linkedin.com/in/damien-carol/))
 * Jannik Jürgens ([@alles-klar](https://github.com/alles-klar))
 * Dubravko Sever ([@dsever](https://github.com/dsever))
 
@@ -148,6 +148,10 @@ Moderators can help you with pull requests or feedback on dev ideas:
 * Fred Blaise ([@madchap](https://github.com/madchap) | [LinkedIn](https://www.linkedin.com/in/fredblaise/)) - Fred
   served as a core moderator during a critical time for DefectDojo. He contributed code, helped the team stay organized,
   and architected important policies and procedures.
+* Aaron Weaver ([@aaronweaver](https://github.com/aaronweaver) | [LinkedIn](https://www.linkedin.com/in/aweaver/)) -
+  Aaron has been a long time contributor and user of DefectDojo. He did the second major UI overhaul and his
+  contributions include automation enhancements, CI/CD engagements, increased metadata at the product level, and many
+  more.
 * Charles Neill ([@ccneill](https://twitter.com/ccneill)) – Charles served as a DefectDojo Maintainer for years and
   wrote some of Dojo's core functionality.
 * Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) – Jay was a DefectDojo maintainer for years. He performed DefectDojo's
