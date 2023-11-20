@@ -62,12 +62,14 @@ def get_severity(vulnerability):
 
 
 def get_references(vulnerability):
-    ref = ""
     if "references" in vulnerability:
+        ref = ""
         references = vulnerability["references"]
         for reference in references:
-            ref += reference + "\n"
-    if ref:
+            if reference[:2] == "- ":
+                ref += reference + "\n"
+            else:
+                ref += "- " + reference + "\n"
         return ref
     else:
         return None
@@ -77,7 +79,7 @@ def get_references(vulnerability):
 def get_remediation(extended_information):
     remediation = ""
     if "remediation" in extended_information:
-        remediation = "\n**Remediation**\n"
+        remediation = "\n\n**Remediation**\n"
         remediation += extended_information["remediation"] + "\n"
     return remediation
 
@@ -89,20 +91,20 @@ def get_severity_justification(vulnerability):
     if extended_information:
         remediation += get_remediation(extended_information)
         if "short_description" in extended_information:
-            severity_desc = "**Short description**\n"
+            severity_desc += "**Short description**\n"
             severity_desc += extended_information["short_description"] + "\n"
         if "full_description" in extended_information:
-            severity_desc = "**Full description**\n"
+            severity_desc += "**Full description**\n"
             severity_desc += extended_information["full_description"] + "\n"
         if "jfrog_research_severity" in extended_information:
-            severity_desc = "**JFrog research severity**\n"
+            severity_desc += "**JFrog research severity**\n"
             severity_desc += extended_information["jfrog_research_severity"] + "\n"
         if "jfrog_research_severity_reasons" in extended_information:
-            severity_desc = "**JFrog research severity reasons**\n"
+            severity_desc += "**JFrog research severity reasons**\n"
             for item in extended_information["jfrog_research_severity_reasons"]:
                 severity_desc += item["name"] + "\n" if item.get("name") else ""
                 severity_desc += item["description"] + "\n" if item.get("description") else ""
-                severity_desc += "Is positive: " + str(item["is_positive"]) + "\n" if item.get("is_positive") else ""
+                severity_desc += "_Is positive:_ " + str(item["is_positive"]).lower() + "\n" if item.get("is_positive") else ""
     return severity_desc, remediation
 
 
