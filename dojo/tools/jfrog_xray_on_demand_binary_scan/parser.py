@@ -32,22 +32,17 @@ class JfrogXrayOnDemandBinaryScanParser(object):
                     item_set = get_item_set(node)
 
                     for item in item_set:
-                        title_cve = "No CVE"
-                        if "cves" in node:
-                            if "cve" in node["cves"][0]:
-                                title_cve = node["cves"][0]["cve"]
-
-                        unique_key = item.title + node.get("issue_id", "") + node.get("summary", "") + title_cve
+                        unique_key = item.title + item.component_name + item.component_version
                         items[unique_key] = item
 
         return list(items.values())
 
 
-def decode_cwe_number(value):
-    match = re.match(r"CWE-\d+", value, re.IGNORECASE)
+def get_component_name_version(name):
+    match = re.match(r"([a-z]+://[a-z\d\.:]+):([a-z\d\.\-]+)", name, re.IGNORECASE)
     if match is None:
-        return 0
-    return int(match[0].rsplit("-")[1])
+        return name, ""
+    return match[1], match[2]
 
 
 def get_severity(vulnerability):
@@ -73,7 +68,6 @@ def get_references(vulnerability):
         return ref
     else:
         return None
-
 
 
 def get_remediation(extended_information):
@@ -125,31 +119,8 @@ def process_component(component):
                 if "full_path" in item:
                     refs.append(item["full_path"])
         if refs:
-            impact += "\n- ".join(sorted(set(refs)))
+            impact += "\n- ".join(sorted(set(refs)))  # deduplication
     return mitigation, impact
-
-
-def get_version_vulnerability(vulnerability):
-    if "vulnerable_versions" in vulnerability["component_versions"]:
-        extra_desc = "\n**Versions that are vulnerable:**\n\n- "
-        extra_desc += "\n- ".join(vulnerability["component_versions"]["vulnerable_versions"])
-        return extra_desc
-    return "None"
-
-
-def get_provider(vulnerability):
-    if "component_versions" in vulnerability:
-        provider = vulnerability.get("component_versions").get("more_details").get("provider")
-        if provider:
-            provider += f"\n**Provider:** {provider}"
-            return provider
-    return ""
-
-
-def get_ext(vulnerability):
-    if "EXT" in vulnerability:
-        return vulnerability["EXT"]
-    return ""
 
 
 def get_cve(vulnerability):
@@ -158,10 +129,19 @@ def get_cve(vulnerability):
         return cves
     return []
 
+
 def get_vuln_id_from_tool(vulnerability):
     if "issue_id" in vulnerability:
         return vulnerability["issue_id"]
     return None
+
+
+def clean_title(title):
+    if title.startswith("Issue summary: "):
+        title = title[len("Issue summary: "):]
+    if '\n' in title:
+        title = title[:title.index('\n')]
+    return title
 
 
 def get_item_set(vulnerability):
@@ -172,7 +152,6 @@ def get_item_set(vulnerability):
     references = get_references(vulnerability)
     vuln_id_from_tool = get_vuln_id_from_tool(vulnerability)
     vulnerability_ids = list()
-    cwe = None
     cvssv3 = None
     cvss_v3 = "No CVSS v3 score."
     extra_desc = ""
@@ -182,43 +161,19 @@ def get_item_set(vulnerability):
         for item in cves:
             if item.get("cve"):
                 vulnerability_ids.append(item.get("cve"))
-        # take only the first one for now, limitation of DD model.
-        if len(cves[0].get("cwe", [])) > 0:
-            cwe = decode_cwe_number(cves[0].get("cwe", [])[0])
         if "cvss_v3_vector" in cves[0]:
             cvss_v3 = cves[0]["cvss_v3_vector"]
             # this dedicated package will clean the vector
             cvssv3 = CVSS3(cvss_v3).clean_vector()
 
-    extra_desc += get_provider(vulnerability)
     for component_name, component in vulnerability.get("components", {}).items():
+        component_name, component_version = get_component_name_version(component_name)
         mitigation, impact = process_component(component)
-        component_version = get_ext(vulnerability)
 
-        # The 'id' field is empty? (at least in my sample file)
-        if vulnerability_ids:
-            if vulnerability.get("id"):
-                title = (
-                    vulnerability["id"]
-                    + " - "
-                    + str(vulnerability_ids[0])
-                    + " - "
-                    + component_name
-                    + ":"
-                    + component_version
-                )
-            else:
-                title = str(vulnerability_ids[0]) + " - " + component_name + ":" + component_version
-        else:
-            if vulnerability.get("id"):
-                title = vulnerability["id"] + " - " + component_name + ":" + component_version
-            else:
-                title = "No CVE - " + component_name + ":" + component_version
-
+        title = clean_title(vulnerability["summary"])
         # create the finding object
         finding = Finding(
             title=title,
-            cwe=cwe,
             severity_justification=severity_justification,
             severity=severity,
             description=(vulnerability["summary"] + extra_desc).strip(),
