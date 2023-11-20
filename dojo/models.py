@@ -37,7 +37,6 @@ import tagulous.admin
 from django.db.models import JSONField
 import hyperlink
 from cvss import CVSS3
-from dojo.settings.settings import SLA_BUSINESS_DAYS
 
 
 logger = logging.getLogger(__name__)
@@ -2762,7 +2761,7 @@ class Finding(models.Model):
 
     def _age(self, start_date):
         from dojo.utils import get_work_days
-        if SLA_BUSINESS_DAYS:
+        if settings.SLA_BUSINESS_DAYS:
             if self.mitigated:
                 days = get_work_days(self.date, self.mitigated.date())
             else:
