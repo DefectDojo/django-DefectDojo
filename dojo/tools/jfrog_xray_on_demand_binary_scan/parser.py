@@ -49,7 +49,7 @@ def decode_cwe_number(value):
     return int(match[0].rsplit("-")[1])
 
 
-def get_servery(vulnerability):
+def get_severity(vulnerability):
     if "severity" in vulnerability:
         if vulnerability["severity"] == "Unknown":
             severity = "Info"
