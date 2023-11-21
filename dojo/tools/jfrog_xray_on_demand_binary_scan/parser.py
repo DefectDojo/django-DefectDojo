@@ -110,8 +110,8 @@ def get_component(vulnerability):
         component = components[gav]
         fixed_versions = component.get("fixed_versions")
         if fixed_versions:
-            mitigation = "**Versions containing a fix:**\n"
-            mitigation = mitigation + "\n".join(fixed_versions)
+            mitigation = "**Versions containing a fix:**\n- "
+            mitigation = mitigation + "\n- ".join(fixed_versions)
         if "impact_paths" in component:
             impact_paths = component["impact_paths"][0]
             for item in impact_paths:
