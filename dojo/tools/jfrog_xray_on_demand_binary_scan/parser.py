@@ -156,7 +156,7 @@ def get_cve(vulnerability):
 
 def get_item(vulnerability, test):
     severity_justification, remediation = get_severity_justification(vulnerability)
-    severity = get_servery(vulnerability)
+    severity = get_severity(vulnerability)
     references = get_references(vulnerability)
     vulnerability_ids = list()
     cwe = None
