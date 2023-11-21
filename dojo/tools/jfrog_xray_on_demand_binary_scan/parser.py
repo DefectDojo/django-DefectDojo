@@ -172,8 +172,8 @@ def get_item(vulnerability, test):
         # take only the first one for now, limitation of DD model.
         if len(cves[0].get("cwe", [])) > 0:
             cwe = decode_cwe_number(cves[0].get("cwe", [])[0])
-        if "cvss_v3" in cves[0]:
-            cvss_v3 = cves[0]["cvss_v3"]
+        if "cvss_v3_vector" in cves[0]:
+            cvss_v3 = cves[0]["cvss_v3_vector"]
             # this dedicated package will clean the vector
             cvssv3 = CVSS3.from_rh_vector(cvss_v3).clean_vector()
 
