@@ -6,7 +6,7 @@ from cvss import CVSS3
 from dojo.models import Finding
 
 
-class JfrogXrayOnDemandBinaryScanParser(object):
+class JFrogXrayOnDemandBinaryScanParser(object):
     """jfrog_xray_scan JSON reports"""
 
     def get_scan_types(self):
@@ -146,7 +146,6 @@ def clean_title(title):
 
 def get_item_set(vulnerability):
     item_set = []
-
     severity_justification, remediation = get_severity_justification(vulnerability)
     severity = get_severity(vulnerability)
     references = get_references(vulnerability)
@@ -163,7 +162,6 @@ def get_item_set(vulnerability):
                 vulnerability_ids.append(item.get("cve"))
         if "cvss_v3_vector" in cves[0]:
             cvss_v3 = cves[0]["cvss_v3_vector"]
-            # this dedicated package will clean the vector
             cvssv3 = CVSS3(cvss_v3).clean_vector()
 
     for component_name, component in vulnerability.get("components", {}).items():
