@@ -1,14 +1,14 @@
 from ..dojo_test_case import DojoTestCase
 from dojo.models import Test, Finding
 from dojo.tools.jfrog_xray_on_demand_binary_scan.parser import \
-    JfrogXrayOnDemandBinaryScanParser, get_component_name_version, clean_title
+    JFrogXrayOnDemandBinaryScanParser, get_component_name_version, clean_title
 
 
 class TestJfrogXrayOnDemandBinaryScanParser(DojoTestCase):
 
     def test_parse_file_with_one_vuln(self):
         testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/one_vuln.json")
-        parser = JfrogXrayOnDemandBinaryScanParser()
+        parser = JFrogXrayOnDemandBinaryScanParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
@@ -19,7 +19,7 @@ class TestJfrogXrayOnDemandBinaryScanParser(DojoTestCase):
 
     def test_parse_file_with_many_vulns(self):
         testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/many_vulns.json")
-        parser = JfrogXrayOnDemandBinaryScanParser()
+        parser = JFrogXrayOnDemandBinaryScanParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(3, len(findings))
@@ -48,14 +48,14 @@ class TestJfrogXrayOnDemandBinaryScanParser(DojoTestCase):
 
     def test_parse_file_with_many_vulns_docker(self):
         testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/many_vulns_docker.json")
-        parser = JfrogXrayOnDemandBinaryScanParser()
+        parser = JFrogXrayOnDemandBinaryScanParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(4, len(findings))
 
     def test_parse_file_with_many_vulns_pypi(self):
         testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/many_vulns_pypi.json")
-        parser = JfrogXrayOnDemandBinaryScanParser()
+        parser = JFrogXrayOnDemandBinaryScanParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(99, len(findings))
