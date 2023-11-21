@@ -1831,6 +1831,34 @@ CREATE_CLOUD_BANNER = env('DD_CREATE_CLOUD_BANNER')
 RISK_ACCEPTANCE = True
 # Role that allows unrestricted acceptance of risk
 ROLE_ALLOWED_TO_ACCEPT_RISKS=["Maintainer"]
+
+# Black List
+BLACK_LIST_FINDING = [
+    "CVE-2017-8923",
+    "CVE-2014-0114",
+    "CVE-2301-2342",
+    "CVE-2301-2356",
+    "CVE-2301-2387",
+    "CVE-2301-2365",
+    "CVE-2301-2378",
+    "CVE-2301-2333",
+    "CVE-2301-2311",
+    "CVE-2301-2324"
+]
+
+# White List
+WHITE_LIST_FINDING = [
+    "CVE-2303-2393",
+    "CVE-2303-2392",
+    "CVE-2303-2342",
+    "CVE-2303-2356",
+    "CVE-2303-2387",
+    "CVE-2303-2365",
+    "CVE-2303-2378",
+    "CVE-2303-2333",
+    "CVE-2303-2311",
+    "CVE-2303-2324"
+]
 # job: puesto de trabajo para saber que persona pueden hacer la solicitude del riesgo
 RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY={
     "Low": {
@@ -1840,13 +1868,13 @@ RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY={
     "Medium": {
         "number_acceptors": 1,
         "roles": ["Reader"],
-        "type_contacts": ["Product Type Technical Contact"]},
+        "type_contacts": ["product_type_technical_contact"]},
     "High": {
         "number_acceptors": 2,
-        "type_contacts": ["Product Type Manager", "Product Type Technical Contact"],
+        "type_contacts": ["product_type_manager", "product_type_technical_contact"],
         "roles": ["Reader"]},
     "Critical": {
         "number_acceptors": 2,
         "roles": ["Reader"],
-        "type_contacts": ["Environment Manager", "Environment Technical Contact"]},
+        "type_contacts": ["environment_manager", "environment_technical_contact"]},
 }

@@ -164,10 +164,10 @@ def get_contacts(engagement: Engagement, finding_serverity: str, user):
     contacts = rule.get("type_contacts")
 
     get_contacts_dict = {
-        "Product Type Manager": product_type.product_type_manager,
-        "Product Type Technical Contact": product_type.product_type_technical_contact,
-        "Environment Manager": product_type.environment_manager,
-        "Environment Technical Contact": product_type.environment_technical_contact,
+        "product_type_manager": product_type.product_type_manager,
+        "product_type_technical_contact": product_type.product_type_technical_contact,
+        "environment_manager": product_type.environment_manager,
+        "environment_technical_contact": product_type.environment_technical_contact,
     }
     contact_list = []
     for contact in contacts:

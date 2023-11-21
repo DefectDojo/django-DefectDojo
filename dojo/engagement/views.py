@@ -848,40 +848,50 @@ def get_risk_acceptance(request, finding: Finding, eng: Engagement):
     if settings.RISK_ACCEPTANCE:
         form = None
         risk_acceptance_title_suggestion = 'Accept: %s' % finding
-        form_aux = RiskAcceptanceForm(
+        form_aux = RiskAcceptanceForm(severity=finding.severity,
             initial={'owner': request.user,
                     'name': risk_acceptance_title_suggestion,
-                    'accepted_by': request.user})
+                    'accepted_by': request.user,
+                    "severity": finding.severity})
         if request.user.is_superuser is True:
             form = form_aux
         elif request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
             form = form_aux
+        elif settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY.get(finding.severity).get("number_acceptors") == 0:
+            form = form_aux
         elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request):
             risk_acceptance_title_suggestion = 'Accept: %s' % finding
-            form = RiskPendingForm(
+            form = RiskPendingForm(severity=finding.severity,
                 initial={'owner': request.user,
                         'name': risk_acceptance_title_suggestion,
-                        'accepted_by': rp_helper.get_contacts(eng, finding.severity, request.user)})
+                        'accepted_by': rp_helper.get_contacts(eng, finding.severity, request.user),
+                        "severity": finding.severity})
     else:
-        form = RiskAcceptanceForm(initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
+        form = RiskAcceptanceForm(severity=finding.severity, initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
     if form is None:
         raise ValueError("Form is None")
     return form
 
-def post_risk_acceptance(request, finding, eng, eid):
+def post_risk_acceptance(request, finding: Finding, eng, eid):
     if settings.RISK_ACCEPTANCE:
+        if any(vulnerability_id in settings.BLACK_LIST_FINDING for vulnerability_id in finding.vulnerability_ids):
+            messages.add_message(request,
+            messages.WARNING,
+            'This risk is on the black list',
+            extra_tags='alert-danger')
+            return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
         if request.user.is_superuser is True:
-            form = RiskAcceptanceForm(request.POST, request.FILES)
+            form = RiskAcceptanceForm(request.POST, request.FILES, severity=finding.severity)
         elif request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
-            form = RiskAcceptanceForm(request.POST, request.FILES)
+            form = RiskAcceptanceForm(request.POST, request.FILES, severity=finding.severity)
         else:
             risk_status = rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request)
             if risk_status:
-                form = RiskPendingForm(request.POST, request.FILES)
+                form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity)
             else:
-                form = RiskAcceptanceForm(request.POST, request.FILES)
+                form = RiskAcceptanceForm(request.POST, request.FILES, severity=finding.severity)
     else:
-        form = RiskAcceptanceForm(request.POST, request.FILES)
+        form = RiskAcceptanceForm(request.POST, request.FILES, severity=finding.severity)
 
     if form.is_valid():
         # first capture notes param as it cannot be saved directly as m2m
@@ -918,8 +928,10 @@ def post_risk_acceptance(request, finding, eng, eid):
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
             elif request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
-            else:
+            elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request):
                 risk_acceptance = ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
+            else:
+                risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
 
         messages.add_message(
             request,
@@ -956,6 +968,7 @@ def add_risk_acceptance(request, eid, fid=None):
                     'product_tab': product_tab,
                     'form': form})
     except ValueError as e:
+        raise ValueError(e)
         messages.add_message(
                     request,
                     messages.ERROR,

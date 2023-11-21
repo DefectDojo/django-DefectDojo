@@ -1,7 +1,8 @@
 from crum import get_current_user
+from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
 from dojo.models import Finding, Product_Member, Product_Type_Member, Stub_Finding, \
-    Product_Group, Product_Type_Group, Vulnerability_Id
+    Product_Group, Product_Type_Group, Vulnerability_Id, Product_Type
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
 
 
@@ -30,7 +31,15 @@ def get_authorized_groups(permission, user=None):
         authorized_product_type_groups,
         authorized_product_groups
     )
-
+def get_authorized_contacts(severity, queryset=None):
+    rule = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY.get(severity)
+    users = []
+    contacts = rule["type_contacts"]
+    queryset=Product_Type.objects.all()
+    for product_type in queryset:
+        for contact in contacts:
+            users.append(product_type, contact)
+    return users
 
 def get_authorized_findings(permission, queryset=None, user=None):
     if user is None:

@@ -1,10 +1,11 @@
 from crum import get_current_user
 from django.db.models import Exists, OuterRef, Q
-from dojo.models import Product_Type, Product_Type_Member, Product_Type_Group
+from dojo.models import Product_Type, Product_Type_Member, Product_Type_Group, Dojo_User
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission, user_has_permission, \
     role_has_permission
 from dojo.group.queries import get_authorized_groups
 from dojo.authorization.roles_permissions import Permissions
+from django.conf import settings
 
 
 def get_authorized_product_types(permission):
@@ -68,6 +69,31 @@ def get_authorized_product_type_members(permission):
 
     product_types = get_authorized_product_types(permission)
     return Product_Type_Member.objects.filter(product_type__in=product_types).select_related('role')
+
+
+def query_contacts(*args):
+    contacts = list(Product_Type.objects.all().values(*args))
+    contacts_dict = {}
+    for contact_dict in contacts:
+        contacts_dict.update({value: key for key, value in contact_dict.items()})
+    return contacts_dict
+
+def get_authorized_contacts(severity, queryset=None):
+    rule = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY.get(severity)
+    contacts_dict = {}
+    contacts_list = []
+    contacts = rule["type_contacts"]
+    if contacts:
+        contacts_dict = query_contacts(*contacts)
+
+    if contacts_dict:
+        for key in contacts_dict.keys():
+            contacts_list.append(key)
+
+    if contacts_list:
+        return Dojo_User.objects.filter(id__in=contacts_list)
+
+    return Dojo_User.objects.all()
 
 
 def get_authorized_product_type_members_for_user(user, permission):

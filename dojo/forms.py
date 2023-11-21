@@ -43,7 +43,7 @@ from dojo.utils import get_system_setting, get_product, is_finding_groups_enable
     get_password_requirements_string
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions
-from dojo.product_type.queries import get_authorized_product_types
+from dojo.product_type.queries import get_authorized_product_types, get_authorized_contacts
 from dojo.product.queries import get_authorized_products
 from dojo.finding.queries import get_authorized_findings
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users
@@ -710,7 +710,7 @@ class RiskPendingForm(forms.ModelForm):
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False, help_text="Description of the engagement and details regarding the engagement.")
     accepted_by = forms.ModelMultipleChoiceField(
-        queryset=Dojo_User.objects.all(),
+        queryset=Dojo_User.objects.none(),
         required=True,
         widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
         help_text=('select acceptors depending on the severity of the risk')
@@ -728,9 +728,10 @@ class RiskPendingForm(forms.ModelForm):
                   "recommendation", "description",
                   "path", "accepted_by", "path",
                   "expiration_date", "expiration_date_warned",
-                  "expiration_date_handled", "owner"]
+                  "expiration_date_handled", "owner", "severity"]
 
     def __init__(self, *args, **kwargs):
+        severity = kwargs.pop("severity", None)
         super().__init__(*args, **kwargs)
         expiration_delta_days = get_system_setting('risk_acceptance_form_default_days')
         logger.debug('expiration_delta_days: %i', expiration_delta_days)
@@ -743,6 +744,7 @@ class RiskPendingForm(forms.ModelForm):
         self.fields['expiration_date_warned'].disabled = True
         self.fields['expiration_date_handled'].disabled = True
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
+        self.fields['accepted_by'].queryset = get_authorized_contacts(severity)
     
     def clean(self):
         data = self.cleaned_data
@@ -766,7 +768,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
                             widget=forms.Textarea,
                             label='Notes')
     accepted_by = forms.ModelMultipleChoiceField(
-        queryset=Dojo_User.objects.all(),
+        queryset=Dojo_User.objects.none(),
         widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
         help_text=('select acceptors depending on the severity of the risk')
     )
@@ -776,6 +778,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
         exclude = ['acceptances_confirmed', 'expiration_date_handled']
 
     def __init__(self, *args, **kwargs):
+        severity = kwargs.pop("severity", None)
         super().__init__(*args, **kwargs)
         expiration_delta_days = get_system_setting('risk_acceptance_form_default_days')
         logger.debug('expiration_delta_days: %i', expiration_delta_days)
@@ -785,6 +788,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
             self.fields['expiration_date'].initial = expiration_date
         # self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
+        self.fields['accepted_by'].queryset = get_authorized_contacts(severity)
         self.fields['reactivate_expired'].disabled = True
     
     def clean(self):
