@@ -126,8 +126,8 @@ def get_component(vulnerability):
 
 def get_version_vulnerability(vulnerability):
     if "vulnerable_versions" in vulnerability["component_versions"]:
-        extra_desc = "\n**Versions that are vulnerable:**\n"
-        extra_desc += "\n".join(vulnerability["component_versions"]["vulnerable_versions"])
+        extra_desc = "\n**Versions that are vulnerable:**\n- "
+        extra_desc += "\n- ".join(vulnerability["component_versions"]["vulnerable_versions"])
         return extra_desc
     return "None"
 
