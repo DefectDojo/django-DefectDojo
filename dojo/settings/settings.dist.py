@@ -1272,7 +1272,7 @@ if len(env('DD_HASHCODE_FIELDS_PER_SCANNER')) > 0:
         if key not in HASHCODE_FIELDS_PER_SCANNER:
             print("Adding {} with value {} from env var DD_HASHCODE_FIELDS_PER_SCANNER".format(key, value))
             HASHCODE_FIELDS_PER_SCANNER[key] = value
-            
+
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
 # If False and cwe = 0, then the hash_code computation will fallback to legacy algorithm for the concerned finding
