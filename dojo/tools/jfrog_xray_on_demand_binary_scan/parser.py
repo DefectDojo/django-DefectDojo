@@ -153,7 +153,6 @@ def get_item_set(vulnerability):
     vulnerability_ids = list()
     cvssv3 = None
     cvss_v3 = "No CVSS v3 score."
-    extra_desc = ""
     # Some entries have no CVE entries, despite they exist. Example CVE-2017-1000502.
     cves = get_cve(vulnerability)
     if len(cves) > 0:
@@ -172,15 +171,14 @@ def get_item_set(vulnerability):
         # create the finding object
         finding = Finding(
             title=title,
-            severity_justification=severity_justification,
+            severity_justification=severity_justification or None,
             severity=severity,
-            description=(vulnerability["summary"] + extra_desc).strip(),
-            mitigation=mitigation + remediation,
+            description=(vulnerability["summary"]).strip(),
+            mitigation=(mitigation + remediation) or None,
             component_name=component_name,
             component_version=component_version,
-            impact=impact,
-            references=references,
-            file_path=vulnerability.get("source_comp_id"),
+            impact=impact or None,
+            references=references or None,
             static_finding=True,
             dynamic_finding=False,
             cvssv3=cvssv3,
