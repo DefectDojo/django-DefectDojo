@@ -1267,8 +1267,12 @@ if len(env('DD_HASHCODE_FIELDS_PER_SCANNER')) > 0:
     env_hashcode_fields_per_scanner = json.loads(env('DD_HASHCODE_FIELDS_PER_SCANNER'))
     for key, value in env_hashcode_fields_per_scanner.items():
         if key in HASHCODE_FIELDS_PER_SCANNER:
-            print("Replacing {} with value {} from env var DD_HASHCODE_FIELDS_PER_SCANNER".format(key, value))
+            print("Replacing {} with value {} (previously set to {}) from env var DD_HASHCODE_FIELDS_PER_SCANNER".format(key, value, HASHCODE_FIELDS_PER_SCANNER[key]))
             HASHCODE_FIELDS_PER_SCANNER[key] = value
+        if key not in HASHCODE_FIELDS_PER_SCANNER:
+            print("Adding {} with value {} from env var DD_HASHCODE_FIELDS_PER_SCANNER".format(key, value))
+            HASHCODE_FIELDS_PER_SCANNER[key] = value
+            
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
 # If False and cwe = 0, then the hash_code computation will fallback to legacy algorithm for the concerned finding
@@ -1464,7 +1468,10 @@ if len(env('DD_DEDUPLICATION_ALGORITHM_PER_PARSER')) > 0:
     env_dedup_algorithm_per_parser = json.loads(env('DD_DEDUPLICATION_ALGORITHM_PER_PARSER'))
     for key, value in env_dedup_algorithm_per_parser.items():
         if key in DEDUPLICATION_ALGORITHM_PER_PARSER:
-            print("Replacing {} with value {} from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER".format(key, value))
+            print("Replacing {} with value {} (previously set to {}) from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER".format(key, value, DEDUPLICATION_ALGORITHM_PER_PARSER[key]))
+            DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
+        if key not in DEDUPLICATION_ALGORITHM_PER_PARSER:
+            print("Adding {} with value {} from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER".format(key, value))
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
