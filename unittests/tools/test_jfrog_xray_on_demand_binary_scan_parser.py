@@ -4,7 +4,7 @@ from dojo.tools.jfrog_xray_on_demand_binary_scan.parser import \
     JFrogXrayOnDemandBinaryScanParser, get_component_name_version, clean_title
 
 
-class TestJfrogXrayOnDemandBinaryScanParser(DojoTestCase):
+class TestJFrogXrayOnDemandBinaryScanParser(DojoTestCase):
 
     def test_parse_file_with_one_vuln(self):
         testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/one_vuln.json")
@@ -59,3 +59,27 @@ class TestJfrogXrayOnDemandBinaryScanParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(99, len(findings))
+
+        with self.subTest(finding=0):
+            self.assertIn("sqlparse is a non-validating SQL parser module for Python", findings[0].title)
+            self.assertIsNone(findings[0].severity_justification)
+            self.assertEqual("High", findings[0].severity)
+            self.assertIn("sqlparse is a non-validating SQL parser module for Python", findings[0].description)
+            self.assertIn("- [0.4.4]", findings[0].mitigation)
+            self.assertEqual("pypi://sqlparse", findings[0].component_name)
+            self.assertEqual("0.4.3", findings[0].component_version)
+            self.assertIn("pypi://django:4.1.4", findings[0].impact)
+            self.assertIn("https://github.com/andialbrecht/sqlparse/commit/", findings[0].references)
+            self.assertTrue(findings[0].static_finding)
+            self.assertFalse(findings[0].dynamic_finding)
+            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H", findings[0].cvssv3)
+            self.assertEqual("XRAY-515353", findings[0].vuln_id_from_tool)
+            self.assertEqual(['CVE-2023-30608'], findings[0].unsaved_vulnerability_ids)
+
+        with self.subTest(finding=1):
+            self.assertIn("**Short description**\nA design problem in Django may lead to denial of service when processing multipart forms.\n", findings[1].severity_justification)
+            self.assertIn("**Full description**\n[Django](https://www.djangoproject.com/) is a popular Python web framework that provides functions, components, and tools for fast web development.\r\n\r\nA vulnerability has been discovered in the Multipart Request Parser in Django. By passing certain inputs (such as an excessive number of parts) to multipart forms, an attacker can trigger too many open files or memory exhaustion, which may lead to a denial-of-service attack. \r\n\r\nThe issue is only exploitable when the `MultiPartParser` class is used by the Django app/\n", findings[1].severity_justification)
+            self.assertIn("**JFrog research severity**\nHigh\n", findings[1].severity_justification)
+            self.assertIn("**JFrog research severity reasons**\nExploitation of the issue is only possible when the vulnerable component is used in a specific manner. The attacker has to perform per-target research to determine the vulnerable attack vector\n", findings[1].severity_justification)
+            self.assertIn("An attacker must find a multipart form that receives files in order to trigger this issue, although this does not require intimate per-target research and can be automated.\n", findings[1].severity_justification)
+            self.assertIn("_Is positive:_ true\n", findings[1].severity_justification)
