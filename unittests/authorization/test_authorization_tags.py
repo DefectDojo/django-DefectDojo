@@ -54,7 +54,7 @@ class TestAuthorizationTags(DojoTestCase):
         mock_configuration_permission.return_value = True
         mock_current_user.return_value = self.user
 
-        result = has_configuration_permission('test')
+        result = has_configuration_permission('test', None)
 
         self.assertTrue(result)
         mock_configuration_permission.assert_called_with(self.user, 'test')

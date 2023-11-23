@@ -26,23 +26,29 @@ class MobsfscanParser(object):
 
     def get_findings(self, filename, test):
         data = json.load(filename)
-        if len(data.get('results')) == 0:
+        if len(data.get("results")) == 0:
             return []
         else:
             dupes = {}
-            for key, item in data.get('results').items():
-                metadata = item.get('metadata')
-                cwe = int(re.match(r'(cwe|CWE)-([0-9]+)', metadata.get('cwe')).group(2))
-                masvs = metadata.get('masvs')
-                owasp_mobile = metadata.get('owasp-mobile')
-                description = "\n".join([
-                    f"**Description:** `{metadata.get('description')}`",
-                    f"**OWASP MASVS:** `{masvs}`",
-                    f"**OWASP Mobile:** `{owasp_mobile}`",
-                ])
-                references = metadata.get('reference')
-                if metadata.get('severity') in self.SEVERITY:
-                    severity = self.SEVERITY[metadata.get('severity')]
+            for key, item in data.get("results").items():
+                metadata = item.get("metadata")
+                cwe = int(
+                    re.match(r"(cwe|CWE)-([0-9]+)", metadata.get("cwe")).group(
+                        2
+                    )
+                )
+                masvs = metadata.get("masvs")
+                owasp_mobile = metadata.get("owasp-mobile")
+                description = "\n".join(
+                    [
+                        f"**Description:** `{metadata.get('description')}`",
+                        f"**OWASP MASVS:** `{masvs}`",
+                        f"**OWASP Mobile:** `{owasp_mobile}`",
+                    ]
+                )
+                references = metadata.get("reference")
+                if metadata.get("severity") in self.SEVERITY:
+                    severity = self.SEVERITY[metadata.get("severity")]
                 else:
                     severity = "Info"
 
@@ -55,15 +61,15 @@ class MobsfscanParser(object):
                     description=description,
                     references=references,
                 )
-                if item.get('files'):
-                    for file in item.get('files'):
-                        file_path = file.get('file_path')
-                        line = file.get('match_lines')[0]
+                if item.get("files"):
+                    for file in item.get("files"):
+                        file_path = file.get("file_path")
+                        line = file.get("match_lines")[0]
                         finding.file_path = file_path
                         finding.line = line
 
                 dupe_key = hashlib.sha256(
-                    (key + str(cwe) + masvs + owasp_mobile).encode('utf-8')
+                    (key + str(cwe) + masvs + owasp_mobile).encode("utf-8")
                 ).hexdigest()
 
                 if dupe_key in dupes:

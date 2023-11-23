@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load display_tags %}
 {% url 'view_finding' finding.id as finding_url %}
     {
         "@context": "https://schema.org/extensions",

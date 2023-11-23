@@ -1,3 +1,8 @@
+## :warning: Note on feature completeness :warning:
+
+We are narrowing the scope of acceptable enhancements to DefectDojo in preparation for v3. Learn more here:
+https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/CONTRIBUTING.md
+
 **Description**
 
 Describe the feature / bug fix implemented by this PR.

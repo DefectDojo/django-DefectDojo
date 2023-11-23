@@ -18,15 +18,15 @@ class SolarAppscreenerParser(object):
         return "Solar Appscreener report file can be imported in CSV format from Detailed_Results.csv."
 
     def get_findings(self, filename, test):
-
         if filename is None:
             return ()
 
         content = filename.read()
-        if type(content) is bytes:
-            content = content.decode('utf-8')
-        reader = csv.DictReader(io.StringIO(
-            content), delimiter=',', quotechar='"')
+        if isinstance(content, bytes):
+            content = content.decode("utf-8")
+        reader = csv.DictReader(
+            io.StringIO(content), delimiter=",", quotechar='"'
+        )
         csvarray = []
 
         for row in reader:
@@ -35,14 +35,14 @@ class SolarAppscreenerParser(object):
         items = list()
         for row in csvarray:
             finding = Finding(test=test)
-            finding.title = row.get('Vulnerability', '')
-            finding.description = row.get('Description', '')
-            finding.mitigation = row.get('Recommendations')
-            finding.references = row.get('Links')
-            finding.severity = row.get('Severity Level', 'Info')
-            finding.file_path = row.get('File')
-            finding.sast_source_file_path = row.get('File')
-            finding.line = row.get('Line')
+            finding.title = row.get("Vulnerability", "")
+            finding.description = row.get("Description", "")
+            finding.mitigation = row.get("Recommendations")
+            finding.references = row.get("Links")
+            finding.severity = row.get("Severity Level", "Info")
+            finding.file_path = row.get("File")
+            finding.sast_source_file_path = row.get("File")
+            finding.line = row.get("Line")
 
             if finding.line:
                 if not finding.line.isdigit():

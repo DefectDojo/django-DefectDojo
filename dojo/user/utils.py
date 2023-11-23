@@ -94,13 +94,7 @@ def get_configuration_permissions_fields():
     else:
         questionnaire_permissions = []
 
-    if get_system_setting('enable_rules_framework'):
-        rules_permissions = [
-            Permission_Helper(name='rule', app='auth', view=True, add=True, change=True, delete=True),
-        ]
-    else:
-        rules_permissions = []
-
+    rules_permissions = []
     permission_fields = [
         Permission_Helper(name='cred user', app='dojo', view=True, add=True, change=True, delete=True),
         Permission_Helper(name='development environment', app='dojo', add=True, change=True, delete=True),

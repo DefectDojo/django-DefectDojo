@@ -1,5 +1,6 @@
 import json
 from unittest import mock
+from django.core.exceptions import ValidationError
 
 from dojo.tools.api_sonarqube.importer import SonarQubeApiImporter
 from ..dojo_test_case import DojoTestCase, get_unit_tests_path
@@ -77,7 +78,7 @@ class TestSonarqubeImporterNoSQToolConfig(DojoTestCase):
         self.test = Test(engagement=engagement)
 
     def test_parser(self):
-        with self.assertRaisesRegex(Exception, 'There are no API Scan Configurations for this Product.'):
+        with self.assertRaisesRegex(ValidationError, r'There are no API Scan Configurations for this Product\.\\nPlease add at least one API Scan Configuration for SonarQube to this Product\. Product: "product" \(1\)'):
             SonarQubeApiImporter.prepare_client(self.test)
 
 
@@ -95,7 +96,7 @@ class TestSonarqubeImporterOneSQToolConfig(DojoTestCase):
         self.test = Test(engagement=engagement)
 
     def test_parser(self):
-        with self.assertRaisesRegex(Exception, 'There are no API Scan Configurations for this Product.'):
+        with self.assertRaisesRegex(ValidationError, r'There are no API Scan Configurations for this Product\.\\nPlease add at least one API Scan Configuration for SonarQube to this Product\. Product: "product" \(1\)'):
             SonarQubeApiImporter.prepare_client(self.test)
 
 
@@ -114,7 +115,7 @@ class TestSonarqubeImporterMultipleSQToolConfig(DojoTestCase):
         self.test = Test(engagement=engagement)
 
     def test_parser(self):
-        with self.assertRaisesRegex(Exception, 'There are no API Scan Configurations for this Product'):
+        with self.assertRaisesRegex(ValidationError, r'There are no API Scan Configurations for this Product\.\\nPlease add at least one API Scan Configuration for SonarQube to this Product\. Product: "product" \(1\)'):
             SonarQubeApiImporter.prepare_client(self.test)
 
 
@@ -187,7 +188,7 @@ class TestSonarqubeImporterMultipleSQConfigs(DojoTestCase):
         self.test = Test(engagement=engagement)
 
     def test_parser(self):
-        with self.assertRaisesRegex(Exception, 'More than one Product API Scan Configuration has been configured, but none of them has been chosen.'):
+        with self.assertRaisesRegex(ValidationError, r'More than one Product API Scan Configuration has been configured, but none of them has been chosen\. Please specify which one should be used\. Product: "product" \(1\)'):
             SonarQubeApiImporter.prepare_client(self.test)
 
 
@@ -257,7 +258,7 @@ class TestSonarqubeImporterSelectedSQConfigsWithKey(DojoTestCase):
         self.assertEqual(2, len(findings))
 
     def test_product_mismatch(self):
-        with self.assertRaisesRegex(Exception, 'Product API Scan Configuration and Product do not match.'):
+        with self.assertRaisesRegex(ValidationError, r'Product API Scan Configuration and Product do not match\. Product: "other product" \(None\), config.product: "product" \(1\)'):
             SonarQubeApiImporter.prepare_client(self.other_test)
 
 
@@ -294,7 +295,7 @@ class TestSonarqubeImporterExternalRule(DojoTestCase):
         self.assertEqual('Remove this useless assignment to local variable "currentValue".', finding.title)
         self.assertEqual(None, finding.cwe)
         self.assertEqual('', finding.description)
-        self.assertEqual('', finding.references)
+        self.assertEqual('[Issue permalink](http://localhoproject/issues?issues=AWKWIl8pZpu0CyehMfc4&open=AWKWIl8pZpu0CyehMfc4&resolved=CONFIRMED&id=internal.dummy.project) \n', finding.references)
         self.assertEqual('Medium', finding.severity)
         self.assertEqual(242, finding.line)
         self.assertEqual('internal.dummy.project:src/main/javascript/TranslateDirective.ts', finding.file_path)
@@ -437,8 +438,10 @@ class TestSonarqubeImporterValidateHotspotData(DojoTestCase):
             '\n\n',
             findings[0].description
         )
-        self.assertEqual(str(findings[0].severity), 'Info')
+        self.assertEqual(str(findings[0].severity), 'High')
         self.assertMultiLineEqual(
+            '[Hotspot permalink](http://localhosecurity_hotspots?id=internal.dummy.project&hotspots=AXgm6Z-ophPPY0C1qhRq) '
+            '\n'
             '[CVE-2019-13466](http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-13466)'
             '\n'
             '[CVE-2018-15389](http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15389)'
@@ -506,8 +509,8 @@ class TestSonarqubeImporterHotspotRule_WO_Risk_Description(DojoTestCase):
             '\n\n',
             findings[0].description
         )
-        self.assertEqual(str(findings[0].severity), 'Info')
-        self.assertEqual(findings[0].references, '')
+        self.assertEqual(str(findings[0].severity), 'High')
+        self.assertEqual(findings[0].references, '[Hotspot permalink](http://localhosecurity_hotspots?id=internal.dummy.project&hotspots=AXgm6Z-ophPPY0C1qhRq) \n')
         self.assertEqual(str(findings[0].file_path), 'internal.dummy.project:spec/support/user_fixture.rb')
         self.assertEqual(findings[0].line, 9)
         self.assertEqual(findings[0].active, True)

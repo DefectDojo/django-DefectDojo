@@ -122,14 +122,17 @@
         // Mapping of table columns to objects for proper cleanup and data formatting
         var dojoTable = $('#components-table').DataTable({
             drawCallback: function(){
-                 $('.has-popover').popover({'trigger':'hover'});
-             },
-             "columns": [
-                    { "data": "Component_name" },
-                    { "data": "Version" },
-                    { "data": "Active" },
-                    { "data": "Duplicate" },
-                    { "data": "Total" },
+                $('#components-table .has-popover').hover(
+                    function() { $(this).popover('show'); }, // hover
+                    function() { $(this).popover('hide'); } // unhover
+                );
+            },
+            "columns": [
+                { "data": "Component_name" },
+                { "data": "Version" },
+                { "data": "Active" },
+                { "data": "Duplicate" },
+                { "data": "Total" },
             ],
             order: [],
             columnDefs: [

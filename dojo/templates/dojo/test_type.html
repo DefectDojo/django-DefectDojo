@@ -11,7 +11,7 @@
                         Test Type List
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
-                            {% if "dojo.add_test_type"|has_configuration_permission %}
+                            {% if "dojo.add_test_type"|has_configuration_permission:request %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa-solid fa-screwdriver-wrench"></span>
@@ -41,13 +41,14 @@
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
                         <thead>
                         <tr>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th>{% dojo_sort request 'Test Type' 'name' 'asc' %}</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for tt in tts %}
                             <tr>
-                                {% if "dojo.change_test_type"|has_configuration_permission %}
+                                {% if "dojo.change_test_type"|has_configuration_permission:request %}
                                     <td><a href="{% url 'edit_test_type' tt.id %}"> {{ tt.name }} </a></td>
                                 {% else %}
                                     <td> {{ tt.name }} </a> </td>

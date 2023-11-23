@@ -5,7 +5,6 @@ from dojo.models import Finding
 
 
 class TruffleHogParser(object):
-
     def get_scan_types(self):
         return ["Trufflehog Scan"]
 
@@ -21,13 +20,13 @@ class TruffleHogParser(object):
         if len(dict_strs) == 0:
             return []
         try:
-            json_data = json.loads(str(dict_strs[0], 'utf-8'))
-        except:
+            json_data = json.loads(str(dict_strs[0], "utf-8"))
+        except Exception:
             json_data = json.loads(dict_strs[0])
 
-        if 'SourceMetadata' in json_data:
+        if "SourceMetadata" in json_data:
             return self.get_findings_v3(dict_strs, test)
-        elif 'path' in json_data:
+        elif "path" in json_data:
             return self.get_findings_v2(dict_strs, test)
         else:
             return []
@@ -36,8 +35,8 @@ class TruffleHogParser(object):
         dupes = {}
         for line in data:
             try:
-                json_data = json.loads(str(line, 'utf-8'))
-            except:
+                json_data = json.loads(str(line, "utf-8"))
+            except Exception:
                 json_data = json.loads(line)
 
             file = json_data.get("path")
@@ -45,8 +44,12 @@ class TruffleHogParser(object):
             titleText = f"Hard Coded {reason} in: {file}"
             commit = json_data.get("commit")
             description = "**Commit:** " + str(commit).split("\n")[0] + "\n"
-            description += "```\n" + str(commit).replace('```', '\\`\\`\\`') + "\n```\n"
-            description += "**Commit Hash:** " + json_data.get("commitHash") + "\n"
+            description += (
+                "```\n" + str(commit).replace("```", "\\`\\`\\`") + "\n```\n"
+            )
+            description += (
+                "**Commit Hash:** " + json_data.get("commitHash") + "\n"
+            )
             description += "**Commit Date:** " + json_data.get("date") + "\n"
             description += "**Branch:** " + json_data.get("branch") + "\n"
             description += "**Reason:** " + json_data.get("reason") + "\n"
@@ -60,9 +63,13 @@ class TruffleHogParser(object):
             elif reason == "Generic Secret":
                 severity = "Medium"
 
-            strings_found = "".join(string + "\n" for string in json_data.get("stringsFound"))
+            strings_found = "".join(
+                string + "\n" for string in json_data.get("stringsFound")
+            )
             dupe_key = hashlib.md5((file + reason).encode("utf-8")).hexdigest()
-            description += "\n**Strings Found:**\n```" + strings_found + "```\n"
+            description += (
+                "\n**Strings Found:**\n```" + strings_found + "```\n"
+            )
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
@@ -83,10 +90,11 @@ class TruffleHogParser(object):
                     references="N/A",
                     file_path=file,
                     line=0,  # setting it to a fake value to activate deduplication
-                    url='N/A',
+                    url="N/A",
                     dynamic_finding=False,
                     static_finding=True,
-                    nb_occurences=1)
+                    nb_occurences=1,
+                )
 
                 dupes[dupe_key] = finding
 
@@ -96,11 +104,11 @@ class TruffleHogParser(object):
         dupes = {}
         for line in data:
             try:
-                json_data = json.loads(str(line, 'utf-8'))
-            except:
+                json_data = json.loads(str(line, "utf-8"))
+            except Exception:
                 json_data = json.loads(line)
 
-            metadata = json_data.get('SourceMetadata', {}).get('Data', {})
+            metadata = json_data.get("SourceMetadata", {}).get("Data", {})
             # Get the source of the data
             source = {}
             source_data = {}
@@ -140,18 +148,26 @@ class TruffleHogParser(object):
                 description += f"**Structured Data:**\n{self.walk_dict(structured_data)}\n"
 
             if extra_data:
-                description += f"**Extra Data:**\n{self.walk_dict(extra_data)}\n"
+                description += (
+                    f"**Extra Data:**\n{self.walk_dict(extra_data)}\n"
+                )
 
             severity = "Critical"
             if not verified:
-                if "Oauth" in detector_name or "AWS" in detector_name or "Heroku" in detector_name:
+                if (
+                    "Oauth" in detector_name
+                    or "AWS" in detector_name
+                    or "Heroku" in detector_name
+                ):
                     severity = "Critical"
                 elif detector_name == "PrivateKey":
                     severity = "High"
                 elif detector_name == "Generic Secret":
                     severity = "Medium"
 
-            dupe_key = hashlib.md5((file + detector_name).encode("utf-8")).hexdigest()
+            dupe_key = hashlib.md5(
+                (file + detector_name).encode("utf-8")
+            ).hexdigest()
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
@@ -172,10 +188,11 @@ class TruffleHogParser(object):
                     references="N/A",
                     file_path=file,
                     line=line_number,  # setting it to a fake value to activate deduplication
-                    url='N/A',
+                    url="N/A",
                     dynamic_finding=False,
                     static_finding=True,
-                    nb_occurences=1)
+                    nb_occurences=1,
+                )
 
                 dupes[dupe_key] = finding
 
@@ -184,11 +201,13 @@ class TruffleHogParser(object):
     def walk_dict(self, obj, tab_count=1):
         return_string = ""
         if obj:
-            tab_string = tab_count * '\t'
+            tab_string = tab_count * "\t"
             if isinstance(obj, dict):
                 for key, value in obj.items():
                     if isinstance(value, dict):
-                        return_string += self.walk_dict(value, tab_count=(tab_count + 1))
+                        return_string += self.walk_dict(
+                            value, tab_count=(tab_count + 1)
+                        )
                         continue
                     else:
                         return_string += f"{tab_string}{key}: {value}\n"

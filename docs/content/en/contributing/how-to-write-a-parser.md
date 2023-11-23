@@ -13,10 +13,10 @@ All commands assume that you're located at the root of the django-DefectDojo clo
 
 - You have forked https://github.com/DefectDojo/django-DefectDojo and cloned locally.
 - Checkout `dev` and make sure you're up to date with the latest changes.
-- It's advised that you create a dedicated branch for your development, such as `git checkout -b parser-name` yet that's up to you.
+- It's advised that you create a dedicated branch for your development, such as `git checkout -b parser-name`.
 
-It is probably easier to use the docker-compose stack (and benefit from the hot-reload capbility for uWSGI).
-Set up your environment to use the debug environment, such as:
+It is easiest to use the docker-compose deployment as it has hot-reload capbility for uWSGI.
+Set up your environment to use the debug environment:
 
 `$ docker/setEnv.sh debug`
 
@@ -24,7 +24,7 @@ Please have a look at [DOCKER.md](https://github.com/DefectDojo/django-DefectDoj
 
 ### Docker images
 
-You'd want to build your docker images locally, and eventually pass in your local user's `uid` to be able to write to the image (handy for database migration files). Assuming your user's `uid` is `1000`, then:
+You will want to build your docker images locally, and eventually pass in your local user's `uid` to be able to write to the image (handy for database migration files). Assuming your user's `uid` is `1000`, then:
 
 {{< highlight bash >}}
 $ docker-compose build --build-arg uid=1000
@@ -94,32 +94,7 @@ class MyToolParser(object):
 
 ## API Parsers
 
-Some reports are not reachable as a file that the user or pipeline can upload but the results of the scans have to be downloaded via API (or we just want to add support for multiple methods).
-In that case, an "API parser" is needed. Core code is the same as a regular parser but there are some additional requirements.
-
-### Which files do you need to modify? (API Parsers only)
-
-| File                                              | Purpose
-|-------                                            |--------
-|`dojo/tools/api_<parser_dir>/api_client.py`        | API client should perform all HTTP API calls and JSON with data from the API
-|`dojo/tools/api_<parser_dir>/importer.py`          | Importer should prepare the API client and process its results
-|`dojo/tools/api_<parser_dir>/parser.py`            | Parser should fetch processed data from the importer
-|`unittests/tools/test_api_<parser_name>_parser.py` | Unit tests of the parser.
-|`unittests/tools/test_api_<parser_name>_importer.py` | Unit tests of the importer.
-|`dojo/tool_config/factory.py`                      | Parser must be listed in `SCAN_APIS`
-|`unittests/test_tool_config.py`                    | Unit tests for content of hints and other metadata
-
-### Factory contract (API Parsers only)
-
-1. Parser directory *MUST* starts with `api_`
-   - ex: `dojo/tools/api_mytool`
-2. class-name of parser *MUST* starts with `Api`
-   - ex: `ApiMytoolParser`
-3. Parser *MUST* implements function `def api_scan_configuration_hint(self)` which returns a string with a hint, on how to configure service keys in Product ...TODO. Using of HTML tag `<b>` is required. Help will be rendered on the website.
-   - ex: `return 'the field <b>Service key 1</b> has to be set to ID of the project. <b>Service key 2</b> has to be set to the version of the project'`
-4. Parser *MUST* implemets function `def requires_tool_type(self, scan_type)` which returns name of the required `Tool_Type`. 
-5. Parser *MUST NOT* create related `Tool_Type`. It will be created automatically based on the function `requires_tool_type`.
-6. API client *SHOULD* implemets `def test_connection(self):` and `def test_product_connection(self, api_scan_configuration):` to be able to test connectivity and test permissions. It should return string with a sucessfull status (like _you have access to 125 projects_) or raise an exception.
+DefectDojo has a limited number of API parsers. While we won’t remove these connectors, adding API connectors has been problematic and thus we cannot accept new API parsers / connectors from the community at this time for supportability reasonsing. To maintain a high quality API connector, it is necessary to have a license to the tool. To get that license requires partnership with the author or vendor. We're close to announcing a new program to help address this and bring API connectors to DefectDojo.
 
 ## Template Generator
 
@@ -139,7 +114,7 @@ Read [more](https://github.com/DefectDojo/cookiecutter-scanner-parser) on the te
 
 ## Things to pay attention to
 
-Here is a list of advise that will make your parser future proof.
+Here is a list of considerations that will make the parser robust for both common cases and edge cases.
 
 ### Do not parse URLs by hand
 
@@ -187,7 +162,7 @@ Good example:
 
 ### Do not parse CVSS by hand (vector, score or severity)
 
-Data can have `CVSS` vectors or scores. Don't try to write your own CVSS score algorithm.
+Data can have `CVSS` vectors or scores. Don't write your own CVSS score algorithm.
 For parser, we rely on module `cvss`.
 
 It's easy to use and will make the parser aligned with the rest of the code.

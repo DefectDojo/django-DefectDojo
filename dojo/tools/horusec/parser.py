@@ -27,13 +27,20 @@ class HorusecParser(object):
 
     def get_findings(self, filename, test):
         data = json.load(filename)
-        report_date = datetime.strptime(data.get("createdAt")[0:10], "%Y-%m-%d")
-        return [self._get_finding(node, report_date) for node in data.get("analysisVulnerabilities")]
+        report_date = datetime.strptime(
+            data.get("createdAt")[0:10], "%Y-%m-%d"
+        )
+        return [
+            self._get_finding(node, report_date)
+            for node in data.get("analysisVulnerabilities")
+        ]
 
     def get_tests(self, scan_type, scan):
         data = json.load(scan)
         report_date = parse(data.get("createdAt"))
-        test = ParserTest(name=self.ID, type=self.ID, version=data.get("version").lstrip("v"))  # remove the v in vX.Y.Z
+        test = ParserTest(
+            name=self.ID, type=self.ID, version=data.get("version").lstrip("v")
+        )  # remove the v in vX.Y.Z
         test.description = "\n".join(
             [
                 f"**Status:** {data.get('status')}",
@@ -43,7 +50,10 @@ class HorusecParser(object):
                 "```",
             ]
         )
-        test.findings = [self._get_finding(node, report_date) for node in data.get("analysisVulnerabilities")]
+        test.findings = [
+            self._get_finding(node, report_date)
+            for node in data.get("analysisVulnerabilities")
+        ]
         return [test]
 
     def _get_finding(self, data, date):
@@ -62,9 +72,14 @@ class HorusecParser(object):
             severity=data["vulnerabilities"]["severity"].title(),
             description=description,
             file_path=data["vulnerabilities"]["file"],
-            scanner_confidence=self.CONDIFDENCE[data["vulnerabilities"]["confidence"]],
+            scanner_confidence=self.CONDIFDENCE[
+                data["vulnerabilities"]["confidence"]
+            ],
         )
         # sometimes the attribute 'line' is empty
-        if data["vulnerabilities"].get("line") and data["vulnerabilities"]["line"].isdigit():
+        if (
+            data["vulnerabilities"].get("line")
+            and data["vulnerabilities"]["line"].isdigit()
+        ):
             finding.line = int(data["vulnerabilities"]["line"])
         return finding

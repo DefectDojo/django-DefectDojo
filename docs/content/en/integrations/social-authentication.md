@@ -198,7 +198,23 @@ To import groups from Azure AD users, the following environment variable needs t
     {{< /highlight >}}
 
 This will ensure the user is added to all the groups found in the Azure AD Token. Any missing groups will be created in DefectDojo (unless filtered). This group synchronization allows for product access via groups to limit the products a user can interact with.
-Do not activate `Emit groups as role claims` within the Azure AD "Token configuration".
+
+The Azure AD token returned by Azure will also need to be configured to include group IDs. Without this step, the
+token will not contain any notion of a group, and the mapping process will report that the current user is not a member of any 
+groups. To update the the format of the token, add a group claim that applies to whatever group type you are using.
+If unsure of what type that is, select `All Groups`. Do not activate `Emit groups as role claims` within the Azure AD 
+"Token configuration" page.
+
+Application API permissions need to be updated with the `Group.Read.All` permission so that groups can be read on behalf
+of the user that has successfully signed in.
+
+To limit the amount of groups imported from Azure AD, a regular expression can be used as the following:
+    
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER='^team-.*' # or 'teamA|teamB|groupC'
+    {{< /highlight >}}
+
+### Automatic Cleanup of User-Groups
 
 To prevent authorization creep, old Azure AD groups a user is not having anymore can be deleted with the following environment parameter:
 
@@ -206,11 +222,8 @@ To prevent authorization creep, old Azure AD groups a user is not having anymore
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS=True
     {{< /highlight >}}
 
- To limit the amount of groups imported from Azure AD, a regular expression can be used as the following:
-    
-    {{< highlight python >}}
-    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER='^team-.*' # or 'teamA|teamB|groupC'
-    {{< /highlight >}}
+When a user is removed from a given group in Azure AD, they will also be removed from the corresponding group in DefectDojo.
+If there is a group in DefectDojo, that no longer has any members, it will be left as is for record purposes.
 
 ## Gitlab
 
@@ -248,6 +261,8 @@ Follow along below.
     DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT = True
     {{< /highlight >}}
 
+    **Important:** if you enable this setting on already working instance with gitlab integrations, it will require new grant "read_repository" by user
+ 
 5. Restart DefectDojo, and you should now see a **Login with Gitlab**
     button on the login page.
 
@@ -426,6 +441,13 @@ When a new user is created via the social-auth, only the default permissions are
 ### Default group
 
 When both the parameters `Default group` and `Default group role` are set, the new user will be a member of the given group with the given role, which will give him the respective permissions.
+
+### Groups from Identity Providers
+
+Some Identity Providers are able to send list of groups to which should user belongs. This functionality is implemented only for Identity Providers mentioned below. For all others, we will be more than happy for contribution (hint: functions `assign_user_to_groups` and `cleanup_old_groups_for_user` from [`dojo/pipeline.py`](https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/pipeline.py) might be useful).
+
+- [Azure](#automatic-import-of-user-groups): Check `DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS` and `DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS`
+- [RemoteUser](#remoteuser): Check `DD_AUTH_REMOTEUSER_GROUPS_HEADER` and `DD_AUTH_REMOTEUSER_GROUPS_CLEANUP`
 
 ## Login speed-up
 

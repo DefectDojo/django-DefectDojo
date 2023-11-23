@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load authorization_tags %}
 {% block add_css %}
     {{ block.super }}
 
@@ -32,16 +33,18 @@
         </div>
     </form>
     {% if template %}
-        <form method="post" action="{% url 'delete_template' template.id %}"
-              style="display: inline" class="form-horizontal">
-            {% csrf_token %}
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <input type="hidden" name="id" value="{{ template.id }}"/>
-                    <button type="submit" class="btn btn-danger template-delete">Delete Template</button>
+        {% if "Finding_Delete"|has_global_permission %}
+            <form method="post" action="{% url 'delete_template' template.id %}"
+                style="display: inline" class="form-horizontal">
+                {% csrf_token %}
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <input type="hidden" name="id" value="{{ template.id }}"/>
+                        <button type="submit" class="btn btn-danger template-delete">Delete Template</button>
+                    </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        {% endif %}
     {% endif %}
 {% endblock %}
 {% block postscript %}

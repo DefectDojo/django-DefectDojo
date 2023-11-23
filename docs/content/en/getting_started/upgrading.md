@@ -20,8 +20,7 @@ DockerHub to update.
 {{% /alert %}}
 
 
-The generic upgrade method for docker-compose follows these steps:
-
+The generic upgrade method for docker-compose are as follows:
 -   Pull the latest version
 
     ``` {.sourceCode .bash}
@@ -29,8 +28,7 @@ The generic upgrade method for docker-compose follows these steps:
     docker pull defectdojo/defectdojo-nginx:latest
     ```
 
--   If you would like to use something older (so not the latest
-    version), specify the version (tag) you want to upgrade to:
+-   If you would like to use a version other than the latest, specify the version (tag) you want to upgrade to:
 
     ``` {.sourceCode .bash}
     docker pull defectdojo/defectdojo-django:1.10.2
@@ -52,31 +50,112 @@ The generic upgrade method for docker-compose follows these steps:
     Check the output via `docker-compose logs initializer` or relevant k8s command
 -   If you have the initializer disabled (or if you want to be on the
     safe side), run the migration command:
-    `docker-compose exec uwsgi /bin/bash -c 'python manage.py migrate`
+    `docker-compose exec uwsgi /bin/bash -c "python manage.py migrate"`
 
 ### Building your local images
 
 If you build your images locally and do not use the ones from DockerHub,
-the instructions are much the same, except that you'd build your images
-first. (Of course, if you're doing this, then you know you have to
-update the source code first)
+the instructions are the same, with the caveat that you must build your images
+first. 
+-   Pull the latest DefectDojo changes
 
-Replace the first step above with this one: `docker-compose build`
+    ``` {.sourceCode .bash}
+    git fetch
+    git pull
+    git merge origin/master
+    ```    
+
+Then replace the first step of the above generic upgrade method for docker-compose with: `docker-compose build`
 
 godojo installations
 --------------------
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
 
+## Upgrading to DefectDojo Version 2.28.x.
+
+There are no special instruction for upgrading to 2.28.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.28.0) for the contents of the release.
+
+## Upgrading to DefectDojo Version 2.27.x.
+
+There are no special instruction for upgrading to 2.27.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.27.0) for the contents of the release.
+
+## Upgrading to DefectDojo Version 2.26.x.
+
+There are no special instruction for upgrading to 2.26.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.26.0) for the contents of the release.
+
+## Upgrading to DefectDojo Version 2.25.x.
+
+There are no special instruction for upgrading to 2.25.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.25.0) for the contents of the release.
+
+A few query parameters related to filtering object via API related to a products tags have been renamed to be more consistent with the other "related object tags":
+
+**Breaking Change**
+
+ - Engagement
+   - `product__tags__name` -> `product__tags` 
+   - `not_product__tags__name` -> `not_product__tags` 
+ - Test
+   - `engagement__product__tags__name` -> `engagement__product__tags`
+   - `not_engagement__product__tags__name` -> `not_engagement__product__tags`
+ - Finding
+   - `test__engagement__product__tags__name` -> `test__engagement__product__tags`
+   - `not_test__engagement__product__tags__name` -> `not_test__engagement__product__tags`
+
+**Deprecation**
+
+The OpenAPI 2.0 Swagger API documentation is being deprecated in favor of the existing
+OpenAPI 3.0 API documentation page. The OpenAPI 2.0 Swagger API documentation page is
+slated for removal in version 2.30.0
+
+*Note*: The API has not changed in any way and behaves the same between OAPI2 and OAPI3
+
+For all other changes, check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.25.0) for the contents of the release.
+
+## Upgrading to DefectDojo Version 2.24.x.
+
+There are no special instruction for upgrading to 2.24.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.24.0) for the contents of the release.
+
+
+## Upgrading to DefectDojo Version 2.23.x.
+
+There is a migration from the legacy Nessus and Nessus WAS parsers to a single Tenable parser. The updated Tenable parser simply merges existing support for Nessus and Nessus WAS without introducing new functionality that could create instability
+
+There is a migration process built into the upgrade that will automatically convert exiting Nessus and Nessus WAS findings and tests into Tenable findings and tests
+
+**Breaking Change**
+
+ - If there is any use of the Nessus or Nessus WAS in automated fashion via the import and reimport API endpoints, the `scan-type` parameter needs to be updated to `Tenable Scan`
+ - The default containerized database will now be [PostgreSQL](https://www.postgresql.org/) rather than [MySQL](https://dev.mysql.com/) due to the use of case insensitivity on fields by default
+   - It is recommended to update the [database character set and collation](https://dev.mysql.com/doc/refman/5.7/en/charset-database.html) to use UTF encoding 
+   - If your deployment uses the MySQL containerized database, please see the following updates to run DefectDojo:
+     - Use of the helper script "dc-up": `./dc-up.sh mysql-rabbitmq` or `./dc-up.sh mysql-redis`
+     - Use of the helper script "dc-up-d": `./dc-up-d.sh mysql-rabbitmq` or `./dc-up-d.sh mysql-redis`
+     - Use of Docker Compose directly: `docker-compose --profile mysql-rabbitmq --env-file ./docker/environments/mysql-rabbitmq.env up` or `docker-compose --profile mysql-redis --env-file ./docker/environments/mysql-redis.env up`
+
+For all other changes, check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.23.0) for the contents of the release.
+
+## Upgrading to DefectDojo Version 2.22.x.
+
+There are no special instruction for upgrading to 2.22.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.22.0) for the contents of the release.
+
+## Upgrading to DefectDojo Version 2.21.x.
+
+There are no special instruction for upgrading to 2.21.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.21.0) for the contents of the release.
+
+## Upgrading to DefectDojo Version 2.20.x.
+
+There are no special instruction for upgrading to 2.20.0. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.20.0) for the contents of the release.
+
 ## Upgrading to DefectDojo Version 2.19.x
 
 There are new docker images based on alpine with fewer third party dependencies. Related to the new images the current docker files had to be renamed and have a "-debian" or the new images a "-alpine" at the end. Furthermore there are new docker tags [DefectdojoVersion]-[OS]. For example 2.19.0-alpine or 2.19.0-debian. The currend tags (latest and [DefectdojoVersion]) are still based on the "old" images. Be aware that the new alpine images are not heavily tested and may contain bugs.
 
-*Breaking Change*
+**Breaking Change**
 
 In version 2.19.3, the GitHub OAuth integration has been removed to prevent configurations that may allow more access than intended.
 
-Advisory with details to follow shortly.
+[DefectDojo Security Advisory: Severity Medium | Potential GitHub Authentication Misconfiguration](https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-hfp4-q5pg-2p7r)
 
 ## Upgrading to DefectDojo Version 2.18.x
 

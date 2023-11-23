@@ -133,7 +133,7 @@ def expiration_handler(*args, **kwargs):
     try:
         system_settings = System_Settings.objects.get()
     except System_Settings.DoesNotExist:
-        logger.warn("Unable to get system_settings, skipping risk acceptance expiration job")
+        logger.warning("Unable to get system_settings, skipping risk acceptance expiration job")
 
     risk_acceptances = get_expired_risk_acceptances_to_handle()
 

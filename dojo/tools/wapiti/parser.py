@@ -30,38 +30,42 @@ class WapitiParser(object):
         # get root of tree.
         root = tree.getroot()
         # check if it is
-        if 'report' not in root.tag:
-            raise ValueError("This doesn't seem to be a valid Wapiti XML file.")
+        if "report" not in root.tag:
+            raise ValueError(
+                "This doesn't seem to be a valid Wapiti XML file."
+            )
 
         severity_mapping = {
-            '4': 'Critical',
-            '3': 'High',
-            '2': 'Medium',
-            '1': 'Low',
-            '0': 'Info',
+            "4": "Critical",
+            "3": "High",
+            "2": "Medium",
+            "1": "Low",
+            "0": "Info",
         }
 
         url = root.findtext('report_infos/info[@name="target"]')
 
         dupes = dict()
-        for vulnerability in root.findall('vulnerabilities/vulnerability'):
-            category = vulnerability.attrib['name']
-            description = vulnerability.findtext('description')
-            mitigation = vulnerability.findtext('solution')
+        for vulnerability in root.findall("vulnerabilities/vulnerability"):
+            category = vulnerability.attrib["name"]
+            description = vulnerability.findtext("description")
+            mitigation = vulnerability.findtext("solution")
             # manage references
             cwe = None
             references = []
-            for reference in vulnerability.findall('references/reference'):
-                reference_title = reference.findtext('title')
+            for reference in vulnerability.findall("references/reference"):
+                reference_title = reference.findtext("title")
                 if reference_title.startswith("CWE"):
                     cwe = self.get_cwe(reference_title)
-                references.append(f"* [{reference_title}]({reference.findtext('url')})")
+                references.append(
+                    f"* [{reference_title}]({reference.findtext('url')})"
+                )
             references = "\n".join(references)
 
-            for entry in vulnerability.findall('entries/entry'):
-                title = category + ": " + entry.findtext('info')
+            for entry in vulnerability.findall("entries/entry"):
+                title = category + ": " + entry.findtext("info")
                 # get numerical severity.
-                num_severity = entry.findtext('level')
+                num_severity = entry.findtext("level")
                 if num_severity in severity_mapping:
                     severity = severity_mapping[num_severity]
                 else:
@@ -81,10 +85,14 @@ class WapitiParser(object):
                     finding.cwe = cwe
                 finding.unsaved_endpoints = [Endpoint.from_uri(url)]
 
-                finding.unsaved_req_resp = [{"req": entry.findtext('http_request'), "resp": ""}]
+                finding.unsaved_req_resp = [
+                    {"req": entry.findtext("http_request"), "resp": ""}
+                ]
 
                 # make dupe hash key
-                dupe_key = hashlib.sha256(str(description + title + severity).encode('utf-8')).hexdigest()
+                dupe_key = hashlib.sha256(
+                    str(description + title + severity).encode("utf-8")
+                ).hexdigest()
                 # check if dupes are present.
                 if dupe_key in dupes:
                     find = dupes[dupe_key]

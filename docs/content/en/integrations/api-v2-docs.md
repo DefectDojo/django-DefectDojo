@@ -23,7 +23,7 @@ interactive. On the top of API v2 docs is a link that generates an OpenAPI v2 sp
 As a preparation to move to OpenAPIv3, we have added an compatible spec and documentation at [`/api/v2/oa3/swagger-ui/`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/)
 
 To interact with the documentation, a valid Authorization header value
-is needed. Visit the `/api/v2/key/` view to generate your
+is needed. Visit the `/api/key-v2` view to generate your
 API Key (`Token <api_key>`) and copy the header value provided.
 
 ![image](../../images/api_v2_2.png)

@@ -2,14 +2,12 @@
 import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.urls import reverse
 from django.shortcuts import render
 from dojo.models import System_Settings, enable_disable_auditlog
 from dojo.utils import (add_breadcrumb,
                         get_celery_worker_status)
 from dojo.forms import SystemSettingsForm
 from django.conf import settings
-from django.http import HttpResponseRedirect
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +60,16 @@ def system_settings(request):
                     messages.WARNING,
                     'Settings cannot be saved: Minimum required password length must be less than maximum required password length.',
                     extra_tags='alert-warning')
+            elif form.cleaned_data['enable_deduplication'] is True and form.cleaned_data['false_positive_history'] is True:
+                messages.add_message(request,
+                    messages.WARNING,
+                    'Settings cannot be saved: Deduplicate findings and False positive history can not be set at the same time.',
+                    extra_tags='alert-warning')
+            elif form.cleaned_data['retroactive_false_positive_history'] is True and form.cleaned_data['false_positive_history'] is False:
+                messages.add_message(request,
+                    messages.WARNING,
+                    'Settings cannot be saved: Retroactive false positive history can not be set without False positive history.',
+                    extra_tags='alert-warning')
             else:
                 new_settings = form.save()
                 enable_disable_auditlog(enable=new_settings.enable_auditlog)
@@ -69,7 +77,7 @@ def system_settings(request):
                                     messages.SUCCESS,
                                     'Settings saved.',
                                     extra_tags='alert-success')
-        return HttpResponseRedirect(reverse('system_settings', ))
+        return render(request, 'dojo/system_settings.html', {'form': form})
 
     else:
         # Celery needs to be set with the setting: CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite'

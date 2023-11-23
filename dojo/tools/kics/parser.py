@@ -28,36 +28,42 @@ class KICSParser(object):
     def get_findings(self, filename, test):
         data = json.load(filename)
         dupes = {}
-        for query in data['queries']:
-            name = query.get('query_name')
-            query_url = query.get('query_url')
-            if query.get('severity') in self.SEVERITY:
-                severity = self.SEVERITY[query.get('severity')]
+        for query in data["queries"]:
+            name = query.get("query_name")
+            query_url = query.get("query_url")
+            if query.get("severity") in self.SEVERITY:
+                severity = self.SEVERITY[query.get("severity")]
             else:
                 severity = "Medium"
-            platform = query.get('platform')
-            category = query.get('category')
-            for item in query.get('files'):
-                file_name = item.get('file_name')
-                line_number = item.get('line')
-                issue_type = item.get('issue_type')
-                expected_value = item.get('expected_value')
-                actual_value = item.get('actual_value')
+            platform = query.get("platform")
+            category = query.get("category")
+            for item in query.get("files"):
+                file_name = item.get("file_name")
+                line_number = item.get("line")
+                issue_type = item.get("issue_type")
+                expected_value = item.get("expected_value")
+                actual_value = item.get("actual_value")
 
                 description = f"{query.get('description','')}\n"
                 if platform:
-                    description += f'**Platform:** {platform}\n'
+                    description += f"**Platform:** {platform}\n"
                 if category:
-                    description += f'**Category:** {category}\n'
+                    description += f"**Category:** {category}\n"
                 if issue_type:
-                    description += f'**Issue type:** {issue_type}\n'
+                    description += f"**Issue type:** {issue_type}\n"
                 if actual_value:
-                    description += f'**Actual value:** {actual_value}\n'
-                if description.endswith('\n'):
+                    description += f"**Actual value:** {actual_value}\n"
+                if description.endswith("\n"):
                     description = description[:-1]
 
                 dupe_key = hashlib.sha256(
-                    (platform + category + issue_type + file_name + str(line_number)).encode("utf-8")
+                    (
+                        platform
+                        + category
+                        + issue_type
+                        + file_name
+                        + str(line_number)
+                    ).encode("utf-8")
                 ).hexdigest()
 
                 if dupe_key in dupes:

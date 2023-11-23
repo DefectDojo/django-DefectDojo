@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load display_tags %}
 {% url 'view_engagement' engagement.id as engagement_url %}
 {
     "@context": "https://schema.org/extensions",

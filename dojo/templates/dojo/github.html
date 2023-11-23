@@ -10,7 +10,7 @@
                     <h3 class="has-filters">
                         GitHub Configuration List
                         <div class="dropdown pull-right">
-                            {% if "dojo.add_github_conf"|has_configuration_permission %}
+                            {% if "dojo.add_github_conf"|has_configuration_permission:request %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa-solid fa-screwdriver-wrench"></span>
@@ -51,7 +51,7 @@
                                         {{ conf.configuration_name }}
                                 </td>
                                 <td class="text-right">
-                                    {% if "dojo.delete_github_conf"|has_configuration_permission %}
+                                    {% if "dojo.delete_github_conf"|has_configuration_permission:request %}
                                     <a href="{% url 'delete_github' conf.id %}" class="btn btn-sm btn-danger">
                                         <i class="fa-solid fa-trash" style="color:white"></i>
                                         Delete

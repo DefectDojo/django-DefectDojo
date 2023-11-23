@@ -57,9 +57,11 @@ class TestSarifParser(DojoTestCase):
 **Rule short description:** A variable was used without being initialized.
 **Rule full description:** A variable was used without being initialized. This can result in runtime errors such as null reference exceptions.
 **Code flow:**
-\tcollections/list.h:15\t-\tint *ptr;
-\tcollections/list.h:15\t-\toffset = (y + z) * q + 1;
-\tcollections/list.h:25\t-\tadd_core(ptr, offset, val)"""
+1. collections/list.h:L15\t-\tint *ptr;
+\tVariable `ptr` declared.
+2. collections/list.h:L15\t-\toffset = (y + z) * q + 1;
+3. collections/list.h:L25\t-\tadd_core(ptr, offset, val)
+\tUninitialized variable `ptr` passed to method `add_core`."""
         self.assertEqual(description, item.description)
         self.assertEqual(datetime.datetime(2016, 7, 16, 14, 19, 1, tzinfo=datetime.timezone.utc), item.date)
         for finding in findings:
@@ -559,3 +561,10 @@ class TestSarifParser(DojoTestCase):
             {"stableResultHash": {"version": 2, "value": "234567900abcd"}},
             get_fingerprints_hashes(data2["fingerprints"]),
         )
+
+    def test_tags_from_result_properties(self):
+        testfile = open(path.join(path.dirname(__file__), "../scans/sarif/taint-python-report.sarif"))
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, Test())
+        item = findings[0]
+        self.assertEqual(["Scan"], item.tags)

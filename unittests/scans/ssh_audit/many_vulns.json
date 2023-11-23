@@ -1,0 +1,469 @@
+{
+    "banner":{
+       "comments":"Debian-10+deb10u2",
+       "protocol":"2.0",
+       "raw":"SSH-2.0-OpenSSH_7.9p1 Debian-10+deb10u2",
+       "software":"OpenSSH_7.9p1"
+    },
+    "compression":[
+       "none",
+       "zlib@openssh.com"
+    ],
+    "cves":[
+       {
+          "cvssv2":7.0,
+          "description":"privilege escalation via supplemental groups",
+          "name":"CVE-2021-41617"
+       },
+       {
+          "cvssv2":7.8,
+          "description":"command injection via anomalous argument transfers",
+          "name":"CVE-2020-15778"
+       },
+       {
+          "cvssv2":7.8,
+          "description":"memory corruption and local code execution via pre-authentication integer overflow",
+          "name":"CVE-2019-16905"
+       },
+       {
+          "cvssv2":5.3,
+          "description":"enumerate usernames via challenge response",
+          "name":"CVE-2016-20012"
+       }
+    ],
+    "enc":[
+       {
+          "algorithm":"chacha20-poly1305@openssh.com",
+          "notes":{
+             "info":[
+                "default cipher since OpenSSH 6.9",
+                "available since OpenSSH 6.5"
+             ]
+          }
+       },
+       {
+          "algorithm":"aes128-ctr",
+          "notes":{
+             "info":[
+                "available since OpenSSH 3.7, Dropbear SSH 0.52"
+             ]
+          }
+       },
+       {
+          "algorithm":"aes192-ctr",
+          "notes":{
+             "info":[
+                "available since OpenSSH 3.7"
+             ]
+          }
+       },
+       {
+          "algorithm":"aes256-ctr",
+          "notes":{
+             "info":[
+                "available since OpenSSH 3.7, Dropbear SSH 0.52"
+             ]
+          }
+       },
+       {
+          "algorithm":"aes128-gcm@openssh.com",
+          "notes":{
+             "info":[
+                "available since OpenSSH 6.2"
+             ]
+          }
+       },
+       {
+          "algorithm":"aes256-gcm@openssh.com",
+          "notes":{
+             "info":[
+                "available since OpenSSH 6.2"
+             ]
+          }
+       }
+    ],
+    "fingerprints":[
+       {
+          "hash":"mHoRf3V/hprQTMrO1PcDB2FSGhB61MlDJ//eWMtkkjE",
+          "hash_alg":"SHA256",
+          "hostkey":"ssh-ed25519"
+       },
+       {
+          "hash":"df:8c:70:0c:d4:18:76:81:83:9e:39:05:6d:f1:01:75",
+          "hash_alg":"MD5",
+          "hostkey":"ssh-ed25519"
+       },
+       {
+          "hash":"W1xWUfJ7EU3CEi4etW6JwLbQZz04gtYEfc8YGIouNyc",
+          "hash_alg":"SHA256",
+          "hostkey":"ssh-rsa"
+       },
+       {
+          "hash":"f4:a2:aa:82:f8:fe:b1:06:de:9a:da:dc:bc:5d:e3:6c",
+          "hash_alg":"MD5",
+          "hostkey":"ssh-rsa"
+       }
+    ],
+    "kex":[
+       {
+          "algorithm":"curve25519-sha256",
+          "notes":{
+             "info":[
+                "default fail key exchange since OpenSSH 6.4",
+                "available since OpenSSH 7.4, Dropbear SSH 2018.76"
+             ]
+          }
+       },
+       {
+          "algorithm":"curve25519-sha256@libssh.org",
+          "notes":{
+             "info":[
+                "default key exchange since OpenSSH 6.4",
+                "available since OpenSSH 6.4, Dropbear SSH 2013.62"
+             ]
+          }
+       },
+       {
+          "algorithm":"ecdh-sha2-nistp256",
+          "notes":{
+             "fail":[
+                "using elliptic curves that are suspected as being backdoored by the U.S. National Security Agency"
+             ],
+             "info":[
+                "available since OpenSSH 5.7, Dropbear SSH 2013.62"
+             ]
+          }
+       },
+       {
+          "algorithm":"ecdh-sha2-nistp384",
+          "notes":{
+             "fail":[
+                "using elliptic curves that are suspected as being backdoored by the U.S. National Security Agency"
+             ],
+             "info":[
+                "available since OpenSSH 5.7, Dropbear SSH 2013.62"
+             ]
+          }
+       },
+       {
+          "algorithm":"ecdh-sha2-nistp521",
+          "notes":{
+             "fail":[
+                "using elliptic curves that are suspected as being backdoored by the U.S. National Security Agency"
+             ],
+             "info":[
+                "available since OpenSSH 5.7, Dropbear SSH 2013.62"
+             ]
+          }
+       },
+       {
+          "algorithm":"diffie-hellman-group-exchange-sha256",
+          "notes":{
+             "info":[
+                "available since OpenSSH 4.4"
+             ]
+          }
+       },
+       {
+          "algorithm":"diffie-hellman-group16-sha512",
+          "notes":{
+             "info":[
+                "available since OpenSSH 7.3, Dropbear SSH 2016.73"
+             ]
+          }
+       },
+       {
+          "algorithm":"diffie-hellman-group18-sha512",
+          "notes":{
+             "info":[
+                "available since OpenSSH 7.3"
+             ]
+          }
+       },
+       {
+          "algorithm":"diffie-hellman-group14-sha256",
+          "notes":{
+             "info":[
+                "available since OpenSSH 7.3, Dropbear SSH 2016.73"
+             ],
+             "warn":[
+                "2048-bit modulus only provides 112-bits of symmetric strength"
+             ]
+          }
+       },
+       {
+          "algorithm":"diffie-hellman-group14-sha1",
+          "notes":{
+             "fail":[
+                "using broken SHA-1 hash algorithm"
+             ],
+             "info":[
+                "available since OpenSSH 3.9, Dropbear SSH 0.53"
+             ],
+             "warn":[
+                "2048-bit modulus only provides 112-bits of symmetric strength"
+             ]
+          }
+       }
+    ],
+    "key":[
+       {
+          "algorithm":"rsa-sha2-512",
+          "keysize":2048,
+          "notes":{
+             "info":[
+                "available since OpenSSH 7.2"
+             ],
+             "warn":[
+                "2048-bit modulus only provides 112-bits of symmetric strength"
+             ]
+          }
+       },
+       {
+          "algorithm":"rsa-sha2-256",
+          "keysize":2048,
+          "notes":{
+             "info":[
+                "available since OpenSSH 7.2"
+             ],
+             "warn":[
+                "2048-bit modulus only provides 112-bits of symmetric strength"
+             ]
+          }
+       },
+       {
+          "algorithm":"ssh-rsa",
+          "keysize":2048,
+          "notes":{
+             "fail":[
+                "using broken SHA-1 hash algorithm"
+             ],
+             "info":[
+                "deprecated in OpenSSH 8.8: https://www.openssh.com/txt/release-8.8",
+                "available since OpenSSH 2.5.0, Dropbear SSH 0.28"
+             ],
+             "warn":[
+                "2048-bit modulus only provides 112-bits of symmetric strength"
+             ]
+          }
+       },
+       {
+          "algorithm":"ecdsa-sha2-nistp256",
+          "notes":{
+             "fail":[
+                "using elliptic curves that are suspected as being backdoored by the U.S. National Security Agency"
+             ],
+             "info":[
+                "available since OpenSSH 5.7, Dropbear SSH 2013.62"
+             ],
+             "warn":[
+                "using weak random number generator could reveal the key"
+             ]
+          }
+       },
+       {
+          "algorithm":"ssh-ed25519",
+          "notes":{
+             "info":[
+                "available since OpenSSH 6.5"
+             ]
+          }
+       }
+    ],
+    "mac":[
+       {
+          "algorithm":"umac-64-etm@openssh.com",
+          "notes":{
+             "info":[
+                "available since OpenSSH 6.2"
+             ],
+             "warn":[
+                "using small 64-bit tag size"
+             ]
+          }
+       },
+       {
+          "algorithm":"umac-128-etm@openssh.com",
+          "notes":{
+             "info":[
+                "available since OpenSSH 6.2"
+             ]
+          }
+       },
+       {
+          "algorithm":"hmac-sha2-256-etm@openssh.com",
+          "notes":{
+             "info":[
+                "available since OpenSSH 6.2"
+             ]
+          }
+       },
+       {
+          "algorithm":"hmac-sha2-512-etm@openssh.com",
+          "notes":{
+             "info":[
+                "available since OpenSSH 6.2"
+             ]
+          }
+       },
+       {
+          "algorithm":"hmac-sha1-etm@openssh.com",
+          "notes":{
+             "fail":[
+                "using broken SHA-1 hash algorithm"
+             ],
+             "info":[
+                "available since OpenSSH 6.2"
+             ]
+          }
+       },
+       {
+          "algorithm":"umac-64@openssh.com",
+          "notes":{
+             "info":[
+                "available since OpenSSH 4.7"
+             ],
+             "warn":[
+                "using encrypt-and-MAC mode",
+                "using small 64-bit tag size"
+             ]
+          }
+       },
+       {
+          "algorithm":"umac-128@openssh.com",
+          "notes":{
+             "info":[
+                "available since OpenSSH 6.2"
+             ],
+             "warn":[
+                "using encrypt-and-MAC mode"
+             ]
+          }
+       },
+       {
+          "algorithm":"hmac-sha2-256",
+          "notes":{
+             "info":[
+                "available since OpenSSH 5.9, Dropbear SSH 2013.56"
+             ],
+             "warn":[
+                "using encrypt-and-MAC mode"
+             ]
+          }
+       },
+       {
+          "algorithm":"hmac-sha2-512",
+          "notes":{
+             "info":[
+                "available since OpenSSH 5.9, Dropbear SSH 2013.56"
+             ],
+             "warn":[
+                "using encrypt-and-MAC mode"
+             ]
+          }
+       },
+       {
+          "algorithm":"hmac-sha1",
+          "notes":{
+             "fail":[
+                "using broken SHA-1 hash algorithm"
+             ],
+             "info":[
+                "available since OpenSSH 2.1.0, Dropbear SSH 0.28"
+             ],
+             "warn":[
+                "using encrypt-and-MAC mode"
+             ]
+          }
+       }
+    ],
+    "recommendations":{
+       "critical":{
+          "del":{
+             "kex":[
+                {
+                   "name":"diffie-hellman-group14-sha1",
+                   "notes":""
+                },
+                {
+                   "name":"ecdh-sha2-nistp256",
+                   "notes":""
+                },
+                {
+                   "name":"ecdh-sha2-nistp384",
+                   "notes":""
+                },
+                {
+                   "name":"ecdh-sha2-nistp521",
+                   "notes":""
+                }
+             ],
+             "key":[
+                {
+                   "name":"ecdsa-sha2-nistp256",
+                   "notes":""
+                },
+                {
+                   "name":"ssh-rsa",
+                   "notes":""
+                }
+             ],
+             "mac":[
+                {
+                   "name":"hmac-sha1",
+                   "notes":""
+                },
+                {
+                   "name":"hmac-sha1-etm@openssh.com",
+                   "notes":""
+                }
+             ]
+          }
+       },
+       "warning":{
+          "chg":{
+             "key":[
+                {
+                   "name":"rsa-sha2-256",
+                   "notes":"increase modulus size to 3072 bits or larger"
+                },
+                {
+                   "name":"rsa-sha2-512",
+                   "notes":"increase modulus size to 3072 bits or larger"
+                }
+             ]
+          },
+          "del":{
+             "kex":[
+                {
+                   "name":"diffie-hellman-group14-sha256",
+                   "notes":""
+                }
+             ],
+             "mac":[
+                {
+                   "name":"hmac-sha2-256",
+                   "notes":""
+                },
+                {
+                   "name":"hmac-sha2-512",
+                   "notes":""
+                },
+                {
+                   "name":"umac-128@openssh.com",
+                   "notes":""
+                },
+                {
+                   "name":"umac-64-etm@openssh.com",
+                   "notes":""
+                },
+                {
+                   "name":"umac-64@openssh.com",
+                   "notes":""
+                }
+             ]
+          }
+       }
+    },
+    "target":"sdf.sdf.fewio:22"
+ }

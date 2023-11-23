@@ -6,7 +6,6 @@ from dojo.models import Endpoint, Finding
 
 
 class NmapParser(object):
-
     def get_scan_types(self):
         return ["Nmap Scan"]
 
@@ -20,23 +19,29 @@ class NmapParser(object):
         tree = parse(file)
         root = tree.getroot()
         dupes = dict()
-        if 'nmaprun' not in root.tag:
+        if "nmaprun" not in root.tag:
             raise ValueError("This doesn't seem to be a valid Nmap xml file.")
 
         report_date = None
         try:
-            report_date = datetime.datetime.fromtimestamp(int(root.attrib['start']))
+            report_date = datetime.datetime.fromtimestamp(
+                int(root.attrib["start"])
+            )
         except ValueError:
             pass
 
         for host in root.findall("host"):
             host_info = "### Host\n\n"
 
-            ip = host.find("address[@addrtype='ipv4']").attrib['addr']
+            ip = host.find("address[@addrtype='ipv4']").attrib["addr"]
             if ip is not None:
                 host_info += "**IP Address:** %s\n" % ip
 
-            fqdn = host.find("hostnames/hostname[@type='PTR']").attrib['name'] if host.find("hostnames/hostname[@type='PTR']") is not None else None
+            fqdn = (
+                host.find("hostnames/hostname[@type='PTR']").attrib["name"]
+                if host.find("hostnames/hostname[@type='PTR']") is not None
+                else None
+            )
             if fqdn is not None:
                 host_info += "**FQDN:** %s\n" % fqdn
 
@@ -44,44 +49,70 @@ class NmapParser(object):
 
             for os in host.iter("os"):
                 for os_match in os.iter("osmatch"):
-                    if 'name' in os_match.attrib:
-                        host_info += "**Host OS:** %s\n" % os_match.attrib['name']
-                    if 'accuracy' in os_match.attrib:
-                        host_info += "**Accuracy:** {0}%\n".format(os_match.attrib['accuracy'])
+                    if "name" in os_match.attrib:
+                        host_info += (
+                            "**Host OS:** %s\n" % os_match.attrib["name"]
+                        )
+                    if "accuracy" in os_match.attrib:
+                        host_info += "**Accuracy:** {0}%\n".format(
+                            os_match.attrib["accuracy"]
+                        )
 
                 host_info += "\n\n"
 
             for port_element in host.findall("ports/port"):
-                protocol = port_element.attrib['protocol']
-                endpoint = Endpoint(host=fqdn if fqdn else ip, protocol=protocol)
-                if 'portid' in port_element.attrib and port_element.attrib['portid'].isdigit():
-                    endpoint.port = int(port_element.attrib['portid'])
+                protocol = port_element.attrib["protocol"]
+                endpoint = Endpoint(
+                    host=fqdn if fqdn else ip, protocol=protocol
+                )
+                if (
+                    "portid" in port_element.attrib
+                    and port_element.attrib["portid"].isdigit()
+                ):
+                    endpoint.port = int(port_element.attrib["portid"])
 
                 # filter on open ports
-                if 'open' != port_element.find("state").attrib.get('state'):
+                if "open" != port_element.find("state").attrib.get("state"):
                     continue
                 title = "Open port: %s/%s" % (endpoint.port, endpoint.protocol)
                 description = host_info
-                description += "**Port/Protocol:** %s/%s\n" % (endpoint.port, endpoint.protocol)
+                description += "**Port/Protocol:** %s/%s\n" % (
+                    endpoint.port,
+                    endpoint.protocol,
+                )
 
                 service_info = "\n\n"
-                if port_element.find('service') is not None:
-                    if 'product' in port_element.find('service').attrib:
-                        service_info += "**Product:** %s\n" % port_element.find('service').attrib['product']
+                if port_element.find("service") is not None:
+                    if "product" in port_element.find("service").attrib:
+                        service_info += (
+                            "**Product:** %s\n"
+                            % port_element.find("service").attrib["product"]
+                        )
 
-                    if 'version' in port_element.find('service').attrib:
-                        service_info += "**Version:** %s\n" % port_element.find('service').attrib['version']
+                    if "version" in port_element.find("service").attrib:
+                        service_info += (
+                            "**Version:** %s\n"
+                            % port_element.find("service").attrib["version"]
+                        )
 
-                    if 'extrainfo' in port_element.find('service').attrib:
-                        service_info += "**Extra Info:** %s\n" % port_element.find('service').attrib['extrainfo']
+                    if "extrainfo" in port_element.find("service").attrib:
+                        service_info += (
+                            "**Extra Info:** %s\n"
+                            % port_element.find("service").attrib["extrainfo"]
+                        )
 
                     description += service_info
 
                 description += "\n\n"
 
-                # manage some script like https://github.com/vulnersCom/nmap-vulners
-                for script_element in port_element.findall('script[@id="vulners"]'):
-                    self.manage_vulner_script(test, dupes, script_element, endpoint, report_date)
+                # manage some script like
+                # https://github.com/vulnersCom/nmap-vulners
+                for script_element in port_element.findall(
+                    'script[@id="vulners"]'
+                ):
+                    self.manage_vulner_script(
+                        test, dupes, script_element, endpoint, report_date
+                    )
 
                 severity = "Info"
                 dupe_key = "nmap:" + str(endpoint.port)
@@ -90,13 +121,14 @@ class NmapParser(object):
                     if description is not None:
                         find.description += description
                 else:
-                    find = Finding(title=title,
-                                test=test,
-                                description=description,
-                                severity=severity,
-                                mitigation="N/A",
-                                impact="No impact provided",
-                                   )
+                    find = Finding(
+                        title=title,
+                        test=test,
+                        description=description,
+                        severity=severity,
+                        mitigation="N/A",
+                        impact="No impact provided",
+                    )
                     find.unsaved_endpoints = list()
                     dupes[dupe_key] = find
                     if report_date:
@@ -124,37 +156,52 @@ class NmapParser(object):
         else:
             return "Critical"
 
-    def manage_vulner_script(self, test, dupes, script_element, endpoint, report_date=None):
-        for component_element in script_element.findall('table'):
-            component_cpe = CPE(component_element.attrib['key'])
-            for vuln in component_element.findall('table'):
+    def manage_vulner_script(
+        self, test, dupes, script_element, endpoint, report_date=None
+    ):
+        for component_element in script_element.findall("table"):
+            component_cpe = CPE(component_element.attrib["key"])
+            for vuln in component_element.findall("table"):
                 # convert elements in dict
                 vuln_attributes = dict()
-                for elem in vuln.findall('elem'):
-                    vuln_attributes[elem.attrib['key'].lower()] = elem.text
+                for elem in vuln.findall("elem"):
+                    vuln_attributes[elem.attrib["key"].lower()] = elem.text
 
-                vuln_id = vuln_attributes['id']
+                vuln_id = vuln_attributes["id"]
                 description = "### Vulnerability\n\n"
                 description += "**ID**: `" + str(vuln_id) + "`\n"
                 description += "**CPE**: " + str(component_cpe) + "\n"
                 for attribute in vuln_attributes:
-                    description += "**" + attribute + "**: `" + vuln_attributes[attribute] + "`\n"
-                severity = self.convert_cvss_score(vuln_attributes['cvss'])
+                    description += (
+                        "**"
+                        + attribute
+                        + "**: `"
+                        + vuln_attributes[attribute]
+                        + "`\n"
+                    )
+                severity = self.convert_cvss_score(vuln_attributes["cvss"])
 
                 finding = Finding(
                     title=vuln_id,
                     test=test,
                     description=description,
                     severity=severity,
-                    component_name=component_cpe.get_product()[0] if len(component_cpe.get_product()) > 0 else '',
-                    component_version=component_cpe.get_version()[0] if len(component_cpe.get_version()) > 0 else '',
+                    component_name=component_cpe.get_product()[0]
+                    if len(component_cpe.get_product()) > 0
+                    else "",
+                    component_version=component_cpe.get_version()[0]
+                    if len(component_cpe.get_version()) > 0
+                    else "",
                     vuln_id_from_tool=vuln_id,
                     nb_occurences=1,
                 )
                 finding.unsaved_endpoints = [endpoint]
 
                 # manage if CVE is in metadata
-                if "type" in vuln_attributes and "cve" == vuln_attributes["type"]:
+                if (
+                    "type" in vuln_attributes
+                    and "cve" == vuln_attributes["type"]
+                ):
                     finding.unsaved_vulnerability_ids = [vuln_attributes["id"]]
 
                 if report_date:
@@ -164,7 +211,9 @@ class NmapParser(object):
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
                     if description is not None:
-                        find.description += "\n-----\n\n" + finding.description  # fives '-' produces an horizontal line
+                        find.description += (
+                            "\n-----\n\n" + finding.description
+                        )  # fives '-' produces an horizontal line
                     find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                     find.nb_occurences += finding.nb_occurences
                 else:

@@ -23,51 +23,51 @@ class GgshieldParser(object):
         Converts a Ggshield report to DefectDojo findings
         """
         json_data = json.load(filename)
-        issues = json_data.get('scans')
+        issues = json_data.get("scans")
         dupes = dict()
 
         for issue in issues:
-            if issue.get('total_incidents') > 0:
+            if issue.get("total_incidents") > 0:
                 findings = {}
-                commit = issue.get('id')
-                extra_info = issue.get('extra_info')
+                commit = issue.get("id")
+                extra_info = issue.get("extra_info")
                 findings["commit"] = commit
-                findings["author"] = extra_info.get('author')
-                findings["email"] = extra_info.get('email')
-                date = parser.parse(extra_info.get('date'))
+                findings["author"] = extra_info.get("author")
+                findings["email"] = extra_info.get("email")
+                date = parser.parse(extra_info.get("date"))
                 commit_date = str(date).split(" ")[0]
                 findings["commit_date"] = commit_date
-                for entity in issue.get('entities_with_incidents'):
-                    file_path = entity.get('filename')
+                for entity in issue.get("entities_with_incidents"):
+                    file_path = entity.get("filename")
                     findings["file_path"] = file_path
-                    for incident in entity.get('incidents'):
-                        policy = incident.get('policy')
-                        secret_key_type = incident.get('type')
-                        total_occurrences = incident.get('total_occurrences')
+                    for incident in entity.get("incidents"):
+                        policy = incident.get("policy")
+                        secret_key_type = incident.get("type")
+                        total_occurrences = incident.get("total_occurrences")
                         findings["policy"] = policy
                         findings["secret_key_type"] = secret_key_type
                         findings["total_occurrences"] = total_occurrences
-                        for item in incident.get('occurrences'):
+                        for item in incident.get("occurrences"):
                             self.get_items(item, findings, dupes, test)
         return list(dupes.values())
 
     def get_items(self, item, findings, dupes, test):
-        findings["match"] = item.get('match')
-        findings["type"] = item.get('type')
-        line_start = item.get('line_start')
-        line_end = item.get('line_end')
+        findings["match"] = item.get("match")
+        findings["type"] = item.get("type")
+        line_start = item.get("line_start")
+        line_end = item.get("line_end")
         if line_start:
             line_start = int(line_start)
         if line_end:
             line_end = int(line_end)
-        findings["line_start"] = item.get('line_start')
-        findings["line_end"] = item.get('line_end')
+        findings["line_start"] = item.get("line_start")
+        findings["line_end"] = item.get("line_end")
         title = f'Hard coded {findings["secret_key_type"]} found in {findings["file_path"]}'
         severity = "High"
 
         if "*" in findings["match"]:
             findings["match"] = findings["match"].replace("*", "-")
-        description = ''
+        description = ""
         if findings["match"]:
             description += f'**Secret:** {findings["match"]}\n'
         if findings["type"]:
@@ -99,10 +99,17 @@ class GgshieldParser(object):
             line=findings["line_start"],
             dynamic_finding=False,
             static_finding=True,
-            date=findings["commit_date"]
+            date=findings["commit_date"],
         )
 
-        key = hashlib.md5((title + findings["match"] + str(findings["line_start"]) + str(findings["line_end"])).encode("utf-8")).hexdigest()
+        key = hashlib.md5(
+            (
+                title
+                + findings["match"]
+                + str(findings["line_start"])
+                + str(findings["line_end"])
+            ).encode("utf-8")
+        ).hexdigest()
 
         if key not in dupes:
             dupes[key] = finding

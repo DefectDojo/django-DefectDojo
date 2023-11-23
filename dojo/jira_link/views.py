@@ -295,7 +295,8 @@ def express_new_jira(request):
                 open_status_key=open_key,
                 close_status_key=close_key,
                 finding_text='',
-                default_issue_type=jform.cleaned_data.get('default_issue_type'))
+                default_issue_type=jform.cleaned_data.get('default_issue_type'),
+                finding_jira_sync=jform.cleaned_data.get('finding_jira_sync'))
             jira_instance.save()
             messages.add_message(
                 request,

@@ -35,14 +35,20 @@ class DojoDefaultImporter(object):
         if created:
             logger.info('Created new Test_Type with name %s because a report is being imported', test_type.name)
 
+        if scan_date and not scan_date.tzinfo:
+            scan_date = timezone.make_aware(scan_date)
+
+        if now and not now.tzinfo:
+            now = timezone.make_aware(now)
+
         test = Test(
             title=title,
             engagement=engagement,
             lead=lead,
             test_type=test_type,
             scan_type=scan_type,
-            target_start=scan_date if scan_date else now.date(),
-            target_end=scan_date if scan_date else now.date(),
+            target_start=scan_date or now,
+            target_end=scan_date or now,
             environment=environment,
             percent_complete=100,
             version=version,
@@ -174,8 +180,17 @@ class DojoDefaultImporter(object):
 
     def close_old_findings(self, test, scan_date_time, user, push_to_jira=None, service=None, close_old_findings_product_scope=False):
         # Close old active findings that are not reported by this scan.
-        new_hash_codes = test.finding_set.values('hash_code')
-
+        # Refactoring this to only call test.finding_set.values() once.
+        findings = test.finding_set.values()
+        mitigated_hash_codes = []
+        new_hash_codes = []
+        for finding in findings:
+            new_hash_codes.append(finding["hash_code"])
+            if finding["is_mitigated"]:
+                mitigated_hash_codes.append(finding["hash_code"])
+                for hash_code in new_hash_codes:
+                    if hash_code == finding["hash_code"]:
+                        new_hash_codes.remove(hash_code)
         if close_old_findings_product_scope:
             # Close old findings of the same test type in the same product
             old_findings = Finding.objects.exclude(test=test) \

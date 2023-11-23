@@ -145,3 +145,11 @@ class TestApiBugcrowdParser(TestCase):
             )
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
+
+    def test_parse_file_with_broken_bug_url(self):
+        with open("unittests/scans/api_bugcrowd/bugcrowd_broken_bug_url.json") as testfile:
+            parser = ApiBugcrowdParser()
+            with self.assertLogs('dojo.tools.api_bugcrowd.parser', level='ERROR') as cm:
+                parser.get_findings(testfile, Test())
+            self.assertEqual(cm.output, ['ERROR:dojo.tools.api_bugcrowd.parser:'
+                'Error parsing bugcrowd bug_url : curl https://example.com/'])

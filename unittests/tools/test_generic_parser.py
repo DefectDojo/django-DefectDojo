@@ -639,7 +639,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         file = open("unittests/scans/generic/generic_empty.json")
         parser = GenericParser()
         with self.assertRaisesMessage(ValueError,
-                "Required fields are missing: ['title', 'severity', 'description']"):
+                "Required fields are missing: ['description', 'severity', 'title']"):
             findings = parser.get_findings(file, Test())
 
     def test_parse_json_invalid_finding(self):

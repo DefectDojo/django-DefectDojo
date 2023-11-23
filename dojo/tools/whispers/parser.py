@@ -1,6 +1,6 @@
 import json
 
-from dojo.models import Endpoint, Finding
+from dojo.models import Finding
 
 
 class WhispersParser(object):
@@ -9,11 +9,18 @@ class WhispersParser(object):
     """
 
     SEVERITY_MAP = {
+        # Whispers 2.1
         "BLOCKER": "Critical",
         "CRITICAL": "High",
         "MAJOR": "Medium",
         "MINOR": "Low",
         "INFO": "Info",
+        # Whispers 2.2
+        "Critical": "Critical",
+        "High": "High",
+        "Medium": "Medium",
+        "Low": "Low",
+        "Info": "Info",
     }
 
     @staticmethod
@@ -50,19 +57,20 @@ class WhispersParser(object):
                         "Replace hardcoded secret with a placeholder (ie: ENV-VAR). "
                         "Invalidate the leaked secret and generate a new one. "
                         "Supply the new secret through a placeholder to avoid disclosing "
-                        "sensitive information in code."),
-                    references=Endpoint.from_uri("https://cwe.mitre.org/data/definitions/798.html"),
+                        "sensitive information in code."
+                    ),
+                    references="https://cwe.mitre.org/data/definitions/798.html",
                     cwe=798,
                     severity=self.SEVERITY_MAP.get(
-                        vuln.get("severity"),
-                        "Info"),
+                        vuln.get("severity"), "Info"
+                    ),
                     file_path=vuln.get("file"),
-                    line=int(
-                        vuln.get("line")),
+                    line=int(vuln.get("line")),
                     vuln_id_from_tool=vuln.get("message"),
                     static_finding=True,
                     dynamic_finding=False,
                     test=test,
-                ))
+                )
+            )
 
         return findings

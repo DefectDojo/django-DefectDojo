@@ -10,7 +10,7 @@ import hyperlink
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from calendar import monthrange
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from math import pi, sqrt
 import vobject
 from dateutil.relativedelta import relativedelta, MO, SU
@@ -28,7 +28,7 @@ import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Product, \
     Test, User, Dojo_User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule, Dojo_Group_Member, NOTIFICATION_CHOICES
+    Language_Type, Languages, Dojo_Group_Member, NOTIFICATION_CHOICES
 from asteval import Interpreter
 from dojo.notifications.helper import create_notification
 import logging
@@ -43,62 +43,158 @@ from django.contrib.auth.signals import user_logged_in, user_logged_out, user_lo
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
-
+WEEKDAY_FRIDAY = 4  # date.weekday() starts with 0
 
 """
 Helper functions for DefectDojo
 """
 
 
-def do_false_positive_history(new_finding, *args, **kwargs):
-    logger.debug('%s: sync false positive history', new_finding.id)
-    if new_finding.endpoints.count() == 0:
-        # if no endpoints on new finding, then look at cwe + test_type + hash_code. or title + test_type + hash_code
-        eng_findings_cwe = Finding.objects.filter(
-            test__engagement__product=new_finding.test.engagement.product,
-            cwe=new_finding.cwe,
-            test__test_type=new_finding.test.test_type,
-            false_p=True, hash_code=new_finding.hash_code).exclude(id=new_finding.id).exclude(cwe=None).values('id')
-        eng_findings_title = Finding.objects.filter(
-            test__engagement__product=new_finding.test.engagement.product,
-            title=new_finding.title,
-            test__test_type=new_finding.test.test_type,
-            false_p=True, hash_code=new_finding.hash_code).exclude(id=new_finding.id).values('id')
-        total_findings = eng_findings_cwe | eng_findings_title
-    else:
-        # if endpoints on new finding, then look at ONLY cwe + test_type. or title + test_type (hash_code doesn't matter!)
-        eng_findings_cwe = Finding.objects.filter(
-            test__engagement__product=new_finding.test.engagement.product,
-            cwe=new_finding.cwe,
-            test__test_type=new_finding.test.test_type,
-            false_p=True).exclude(id=new_finding.id).exclude(cwe=None).exclude(endpoints=None).values('id')
-        eng_findings_title = Finding.objects.filter(
-            test__engagement__product=new_finding.test.engagement.product,
-            title=new_finding.title,
-            test__test_type=new_finding.test.test_type,
-            false_p=True).exclude(id=new_finding.id).exclude(endpoints=None).values('id')
+def do_false_positive_history(finding, *args, **kwargs):
+    """Replicate false positives across product.
 
-    total_findings = eng_findings_cwe | eng_findings_title
+    Mark finding as false positive if the same finding was previously marked
+    as false positive in the same product, beyond that, retroactively mark
+    all equal findings in the product as false positive (if they weren't already).
+    The retroactively replication will be also trigerred if the finding passed as
+    an argument already is a false positive. With this feature we can assure that
+    on each call of this method all findings in the product complies to the rule
+    (if one finding is a false positive, all equal findings in the same product also are).
 
-    deduplicationLogger.debug("cwe   query: %s", eng_findings_cwe.query)
-    deduplicationLogger.debug("title query: %s", eng_findings_title.query)
+    Args:
+        finding (:model:`dojo.Finding`): Finding to be replicated
+    """
+    to_mark_as_fp = set()
 
-    # TODO this code retrieves all matching findings + data. in 3 queries. just to check if there is a non-zero amount of matching findings.
-    # if we keep false positive history like this, this can be rewritten into 1 query that performs these counts.
+    existing_findings = match_finding_to_existing_findings(finding, product=finding.test.engagement.product)
+    deduplicationLogger.debug(
+        "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product",
+        len(existing_findings)
+    )
 
-    deduplicationLogger.debug("False positive history: Found " +
-        str(len(eng_findings_cwe)) + " findings with same cwe, " +
-        str(len(eng_findings_title)) + " findings with same title: " +
-        str(len(total_findings)) + " findings with either same title or same cwe")
+    existing_fp_findings = existing_findings.filter(false_p=True)
+    deduplicationLogger.debug(
+        "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product " +
+        "that were previously marked as false positive",
+        len(existing_fp_findings)
+    )
 
-    if total_findings.count() > 0:
-        new_finding.false_p = True
-        new_finding.active = False
-        new_finding.verified = True
-        # Remove the async user kwarg because save() really does not like it
-        # Would rather not add anything to Finding.save()
+    if existing_fp_findings:
+        finding.false_p = True
+        to_mark_as_fp.add(finding)
+
+    system_settings = System_Settings.objects.get()
+    if system_settings.retroactive_false_positive_history:
+        # Retroactively mark all active existing findings as false positive if this one
+        # is being (or already was) marked as a false positive
+        if finding.false_p:
+            existing_non_fp_findings = existing_findings.filter(active=True).exclude(false_p=True)
+            to_mark_as_fp.update(set(existing_non_fp_findings))
+
+    # Remove the async user kwarg because save() really does not like it
+    # Would rather not add anything to Finding.save()
+    if 'async_user' in kwargs:
         kwargs.pop('async_user')
-        super(Finding, new_finding).save(*args, **kwargs)
+
+    for find in to_mark_as_fp:
+        deduplicationLogger.debug(
+            "FALSE_POSITIVE_HISTORY: Marking Finding %i:%s from %s as false positive",
+            find.id, find.title, find.test.engagement
+        )
+        try:
+            find.false_p = True
+            find.active = False
+            find.verified = False
+            super(Finding, find).save(*args, **kwargs)
+        except Exception as e:
+            deduplicationLogger.debug(str(e))
+
+
+def match_finding_to_existing_findings(finding, product=None, engagement=None, test=None):
+    """Customizable lookup that returns all existing findings for a given finding.
+
+    Takes one finding as an argument and returns all findings that are equal to it
+    on the same product, engagement or test. For now, only one custom filter can
+    be used, so you should choose between product, engagement or test.
+    The lookup is done based on the deduplication_algorithm of the given finding test.
+
+    Args:
+        finding (:model:`dojo.Finding`): Finding to be matched
+        product (:model:`dojo.Product`, optional): Product to filter findings by
+        engagement (:model:`dojo.Engagement`, optional): Engagement to filter findings by
+        test (:model:`dojo.Test`, optional): Test to filter findings by
+    """
+    if product:
+        custom_filter_type = 'product'
+        custom_filter = {'test__engagement__product': product}
+
+    elif engagement:
+        custom_filter_type = 'engagement'
+        custom_filter = {'test__engagement': engagement}
+
+    elif test:
+        custom_filter_type = 'test'
+        custom_filter = {'test': test}
+
+    else:
+        raise ValueError('No product, engagement or test provided as argument.')
+
+    deduplication_algorithm = finding.test.deduplication_algorithm
+
+    deduplicationLogger.debug(
+        'Matching finding %i:%s to existing findings in %s %s using %s as deduplication algorithm.',
+        finding.id, finding.title, custom_filter_type, list(custom_filter.values())[0], deduplication_algorithm
+    )
+
+    if deduplication_algorithm == 'hash_code':
+        return (
+            Finding.objects.filter(
+                **custom_filter,
+                hash_code=finding.hash_code
+            ).exclude(hash_code=None)
+            .exclude(id=finding.id)
+            .order_by('id')
+        )
+
+    elif deduplication_algorithm == 'unique_id_from_tool':
+        return (
+            Finding.objects.filter(
+                **custom_filter,
+                unique_id_from_tool=finding.unique_id_from_tool
+            ).exclude(unique_id_from_tool=None)
+            .exclude(id=finding.id)
+            .order_by('id')
+        )
+
+    elif deduplication_algorithm == 'unique_id_from_tool_or_hash_code':
+        query = Finding.objects.filter(
+            Q(**custom_filter),
+            (
+                (Q(hash_code__isnull=False) & Q(hash_code=finding.hash_code)) |
+                (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=finding.unique_id_from_tool))
+            )
+        ).exclude(id=finding.id).order_by('id')
+        deduplicationLogger.debug(query.query)
+        return query
+
+    elif deduplication_algorithm == 'legacy':
+        # This is the legacy reimport behavior. Although it's pretty flawed and
+        # doesn't match the legacy algorithm for deduplication, this is left as is for simplicity.
+        # Re-writing the legacy deduplication here would be complicated and counter-productive.
+        # If you have use cases going through this section, you're advised to create a deduplication configuration for your parser
+        logger.debug("Legacy dedupe. In case of issue, you're advised to create a deduplication configuration in order not to go through this section")
+        return (
+            Finding.objects.filter(
+                **custom_filter,
+                title=finding.title,
+                severity=finding.severity,
+                numerical_severity=Finding.get_numerical_severity(finding.severity)
+            ).order_by('id')
+        )
+
+    else:
+        logger.error("Internal error: unexpected deduplication_algorithm: '%s' ", deduplication_algorithm)
+        return None
 
 
 # true if both findings are on an engagement that have a different "deduplication on engagement" configuration
@@ -429,56 +525,6 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.notes.create(author=existing_finding.reporter,
                                     entry="This finding has been automatically re-opened as it was found in recent scans.")
     existing_finding.save()
-
-
-def do_apply_rules(new_finding, *args, **kwargs):
-    rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
-    for rule in rules:
-        child_val = True
-        child_list = [val for val in rule.child_rules.all()]
-        while (len(child_list) != 0):
-            child_val = child_val and child_rule(child_list.pop(), new_finding)
-        if child_val:
-            if rule.operator == 'Matches':
-                if getattr(new_finding, rule.match_field) == rule.match_text:
-                    if rule.application == 'Append':
-                        set_attribute_rule(new_finding, rule, (getattr(
-                            new_finding, rule.applied_field) + rule.text))
-                    else:
-                        set_attribute_rule(new_finding, rule, rule.text)
-                        new_finding.save(dedupe_option=False,
-                                         rules_option=False)
-            else:
-                if rule.match_text in getattr(new_finding, rule.match_field):
-                    if rule.application == 'Append':
-                        set_attribute_rule(new_finding, rule, (getattr(
-                            new_finding, rule.applied_field) + rule.text))
-                    else:
-                        set_attribute_rule(new_finding, rule, rule.text)
-                        new_finding.save(dedupe_option=False,
-                                         rules_option=False)
-
-
-def set_attribute_rule(new_finding, rule, value):
-    if rule.text == "True":
-        setattr(new_finding, rule.applied_field, True)
-    elif rule.text == "False":
-        setattr(new_finding, rule.applied_field, False)
-    else:
-        setattr(new_finding, rule.applied_field, value)
-
-
-def child_rule(rule, new_finding):
-    if rule.operator == 'Matches':
-        if getattr(new_finding, rule.match_field) == rule.match_text:
-            return True
-        else:
-            return False
-    else:
-        if rule.match_text in getattr(new_finding, rule.match_field):
-            return True
-        else:
-            return False
 
 
 def count_findings(findings):
@@ -1520,6 +1566,36 @@ def get_celery_worker_status():
         return False
 
 
+def get_work_days(start: date, end: date):
+    """
+    Math function to get workdays between 2 dates.
+    Can be used only as fallback as it doesn't know
+    about specific country holidays or extra working days.
+    https://stackoverflow.com/questions/3615375/number-of-days-between-2-dates-excluding-weekends/71977946#71977946
+    """
+
+    # if the start date is on a weekend, forward the date to next Monday
+    if start.weekday() > WEEKDAY_FRIDAY:
+        start = start + timedelta(days=7 - start.weekday())
+
+    # if the end date is on a weekend, rewind the date to the previous Friday
+    if end.weekday() > WEEKDAY_FRIDAY:
+        end = end - timedelta(days=end.weekday() - WEEKDAY_FRIDAY)
+
+    if start > end:
+        return 0
+    # that makes the difference easy, no remainders etc
+    diff_days = (end - start).days + 1
+    weeks = int(diff_days / 7)
+
+    remainder = end.weekday() - start.weekday() + 1
+
+    if remainder != 0 and end.weekday() < start.weekday():
+        remainder = 5 + remainder
+
+    return weeks * 5 + remainder
+
+
 # Used to display the counts and enabled tabs in the product view
 class Product_Tab():
     def __init__(self, product, title=None, tab=None):
@@ -1649,7 +1725,7 @@ def get_full_url(relative_url):
     if settings.SITE_URL:
         return settings.SITE_URL + relative_url
     else:
-        logger.warn('SITE URL undefined in settings, full_url cannot be created')
+        logger.warning('SITE URL undefined in settings, full_url cannot be created')
         return "settings.SITE_URL" + relative_url
 
 
@@ -1657,7 +1733,7 @@ def get_site_url():
     if settings.SITE_URL:
         return settings.SITE_URL
     else:
-        logger.warn('SITE URL undefined in settings, full_url cannot be created')
+        logger.warning('SITE URL undefined in settings, full_url cannot be created')
         return "settings.SITE_URL"
 
 
@@ -1789,17 +1865,18 @@ def sla_compute_and_notify(*args, **kwargs):
     import dojo.jira_link.helper as jira_helper
 
     def _notify(finding, title):
-        create_notification(
-            event='sla_breach',
-            title=title,
-            finding=finding,
-            url=reverse('view_finding', args=(finding.id,)),
-            sla_age=sla_age
-        )
+        if not finding.test.engagement.product.disable_sla_breach_notifications:
+            create_notification(
+                event='sla_breach',
+                title=title,
+                finding=finding,
+                url=reverse('view_finding', args=(finding.id,)),
+                sla_age=sla_age
+            )
 
-        if do_jira_sla_comment:
-            logger.info("Creating JIRA comment to notify of SLA breach information.")
-            jira_helper.add_simple_jira_comment(jira_instance, jira_issue, title)
+            if do_jira_sla_comment:
+                logger.info("Creating JIRA comment to notify of SLA breach information.")
+                jira_helper.add_simple_jira_comment(jira_instance, jira_issue, title)
 
     # exit early on flags
     system_settings = System_Settings.objects.get()
@@ -1821,10 +1898,10 @@ def sla_compute_and_notify(*args, **kwargs):
             ))
 
             query = None
-            if system_settings.enable_notify_sla_active:
-                query = Q(active=True, is_mitigated=False, duplicate=False)
             if system_settings.enable_notify_sla_active_verified:
                 query = Q(active=True, verified=True, is_mitigated=False, duplicate=False)
+            elif system_settings.enable_notify_sla_active:
+                query = Q(active=True, is_mitigated=False, duplicate=False)
             logger.debug("My query: {}".format(query))
 
             no_jira_findings = {}
@@ -1865,7 +1942,7 @@ def sla_compute_and_notify(*args, **kwargs):
                 jira_issue = None
                 if finding.has_jira_issue:
                     jira_issue = finding.jira_issue
-                elif finding.has_finding_group:
+                elif finding.has_jira_group_issue:
                     jira_issue = finding.finding_group.jira_issue
 
                 if jira_issue:
@@ -1895,7 +1972,14 @@ def sla_compute_and_notify(*args, **kwargs):
                 if (sla_age < 0):
                     post_breach_count += 1
                     logger.info("Finding {} has breached by {} days.".format(finding.id, abs(sla_age)))
-                    _notify(finding, 'Finding {} - SLA breached by {} day(s)! Overdue notice'.format(finding.id, abs(sla_age)))
+                    abs_sla_age = abs(sla_age)
+                    if not system_settings.enable_notify_sla_exponential_backoff or abs_sla_age == 1 or (abs_sla_age & (abs_sla_age - 1) == 0):
+                        period = "day"
+                        if abs_sla_age > 1:
+                            period = "days"
+                        _notify(finding, 'Finding {} - SLA breached by {} {}! Overdue notice'.format(finding.id, abs_sla_age, period))
+                    else:
+                        logger.info("Skipping notification as exponential backoff is enabled and the SLA is not a power of two")
                 # The finding is within the pre-breach period
                 elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
                     pre_breach_count += 1
@@ -1907,7 +1991,7 @@ def sla_compute_and_notify(*args, **kwargs):
                     logger.info("Security SLA breach warning. Finding ID {} breaching today ({})".format(finding.id, sla_age))
                     _notify(finding, "Finding {} - SLA is breaching today".format(finding.id))
 
-            logger.info("SLA run results: Pre-breach: {}, at-breach: {}, post-breach: {} post-breach-no-notify: {}, with-jira: {}, TOTAL: {}".format(
+            logger.info("SLA run results: Pre-breach: {}, at-breach: {}, post-breach: {}, post-breach-no-notify: {}, with-jira: {}, TOTAL: {}".format(
                 pre_breach_count,
                 at_breach_count,
                 post_breach_count,
@@ -2108,16 +2192,16 @@ def get_product(obj):
     if not obj:
         return None
 
-    if type(obj) == Finding or type(obj) == Finding_Group:
+    if isinstance(obj, Finding) or isinstance(obj, Finding_Group):
         return obj.test.engagement.product
 
-    if type(obj) == Test:
+    if isinstance(obj, Test):
         return obj.engagement.product
 
-    if type(obj) == Engagement:
+    if isinstance(obj, Engagement):
         return obj.product
 
-    if type(obj) == Product:
+    if isinstance(obj, Product):
         return obj
 
 
@@ -2308,3 +2392,135 @@ def sum_by_severity_level(metrics):
             values[m.severity] += 1
 
     return values
+
+
+def get_open_findings_burndown(product):
+    findings = Finding.objects.filter(test__engagement__product=product, duplicate=False)
+    f_list = list(findings)
+
+    curr_date = datetime.combine(datetime.now(), datetime.min.time())
+    start_date = curr_date - timedelta(days=90)
+
+    critical_count = 0
+    high_count = 0
+    medium_count = 0
+    low_count = 0
+    info_count = 0
+
+    # count all findings older than 90 days that are still active OR will be mitigated/risk-accepted in the next 90 days
+    for f in list(findings.filter(date__lt=start_date)):
+        if f.active:
+            if f.severity == 'Critical':
+                critical_count += 1
+            if f.severity == 'High':
+                high_count += 1
+            if f.severity == 'Medium':
+                medium_count += 1
+            if f.severity == 'Low':
+                low_count += 1
+            if f.severity == 'Info':
+                info_count += 1
+        elif f.is_mitigated:
+            f_mitigated_date = f.mitigated.timestamp()
+            if f_mitigated_date >= start_date.timestamp():
+                if f.severity == 'Critical':
+                    critical_count += 1
+                if f.severity == 'High':
+                    high_count += 1
+                if f.severity == 'Medium':
+                    medium_count += 1
+                if f.severity == 'Low':
+                    low_count += 1
+                if f.severity == 'Info':
+                    info_count += 1
+        elif f.risk_accepted:
+            f_risk_accepted_date = f.risk_acceptance.created.timestamp()
+            if f_risk_accepted_date >= start_date.timestamp():
+                if f.severity == 'Critical':
+                    critical_count += 1
+                if f.severity == 'High':
+                    high_count += 1
+                if f.severity == 'Medium':
+                    medium_count += 1
+                if f.severity == 'Low':
+                    low_count += 1
+                if f.severity == 'Info':
+                    info_count += 1
+
+    running_min, running_max = float('inf'), float('-inf')
+    past_90_days = {
+        'Critical': [],
+        'High': [],
+        'Medium': [],
+        'Low': [],
+        'Info': []
+    }
+
+    # count the number of open findings for the 90-day window
+    for i in range(90, -1, -1):
+        start = (curr_date - timedelta(days=i))
+
+        d_start = start.timestamp()
+        d_end = (start + timedelta(days=1)).timestamp()
+
+        for f in f_list:
+            # If a finding was opened on this day we add it to the counter of that day
+            f_open_date = datetime.combine(f.date, datetime.min.time()).timestamp()
+            if f_open_date >= d_start and f_open_date < d_end:
+                if f.severity == 'Critical':
+                    critical_count += 1
+                if f.severity == 'High':
+                    high_count += 1
+                if f.severity == 'Medium':
+                    medium_count += 1
+                if f.severity == 'Low':
+                    low_count += 1
+                if f.severity == 'Info':
+                    info_count += 1
+
+            # If a finding was mitigated on this day we subtract it
+            if f.is_mitigated:
+                f_mitigated_date = f.mitigated.timestamp()
+                if f_mitigated_date >= d_start and f_mitigated_date < d_end:
+                    if f.severity == 'Critical':
+                        critical_count -= 1
+                    if f.severity == 'High':
+                        high_count -= 1
+                    if f.severity == 'Medium':
+                        medium_count -= 1
+                    if f.severity == 'Low':
+                        low_count -= 1
+                    if f.severity == 'Info':
+                        info_count -= 1
+
+            # If a finding was risk accepted on this day we subtract it
+            elif f.risk_accepted:
+                f_risk_accepted_date = f.risk_acceptance.created.timestamp()
+                if f_risk_accepted_date >= d_start and f_risk_accepted_date < d_end:
+                    if f.severity == 'Critical':
+                        critical_count -= 1
+                    if f.severity == 'High':
+                        high_count -= 1
+                    if f.severity == 'Medium':
+                        medium_count -= 1
+                    if f.severity == 'Low':
+                        low_count -= 1
+                    if f.severity == 'Info':
+                        info_count -= 1
+
+        f_day = [critical_count, high_count, medium_count, low_count, info_count]
+        if min(f_day) < running_min:
+            running_min = min(f_day)
+        if max(f_day) > running_max:
+            running_max = max(f_day)
+
+        past_90_days['Critical'].append([d_start * 1000, critical_count])
+        past_90_days['High'].append([d_start * 1000, high_count])
+        past_90_days['Medium'].append([d_start * 1000, medium_count])
+        past_90_days['Low'].append([d_start * 1000, low_count])
+        past_90_days['Info'].append([d_start * 1000, info_count])
+
+    past_90_days['y_max'] = running_max
+    past_90_days['y_min'] = running_min
+
+    return past_90_days

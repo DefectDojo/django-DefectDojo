@@ -31,7 +31,8 @@ class BugcrowdAPI:
 
     def get_findings(self, program, target):
         """
-        Returns the findings in a paginated iterator for a given bugcrowd program and target, if target is *, everything is returned
+        Returns the findings in a paginated iterator for a given bugcrowd program and target, if target is *,
+        everything is returned
         :param program:
         :param target:
         :return:
@@ -52,7 +53,9 @@ class BugcrowdAPI:
         else:
             params_encoded = urlencode(params_default)
 
-        next = "{}/submissions?{}".format(self.bugcrowd_api_url, params_encoded)
+        next = "{}/submissions?{}".format(
+            self.bugcrowd_api_url, params_encoded
+        )
         while next != "":
             response = self.session.get(url=next)
             response.raise_for_status()
@@ -67,7 +70,9 @@ class BugcrowdAPI:
                     break
 
                 # Otherwise, keep updating next link
-                next = "{}{}".format(self.bugcrowd_api_url, data["links"]["next"])
+                next = "{}{}".format(
+                    self.bugcrowd_api_url, data["links"]["next"]
+                )
             else:
                 next = "over"
 
@@ -105,18 +110,23 @@ class BugcrowdAPI:
                 target_names = ", ".join(
                     list(map(lambda p: p["attributes"]["name"], targets))
                 )
-                return f'With {total_subs} submissions, you have access to the "{ program_names }" programs, \
-                    you can use these as Service key 1 for filtering submissions \
-                        You also have targets "{ target_names }" that can be used in Service key 2'
+                return (
+                    f'With {total_subs} submissions, you have access to the "{ program_names }" '
+                    f"programs, "
+                    f"you can use these as Service key 1 for filtering submissions "
+                    f'You also have targets "{ target_names }" that can be used in Service key 2'
+                )
             else:
                 raise Exception(
-                    "Bugcrowd API test not successful, no targets were defined in Bugcrowd which is used for filtering, check your configuration, HTTP response was: {}".format(
+                    "Bugcrowd API test not successful, no targets were defined in Bugcrowd which is used for "
+                    "filtering, check your configuration, HTTP response was: {}".format(
                         response_targets.text
                     )
                 )
         else:
             raise Exception(
-                "Bugcrowd API test not successful, could not retrieve the programs or submissions, check your configuration, HTTP response for programs was: {}, HTTP response for submissions was: {}".format(
+                "Bugcrowd API test not successful, could not retrieve the programs or submissions, check your "
+                "configuration, HTTP response for programs was: {}, HTTP response for submissions was: {}".format(
                     response_programs.text, response_subs.text
                 )
             )
@@ -124,11 +134,16 @@ class BugcrowdAPI:
     def test_product_connection(self, api_scan_configuration):
         submissions = []
         submission_gen = self.get_findings(
-            api_scan_configuration.service_key_1, api_scan_configuration.service_key_2
+            api_scan_configuration.service_key_1,
+            api_scan_configuration.service_key_2,
         )
         for page in submission_gen:
             submissions = submissions + page
         submission_number = len(submissions)
-        return f'You have access to "{submission_number}" submissions (no duplicates)\
-            in Bugcrowd in the Program code "{api_scan_configuration.service_key_1}" \
-            and Target "{api_scan_configuration.service_key_2}" (leave service key 2 empty to get all submissions in program)'
+        return (
+            f'You have access to "{submission_number}" submissions (no duplicates)'
+            f'in Bugcrowd in the Program code "{api_scan_configuration.service_key_1}"'
+            f'and Target "{api_scan_configuration.service_key_2}" '
+            f"(leave service key 2 empty to get all submissions in "
+            f"program)"
+        )

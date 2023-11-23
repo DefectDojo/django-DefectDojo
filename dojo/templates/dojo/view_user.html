@@ -20,7 +20,7 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                                {% if "auth.change_user"|has_configuration_permission %}
+                                {% if "auth.change_user"|has_configuration_permission:request %}
                                 <li>
                                     <a class="" href="{% url 'edit_user' user.id %}">
                                         <i class="fa-solid fa-pen-to-square"></i>{% trans "Edit" %}</a>
@@ -31,7 +31,7 @@
                                     <a href="{% url 'action_history' user|content_type user.id %}">
                                         <i class="fa-solid fa-clock-rotate-left"></i>{% trans "View History" %}</a>
                                 </li>
-                                {% if "auth.delete_user"|has_configuration_permission and user.id != request.user.id %}
+                                {% if "auth.delete_user"|has_configuration_permission:request and user.id != request.user.id %}
                                 <li role="separator" class="divider"></li>
                                 <li>
                                     <a class="" href="{% url 'delete_user' user.id %}" id="deleteUser"> 

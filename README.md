@@ -41,19 +41,36 @@ Try out the demo server at [demo.defectdojo.org](https://demo.defectdojo.org)
 
 Log in with `admin / 1Defectdojo@demo#appsec`. Please note that the demo is publicly accessible and regularly reset. Do not put sensitive data in the demo.
 
-## Quick Start
+## Quick Start for Compose V2
+From July 2023 Compose V1 [stopped receiving updates](https://docs.docker.com/compose/reference/).
+
+Compose V2 integrates compose functions into the Docker platform, continuing to support most of the previous docker-compose features and flags. You can run Compose V2 by replacing the hyphen (-) with a space, using `docker compose`, instead of `docker-compose`.
 
 ```sh
 git clone https://github.com/DefectDojo/django-DefectDojo
 cd django-DefectDojo
 # building
 ./dc-build.sh
-# running (for other profiles besides mysql-rabbitmq look at https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md)
-./dc-up.sh mysql-rabbitmq
+# running (for other profiles besides postgres-redis look at https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md)
+./dc-up.sh postgres-redis
 # obtain admin credentials. the initializer can take up to 3 minutes to run
 # use docker-compose logs -f initializer to track progress
-docker-compose logs initializer | grep "Admin password:"
+docker compose logs initializer | grep "Admin password:"
 ```
+## For Docker Compose V1
+You can run Compose V1 by editing the below files to add the hyphen (-) between `docker compose`. 
+```sh
+     dc-build.sh
+     dc-down.sh
+     dc-stop.sh
+     dc-unittest.sh
+     dc-up-d.sh
+     dc-up.sh
+     docker/docker-compose-check.sh
+     docker/entrypoint-initializer.sh
+     docker/setEnv.sh
+```
+
 
 Navigate to <http://localhost:8080>.
 
@@ -70,9 +87,7 @@ Navigate to <http://localhost:8080>.
 
 * [Docker / Docker Compose](readme-docs/DOCKER.md)
 * [SaaS](https://www.defectdojo.com/pricing) - Includes Support & Supports the Project
-* [AWS AMI ](https://aws.amazon.com/marketplace/pp/prodview-m2a25gr67xbzk) - Supports the Project
-* [godojo](https://github.com/DefectDojo/godojo)
-
+* [AWS AMI](https://aws.amazon.com/marketplace/pp/prodview-m2a25gr67xbzk) - Supports the Project
 
 ## Community, Getting Involved, and Updates
 
@@ -85,6 +100,10 @@ Navigate to <http://localhost:8080>.
 Follow DefectDojo on [Twitter](https://twitter.com/defectdojo), [Linkedin](https://www.linkedin.com/company/defectdojo), and [YouTube](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ) for project updates!
 
 ## Contributing
+
+:warning: Please note that DefectDojo will soon stop accepting new features to stabilize the API and data model for a
+forthcoming v3 release. See the contributing guidelines below for more details. :warning:
+
 See our [Contributing guidelines](readme-docs/CONTRIBUTING.md)
 
 ## Commercial Support and Training

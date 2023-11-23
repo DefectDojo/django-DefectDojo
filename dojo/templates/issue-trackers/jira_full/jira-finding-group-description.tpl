@@ -55,7 +55,9 @@ h3. [{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]
 *Source Line*: {{ finding.sast_source_line }}
 *Sink Object*: {{ finding.sast_sink_object }}
 {% elif finding.static_finding %}
-{% if finding.file_path %}
+{% if finding.file_path and finding.get_file_path_with_raw_link %}
+*Source File*: [{{ finding.file_path }} | {{ finding.get_file_path_with_raw_link }}]
+{% elif finding.file_path %}
 *Source File*: {{ finding.file_path }}
 {% endif %}
 {% if finding.line %}

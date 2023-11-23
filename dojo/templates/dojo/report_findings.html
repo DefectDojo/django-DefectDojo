@@ -30,10 +30,14 @@
                        class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                     <thead>
                     <tr>
+                        {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                         <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
+                        {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                         <th class="nowrap">{% dojo_sort request 'Date' 'date' %}</th>
+                        {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                         <th class="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
                         <th class="nowrap">Status</th>
+                        {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                         <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name' %}</th>
                     </tr>
                     </thead>

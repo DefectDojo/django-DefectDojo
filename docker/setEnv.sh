@@ -23,7 +23,7 @@ function show_current {
 function get_current {
     if [ -L ${override_link} ]
     then
-        # Check for Mac OSX 
+        # Check for Mac OSX
         if [[ "$OSTYPE" == "darwin"* ]]; then
             # readlink is not native to mac, so this will work in it's place.
             symlink=$(python3 -c "import os; print(os.path.realpath('docker-compose.override.yml'))")
@@ -31,7 +31,7 @@ function get_current {
             # Maintain the cleaner way
             symlink=$(readlink -f docker-compose.override.yml)
         fi
-        current_env=$(expr $(basename symlink) : "^docker-compose.override.\(.*\).yml$")
+        current_env=$(expr $(basename $symlink) : "^docker-compose.override.\(.*\).yml$")
     else
         current_env=release
     fi
@@ -53,7 +53,7 @@ function set_release {
     get_current
     if [ "${current_env}" != release ]
     then
-        docker-compose --profile mysql-rabbitmq --profile postgres-redis --env-file ./docker/environments/mysql-rabbitmq.env down
+        docker compose --profile mysql-rabbitmq --profile postgres-redis --env-file ./docker/environments/mysql-rabbitmq.env down
         # In release configuration there is no override file
         rm ${override_link}
         echo "Now using 'release' configuration."
@@ -67,7 +67,7 @@ function set_dev {
     get_current
     if [ "${current_env}" != dev ]
     then
-        docker-compose --profile mysql-rabbitmq --profile postgres-redis --env-file ./docker/environments/mysql-rabbitmq.env down
+        docker compose --profile mysql-rabbitmq --profile postgres-redis --env-file ./docker/environments/mysql-rabbitmq.env down
         rm -f ${override_link}
         ln -s ${override_file_dev} ${override_link}
         echo "Now using 'dev' configuration."
@@ -80,7 +80,7 @@ function set_debug {
     get_current
     if [ "${current_env}" != debug ]
     then
-        docker-compose --profile mysql-rabbitmq --profile postgres-redis --env-file ./docker/environments/mysql-rabbitmq.env down
+        docker compose --profile mysql-rabbitmq --profile postgres-redis --env-file ./docker/environments/mysql-rabbitmq.env down
         rm -f ${override_link}
         ln -s ${override_file_debug} ${override_link}
         echo "Now using 'debug' configuration."
@@ -93,7 +93,7 @@ function set_unit_tests {
     get_current
     if [ "${current_env}" != unit_tests ]
     then
-        docker-compose --profile mysql-rabbitmq --profile postgres-redis --env-file ./docker/environments/mysql-rabbitmq.env down
+        docker compose --profile mysql-rabbitmq --profile postgres-redis --env-file ./docker/environments/mysql-rabbitmq.env down
         rm -f ${override_link}
         ln -s ${override_file_unit_tests} ${override_link}
         echo "Now using 'unit_tests' configuration."
@@ -106,7 +106,7 @@ function set_unit_tests_cicd {
     get_current
     if [ "${current_env}" != unit_tests_cicd ]
     then
-        docker-compose --profile mysql-rabbitmq --profile postgres-redis --env-file ./docker/environments/mysql-rabbitmq.env down
+        docker compose --profile mysql-rabbitmq --profile postgres-redis --env-file ./docker/environments/mysql-rabbitmq.env down
         rm -f ${override_link}
         ln -s ${override_file_unit_tests_cicd} ${override_link}
         echo "Now using 'unit_tests_cicd' configuration."
@@ -119,7 +119,7 @@ function set_integration_tests {
     get_current
     if [ "${current_env}" != integration_tests ]
     then
-        docker-compose --profile mysql-rabbitmq --profile postgres-redis --env-file ./docker/environments/mysql-rabbitmq.env down
+        docker compose --profile mysql-rabbitmq --profile postgres-redis --env-file ./docker/environments/mysql-rabbitmq.env down
         rm -f ${override_link}
         ln -s ${override_file_integration_tests} ${override_link}
         echo "Now using 'integration_tests' configuration."

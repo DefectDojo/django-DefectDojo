@@ -17,13 +17,12 @@ class SslyzeParser(object):
         return "Import XML report of SSLyze version 2 scan."
 
     def get_findings(self, filename, test):
-
         if filename is None:
             return list()
 
-        if filename.name.lower().endswith('.xml'):
+        if filename.name.lower().endswith(".xml"):
             return SSLyzeXMLParser().get_findings(filename, test)
-        elif filename.name.lower().endswith('.json'):
+        elif filename.name.lower().endswith(".json"):
             return SSLyzeJSONParser().get_findings(filename, test)
         else:
-            raise ValueError('Unknown File Format')
+            raise ValueError("Unknown File Format")

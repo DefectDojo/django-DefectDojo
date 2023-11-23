@@ -1,0 +1,78 @@
+{
+    "Findings": [
+        {
+            "SchemaVersion": "2018-10-08",
+            "Id": "arn:aws:inspector2:us-east-1:XXXXXXXXXXXX:finding/c830773636319eaf8313475ae5876490",
+            "ProductArn": "arn:aws:securityhub:us-east-1::product/aws/inspector",
+            "ProductName": "Inspector",
+            "CompanyName": "Amazon",
+            "Region": "us-east-1",
+            "GeneratorId": "AWSInspector",
+            "AwsAccountId": "XXXXXXXXXXXX",
+            "Types": [
+                "Software and Configuration Checks/Vulnerabilities/CVE"
+            ],
+            "FirstObservedAt": "2023-03-01T08:04:10Z",
+            "LastObservedAt": "2023-03-01T08:34:29Z",
+            "CreatedAt": "2023-03-01T08:04:10Z",
+            "UpdatedAt": "2023-03-01T08:34:29Z",
+            "Severity": {
+                "Label": "CRITICAL",
+                "Normalized": 90
+            },
+            "Title": "CVE-2022-3643 - kernel",
+            "Description": "Guests can trigger NIC interface reset/abort/crash via netback It is possible for a guest to trigger a NIC interface reset/abort/crash in a Linux based network backend by sending certain kinds of packets. It appears to be an (unwritten?) assumption in the rest of the Linux network stack that packet protocol headers are all contained within the linear section of the SKB and some NICs behave badly if this is not the case. This has been reported to occur with Cisco (enic) and Broadcom NetXtrem II BCM5780 (bnx2x) though it may be an issue with other NICs/drivers as well. In case the frontend is sending requests with split headers, netback will forward those violating above mentioned assumption to the networking core, resulting in said misbehavior.",
+            "Remediation": {
+                "Recommendation": {
+                    "Text": "None Provided"
+                }
+            },
+            "ProductFields": {
+                "aws/inspector/FindingStatus": "ACTIVE",
+                "aws/inspector/inspectorScore": "10.0",
+                "aws/inspector/resources/1/resourceDetails/awsEc2InstanceDetails/platform": "AMAZON_LINUX_2",
+                "aws/inspector/ProductVersion": "2",
+                "aws/inspector/instanceId": "i-11111111111111111",
+                "aws/securityhub/FindingId": "arn:aws:securityhub:us-east-1::product/aws/inspector/arn:aws:inspector2:us-east-1:XXXXXXXXXXXX:finding/c830773636319eaf8313475ae5876490",
+                "aws/securityhub/ProductName": "Inspector",
+                "aws/securityhub/CompanyName": "Amazon"
+            },
+            "Resources": [
+                {
+                    "Type": "AwsEc2Instance",
+                    "Id": "arn:aws:ec2:us-east-1:XXXXXXXXXXXX:i-11111111111111111",
+                    "Partition": "aws",
+                    "Region": "us-east-1",
+                    "Tags": {},
+                    "Details": {
+                        "AwsEc2Instance": {
+                            "Type": "c6i.large",
+                            "ImageId": "ami-11111111111111111",
+                            "IpV4Addresses": [
+                                "11.1.11.111"
+                            ],
+                            "IamInstanceProfileArn": "arn:aws:iam::XXXXXXXXXXXX:instance-profile/something",
+                            "VpcId": "vpc-11111111111111111",
+                            "SubnetId": "subnet-11111111111111111",
+                            "LaunchedAt": "2023-03-01T08:03:19Z"
+                        }
+                    }
+                }
+            ],
+            "WorkflowState": "NEW",
+            "Workflow": {
+                "Status": "NEW"
+            },
+            "RecordState": "ACTIVE",
+            "Vulnerabilities": [],
+            "FindingProviderFields": {
+                "Severity": {
+                    "Label": "CRITICAL"
+                },
+                "Types": [
+                    "Software and Configuration Checks/Vulnerabilities/CVE"
+                ]
+            }
+        }
+    ]
+}

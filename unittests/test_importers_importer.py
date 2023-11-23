@@ -126,7 +126,7 @@ class TestDojoDefaultImporter(DojoTestCase):
 
     def test_import_scan_without_test_scan_type(self):
         # GitLabSastParser implements get_tests but report has no scanner name
-        scan = open(get_unit_tests_path() + "/scans/gitlab_sast/gl-sast-report-1-vuln.json")
+        scan = open(f"{get_unit_tests_path()}/scans/gitlab_sast/gl-sast-report-1-vuln_v15.json")
         scan_type = GitlabSastParser().get_scan_types()[0]
 
         user, _ = User.objects.get_or_create(username="admin")

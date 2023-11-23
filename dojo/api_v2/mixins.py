@@ -6,19 +6,22 @@ from rest_framework.decorators import action
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from dojo.api_v2 import serializers
+from dojo.models import Question, Answer
 import itertools
 
 
 class DeletePreviewModelMixin:
     @extend_schema(
-        methods=['GET'],
-        responses={status.HTTP_200_OK: serializers.DeletePreviewSerializer(many=True)}
+        methods=["GET"],
+        responses={
+            status.HTTP_200_OK: serializers.DeletePreviewSerializer(many=True)
+        },
     )
     @swagger_auto_schema(
-        method='get',
-        responses={'default': serializers.DeletePreviewSerializer(many=True)}
+        method="get",
+        responses={"default": serializers.DeletePreviewSerializer(many=True)},
     )
-    @action(detail=True, methods=["get"], filter_backends=[], suffix='List')
+    @action(detail=True, methods=["get"], filter_backends=[], suffix="List")
     def delete_preview(self, request, pk=None):
         object = self.get_object()
 
@@ -35,8 +38,10 @@ class DeletePreviewModelMixin:
         rels = [
             {
                 "model": type(x).__name__,
-                "id": x.id if hasattr(x, 'id') else None,
-                "name": str(x) if not isinstance(x, Token) else "<APITokenIsHidden>"
+                "id": x.id if hasattr(x, "id") else None,
+                "name": str(x)
+                if not isinstance(x, Token)
+                else "<APITokenIsHidden>",
             }
             for x in flatten(rels)
         ]
@@ -45,3 +50,13 @@ class DeletePreviewModelMixin:
 
         serializer = serializers.DeletePreviewSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
+
+
+class QuestionSubClassFieldsMixin(object):
+    def get_queryset(self):
+        return Question.objects.select_subclasses()
+
+
+class AnswerSubClassFieldsMixin(object):
+    def get_queryset(self):
+        return Answer.objects.select_subclasses()

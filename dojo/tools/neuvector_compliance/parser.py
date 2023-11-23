@@ -4,7 +4,7 @@ import json
 from dojo.models import Finding
 
 
-NEUVECTOR_SCAN_NAME = 'NeuVector (compliance)'
+NEUVECTOR_SCAN_NAME = "NeuVector (compliance)"
 
 
 def parse(json_output, test):
@@ -19,10 +19,10 @@ def parse_json(json_output):
     try:
         data = json_output.read()
         try:
-            tree = json.loads(str(data, 'utf-8'))
-        except:
+            tree = json.loads(str(data, "utf-8"))
+        except Exception:
             tree = json.loads(data)
-    except:
+    except Exception:
         raise ValueError("Invalid format")
 
     return tree
@@ -36,98 +36,106 @@ def get_items(tree, test):
     # /v1/host/{id}/compliance or similar. thus, we need to support items in a
     # bit different leafs.
     testsTree = None
-    if 'report' in tree:
-        testsTree = tree.get('report').get('checks', [])
+    if "report" in tree:
+        testsTree = tree.get("report").get("checks", [])
     else:
-        testsTree = tree.get('items', [])
+        testsTree = tree.get("items", [])
 
     for node in testsTree:
         item = get_item(node, test)
-        unique_key = node.get('type') + node.get('category') + node.get('test_number') + node.get('description')
-        unique_key = hashlib.md5(unique_key.encode('utf-8')).hexdigest()
+        unique_key = (
+            node.get("type")
+            + node.get("category")
+            + node.get("test_number")
+            + node.get("description")
+        )
+        unique_key = hashlib.md5(unique_key.encode("utf-8")).hexdigest()
         items[unique_key] = item
     return list(items.values())
 
 
 def get_item(node, test):
-    if 'test_number' not in node:
+    if "test_number" not in node:
         return None
-    if 'category' not in node:
+    if "category" not in node:
         return None
-    if 'description' not in node:
+    if "description" not in node:
         return None
-    if 'level' not in node:
+    if "level" not in node:
         return None
 
-    test_number = node.get('test_number')
-    test_description = node.get('description').rstrip()
+    test_number = node.get("test_number")
+    test_description = node.get("description").rstrip()
 
-    title = test_number + ' - ' + test_description
+    title = test_number + " - " + test_description
 
-    test_severity = node.get('level')
+    test_severity = node.get("level")
     severity = convert_severity(test_severity)
 
-    mitigation = node.get('remediation', '').rstrip()
+    mitigation = node.get("remediation", "").rstrip()
 
-    category = node.get('category')
+    category = node.get("category")
 
-    vuln_id_from_tool = category + '_' + test_number
+    vuln_id_from_tool = category + "_" + test_number
 
-    test_profile = node.get('profile', 'profile unknown')
+    test_profile = node.get("profile", "profile unknown")
 
-    full_description = '{} ({}), {}:\n'.format(test_number, category, test_profile)
-    full_description += '{}\n'.format(test_description)
-    full_description += 'Audit: {}\n'.format(test_severity)
-    if 'evidence' in node:
-        full_description += 'Evidence:\n{}\n'.format(node.get('evidence'))
-    if 'location' in node:
-        full_description += 'Location:\n{}\n'.format(node.get('location'))
-    full_description += 'Mitigation:\n{}\n'.format(mitigation)
+    full_description = "{} ({}), {}:\n".format(
+        test_number, category, test_profile
+    )
+    full_description += "{}\n".format(test_description)
+    full_description += "Audit: {}\n".format(test_severity)
+    if "evidence" in node:
+        full_description += "Evidence:\n{}\n".format(node.get("evidence"))
+    if "location" in node:
+        full_description += "Location:\n{}\n".format(node.get("location"))
+    full_description += "Mitigation:\n{}\n".format(mitigation)
 
-    tags = node.get('tags', [])
+    tags = node.get("tags", [])
     if len(tags) > 0:
-        full_description += 'Tags:\n'
+        full_description += "Tags:\n"
         for t in tags:
-            full_description += '{}\n'.format(str(t).rstrip())
+            full_description += "{}\n".format(str(t).rstrip())
 
-    messages = node.get('message', [])
+    messages = node.get("message", [])
     if len(messages) > 0:
-        full_description += 'Messages:\n'
+        full_description += "Messages:\n"
         for m in messages:
-            full_description += '{}\n'.format(str(m).rstrip())
+            full_description += "{}\n".format(str(m).rstrip())
 
-    finding = Finding(title=title,
-                      test=test,
-                      description=full_description,
-                      severity=severity,
-                      mitigation=mitigation,
-                      vuln_id_from_tool=vuln_id_from_tool,
-                      static_finding=True,
-                      dynamic_finding=False)
+    finding = Finding(
+        title=title,
+        test=test,
+        description=full_description,
+        severity=severity,
+        mitigation=mitigation,
+        vuln_id_from_tool=vuln_id_from_tool,
+        static_finding=True,
+        dynamic_finding=False,
+    )
 
     return finding
 
 
 # see neuvector/share/clus_apis.go
 def convert_severity(severity):
-    if severity.lower() == 'high':
+    if severity.lower() == "high":
         return "High"
-    elif severity.lower() == 'warn':
+    elif severity.lower() == "warn":
         return "Medium"
-    elif severity.lower() == 'info':
+    elif severity.lower() == "info":
         return "Low"
-    elif severity.lower() == 'pass':
+    elif severity.lower() == "pass":
         return "Info"
-    elif severity.lower() == 'note':
+    elif severity.lower() == "note":
         return "Info"
-    elif severity.lower() == 'error':
+    elif severity.lower() == "error":
         return "Info"
     else:
         return severity.title()
 
 
 class NeuVectorComplianceParser(object):
-
     def get_scan_types(self):
         return [NEUVECTOR_SCAN_NAME]
 
@@ -141,7 +149,7 @@ class NeuVectorComplianceParser(object):
         if filename is None:
             return list()
 
-        if filename.name.lower().endswith('.json'):
+        if filename.name.lower().endswith(".json"):
             return parse(filename, test)
         else:
-            raise ValueError('Unknown File Format')
+            raise ValueError("Unknown File Format")

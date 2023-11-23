@@ -22,7 +22,7 @@ usage() {
   echo "You must specify a test case (arg) and profile (arg or env var)!"
   echo
   echo "Example command:"
-  echo "./dc-unittest.sh --profile mysql-rabbitmq --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser"
+  echo "./dc-unittest.sh --profile postgres-redis --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -73,4 +73,6 @@ then
 fi
 
 echo "Running docker compose unit tests with profile $PROFILE and test case $TEST_CASE ..."
-docker-compose --profile $PROFILE --env-file ./docker/environments/$PROFILE.env exec uwsgi bash -c "python manage.py test $TEST_CASE -v2"
+
+# Compose V2 integrates compose functions into the Docker platform, continuing to support most of the previous docker-compose features and flags. You can run Compose V2 by replacing the hyphen (-) with a space, using docker compose, instead of docker-compose.
+docker compose --profile $PROFILE --env-file ./docker/environments/$PROFILE.env exec uwsgi bash -c "python manage.py test $TEST_CASE -v2 --keepdb"

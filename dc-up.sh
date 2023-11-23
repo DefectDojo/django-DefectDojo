@@ -8,15 +8,15 @@ if [[ $? -eq 1 ]]; then exit 1; fi
 if [ $# -eq 0 ]; then
     if [ -z $DD_PROFILE ]
     then
-        echo "No profile supplied, running default: mysql-rabbitmq"
-        PROFILE="mysql-rabbitmq"
+        echo "No profile supplied, running default: postgres-redis"
+        PROFILE="postgres-redis"
         echo "Other supported profiles:
-          mysql-rabbitmq*
-          mysql-redis
+          postgres-redis*
           postgres-rabbitmq
-          postgres-redis
+          mysql-redis
+          mysql-rabbitmq
 
-        Usage example: ./dc-up.sh mysql-redis
+        Usage example: ./dc-up.sh mysql-rabbitmq
         "
     else
         PROFILE=$DD_PROFILE
@@ -26,4 +26,6 @@ else
 fi
 
 echo "Starting docker compose with profile $PROFILE in the foreground ..."
-docker-compose --profile $PROFILE --env-file ./docker/environments/$PROFILE.env up --no-deps
+
+# Compose V2 integrates compose functions into the Docker platform, continuing to support most of the previous docker-compose features and flags. You can run Compose V2 by replacing the hyphen (-) with a space, using docker compose, instead of docker-compose.
+docker compose --profile $PROFILE --env-file ./docker/environments/$PROFILE.env up --no-deps

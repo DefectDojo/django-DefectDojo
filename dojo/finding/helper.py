@@ -3,6 +3,7 @@ from django.db.models.signals import post_delete, pre_delete
 from django.dispatch.dispatcher import receiver
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
+import dojo.jira_link.helper as jira_helper
 import logging
 from time import strftime
 from django.utils import timezone
@@ -178,6 +179,11 @@ def add_to_finding_group(finding_group, finds):
     available_findings = [find for find in finds if not find.finding_group_set.all()]
     finding_group.findings.add(*available_findings)
 
+    # Now update the JIRA to add the finding to the finding group
+    if finding_group.has_jira_issue and jira_helper.get_jira_instance(finding_group).finding_jira_sync:
+        logger.debug('pushing to jira from finding.finding_bulk_update_all()')
+        jira_helper.push_to_jira(finding_group)
+
     added = len(available_findings)
     skipped = len(finds) - added
     return finding_group, added, skipped
@@ -198,6 +204,12 @@ def remove_from_finding_group(finds):
             affected_groups.add(group)
 
         removed += 1
+
+    # Now update the JIRA to remove the finding from the finding group
+    for group in affected_groups:
+        if group.has_jira_issue and jira_helper.get_jira_instance(group).finding_jira_sync:
+            logger.debug('pushing to jira from finding.finding_bulk_update_all()')
+            jira_helper.push_to_jira(group)
 
     return affected_groups, removed, skipped
 
@@ -256,7 +268,7 @@ def group_findings_by(finds, finding_group_by_option):
             skipped += 1
             continue
 
-        finding_group = Finding_Group.objects.filter(name=group_name).first()
+        finding_group = Finding_Group.objects.filter(test=find.test, name=group_name).first()
         if not finding_group:
             finding_group, added, skipped = create_finding_group([find], group_name)
             groups_created += 1
@@ -268,6 +280,12 @@ def group_findings_by(finds, finding_group_by_option):
             grouped += 1
 
         affected_groups.add(finding_group)
+
+    # Now update the JIRA to add the finding to the finding group
+    for group in affected_groups:
+        if group.has_jira_issue and jira_helper.get_jira_instance(group).finding_jira_sync:
+            logger.debug('pushing to jira from finding.finding_bulk_update_all()')
+            jira_helper.push_to_jira(group)
 
     return affected_groups, grouped, skipped, groups_created
 
@@ -317,7 +335,7 @@ def add_findings_to_auto_group(name, findings, group_by, create_finding_groups_f
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def post_process_finding_save(finding, dedupe_option=True, false_history=False, rules_option=True, product_grading_option=True,
+def post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True,
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
 
     system_settings = System_Settings.objects.get()
@@ -333,12 +351,13 @@ def post_process_finding_save(finding, dedupe_option=True, false_history=False, 
         else:
             deduplicationLogger.warning("skipping dedupe because hash_code is None")
 
-    if false_history:
-        if system_settings.false_positive_history:
+    if system_settings.false_positive_history:
+        # Only perform false positive history if deduplication is disabled
+        if system_settings.enable_deduplication:
+            deduplicationLogger.warning("skipping false positive history because deduplication is also enabled")
+        else:
             from dojo.utils import do_false_positive_history
             do_false_positive_history(finding, *args, **kwargs)
-        else:
-            deduplicationLogger.debug("skipping false positive history because it's disabled in system settings")
 
     # STEP 2 run all non-status changing tasks as celery tasks in the background
     if issue_updater_option:
@@ -463,7 +482,7 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
 def prepare_duplicates_for_delete(test=None, engagement=None):
     logger.debug('prepare duplicates for delete, test: %s, engagement: %s', test.id if test else None, engagement.id if engagement else None)
     if test is None and engagement is None:
-        logger.warn('nothing to prepare as test and engagement are None')
+        logger.warning('nothing to prepare as test and engagement are None')
 
     fix_loop_duplicates()
 

@@ -19,7 +19,7 @@
                         {{ name }}
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
-                            {% if "auth.add_user"|has_configuration_permission %}
+                            {% if "auth.add_user"|has_configuration_permission:request %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa-solid fa-screwdriver-wrench"></span>
@@ -52,13 +52,19 @@
                             {% block users_table_header_row %}
                                 <tr>
                                     <th></th>
+                                    {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                     <th class="nowrap">{% dojo_sort request first_name 'first_name' %}</th>
+                                    {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                     <th class="nowrap">{% dojo_sort request last_name 'last_name' %}</th>
+                                    {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                     <th class="nowrap">{% dojo_sort request user_name 'username' 'asc' %}</th>
+                                    {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                     <th class="nowrap">{% dojo_sort request email 'email' %}</th>
                                     <th class="nowrap">{% trans "Title" %}</th>
                                     <th class="nowrap">{% trans "Phone Number(s)" %}</th>
+                                    {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                     <th class="nowrap, text-center">{% dojo_sort request active 'is_active' %}</th>
+                                    {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                     <th class="nowrap, text-center">{% dojo_sort request superuser 'is_superuser' %}</th>
                                     <th class="nowrap">{% trans "Global Role" %}</th>
                                     <th class="nowrap">{% trans "Last Login" %}</th>
@@ -78,7 +84,7 @@
                                                             <a class="" href="{% url 'view_user' u.id %}" id="viewUser">
                                                             <i class="fa-solid fa-rectangle-list"></i> {% trans "View" %}</a>
                                                         </li>
-                                                        {% if "auth.change_user"|has_configuration_permission %}
+                                                        {% if "auth.change_user"|has_configuration_permission:request %}
                                                         <li role="presentation">
                                                             <a class="" href="{% url 'edit_user' u.id %}"  id="editUser">
                                                             <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}</a>
@@ -90,7 +96,7 @@
                                                             <i class="fa-solid fa-clock-rotate-left"></i> {% trans "View History" %}
                                                         </a>
                                                         </li>
-                                                        {% if "auth.delete_user"|has_configuration_permission and u.id != request.user.id %}
+                                                        {% if "auth.delete_user"|has_configuration_permission:request and u.id != request.user.id %}
                                                         <li role="separator" class="divider"></li>
                                                         <li role="presentation">
                                                             <a class="" href="{% url 'delete_user' u.id %}">

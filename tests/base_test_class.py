@@ -354,6 +354,24 @@ class BaseTestCase(unittest.TestCase):
     def disable_block_execution(self):
         self.set_block_execution(block_execution=False)
 
+    def enable_deduplication(self):
+        return self.enable_system_setting("id_enable_deduplication")
+
+    def disable_deduplication(self):
+        return self.disable_system_setting("id_enable_deduplication")
+
+    def enable_false_positive_history(self):
+        return self.enable_system_setting("id_false_positive_history")
+
+    def disable_false_positive_history(self):
+        return self.disable_system_setting("id_false_positive_history")
+
+    def enable_retroactive_false_positive_history(self):
+        return self.enable_system_setting("id_retroactive_false_positive_history")
+
+    def disable_retroactive_false_positive_history(self):
+        return self.disable_system_setting("id_retroactive_false_positive_history")
+
     def is_alert_present(self):
         try:
             self.driver.switch_to_alert()

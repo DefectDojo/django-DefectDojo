@@ -238,6 +238,7 @@ class TestDependencyCheckParser(DojoTestCase):
             )
             self.assertEqual(items[9].tags, ["suppressed", "no_suppression_document"])
             self.assertEqual(items[10].severity, "Critical")
+            self.assertEqual(items[10].is_mitigated, True)
 
         with self.subTest(i=10):
             self.assertEqual(items[10].active, False)
@@ -247,6 +248,7 @@ class TestDependencyCheckParser(DojoTestCase):
             )
             self.assertEqual(items[10].tags, "suppressed")
             self.assertEqual(items[10].severity, "Critical")
+            self.assertEqual(items[10].is_mitigated, True)
 
     def test_parse_java_6_5_3(self):
         """Test with version 6.5.3"""

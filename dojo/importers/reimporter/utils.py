@@ -219,12 +219,13 @@ def get_or_create_product(product_name=None, product_type_name=None, auto_create
             member.role = Role.objects.get(is_owner=True)
             member.save()
 
-        product = Product.objects.create(name=product_name, prod_type=product_type, description=product_name)
-        member = Product_Member()
-        member.user = get_current_user()
-        member.product = product
-        member.role = Role.objects.get(is_owner=True)
-        member.save()
+        product, created = Product.objects.get_or_create(name=product_name, prod_type=product_type, description=product_name)
+        if created:
+            member = Product_Member()
+            member.user = get_current_user()
+            member.product = product
+            member.role = Role.objects.get(is_owner=True)
+            member.save()
 
         return product
 
@@ -251,7 +252,7 @@ def get_or_create_engagement(engagement_id=None, engagement_name=None, product_n
             target_end = (timezone.now() + timedelta(days=365)).date()
 
         engagement = Engagement.objects.create(engagement_type="CI/CD", name=engagement_name, product=product, lead=get_current_user(),
-                                               target_start=target_start, target_end=target_end,
+                                               target_start=target_start, target_end=target_end, status="In Progress",
                                                deduplication_on_engagement=deduplication_on_engagement,
                                                source_code_management_uri=source_code_management_uri)
 

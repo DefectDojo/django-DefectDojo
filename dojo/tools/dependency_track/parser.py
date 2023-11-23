@@ -144,7 +144,7 @@ class DependencyTrackParser(object):
         # We should collect all the vulnerability ids, the FPF format can add additional IDs as aliases
         # we add these aliases in the vulnerability_id list making sure duplicate findings get correctly deduplicated
         # older version of Dependency-track might not include these field therefore lets check first
-        if 'aliases' in dependency_track_finding['vulnerability']:
+        if dependency_track_finding['vulnerability'].get('aliases'):
             # There can be multiple alias entries
             set_of_ids = set()
             set_of_sources = {'cveId', 'sonatypeId', 'ghsaId', 'osvId', 'snykId', 'gsdId', 'vulnDbId'}
@@ -201,8 +201,11 @@ class DependencyTrackParser(object):
         dependency_track_severity = dependency_track_finding['vulnerability']['severity']
         vulnerability_severity = self._convert_dependency_track_severity_to_dojo_severity(dependency_track_severity)
         if vulnerability_severity is None:
-            logger.warn("Detected severity of %s that could not be mapped for %s. Defaulting to Critical!", dependency_track_severity, title)
+            logger.warning("Detected severity of %s that could not be mapped for %s. Defaulting to Critical!", dependency_track_severity, title)
             vulnerability_severity = "Critical"
+
+        # Get the cvss score of the vulnerabililty
+        cvss_score = dependency_track_finding['vulnerability'].get("cvssV3BaseScore")
 
         # Use the analysis state from Dependency Track to determine if the finding has already been marked as a false positive upstream
         analysis = dependency_track_finding.get('analysis')
@@ -223,8 +226,15 @@ class DependencyTrackParser(object):
             static_finding=True,
             dynamic_finding=False)
 
+        if is_false_positive:
+            finding.is_mitigated = True
+            finding.active = False
+
         if vulnerability_id:
             finding.unsaved_vulnerability_ids = vulnerability_id
+
+        if cvss_score:
+            finding.cvssv3_score = cvss_score
 
         return finding
 
