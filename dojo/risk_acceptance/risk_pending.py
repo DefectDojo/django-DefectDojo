@@ -161,7 +161,6 @@ def get_contacts(engagement: Engagement, finding_serverity: str, user):
             contact_list.append(get_contacts_dict[contact])
         else:
             raise ValueError(f"Contact {contact} not found")
-    # if severity is low load default acceptanced_by = user.id
     if contact_list == []:
         contact_list.append(user)
 

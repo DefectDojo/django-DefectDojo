@@ -880,9 +880,7 @@ def post_risk_acceptance(request, finding: Finding, eng, eid):
             'This risk is on the black list',
             extra_tags='alert-danger')
             return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
-        if request.user.is_superuser is True:
-            form = RiskAcceptanceForm(request.POST, request.FILES, severity=finding.severity)
-        elif request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
+        if (request.user.is_superuser is True or request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
             form = RiskAcceptanceForm(request.POST, request.FILES, severity=finding.severity)
         else:
             risk_status = rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request)

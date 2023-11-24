@@ -44,8 +44,8 @@ urlpatterns = [
         views.reinstate_risk_acceptance, name='reinstate_risk_acceptance'),
     re_path(r'^engagement/(?P<eid>\d+)/risk_acceptance/(?P<raid>\d+)/delete$',
         views.delete_risk_acceptance, name='delete_risk_acceptance'),
-    re_path(r'^engagement/(?P<eid>\d+)/risk_acceptance/(?P<raid>\d+)/pending$',
-        views.risk_acceptance_pending, name='risk_acceptance_pending'),
+    # re_path(r'^engagement/(?P<eid>\d+)/risk_acceptance/(?P<raid>\d+)/pending$',
+    #     views.risk_acceptance_pending, name='risk_acceptance_pending'), # Todo: Deleted
     re_path(r'^engagement/(?P<eid>\d+)/risk_acceptance/(?P<raid>\d+)/download$',
         views.download_risk_acceptance, name='download_risk_acceptance'),
     re_path(r'^engagement/(?P<eid>\d+)/threatmodel$', views.view_threatmodel,

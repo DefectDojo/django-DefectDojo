@@ -1325,8 +1325,6 @@ def get_page_items(request, items, page_size, prefix=""):
     return get_page_items_and_count(request, items, page_size, prefix=prefix, do_count=False)
 
 
-
-
 def get_page_items_and_count(request, items, page_size, prefix="", do_count=True):
     page_param = prefix + "page"
     page_size_param = prefix + "page_size"
