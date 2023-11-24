@@ -894,7 +894,6 @@ def post_risk_acceptance(request, finding: Finding, eng, eid):
         form = RiskAcceptanceForm(request.POST, request.FILES, severity=finding.severity)
 
     if form.is_valid():
-        # first capture notes param as it cannot be saved directly as m2m
         notes = None
         if form.cleaned_data['notes']:
             notes = Notes(
@@ -906,8 +905,6 @@ def post_risk_acceptance(request, finding: Finding, eng, eid):
         del form.cleaned_data['notes']
 
         try:
-            # we sometimes see a weird exception here, but are unable to reproduce.
-            # we add some logging in case it happens
             risk_acceptance = form.save()
         except Exception as e:
             logger.debug(vars(request.POST))
@@ -915,7 +912,6 @@ def post_risk_acceptance(request, finding: Finding, eng, eid):
             logger.exception(e)
             raise
 
-        # attach note to risk acceptance object now in database
         if notes:
             risk_acceptance.notes.add(notes)
 
@@ -924,9 +920,8 @@ def post_risk_acceptance(request, finding: Finding, eng, eid):
         findings = form.cleaned_data['accepted_findings']
 
         if settings.RISK_ACCEPTANCE is True:
-            if request.user.is_superuser is True:
-                risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
-            elif request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
+            if (request.user.is_superuser is True or
+                request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
             elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request):
                 risk_acceptance = ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)

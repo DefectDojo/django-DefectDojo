@@ -12,20 +12,6 @@ import crum
 logger = logging.getLogger(__name__)
 
 
-def finding_is_black_list():
-    pass
-
-
-def get_abuse_control():
-    # se calcula el control de abuso
-    pass
-
-
-def get_number_acceptance_risk(finding):
-    # TODO: number acceptaciones
-    return 1
-
-
 def risk_acceptance_decline(
     eng: Engagement, finding: Finding, risk_acceptance: Risk_Acceptance
 ):
