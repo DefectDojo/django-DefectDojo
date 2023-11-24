@@ -213,4 +213,3 @@ class TruffleHogParser(object):
                     else:
                         return_string += f"{tab_string}{key}: {value}\n"
         return return_string
-        
