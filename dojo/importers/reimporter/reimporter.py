@@ -22,6 +22,18 @@ logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
+def add_note_if_not_exists(finding, test, user, text):
+    existing_note = finding.notes.filter(
+        entry=text % test.test_type, author=user
+    )
+    if len(existing_note) == 0:
+        note = Notes(
+            entry=text % test.test_type, author=user
+        )
+        note.save()
+        finding.notes.add(note)
+
+
 class DojoDefaultReImporter(object):
     @dojo_async_task
     @app.task(ignore_result=False)
@@ -46,20 +58,18 @@ class DojoDefaultReImporter(object):
         **kwargs,
     ):
 
-        items = parsed_findings
-        original_items = list(test.finding_set.all())
-        new_items = []
+        reimported_findings = parsed_findings
+        original_findings = list(test.finding_set.all())
+        new_findings = []
         finding_count = 0
-        finding_added_count = 0
         reactivated_count = 0
         reactivated_items = []
         unchanged_count = 0
-        unchanged_items = []
+        unchanged_findings = []
 
-        logger.debug("starting reimport of %i items.", len(items) if items else 0)
+        logger.debug("starting reimport of %i items.", len(reimported_findings) if reimported_findings else 0)
         deduplication_algorithm = test.deduplication_algorithm
 
-        i = 0
         group_names_to_findings_dict = {}
         logger.debug(
             "STEP 1: looping over findings from the reimported report and trying to match them to existing findings"
@@ -68,35 +78,35 @@ class DojoDefaultReImporter(object):
             "Algorithm used for matching new findings to existing findings: %s",
             deduplication_algorithm,
         )
-        for item in items:
+        for index, reimported_finding in enumerate(reimported_findings):
             # FIXME hack to remove when all parsers have unit tests for this attribute
-            if item.severity.lower().startswith("info") and item.severity != "Info":
-                item.severity = "Info"
+            if reimported_finding.severity.lower().startswith("info") and reimported_finding.severity != "Info":
+                reimported_finding.severity = "Info"
 
-            item.numerical_severity = Finding.get_numerical_severity(item.severity)
+            reimported_finding.numerical_severity = Finding.get_numerical_severity(reimported_finding.severity)
 
             if minimum_severity and (
-                Finding.SEVERITIES[item.severity] > Finding.SEVERITIES[minimum_severity]
+                Finding.SEVERITIES[reimported_finding.severity] > Finding.SEVERITIES[minimum_severity]
             ):
                 # finding's severity is below the configured threshold : ignoring the finding
                 continue
 
             # existing findings may be from before we had component_name/version fields
             component_name = (
-                item.component_name if hasattr(item, "component_name") else None
+                reimported_finding.component_name if hasattr(reimported_finding, "component_name") else None
             )
             component_version = (
-                item.component_version if hasattr(item, "component_version") else None
+                reimported_finding.component_version if hasattr(reimported_finding, "component_version") else None
             )
 
-            if not hasattr(item, "test"):
-                item.test = test
+            if not hasattr(reimported_finding, "test"):
+                reimported_finding.test = test
 
             if service:
-                item.service = service
+                reimported_finding.service = service
 
-            if item.dynamic_finding:
-                for e in item.unsaved_endpoints:
+            if reimported_finding.dynamic_finding:
+                for e in reimported_finding.unsaved_endpoints:
                     try:
                         e.clean()
                     except ValidationError as err:
@@ -105,257 +115,243 @@ class DojoDefaultReImporter(object):
                             "{}".format(err)
                         )
 
-            item.hash_code = item.compute_hash_code()
-            deduplicationLogger.debug("item's hash_code: %s", item.hash_code)
+            reimported_finding.hash_code = reimported_finding.compute_hash_code()
+            deduplicationLogger.debug("item's hash_code: %s", reimported_finding.hash_code)
 
-            findings = reimporter_utils.match_new_finding_to_existing_finding(
-                item, test, deduplication_algorithm
+            existing_findings = reimporter_utils.match_new_finding_to_existing_finding(
+                reimported_finding, test, deduplication_algorithm
             )
             deduplicationLogger.debug(
-                "found %i findings matching with current new finding", len(findings)
+                "found %i findings matching with current new finding", len(existing_findings)
             )
 
-            if findings:
-                # existing finding found
-                finding = findings[0]
-                if finding.false_p or finding.out_of_scope or finding.risk_accepted:
-                    logger.debug(
-                        "%i: skipping existing finding (it is marked as false positive:%s and/or out of scope:%s or is a risk accepted:%s): %i:%s:%s:%s",
-                        i,
-                        finding.false_p,
-                        finding.out_of_scope,
-                        finding.risk_accepted,
-                        finding.id,
-                        finding,
-                        finding.component_name,
-                        finding.component_version,
-                    )
-                    if (
-                        finding.false_p == item.false_p
-                        and finding.out_of_scope == item.out_of_scope
-                        and finding.risk_accepted == item.risk_accepted
-                    ):
-                        unchanged_items.append(finding)
-                        unchanged_count += 1
-                        continue
-                elif finding.is_mitigated:
+            if existing_findings:
+                # existing findings found
+                existing_finding = existing_findings[0]
+                if existing_finding.is_mitigated:
                     # if the reimported item has a mitigation time, we can compare
-                    if item.is_mitigated:
-                        unchanged_items.append(finding)
+                    if reimported_finding.is_mitigated:
+                        unchanged_findings.append(existing_finding)
                         unchanged_count += 1
-                        if item.mitigated:
+                        if reimported_finding.mitigated:
                             logger.debug(
                                 "item mitigated time: "
-                                + str(item.mitigated.timestamp())
+                                + str(reimported_finding.mitigated.timestamp())
                             )
                             logger.debug(
                                 "finding mitigated time: "
-                                + str(finding.mitigated.timestamp())
+                                + str(existing_finding.mitigated.timestamp())
                             )
-                            if (
-                                item.mitigated.timestamp()
-                                == finding.mitigated.timestamp()
-                            ):
+                            if reimported_finding.mitigated.timestamp() == existing_finding.mitigated.timestamp():
                                 logger.debug(
                                     "New imported finding and already existing finding have the same mitigation date, will skip as they are the same."
                                 )
-                                continue
-                            if (
-                                item.mitigated.timestamp()
-                                != finding.mitigated.timestamp()
-                            ):
+                            else:
                                 logger.debug(
                                     "New imported finding and already existing finding are both mitigated but have different dates, not taking action"
                                 )
                                 # TODO: implement proper date-aware reimporting mechanism, if an imported finding is closed more recently than the defectdojo finding, then there might be details in the scanner that should be added
-                                continue
-                        else:
-                            # even if there is no mitigation time, skip it, because both the current finding and the reimported finding are is_mitigated
-                            continue
+                    # existing_finding is mitigated but reimported_finding is not
                     else:
-                        if not do_not_reactivate:
-                            logger.debug(
-                                "%i: reactivating: %i:%s:%s:%s",
-                                i,
-                                finding.id,
-                                finding,
-                                finding.component_name,
-                                finding.component_version,
-                            )
-                            finding.mitigated = None
-                            finding.is_mitigated = False
-                            finding.mitigated_by = None
-                            finding.active = True
-                            if verified is not None:
-                                finding.verified = verified
                         if do_not_reactivate:
                             logger.debug(
                                 "%i: skipping reactivating by user's choice do_not_reactivate: %i:%s:%s:%s",
-                                i,
-                                finding.id,
-                                finding,
-                                finding.component_name,
-                                finding.component_version,
+                                index,
+                                existing_finding.id,
+                                existing_finding,
+                                existing_finding.component_name,
+                                existing_finding.component_version,
                             )
-                            existing_note = finding.notes.filter(
-                                entry="Finding has skipped reactivation from %s re-upload with user decision do_not_reactivate."
-                                % scan_type,
-                                author=user,
-                            )
-                            if len(existing_note) == 0:
+                            add_note_if_not_exists(existing_finding, test, user, "Finding has skipped reactivation from %s re-upload with user decision do_not_reactivate.")
+                            existing_finding.save(dedupe_option=False)
+                        else:
+                            # i.e. Reactivate findings
+                            if existing_finding.false_p or existing_finding.out_of_scope or existing_finding.risk_accepted:
+                                #  If the existing_finding in DD is in one of the above states,
+                                #  we no longer sync the scanners state similar to do_not_reactivate=True
+                                unchanged_findings.append(existing_finding)
+                                unchanged_count += 1
+                            else:
+                                logger.debug(
+                                    "%i: reactivating: %i:%s:%s:%s",
+                                    index,
+                                    existing_finding.id,
+                                    existing_finding,
+                                    existing_finding.component_name,
+                                    existing_finding.component_version,
+                                )
+                                existing_finding.mitigated = None
+                                existing_finding.is_mitigated = False
+                                existing_finding.mitigated_by = None
+                                existing_finding.active = True
+                                if verified is not None:
+                                    existing_finding.verified = verified
+                                # existing findings may be from before we had component_name/version fields
+                                existing_finding.component_name = (
+                                    existing_finding.component_name
+                                    if existing_finding.component_name
+                                    else component_name
+                                )
+                                existing_finding.component_version = (
+                                    existing_finding.component_version
+                                    if existing_finding.component_version
+                                    else component_version
+                                )
+
+                                # don't dedupe before endpoints are added
+                                existing_finding.save(dedupe_option=False)
                                 note = Notes(
-                                    entry="Finding has skipped reactivation from %s re-upload with user decision do_not_reactivate."
-                                    % scan_type,
-                                    author=user,
+                                    entry="Re-activated by %s re-upload." % scan_type, author=user
                                 )
                                 note.save()
-                                finding.notes.add(note)
-                                finding.save(dedupe_option=False)
-                            continue
-                    # existing findings may be from before we had component_name/version fields
-                    finding.component_name = (
-                        finding.component_name
-                        if finding.component_name
-                        else component_name
-                    )
-                    finding.component_version = (
-                        finding.component_version
-                        if finding.component_version
-                        else component_version
-                    )
 
-                    # don't dedupe before endpoints are added
-                    finding.save(dedupe_option=False)
-                    note = Notes(
-                        entry="Re-activated by %s re-upload." % scan_type, author=user
-                    )
-                    note.save()
+                                endpoint_statuses = existing_finding.status_finding.exclude(
+                                    Q(false_positive=True)
+                                    | Q(out_of_scope=True)
+                                    | Q(risk_accepted=True)
+                                )
+                                reimporter_utils.chunk_endpoints_and_reactivate(endpoint_statuses)
 
-                    endpoint_statuses = finding.status_finding.exclude(
-                        Q(false_positive=True)
-                        | Q(out_of_scope=True)
-                        | Q(risk_accepted=True)
-                    )
-                    reimporter_utils.chunk_endpoints_and_reactivate(endpoint_statuses)
-
-                    finding.notes.add(note)
-                    reactivated_items.append(finding)
-                    reactivated_count += 1
+                                existing_finding.notes.add(note)
+                                reactivated_items.append(existing_finding)
+                                reactivated_count += 1
+                # Existing finding is not mitigated
                 else:
-                    # if finding associated to new item is none of risk accepted, mitigated, false positive or out of scope
-                    # existing findings may be from before we had component_name/version fields
                     logger.debug(
-                        "%i: updating existing finding: %i:%s:%s:%s",
-                        i,
-                        finding.id,
-                        finding,
-                        finding.component_name,
-                        finding.component_version,
+                        "Reimported item matches a finding that is currently open."
                     )
-                    if not (finding.mitigated and finding.is_mitigated):
+                    if reimported_finding.is_mitigated:
                         logger.debug(
-                            "Reimported item matches a finding that is currently open."
+                            "Reimported mitigated item matches a finding that is currently open, closing."
                         )
-                        if item.is_mitigated:
-                            logger.debug(
-                                "Reimported mitigated item matches a finding that is currently open, closing."
-                            )
-                            # TODO: Implement a date comparison for opened defectdojo findings before closing them by reimporting, as they could be force closed by the scanner but a DD user forces it open ?
-                            logger.debug(
-                                "%i: closing: %i:%s:%s:%s",
-                                i,
-                                finding.id,
-                                finding,
-                                finding.component_name,
-                                finding.component_version,
-                            )
-                            finding.mitigated = item.mitigated
-                            finding.is_mitigated = True
-                            finding.mitigated_by = item.mitigated_by
-                            finding.active = False
+                        # TODO: Implement a date comparison for opened defectdojo findings before closing them by reimporting, as they could be force closed by the scanner but a DD user forces it open ?
+                        logger.debug(
+                            "%i: closing: %i:%s:%s:%s",
+                            index,
+                            existing_finding.id,
+                            existing_finding,
+                            existing_finding.component_name,
+                            existing_finding.component_version,
+                        )
+                        existing_finding.mitigated = reimported_finding.mitigated
+                        existing_finding.is_mitigated = True
+                        existing_finding.mitigated_by = reimported_finding.mitigated_by
+                        existing_finding.active = False
+                        if verified is not None:
+                            existing_finding.verified = verified
+                        add_note_if_not_exists(existing_finding, test, user, "Mitigated by %s re-upload.")
+                        existing_finding.save(dedupe_option=False)
+                    #  reimported_finding is not mitigated but is risk accepted by the scanner
+                    elif reimported_finding.risk_accepted:
+                        # A risk accepted finding is not explicitly mitigated, so we need to add it to avoid mitigation
+                        # as otherwise it will get mitigated in close_old_findings
+                        # keeps https://github.com/DefectDojo/django-DefectDojo/pull/7447 behaviour the same
+                        unchanged_findings.append(existing_finding)
+                        unchanged_count += 1
+                        if not existing_finding.risk_accepted:
+                            #  If the existing_finding in DD is not risk accepted
+                            #  then we risk accept it and set it to inactive
+                            logger.debug('Reimported risk_accepted item matches '
+                                         'a finding that is currently not risk_accepted.')
+                            logger.debug('%i: risk accepting: %i:%s:%s:%s', index, existing_finding.id,
+                                         existing_finding, existing_finding.component_name,
+                                         existing_finding.component_version)
+                            existing_finding.risk_accepted = reimported_finding.risk_accepted
+                            existing_finding.active = False
                             if verified is not None:
-                                finding.verified = verified
-                        elif item.risk_accepted or item.false_p or item.out_of_scope:
-                            logger.debug('Reimported mitigated item matches a finding that is currently open, closing.')
-                            logger.debug('%i: closing: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
-                            finding.risk_accepted = item.risk_accepted
-                            finding.false_p = item.false_p
-                            finding.out_of_scope = item.out_of_scope
-                            finding.active = False
-                            if verified is not None:
-                                finding.verified = verified
-                        else:
-                            # if finding is the same but list of affected was changed, finding is marked as unchanged. This is a known issue
-                            unchanged_items.append(finding)
-                            unchanged_count += 1
+                                existing_finding.verified = verified
+                            note = Notes(
+                                entry="Risk accepted by %s re-upload." % test.test_type, author=user
+                            )
+                            note.save()
+                            existing_finding.notes.add(note)
+                            existing_finding.save(dedupe_option=False)
+                    # If the scanner says the reimported_finding is either
+                    # (false positive or out of scope but not risk accepted or mitigated)
+                    # we take over these values and close the finding
+                    elif reimported_finding.false_p or reimported_finding.out_of_scope:
+                        logger.debug('Reimported false positive or out of scope'
+                                     ' item matches a finding that is currently open, closing.')
+                        logger.debug('%i: closing: %i:%s:%s:%s', index, existing_finding.id, existing_finding, existing_finding.component_name, existing_finding.component_version)
+                        existing_finding.false_p = reimported_finding.false_p
+                        existing_finding.out_of_scope = reimported_finding.out_of_scope
+                        existing_finding.active = False
+                        if verified is not None:
+                            existing_finding.verified = verified
+                        # because existing_finding is not added to unchanged_items,
+                        # it will get mitigated in close_old_findings
+                    else:
+                        # if finding is the same but list of affected was changed,
+                        # finding is marked as unchanged. This is a known issue
+                        unchanged_findings.append(existing_finding)
+                        unchanged_count += 1
 
-                    if (component_name is not None and not finding.component_name) or (
-                        component_version is not None and not finding.component_version
+                    if (component_name is not None and not existing_finding.component_name) or (
+                        component_version is not None and not existing_finding.component_version
                     ):
-                        finding.component_name = (
-                            finding.component_name
-                            if finding.component_name
+                        existing_finding.component_name = (
+                            existing_finding.component_name
+                            if existing_finding.component_name
                             else component_name
                         )
-                        finding.component_version = (
-                            finding.component_version
-                            if finding.component_version
+                        existing_finding.component_version = (
+                            existing_finding.component_version
+                            if existing_finding.component_version
                             else component_version
                         )
-                        finding.save(dedupe_option=False)
+                        existing_finding.save(dedupe_option=False)
 
-                if finding.dynamic_finding:
+                if existing_finding.dynamic_finding:
                     logger.debug(
                         "Re-import found an existing dynamic finding for this new finding. Checking the status of endpoints"
                     )
-                    reimporter_utils.update_endpoint_status(finding, item, user)
+                    reimporter_utils.update_endpoint_status(existing_finding, reimported_finding, user)
             else:
-                # no existing finding found
-                item.reporter = user
-                item.last_reviewed = timezone.now()
-                item.last_reviewed_by = user
+                # no existing finding, found
+                reimported_finding.reporter = user
+                reimported_finding.last_reviewed = timezone.now()
+                reimported_finding.last_reviewed_by = user
 
                 if active is not None:
                     # indicates an override. Otherwise, do not change the value of item.active
-                    item.active = active
+                    reimported_finding.active = active
 
                 if verified is not None:
                     # indicates an override. Otherwise, do not change the value of verified
-                    item.verified = verified
+                    reimported_finding.verified = verified
 
                 # if scan_date was provided, override value from parser
                 if scan_date:
-                    item.date = scan_date.date()
+                    reimported_finding.date = scan_date.date()
 
                 # Save it. Don't dedupe before endpoints are added.
-                item.save(dedupe_option=False)
+                reimported_finding.save(dedupe_option=False)
                 logger.debug(
                     "%i: reimport created new finding as no existing finding match: %i:%s:%s:%s",
-                    i,
-                    item.id,
-                    item,
-                    item.component_name,
-                    item.component_version,
+                    index,
+                    reimported_finding.id,
+                    reimported_finding,
+                    reimported_finding.component_name,
+                    reimported_finding.component_version,
                 )
 
                 # only new items get auto grouped to avoid confusion around already existing items that are already grouped
                 if is_finding_groups_enabled() and group_by:
                     # If finding groups are enabled, group all findings by group name
-                    name = finding_helper.get_group_by_group_name(item, group_by)
+                    name = finding_helper.get_group_by_group_name(reimported_finding, group_by)
                     if name is not None:
                         if name in group_names_to_findings_dict:
-                            group_names_to_findings_dict[name].append(item)
+                            group_names_to_findings_dict[name].append(reimported_finding)
                         else:
-                            group_names_to_findings_dict[name] = [item]
+                            group_names_to_findings_dict[name] = [reimported_finding]
 
-                finding_added_count += 1
-                new_items.append(item)
-                finding = item
+                new_findings.append(reimported_finding)
+                existing_finding = reimported_finding
 
-                if hasattr(item, "unsaved_req_resp"):
-                    for req_resp in item.unsaved_req_resp:
+                if hasattr(reimported_finding, "unsaved_req_resp"):
+                    for req_resp in reimported_finding.unsaved_req_resp:
                         burp_rr = BurpRawRequestResponse(
-                            finding=finding,
+                            finding=existing_finding,
                             burpRequestBase64=base64.b64encode(
                                 req_resp["req"].encode("utf-8")
                             ),
@@ -366,35 +362,35 @@ class DojoDefaultReImporter(object):
                         burp_rr.clean()
                         burp_rr.save()
 
-                if item.unsaved_request and item.unsaved_response:
+                if reimported_finding.unsaved_request and reimported_finding.unsaved_response:
                     burp_rr = BurpRawRequestResponse(
-                        finding=finding,
+                        finding=existing_finding,
                         burpRequestBase64=base64.b64encode(
-                            item.unsaved_request.encode()
+                            reimported_finding.unsaved_request.encode()
                         ),
                         burpResponseBase64=base64.b64encode(
-                            item.unsaved_response.encode()
+                            reimported_finding.unsaved_response.encode()
                         ),
                     )
                     burp_rr.clean()
                     burp_rr.save()
 
             # for existing findings: make sure endpoints are present or created
-            if finding:
+            if existing_finding:
                 finding_count += 1
                 importer_utils.chunk_endpoints_and_disperse(
-                    finding, test, item.unsaved_endpoints
+                    existing_finding, test, reimported_finding.unsaved_endpoints
                 )
                 if endpoints_to_add:
                     importer_utils.chunk_endpoints_and_disperse(
-                        finding, test, endpoints_to_add
+                        existing_finding, test, endpoints_to_add
                     )
 
-                if item.unsaved_tags:
-                    finding.tags = item.unsaved_tags
+                if reimported_finding.unsaved_tags:
+                    existing_finding.tags = reimported_finding.unsaved_tags
 
-                if item.unsaved_files:
-                    for unsaved_file in item.unsaved_files:
+                if reimported_finding.unsaved_files:
+                    for unsaved_file in reimported_finding.unsaved_files:
                         data = base64.b64decode(unsaved_file.get("data"))
                         title = unsaved_file.get("title", "<No title>")
                         (
@@ -405,30 +401,30 @@ class DojoDefaultReImporter(object):
                         )
                         file_upload.file.save(title, ContentFile(data))
                         file_upload.save()
-                        finding.files.add(file_upload)
+                        existing_finding.files.add(file_upload)
 
-                if finding.unsaved_vulnerability_ids:
-                    importer_utils.handle_vulnerability_ids(finding)
+                if existing_finding.unsaved_vulnerability_ids:
+                    importer_utils.handle_vulnerability_ids(existing_finding)
 
                 # existing findings may be from before we had component_name/version fields
-                finding.component_name = (
-                    finding.component_name if finding.component_name else component_name
+                existing_finding.component_name = (
+                    existing_finding.component_name if existing_finding.component_name else component_name
                 )
-                finding.component_version = (
-                    finding.component_version
-                    if finding.component_version
+                existing_finding.component_version = (
+                    existing_finding.component_version
+                    if existing_finding.component_version
                     else component_version
                 )
 
                 # finding = new finding or existing finding still in the upload report
                 # to avoid pushing a finding group multiple times, we push those outside of the loop
                 if is_finding_groups_enabled() and group_by:
-                    finding.save()
+                    existing_finding.save()
                 else:
-                    finding.save(push_to_jira=push_to_jira)
+                    existing_finding.save(push_to_jira=push_to_jira)
 
         to_mitigate = (
-            set(original_items) - set(reactivated_items) - set(unchanged_items)
+            set(original_findings) - set(reactivated_items) - set(unchanged_findings)
         )
         # due to #3958 we can have duplicates inside the same report
         # this could mean that a new finding is created and right after
@@ -436,21 +432,21 @@ class DojoDefaultReImporter(object):
         # following finding in the same report
         # this means untouched can have this finding inside it,
         # while it is in fact a new finding. So we substract new_items
-        untouched = set(unchanged_items) - set(to_mitigate) - set(new_items)
+        untouched = set(unchanged_findings) - set(to_mitigate) - set(new_findings)
 
-        for (group_name, findings) in group_names_to_findings_dict.items():
-            finding_helper.add_findings_to_auto_group(group_name, findings, group_by, create_finding_groups_for_all_findings, **kwargs)
+        for (group_name, existing_findings) in group_names_to_findings_dict.items():
+            finding_helper.add_findings_to_auto_group(group_name, existing_findings, group_by, create_finding_groups_for_all_findings, **kwargs)
             if push_to_jira:
-                if findings[0].finding_group is not None:
-                    jira_helper.push_to_jira(findings[0].finding_group)
+                if existing_findings[0].finding_group is not None:
+                    jira_helper.push_to_jira(existing_findings[0].finding_group)
                 else:
-                    jira_helper.push_to_jira(findings[0])
+                    jira_helper.push_to_jira(existing_findings[0])
 
         if is_finding_groups_enabled() and push_to_jira:
             for finding_group in set(
                 [
                     finding.finding_group
-                    for finding in reactivated_items + unchanged_items
+                    for finding in reactivated_items + unchanged_findings
                     if finding.finding_group is not None and not finding.is_mitigated
                 ]
             ):
@@ -465,7 +461,7 @@ class DojoDefaultReImporter(object):
                         finding,
                     ],
                 )
-                for finding in new_items
+                for finding in new_findings
             ]
             serialized_reactivated_items = [
                 serializers.serialize(
@@ -501,7 +497,7 @@ class DojoDefaultReImporter(object):
                 serialized_untouched,
             )
 
-        return new_items, reactivated_items, to_mitigate, untouched
+        return new_findings, reactivated_items, to_mitigate, untouched
 
     def close_old_findings(
         self, test, to_mitigate, scan_date_time, user, push_to_jira=None
@@ -528,11 +524,7 @@ class DojoDefaultReImporter(object):
                 else:
                     finding.save(push_to_jira=push_to_jira, dedupe_option=False)
 
-                note = Notes(
-                    entry="Mitigated by %s re-upload." % test.test_type, author=user
-                )
-                note.save()
-                finding.notes.add(note)
+                add_note_if_not_exists(finding, test, user, "Mitigated by %s re-upload.")
                 mitigated_findings.append(finding)
 
         if is_finding_groups_enabled() and push_to_jira:
