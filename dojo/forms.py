@@ -2082,7 +2082,7 @@ class DeleteUserForm(forms.ModelForm):
 class UserContactInfoForm(forms.ModelForm):
     class Meta:
         model = UserContactInfo
-        exclude = ['user', 'slack_user_id']
+        exclude = ['user']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

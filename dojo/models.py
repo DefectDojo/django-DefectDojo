@@ -237,8 +237,7 @@ class UserContactInfo(models.Model):
                                              "Up to 15 digits allowed."))
     twitter_username = models.CharField(blank=True, null=True, max_length=150)
     github_username = models.CharField(blank=True, null=True, max_length=150)
-    slack_username = models.CharField(blank=True, null=True, max_length=150, help_text=_("Email address associated with your slack account"), verbose_name=_('Slack Email Address'))
-    slack_user_id = models.CharField(blank=True, null=True, max_length=25)
+    slack_username = models.CharField(blank=True, null=True, max_length=150, help_text=_("Slack channel name (with optional # prefix) or ID"), verbose_name=_('Slack channel'))
     block_execution = models.BooleanField(default=False, help_text=_("Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion."))
     force_password_reset = models.BooleanField(default=False, help_text=_('Forces this user to reset their password on next login.'))
 
