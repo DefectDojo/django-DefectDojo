@@ -29,8 +29,8 @@ jobs:
 
       - name: Download OpenAPI Specifications
         run: |-
-             wget 'http://localhost:8080/api/v2/oa3/schema/?format=yaml' -O oas.yaml
-             wget 'http://localhost:8080/api/v2/oa3/schema/?format=json' -O oas.json
+             wget 'http://localhost:8080/api/v2/oa3/schema/?format=yaml' -O oas.yaml --tries=10 --retry-on-http-error=502
+             wget 'http://localhost:8080/api/v2/oa3/schema/?format=json' -O oas.json --tries=10 --retry-on-http-error=502
 
       - name: Logs
         if: always()
