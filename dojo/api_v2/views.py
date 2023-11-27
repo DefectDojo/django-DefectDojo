@@ -302,6 +302,12 @@ class DojoGroupMemberViewSet(
     def get_queryset(self):
         return get_authorized_group_members(Permissions.Group_View).distinct()
 
+    @extend_schema(
+        exclude=True
+    )
+    @swagger_auto_schema(
+        auto_schema=None
+    )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
         response = {"message": "Patch function is not offered in this path."}
@@ -2226,12 +2232,10 @@ class ProductMemberViewSet(
         ).distinct()
 
     @extend_schema(
-        request=OpenApiTypes.NONE,
-        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+        exclude=True
     )
     @swagger_auto_schema(
-        request_body=no_body,
-        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+        auto_schema=None
     )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
@@ -2294,12 +2298,10 @@ class ProductGroupViewSet(
         ).distinct()
 
     @extend_schema(
-        request=OpenApiTypes.NONE,
-        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+        exclude=True
     )
     @swagger_auto_schema(
-        request_body=no_body,
-        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+        auto_schema=None
     )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
@@ -2500,12 +2502,10 @@ class ProductTypeMemberViewSet(
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(
-        request=OpenApiTypes.NONE,
-        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+        exclude=True
     )
     @swagger_auto_schema(
-        request_body=no_body,
-        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+        auto_schema=None
     )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
@@ -2568,12 +2568,10 @@ class ProductTypeGroupViewSet(
         ).distinct()
 
     @extend_schema(
-        request=OpenApiTypes.NONE,
-        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+        exclude=True
     )
     @swagger_auto_schema(
-        request_body=no_body,
-        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+        auto_schema=None
     )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
