@@ -29,6 +29,9 @@ jobs:
     needs: oas-fetch
     runs-on: ubuntu-latest
     steps:
+      - name: Load OAS files from artifacts
+        uses: actions/download-artifact@v3
+
       - name: Create Release
         id: create_release
         uses: release-drafter/release-drafter@v5.25.0

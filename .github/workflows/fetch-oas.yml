@@ -5,8 +5,11 @@ on:
 
 jobs:
   oas_fetch:
-    name: etch OpenAPI Specifications
+    name: Fetch OpenAPI Specifications
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        file-type: [yaml, json]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,8 +32,7 @@ jobs:
 
       - name: Download OpenAPI Specifications
         run: |-
-             wget 'http://localhost:8080/api/v2/oa3/schema/?format=yaml' -O oas.yaml --tries=10 --retry-on-http-error=502
-             wget 'http://localhost:8080/api/v2/oa3/schema/?format=json' -O oas.json --tries=10 --retry-on-http-error=502
+             wget 'http://localhost:8080/api/v2/oa3/schema/?format=${{ matrix.file-type }}' -O oas.${{ matrix.file-type }} --tries=10 --retry-on-http-error=502
 
       - name: Logs
         if: always()
@@ -39,3 +41,10 @@ jobs:
       - name: Shutdown
         if: always()
         run: docker-compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env down
+
+      - name: Upload oas.${{ matrix.file-type }} as artifact
+        uses:  actions/upload-artifact@v3
+        with:
+          name: oas.${{ matrix.file-type }}
+          path: oas.${{ matrix.file-type }}
+          retention-days: 1
