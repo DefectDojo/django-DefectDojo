@@ -473,7 +473,7 @@ def view_engagement(request, eid):
             'cred_eng': cred_eng,
             'network': network,
             'preset_test_type': preset_test_type,
-            'risk_pending': settings.RISK_ACCEPTANCE
+            'risk_pending': settings.RISK_PENDING
         })
 
 
@@ -845,7 +845,7 @@ def complete_checklist(request, eid):
 
 
 def get_risk_acceptance(request, finding: Finding, eng: Engagement):
-    if settings.RISK_ACCEPTANCE:
+    if settings.RISK_PENDING:
         form = None
         risk_acceptance_title_suggestion = 'Accept: %s' % finding
         form_aux = RiskAcceptancePendingForm(severity=finding.severity,
@@ -857,7 +857,7 @@ def get_risk_acceptance(request, finding: Finding, eng: Engagement):
             form = form_aux
         elif request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
             form = form_aux
-        elif settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY.get(finding.severity).get("number_acceptors") == 0:
+        elif settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity).get("number_acceptors") == 0:
             form = form_aux
         elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request):
             risk_acceptance_title_suggestion = 'Accept: %s' % finding
@@ -874,7 +874,7 @@ def get_risk_acceptance(request, finding: Finding, eng: Engagement):
 
 
 def post_risk_acceptance(request, finding: Finding, eng, eid):
-    if settings.RISK_ACCEPTANCE:
+    if settings.RISK_PENDING:
         if any(vulnerability_id in settings.BLACK_LIST_FINDING for vulnerability_id in finding.vulnerability_ids):
             messages.add_message(request,
             messages.WARNING,
@@ -918,7 +918,7 @@ def post_risk_acceptance(request, finding: Finding, eng, eid):
 
         findings = form.cleaned_data['accepted_findings']
 
-        if settings.RISK_ACCEPTANCE is True:
+        if settings.RISK_PENDING is True:
             if (request.user.is_superuser is True or
                 request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
@@ -974,7 +974,7 @@ def add_risk_acceptance_pending(request, eid, fid):
 
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
 def add_risk_acceptance(request, eid, fid=None):
-    if settings.RISK_ACCEPTANCE:
+    if settings.RISK_PENDING:
         return add_risk_acceptance_pending(request, eid, fid)
 
     eng = get_object_or_404(Engagement, id=eid)
@@ -1181,7 +1181,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             errors = errors or not add_findings_form.is_valid()
             if not errors:
                 findings = add_findings_form.cleaned_data['accepted_findings']
-                if settings.RISK_ACCEPTANCE:
+                if settings.RISK_PENDING:
                     ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
                 else:
                     ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
@@ -1209,7 +1209,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
 
     accepted_findings = risk_acceptance.accepted_findings.order_by('numerical_severity')
     fpage = get_page_items(request, accepted_findings, 15)
-    if settings.RISK_ACCEPTANCE:
+    if settings.RISK_PENDING:
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False, severity=risk_acceptance.severity) \
             .exclude(id__in=accepted_findings).order_by("title")
     else:

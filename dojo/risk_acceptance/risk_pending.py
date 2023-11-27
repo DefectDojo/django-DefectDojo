@@ -92,7 +92,7 @@ def risk_acceptante_pending(
     status = "Failed"
     message = "Cannot perform action"
     number_of_acceptors_required = (
-        settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY.get(
+        settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(
             finding.severity
         ).get("number_acceptors")
     )
@@ -145,7 +145,7 @@ def get_confirmed_acceptors(finding: Finding):
 
 
 def get_contacts(engagement: Engagement, finding_serverity: str, user):
-    rule = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY.get(finding_serverity)
+    rule = settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding_serverity)
     product_type = engagement.product.get_product_type
     contacts = rule.get("type_contacts")
 
@@ -184,7 +184,7 @@ def rule_risk_acceptance_according_to_critical(severity, request):
     if request.user.global_role.role is None:
         raise ValueError("The user does not have a role associated")
     user_rol = request.user.global_role.role.name
-    risk_rule = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY.get(severity)
+    risk_rule = settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(severity)
     view_risk_pending = False
     if risk_rule:
         if risk_rule.get("number_acceptors") == 0 and user_rol in risk_rule.get(

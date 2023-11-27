@@ -32,7 +32,7 @@ def get_authorized_groups(permission, user=None):
         authorized_product_groups
     )
 def get_authorized_contacts(severity, queryset=None):
-    rule = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY.get(severity)
+    rule = settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(severity)
     users = []
     contacts = rule["type_contacts"]
     queryset=Product_Type.objects.all()

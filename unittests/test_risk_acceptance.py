@@ -38,7 +38,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
     }
 
     def __init__(self, *args, **kwargs):
-        settings.RISK_ACCEPTANCE = False
+        settings.RISK_PENDING = False
         DojoTestCase.__init__(self, *args, **kwargs)
 
     def setUp(self):

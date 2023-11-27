@@ -697,7 +697,7 @@ class EditRiskAcceptanceForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
         self.fields['expiration_date_warned'].disabled = True
-        # self.fields['expiration_date_handled'].disabled = True
+        self.fields['expiration_date_handled'].disabled = True
 
 class RiskPendingForm(forms.ModelForm):
     name = forms.CharField(max_length=255, required=True)
@@ -727,7 +727,7 @@ class RiskPendingForm(forms.ModelForm):
                   "recommendation", "description",
                   "path", "accepted_by", "path",
                   "expiration_date", "expiration_date_warned",
-                  "expiration_date_handled", "owner", "severity"]
+                  "expiration_date_handled", "owner"]
 
     def __init__(self, *args, **kwargs):
         severity = kwargs.pop("severity", None)
@@ -771,7 +771,7 @@ class RiskAcceptancePendingForm(EditRiskAcceptanceForm):
 
     class Meta:
         model = Risk_Acceptance
-        exclude = ['acceptances_confirmed', 'expiration_date_handled']
+        exclude = ['acceptances_confirmed', 'expiration_date_handled', 'severity']
 
     def __init__(self, *args, **kwargs):
         severity = kwargs.pop("severity", None)
@@ -798,9 +798,8 @@ class RiskAcceptancePendingForm(EditRiskAcceptanceForm):
             raise ValidationError("Accepted_by key no found")
         return data
 
+
 class RiskAcceptanceForm(EditRiskAcceptanceForm):
-   # path = forms.FileField(label="Proof", required=False, widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}))
-    # expiration_date = forms.DateTimeField(required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.none(), required=True,
         widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
@@ -819,9 +818,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
         logger.debug('expiration_delta_days: %i', expiration_delta_days)
         if expiration_delta_days > 0:
             expiration_date = timezone.now().date() + relativedelta(days=expiration_delta_days)
-            # logger.debug('setting default expiration_date: %s', expiration_date)
             self.fields['expiration_date'].initial = expiration_date
-        # self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
     
 

@@ -79,7 +79,7 @@ def query_contacts(*args):
     return contacts_dict
 
 def get_authorized_contacts(severity, queryset=None):
-    rule = settings.RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY.get(severity)
+    rule = settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(severity)
     contacts_dict = {}
     contacts_list = []
     contacts = rule["type_contacts"]

@@ -319,6 +319,35 @@ env = environ.Env(
     DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, ""),
     # Dictates whether cloud banner is created or not
     DD_CREATE_CLOUD_BANNER=(bool, True),
+
+    # ---------------RISK PENDING-------------------------
+    # The variable that allows enabling pending risk acceptance.
+    DD_RISK_PENDING=(bool, True), 
+    # Role that allows risk acceptance bypassing restrictions.
+    DD_ROLE_ALLOWED_TO_ACCEPT_RISKS=(list, ["Maintainer"]),
+    # Blacklist to define CVEs that will not be accepted for any reason.
+    DD_BLACK_LIST_FINDING=(list, [""]),
+    # Whitelist to define CVEs that can be accepted without any restrictions.
+    DD_WHITE_LIST_FINDING=(list, [""]),
+    # job: puesto de trabajo para saber que persona pueden hacer la solicitude del riesgo
+    DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY=(dict, {
+        "Low": {
+            "number_acceptors": 0,
+            "roles": ["Developer", "Reader"],
+            "type_contacts": []},
+        "Medium": {
+            "number_acceptors": 1,
+            "roles": ["Reader"],
+            "type_contacts": ["product_type_technical_contact"]},
+        "High": {
+            "number_acceptors": 2,
+            "type_contacts": ["product_type_manager", "product_type_technical_contact"],
+            "roles": ["Reader"]},
+        "Critical": {
+            "number_acceptors": 2,
+            "roles": ["Reader"],
+            "type_contacts": ["environment_manager", "environment_technical_contact"]},
+    })
 )
 
 def generate_url(scheme, double_slashes, user, password, host, port, path, params):
@@ -1826,55 +1855,10 @@ AUDITLOG_DISABLE_ON_RAW_SAVE = False
 #  You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
 ADDITIONAL_HEADERS = env("DD_ADDITIONAL_HEADERS")
 # Dictates whether cloud banner is created or not
-CREATE_CLOUD_BANNER = env('DD_CREATE_CLOUD_BANNER')
-# Risk Acceptance
-RISK_ACCEPTANCE = True
-# Role that allows unrestricted acceptance of risk
-ROLE_ALLOWED_TO_ACCEPT_RISKS=["Maintainer"]
-
-# Black List
-BLACK_LIST_FINDING = [
-    "CVE-2017-8923",
-    "CVE-2014-0114",
-    "CVE-2301-2342",
-    "CVE-2301-2356",
-    "CVE-2301-2387",
-    "CVE-2301-2365",
-    "CVE-2301-2378",
-    "CVE-2301-2333",
-    "CVE-2301-2311",
-    "CVE-2301-2324"
-]
-
-# White List
-WHITE_LIST_FINDING = [
-    "CVE-2303-2393",
-    "CVE-2303-2392",
-    "CVE-2303-2342",
-    "CVE-2303-2356",
-    "CVE-2303-2387",
-    "CVE-2303-2365",
-    "CVE-2303-2378",
-    "CVE-2303-2333",
-    "CVE-2303-2311",
-    "CVE-2303-2324"
-]
-# job: puesto de trabajo para saber que persona pueden hacer la solicitude del riesgo
-RULE_RISK_ACCEPTANCE_ACCORDING_TO_CRITICALITY={
-    "Low": {
-        "number_acceptors": 0,
-        "roles": ["Developer", "Reader"],
-        "type_contacts": []},
-    "Medium": {
-        "number_acceptors": 1,
-        "roles": ["Reader"],
-        "type_contacts": ["product_type_technical_contact"]},
-    "High": {
-        "number_acceptors": 2,
-        "type_contacts": ["product_type_manager", "product_type_technical_contact"],
-        "roles": ["Reader"]},
-    "Critical": {
-        "number_acceptors": 2,
-        "roles": ["Reader"],
-        "type_contacts": ["environment_manager", "environment_technical_contact"]},
-}
+CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
+# Risk Pending
+RISK_PENDING = env("DD_RISK_PENDING")
+ROLE_ALLOWED_TO_ACCEPT_RISKS = env("DD_ROLE_ALLOWED_TO_ACCEPT_RISKS")
+BLACK_LIST_FINDING = env("DD_BLACK_LIST_FINDING")
+WHITE_LIST_FINDING = env("DD_WHITE_LIST_FINDING")
+RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = env("DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY")
