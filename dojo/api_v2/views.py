@@ -225,12 +225,7 @@ class RoleViewSet(
 class DojoGroupViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.DojoGroupSerializer
@@ -278,12 +273,7 @@ class DojoGroupViewSet(
 class DojoGroupMemberViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.DojoGroupMemberSerializer
@@ -312,12 +302,7 @@ class DojoGroupMemberViewSet(
 class GlobalRoleViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.GlobalRoleSerializer
@@ -335,12 +320,7 @@ class GlobalRoleViewSet(
 class EndPointViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.EndpointSerializer
@@ -404,12 +384,7 @@ class EndPointViewSet(
 class EndpointStatusViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.EndpointStatusSerializer
@@ -443,13 +418,8 @@ class EndpointStatusViewSet(
 class EngagementViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
+    viewsets.ModelViewSet,
     ra_api.AcceptedRisksMixin,
-    viewsets.GenericViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.EngagementSerializer
@@ -850,12 +820,7 @@ class RiskAcceptanceViewSet(
 class AppAnalysisViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.AppAnalysisSerializer
@@ -879,12 +844,7 @@ class AppAnalysisViewSet(
 class CredentialsViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.CredentialSerializer
@@ -901,12 +861,7 @@ class CredentialsViewSet(
 class CredentialsMappingViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.CredentialMappingSerializer
@@ -928,12 +883,7 @@ class CredentialsMappingViewSet(
 
 # Authorization: configuration
 class FindingTemplatesViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.FindingTemplateSerializer
@@ -1807,12 +1757,7 @@ class FindingViewSet(
 
 # Authorization: configuration
 class JiraInstanceViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.JIRAInstanceSerializer
@@ -1826,12 +1771,7 @@ class JiraInstanceViewSet(
 class JiraIssuesViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.JIRAIssueSerializer
@@ -1862,12 +1802,7 @@ class JiraIssuesViewSet(
 class JiraProjectViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.JIRAProjectSerializer
@@ -1899,12 +1834,7 @@ class JiraProjectViewSet(
 
 # Authorization: superuser
 class SonarqubeIssueViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.SonarqubeIssueSerializer
@@ -1916,12 +1846,7 @@ class SonarqubeIssueViewSet(
 
 # Authorization: superuser
 class SonarqubeIssueTransitionViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.SonarqubeIssueTransitionSerializer
@@ -1941,12 +1866,7 @@ class SonarqubeIssueTransitionViewSet(
 class ProductAPIScanConfigurationViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.ProductAPIScanConfigurationSerializer
@@ -2006,12 +1926,7 @@ class ProductAPIScanConfigurationViewSet(
 class DojoMetaViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.MetaSerializer
@@ -2199,12 +2114,7 @@ class ProductViewSet(
 class ProductMemberViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.ProductMemberSerializer
@@ -2267,12 +2177,7 @@ class ProductMemberViewSet(
 class ProductGroupViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.ProductGroupSerializer
@@ -2335,12 +2240,7 @@ class ProductGroupViewSet(
 class ProductTypeViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.ProductTypeSerializer
@@ -2459,12 +2359,7 @@ class ProductTypeViewSet(
 class ProductTypeMemberViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.ProductTypeMemberSerializer
@@ -2541,12 +2436,7 @@ class ProductTypeMemberViewSet(
 class ProductTypeGroupViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.ProductTypeGroupSerializer
@@ -2585,12 +2475,7 @@ class ProductTypeGroupViewSet(
 class StubFindingsViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.StubFindingSerializer
@@ -2620,12 +2505,7 @@ class StubFindingsViewSet(
 
 # Authorization: authenticated, configuration
 class DevelopmentEnvironmentViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.DevelopmentEnvironmentSerializer
@@ -2638,13 +2518,8 @@ class DevelopmentEnvironmentViewSet(
 class TestsViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
+    viewsets.ModelViewSet,
     ra_api.AcceptedRisksMixin,
-    viewsets.GenericViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.TestSerializer
@@ -2923,12 +2798,7 @@ class TestTypesViewSet(
 class TestImportViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.TestImportSerializer
@@ -2993,12 +2863,7 @@ class TestImportViewSet(
 class ToolConfigurationsViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.ToolConfigurationSerializer
@@ -3022,12 +2887,7 @@ class ToolConfigurationsViewSet(
 class ToolProductSettingsViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.ToolProductSettingsSerializer
@@ -3056,12 +2916,7 @@ class ToolProductSettingsViewSet(
 
 # Authorization: configuration
 class ToolTypesViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.ToolTypeSerializer
@@ -3073,12 +2928,7 @@ class ToolTypesViewSet(
 
 # Authorization: authenticated, configuration
 class RegulationsViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.RegulationSerializer
@@ -3090,12 +2940,7 @@ class RegulationsViewSet(
 
 # Authorization: configuration
 class UsersViewSet(
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.UserSerializer
@@ -3151,12 +2996,7 @@ class UsersViewSet(
 class UserContactInfoViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.UserContactInfoSerializer
@@ -3316,12 +3156,7 @@ class EndpointMetaImporterView(
 
 # Authorization: configuration
 class LanguageTypeViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.LanguageTypeSerializer
@@ -3359,12 +3194,7 @@ class LanguageTypeViewSet(
 class LanguageViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.LanguageSerializer
@@ -3487,12 +3317,7 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 # Authorization: configuration
 class NoteTypeViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.NoteTypeSerializer
@@ -3881,12 +3706,7 @@ class SystemSettingsViewSet(
 class NotificationsViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.NotificationsSerializer
@@ -3903,12 +3723,7 @@ class NotificationsViewSet(
 class EngagementPresetsViewset(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.EngagementPresetsSerializer
@@ -3931,12 +3746,7 @@ class EngagementPresetsViewset(
 class EngagementCheckListViewset(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.EngagementCheckListSerializer
@@ -3956,12 +3766,7 @@ class EngagementCheckListViewset(
 
 
 class NetworkLocationsViewset(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.NetworkLocationsSerializer
@@ -3985,12 +3790,7 @@ class ConfigurationPermissionViewSet(
 
 
 class SLAConfigurationViewset(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.SLAConfigurationSerializer
