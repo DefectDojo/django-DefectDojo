@@ -58,7 +58,7 @@ steps:
       python manage.py makemigrations dojo
       python manage.py migrate
 
-      python manage.py test unittests -v 3 --no-input --tag broken && true
+      python manage.py test broken && true
       coverage run --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --exclude-tag broken
       coverage xml
     displayName: "Unit test"
