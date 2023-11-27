@@ -47,7 +47,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./oas.yaml
+          asset_path: ./oas-yaml/oas.yaml
           asset_name: oas.yaml
           asset_content_type: application/vnd.oai.openapi
 
@@ -58,6 +58,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./oas.json
+          asset_path: ./oas-json/oas.json
           asset_name: oas.json
           asset_content_type: application/json

@@ -45,6 +45,6 @@ jobs:
       - name: Upload oas.${{ matrix.file-type }} as artifact
         uses:  actions/upload-artifact@v3
         with:
-          name: oas.${{ matrix.file-type }}
+          name: oas-${{ matrix.file-type }}
           path: oas.${{ matrix.file-type }}
           retention-days: 1
