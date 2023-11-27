@@ -15,43 +15,37 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
-class RiskAcceptanceTestUI(DojoTestCase):
+class RiskAcceptancePendingTestUI(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
     data_risk_accceptance = {
-        'name': 'Accept: Unit test',
+        'name': 'Accept: Unit Pending',
         'accepted_findings': [72808],
         'recommendation': 'A',
         'recommendation_details': 'recommendation 1',
         'decision': 'A',
         'decision_details': 'it has been decided!',
         'accepted_by': 'pointy haired boss',
-        # 'path: (binary)
         'owner': 1,
         'expiration_date': '2021-07-15',
         'reactivate_expired': True
     }
 
-    data_remove_finding_from_ra = {
+    data_remove_finding_from_rp = {
         'remove_finding': 'Remove',
         'remove_finding_id': 666,
     }
 
     def __init__(self, *args, **kwargs):
-        settings.RISK_ACCEPTANCE = False
+        settings.RISK_ACCEPTANCE = True
         DojoTestCase.__init__(self, *args, **kwargs)
 
     def setUp(self):
         self.system_settings(enable_jira=True)
         self.client.force_login(self.get_test_admin())
 
-    def add_risk_acceptance(self, eid, data_risk_accceptance, fid=None):
-
-        if fid:
-            args = (eid, fid, )
-        else:
-            args = (eid, )
-
+    def add_risk_acceptance(self, eid, data_risk_accceptance, fid):
+        args = (eid, fid, )
         response = self.client.post(reverse('add_risk_acceptance', args=args), data_risk_accceptance)
         self.assertEqual(302, response.status_code, response.content[:1000])
         return response
@@ -86,7 +80,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
     def test_add_risk_acceptance_multiple_findings_accepted(self):
         ra_data = copy.copy(self.data_risk_accceptance)
         ra_data['accepted_findings'] = [2, 3]
-        response = self.add_risk_acceptance(1, ra_data)
+        response = self.add_risk_acceptance(1, ra_data, 2)
         self.assertEqual('/engagement/1', response.url)
         ra = Risk_Acceptance.objects.last()
         self.assert_all_active_not_risk_accepted(ra.accepted_findings.all())
@@ -112,7 +106,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
         # create risk acceptance first
         self.test_add_risk_acceptance_multiple_findings_accepted()
 
-        data = copy.copy(self.data_remove_finding_from_ra)
+        data = copy.copy(self.data_remove_finding_from_rp)
         data['remove_finding_id'] = 2
         ra = Risk_Acceptance.objects.last()
         response = self.client.post(reverse('view_risk_acceptance', args=(1, ra.id)), data)

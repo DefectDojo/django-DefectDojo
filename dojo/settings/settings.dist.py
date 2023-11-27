@@ -1828,7 +1828,7 @@ ADDITIONAL_HEADERS = env("DD_ADDITIONAL_HEADERS")
 # Dictates whether cloud banner is created or not
 CREATE_CLOUD_BANNER = env('DD_CREATE_CLOUD_BANNER')
 # Risk Acceptance
-RISK_ACCEPTANCE = False
+RISK_ACCEPTANCE = True
 # Role that allows unrestricted acceptance of risk
 ROLE_ALLOWED_TO_ACCEPT_RISKS=["Maintainer"]
 
