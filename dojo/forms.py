@@ -738,7 +738,7 @@ class RiskPendingForm(forms.ModelForm):
             expiration_date = timezone.now().date() + relativedelta(days=expiration_delta_days)
             self.fields['expiration_date'].initial = expiration_date
         self.fields['expiration_date_warned'].disabled = True
-        self.fields['expiration_date_handled'].disabled = True
+        # self.fields['expiration_date_handled'].disabled = True
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
         self.fields['accepted_by'].queryset = get_authorized_contacts(severity)
     
