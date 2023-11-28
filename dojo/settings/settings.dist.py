@@ -319,8 +319,36 @@ env = environ.Env(
     DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, ""),
     # Dictates whether cloud banner is created or not
     DD_CREATE_CLOUD_BANNER=(bool, True),
-)
 
+    # ---------------RISK PENDING-------------------------
+    # The variable that allows enabling pending risk acceptance.
+    DD_RISK_PENDING=(bool, False), 
+    # Role that allows risk acceptance bypassing restrictions.
+    DD_ROLE_ALLOWED_TO_ACCEPT_RISKS=(list, ["Maintainer"]),
+    # Blacklist to define CVEs that will not be accepted for any reason.
+    DD_BLACK_LIST_FINDING=(list, [""]),
+    # Whitelist to define CVEs that can be accepted without any restrictions.
+    DD_WHITE_LIST_FINDING=(list, [""]),
+    # job: puesto de trabajo para saber que persona pueden hacer la solicitude del riesgo
+    DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY=(dict, {
+        "Low": {
+            "number_acceptors": 0,
+            "roles": ["Developer", "Reader"],
+            "type_contacts": []},
+        "Medium": {
+            "number_acceptors": 1,
+            "roles": ["Reader"],
+            "type_contacts": ["product_type_technical_contact"]},
+        "High": {
+            "number_acceptors": 2,
+            "type_contacts": ["product_type_manager", "product_type_technical_contact"],
+            "roles": ["Reader"]},
+        "Critical": {
+            "number_acceptors": 2,
+            "roles": ["Reader"],
+            "type_contacts": ["environment_manager", "environment_technical_contact"]},
+    })
+)
 
 def generate_url(scheme, double_slashes, user, password, host, port, path, params):
     result_list = []
@@ -1835,3 +1863,9 @@ AUDITLOG_DISABLE_ON_RAW_SAVE = False
 ADDITIONAL_HEADERS = env("DD_ADDITIONAL_HEADERS")
 # Dictates whether cloud banner is created or not
 CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
+# Risk Pending
+RISK_PENDING = env("DD_RISK_PENDING")
+ROLE_ALLOWED_TO_ACCEPT_RISKS = env("DD_ROLE_ALLOWED_TO_ACCEPT_RISKS")
+BLACK_LIST_FINDING = env("DD_BLACK_LIST_FINDING")
+WHITE_LIST_FINDING = env("DD_WHITE_LIST_FINDING")
+RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = env("DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY")

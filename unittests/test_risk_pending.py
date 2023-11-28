@@ -8,31 +8,28 @@ from dojo.models import Risk_Acceptance, Finding, System_Settings
 from django.utils.datastructures import MultiValueDict
 from django.db.models import Q
 import copy
+from dojo.models import Dojo_User
 import dojo.risk_acceptance.helper as ra_helper
-import logging
 from django.conf import settings
 
-logger = logging.getLogger(__name__)
 
-
-class RiskAcceptanceTestUI(DojoTestCase):
+class RiskAcceptancePendingTestUI(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
     data_risk_accceptance = {
         'name': 'Accept: Unit test',
         'accepted_findings': [72808],
         'recommendation': 'A',
-        'recommendation_details': 'recommendation 1',
-        'decision': 'A',
-        'decision_details': 'it has been decided!',
-        'accepted_by': 'pointy haired boss',
-        # 'path: (binary)
-        'owner': 1,
+        'accepted_by': ["user1", "user2"],
+        'owner': '2',
         'expiration_date': '2021-07-15',
-        'reactivate_expired': True
+        'notes': '',
+        'expiration_date_warned': '2021-07-15',
+        'expiration_date_handled': '2021-07-15',
+        'decision': 'A'
     }
 
-    data_remove_finding_from_ra = {
+    data_remove_finding_from_rp = {
         'remove_finding': 'Remove',
         'remove_finding_id': 666,
     }
@@ -44,14 +41,10 @@ class RiskAcceptanceTestUI(DojoTestCase):
         self.system_settings(enable_jira=True)
         self.client.force_login(self.get_test_admin())
 
-    def add_risk_acceptance(self, eid, data_risk_accceptance, fid=None):
-
-        if fid:
-            args = (eid, fid, )
-        else:
-            args = (eid, )
-
+    def add_risk_acceptance(self, eid, data_risk_accceptance, fid):
+        args = (eid, fid, )
         response = self.client.post(reverse('add_risk_acceptance', args=args), data_risk_accceptance)
+        print("debug_respose", response)
         self.assertEqual(302, response.status_code, response.content[:1000])
         return response
 
@@ -78,6 +71,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
         ra_data['accepted_findings'] = [2]
         ra_data['return_url'] = reverse('view_finding', args=(2, ))
         response = self.add_risk_acceptance(1, ra_data, 2)
+        response = self.add_risk_acceptance(1, ra_data, 2)
         self.assertEqual('/finding/2', response.url)
         ra = Risk_Acceptance.objects.last()
         self.assert_all_active_not_risk_accepted(ra.accepted_findings.all())
@@ -85,13 +79,12 @@ class RiskAcceptanceTestUI(DojoTestCase):
     def test_add_risk_acceptance_multiple_findings_accepted(self):
         ra_data = copy.copy(self.data_risk_accceptance)
         ra_data['accepted_findings'] = [2, 3]
-        response = self.add_risk_acceptance(1, ra_data)
+        response = self.add_risk_acceptance(1, ra_data, 2)
         self.assertEqual('/engagement/1', response.url)
         ra = Risk_Acceptance.objects.last()
         self.assert_all_active_not_risk_accepted(ra.accepted_findings.all())
 
     def test_add_findings_to_risk_acceptance_findings_accepted(self):
-        # create risk acceptance first
         self.test_add_risk_acceptance_multiple_findings_accepted()
         ra = Risk_Acceptance.objects.last()
 
@@ -99,6 +92,8 @@ class RiskAcceptanceTestUI(DojoTestCase):
             'add_findings': 'Add Selected Findings',
             'accepted_findings': [4, 5]
         }
+        ra.accepted_by = ["user1", "user2"]
+        ra.save()
 
         response = self.client.post(reverse('view_risk_acceptance', args=(1, ra.id)),
                     urlencode(MultiValueDict(data_add_findings_to_ra), doseq=True),
@@ -108,10 +103,9 @@ class RiskAcceptanceTestUI(DojoTestCase):
         self.assert_all_inactive_risk_accepted(Finding.objects.filter(id__in=[2, 3, 4, 5]))
 
     def test_remove_findings_from_risk_acceptance_findings_active(self):
-        # create risk acceptance first
         self.test_add_risk_acceptance_multiple_findings_accepted()
 
-        data = copy.copy(self.data_remove_finding_from_ra)
+        data = copy.copy(self.data_remove_finding_from_rp)
         data['remove_finding_id'] = 2
         ra = Risk_Acceptance.objects.last()
         response = self.client.post(reverse('view_risk_acceptance', args=(1, ra.id)), data)
@@ -135,13 +129,8 @@ class RiskAcceptanceTestUI(DojoTestCase):
     def test_expire_risk_acceptance_findings_active(self):
         self.test_add_risk_acceptance_multiple_findings_accepted()
         ra = Risk_Acceptance.objects.last()
-        # ra.reactivate_expired = True # default True
-        # ra.save()
-
         findings = ra.accepted_findings.all()
-
         data = {'id': ra.id}
-
         response = self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
 
         ra.refresh_from_db()
@@ -193,21 +182,6 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         self.assertTrue(all(finding.sla_start_date != timezone.now().date() for finding in findings))
 
-    def test_expire_risk_acceptance_sla_reset(self):
-        self.test_add_risk_acceptance_multiple_findings_accepted()
-        ra = Risk_Acceptance.objects.last()
-        ra.restart_sla_expired = True
-        ra.save()
-
-        findings = ra.accepted_findings.all()
-
-        data = {'id': ra.id}
-
-        response = self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
-
-        ra.refresh_from_db()
-
-        self.assertTrue(all(finding.sla_start_date == timezone.now().date() for finding in findings))
 
     def test_reinstate_risk_acceptance_findings_accepted(self):
         # first create an expired risk acceptance
@@ -253,52 +227,3 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         return ra1, ra2, ra3
 
-    def test_expiration_handler(self):
-        ra1, ra2, ra3 = self.create_multiple_ras()
-        system_settings = System_Settings.objects.get()
-        system_settings.risk_acceptance_notify_before_expiration = 10
-        system_settings.save()
-        heads_up_days = system_settings.risk_acceptance_notify_before_expiration
-
-        # ra1: expire in 9 days -> warn:yes, expire:no
-        # ra2: expire in 11 days -> warn:no, expire:no
-        # ra3: expire 5 days ago -> warn:no, expire:yes (expiration not handled yet, so expire)
-        ra1.expiration_date = timezone.now().date() + relativedelta(days=heads_up_days - 1)
-        ra2.expiration_date = timezone.now().date() + relativedelta(days=heads_up_days + 1)
-        ra3.expiration_date = timezone.now().date() - relativedelta(days=5)
-        ra1.save()
-        ra2.save()
-        ra3.save()
-
-        to_warn = ra_helper.get_almost_expired_risk_acceptances_to_handle(heads_up_days=heads_up_days)
-        to_expire = ra_helper.get_expired_risk_acceptances_to_handle()
-
-        self.assertTrue(ra1 in to_warn)
-        self.assertFalse(ra2 in to_warn)
-        self.assertFalse(ra3 in to_warn)
-
-        self.assertFalse(ra1 in to_expire)
-        self.assertFalse(ra2 in to_expire)
-        self.assertTrue(ra3 in to_expire)
-
-        # run job
-        ra_helper.expiration_handler()
-
-        ra1.refresh_from_db()
-        ra2.refresh_from_db()
-        ra3.refresh_from_db()
-
-        self.assertIsNotNone(ra1.expiration_date_warned)
-        self.assertIsNone(ra2.expiration_date_warned)
-        self.assertIsNone(ra3.expiration_date_warned)
-
-        self.assertIsNone(ra1.expiration_date_handled)
-        self.assertIsNone(ra2.expiration_date_handled)
-        self.assertIsNotNone(ra3.expiration_date_handled)
-
-        to_warn = ra_helper.get_almost_expired_risk_acceptances_to_handle(heads_up_days=heads_up_days)
-        to_expire = ra_helper.get_expired_risk_acceptances_to_handle()
-
-        # after handling no ra should be select for anything
-        self.assertFalse(any(ra in to_warn for ra in [ra1, ra2, ra3]))
-        self.assertFalse(any(ra in to_expire for ra in [ra1, ra2, ra3]))

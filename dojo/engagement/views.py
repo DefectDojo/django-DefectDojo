@@ -25,7 +25,7 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import EngagementFilter, EngagementDirectFilter, EngagementTestFilter
 from dojo.forms import CheckForm, \
-    UploadThreatForm, RiskAcceptanceForm, NoteForm, DoneForm, \
+    UploadThreatForm, RiskAcceptanceForm, RiskAcceptancePendingForm, RiskPendingForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
     CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm, \
     EditRiskAcceptanceForm
@@ -44,6 +44,7 @@ from functools import reduce
 from django.db.models.query import Prefetch, QuerySet
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
+import dojo.risk_acceptance.risk_pending as rp_helper
 from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.finding.helper import NOT_ACCEPTED_FINDINGS_QUERY
 from django.views.decorators.vary import vary_on_cookie
@@ -327,7 +328,7 @@ def delete_engagement(request, eid):
 
     product_tab = Product_Tab(product, title="Delete Engagement", tab="engagements")
     product_tab.setEngagement(engagement)
-    return render(request, 'dojo/delete_engagement.html', {
+    return render(request, '', {
         'product_tab': product_tab,
         'engagement': engagement,
         'form': form,
@@ -472,7 +473,8 @@ def view_engagement(request, eid):
             'creds': creds,
             'cred_eng': cred_eng,
             'network': network,
-            'preset_test_type': preset_test_type
+            'preset_test_type': preset_test_type,
+            'risk_pending': settings.RISK_PENDING
         })
 
 
@@ -864,8 +866,136 @@ def complete_checklist(request, eid):
     })
 
 
+def get_risk_acceptance_pending(request, finding: Finding, eng: Engagement):
+    if settings.RISK_PENDING:
+        form = None
+        risk_acceptance_title_suggestion = 'Accept: %s' % finding
+        form_aux = RiskAcceptancePendingForm(severity=finding.severity,
+            initial={'owner': request.user,
+                    'name': risk_acceptance_title_suggestion,
+                    'accepted_by': request.user,
+                    "severity": finding.severity})
+        if request.user.is_superuser is True:
+            form = form_aux
+        elif request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
+            form = form_aux
+        elif settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity).get("number_acceptors") == 0:
+            form = form_aux
+        elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request):
+            risk_acceptance_title_suggestion = 'Accept: %s' % finding
+            form = RiskPendingForm(severity=finding.severity,
+                initial={'owner': request.user,
+                        'name': risk_acceptance_title_suggestion,
+                        'accepted_by': rp_helper.get_contacts(eng, finding.severity, request.user),
+                        "severity": finding.severity})
+    else:
+        form = RiskAcceptanceForm(severity=finding.severity, initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
+    if form is None:
+        raise ValueError("Form is None")
+    return form
+
+
+def post_risk_acceptance_pending(request, finding: Finding, eng, eid):
+    if any(vulnerability_id in settings.BLACK_LIST_FINDING for vulnerability_id in finding.vulnerability_ids):
+        messages.add_message(request,
+        messages.WARNING,
+        'This risk is on the black list',
+        extra_tags='alert-danger')
+        return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
+    if (request.user.is_superuser is True or request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
+        form = RiskAcceptancePendingForm(request.POST, request.FILES, severity=finding.severity)
+    else:
+        risk_status = rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request)
+        if risk_status:
+            form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity)
+        else:
+            form = RiskAcceptancePendingForm(request.POST, request.FILES, severity=finding.severity)
+
+    if form.is_valid():
+        notes = None
+        if form.cleaned_data['notes']:
+            notes = Notes(
+                entry=form.cleaned_data['notes'],
+                author=request.user,
+                date=timezone.now())
+            notes.save()
+
+        del form.cleaned_data['notes']
+
+        try:
+            risk_acceptance = form.save()
+        except Exception as e:
+            logger.debug(vars(request.POST))
+            logger.error(vars(form))
+            logger.exception(e)
+            raise
+
+        if notes:
+            risk_acceptance.notes.add(notes)
+
+        eng.risk_acceptance.add(risk_acceptance)
+
+        findings = form.cleaned_data['accepted_findings']
+
+        if settings.RISK_PENDING is True:
+            if (request.user.is_superuser is True or
+                request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
+                risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+            elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request):
+                risk_acceptance = ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
+            else:
+                risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+
+        messages.add_message(
+            request,
+            messages.SUCCESS,
+            'Risk acceptance saved.',
+            extra_tags='alert-success')
+
+    return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
+
+def add_risk_acceptance_pending(request, eid, fid):
+    eng = get_object_or_404(Engagement, id=eid)
+    form = None
+    finding = None
+    try:
+        if fid:
+            finding = get_object_or_404(Finding, id=fid)
+
+        if not eng.product.enable_full_risk_acceptance:
+            raise PermissionDenied()
+
+        if request.method == 'POST':
+            return post_risk_acceptance_pending(request, finding, eng, eid)
+        else:
+            form = get_risk_acceptance_pending(request, finding, eng)
+        finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        form.fields['accepted_findings'].queryset = finding_choices
+        if fid:
+            form.fields['accepted_findings'].initial = {fid}
+        product_tab = Product_Tab(eng.product, title="Risk Acceptance", tab="engagements")
+        product_tab.setEngagement(eng)
+        return render(request, 'dojo/add_risk_acceptance.html', {
+                    'eng': eng,
+                    'product_tab': product_tab,
+                    'form': form})
+    except ValueError as e:
+        messages.add_message(
+                    request,
+                    messages.ERROR,
+                    str(e),
+                    extra_tags='alert-danger')
+        return render(request, 'dojo/add_risk_acceptance.html', {
+            'form': form
+        })
+
+
+
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
 def add_risk_acceptance(request, eid, fid=None):
+    if settings.RISK_PENDING:
+        return add_risk_acceptance_pending(request, eid, fid)
+
     eng = get_object_or_404(Engagement, id=eid)
     finding = None
     if fid:
@@ -933,7 +1063,6 @@ def add_risk_acceptance(request, eid, fid=None):
                   'form': form
                   })
 
-
 @user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
 def view_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=False)
@@ -946,6 +1075,7 @@ def edit_risk_acceptance(request, eid, raid):
 
 # will only be called by view_risk_acceptance and edit_risk_acceptance
 def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
+    response = None
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
 
@@ -1024,6 +1154,29 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                 'Finding removed successfully from risk acceptance.',
                 extra_tags='alert-success')
 
+        if 'risk_accept_pending' in request.POST:
+            finding = get_object_or_404(Finding,
+                                        pk=request.POST['risk_accept_finding_id'])
+            response=rp_helper.risk_acceptante_pending(eng, finding, risk_acceptance)
+        if 'risk_accept_decline' in request.POST:
+            finding = get_object_or_404(Finding,
+                                        pk=request.POST['risk_accept_finding_id'])
+            response=rp_helper.risk_acceptance_decline(eng, finding, risk_acceptance)
+        
+        if response:
+            if response.status == "OK":
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    response.message,
+                    extra_tags='alert-success')
+            else:
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    response.message,
+                    extra_tags='alert-warning')
+
         if 'replace_file' in request.POST:
             replace_form = ReplaceRiskAcceptanceProofForm(
                 request.POST, request.FILES, instance=risk_acceptance)
@@ -1047,8 +1200,10 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             errors = errors or not add_findings_form.is_valid()
             if not errors:
                 findings = add_findings_form.cleaned_data['accepted_findings']
-
-                ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+                if settings.RISK_PENDING:
+                    ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
+                else:
+                    ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
 
                 messages.add_message(
                     request,
@@ -1073,9 +1228,12 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
 
     accepted_findings = risk_acceptance.accepted_findings.order_by('numerical_severity')
     fpage = get_page_items(request, accepted_findings, 15)
-
-    unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False) \
-        .exclude(id__in=accepted_findings).order_by("title")
+    if settings.RISK_PENDING:
+        unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False, severity=risk_acceptance.severity) \
+            .exclude(id__in=accepted_findings).order_by("title")
+    else:
+        unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False) \
+            .exclude(id__in=accepted_findings).order_by("title")
     add_fpage = get_page_items(request, unaccepted_findings, 10, 'apage')
     # on this page we need to add unaccepted findings as possible findings to add as accepted
     add_findings_form.fields[
@@ -1132,6 +1290,19 @@ def delete_risk_acceptance(request, eid, raid):
     eng = get_object_or_404(Engagement, pk=eid)
 
     ra_helper.delete(eng, risk_acceptance)
+
+    messages.add_message(
+        request,
+        messages.SUCCESS,
+        'Risk acceptance deleted successfully.',
+        extra_tags='alert-success')
+    return HttpResponseRedirect(reverse("view_engagement", args=(eng.id, )))
+
+
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
+def risk_acceptance_pending(request, eid, raid):
+    risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
+    eng = get_object_or_404(Engagement, pk=eid)
 
     messages.add_message(
         request,

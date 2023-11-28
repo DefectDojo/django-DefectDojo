@@ -107,16 +107,42 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
     post_jira_comments(risk_acceptance, [finding], unaccepted_message_creator)
 
 
-def add_findings_to_risk_acceptance(risk_acceptance, findings):
+def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
+    for finding in findings:
+        add_severity_to_risk_acceptance(risk_pending, finding.severity)
+        if not finding.duplicate:
+            finding.risk_status = "Risk Pending"
+            finding.save(dedupe_option=False)
+            risk_pending.accepted_findings.add(finding)
+    risk_pending.save()
+    title = f"{risk_pending.TREATMENT_TRANSLATIONS.get(risk_pending.recommendation)} is requested:  {str(risk_pending.engagement.name)}"
+    create_notification(event='risk_acceptance_request', title=title, risk_acceptance=risk_pending, accepted_findings=risk_pending.accepted_findings,
+    reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
+    product=risk_pending.engagement.product,
+    recipients=eval(risk_pending.accepted_by),
+    icon="bell",
+    color_icon="#1B30DE",
+    url=reverse('view_risk_acceptance', args=(risk_pending.engagement.id, risk_pending.id, )))
+    post_jira_comments(risk_pending, findings, accepted_message_creator)
+
+
+def add_severity_to_risk_acceptance(risk_acceptance: Risk_Acceptance, severity: str):
+    if risk_acceptance.severity is None:
+        risk_acceptance.severity = severity
+        risk_acceptance.save()
+
+
+def add_findings_to_risk_acceptance(risk_acceptance: Risk_Acceptance, findings):
     for finding in findings:
         if not finding.duplicate or finding.risk_accepted:
+            add_severity_to_risk_acceptance(risk_acceptance, finding.severity)
             finding.active = False
             finding.risk_accepted = True
+            finding.risk_status = "Risk Accepted"
             finding.save(dedupe_option=False)
             risk_acceptance.accepted_findings.add(finding)
     risk_acceptance.save()
 
-    # best effort jira integration, no status changes
     post_jira_comments(risk_acceptance, findings, accepted_message_creator)
 
 

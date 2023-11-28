@@ -1081,12 +1081,14 @@
                         $.get("{% url 'alerts_json' %}?limit=12", function (data) {
                             $('.dropdown-alerts').empty();
                             $.each(data, function(i, elem) {
+                            console.log(data)
                             var titleField = elem.fields.title ? elem.fields.title : elem.fields.description;
                             var display_title = titleField.length < 50 ? titleField : titleField.trim().substring(0,50).trim(this) + '...';
                             var description = elem.fields.description
+                            var color_style = elem.fields.color_icon ? elem.fields.color_icon: "#262626"
                             var display_description = description ? description.length < 100 ? description : description.trim().substring(0,100).trim(this) + '...': ''
                             var dropdown_alert = "alert-list" + i;
-                            $('.dropdown-alerts').append('<li><div style="padding: 3px 20px;"><i class="fa-solid fa-' + htmlEscape(elem.fields.icon) +
+                            $('.dropdown-alerts').append('<li><div style="padding: 3px 20px;"><i style="color:' + htmlEscape(color_style) + '" class="fa-solid fa-' + htmlEscape(elem.fields.icon) +
                                                             ' fa-fw"></i><a rel="noopener noreferrer" href="' + htmlEscape(elem.fields.url) + '" id=' + dropdown_alert +
                                                             ' title="' + htmlEscape(display_description) + '"></a><span class="pull-right text-muted small">' +
                                                         htmlEscape(elem.fields.source) + '</span></div></li><li class="divider"></li>');
