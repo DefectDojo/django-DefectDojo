@@ -192,6 +192,7 @@ class DojoModelViewSet(
 ):
     pass
 
+
 class PrefetchDojoModelViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
@@ -741,11 +742,9 @@ class EngagementViewSet(
 class RiskAcceptanceViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin,
     mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ReadOnlyModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.RiskAcceptanceSerializer
@@ -2703,11 +2702,9 @@ class TestsViewSet(
 
 # Authorization: authenticated, configuration
 class TestTypesViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ReadOnlyModelViewSet,
 ):
     serializer_class = serializers.TestTypeSerializer
     queryset = Test_Type.objects.all()
@@ -3263,10 +3260,8 @@ class NoteTypeViewSet(
 
 # Authorization: superuser
 class NotesViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ReadOnlyModelViewSet,
 ):
     serializer_class = serializers.NoteSerializer
     queryset = Notes.objects.all()
@@ -3695,7 +3690,7 @@ class NetworkLocationsViewset(
 
 # Authorization: superuser
 class ConfigurationPermissionViewSet(
-    mixins.RetrieveModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet
+    viewsets.ReadOnlyModelViewSet,
 ):
     serializer_class = serializers.ConfigurationPermissionSerializer
     queryset = Permission.objects.filter(
@@ -3716,9 +3711,7 @@ class SLAConfigurationViewset(
 
 
 class QuestionnaireQuestionViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ReadOnlyModelViewSet,
     dojo_mixins.QuestionSubClassFieldsMixin,
 ):
     serializer_class = serializers.QuestionnaireQuestionSerializer
@@ -3731,9 +3724,7 @@ class QuestionnaireQuestionViewSet(
 
 
 class QuestionnaireAnswerViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ReadOnlyModelViewSet,
     dojo_mixins.AnswerSubClassFieldsMixin,
 ):
     serializer_class = serializers.QuestionnaireAnswerSerializer
@@ -3746,7 +3737,7 @@ class QuestionnaireAnswerViewSet(
 
 
 class QuestionnaireGeneralSurveyViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    viewsets.ReadOnlyModelViewSet,
 ):
     serializer_class = serializers.QuestionnaireGeneralSurveySerializer
     queryset = General_Survey.objects.all()
@@ -3758,7 +3749,7 @@ class QuestionnaireGeneralSurveyViewSet(
 
 
 class QuestionnaireEngagementSurveyViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    viewsets.ReadOnlyModelViewSet
 ):
     serializer_class = serializers.QuestionnaireEngagementSurveySerializer
     queryset = Engagement_Survey.objects.all()
@@ -3772,9 +3763,7 @@ class QuestionnaireEngagementSurveyViewSet(
 class QuestionnaireAnsweredSurveyViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ReadOnlyModelViewSet,
 ):
     serializer_class = serializers.QuestionnaireAnsweredSurveySerializer
     queryset = Answered_Survey.objects.all()
