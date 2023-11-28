@@ -216,7 +216,7 @@ class VCGParser(object):
             return list()
 
         content = filename.read()
-
+        #  'utf-8' This line was added to pass a unittest in test_parsers.TestParsers.test_file_existence.
         if filename.name.lower().endswith(".xml"):
             return list(VCGXmlParser().parse(content, test).values())
         elif filename.name.lower().endswith(".csv"):
