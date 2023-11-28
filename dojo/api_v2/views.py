@@ -192,6 +192,13 @@ class DojoModelViewSet(
 ):
     pass
 
+class PrefetchDojoModelViewSet(
+    prefetch.PrefetchListMixin,
+    prefetch.PrefetchRetrieveMixin,
+    DojoModelViewSet,
+):
+    pass
+
 
 # Authorization: authenticated users
 class RoleViewSet(viewsets.ReadOnlyModelViewSet):
@@ -228,9 +235,7 @@ class RoleViewSet(viewsets.ReadOnlyModelViewSet):
     ),
 )
 class DojoGroupViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.DojoGroupSerializer
     queryset = Dojo_Group.objects.none()
@@ -275,9 +280,7 @@ class DojoGroupViewSet(
     ),
 )
 class DojoGroupMemberViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.DojoGroupMemberSerializer
     queryset = Dojo_Group_Member.objects.none()
@@ -303,9 +306,7 @@ class DojoGroupMemberViewSet(
 
 # Authorization: superuser
 class GlobalRoleViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.GlobalRoleSerializer
     queryset = Global_Role.objects.all()
@@ -320,9 +321,7 @@ class GlobalRoleViewSet(
 
 # Authorization: object-based
 class EndPointViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.EndpointSerializer
     queryset = Endpoint.objects.none()
@@ -383,9 +382,7 @@ class EndPointViewSet(
 
 # Authorization: object-based
 class EndpointStatusViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.EndpointStatusSerializer
     queryset = Endpoint_Status.objects.none()
@@ -416,9 +413,7 @@ class EndpointStatusViewSet(
 
 # Authorization: object-based
 class EngagementViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
     ra_api.AcceptedRisksMixin,
 ):
     serializer_class = serializers.EngagementSerializer
@@ -817,9 +812,7 @@ class RiskAcceptanceViewSet(
 # These are technologies in the UI and the API!
 # Authorization: object-based
 class AppAnalysisViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.AppAnalysisSerializer
     queryset = App_Analysis.objects.none()
@@ -840,9 +833,7 @@ class AppAnalysisViewSet(
 
 # Authorization: object-based
 class CredentialsViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.CredentialSerializer
     queryset = Cred_User.objects.all()
@@ -856,9 +847,7 @@ class CredentialsViewSet(
 
 # Authorization: configuration
 class CredentialsMappingViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.CredentialMappingSerializer
     queryset = Cred_Mapping.objects.none()
@@ -1763,9 +1752,7 @@ class JiraInstanceViewSet(
 
 # Authorization: object-based
 class JiraIssuesViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.JIRAIssueSerializer
     queryset = JIRA_Issue.objects.none()
@@ -1793,9 +1780,7 @@ class JiraIssuesViewSet(
 
 # Authorization: object-based
 class JiraProjectViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.JIRAProjectSerializer
     queryset = JIRA_Project.objects.none()
@@ -1854,9 +1839,7 @@ class SonarqubeIssueTransitionViewSet(
 
 # Authorization: object-based
 class ProductAPIScanConfigurationViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.ProductAPIScanConfigurationSerializer
     queryset = Product_API_Scan_Configuration.objects.none()
@@ -1913,9 +1896,7 @@ class ProductAPIScanConfigurationViewSet(
     ),
 )
 class DojoMetaViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.MetaSerializer
     queryset = DojoMeta.objects.none()
@@ -2100,9 +2081,7 @@ class ProductViewSet(
     ),
 )
 class ProductMemberViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.ProductMemberSerializer
     queryset = Product_Member.objects.none()
@@ -2162,9 +2141,7 @@ class ProductMemberViewSet(
     ),
 )
 class ProductGroupViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.ProductGroupSerializer
     queryset = Product_Group.objects.none()
@@ -2224,9 +2201,7 @@ class ProductGroupViewSet(
     ),
 )
 class ProductTypeViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.ProductTypeSerializer
     queryset = Product_Type.objects.none()
@@ -2342,9 +2317,7 @@ class ProductTypeViewSet(
     ),
 )
 class ProductTypeMemberViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.ProductTypeMemberSerializer
     queryset = Product_Type_Member.objects.none()
@@ -2418,9 +2391,7 @@ class ProductTypeMemberViewSet(
     ),
 )
 class ProductTypeGroupViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.ProductTypeGroupSerializer
     queryset = Product_Type_Group.objects.none()
@@ -2456,9 +2427,7 @@ class ProductTypeGroupViewSet(
 
 # Authorization: object-based
 class StubFindingsViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.StubFindingSerializer
     queryset = Stub_Finding.objects.none()
@@ -2497,9 +2466,7 @@ class DevelopmentEnvironmentViewSet(
 
 # Authorization: object-based
 class TestsViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
     ra_api.AcceptedRisksMixin,
 ):
     serializer_class = serializers.TestSerializer
@@ -2776,9 +2743,7 @@ class TestTypesViewSet(
     ),
 )
 class TestImportViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.TestImportSerializer
     queryset = Test_Import.objects.none()
@@ -2840,9 +2805,7 @@ class TestImportViewSet(
 
 # Authorization: configurations
 class ToolConfigurationsViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.ToolConfigurationSerializer
     queryset = Tool_Configuration.objects.all()
@@ -2863,9 +2826,7 @@ class ToolConfigurationsViewSet(
 
 # Authorization: object-based
 class ToolProductSettingsViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.ToolProductSettingsSerializer
     queryset = Tool_Product_Settings.objects.none()
@@ -2968,9 +2929,7 @@ class UsersViewSet(
     ),
 )
 class UserContactInfoViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.UserContactInfoSerializer
     queryset = UserContactInfo.objects.all()
@@ -3164,9 +3123,7 @@ class LanguageTypeViewSet(
     ),
 )
 class LanguageViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.LanguageSerializer
     queryset = Languages.objects.none()
@@ -3674,9 +3631,7 @@ class SystemSettingsViewSet(
     ),
 )
 class NotificationsViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.NotificationsSerializer
     queryset = Notifications.objects.all()
@@ -3690,9 +3645,7 @@ class NotificationsViewSet(
 
 
 class EngagementPresetsViewset(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.EngagementPresetsSerializer
     queryset = Engagement_Presets.objects.none()
@@ -3712,9 +3665,7 @@ class EngagementPresetsViewset(
 
 
 class EngagementCheckListViewset(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.EngagementCheckListSerializer
     queryset = Check_List.objects.none()
