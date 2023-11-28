@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 root = environ.Path(__file__) - 3  # Three folders back
 
 # reference: https://pypi.org/project/django-environ/
-env = environ.Env(
+env = environ.FileAwareEnv(
     # Set casting and default values
     DD_SITE_URL=(str, 'http://localhost:8080'),
     DD_DEBUG=(bool, False),
