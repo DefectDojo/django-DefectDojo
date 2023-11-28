@@ -116,7 +116,6 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
             risk_pending.accepted_findings.add(finding)
     risk_pending.save()
     title = f"{risk_pending.TREATMENT_TRANSLATIONS.get(risk_pending.recommendation)} is requested:  {str(risk_pending.engagement.name)}"
-    print("rene: pending", risk_pending.accepted_by)
     create_notification(event='risk_acceptance_request', title=title, risk_acceptance=risk_pending, accepted_findings=risk_pending.accepted_findings,
     reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
     product=risk_pending.engagement.product,

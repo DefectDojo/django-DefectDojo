@@ -889,9 +889,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid):
         else:
             form = RiskAcceptancePendingForm(request.POST, request.FILES, severity=finding.severity)
 
-    print("rene data", form.data)
     if form.is_valid():
-        print("rene_valid")
         notes = None
         if form.cleaned_data['notes']:
             notes = Notes(
@@ -932,8 +930,6 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid):
             'Risk acceptance saved.',
             extra_tags='alert-success')
 
-    else:
-        print(f"error_rene: {form.errors}")
     return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
 
 def add_risk_acceptance_pending(request, eid, fid):

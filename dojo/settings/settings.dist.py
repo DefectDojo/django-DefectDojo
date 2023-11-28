@@ -322,7 +322,7 @@ env = environ.Env(
 
     # ---------------RISK PENDING-------------------------
     # The variable that allows enabling pending risk acceptance.
-    DD_RISK_PENDING=(bool, True), 
+    DD_RISK_PENDING=(bool, False), 
     # Role that allows risk acceptance bypassing restrictions.
     DD_ROLE_ALLOWED_TO_ACCEPT_RISKS=(list, ["Maintainer"]),
     # Blacklist to define CVEs that will not be accepted for any reason.

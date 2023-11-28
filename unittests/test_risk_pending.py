@@ -71,9 +71,7 @@ class RiskAcceptancePendingTestUI(DojoTestCase):
         ra_data = copy.copy(self.data_risk_accceptance)
         ra_data['accepted_findings'] = [2]
         ra_data['return_url'] = reverse('view_finding', args=(2, ))
-        print("rene_debug 1 ", ra_data)
         response = self.add_risk_acceptance(1, ra_data, 2)
-        print("rene_debug 2 ", response)
         response = self.add_risk_acceptance(1, ra_data, 2)
         self.assertEqual('/finding/2', response.url)
         ra = Risk_Acceptance.objects.last()
@@ -82,9 +80,7 @@ class RiskAcceptancePendingTestUI(DojoTestCase):
     def test_add_risk_acceptance_multiple_findings_accepted(self):
         ra_data = copy.copy(self.data_risk_accceptance)
         ra_data['accepted_findings'] = [2, 3]
-        print(f"rene: {ra_data}")
         response = self.add_risk_acceptance(1, ra_data, 2)
-        print(f"rene_reponse: {response}")
         self.assertEqual('/engagement/1', response.url)
         ra = Risk_Acceptance.objects.last()
         self.assert_all_active_not_risk_accepted(ra.accepted_findings.all())
