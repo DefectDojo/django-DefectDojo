@@ -28,7 +28,7 @@ def user_is_authorized(model, permission, arg, lookup="pk", func=None):
         else:
             # Lookup value was passed as keyword argument
             lookup_value = kwargs.get(arg)
-        
+
         if not isinstance(request, WSGIRequest):
             request = args[0]
 
