@@ -844,7 +844,7 @@ def complete_checklist(request, eid):
     })
 
 
-def get_risk_acceptance(request, finding: Finding, eng: Engagement):
+def get_risk_acceptance_pending(request, finding: Finding, eng: Engagement):
     if settings.RISK_PENDING:
         form = None
         risk_acceptance_title_suggestion = 'Accept: %s' % finding
@@ -873,26 +873,25 @@ def get_risk_acceptance(request, finding: Finding, eng: Engagement):
     return form
 
 
-def post_risk_acceptance(request, finding: Finding, eng, eid):
-    if settings.RISK_PENDING:
-        if any(vulnerability_id in settings.BLACK_LIST_FINDING for vulnerability_id in finding.vulnerability_ids):
-            messages.add_message(request,
-            messages.WARNING,
-            'This risk is on the black list',
-            extra_tags='alert-danger')
-            return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
-        if (request.user.is_superuser is True or request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
-            form = RiskAcceptancePendingForm(request.POST, request.FILES, severity=finding.severity)
-        else:
-            risk_status = rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request)
-            if risk_status:
-                form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity)
-            else:
-                form = RiskAcceptancePendingForm(request.POST, request.FILES, severity=finding.severity)
+def post_risk_acceptance_pending(request, finding: Finding, eng, eid):
+    if any(vulnerability_id in settings.BLACK_LIST_FINDING for vulnerability_id in finding.vulnerability_ids):
+        messages.add_message(request,
+        messages.WARNING,
+        'This risk is on the black list',
+        extra_tags='alert-danger')
+        return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
+    if (request.user.is_superuser is True or request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
+        form = RiskAcceptancePendingForm(request.POST, request.FILES, severity=finding.severity)
     else:
-        form = RiskAcceptanceForm(request.POST, request.FILES, severity=finding.severity)
+        risk_status = rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request)
+        if risk_status:
+            form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity)
+        else:
+            form = RiskAcceptancePendingForm(request.POST, request.FILES, severity=finding.severity)
 
+    print("rene data", form.data)
     if form.is_valid():
+        print("rene_valid")
         notes = None
         if form.cleaned_data['notes']:
             notes = Notes(
@@ -933,7 +932,9 @@ def post_risk_acceptance(request, finding: Finding, eng, eid):
             'Risk acceptance saved.',
             extra_tags='alert-success')
 
-        return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
+    else:
+        print(f"error_rene: {form.errors}")
+    return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
 
 def add_risk_acceptance_pending(request, eid, fid):
     eng = get_object_or_404(Engagement, id=eid)
@@ -947,9 +948,9 @@ def add_risk_acceptance_pending(request, eid, fid):
             raise PermissionDenied()
 
         if request.method == 'POST':
-            return post_risk_acceptance(request, finding, eng, eid)
+            return post_risk_acceptance_pending(request, finding, eng, eid)
         else:
-            form = get_risk_acceptance(request, finding, eng)
+            form = get_risk_acceptance_pending(request, finding, eng)
         finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
         form.fields['accepted_findings'].queryset = finding_choices
         if fid:

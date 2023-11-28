@@ -38,7 +38,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
     }
 
     def __init__(self, *args, **kwargs):
-        settings.RISK_PENDING = False
+        settings.RISK_PENDING = False # normal flow unit tests defect-dojo
         DojoTestCase.__init__(self, *args, **kwargs)
 
     def setUp(self):
