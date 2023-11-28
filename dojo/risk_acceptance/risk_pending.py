@@ -2,7 +2,7 @@ import logging
 from typing import List
 from django.conf import settings
 from dataclasses import dataclass
-from utils.response import Response
+from dojo.utils import Response
 from django.urls import reverse
 from dojo.models import Engagement, Risk_Acceptance, Finding
 from dojo.risk_acceptance.helper import create_notification
