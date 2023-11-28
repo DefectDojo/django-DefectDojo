@@ -1260,7 +1260,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'KubeHunter Scan': ['title', 'description'],
     'kube-bench Scan': ['title', 'vuln_id_from_tool', 'description'],
     'Threagile risks report': ['title', 'cwe', "severity"],
-    'Humble Json Importer': ['title', 'description'],
+    'Humble Json Importer': ['title'],
 }
 
 # Override the hardcoded settings here via the env var
