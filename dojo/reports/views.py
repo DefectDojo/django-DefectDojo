@@ -110,7 +110,7 @@ def custom_report(request):
             return render(request,
                           'dojo/custom_html_report.html',
                           {"widgets": widgets,
-                           "host": host,
+                           "host": "",
                            "finding_notes": finding_notes,
                            "finding_images": finding_images,
                            "user_id": request.user.id})
@@ -859,7 +859,8 @@ def csv_export(request):
                             continue
                         fields.append(key)
                 except Exception as exc:
-                    logger.debug('Error in attribute: ' + str(exc))
+                    logger.error('Error in attribute: ' + str(exc))
+                    fields.append(key)
                     continue
             fields.append('test')
             fields.append('found_by')
@@ -891,7 +892,8 @@ def csv_export(request):
                             value = value.replace('\n', ' NEWLINE ').replace('\r', '')
                         fields.append(value)
                 except Exception as exc:
-                    logger.debug('Error in attribute: ' + str(exc))
+                    logger.error('Error in attribute: ' + str(exc))
+                    fields.append("Value not supported")
                     continue
             fields.append(finding.test.title)
             fields.append(finding.test.test_type.name)
@@ -955,7 +957,8 @@ def excel_export(request):
                         cell.font = font_bold
                         col_num += 1
                 except Exception as exc:
-                    logger.debug('Error in attribute: ' + str(exc))
+                    logger.error('Error in attribute: ' + str(exc))
+                    cell = worksheet.cell(row=row_num, column=col_num, value=key)
                     continue
             cell = worksheet.cell(row=row_num, column=col_num, value='found_by')
             cell.font = font_bold
@@ -998,7 +1001,8 @@ def excel_export(request):
                         worksheet.cell(row=row_num, column=col_num, value=value)
                         col_num += 1
                 except Exception as exc:
-                    logger.debug('Error in attribute: ' + str(exc))
+                    logger.error('Error in attribute: ' + str(exc))
+                    worksheet.cell(row=row_num, column=col_num, value="Value not supported")
                     continue
             worksheet.cell(row=row_num, column=col_num, value=finding.test.test_type.name)
             col_num += 1
