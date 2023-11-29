@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. /secret-file-loader.sh
+
 echo "Testing DefectDojo Service"
 
 echo "Waiting max 60s for services to start"
