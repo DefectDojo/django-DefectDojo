@@ -8,8 +8,7 @@
 for VAR_NAME in $(env | grep '^DD_[^=]\+_FILE=.\+' | sed -r "s/([^=]*)_FILE=.*/\1/g"); do
     VAR_NAME_FILE="$VAR_NAME"_FILE
     if [ -n "$(eval echo "\$$VAR_NAME")" ]; then
-        echo >&2 "ERROR: Both $VAR_NAME and $VAR_NAME_FILE are set (but are exclusive)"
-        exit 1
+        echo >&2 "WARNING: Both $VAR_NAME and $VAR_NAME_FILE are set. Content of $VAR_NAME will be overridden."
     fi
     echo "Getting secret $VAR_NAME from $(eval echo "\$$VAR_NAME_FILE")"
     export "$VAR_NAME"="$(cat "$(eval echo "\$$VAR_NAME_FILE")")"
