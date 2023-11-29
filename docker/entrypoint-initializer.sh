@@ -67,8 +67,6 @@ done
 echo
 
 echo "Making migrations"
-python3 manage.py makemigrations dojo
-echo "Migrating"
 python3 manage.py migrate
 
 echo "Admin user: ${DD_ADMIN_USER}"
