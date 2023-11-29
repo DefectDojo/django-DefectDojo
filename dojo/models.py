@@ -1716,7 +1716,6 @@ class Endpoint(models.Model):
             mitigated__isnull=True,
             false_p=False,
             duplicate=False,
-            status_finding__mitigated=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False
@@ -1731,7 +1730,6 @@ class Endpoint(models.Model):
             mitigated__isnull=True,
             false_p=False,
             duplicate=False,
-            status_finding__mitigated=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False
@@ -1786,7 +1784,6 @@ class Endpoint(models.Model):
             mitigated__isnull=True,
             false_p=False,
             duplicate=False,
-            status_finding__mitigated=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False,
@@ -1802,7 +1799,6 @@ class Endpoint(models.Model):
             mitigated__isnull=True,
             false_p=False,
             duplicate=False,
-            status_finding__mitigated=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False,
