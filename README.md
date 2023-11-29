@@ -27,13 +27,8 @@
 
 ![Screenshot of DefectDojo](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/screenshot1.png)
 
-[DefectDojo](https://www.defectdojo.com/) is a security orchestration and
-vulnerability management platform.
-DefectDojo allows you to manage your application security program, maintain
-product and application information, triage vulnerabilities and
-push findings to systems like JIRA and Slack. DefectDojo enriches and
-refines vulnerability data using a number of heuristic algorithms that
-improve with the more you use the platform.
+[DefectDojo](https://www.defectdojo.com/) is a DevSecOps, ASPM (application security posture management), and vulnerability management tool.
+DefectDojo ​​orchestrates end-to-end security testing, vulnerability tracking, deduplication, remediation, and reporting.
 
 ## Demo
 
@@ -106,8 +101,10 @@ forthcoming v3 release. See the contributing guidelines below for more details. 
 
 See our [Contributing guidelines](readme-docs/CONTRIBUTING.md)
 
-## Commercial Support and Training
-[Commercial support and training is availaible.](https://www.defectdojo.com/) For information please email info@defectdojo.com.
+## Pro Edition
+[Upgrade to DefectDojo Pro](https://www.defectdojo.com/pricing) today to take your DevSecOps to 11. DefectDojo Pro is designed to meet you wherever you are on your security journey and help you scale, with enhanced dashboards, additional smart features, tunable deduplication, and support from DevSecOps experts.
+
+Alternatively, for information please email info@defectdojo.com
 
 ## About Us
 
@@ -139,4 +136,4 @@ Please report Security issues via our [disclosure policy](readme-docs/SECURITY.m
 
 ## License
 
-DefectDojo is licensed under the [BSD-3-Clause License](LICENSE.md)
+DefectDojo is licensed under the [BSD 3-Clause License](LICENSE.md)
