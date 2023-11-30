@@ -279,7 +279,6 @@ def get_roles_with_permissions():
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
-            Permissions.Risk_Acceptance_Edit,
         },
         Roles.API_Importer: {
             Permissions.Product_Type_Add,
@@ -546,6 +545,7 @@ def get_roles_with_permissions():
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
+            Permissions.Risk_Acceptance_Edit,
         },
         Roles.Cibersecurity: {
             Permissions.Product_Type_View,
