@@ -329,23 +329,26 @@ env = environ.Env(
     DD_BLACK_LIST_FINDING=(list, [""]),
     # Whitelist to define CVEs that can be accepted without any restrictions.
     DD_WHITE_LIST_FINDING=(list, [""]),
-    # job: puesto de trabajo para saber que persona pueden hacer la solicitude del riesgo
+    # Risk severity levels: Low, Medium, High, Critical
+    # num_acceptors: number of acceptors required for risk acceptance
+    # roles: roles with permission to accept the risk
+    # type_contacts: users with allowed contact types for risk acceptance at a specific severity
     DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY=(dict, {
         "Low": {
             "number_acceptors": 0,
-            "roles": ["Developer", "Reader"],
+            "roles": ["Developer"],
             "type_contacts": []},
         "Medium": {
             "number_acceptors": 1,
-            "roles": ["Reader"],
+            "roles": ["Leader"],
             "type_contacts": ["product_type_technical_contact"]},
         "High": {
             "number_acceptors": 2,
             "type_contacts": ["product_type_manager", "product_type_technical_contact"],
-            "roles": ["Reader"]},
+            "roles": ["Leader"]},
         "Critical": {
             "number_acceptors": 2,
-            "roles": ["Reader"],
+            "roles": ["Leader"],
             "type_contacts": ["environment_manager", "environment_technical_contact"]},
     })
 )
