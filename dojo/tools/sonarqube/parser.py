@@ -56,21 +56,22 @@ class SonarQubeParser(object):
             rulesDic = dict()
             for rule in rules_table:
                 rule_properties = list(rule.iter("td"))
-                rule_name = list(rule_properties[0].iter("a"))[0].text
+                rule_name = list(rule_properties[0].iter("a"))[0].text.strip()
                 rule_details = list(rule_properties[1].iter("details"))[0]
                 rulesDic[rule_name] = rule_details
 
             for vuln in vulnerabilities_table:
                 vuln_properties = list(vuln.iter("td"))
-                vuln_rule_name = list(vuln_properties[0].iter("a"))[0].text
+                rule_key = list(vuln_properties[0].iter("a"))[0].text
+                vuln_rule_name = rule_key and rule_key.strip()
                 vuln_severity = self.convert_sonar_severity(
-                    vuln_properties[1].text
+                    vuln_properties[1].text and vuln_properties[1].text.strip()
                 )
-                vuln_file_path = vuln_properties[2].text
-                vuln_line = vuln_properties[3].text
-                vuln_title = vuln_properties[4].text
-                vuln_mitigation = vuln_properties[5].text
-                vuln_key = vuln_properties[6].text
+                vuln_file_path = vuln_properties[2].text and vuln_properties[2].text.strip()
+                vuln_line = vuln_properties[3].text and vuln_properties[3].text.strip()
+                vuln_title = vuln_properties[4].text and vuln_properties[4].text.strip()
+                vuln_mitigation = vuln_properties[5].text and vuln_properties[5].text.strip()
+                vuln_key = vuln_properties[6].text and vuln_properties[6].text.strip()
                 if vuln_title is None or vuln_mitigation is None:
                     raise ValueError(
                         "Parser ValueError: can't find a title or a mitigation for vulnerability of name "

@@ -3791,12 +3791,19 @@ class JIRA_Issue(models.Model):
         return text + " | Jira Key: " + str(self.jira_key)
 
 
+NOTIFICATION_CHOICE_SLACK = ("slack", "slack")
+NOTIFICATION_CHOICE_MSTEAMS = ("msteams", "msteams")
+NOTIFICATION_CHOICE_MAIL = ("mail", "mail")
+NOTIFICATION_CHOICE_ALERT = ("alert", "alert")
+
 NOTIFICATION_CHOICES = (
-    ("slack", "slack"), ("msteams", "msteams"), ("mail", "mail"),
-    ("alert", "alert")
+    NOTIFICATION_CHOICE_SLACK,
+    NOTIFICATION_CHOICE_MSTEAMS,
+    NOTIFICATION_CHOICE_MAIL,
+    NOTIFICATION_CHOICE_ALERT,
 )
 
-DEFAULT_NOTIFICATION = ("alert", "alert")
+DEFAULT_NOTIFICATION = NOTIFICATION_CHOICE_ALERT
 
 
 class Notifications(models.Model):
@@ -3806,6 +3813,7 @@ class Notifications(models.Model):
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
 
     scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True, help_text=_('Triggered whenever an (re-)import has been done that created/updated/closed findings.'))
+    scan_added_empty = MultiSelectField(choices=NOTIFICATION_CHOICES, default=[], blank=True, help_text=_('Triggered whenever an (re-)import has been done (even if that created/updated/closed no findings).'))
     jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True, verbose_name=_("JIRA problems"), help_text=_("JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe"))
     upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
     stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
