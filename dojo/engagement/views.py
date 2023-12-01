@@ -518,6 +518,11 @@ class ViewEngagement(View):
             available_note_types = find_available_notetypes(notes)
         form = DoneForm()
 
+        if note_type_activation:
+            form = TypedNoteForm(request.POST, available_note_types=find_available_notetypes(eng.notes.all()))
+        else:
+            form = NoteForm(request.POST)
+
         creds = Cred_Mapping.objects.filter(
             product=eng.product
         ).select_related('cred_id').order_by('cred_id')
@@ -567,10 +572,6 @@ class ViewEngagement(View):
         eng.save()
 
         note_type_activation = Note_Type.objects.filter(is_active=True).count()
-        if note_type_activation:
-            form = TypedNoteForm(request.POST, available_note_types=find_available_notetypes(eng.notes.all()))
-        else:
-            form = NoteForm(request.POST)
 
         if form.is_valid():
             new_note = form.save(commit=False)
@@ -580,11 +581,10 @@ class ViewEngagement(View):
             eng.notes.add(new_note)
 
             if note_type_activation:
-                form = TypedNoteForm(available_note_types=find_available_notetypes(eng.notes.all()))
+                form = TypedNoteForm(request.POST, available_note_types=available_note_types)
             else:
-                form = NoteForm()
+                form = NoteForm(request.POST)
 
-            url = request.build_absolute_uri(reverse("view_engagement", args=(eng.id,)))
             title = f"Engagement: {eng.name} on {eng.product.name}"
             messages.add_message(
                 request,
@@ -592,6 +592,11 @@ class ViewEngagement(View):
                 'Note added successfully.',
                 extra_tags='alert-success'
             )
+        prod = eng.product
+        product_tab = Product_Tab(
+            prod, title="View" + title + " Engagement", tab="engagements"
+        )
+        product_tab.setEngagement(eng)
 
         return render(
             request,
