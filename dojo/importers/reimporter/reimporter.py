@@ -747,15 +747,14 @@ class DojoDefaultReImporter(object):
         updated_count = (
             len(closed_findings) + len(reactivated_findings) + len(new_findings)
         )
-        if updated_count > 0:
-            notifications_helper.notify_scan_added(
-                test,
-                updated_count,
-                new_findings=new_findings,
-                findings_mitigated=closed_findings,
-                findings_reactivated=reactivated_findings,
-                findings_untouched=untouched_findings,
-            )
+        notifications_helper.notify_scan_added(
+            test,
+            updated_count,
+            new_findings=new_findings,
+            findings_mitigated=closed_findings,
+            findings_reactivated=reactivated_findings,
+            findings_untouched=untouched_findings,
+        )
 
         logger.debug("REIMPORT_SCAN: Done")
 

@@ -5,6 +5,7 @@ metadata:
   name: {{ $fullName }}-celery-worker
   labels:
     defectdojo.org/component: celery
+    defectdojo.org/subcomponent: worker
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}

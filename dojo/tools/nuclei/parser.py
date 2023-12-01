@@ -26,10 +26,21 @@ class NucleiParser(object):
         return "Import JSON output for nuclei scan report."
 
     def get_findings(self, filename, test):
-        data = [json.loads(line) for line in filename]
-        if len(data) == 0:
+        filecontent = filename.read()
+        if isinstance(filecontent, bytes):
+            filecontent = filecontent.decode("utf-8")
+        data = []
+        if filecontent == "" or len(filecontent) == 0:
             return []
-
+        elif filecontent[0] == "[":
+            content = json.loads(filecontent)
+            for template in content:
+                data.append(template)
+        elif filecontent[0] == "{":
+            file = filecontent.split('\n')
+            for line in file:
+                if line != "":
+                    data.append(json.loads(line))
         dupes = {}
         for item in data:
             logger.debug("Item %s.", str(item))

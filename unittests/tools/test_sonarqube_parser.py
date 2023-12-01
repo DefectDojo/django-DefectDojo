@@ -408,3 +408,86 @@ class TestSonarQubeParser(DojoTestCase):
         findings = parser.get_findings(my_file_handle, test)
         # specific verifications
         self.assertEqual(322, len(findings))
+
+    def test_detailed_parse_file_table_has_whitespace(self):
+        """
+        from version 3.1.1: sonarqube-report has new template with some change.
+        see: https://github.com/soprasteria/sonar-report/commit/7dab559e7ecf9ed319345e9262a8b160bd3af94f
+        Data table will have some whitespaces, parser should strip it before compare or use these properties.
+        """
+        my_file_handle, product, engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/sonar-table-in-table-with-whitespace.html"
+        )
+        parser = SonarQubeParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(1, len(findings))
+
+        # check content
+        item = findings[0]
+        self.assertEqual(str, type(findings[0].title))
+        self.assertEqual('"clone" should not be overridden', item.title)
+        self.assertEqual(int, type(item.cwe))
+        self.assertEqual(0, item.cwe)
+        self.assertEqual(bool, type(item.active))
+        self.assertEqual(True, item.active)
+        self.assertEqual(bool, type(item.verified))
+        self.assertEqual(False, item.verified)
+        self.assertEqual(str, type(item.description))
+        self.assertMultiLineEqual(
+            "Many consider clone and Cloneable broken in Java, largely because the rules for overriding clone are tricky\n"
+            "and difficult to get right, according to Joshua Bloch:\n"
+            "\n"
+            "  Object's clone method is very tricky. It's based on field copies, and it's \"extra-linguistic.\" It creates an object without calling a constructor.\n"
+            "  There are no guarantees that it preserves the invariants established by the constructors. There have been lots of bugs over the years, both in and\n"
+            "  outside Sun, stemming from the fact that if you just call super.clone repeatedly up the chain until you have cloned an object, you have a shallow\n"
+            "  copy of the object. The clone generally shares state with the object being cloned. If that state is mutable, you don't have two independent objects.\n"
+            "  If you modify one, the other changes as well. And all of a sudden, you get random behavior.\n"
+            "\n"
+            "A copy constructor or copy factory should be used instead.\n"
+            "This rule raises an issue when clone is overridden, whether or not Cloneable is implemented.\n"
+            "**Noncompliant Code Example**\n"
+            "\n"
+            "public class MyClass {\n"
+            "  // ...\n"
+            "\n"
+            "  public Object clone() { // Noncompliant\n"
+            "    //...\n"
+            "  }\n"
+            "}\n"
+            "\n"
+            "**Compliant Solution**\n"
+            "\n"
+            "public class MyClass {\n"
+            "  // ...\n"
+            "\n"
+            "  MyClass (MyClass source) {\n"
+            "    //...\n"
+            "  }\n"
+            "}",
+            item.description,
+        )
+        self.assertEqual(str, type(item.severity))
+        self.assertEqual("Critical", item.severity)
+        self.assertEqual(str, type(item.mitigation))
+        self.assertEqual(
+            'Remove this "clone" implementation; use a copy constructor or copy factory instead.',
+            item.mitigation,
+        )
+        self.assertEqual(str, type(item.references))
+        self.assertMultiLineEqual(
+            "squid:S2975\n" "Copy Constructor versus Cloning\n" "S2157\n" "S1182",
+            item.references,
+        )
+        self.assertEqual(str, type(item.file_path))
+        self.assertEqual(
+            "java/org/apache/catalina/util/URLEncoder.java", item.file_path
+        )
+        self.assertEqual(str, type(item.line))
+        self.assertEqual("190", item.line)
+        self.assertEqual(str, type(item.unique_id_from_tool))
+        self.assertEqual("AWK40IMu-pl6AHs22MnV", item.unique_id_from_tool)
+        self.assertEqual(bool, type(item.static_finding))
+        self.assertEqual(True, item.static_finding)
+        self.assertEqual(bool, type(item.dynamic_finding))
+        self.assertEqual(False, item.dynamic_finding)
