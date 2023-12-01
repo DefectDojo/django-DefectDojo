@@ -479,6 +479,9 @@ def view_engagement(request, eid):
 class ViewEngagement(View):
     def get_tests(self, engagement):
         return engagement.test_set.all().order_by('test_type__name', '-updated')
+    
+    def get_template(self):
+        return 'dojo/view_eng.html'
 
     def get(self, request, eid):
         eng = get_object_or_404(Engagement, id=eid)
@@ -534,7 +537,7 @@ class ViewEngagement(View):
 
         return render(
             request,
-            'dojo/view_eng.html',
+            self.get_template(),
             {
                 'eng': eng,
                 'product_tab': product_tab,
@@ -592,7 +595,7 @@ class ViewEngagement(View):
 
         return render(
             request,
-            'dojo/view_eng.html',
+            self.get_template(),
             {
                 'eng': eng,
                 'product_tab': Product_Tab(
@@ -617,6 +620,7 @@ class ViewEngagement(View):
                 'preset_test_type': eng.preset.test_type.all() if eng.preset else None
             },
         )
+
 
 def prefetch_for_view_tests(tests):
     prefetched = tests
