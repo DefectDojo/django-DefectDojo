@@ -479,7 +479,7 @@ def view_engagement(request, eid):
 class ViewEngagement(View):
     def get_tests(self, engagement):
         return engagement.test_set.all().order_by('test_type__name', '-updated')
-    
+
     def get_template(self):
         return 'dojo/view_eng.html'
 
