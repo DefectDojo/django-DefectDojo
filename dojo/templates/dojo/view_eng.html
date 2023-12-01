@@ -242,6 +242,7 @@
                             <table class="tablesorter-bootstrap table table-condensed table-striped">
                                 <thead>
                                     <tr>
+                                        {% block tests_header %}
                                         <th></th>
                                         <th>Title / Type</th>
                                         <th>Date</th>
@@ -254,11 +255,13 @@
                                         {% if 'TRACK_IMPORT_HISTORY'|setting_enabled %}
                                             <th>Reimports</th>
                                         {% endif %}
+                                        {% endblock tests_header %}
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for test in tests %}
                                         <tr>
+                                            {% block test_body %}
                                             <td>
                                                 <div class="dropdown">
                                                     <a href="#" id="test-menu" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
@@ -349,6 +352,7 @@
                                                     {{ test.total_reimport_count }}
                                                 </td>
                                             {% endif %}
+                                            {% endblock test_body %}
                                         </tr>
                                     {% endfor %}
                                 </tbody>

@@ -476,6 +476,148 @@ def view_engagement(request, eid):
         })
 
 
+class ViewEngagement(View):
+    def get_tests(self, engagement):
+        return engagement.test_set.all().order_by('test_type__name', '-updated')
+
+    def get(self, request, eid):
+        eng = get_object_or_404(Engagement, id=eid)
+        tests = self.get_tests(eng)
+
+        default_page_num = 10
+
+        tests_filter = EngagementTestFilter(request.GET, queryset=tests, engagement=eng)
+        paged_tests = get_page_items(request, tests_filter.qs, default_page_num)
+        paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)
+
+        prod = eng.product
+        risks_accepted = eng.risk_acceptance.all().select_related('owner').annotate(
+            accepted_findings_count=Count('accepted_findings__id')
+        )
+        preset_test_type = None
+        network = None
+        if eng.preset:
+            preset_test_type = eng.preset.test_type.all()
+            network = eng.preset.network_locations.all()
+        system_settings = System_Settings.objects.get()
+
+        jissue = jira_helper.get_jira_issue(eng)
+        jira_project = jira_helper.get_jira_project(eng)
+
+        try:
+            check = Check_List.objects.get(engagement=eng)
+        except Check_List.DoesNotExist:
+            check = None
+
+        notes = eng.notes.all()
+        note_type_activation = Note_Type.objects.filter(is_active=True).count()
+        if note_type_activation:
+            available_note_types = find_available_notetypes(notes)
+        form = DoneForm()
+
+        creds = Cred_Mapping.objects.filter(
+            product=eng.product
+        ).select_related('cred_id').order_by('cred_id')
+        cred_eng = Cred_Mapping.objects.filter(
+            engagement=eng.id
+        ).select_related('cred_id').order_by('cred_id')
+
+        add_breadcrumb(parent=eng, top_level=False, request=request)
+
+        title = ""
+        if eng.engagement_type == "CI/CD":
+            title = " CI/CD"
+        product_tab = Product_Tab(
+            prod, title="View" + title + " Engagement", tab="engagements"
+        )
+        product_tab.setEngagement(eng)
+
+        return render(
+            request,
+            'dojo/view_eng.html',
+            {
+                'eng': eng,
+                'product_tab': product_tab,
+                'system_settings': system_settings,
+                'tests': paged_tests,
+                'filter': tests_filter,
+                'check': check,
+                'threat': eng.tmodel_path,
+                'form': form,
+                'notes': notes,
+                'files': eng.files.all(),
+                'risks_accepted': risks_accepted,
+                'jissue': jissue,
+                'jira_project': jira_project,
+                'creds': creds,
+                'cred_eng': cred_eng,
+                'network': network,
+                'preset_test_type': preset_test_type
+            },
+        )
+
+    def post(self, request, eid):
+        eng = get_object_or_404(Engagement, id=eid)
+        tests = self.get_tests(eng)
+        user_has_permission_or_403(request.user, eng, Permissions.Note_Add)
+        eng.progress = 'check_list'
+        eng.save()
+
+        note_type_activation = Note_Type.objects.filter(is_active=True).count()
+        if note_type_activation:
+            form = TypedNoteForm(request.POST, available_note_types=find_available_notetypes(eng.notes.all()))
+        else:
+            form = NoteForm(request.POST)
+
+        if form.is_valid():
+            new_note = form.save(commit=False)
+            new_note.author = request.user
+            new_note.date = timezone.now()
+            new_note.save()
+            eng.notes.add(new_note)
+
+            if note_type_activation:
+                form = TypedNoteForm(available_note_types=find_available_notetypes(eng.notes.all()))
+            else:
+                form = NoteForm()
+
+            url = request.build_absolute_uri(reverse("view_engagement", args=(eng.id,)))
+            title = f"Engagement: {eng.name} on {eng.product.name}"
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Note added successfully.',
+                extra_tags='alert-success'
+            )
+
+        return render(
+            request,
+            'dojo/view_eng.html',
+            {
+                'eng': eng,
+                'product_tab': Product_Tab(
+                    eng.product,
+                    title=f"View Engagement: {eng.name}",
+                    tab="engagements"
+                ),
+                'system_settings': System_Settings.objects.get(),
+                'tests': tests,
+                'filter': EngagementTestFilter(request.GET, queryset=eng.test_set.all(), engagement=eng),
+                'check': Check_List.objects.get(engagement=eng) if Check_List.objects.filter(engagement=eng).exists() else None,
+                'threat': eng.tmodel_path,
+                'form': form,
+                'notes': eng.notes.all(),
+                'files': eng.files.all(),
+                'risks_accepted': eng.risk_acceptance.all().select_related('owner').annotate(accepted_findings_count=Count('accepted_findings__id')),
+                'jissue': jira_helper.get_jira_issue(eng),
+                'jira_project': jira_helper.get_jira_project(eng),
+                'creds': Cred_Mapping.objects.filter(product=eng.product).select_related('cred_id').order_by('cred_id'),
+                'cred_eng': Cred_Mapping.objects.filter(engagement=eng.id).select_related('cred_id').order_by('cred_id'),
+                'network': eng.preset.network_locations.all() if eng.preset else None,
+                'preset_test_type': eng.preset.test_type.all() if eng.preset else None
+            },
+        )
+
 def prefetch_for_view_tests(tests):
     prefetched = tests
     if isinstance(tests,
