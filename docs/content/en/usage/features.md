@@ -557,6 +557,9 @@ Product Type Counts
 
     ![Product Type Counts](../../images/met_2.png)
 
+Product Tag Counts
+:   Same as above, but for a group of products sharing a tag.
+
 Simple Metrics
 :   Provides tabular data for all Product Types. The data displayed in
     this view is the total number of S0, S1, S2, S3, S4, Opened This
