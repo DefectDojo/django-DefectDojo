@@ -367,8 +367,7 @@ class DojoDefaultImporter(object):
         logger.debug('IMPORT_SCAN: Generating notifications')
         notifications_helper.notify_test_created(test)
         updated_count = len(new_findings) + len(closed_findings)
-        if updated_count > 0:
-            notifications_helper.notify_scan_added(test, updated_count, new_findings=new_findings, findings_mitigated=closed_findings)
+        notifications_helper.notify_scan_added(test, updated_count, new_findings=new_findings, findings_mitigated=closed_findings)
 
         logger.debug('IMPORT_SCAN: Updating Test progress')
         importer_utils.update_test_progress(test)
