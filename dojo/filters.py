@@ -1247,7 +1247,7 @@ class ApiFindingFilter(DojoFilter):
         help_text='Comma separated list of exact tags not present on product',
         exclude='True')
     has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
-    outside_of_sla = extend_schema_field(OpenApiTypes.NUMBER)(ProductSLAFilter())
+    outside_of_sla = extend_schema_field(OpenApiTypes.NUMBER)(FindingSLAFilter())
 
     o = OrderingFilter(
         # tuple-mapping retains order
