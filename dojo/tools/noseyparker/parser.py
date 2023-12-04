@@ -17,8 +17,8 @@ class NoseyParkerParser(object):
         return "Nosey Parker Scan"
 
     def get_description_for_scan_types(self, scan_type):
-        return f"Nosey Parker report file can be imported in JSON Lines format (option --jsonl). " \
-               f"Supports v0.15.0 of https://github.com/praetorian-inc/noseyparker"
+        return "Nosey Parker report file can be imported in JSON Lines format (option --jsonl). " \
+               "Supports v0.15.0 of https://github.com/praetorian-inc/noseyparker"
 
     def get_findings(self, file, test):
         """
@@ -82,8 +82,8 @@ class NoseyParkerParser(object):
                             description=description,
                             steps_to_reproduce=reproduce,
                             severity='High',
-                            mitigation=f"Reset the account/token and remove occurrences of this secret from source "
-                                       f"code. Store secrets/tokens/passwords in secret managers or secure vaults.",
+                            mitigation="Reset the account/token and remove occurrences of this secret from source "
+                                       "code. Store secrets/tokens/passwords in secret managers or secure vaults.",
                             date=datetime.today().strftime("%Y-%m-%d"),
                             verified=False,
                             active=True,
