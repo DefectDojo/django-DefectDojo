@@ -390,6 +390,12 @@ def notify_scan_added(test, updated_count, new_findings=[], findings_mitigated=[
     findings_untouched = sorted(list(findings_untouched), key=lambda x: x.numerical_severity)
 
     title = 'Created/Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
-    create_notification(event='scan_added', title=title, findings_new=new_findings, findings_mitigated=findings_mitigated, findings_reactivated=findings_reactivated,
+
+    if updated_count == 0:
+        event = 'scan_added_empty'
+    else:
+        event = 'scan_added'
+
+    create_notification(event=event, title=title, findings_new=new_findings, findings_mitigated=findings_mitigated, findings_reactivated=findings_reactivated,
                         finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=findings_untouched,
                         url=reverse('view_test', args=(test.id,)))

@@ -2303,10 +2303,10 @@ def add_template(request):
             template.numerical_severity = Finding.get_numerical_severity(
                 template.severity
             )
+            template.save()
             finding_helper.save_vulnerability_ids_template(
                 template, form.cleaned_data["vulnerability_ids"].split()
             )
-            template.save()
             form.save_m2m()
             count = apply_cwe_mitigation(
                 form.cleaned_data["apply_to_findings"], template
