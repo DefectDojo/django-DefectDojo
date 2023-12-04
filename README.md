@@ -59,7 +59,6 @@ cd django-DefectDojo
 
 # Obtain admin credentials. The initializer can take up to 3 minutes to run.
 # Use docker compose logs -f initializer to track its progress.
-
 docker compose logs initializer | grep "Admin password:"
 ```
 
