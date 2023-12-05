@@ -758,29 +758,6 @@ REST_FRAMEWORK = {
 if API_TOKENS_ENABLED:
     REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += ('rest_framework.authentication.TokenAuthentication',)
 
-SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'basicAuth': {
-            'type': 'basic'
-        },
-        'cookieAuth': {
-            'type': 'apiKey',
-            'in': 'cookie',
-            'name': 'sessionid'
-        },
-    },
-    'DOC_EXPANSION': "none",
-    'JSON_EDITOR': True,
-    'SHOW_REQUEST_HEADERS': True,
-}
-
-if API_TOKENS_ENABLED:
-    SWAGGER_SETTINGS['SECURITY_DEFINITIONS']['tokenAuth'] = {
-        'type': 'apiKey',
-        'in': 'header',
-        'name': 'Authorization'
-    }
-
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Defect Dojo API v2',
     'DESCRIPTION': 'Defect Dojo - Open Source vulnerability Management made easy. Prefetch related parameters/responses not yet in the schema.',
@@ -854,7 +831,6 @@ INSTALLED_APPS = (
     'dbbackup',
     'django_celery_results',
     'social_django',
-    'drf_yasg',
     'drf_spectacular',
     'drf_spectacular_sidecar',  # required for Django collectstatic discovery
     'tagulous',
@@ -1088,11 +1064,6 @@ if AUTH_REMOTEUSER_ENABLED:
         ('dojo.remote_user.RemoteUserAuthentication',) + \
         REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES']
 
-    SWAGGER_SETTINGS['SECURITY_DEFINITIONS']['remoteUserAuth'] = {
-        'type': 'apiKey',
-        'in': 'header',
-        'name': AUTH_REMOTEUSER_USERNAME_HEADER[5:].replace('_', '-')
-    }
 # ------------------------------------------------------------------------------
 # CELERY
 # ------------------------------------------------------------------------------
