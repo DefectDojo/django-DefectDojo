@@ -2932,17 +2932,9 @@ class LoginBanner(forms.Form):
 
 
 class AnnouncementCreateForm(forms.ModelForm):
-    dismissable = forms.BooleanField(
-        label=_('Dismissable?'),
-        initial=False,
-        required=False,
-        help_text=_('Ticking this box allows users to dismiss the current announcement')
-    )
-
     class Meta:
         model = Announcement
-        fields = ['message', 'style']
-
+        fields = "__all__"
 
 class AnnouncementRemoveForm(AnnouncementCreateForm):
     def __init__(self, *args, **kwargs):

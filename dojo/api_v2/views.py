@@ -82,6 +82,7 @@ from dojo.models import (
     Answered_Survey,
     General_Survey,
     Check_List,
+    Announcement,
 )
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import (
@@ -3777,3 +3778,21 @@ class QuestionnaireAnsweredSurveyViewSet(
         ],
         serializers.QuestionnaireAnsweredSurveySerializer,
     ).to_schema()
+
+
+# Authorization: configuration
+class AnnouncementViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+    dojo_mixins.DeletePreviewModelMixin,
+):
+    serializer_class = serializers.AnnouncementSerializer
+    queryset = Announcement.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = "__all__"
+    permission_classes = (permissions.UserHasConfigurationPermissionStaff,)
+
