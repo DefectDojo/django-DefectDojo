@@ -20,14 +20,14 @@ from dojo.api_v2.views import \
     SonarqubeIssueTransitionViewSet, StubFindingsViewSet, SystemSettingsViewSet, \
     TestTypesViewSet, TestsViewSet, ToolConfigurationsViewSet, ToolProductSettingsViewSet, \
     ToolTypesViewSet, UsersViewSet, JiraIssuesViewSet, JiraProjectViewSet, AppAnalysisViewSet, \
-    LanguageTypeViewSet, LanguageViewSet
+    LanguageTypeViewSet, LanguageViewSet, AnnouncementViewSet
 
 from dojo.models import \
     Development_Environment, Endpoint_Status, Endpoint, Engagement, Finding_Template, \
     Finding, JIRA_Instance, JIRA_Issue, DojoMeta, Note_Type, Notes, Product_Type, Product, Regulation, \
     Sonarqube_Issue, Product_API_Scan_Configuration, Sonarqube_Issue_Transition, \
     Stub_Finding, System_Settings, Test_Type, Test, Tool_Configuration, Tool_Product_Settings, \
-    Tool_Type, Dojo_User, JIRA_Project, App_Analysis, Language_Type, Languages
+    Tool_Type, Dojo_User, JIRA_Project, App_Analysis, Language_Type, Languages, Announcement
 
 from dojo.api_v2.serializers import \
     DevelopmentEnvironmentSerializer, EndpointStatusSerializer, EndpointSerializer, \
@@ -37,7 +37,7 @@ from dojo.api_v2.serializers import \
     SonarqubeIssueSerializer, ProductAPIScanConfigurationSerializer, SonarqubeIssueTransitionSerializer, \
     StubFindingSerializer, SystemSettingsSerializer, TestTypeSerializer, TestSerializer, ToolConfigurationSerializer, \
     ToolProductSettingsSerializer, ToolTypeSerializer, UserSerializer, NoteSerializer, ProductTypeSerializer, \
-    AppAnalysisSerializer, LanguageTypeSerializer, LanguageSerializer
+    AppAnalysisSerializer, LanguageTypeSerializer, LanguageSerializer, AnnouncementSerializer
 
 SWAGGER_SCHEMA_GENERATOR = OpenAPISchemaGenerator(Info("defectdojo", "v2"))
 BASE_API_URL = "/api/v2"
@@ -818,3 +818,15 @@ class LanguageTest(BaseClass.SchemaTest):
 
     def test_post_endpoint(self):
         super().test_post_endpoint(extra_data={"language": 2})
+
+
+class AnnouncementTest(BaseClass.SchemaTest):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.viewname = "announcements"
+        self.viewset = AnnouncementViewSet
+        self.model = Announcement
+        self.serializer = AnnouncementSerializer
+
+    def test_post_endpoint(self, extra_data=[], extra_args=None):
+        self.skipTest('Only one Announcement can exists')
