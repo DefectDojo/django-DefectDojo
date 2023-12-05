@@ -2842,7 +2842,7 @@ class AnnouncementTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
-        self.endpoint_model = Finding_Template
+        self.endpoint_model = Announcement
         self.endpoint_path = 'announcements'
         self.viewname = 'announcement'
         self.viewset = AnnouncementViewSet
