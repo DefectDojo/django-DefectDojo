@@ -7,13 +7,13 @@ weight: 1
 
 ## Import
 
-The importers analyze each report and create new findings for each item
-reported. DefectDojo collapses duplicate findings by capturing the
+The importers analyze each report and create new Findings for each item
+reported. DefectDojo collapses duplicate Findings by capturing the
 individual hosts vulnerable.
 
 ![Import Form](../../images/imp_1.png)
 
-This approach will create a new Test for each upload. This can result in a lot of findings. If deduplication is enabled, new findings that are identical to existing findings get marked as a duplicate.
+This approach will create a new Test for each upload. This can result in a lot of findings. If deduplication is enabled, new Findings that are identical to existing Findings get marked as a duplicate.
 
 ## Reimport
 
@@ -39,7 +39,7 @@ Clicking on a reimport changset will show the affected findings, as well as a st
 ### Triage-less scanners
 Some scanners might not include triage information in their reports (e.g. tfsec). They simply scan code or dependencies, flag issues, and return everything. Removing some findings requires you to add comments in your code perhaps, but there is no simple way to filter out findings from the reports.
 
-That is why DefectDojo also includes a "Do not reactivate" checkbox in uploading reports (also in the reimport API), so you can persist the triages that have been done in Defectdojo without reactivating findings on every upload.
+That is why DefectDojo also includes a "Do not reactivate" checkbox in uploading reports (also in the reimport API), so you can persist the triages that have been done in Defectdojo without reactivating Findings on every upload.
 
 For context, see [#6892](https://github.com/DefectDojo/django-DefectDojo/issues/6892)
 
@@ -112,7 +112,7 @@ When `do_not_reactivate` is `True`, the importing/reimporting will ignore upload
 
 A reimport will automatically select the latest test inside the provided engagement that satisifes the provided `scan_type` and (optionally) provided `test_title`.
 
-If no existing test is found, the reimport endpoint will use the import function to import the provided report into a new test. This means a (CI/CD) script using the API doesn't need to know if a test already exist, or if it is a first time upload for this product / engagement.
+If no existing Test is found, the reimport endpoint will use the import function to import the provided report into a new Test. This means a (CI/CD) script using the API doesn't need to know if a Test already exists, or if it is a first time upload for this Product / Engagement.
 
 A classic way of reimporting a scan is by specifying the ID of the test instead:
 
