@@ -2936,6 +2936,7 @@ class AnnouncementCreateForm(forms.ModelForm):
         model = Announcement
         fields = "__all__"
 
+
 class AnnouncementRemoveForm(AnnouncementCreateForm):
     def __init__(self, *args, **kwargs):
         super(AnnouncementRemoveForm, self).__init__(*args, **kwargs)

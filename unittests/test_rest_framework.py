@@ -12,7 +12,7 @@ from dojo.models import Development_Environment, Product, Engagement, Test, Find
     Product_Group, Global_Role, Dojo_Group_Member, Language_Type, Languages, \
     Notifications, UserContactInfo, Cred_Mapping, Cred_User, \
     TextQuestion, ChoiceQuestion, TextAnswer, ChoiceAnswer, Engagement_Survey, \
-    Answered_Survey, General_Survey
+    Answered_Survey, General_Survey, Announcement
 from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
@@ -26,7 +26,8 @@ from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, En
     NotificationsViewSet, UserContactInfoViewSet, ProductAPIScanConfigurationViewSet, \
     ConfigurationPermissionViewSet, CredentialsMappingViewSet, \
     CredentialsViewSet, QuestionnaireQuestionViewSet, QuestionnaireAnswerViewSet, \
-    QuestionnaireGeneralSurveyViewSet, QuestionnaireEngagementSurveyViewSet, QuestionnaireAnsweredSurveyViewSet
+    QuestionnaireGeneralSurveyViewSet, QuestionnaireEngagementSurveyViewSet, QuestionnaireAnsweredSurveyViewSet, \
+    AnnouncementViewSet
 from json import dumps
 from enum import Enum
 from django.urls import reverse
@@ -2835,3 +2836,31 @@ class AnsweredSurveyTest(BaseClass.RESTEndpointTest):
         self.test_type = TestType.STANDARD
         self.deleted_objects = 5
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class AnnouncementTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Finding_Template
+        self.endpoint_path = 'announcements'
+        self.viewname = 'announcement'
+        self.viewset = AnnouncementViewSet
+        self.payload = {
+            "message": "Test template",
+            "style": "info",
+            "dismissable": True,
+        }
+        self.update_fields = {'style': 'warning'}
+        self.test_type = TestType.CONFIGURATION_PERMISSIONS
+        self.deleted_objects = 7
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_create(self):
+        length = self.endpoint_model.objects.count()
+        response = self.client.post(self.url, self.payload)
+        logger.debug('test_create_response:')
+        logger.debug(response)
+        logger.debug(response.data)
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("No more than one Announcement is allowed", str(response.content))

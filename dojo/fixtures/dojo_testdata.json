@@ -2988,5 +2988,14 @@
       "is_authn_provider": false,
       "url": "https://google.com"
     }
+  },
+  {
+    "model": "dojo.announcement",
+    "pk": 1,
+    "fields": {
+      "message": "test message",
+      "dismissable": true,
+      "style": "danger"
+    }
   }
 ]

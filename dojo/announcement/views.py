@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect
 from dojo.utils import add_breadcrumb
 
 from dojo.forms import AnnouncementCreateForm, AnnouncementRemoveForm
-from dojo.models import Announcement, UserAnnouncement, Dojo_User
+from dojo.models import Announcement, UserAnnouncement
 from dojo.authorization.authorization_decorators import (
     user_is_configuration_authorized,
 )
