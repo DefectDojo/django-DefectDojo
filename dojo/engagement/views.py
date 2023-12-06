@@ -870,16 +870,15 @@ def get_risk_acceptance_pending(request, finding: Finding, eng: Engagement):
     if settings.RISK_PENDING:
         form = None
         risk_acceptance_title_suggestion = 'Accept: %s' % finding
-        form_aux = RiskAcceptancePendingForm(severity=finding.severity,
+        form_aux = RiskPendingForm(severity=finding.severity,
             initial={'owner': request.user,
                     'name': risk_acceptance_title_suggestion,
                     'accepted_by': request.user,
                     "severity": finding.severity})
-        if request.user.is_superuser is True:
-            form = form_aux
-        elif request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
-            form = form_aux
-        elif settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity).get("number_acceptors") == 0:
+        if (
+            request.user.is_superuser is True or
+            request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS or
+            settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity).get("number_acceptors") == 0):
             form = form_aux
         elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request):
             risk_acceptance_title_suggestion = 'Accept: %s' % finding
