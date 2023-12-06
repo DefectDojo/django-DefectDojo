@@ -3,8 +3,9 @@ name: Shellcheck
 on:
   pull_request:
 env:
-  SHELLCHECK_VERSION: 'v0.9.0'
   SHELLCHECK_REPO: 'koalaman/shellcheck'
+  SHELLCHECK_VERSION: 'v0.9.0'
+  SHELLCHECK_SHA: '038fd81de6b7e20cc651571362683853670cdc71'
 jobs:
   shellcheck:
     runs-on: ubuntu-latest
@@ -19,6 +20,11 @@ jobs:
           SHELLCHECK_TARBALL_URL="https://github.com/${SHELLCHECK_REPO}/releases/download/${SHELLCHECK_VERSION}/shellcheck-${SHELLCHECK_VERSION}.linux.x86_64.tar.xz"
           SHELLCHECK_TARBALL_LOC="shellcheck.tar.xz"
           curl -L "${SHELLCHECK_TARBALL_URL}" -o "${SHELLCHECK_TARBALL_LOC}"
+          tarball_sha=$(shasum ${SHELLCHECK_TARBALL_LOC} | awk '{print $1}')
+          if [ "${tarball_sha}" != "${SHELLCHECK_SHA}" ]; then
+            echo "Got invalid SHA for shellcheck: ${tarball_sha}"
+            exit 1
+          fi
           tar -xvf "${SHELLCHECK_TARBALL_LOC}"
           cd "shellcheck-${SHELLCHECK_VERSION}" || exit 1
           mv shellcheck "${GITHUB_WORKSPACE}/shellcheck"
