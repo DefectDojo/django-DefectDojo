@@ -98,12 +98,12 @@ jobs:
               find . -name "*.sh" -or -name "*.bash" | sed 's#^\./##' > "${shell_scripts}"
               git diff --name-only "origin/${GITHUB_BASE_REF}" HEAD > "${modified_files}"
 
-              if [ ! -f "${shell_scripts}" ] || [ ! -f "${modified_files}" ]; then
+              if [ ! -s "${shell_scripts}" ] || [ ! -s "${modified_files}" ]; then
                   echo "No modified shell scripts detected"
                   exit 0
               fi
 
-              grep -Fxf "${shell_scripts}" "${modified_files}" > "${modified_shell_scripts}"
+              grep -Fxf "${shell_scripts}" "${modified_files}" > "${modified_shell_scripts}" || true # Avoid failing when no matching files are found
           }
 
           git fetch origin "${GITHUB_BASE_REF}" || exit 1
