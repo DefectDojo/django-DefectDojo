@@ -103,7 +103,10 @@ jobs:
                   exit 0
               fi
 
-              grep -Fxf "${shell_scripts}" "${modified_files}" > "${modified_shell_scripts}" || true # Avoid failing when no matching files are found
+              if ! grep -Fxf "${shell_scripts}" "${modified_files}" > "${modified_shell_scripts}"; then
+                echo "No modified shell scripts detected"
+                exit 0
+              fi
           }
 
           git fetch origin "${GITHUB_BASE_REF}" || exit 1
