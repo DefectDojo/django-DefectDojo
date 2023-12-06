@@ -3563,7 +3563,7 @@ def report_generate(request, obj, options):
                 )
             ),
         )
-        
+
         if len(findings.qs) > 0:
             start_date = timezone.make_aware(
                 datetime.combine(findings.qs.last().date, datetime.min.time())
