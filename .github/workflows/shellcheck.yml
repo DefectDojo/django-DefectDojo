@@ -33,7 +33,6 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          set -x
 
           # Make sure we already put the proper shellcheck binary in place
           if [ ! -f "./shellcheck" ]; then
