@@ -88,7 +88,7 @@ class MobSFParser(object):
         # Mobile Permissions
         if "permissions" in data:
             # for permission, details in data["permissions"].items():
-            if type(data["permissions"]) is list:
+            if isinstance(data["permissions"], list):
                 for details in data["permissions"]:
                     mobsf_item = {
                         "category": "Mobile Permissions",
@@ -127,7 +127,7 @@ class MobSFParser(object):
 
         # Binary Analysis
         if "binary_analysis" in data:
-            if type(data["binary_analysis"]) is list:
+            if isinstance(data["binary_analysis"], list):
                 for details in data["binary_analysis"]:
                     for binary_analysis_type in details:
                         if "name" != binary_analysis_type:

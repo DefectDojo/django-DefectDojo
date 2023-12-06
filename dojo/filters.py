@@ -220,7 +220,7 @@ def cwe_options(queryset):
     cwe = dict()
     cwe = dict([cwe, cwe]
                 for cwe in queryset.order_by().values_list('cwe', flat=True).distinct()
-                if type(cwe) is int and cwe is not None and cwe > 0)
+                if isinstance(cwe, int) and cwe is not None and cwe > 0)
     cwe = collections.OrderedDict(sorted(cwe.items()))
     return list(cwe.items())
 
@@ -259,7 +259,7 @@ def get_tags_model_from_field_name(field):
         parts = field.split('__')
         model_name = parts[-2]
         return apps.get_model('dojo.%s' % model_name, require_ready=True), exclude
-    except Exception as e:
+    except Exception:
         return None, exclude
 
 

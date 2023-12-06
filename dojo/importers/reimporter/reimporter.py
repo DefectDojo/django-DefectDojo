@@ -48,7 +48,6 @@ class DojoDefaultReImporter(object):
         items = parsed_findings
         original_items = list(test.finding_set.all())
         new_items = []
-        mitigated_count = 0
         finding_count = 0
         finding_added_count = 0
         reactivated_count = 0

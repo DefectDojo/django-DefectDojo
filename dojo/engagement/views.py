@@ -213,7 +213,6 @@ def edit_engagement(request, eid):
     jira_project_form = None
     jira_epic_form = None
     jira_project = None
-    jira_error = False
 
     if request.method == 'POST':
         form = EngForm(request.POST, instance=engagement, cicd=is_ci_cd, product=engagement.product, user=request.user)
@@ -430,7 +429,6 @@ def view_engagement(request, eid):
                 form = TypedNoteForm(available_note_types=available_note_types)
             else:
                 form = NoteForm()
-            url = request.build_absolute_uri(reverse("view_engagement", args=(eng.id,)))
             title = "Engagement: %s on %s" % (eng.name, eng.product.name)
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -1106,7 +1104,8 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
 def expire_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
-    eng = get_object_or_404(Engagement, pk=eid)
+    # Validate the engagement ID exists before moving forward
+    get_object_or_404(Engagement, pk=eid)
 
     ra_helper.expire_now(risk_acceptance)
 
@@ -1230,7 +1229,7 @@ def engagement_ics(request, eid):
 def get_list_index(list, index):
     try:
         element = list[index]
-    except Exception as e:
+    except Exception:
         element = None
     return element
 
