@@ -997,13 +997,13 @@ def get_period_counts(findings,
         else:
             risks_a = None
 
-        f_crit_count, f_high_count, f_med_count, f_low_count = [
+        f_crit_count, f_high_count, f_med_count, f_low_count, _ = [
             0, 0, 0, 0, 0
         ]
-        ra_crit_count, ra_high_count, ra_med_count, ra_low_count = [
+        ra_crit_count, ra_high_count, ra_med_count, ra_low_count, _ = [
             0, 0, 0, 0, 0
         ]
-        active_crit_count, active_high_count, active_med_count, active_low_count = [
+        active_crit_count, active_high_count, active_med_count, active_low_count, _ = [
             0, 0, 0, 0, 0
         ]
 
