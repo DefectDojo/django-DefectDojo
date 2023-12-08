@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Install Ruff Linter
-        run: pip install ruff==0.1.7
+        run: pip install -r requirements-lint.txt
 
       - name: Run Ruff Linter
         run: ruff dojo
