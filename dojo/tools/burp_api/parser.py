@@ -110,6 +110,7 @@ class BurpApiParser(object):
                     try:
                         output += data.decode()
                     except UnicodeDecodeError:
+                        output += "Decoding of the DataSegment failed. Thus, decoded with `latin1`. The result is the following one:\n"
                         output += data.decode('latin1')
                 elif segment["type"] == "SnipSegment":
                     output += f"\n<...> ({segment['length']} bytes)"
