@@ -900,7 +900,7 @@ def get_period_counts_legacy(findings,
         else:
             risks_a = None
 
-        crit_count, high_count, med_count, low_count = [
+        crit_count, high_count, med_count, low_count, _ = [
             0, 0, 0, 0, 0
         ]
         for finding in findings:
@@ -920,7 +920,7 @@ def get_period_counts_legacy(findings,
             [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
              crit_count, high_count, med_count, low_count, total,
              closed_in_range_count])
-        crit_count, high_count, med_count, low_count = [
+        crit_count, high_count, med_count, low_count, _ = [
             0, 0, 0, 0, 0
         ]
         if risks_a is not None:
