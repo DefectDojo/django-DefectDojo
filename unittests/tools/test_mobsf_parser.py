@@ -81,3 +81,14 @@ class TestMobSFParser(DojoTestCase):
         self.assertEqual(findings[1].title, "The binary may use _malloc\n function instead of calloc")
         self.assertEqual(findings[0].severity, "High")
         self.assertEqual(findings[1].severity, "High")
+
+    def test_parse_issue_9132(self):
+        test = Test()
+        engagement = Engagement()
+        engagement.product = Product()
+        test.engagement = engagement
+        testfile = open("unittests/scans/mobsf/issue_9132.json")
+        parser = MobSFParser()
+        findings = parser.get_findings(testfile, test)
+        testfile.close()
+        self.assertEqual(37, len(findings))

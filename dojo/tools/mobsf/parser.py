@@ -125,6 +125,44 @@ class MobSFParser(object):
                 }
                 mobsf_findings.append(mobsf_item)
 
+        # Certificate Analysis
+        if "certificate_analysis" in data:
+            certificate_info = data["certificate_analysis"]["certificate_info"]
+            for details in data["certificate_analysis"]["certificate_findings"]:
+                mobsf_item = {
+                    "category": "Certificate Analysis",
+                    "title": details[2],
+                    "severity": details[0].replace("warning", "low").title(),
+                    "description": details[1] + "\n\n**Certificate Info:** " + certificate_info,
+                    "file_path": None
+                }
+                mobsf_findings.append(mobsf_item)
+
+        # Manifest Analysis
+        if "manifest_analysis" in data:
+            for details in data["manifest_analysis"]["manifest_findings"]:
+                mobsf_item = {
+                    "category": "Manifest Analysis",
+                    "title": details["title"],
+                    "severity": details["severity"].replace("warning", "low").title(),
+                    "description": details["description"] + "\n\n " + details["name"],
+                    "file_path": None
+                }
+                mobsf_findings.append(mobsf_item)
+
+        # Code Analysis
+        if "code_analysis" in data:
+            for details in data["code_analysis"]["findings"]:
+                metadata = data["code_analysis"]["findings"][details]
+                mobsf_item = {
+                    "category": "Code Analysis",
+                    "title": details,
+                    "severity": metadata["metadata"]["severity"].replace("warning", "low").title(),
+                    "description": metadata["metadata"]["description"],
+                    "file_path": None
+                }
+                mobsf_findings.append(mobsf_item)
+
         # Binary Analysis
         if "binary_analysis" in data:
             if type(data["binary_analysis"]) is list:
