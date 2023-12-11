@@ -14,7 +14,7 @@ class TestMobSFParser(DojoTestCase):
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
-        self.assertEqual(18, len(findings))
+        self.assertEqual(22, len(findings))
         item = findings[0]
         self.assertEqual('android.permission.WRITE_EXTERNAL_STORAGE', item.title)
         self.assertEqual('High', item.severity)
@@ -22,12 +22,12 @@ class TestMobSFParser(DojoTestCase):
         self.assertEqual('android.permission.INTERNET', item.title)
         self.assertEqual('Info', item.severity)
         item = findings[10]
-        self.assertEqual('Symbols are stripped', item.title)
-        self.assertEqual('Info', item.severity)
+        self.assertEqual('This shared object does not have RELRO enabled', item.title)
+        self.assertEqual('High', item.severity)
         self.assertEqual('lib/armeabi-v7a/libdivajni.so', item.file_path)
         self.assertEqual(7, item.nb_occurences)
         item = findings[17]
-        self.assertEqual('Loading Native Code (Shared Library)', item.title)
+        self.assertEqual('Local File I/O Operations', item.title)
         self.assertEqual('Info', item.severity)
         self.assertEqual(1, item.nb_occurences)
 
@@ -52,7 +52,7 @@ class TestMobSFParser(DojoTestCase):
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
-        self.assertEqual(61, len(findings))
+        self.assertEqual(77, len(findings))
         # TODO add more checks dedicated to this file
 
     def test_parse_file_3_1_9_ios(self):
