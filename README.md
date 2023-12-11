@@ -55,7 +55,7 @@ cd django-DefectDojo
 
 # Run the application (for other profiles besides postgres-redis see  
 # https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md)
-./dc-up.sh postgres-redis
+./dc-up-d.sh postgres-redis
 
 # Obtain admin credentials. The initializer can take up to 3 minutes to run.
 # Use docker compose logs -f initializer to track its progress.

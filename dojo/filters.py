@@ -148,12 +148,16 @@ class FindingSLAFilter(ChoiceFilter):
         return qs
 
     def satisfies_sla(self, qs, name):
-        non_sla_violations = [finding.id for finding in qs if not finding.violates_sla]
-        return Finding.objects.filter(id__in=non_sla_violations)
+        for finding in qs:
+            if finding.violates_sla:
+                qs = qs.exclude(id=finding.id)
+        return qs
 
     def violates_sla(self, qs, name):
-        sla_violations = [finding.id for finding in qs if finding.violates_sla]
-        return Finding.objects.filter(id__in=sla_violations)
+        for finding in qs:
+            if not finding.violates_sla:
+                qs = qs.exclude(id=finding.id)
+        return qs
 
     options = {
         None: (_('Any'), any),
@@ -179,12 +183,16 @@ class ProductSLAFilter(ChoiceFilter):
         return qs
 
     def satisfies_sla(self, qs, name):
-        non_sla_violations = [product.id for product in qs if not product.violates_sla]
-        return Product.objects.filter(id__in=non_sla_violations)
+        for product in qs:
+            if product.violates_sla:
+                qs = qs.exclude(id=product.id)
+        return qs
 
     def violates_sla(self, qs, name):
-        sla_violations = [product.id for product in qs if product.violates_sla]
-        return Product.objects.filter(id__in=sla_violations)
+        for product in qs:
+            if not product.violates_sla:
+                qs = qs.exclude(id=product.id)
+        return qs
 
     options = {
         None: (_('Any'), any),
