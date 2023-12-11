@@ -92,3 +92,25 @@ class TestMobSFParser(DojoTestCase):
         findings = parser.get_findings(testfile, test)
         testfile.close()
         self.assertEqual(37, len(findings))
+
+    def test_parse_allsafe(self):
+        test = Test()
+        engagement = Engagement()
+        engagement.product = Product()
+        test.engagement = engagement
+        testfile = open("unittests/scans/mobsf/allsafe.json")
+        parser = MobSFParser()
+        findings = parser.get_findings(testfile, test)
+        testfile.close()
+        self.assertEqual(55, len(findings))
+
+    def test_parse_damnvulnrablebank(self):
+        test = Test()
+        engagement = Engagement()
+        engagement.product = Product()
+        test.engagement = engagement
+        testfile = open("unittests/scans/mobsf/damnvulnrablebank.json")
+        parser = MobSFParser()
+        findings = parser.get_findings(testfile, test)
+        testfile.close()
+        self.assertEqual(39, len(findings))
