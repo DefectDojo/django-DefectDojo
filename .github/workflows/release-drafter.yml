@@ -42,7 +42,7 @@ jobs:
 
       - name: Upload Release Asset - OpenAPI Specification - YAML
         id: upload-release-asset-yaml
-        uses: sekwah41/upload-release-assets@v1
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -53,7 +53,7 @@ jobs:
 
       - name: Upload Release Asset - OpenAPI Specification - JSON
         id: upload-release-asset-json
-        uses: sekwah41/upload-release-assets@v1
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
