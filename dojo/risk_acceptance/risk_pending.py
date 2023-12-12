@@ -6,7 +6,6 @@ from dojo.utils import Response
 from django.urls import reverse
 from dojo.models import Engagement, Risk_Acceptance, Finding
 from dojo.risk_acceptance.helper import create_notification
-import dojo.risk_acceptance.risk_pending as rp_helper
 import crum
 
 logger = logging.getLogger(__name__)
@@ -92,9 +91,9 @@ def risk_acceptante_pending(
     status = "Failed"
     message = "Cannot perform action"
     number_of_acceptors_required = (
-        settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(
-            finding.severity
-        ).get("number_acceptors")
+        settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity).get(
+            "number_acceptors"
+        )
     )
     if (
         user.is_superuser
@@ -121,8 +120,10 @@ def risk_acceptante_pending(
                 if finding.risk_status == "Risk Rejected":
                     finding.risk_status = "Risk Pending"
                 finding.save()
-                if number_of_acceptors_required == len(get_confirmed_acceptors(finding)):
-                    # TODO : MOVER este bloque de codigo al evento save del findign 
+                if number_of_acceptors_required == len(
+                    get_confirmed_acceptors(finding)
+                ):
+                    # TODO : MOVER este bloque de codigo al evento save del findign
                     risk_accepted_succesfully(eng, finding, risk_acceptance)
                 message = "Finding Accept successfully from risk acceptance."
                 status = "OK"
@@ -158,6 +159,8 @@ def get_contacts(engagement: Engagement, finding_serverity: str, user):
     contact_list = []
     for contact in contacts:
         if contact in get_contacts_dict.keys():
+            if not get_contacts_dict[contact]:
+                logger.warning("Risk_pending: contact not related to a product_type")
             contact_list.append(get_contacts_dict[contact])
         else:
             raise ValueError(f"Contact {contact} not found")
@@ -170,7 +173,7 @@ def get_contacts(engagement: Engagement, finding_serverity: str, user):
 def is_permissions_risk_acceptance(
     engagement: Engagement, finding_serverity: str, user
 ):
-    if user.is_superuser is True:
+    if user.is_superuser is True or user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
         return True
     contacts = get_contacts(engagement, finding_serverity, user)
     contacts_ids = [contact.id for contact in contacts]
@@ -178,6 +181,20 @@ def is_permissions_risk_acceptance(
         # has the permissions
         return True
     return False
+
+
+def is_rol_permissions_risk_acceptance(user, severity):
+    result = False
+    if (
+        user.is_superuser is True
+        or user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
+        or settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(severity).get(
+            "number_acceptors"
+        )
+        == 0
+    ):
+        result = True
+    return result
 
 
 def rule_risk_acceptance_according_to_critical(severity, request):

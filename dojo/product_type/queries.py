@@ -1,10 +1,11 @@
 from crum import get_current_user
 from django.db.models import Exists, OuterRef, Q
-from dojo.models import Product_Type, Product_Type_Member, Product_Type_Group, Dojo_User
+from dojo.models import Product_Type, Product_Type_Member, Product_Type_Group, Dojo_User, Role, Global_Role
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission, user_has_permission, \
     role_has_permission
 from dojo.group.queries import get_authorized_groups
 from dojo.authorization.roles_permissions import Permissions
+# from dojo.risk_acceptance import risk_pending
 from django.conf import settings
 
 
@@ -78,17 +79,37 @@ def query_contacts(*args):
         contacts_dict.update({value: key for key, value in contact_dict.items()})
     return contacts_dict
 
+def query_user_by_rol(rol):
+    # get ids for rol name
+    user_list_maintainer = []
+    ids_role = list(
+        Role.objects.filter(name__in=rol).values_list("id", flat=True))
+    if ids_role:
+        user_list_maintainer = Global_Role.objects.filter(role_id__in=ids_role).values_list("id", flat=True)
+    return list(user_list_maintainer)
+
+def get_owner_user():
+    user = get_current_user()
+    user_owner = Dojo_User.objects.filter(id=user.id)
+    return user_owner
+
 def get_authorized_contacts(severity, queryset=None):
+    user = get_current_user()
     rule = settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(severity)
     contacts_dict = {}
     contacts_list = []
     contacts = rule["type_contacts"]
     if contacts:
         contacts_dict = query_contacts(*contacts)
+        if contacts_dict:
+            for key in contacts_dict.keys():
+                contacts_list.append(key)
+        contacts_list += query_user_by_rol(settings.ROLE_ALLOWED_TO_ACCEPT_RISKS)
+    else:
+        # in the event that risk does not need acceptance by leaders
+        contacts_list.append(user.id)
 
-    if contacts_dict:
-        for key in contacts_dict.keys():
-            contacts_list.append(key)
+    # add user current to form acceptance_by field
 
     if contacts_list:
         return Dojo_User.objects.filter(id__in=contacts_list)

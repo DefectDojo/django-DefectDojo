@@ -43,7 +43,7 @@ from dojo.utils import get_system_setting, get_product, is_finding_groups_enable
     get_password_requirements_string
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions
-from dojo.product_type.queries import get_authorized_product_types, get_authorized_contacts
+from dojo.product_type.queries import get_authorized_product_types, get_authorized_contacts, get_owner_user
 from dojo.product.queries import get_authorized_products
 from dojo.finding.queries import get_authorized_findings
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users
@@ -716,18 +716,16 @@ class RiskPendingForm(forms.ModelForm):
     )
     path = forms.FileField(label="Proof", required=False, widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}))
     expiration_date = forms.DateTimeField(required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
-    expiration_date_warned = forms.DateTimeField(required=False)
-    expiration_date_handled = forms.DateTimeField(required=False)
     notes = forms.CharField(required=False, max_length=2400,
                             widget=forms.Textarea,
                             label='Notes')
+    owner = forms.ModelChoiceField(queryset=Dojo_User.objects.none(), required=True)
     class Meta:
         model = Risk_Acceptance
         fields = ["name", "accepted_findings",
                   "recommendation", "description",
                   "path", "accepted_by", "path",
-                  "expiration_date", "expiration_date_warned",
-                  "expiration_date_handled", "owner"]
+                  "expiration_date", "owner"]
 
     def __init__(self, *args, **kwargs):
         severity = kwargs.pop("severity", None)
@@ -737,10 +735,11 @@ class RiskPendingForm(forms.ModelForm):
         if expiration_delta_days > 0:
             expiration_date = timezone.now().date() + relativedelta(days=expiration_delta_days)
             self.fields['expiration_date'].initial = expiration_date
-        self.fields['expiration_date_warned'].disabled = True
-        # self.fields['expiration_date_handled'].disabled = True
+            self.fields["expiration_date"].disabled = True
+
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
         self.fields['accepted_by'].queryset = get_authorized_contacts(severity)
+        self.fields['owner'].queryset = get_owner_user()
     
     def clean(self):
         data = self.cleaned_data

@@ -870,16 +870,12 @@ def get_risk_acceptance_pending(request, finding: Finding, eng: Engagement):
     if settings.RISK_PENDING:
         form = None
         risk_acceptance_title_suggestion = 'Accept: %s' % finding
-        form_aux = RiskPendingForm(severity=finding.severity,
-            initial={'owner': request.user,
-                    'name': risk_acceptance_title_suggestion,
-                    'accepted_by': request.user,
-                    "severity": finding.severity})
-        if (
-            request.user.is_superuser is True or
-            request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS or
-            settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity).get("number_acceptors") == 0):
-            form = form_aux
+        if rp_helper.is_rol_permissions_risk_acceptance(request.user, finding.severity):
+            form = RiskPendingForm(severity=finding.severity,
+                initial={'owner': request.user,
+                        'name': risk_acceptance_title_suggestion,
+                        'accepted_by': request.user,
+                        "severity": finding.severity})
         elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request):
             risk_acceptance_title_suggestion = 'Accept: %s' % finding
             form = RiskPendingForm(severity=finding.severity,
@@ -902,13 +898,13 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid):
         extra_tags='alert-danger')
         return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
     if (request.user.is_superuser is True or request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
-        form = RiskAcceptancePendingForm(request.POST, request.FILES, severity=finding.severity)
+        form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity)
     else:
         risk_status = rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request)
         if risk_status:
             form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity)
         else:
-            form = RiskAcceptancePendingForm(request.POST, request.FILES, severity=finding.severity)
+            form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity)
 
     if form.is_valid():
         notes = None
@@ -968,6 +964,7 @@ def add_risk_acceptance_pending(request, eid, fid):
             return post_risk_acceptance_pending(request, finding, eng, eid)
         else:
             form = get_risk_acceptance_pending(request, finding, eng)
+            # form.fields["expiration_date"].disabled = True
         finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
         form.fields['accepted_findings'].queryset = finding_choices
         if fid:

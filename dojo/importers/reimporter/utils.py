@@ -1,10 +1,13 @@
+import sys
 from datetime import timedelta
 from crum import get_current_user
 from django.conf import settings
 from dojo.importers import utils as importer_utils
 from dojo.models import Engagement, Finding, Q, Product, Product_Member, Product_Type, Product_Type_Member, Role, Test
+from django.db.utils import IntegrityError
 from django.utils import timezone
 from dojo.decorators import dojo_async_task
+from dojo.api_v2.api_error import ApiError
 from dojo.celery import app
 import logging
 from dojo.utils import get_last_object_or_none, get_object_or_none
@@ -218,7 +221,12 @@ def get_or_create_product(product_name=None, product_type_name=None, auto_create
             member.role = Role.objects.get(is_owner=True)
             member.save()
 
-        product, created = Product.objects.get_or_create(name=product_name, prod_type=product_type, description=product_name)
+        try:
+            product, created = Product.objects.get_or_create(name=product_name, prod_type=product_type, description=product_name)
+        except IntegrityError as e:
+            logger.error(str(e))
+            raise ApiError.integrity_error(contex=str(e))
+
         if created:
             member = Product_Member()
             member.user = get_current_user()
