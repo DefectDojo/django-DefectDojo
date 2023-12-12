@@ -161,9 +161,9 @@ class DojoDefaultImporter(object):
             new_findings.append(item)
             # to avoid pushing a finding group multiple times, we push those outside of the loop
             if is_finding_groups_enabled() and group_by:
-                item.save()
+                item.save(dedupe_option=False)
             else:
-                item.save(push_to_jira=push_to_jira)
+                item.save(dedupe_option=False, push_to_jira=push_to_jira)
 
         for (group_name, findings) in group_names_to_findings_dict.items():
             finding_helper.add_findings_to_auto_group(group_name, findings, group_by, create_finding_groups_for_all_findings, **kwargs)
@@ -347,6 +347,10 @@ class DojoDefaultImporter(object):
                                                             endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
                                                             group_by=group_by, now=now, service=service, scan_date=scan_date, sync=True,
                                                             create_finding_groups_for_all_findings=create_finding_groups_for_all_findings)
+        self.findings = parsed_findings
+        self.test = test
+        # Start post processing
+        self.post_processing_findings()
 
         closed_findings = []
         if close_old_findings:
@@ -376,3 +380,12 @@ class DojoDefaultImporter(object):
         logger.debug('IMPORT_SCAN: Done')
 
         return test, len(new_findings), len(closed_findings), test_import
+
+    def post_processing_findings(self):
+        from dojo.utils import do_dedupe_finding
+        from dojo.utils import do_false_positive_history
+
+        for finding in self.findings:
+            do_dedupe_finding(finding)
+        for finding in self.findings:
+            do_false_positive_history(finding)

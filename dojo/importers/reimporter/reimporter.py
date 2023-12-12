@@ -424,9 +424,9 @@ class DojoDefaultReImporter(object):
                 # finding = new finding or existing finding still in the upload report
                 # to avoid pushing a finding group multiple times, we push those outside of the loop
                 if is_finding_groups_enabled() and group_by:
-                    finding.save()
+                    finding.save(dedupe_option=False)
                 else:
-                    finding.save(push_to_jira=push_to_jira)
+                    finding.save(dedupe_option=False, push_to_jira=push_to_jira)
 
         to_mitigate = (
             set(original_items) - set(reactivated_items) - set(unchanged_items)
@@ -698,6 +698,10 @@ class DojoDefaultReImporter(object):
                 create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
             )
 
+        self.findings = parsed_findings
+        self.test = test
+        self.post_processing_findings()
+
         closed_findings = []
         if close_old_findings:
             logger.debug(
@@ -768,3 +772,12 @@ class DojoDefaultReImporter(object):
             len(untouched_findings),
             test_import,
         )
+
+    def post_processing_findings(self):
+        from dojo.utils import do_dedupe_finding
+        from dojo.utils import do_false_positive_history
+
+        for finding in self.findings:
+            do_dedupe_finding(finding)
+        for finding in self.findings:
+            do_false_positive_history(finding)
