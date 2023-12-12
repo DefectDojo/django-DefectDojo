@@ -25,9 +25,9 @@ class TestBlackduckHubParser(DojoTestCase):
         findings = list(findings)
         self.assertEqual(1, len(findings[10].unsaved_vulnerability_ids))
         self.assertEqual("CVE-2007-3386", findings[10].unsaved_vulnerability_ids[0])
-        self.assertEqual(findings[0].component_name, "Apache Commons BeanUtils")
+        self.assertEqual(findings[4].component_name, "Apache Tomcat")
         self.assertEqual(findings[2].component_name, "Apache HttpComponents Client")
-        self.assertEqual(findings[0].component_version, "1.8.3")
+        self.assertEqual(findings[4].component_version, "5.5.23")
         self.assertEqual(findings[2].component_version, "4.5.2")
 
     def test_blackduck_csv_parser_new_format_has_many_findings(self):
