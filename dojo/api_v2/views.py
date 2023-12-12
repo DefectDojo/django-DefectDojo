@@ -3782,13 +3782,7 @@ class QuestionnaireAnsweredSurveyViewSet(
 
 # Authorization: configuration
 class AnnouncementViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    DojoModelViewSet
 ):
     serializer_class = serializers.AnnouncementSerializer
     queryset = Announcement.objects.all()
