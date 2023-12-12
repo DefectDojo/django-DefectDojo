@@ -1,6 +1,7 @@
 import contextlib
 
 from auditlog.models import LogEntry
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_delete, pre_save
 from django.dispatch import receiver
@@ -9,13 +10,12 @@ from django.utils.translation import gettext as _
 
 from dojo.models import Finding, Test
 from dojo.notifications.helper import create_notification
-from dojo.utils import get_system_setting
 
 
 @receiver(post_delete, sender=Test)
 def test_post_delete(sender, instance, using, origin, **kwargs):
     if instance == origin:
-        if get_system_setting('enable_auditlog'):
+        if settings.ENABLE_AUDITLOG:
             le = LogEntry.objects.get(
                     action=LogEntry.Action.DELETE,
                     content_type=ContentType.objects.get(app_label='dojo', model='test'),
