@@ -218,6 +218,7 @@ def get_item(vulnerability, test):
         static_finding=True,
         dynamic_finding=False,
         cvssv3=cvssv3,
+        vuln_id_from_tool=vulnerability.get("issue_id")
     )
     if vulnerability_ids:
         finding.unsaved_vulnerability_ids = vulnerability_ids

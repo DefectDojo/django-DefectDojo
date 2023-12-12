@@ -196,7 +196,7 @@ class SonarQubeApiImporter(object):
                     impact="No impact provided",
                     static_finding=True,
                     sonarqube_issue=sonarqube_issue,
-                    unique_id_from_tool=issue.get("key"),
+                    vuln_id_from_tool=issue.get("key")
                 )
                 items.append(find)
 
