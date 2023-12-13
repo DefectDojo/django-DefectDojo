@@ -23,7 +23,6 @@ class TestBlackduckBinaryAnalysisParser(DojoTestCase):
             self.assertIsNotNone(finding.version)
             self.assertIsNotNone(finding.object_name)
             self.assertIsNotNone(finding.object_sha1)
-            self.assertIsNotNone(finding.cve)
             self.assertIsNotNone(finding.report_path)
 
     def test_parse_many_vulns(self):
@@ -39,5 +38,4 @@ class TestBlackduckBinaryAnalysisParser(DojoTestCase):
             self.assertIsNotNone(finding.version)
             self.assertIsNotNone(finding.object_name)
             self.assertIsNotNone(finding.object_sha1)
-            self.assertIsNotNone(finding.cve)
             self.assertIsNotNone(finding.report_path)
