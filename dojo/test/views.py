@@ -782,6 +782,9 @@ def search(request, tid):
 
 
 class ReImportScanResultsView(View):
+    def get_reimporter():
+        return ReImporter()
+
     @user_is_authorized(Test, Permissions.Import_Scan_Result, 'tid')
     def get(self, request, tid):
         additional_message = _("When re-uploading a scan, any findings not found in the original scan will be updated as "
@@ -889,7 +892,7 @@ class ReImportScanResultsView(View):
             push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
             error = False
             finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = 0, 0, 0, 0, 0
-            reimporter = ReImporter()
+            reimporter = self.get_reimporter()
             try:
                 test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count, test_import = \
                     reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
