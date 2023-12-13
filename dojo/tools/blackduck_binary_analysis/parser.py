@@ -104,8 +104,13 @@ class BlackduckBinaryAnalysisParser(object):
         return findings.values()
 
     def format_title(self, i):
-        title = "{} {}: {} Vulnerable to {} per {}".format(
-            i.component, i.version, i.object_name, i.cve, i.report_path
+        title = "{} {}: {} ({}) Vulnerable to {} per {}".format(
+            i.component,
+            i.version,
+            i.object_name,
+            i.object_sha1,
+            i.cve,
+            i.report_path
         )
 
         return title
