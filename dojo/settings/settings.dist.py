@@ -1457,7 +1457,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Whispers': DEDUPE_ALGO_HASH_CODE,
     'Blackduck Hub Scan': DEDUPE_ALGO_HASH_CODE,
     'BlackDuck API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'BlackDuck Binary Analysis': DEUPE_ALGO_HASH_CODE,
+    'BlackDuck Binary Analysis': DEDUPE_ALGO_HASH_CODE,
     'docker-bench-security Scan': DEDUPE_ALGO_HASH_CODE,
     'Vulners Scan': DEDUPE_ALGO_HASH_CODE,
     'Twistlock Image Scan': DEDUPE_ALGO_HASH_CODE,
