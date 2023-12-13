@@ -32,4 +32,3 @@ BlackduckBinaryAnalysisFinding = namedtuple(
         "version_override_type",
     ],
 )
-

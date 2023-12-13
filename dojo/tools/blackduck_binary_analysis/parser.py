@@ -2,7 +2,6 @@ import hashlib
 
 from dojo.models import Finding
 from .importer import BlackduckBinaryAnalysisImporter
-from cvss import CVSS2, CVSS3
 import cvss.parser
 
 
@@ -59,9 +58,9 @@ class BlackduckBinaryAnalysisParser(object):
 
             cvss_obj = cvss.parser.parse_cvss_from_text(cvss_vectors)
             if not cvss_obj:
-              severity = "Info"
+                severity = "Info"
             else:
-              severity = cvss_obj[0].severities()[0]
+                severity = cvss_obj[0].severities()[0]
 
             mitigation = self.format_mitigation(i)
             impact = self.format_impact(i)
@@ -147,7 +146,6 @@ class BlackduckBinaryAnalysisParser(object):
         description += "Unresolving Triage Vectors:\n{}\n".format(str(i.triage_vectors))
 
         return description
-
 
     def format_mitigation(self, i):
         mitigation = "Upgrade {} to latest version: {}.\n".format(

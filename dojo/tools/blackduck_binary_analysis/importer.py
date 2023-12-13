@@ -1,5 +1,4 @@
 import csv
-import re
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
