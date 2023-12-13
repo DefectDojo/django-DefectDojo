@@ -107,7 +107,7 @@ def risk_acceptante_pending(
 
     if finding.risk_status in ["Risk Pending", "Risk Rejected"]:
         confirmed_acceptances = get_confirmed_acceptors(finding)
-        if is_permissions_risk_acceptance(eng, finding.severity, user):
+        if is_permissions_risk_acceptance(eng, finding, user):
             if user.username in confirmed_acceptances:
                 message = "The user has already accepted the risk"
                 status = "Failed"
@@ -171,14 +171,14 @@ def get_contacts(engagement: Engagement, finding_serverity: str, user):
 
 
 def is_permissions_risk_acceptance(
-    engagement: Engagement, finding_serverity: str, user
+    engagement: Engagement, finding: Finding, user
 ):
     if user.is_superuser is True or user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
         return True
-    contacts = get_contacts(engagement, finding_serverity, user)
+    contacts = get_contacts(engagement, finding.severity, user)
     contacts_ids = [contact.id for contact in contacts]
-    if user.id in contacts_ids:
-        # has the permissions
+    if user.id in contacts_ids and finding.risk_accepted is False:
+        # has the permissions remove and reject risk pending
         return True
     return False
 

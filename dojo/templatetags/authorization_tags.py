@@ -1,10 +1,8 @@
 from django import template
-from django.conf import settings
 import crum
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_global_permission, user_has_permission, \
     user_has_configuration_permission as configuration_permission
-from dojo.models import Finding
 from dojo.risk_acceptance.risk_pending import is_permissions_risk_acceptance 
 from dojo.request_cache import cache_for_request
 
@@ -15,7 +13,7 @@ register = template.Library()
 @register.filter
 def has_risk_acceptance_permission(engagement, finding):
     user = crum.get_current_user()
-    return is_permissions_risk_acceptance(engagement, finding.severity, user)
+    return is_permissions_risk_acceptance(engagement, finding, user)
 
 
 @register.filter

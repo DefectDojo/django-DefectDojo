@@ -149,6 +149,8 @@ class Permissions(IntEnum):
             Permissions.Engagement_Delete,
             Permissions.Risk_Acceptance,
             Permissions.Risk_Acceptance_Edit,
+            Permissions.Risk_Acceptance_Delete,
+            Permissions.Risk_Acceptance_Add,
             Permissions.Test_Add,
             Permissions.Import_Scan_Result,
             Permissions.Note_Add,

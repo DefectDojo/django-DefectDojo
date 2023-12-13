@@ -705,9 +705,9 @@ class RiskPendingForm(forms.ModelForm):
         queryset=Finding.objects.none(), required=True,
         widget=forms.widgets.SelectMultiple(attrs={'size': 1}),
         help_text=('Active, verified findings listed, please select to add findings.'))
-    recommendation = forms.ChoiceField(choices=Risk_Acceptance.TREATMENT_CHOICES, initial=Risk_Acceptance.TREATMENT_ACCEPT, widget=forms.RadioSelect, label="Security Recommendation")
-    description = forms.CharField(widget=forms.Textarea(attrs={}),
-                                  required=False, help_text="Description of the engagement and details regarding the engagement.")
+    recommendation = forms.ChoiceField(choices=Risk_Acceptance.TREATMENT_CHOICES,
+                                       initial=Risk_Acceptance.TREATMENT_ACCEPT,
+                                       widget=forms.RadioSelect, label="Security Recommendation")
     accepted_by = forms.ModelMultipleChoiceField(
         queryset=Dojo_User.objects.none(),
         required=True,
@@ -723,7 +723,7 @@ class RiskPendingForm(forms.ModelForm):
     class Meta:
         model = Risk_Acceptance
         fields = ["name", "accepted_findings",
-                  "recommendation", "description",
+                  "recommendation", "recommendation_details",
                   "path", "accepted_by", "path",
                   "expiration_date", "owner"]
 
