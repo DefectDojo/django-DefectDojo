@@ -89,7 +89,6 @@ class BlackduckBinaryAnalysisParser(object):
                     file_path=i.object_full_path,
                     url=i.vulnerability_url,
                     vuln_id_from_tool=str(cve),
-                    cvssv3_score=cvss_score,
                     severity_justification=cvss_vectors,
                     component_name=i.component,
                     component_version=i.version,
@@ -98,6 +97,13 @@ class BlackduckBinaryAnalysisParser(object):
 
                 if cvss_v3:
                     finding.cvssv3 = cvss_vectors
+                    finding.cvssv3_score = cvss_score
+                else:
+                    finding.severity_justification = format(
+                        "CVSS2 Score: {}\nCVSS:2.0/{}",
+                        cvss_score,
+                        cvss_vectors
+                    )
 
                 findings[unique_finding_key] = finding
 
