@@ -47,20 +47,18 @@ class BlackduckBinaryAnalysisParser(object):
                     i.cvss_vector_v3
                 )
                 cvss_obj = CVSS3(cvss_vectors)
-                cvss_score = cvss_obj.scores()[0]
             elif str(i.cvss_vector_v2) != "":
-                # Some of the CVSSv2 vectors have an trailinf colon
-                # that needs to be removed
+                # Some of the CVSSv2 vectors have a trailing
+                # colon that needs to be removed
                 cvss_v3 = False
                 cvss_vectors = i.cvss_vector_v2.replace('Au:N:/', 'Au:N/')
                 cvss_obj = CVSS2(cvss_vectors)
-                cvss_score = cvss_obj.scores()[0]
             else:
                 cvss_vectors = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N"
                 cvss_obj = CVSS3(cvss_vectors)
 
-                cvss_score = cvss_obj.scores()[0]
-                severity = cvss_obj.severities()
+            cvss_score = cvss_obj.scores()[0]
+            severity = cvss_obj.severities()[0]
 
             mitigation = self.format_mitigation(i)
             impact = self.format_impact(i)
