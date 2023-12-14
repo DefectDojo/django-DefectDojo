@@ -40,14 +40,14 @@ class BlackduckBinaryAnalysisParser(object):
             cwe = 1357
             title = self.format_title(i)
             description = self.format_description(i)
-            if i.cvss_v3 is not None and i.cvss_vector_v3 is not None:
+            if str(i.cvss_v3) != "" and str(i.cvss_vector_v3) != "":
                 cvss_v3 = True
                 cvss_score = i.cvss_v3
                 cvss_vectors = "{}{}".format(
                     "CVSS:3.1/",
                     i.cvss_vector_v3
                 )
-            elif i.cvss_v2 is not None and i.cvss_vector_v2 is not None:
+            elif str(i.cvss_v2) != "" and str(i.cvss_vector_v2) != "":
                 cvss_v3 = False
                 cvss_score = i.cvss_v2
                 cvss_vectors = i.cvss_vector_v2
@@ -89,6 +89,7 @@ class BlackduckBinaryAnalysisParser(object):
                     file_path=i.object_full_path,
                     url=i.vulnerability_url,
                     vuln_id_from_tool=str(cve),
+                    cvssv3_score = cvss_score,
                     severity_justification=cvss_vectors,
                     component_name=i.component,
                     component_version=i.version,
@@ -97,7 +98,6 @@ class BlackduckBinaryAnalysisParser(object):
 
                 if cvss_v3:
                     finding.cvssv3 = cvss_vectors
-                    finding.cvssv3_score = cvss_score
 
                 findings[unique_finding_key] = finding
 
