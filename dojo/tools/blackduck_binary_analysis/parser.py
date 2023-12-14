@@ -88,7 +88,7 @@ class BlackduckBinaryAnalysisParser(object):
                     references=references,
                     file_path=i.object_full_path,
                     url=i.vulnerability_url,
-                    vuln_id_from_tool=cve,
+                    vuln_id_from_tool=str(cve),
                     severity_justification=cvss_vectors,
                     component_name=i.component,
                     component_version=i.version,
@@ -104,13 +104,23 @@ class BlackduckBinaryAnalysisParser(object):
         return findings.values()
 
     def format_title(self, i):
-        title = "{} ({}): {} {} Vulnerable per {}".format(
-            i.object_name,
-            i.object_sha1,
-            i.component,
-            i.version,
-            i.report_path
-        )
+        if i.cve is not None:
+            title = "{} ({}): {} {} Vulnerable to {} per {} ".format(
+                i.object_name,
+                i.object_sha1,
+                i.component,
+                i.version,
+                i.cve,
+                i.report_path,
+            )
+        else:
+            title = "{} ({}): {} {} Vulnerable per {}".format(
+                i.object_name,
+                i.object_sha1,
+                i.component,
+                i.version,
+                i.report_path
+            )
 
         return title
 
