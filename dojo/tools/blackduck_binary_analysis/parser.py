@@ -41,40 +41,25 @@ class BlackduckBinaryAnalysisParser(object):
             title = self.format_title(i)
             description = self.format_description(i)
             cvss_v3 = True
-            no_cvss = False
-            if str(i.cvss_v3) != "" and str(i.cvss_vector_v3) != "":
-                cvss_score = float(i.cvss_v3)
+            if str(i.cvss_vector_v3) != "":
                 cvss_vectors = "{}{}".format(
                     "CVSS:3.1/",
                     i.cvss_vector_v3
                 )
                 cvss_obj = CVSS3(cvss_vectors)
-            elif str(i.cvss_v2) != "" and str(i.cvss_vector_v2) != "":
+                cvss_score = cvss_obj.scores()[0]
+            elif str(i.cvss_vector_v2) != "":
+                # Some of the CVSSv2 vectors have an trailinf colon
+                # that needs to be removed
                 cvss_v3 = False
-                cvss_score = float(i.cvss_v2)
-                cvss_vectors = i.cvss_vector_v2
+                cvss_vectors = i.cvss_vector_v2.replace('Au:N:/', 'Au:N/')
                 cvss_obj = CVSS2(cvss_vectors)
+                cvss_score = cvss_obj.scores()[0]
             else:
-                if str(i.cvss_vector_v3) != "":
-                    cvss_vectors = "{}{}".format(
-                        "CVSS:3.1/",
-                        i.cvss_vector_v3
-                    )
-                    cvss_obj = CVSS3(cvss_vectors)
-                    cvss_score = cvss_obj.scores()[0]
-                elif str(i.cvss_vector_v2) != "":
-                    cvss_vectors = i.cvss_vector_v2
-                    cvss_obj = CVSS2(cvss_vectors)
-                    cvss_score = cvss_obj.scores()[0]
-                else:
-                    no_cvss = True
-                    cvss_score = 0.0
-                    cvss_vectors = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N"
-                    cvss_obj = CVSS3(cvss_vectors)
+                cvss_vectors = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N"
+                cvss_obj = CVSS3(cvss_vectors)
 
-            if no_cvss:
-                severity = "Info"
-            else:
+                cvss_score = cvss_obj.scores()[0]
                 severity = cvss_obj.severities()
 
             mitigation = self.format_mitigation(i)
