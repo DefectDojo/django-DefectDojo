@@ -97,10 +97,7 @@ class BlackduckBinaryAnalysisParser(object):
                 if cvss_v3:
                     finding.cvssv3 = cvss_vectors
                 else:
-                    finding.severity_justification = "CVSS2 Score: {}\nCVSS:2.0/{}".format(
-                        cvss_score,
-                        cvss_vectors
-                    )
+                    finding.severity_justification = cvss_vectors
 
                 findings[unique_finding_key] = finding
 
