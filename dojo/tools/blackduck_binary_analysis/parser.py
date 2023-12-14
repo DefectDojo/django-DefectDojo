@@ -122,7 +122,7 @@ class BlackduckBinaryAnalysisParser(object):
             str(i.latest_version)
         )
         description += "Matching Type: {}\n".format(str(i.matching_type))
-        description += "Binary: {}\n".format(
+        description += "Object Name: {}\n".format(
             str(i.object_name)
         )
         description += "Object Extraction Path: {}\n".format(
