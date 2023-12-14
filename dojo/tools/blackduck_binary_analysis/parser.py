@@ -89,7 +89,7 @@ class BlackduckBinaryAnalysisParser(object):
                     file_path=i.object_full_path,
                     url=i.vulnerability_url,
                     vuln_id_from_tool=str(cve),
-                    cvssv3_score = cvss_score,
+                    cvssv3_score=cvss_score,
                     severity_justification=cvss_vectors,
                     component_name=i.component,
                     component_version=i.version,
