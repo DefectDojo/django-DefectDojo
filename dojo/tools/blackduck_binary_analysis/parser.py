@@ -105,18 +105,16 @@ class BlackduckBinaryAnalysisParser(object):
 
     def format_title(self, i):
         if i.cve is not None:
-            title = "{} ({}): {} {} Vulnerable to {} per {} ".format(
+            title = "{}: {} {} Vulnerable to {} per {} ".format(
                 i.object_name,
-                i.object_sha1,
                 i.component,
                 i.version,
                 i.cve,
                 i.report_path,
             )
         else:
-            title = "{} ({}): {} {} Vulnerable per {}".format(
+            title = "{}: {} {} Vulnerable per {}".format(
                 i.object_name,
-                i.object_sha1,
                 i.component,
                 i.version,
                 i.report_path

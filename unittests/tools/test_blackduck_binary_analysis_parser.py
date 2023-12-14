@@ -26,6 +26,7 @@ class TestBlackduckBinaryAnalysisParser(DojoTestCase):
             self.assertIsNotNone(finding.report_path)
             self.assertIsNotNone(finding.object_full_path)
             self.assertIsNotNone(finding.vuln_id_from_tool)
+            self.assertIsNotNone(finding.unique_id_from_tool)
 
     def test_parse_many_vulns(self):
         testfile = open("unittests/scans/blackduck_binary_analysis/many_vulns.csv")
@@ -43,3 +44,4 @@ class TestBlackduckBinaryAnalysisParser(DojoTestCase):
             self.assertIsNotNone(finding.report_path)
             self.assertIsNotNone(finding.object_full_path)
             self.assertIsNotNone(finding.vuln_id_from_tool)
+            self.assertIsNotNone(finding.unique_id_from_tool)

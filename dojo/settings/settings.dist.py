@@ -1250,7 +1250,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Whispers': ['vuln_id_from_tool', 'file_path', 'line'],
     'Blackduck Hub Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
     'BlackDuck API': ['unique_id_from_tool'],
-    'Blackduck Binary Analysis': ['title', 'file_path', 'vuln_id_from_tool'],
+    'Blackduck Binary Analysis': ['title', 'file_path', 'vuln_id_from_tool', 'unique_id_from_tool'],
     'docker-bench-security Scan': ['unique_id_from_tool'],
     'Veracode SourceClear Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version', 'severity'],
     'Vulners Scan': ['vuln_id_from_tool', 'component_name'],
