@@ -116,22 +116,22 @@ class BlackduckBinaryAnalysisParser(object):
 
     def format_description(self, i):
         description = "CSV Result: {}\n".format(str(i.report_path))
-        description = "Component: {}\n".format(str(i.component))
-        description += "Component Version in Use: {}\n".format(str(i.version))
-        description += "Component Latest Version: {}\n".format(
+        description = "Vulnerable Component: {}\n".format(str(i.component))
+        description += "Vulnerable Component Version in Use: {}\n".format(str(i.version))
+        description += "Vulnerable Component Latest Version: {}\n".format(
             str(i.latest_version)
         )
         description += "Matching Type: {}\n".format(str(i.matching_type))
-        description += "Vulnerable Binary: {}\n".format(
+        description += "Binary: {}\n".format(
             str(i.object_name)
         )
-        description += "Vulnerable Binary Extraction Path: {}\n".format(
+        description += "Object Extraction Path: {}\n".format(
             str(i.object_full_path)
         )
-        description += "Vulnerable Binary Compilation Date: {}\n".format(
+        description += "Object Compilation Date: {}\n".format(
             str(i.object_compilation_date)
         )
-        description += "Vulnerable Binary SHA1: {}\n".format(str(i.object_sha1))
+        description += "Object SHA1: {}\n".format(str(i.object_sha1))
         description += "CVE: {}\n".format(str(i.cve))
         description += "CVE Publication Date: {}\n".format(
             str(i.cve_publication_date)
