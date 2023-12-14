@@ -781,4 +781,3 @@ class DojoDefaultReImporter(object):
             do_dedupe_finding(finding)
         for finding in self.findings:
             do_false_positive_history(finding)
-
