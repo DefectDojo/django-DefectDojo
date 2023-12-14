@@ -40,14 +40,14 @@ class BlackduckBinaryAnalysisParser(object):
             cwe = 1357
             title = self.format_title(i)
             description = self.format_description(i)
-            if i.cvss_v3 is not None:
+            if i.cvss_v3 is not None and i.cvss_vector_v3 is not None:
                 cvss_v3 = True
                 cvss_score = i.cvss_v3
                 cvss_vectors = "{}{}".format(
                     "CVSS:3.1/",
                     i.cvss_vector_v3
                 )
-            elif i.cvss_v2 is not None:
+            elif i.cvss_v2 is not None and i.cvss_vector_v2 is not None:
                 cvss_v3 = False
                 cvss_score = i.cvss_v2
                 cvss_vectors = i.cvss_vector_v2
