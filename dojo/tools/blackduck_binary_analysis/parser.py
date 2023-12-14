@@ -41,6 +41,7 @@ class BlackduckBinaryAnalysisParser(object):
             title = self.format_title(i)
             description = self.format_description(i)
             cvss_v3 = True
+            no_cvss = False
             if str(i.cvss_v3) != "" and str(i.cvss_vector_v3) != "":
                 cvss_score = float(i.cvss_v3)
                 cvss_vectors = "{}{}".format(
@@ -66,15 +67,15 @@ class BlackduckBinaryAnalysisParser(object):
                     cvss_obj = CVSS2(cvss_vectors)
                     cvss_score = cvss_obj.scores()[0]
                 else:
+                    no_cvss = True
                     cvss_score = 0.0
                     cvss_vectors = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N"
                     cvss_obj = CVSS3(cvss_vectors)
 
-            severity = cvss_obj.severities()
-            if not cvss_obj:
+            if no_cvss:
                 severity = "Info"
             else:
-                severity = cvss_obj[0].severities()[0]
+                severity = cvss_obj.severities()
 
             mitigation = self.format_mitigation(i)
             impact = self.format_impact(i)
