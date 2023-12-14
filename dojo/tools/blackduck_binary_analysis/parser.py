@@ -2,7 +2,7 @@ import hashlib
 
 from dojo.models import Finding
 from .importer import BlackduckBinaryAnalysisImporter
-import cvss.parser
+from cvss import CVSS2, CVSS3
 
 
 class BlackduckBinaryAnalysisParser(object):
@@ -40,23 +40,37 @@ class BlackduckBinaryAnalysisParser(object):
             cwe = 1357
             title = self.format_title(i)
             description = self.format_description(i)
+            cvss_v3 = True
             if str(i.cvss_v3) != "" and str(i.cvss_vector_v3) != "":
-                cvss_v3 = True
-                cvss_score = i.cvss_v3
+                cvss_score = float(i.cvss_v3)
                 cvss_vectors = "{}{}".format(
                     "CVSS:3.1/",
                     i.cvss_vector_v3
                 )
+                cvss_obj = CVSS3(cvss_vectors)
             elif str(i.cvss_v2) != "" and str(i.cvss_vector_v2) != "":
                 cvss_v3 = False
-                cvss_score = i.cvss_v2
+                cvss_score = float(i.cvss_v2)
                 cvss_vectors = i.cvss_vector_v2
+                cvss_obj = CVSS2(cvss_vectors)
             else:
-                cvss_v3 = True
-                cvss_score = 0.0
-                cvss_vectors = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N"
+                if str(i.cvss_vector_v3) != "":
+                    cvss_vectors = "{}{}".format(
+                        "CVSS:3.1/",
+                        i.cvss_vector_v3
+                    )
+                    cvss_obj = CVSS3(cvss_vectors)
+                    cvss_score = cvss_obj.scores()[0]
+                elif str(i.cvss_vector_v2) != "":
+                    cvss_vectors = i.cvss_vector_v2
+                    cvss_obj = CVSS2(cvss_vectors)
+                    cvss_score = cvss_obj.scores()[0]
+                else:
+                    cvss_score = 0.0
+                    cvss_vectors = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N"
+                    cvss_obj = CVSS3(cvss_vectors)
 
-            cvss_obj = cvss.parser.parse_cvss_from_text(cvss_vectors)
+            severity = cvss_obj.severities()
             if not cvss_obj:
                 severity = "Info"
             else:
@@ -77,6 +91,7 @@ class BlackduckBinaryAnalysisParser(object):
                 finding = Finding(
                     title=title,
                     test=test,
+                    cvssv3_score=cvss_score,
                     severity=severity,
                     description=description,
                     mitigation=mitigation,
@@ -97,7 +112,6 @@ class BlackduckBinaryAnalysisParser(object):
 
                 if cvss_v3:
                     finding.cvssv3 = cvss_vectors
-                    finding.cvssv3_score = cvss_score
                 else:
                     finding.severity_justification = "CVSS2 Score: {}\nCVSS:2.0/{}".format(
                         cvss_score,
