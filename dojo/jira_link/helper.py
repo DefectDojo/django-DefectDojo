@@ -551,10 +551,8 @@ def get_tags(obj):
 
 def jira_summary(obj):
     summary = ''
-
     if isinstance(obj, Finding):
         summary = obj.title
-
     if isinstance(obj, Finding_Group):
         summary = obj.name
 
@@ -658,6 +656,7 @@ def prepare_jira_issue_fields(
         environment=None,
         priority_name=None,
         epic_name_field=None,
+        default_assignee=None,
         duedate=None,
         issuetype_fields=[]):
 
@@ -688,6 +687,9 @@ def prepare_jira_issue_fields(
 
     if duedate and 'duedate' in issuetype_fields:
         fields['duedate'] = duedate.strftime('%Y-%m-%d')
+
+    if default_assignee:
+        fields['assignee'] = {'name': default_assignee}
 
     return fields
 
@@ -743,12 +745,16 @@ def add_jira_issue(obj, *args, **kwargs):
             priority_name=jira_priority(obj),
             epic_name_field=get_epic_name_field_name(jira_instance),
             duedate=duedate,
-            issuetype_fields=issuetype_fields)
+            issuetype_fields=issuetype_fields,
+            default_assignee=jira_project.default_assignee)
 
         logger.debug('sending fields to JIRA: %s', fields)
         new_issue = jira.create_issue(fields)
         if jira_project.default_assignee:
-            jira.assign_issue(new_issue.key, jira_project.default_assignee)
+            created_assignee = str(new_issue.get_field('assignee'))
+            logger.debug("new issue created with assignee %s", created_assignee)
+            if created_assignee != jira_project.default_assignee:
+                jira.assign_issue(new_issue.key, jira_project.default_assignee)
 
         # Upload dojo finding screenshots to Jira
         findings = [obj]

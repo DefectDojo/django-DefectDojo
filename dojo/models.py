@@ -37,7 +37,6 @@ import tagulous.admin
 from django.db.models import JSONField
 import hyperlink
 from cvss import CVSS3
-from dojo.settings.settings import SLA_BUSINESS_DAYS
 
 
 logger = logging.getLogger(__name__)
@@ -271,15 +270,6 @@ class Role(models.Model):
 
 
 class System_Settings(models.Model):
-    enable_auditlog = models.BooleanField(
-        default=True,
-        blank=False,
-        verbose_name=_('Enable audit logging'),
-        help_text=_("With this setting turned on, Dojo maintains an audit log "
-                  "of changes made to entities (Findings, Tests, Engagements, Procuts, ...)"
-                  "If you run big import you may want to disable this "
-                  "because the way django-auditlog currently works, there's a "
-                  "big performance hit. Especially during (re-)imports."))
     enable_deduplication = models.BooleanField(
         default=False,
         blank=False,
@@ -2762,7 +2752,7 @@ class Finding(models.Model):
 
     def _age(self, start_date):
         from dojo.utils import get_work_days
-        if SLA_BUSINESS_DAYS:
+        if settings.SLA_BUSINESS_DAYS:
             if self.mitigated:
                 days = get_work_days(self.date, self.mitigated.date())
             else:
@@ -4290,36 +4280,21 @@ class ChoiceAnswer(Answer):
             return 'No Response'
 
 
-def enable_disable_auditlog(enable=True):
-    if enable:
-        # Register for automatic logging to database
-        logger.info('enabling audit logging')
-        auditlog.register(Dojo_User, exclude_fields=['password'])
-        auditlog.register(Endpoint)
-        auditlog.register(Engagement)
-        auditlog.register(Finding)
-        auditlog.register(Product_Type)
-        auditlog.register(Product)
-        auditlog.register(Test)
-        auditlog.register(Risk_Acceptance)
-        auditlog.register(Finding_Template)
-        auditlog.register(Cred_User, exclude_fields=['password'])
-    else:
-        logger.info('disabling audit logging')
-        auditlog.unregister(Dojo_User)
-        auditlog.unregister(Endpoint)
-        auditlog.unregister(Engagement)
-        auditlog.unregister(Finding)
-        auditlog.unregister(Product_Type)
-        auditlog.unregister(Product)
-        auditlog.unregister(Test)
-        auditlog.unregister(Risk_Acceptance)
-        auditlog.unregister(Finding_Template)
-        auditlog.unregister(Cred_User)
+if settings.ENABLE_AUDITLOG:
+    # Register for automatic logging to database
+    logger.info('enabling audit logging')
+    auditlog.register(Dojo_User, exclude_fields=['password'])
+    auditlog.register(Endpoint)
+    auditlog.register(Engagement)
+    auditlog.register(Finding)
+    auditlog.register(Product_Type)
+    auditlog.register(Product)
+    auditlog.register(Test)
+    auditlog.register(Risk_Acceptance)
+    auditlog.register(Finding_Template)
+    auditlog.register(Cred_User, exclude_fields=['password'])
 
-
-from dojo.utils import calculate_grade, get_system_setting, to_str_typed
-enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on startup choose safe to retrieve system settiung)
+from dojo.utils import calculate_grade, to_str_typed
 
 tagulous.admin.register(Product.tags)
 tagulous.admin.register(Test.tags)
