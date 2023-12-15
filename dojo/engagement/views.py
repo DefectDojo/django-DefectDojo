@@ -33,11 +33,12 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Import, Notes, \
     Risk_Acceptance, Development_Environment, Endpoint, \
-    Cred_Mapping, System_Settings, Note_Type, Product_API_Scan_Configuration
+    Cred_Mapping, System_Settings, Note_Type, Product_API_Scan_Configuration, \
+    Product_Type
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, async_delete, \
-    get_system_setting, get_setting, redirect_to_return_url_or_else, get_return_url, calculate_grade
+    get_system_setting, get_setting, redirect_to_return_url_or_else, get_return_url, calculate_grade, get_product
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
@@ -866,17 +867,24 @@ def complete_checklist(request, eid):
     })
 
 
-def get_risk_acceptance_pending(request, finding: Finding, eng: Engagement):
+def get_risk_acceptance_pending(request,
+                                finding: Finding,
+                                eng: Engagement,
+                                product: Product,
+                                product_type: Product_Type):
     if settings.RISK_PENDING:
         form = None
         risk_acceptance_title_suggestion = 'Accept: %s' % finding
-        if rp_helper.is_rol_permissions_risk_acceptance(request.user, finding.severity):
+        if rp_helper.is_rol_permissions_risk_acceptance(request.user,
+                                                        finding,
+                                                        product,
+                                                        product_type):
             form = RiskPendingForm(severity=finding.severity,
                 initial={'owner': request.user,
                         'name': risk_acceptance_title_suggestion,
                         'accepted_by': request.user,
                         "severity": finding.severity})
-        elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request):
+        elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
             risk_acceptance_title_suggestion = 'Accept: %s' % finding
             form = RiskPendingForm(severity=finding.severity,
                 initial={'owner': request.user,
@@ -890,17 +898,17 @@ def get_risk_acceptance_pending(request, finding: Finding, eng: Engagement):
     return form
 
 
-def post_risk_acceptance_pending(request, finding: Finding, eng, eid):
+def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: Product, product_type: Product_Type):
     if any(vulnerability_id in settings.BLACK_LIST_FINDING for vulnerability_id in finding.vulnerability_ids):
         messages.add_message(request,
         messages.WARNING,
         'This risk is on the black list',
         extra_tags='alert-danger')
         return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
-    if (request.user.is_superuser is True or request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
+    if (request.user.is_superuser is True or rp_helper.get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
         form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity)
     else:
-        risk_status = rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request)
+        risk_status = rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type)
         if risk_status:
             form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity)
         else:
@@ -934,9 +942,9 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid):
 
         if settings.RISK_PENDING is True:
             if (request.user.is_superuser is True or
-                request.user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
+                rp_helper.get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
-            elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request):
+            elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
                 risk_acceptance = ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
             else:
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
@@ -951,6 +959,8 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid):
 
 def add_risk_acceptance_pending(request, eid, fid):
     eng = get_object_or_404(Engagement, id=eid)
+    product = get_product(eng)
+    product_type = product.get_product_type
     form = None
     finding = None
     try:
@@ -961,9 +971,9 @@ def add_risk_acceptance_pending(request, eid, fid):
             raise PermissionDenied()
 
         if request.method == 'POST':
-            return post_risk_acceptance_pending(request, finding, eng, eid)
+            return post_risk_acceptance_pending(request, finding, eng, eid, product, product_type)
         else:
-            form = get_risk_acceptance_pending(request, finding, eng)
+            form = get_risk_acceptance_pending(request, finding, eng, product, product_type)
             # form.fields["expiration_date"].disabled = True
         finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
         form.fields['accepted_findings'].queryset = finding_choices
@@ -1074,6 +1084,8 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     response = None
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
+    product = get_product(eng) 
+    product_type = product.get_product_type
 
     if edit_mode and not eng.product.enable_full_risk_acceptance:
         raise PermissionDenied()
@@ -1153,7 +1165,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         if 'risk_accept_pending' in request.POST:
             finding = get_object_or_404(Finding,
                                         pk=request.POST['risk_accept_finding_id'])
-            response=rp_helper.risk_acceptante_pending(eng, finding, risk_acceptance)
+            response=rp_helper.risk_acceptante_pending(eng, finding, risk_acceptance, product, product_type)
         if 'risk_accept_decline' in request.POST:
             finding = get_object_or_404(Finding,
                                         pk=request.POST['risk_accept_finding_id'])

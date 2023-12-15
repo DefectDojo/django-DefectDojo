@@ -4,8 +4,12 @@ from django.conf import settings
 from dataclasses import dataclass
 from dojo.utils import Response
 from django.urls import reverse
-from dojo.models import Engagement, Risk_Acceptance, Finding
+from dojo.models import Engagement, Risk_Acceptance, Finding, Product_Type_Member, Role, Product_Member, \
+    Product, Product_Type
 from dojo.risk_acceptance.helper import create_notification
+from dojo.product_type.queries import get_authorized_product_type_members_for_user
+from dojo.product.queries import get_authorized_members_for_product
+from dojo.authorization.roles_permissions import Permissions
 import crum
 
 logger = logging.getLogger(__name__)
@@ -84,8 +88,21 @@ def risk_accepted_succesfully(
         )
 
 
+def get_role_members(user, product: Product, product_type: Product_Type):
+    user_members: Product_Type_Member = get_authorized_product_type_members_for_user(user, Permissions.Risk_Acceptance)
+    if not user_members:
+        user_members: Product_Member = get_authorized_members_for_product(product=product, permission=Permissions.Risk_Acceptance)
+    if not user_members:
+        raise ValueError("The user does not have any product_type or product associated with it")
+    for user_member in user_members:
+        if user_member.product_type_id == product_type.id:
+            return user_member.role.name
+    raise ValueError(f"The user is not related to the object {product_type}")    
+
+
 def risk_acceptante_pending(
-    eng: Engagement, finding: Finding, risk_acceptance: Risk_Acceptance
+    eng: Engagement, finding: Finding, risk_acceptance: Risk_Acceptance,
+    product: Product, product_type: Product_Type
 ):
     user = crum.get_current_user()
     status = "Failed"
@@ -96,8 +113,8 @@ def risk_acceptante_pending(
         )
     )
     if (
-        user.is_superuser
-        or user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
+        user.is_superuser is True
+        or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
         or number_of_acceptors_required == 0
     ):
         finding.accepted_by = user.username
@@ -107,7 +124,7 @@ def risk_acceptante_pending(
 
     if finding.risk_status in ["Risk Pending", "Risk Rejected"]:
         confirmed_acceptances = get_confirmed_acceptors(finding)
-        if is_permissions_risk_acceptance(eng, finding, user):
+        if is_permissions_risk_acceptance(eng, finding, user, product, product_type):
             if user.username in confirmed_acceptances:
                 message = "The user has already accepted the risk"
                 status = "Failed"
@@ -123,14 +140,12 @@ def risk_acceptante_pending(
                 if number_of_acceptors_required == len(
                     get_confirmed_acceptors(finding)
                 ):
-                    # TODO : MOVER este bloque de codigo al evento save del findign
                     risk_accepted_succesfully(eng, finding, risk_acceptance)
                 message = "Finding Accept successfully from risk acceptance."
                 status = "OK"
             else:
                 raise ValueError(
-                    f"Error number of accepttors{finding.acceptances_confirmed} \
-                                    < number of acceptors required {number_of_acceptors_required}"
+                    f"Error number of acceptors {len(confirmed_acceptances)} > number of acceptors required {number_of_acceptors_required}"
                 )
     else:
         message = "The risk is already accepted"
@@ -171,9 +186,9 @@ def get_contacts(engagement: Engagement, finding_serverity: str, user):
 
 
 def is_permissions_risk_acceptance(
-    engagement: Engagement, finding: Finding, user
+    engagement: Engagement, finding: Finding, user, product: Product, product_type: Product_Type
 ):
-    if user.is_superuser is True or user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
+    if user.is_superuser is True or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
         return True
     contacts = get_contacts(engagement, finding.severity, user)
     contacts_ids = [contact.id for contact in contacts]
@@ -183,12 +198,12 @@ def is_permissions_risk_acceptance(
     return False
 
 
-def is_rol_permissions_risk_acceptance(user, severity):
+def is_rol_permissions_risk_acceptance(user, finding: Finding, product: Product, product_type: Product_Type):
     result = False
     if (
         user.is_superuser is True
-        or user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
-        or settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(severity).get(
+        or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
+        or settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity).get(
             "number_acceptors"
         )
         == 0
@@ -197,10 +212,8 @@ def is_rol_permissions_risk_acceptance(user, severity):
     return result
 
 
-def rule_risk_acceptance_according_to_critical(severity, request):
-    if request.user.global_role.role is None:
-        raise ValueError("The user does not have a role associated")
-    user_rol = request.user.global_role.role.name
+def rule_risk_acceptance_according_to_critical(severity, user, product: Product, product_type: Product_Type):
+    user_rol = get_role_members(user, product, product_type)
     risk_rule = settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(severity)
     view_risk_pending = False
     if risk_rule:

@@ -4,6 +4,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_global_permission, user_has_permission, \
     user_has_configuration_permission as configuration_permission
 from dojo.risk_acceptance.risk_pending import is_permissions_risk_acceptance 
+from dojo.utils import get_product
 from dojo.request_cache import cache_for_request
 
 register = template.Library()
@@ -13,7 +14,9 @@ register = template.Library()
 @register.filter
 def has_risk_acceptance_permission(engagement, finding):
     user = crum.get_current_user()
-    return is_permissions_risk_acceptance(engagement, finding, user)
+    product = get_product(engagement)
+    product_type = product.get_product_type
+    return is_permissions_risk_acceptance(engagement, finding, user, product, product_type)
 
 
 @register.filter
