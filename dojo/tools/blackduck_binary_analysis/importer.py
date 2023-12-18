@@ -16,8 +16,8 @@ class Importer(ABC):
 
 class BlackduckBinaryAnalysisImporter(Importer):
     def parse_findings(self, report: Path) -> Iterable[BlackduckBinaryAnalysisFinding]:
+        orig_report_name = Path(report.name)
         if not issubclass(type(report), Path):
-            orig_report_name = Path(report.name)
             report = Path(report.temporary_file_path())
 
         return self._process_csvfile(report, orig_report_name)
