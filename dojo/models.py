@@ -2949,9 +2949,7 @@ class Finding(models.Model):
             finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
                 issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
         else:
-            logger.debug('no options selected that require finding post processing')
-                    
-        
+            logger.debug('no options selected that require finding post processing')        
 
     # Check if a mandatory field is empty. If it's the case, fill it with "no <fieldName> given"
     def clean(self):
