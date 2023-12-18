@@ -1,39 +1,62 @@
+---
 docs:
-- docs/**/*
-- readme-docs/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/**/*
+      - readme-docs/**/*
 
 docker:
-- docker/**/*
-- docker**
-- Docker*
+  - changed-files:
+    - any-glob-to-any-file:
+      - docker/**/*
+      - docker**
+      - Docker*
 
 helm:
-- helm/defectdojo/*
-- helm/defectdojo/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - helm/defectdojo/*
+      - helm/defectdojo/**/*
 
 "New Migration":
-- dojo/db_migrations/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - dojo/db_migrations/*
 
 unittests:
-- unittests/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - unittests/**/*
 
 integration_tests:
-- tests/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - tests/**/*
 
 settings_changes:
-- dojo/settings/settings.dist.py
+  - changed-files:
+    - any-glob-to-any-file:
+      - dojo/settings/settings.dist.py
 
 apiv2:
-- dojo/api_v2/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - dojo/api_v2/**/*
 
 ui:
-  - dojo/static/**/*
-  - dojo/templates/**/*
-  - dojo/templatetags/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - dojo/static/**/*
+      - dojo/templates/**/*
+      - dojo/templatetags/**/*
 
 parser:
-  - dojo/tools/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - dojo/tools/**/*
 
 localization:
-  - dojo/locale/*
-  - dojo/locale/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - dojo/locale/*
+      - dojo/locale/**/*

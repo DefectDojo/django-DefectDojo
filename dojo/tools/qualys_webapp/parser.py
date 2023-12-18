@@ -9,13 +9,13 @@ from datetime import datetime
 from dojo.models import Endpoint, Finding
 
 try:
-    from dojo.settings.settings import QUALYS_WAS_WEAKNESS_IS_VULN
+    from django.conf.settings import QUALYS_WAS_WEAKNESS_IS_VULN
 except ImportError:
     # Avoid breaking change
     QUALYS_WAS_WEAKNESS_IS_VULN = False
 
 try:
-    from dojo.settings.settings import QUALYS_WAS_UNIQUE_ID
+    from django.conf.settings import QUALYS_WAS_UNIQUE_ID
 except ImportError:
     # Avoid breaking change
     QUALYS_WAS_UNIQUE_ID = False

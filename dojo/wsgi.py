@@ -51,9 +51,11 @@ if os.environ.get("DD_DEBUG") == "True" and not os.getenv("RUN_MAIN") and is_deb
             logger.info("Waiting for the debugging client to connect on port {}".format(debugpy_port))
             debugpy.wait_for_client()
             print("Debugging client connected, resuming execution")
+    except RuntimeError as e:
+        if str(e) != "Can't listen for client connections: [Errno 98] Address already in use":
+            logger.exception(e)
     except Exception as e:
         logger.exception(e)
-        pass
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
