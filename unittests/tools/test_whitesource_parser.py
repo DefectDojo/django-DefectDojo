@@ -18,7 +18,9 @@ class TestWhitesourceParser(DojoTestCase):
         self.assertEqual(1, len(findings))
         finding = list(findings)[0]
         self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
-        self.assertEqual("WS-2009-0001", finding.unsaved_vulnerability_ids[0])
+        self.assertEqual("CVE-2019-9658", finding.unsaved_vulnerability_ids[0])
+        self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N", finding.cvssv3)
+        self.assertEqual(5.3, finding.cvssv3_score)
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         testfile = open("unittests/scans/whitesource/okhttp_many_vuln.json")
