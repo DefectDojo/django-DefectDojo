@@ -121,8 +121,8 @@ class BlackduckBinaryAnalysisParser(object):
         return title
 
     def format_description(self, i):
-        description = "CSV Result: {}\n".format(str(i.report_path))
-        description = "Vulnerable Component: {}\n".format(str(i.component))
+        description = "CSV Result: {}\n".format(str(i.report_name))
+        description += "Vulnerable Component: {}\n".format(str(i.component))
         description += "Vulnerable Component Version in Use: {}\n".format(str(i.version))
         description += "Vulnerable Component Latest Version: {}\n".format(
             str(i.latest_version)

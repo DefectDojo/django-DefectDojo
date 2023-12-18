@@ -3,7 +3,7 @@ from collections import namedtuple
 BlackduckBinaryAnalysisFinding = namedtuple(
     "BlackduckBinaryAnalysisFinding",
     [
-        "report_path",
+        "report_name",
         "component",
         "version",
         "latest_version",

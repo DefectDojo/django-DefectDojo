@@ -17,11 +17,12 @@ class Importer(ABC):
 class BlackduckBinaryAnalysisImporter(Importer):
     def parse_findings(self, report: Path) -> Iterable[BlackduckBinaryAnalysisFinding]:
         if not issubclass(type(report), Path):
+            orig_report_name = Path(report.name)
             report = Path(report.temporary_file_path())
 
-        return self._process_csvfile(report)
+        return self._process_csvfile(report, orig_report_name)
 
-    def _process_csvfile(self, report):
+    def _process_csvfile(self, report, orig_report_name):
         """
         If passed a CSV file, process.
         """
@@ -31,11 +32,11 @@ class BlackduckBinaryAnalysisImporter(Importer):
 
         sha1_hash_keys = set(vulnerabilities.keys())
         return self._process_vuln_results(
-            sha1_hash_keys, report, vulnerabilities
+            sha1_hash_keys, report, orig_report_name, vulnerabilities
         )
 
     def _process_vuln_results(
-        self, sha1_hash_keys, report, vulnerabilities
+        self, sha1_hash_keys, report, orig_report_name, vulnerabilities
     ):
         """
         Process findings for each project.
@@ -46,7 +47,7 @@ class BlackduckBinaryAnalysisImporter(Importer):
                 vuln_dict = dict(vuln)
 
                 yield BlackduckBinaryAnalysisFinding(
-                    report,
+                    orig_report_name,
                     vuln_dict.get("Component"),
                     vuln_dict.get("Version"),
                     vuln_dict.get("Latest version"),
