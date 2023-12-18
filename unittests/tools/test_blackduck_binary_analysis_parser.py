@@ -1,4 +1,4 @@
-from ..dojo_test_case import DojoTestCase
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.tools.blackduck_binary_analysis.parser import BlackduckBinaryAnalysisParser
 from dojo.models import Test
 from pathlib import Path
