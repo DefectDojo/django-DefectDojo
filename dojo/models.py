@@ -3837,7 +3837,7 @@ class Notifications(models.Model):
                 result.risk_acceptance_expiration = merge_sets_safe(result.risk_acceptance_expiration, notifications.risk_acceptance_expiration)
 
         return result
-    
+
     def __str__(self):
         return f"Notifications about {self.product or 'all projects'} for {self.user}"
 
