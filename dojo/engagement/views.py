@@ -905,6 +905,17 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
         'This risk is on the black list',
         extra_tags='alert-danger')
         return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
+
+    abuse_control_result = rp_helper.abuse_control(finding_id = finding.id)
+    for abuse_control, result in abuse_control_result.items():
+        if not abuse_control_result[abuse_control]["status"]:
+            messages.add_message(
+            request,
+            messages.SUCCESS,
+            abuse_control_result[abuse_control]["message"],
+            extra_tags='alert-danger')
+            return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
+
     if (request.user.is_superuser is True or rp_helper.get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
         form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity)
     else:
@@ -1274,7 +1285,10 @@ def expire_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
 
-    ra_helper.expire_now(risk_acceptance)
+    if settings.RISK_PENDING:
+        rp_helper.expire_now_risk_pending(risk_acceptance)
+    else:
+        ra_helper.expire_now(risk_acceptance)
 
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 

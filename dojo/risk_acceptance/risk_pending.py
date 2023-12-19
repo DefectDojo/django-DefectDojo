@@ -3,10 +3,11 @@ from typing import List
 from django.conf import settings
 from dataclasses import dataclass
 from dojo.utils import Response
+from django.utils import timezone
 from django.urls import reverse
 from dojo.models import Engagement, Risk_Acceptance, Finding, Product_Type_Member, Role, Product_Member, \
-    Product, Product_Type
-from dojo.risk_acceptance.helper import create_notification
+    Product, Product_Type   
+from dojo.risk_acceptance.helper import create_notification, expiration_message_creator, post_jira_comments
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.product.queries import get_authorized_members_for_product
 from dojo.authorization.roles_permissions import Permissions
@@ -100,6 +101,13 @@ def get_role_members(user, product: Product, product_type: Product_Type):
     raise ValueError(f"The user is not related to the object {product_type}")    
 
 
+def role_has_exclusive_permissions(user):
+    if user.global_role.role:
+        if user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
+            return True
+        return False
+
+
 def risk_acceptante_pending(
     eng: Engagement, finding: Finding, risk_acceptance: Risk_Acceptance,
     product: Product, product_type: Product_Type
@@ -116,6 +124,7 @@ def risk_acceptante_pending(
         user.is_superuser is True
         or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
         or number_of_acceptors_required == 0
+        or role_has_exclusive_permissions(user)
     ):
         finding.accepted_by = user.username
         risk_accepted_succesfully(eng, finding, risk_acceptance)
@@ -188,14 +197,18 @@ def get_contacts(engagement: Engagement, finding_serverity: str, user):
 def is_permissions_risk_acceptance(
     engagement: Engagement, finding: Finding, user, product: Product, product_type: Product_Type
 ):
-    if user.is_superuser is True or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
-        return True
+    result = False
+    if (user.is_superuser is True
+        or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
+        or role_has_exclusive_permissions(user)):
+        result = True
+        
     contacts = get_contacts(engagement, finding.severity, user)
     contacts_ids = [contact.id for contact in contacts]
     if user.id in contacts_ids and finding.risk_accepted is False:
         # has the permissions remove and reject risk pending
-        return True
-    return False
+        result = True
+    return result
 
 
 def is_rol_permissions_risk_acceptance(user, finding: Finding, product: Product, product_type: Product_Type):
@@ -226,3 +239,95 @@ def rule_risk_acceptance_according_to_critical(severity, user, product: Product,
         ):
             view_risk_pending = True
     return view_risk_pending
+
+
+def limit_assumption_of_vulnerability(*args, **kwargs):
+    # "LAV"  - (Limit Assumption of Vulnerability).
+    number_of_acceptances_by_finding = Risk_Acceptance.objects.filter(accepted_findings=kwargs["finding_id"]).count()
+    result = {}
+    if number_of_acceptances_by_finding < settings.LIMIT_ASSUMPTION_OF_VULNERABILITY:
+        result["status"] = True
+        result["message"] = ""
+    else:
+        result["status"] = False
+        result["message"] = "The finding exceeds the maximum limit of acceptance times"
+    return result
+
+
+def limit_of_tempralily_assumed_vulnerabilities_limited_to_tolerance(*args, **kwargs):
+    # "LTVLT - Limit of Temporarily Assumed Vulnerabilities Limited to Tolerance"
+    result = {}
+    result["status"] = True
+    result["message"] = ""
+    return result
+
+
+def percentage_of_vulnerabilitiese_closed(*args, **kwargs):
+    # "PVC - Percentage of Vulnerabilities Closed"
+    result = {}
+    result["status"] = True
+    result["message"] = ""
+    return result
+
+
+
+def temporaly_assumed_vulnerabilities(*args, **kwargs):
+    # "TAV - Temporarily Assumed Vulnerabilities"
+    result = {}
+    result["status"] = True
+    result["message"] = ""
+    return result
+
+
+
+def abuse_control(*args, **kwargs):
+    rule_abuse_control = {
+        "LAV": limit_assumption_of_vulnerability,
+        "LTVLT": limit_of_tempralily_assumed_vulnerabilities_limited_to_tolerance,
+        "PVC": percentage_of_vulnerabilitiese_closed,
+        "TAV": temporaly_assumed_vulnerabilities
+    }
+    result_dict = {}
+    for key, rule in rule_abuse_control.items():
+        result_dict[key] = rule(*args, **kwargs)
+    return result_dict
+
+
+def expire_now_risk_pending(risk_acceptance):
+    logger.info('Expiring risk acceptance %i:%s with %i findings', risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
+
+    reactivated_findings = []
+    if risk_acceptance.reactivate_expired:
+        for finding in risk_acceptance.accepted_findings.all():
+            if not finding.active:
+                logger.debug('%i:%s: unaccepting a.k.a reactivating finding.', finding.id, finding)
+                finding.active = True
+                finding.risk_accepted = False
+                finding.risk_status = "Risk_Active"
+                finding.acceptances_confirmed = 0
+                finding.accepted_by = ""
+
+                if risk_acceptance.restart_sla_expired:
+                    finding.sla_start_date = timezone.now().date()
+
+                finding.save(dedupe_option=False)
+                reactivated_findings.append(finding)
+                # findings remain in this risk acceptance for reporting / metrics purposes
+            else:
+                logger.debug('%i:%s already active, no changes made.', finding.id, finding)
+
+        # best effort JIRA integration, no status changes
+        post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_message_creator)
+
+    risk_acceptance.expiration_date = timezone.now()
+    risk_acceptance.expiration_date_handled = timezone.now()
+    risk_acceptance.save()
+
+    accepted_findings = risk_acceptance.accepted_findings.all()
+    title = 'Risk acceptance with ' + str(len(accepted_findings)) + " accepted findings has expired for " + \
+            str(risk_acceptance.engagement.product) + ': ' + str(risk_acceptance.engagement.name)
+
+    create_notification(event='risk_acceptance_expiration', title=title, risk_acceptance=risk_acceptance, accepted_findings=accepted_findings,
+                         reactivated_findings=reactivated_findings, engagement=risk_acceptance.engagement,
+                         product=risk_acceptance.engagement.product,
+                         url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
