@@ -3839,7 +3839,7 @@ class Notifications(models.Model):
         return result
 
     def __str__(self):
-        return f"Notifications about {self.product or 'all projects'} for {self.user}"
+        return f"Notifications about {self.product or 'all projects'} for {self.user or 'system notifications'}"
 
 
 class NotificationsAdmin(admin.ModelAdmin):
