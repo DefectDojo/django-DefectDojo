@@ -3837,6 +3837,18 @@ class Notifications(models.Model):
                 result.risk_acceptance_expiration = merge_sets_safe(result.risk_acceptance_expiration, notifications.risk_acceptance_expiration)
 
         return result
+    
+    def __str__(self):
+        return f"Notifications about {self.product or 'all projects'} for {self.user}"
+
+
+class NotificationsAdmin(admin.ModelAdmin):
+    list_filter = ('user', 'product')
+
+    def get_list_display(self, request):
+        list_fields = ['user', 'product']
+        list_fields += [field.name for field in self.model._meta.fields if field.name not in list_fields]
+        return list_fields
 
 
 class Tool_Product_Settings(models.Model):
@@ -4414,7 +4426,7 @@ admin.site.register(BurpRawRequestResponse)
 admin.site.register(Announcement)
 admin.site.register(UserAnnouncement)
 admin.site.register(BannerConf)
-admin.site.register(Notifications)
+admin.site.register(Notifications, NotificationsAdmin)
 admin.site.register(Tool_Product_History)
 admin.site.register(General_Survey)
 admin.site.register(Test_Import)
