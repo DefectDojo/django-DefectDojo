@@ -95,9 +95,13 @@ def get_role_members(user, product: Product, product_type: Product_Type):
         user_members: Product_Member = get_authorized_members_for_product(product=product, permission=Permissions.Risk_Acceptance)
     if not user_members:
         raise ValueError("The user does not have any product_type or product associated with it")
-    for user_member in user_members:
-        if user_member.product_type_id == product_type.id:
-            return user_member.role.name
+    for user_member in user_members.all():
+        if hasattr(user_member,"product_type_id"):
+            if user_member.product_type_id == product_type.id:
+                return user_member.role.name
+        elif hasattr(user_member, "product_id"):
+            if user_member.product_id == product_type.id:
+                return user_member.role.name
     raise ValueError(f"The user is not related to the object {product_type}")    
 
 
@@ -122,9 +126,9 @@ def risk_acceptante_pending(
     )
     if (
         user.is_superuser is True
-        or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
-        or number_of_acceptors_required == 0
         or role_has_exclusive_permissions(user)
+        or number_of_acceptors_required == 0
+        or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
     ):
         finding.accepted_by = user.username
         risk_accepted_succesfully(eng, finding, risk_acceptance)
@@ -199,8 +203,8 @@ def is_permissions_risk_acceptance(
 ):
     result = False
     if (user.is_superuser is True
-        or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
-        or role_has_exclusive_permissions(user)):
+        or role_has_exclusive_permissions(user)
+        or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
         result = True
         
     contacts = get_contacts(engagement, finding.severity, user)
@@ -215,6 +219,7 @@ def is_rol_permissions_risk_acceptance(user, finding: Finding, product: Product,
     result = False
     if (
         user.is_superuser is True
+        or role_has_exclusive_permissions(user)
         or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
         or settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity).get(
             "number_acceptors"
@@ -222,6 +227,7 @@ def is_rol_permissions_risk_acceptance(user, finding: Finding, product: Product,
         == 0
     ):
         result = True
+
     return result
 
 
@@ -241,7 +247,7 @@ def rule_risk_acceptance_according_to_critical(severity, user, product: Product,
     return view_risk_pending
 
 
-def limit_assumption_of_vulnerability(*args, **kwargs):
+def limit_assumption_of_vulnerability(**kwargs):
     # "LAV"  - (Limit Assumption of Vulnerability).
     number_of_acceptances_by_finding = Risk_Acceptance.objects.filter(accepted_findings=kwargs["finding_id"]).count()
     result = {}
@@ -254,7 +260,7 @@ def limit_assumption_of_vulnerability(*args, **kwargs):
     return result
 
 
-def limit_of_tempralily_assumed_vulnerabilities_limited_to_tolerance(*args, **kwargs):
+def limit_of_tempralily_assumed_vulnerabilities_limited_to_tolerance(**kwargs):
     # "LTVLT - Limit of Temporarily Assumed Vulnerabilities Limited to Tolerance"
     result = {}
     result["status"] = True
@@ -262,7 +268,7 @@ def limit_of_tempralily_assumed_vulnerabilities_limited_to_tolerance(*args, **kw
     return result
 
 
-def percentage_of_vulnerabilitiese_closed(*args, **kwargs):
+def percentage_of_vulnerabilitiese_closed(**kwargs):
     # "PVC - Percentage of Vulnerabilities Closed"
     result = {}
     result["status"] = True
@@ -271,7 +277,7 @@ def percentage_of_vulnerabilitiese_closed(*args, **kwargs):
 
 
 
-def temporaly_assumed_vulnerabilities(*args, **kwargs):
+def temporaly_assumed_vulnerabilities(**kwargs):
     # "TAV - Temporarily Assumed Vulnerabilities"
     result = {}
     result["status"] = True
@@ -280,7 +286,10 @@ def temporaly_assumed_vulnerabilities(*args, **kwargs):
 
 
 
-def abuse_control(*args, **kwargs):
+def abuse_control(user, finding: Finding, product: Product, product_type: Product_Type):
+    if is_rol_permissions_risk_acceptance(user, finding, product, product_type):
+        return {"Privileged role": {"status": True, "message": "This user has risk acceptance privileges"}}
+
     rule_abuse_control = {
         "LAV": limit_assumption_of_vulnerability,
         "LTVLT": limit_of_tempralily_assumed_vulnerabilities_limited_to_tolerance,
@@ -289,7 +298,7 @@ def abuse_control(*args, **kwargs):
     }
     result_dict = {}
     for key, rule in rule_abuse_control.items():
-        result_dict[key] = rule(*args, **kwargs)
+        result_dict[key] = rule(finding_id=finding.id)
     return result_dict
 
 

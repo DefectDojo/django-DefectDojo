@@ -906,7 +906,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
         extra_tags='alert-danger')
         return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
 
-    abuse_control_result = rp_helper.abuse_control(finding_id = finding.id)
+    abuse_control_result = rp_helper.abuse_control(request.user, finding, product, product_type)
     for abuse_control, result in abuse_control_result.items():
         if not abuse_control_result[abuse_control]["status"]:
             messages.add_message(
@@ -916,14 +916,9 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
             extra_tags='alert-danger')
             return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
 
-    if (request.user.is_superuser is True or rp_helper.get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
-        form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity)
-    else:
-        risk_status = rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type)
-        if risk_status:
-            form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity)
-        else:
-            form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity)
+    # risk_status = rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type)
+        # if risk_status:
+    form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity)
 
     if form.is_valid():
         notes = None
@@ -952,8 +947,9 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
         findings = form.cleaned_data['accepted_findings']
 
         if settings.RISK_PENDING is True:
-            if (request.user.is_superuser is True or
-                rp_helper.get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
+            if (request.user.is_superuser is True
+                or rp_helper.role_has_exclusive_permissions(request.user)
+                or rp_helper.get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
             elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
                 risk_acceptance = ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
