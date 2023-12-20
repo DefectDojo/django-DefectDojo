@@ -85,7 +85,7 @@ def query_user_by_rol(rol):
     ids_role = list(
         Role.objects.filter(name__in=rol).values_list("id", flat=True))
     if ids_role:
-        user_list_maintainer = Global_Role.objects.filter(role_id__in=ids_role).values_list("id", flat=True)
+        user_list_maintainer = Global_Role.objects.filter(role_id__in=ids_role).values_list("user_id", flat=True)
     return list(user_list_maintainer)
 
 def get_owner_user():

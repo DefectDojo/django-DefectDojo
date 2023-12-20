@@ -59,6 +59,7 @@ class Permissions(IntEnum):
     Risk_Acceptance_Delete = 1211
     Risk_Acceptance_Expire = 1213
     Risk_Acceptance_Reinstance = 1214
+    Risk_Unaccept = 1215
 
     Test_View = 1302
     Test_Add = 1303
@@ -155,6 +156,7 @@ class Permissions(IntEnum):
             Permissions.Risk_Acceptance_Add,
             Permissions.Risk_Acceptance_Expire,
             Permissions.Risk_Acceptance_Reinstance,
+            Permissions.Risk_Unaccept,
             Permissions.Test_Add,
             Permissions.Import_Scan_Result,
             Permissions.Note_Add,
@@ -368,6 +370,7 @@ def get_roles_with_permissions():
             Permissions.Engagement_Delete,
             Permissions.Risk_Acceptance,
             Permissions.Risk_Acceptance_Edit,
+            Permissions.Risk_Unaccept,
             Permissions.Test_View,
             Permissions.Test_Add,
             Permissions.Test_Edit,

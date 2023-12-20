@@ -56,6 +56,7 @@ def risk_acceptance_decline(
 
 
 def risk_accepted_succesfully(
+    user,
     eng: Engagement,
     finding: Finding,
     risk_acceptance: Risk_Acceptance,
@@ -64,6 +65,7 @@ def risk_accepted_succesfully(
     finding.risk_status = "Risk Accepted"
     finding.risk_accepted = True
     finding.active = False
+    finding.accepted_by = user.username
     finding.save()
     # Send notification
     if send_notification:
@@ -131,7 +133,7 @@ def risk_acceptante_pending(
         or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
     ):
         finding.accepted_by = user.username
-        risk_accepted_succesfully(eng, finding, risk_acceptance)
+        risk_accepted_succesfully(user, eng, finding, risk_acceptance)
         message = "Finding Accept successfully from risk acceptance."
         status = "OK"
 
@@ -153,7 +155,7 @@ def risk_acceptante_pending(
                 if number_of_acceptors_required == len(
                     get_confirmed_acceptors(finding)
                 ):
-                    risk_accepted_succesfully(eng, finding, risk_acceptance)
+                    risk_accepted_succesfully(user, eng, finding, risk_acceptance)
                 message = "Finding Accept successfully from risk acceptance."
                 status = "OK"
             else:
