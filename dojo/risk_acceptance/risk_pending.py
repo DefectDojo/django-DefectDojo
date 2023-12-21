@@ -11,6 +11,7 @@ from dojo.risk_acceptance.helper import create_notification, expiration_message_
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.product.queries import get_authorized_members_for_product
 from dojo.authorization.roles_permissions import Permissions
+import dojo.risk_acceptance.helper as ra_helper
 import crum
 
 logger = logging.getLogger(__name__)
@@ -342,3 +343,55 @@ def expire_now_risk_pending(risk_acceptance):
                          reactivated_findings=reactivated_findings, engagement=risk_acceptance.engagement,
                          product=risk_acceptance.engagement.product,
                          url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
+
+def delete(eng, risk_acceptance):
+    findings = risk_acceptance.accepted_findings.all()
+    for finding in findings:
+        finding.active = True
+        finding.risk_accepted = False
+        finding.accepted_by = ""
+        finding.risk_status = "Risk Active"
+        finding.save(dedupe_option=False)
+
+    # best effort jira integration, no status changes
+    post_jira_comments(risk_acceptance, findings, unaccepted_message_creator)
+
+    risk_acceptance.accepted_findings.clear()
+    eng.risk_acceptance.remove(risk_acceptance)
+    eng.save()
+
+    for note in risk_acceptance.notes.all():
+        note.delete()
+
+    risk_acceptance.path.delete()
+    risk_acceptance.delete()
+
+def remove_finding_from_risk_acceptance(risk_acceptance, finding):
+    logger.debug('removing finding %i from risk acceptance %i', finding.id, risk_acceptance.id)
+    risk_acceptance.accepted_findings.remove(finding)
+    finding.active = True
+    finding.risk_accepted = False
+    finding.accepted_by = ""
+    finding.risk_status = "Risk Active"
+    finding.save(dedupe_option=False)
+    # best effort jira integration, no status changes
+    post_jira_comments(risk_acceptance, [finding], ra_helper.unaccepted_message_creator)
+
+
+def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
+    for finding in findings:
+        add_severity_to_risk_acceptance(risk_pending, finding.severity)
+        if not finding.duplicate:
+            finding.risk_status = "Risk Pending"
+            finding.save(dedupe_option=False)
+            risk_pending.accepted_findings.add(finding)
+    risk_pending.save()
+    title = f"{risk_pending.TREATMENT_TRANSLATIONS.get(risk_pending.recommendation)} is requested:  {str(risk_pending.engagement.name)}"
+    create_notification(event='risk_acceptance_request', title=title, risk_acceptance=risk_pending, accepted_findings=risk_pending.accepted_findings,
+    reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
+    product=risk_pending.engagement.product,
+    recipients=eval(risk_pending.accepted_by),
+    icon="bell",
+    color_icon="#1B30DE",
+    url=reverse('view_risk_acceptance', args=(risk_pending.engagement.id, risk_pending.id, )))
+    post_jira_comments(risk_pending, findings, ra_helper.accepted_message_creator)

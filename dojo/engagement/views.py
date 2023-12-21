@@ -894,7 +894,7 @@ def get_risk_acceptance_pending(request,
     else:
         form = RiskAcceptanceForm(severity=finding.severity, initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
     if form is None:
-        raise ValueError("Form is None")
+        raise ValueError("The user does not have the necessary permissions")
     return form
 
 
@@ -1160,8 +1160,10 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         if 'remove_finding' in request.POST:
             finding = get_object_or_404(
                 Finding, pk=request.POST['remove_finding_id'])
-
-            ra_helper.remove_finding_from_risk_acceptance(risk_acceptance, finding)
+            if settings.RISK_PENDING:
+                rp_helper.remove_finding_from_risk_acceptance(risk_acceptance, finding)
+            else:
+                ra_helper.remove_finding_from_risk_acceptance(risk_acceptance, finding)
 
             messages.add_message(
                 request,
@@ -1306,8 +1308,10 @@ def reinstate_risk_acceptance(request, eid, raid):
 def delete_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
-
-    ra_helper.delete(eng, risk_acceptance)
+    if settings.RISK_PENDING:
+        rp_helper.delete(eng, risk_acceptance)
+    else:
+        ra_helper.delete(eng, risk_acceptance)
 
     messages.add_message(
         request,
