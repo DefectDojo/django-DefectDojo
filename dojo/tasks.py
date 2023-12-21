@@ -1,5 +1,7 @@
 import logging
-from datetime import timedelta
+from auditlog.models import LogEntry
+from datetime import timedelta, date
+from dateutil.relativedelta import relativedelta
 from django.db.models import Count, Prefetch
 from django.conf import settings
 from django.urls import reverse
