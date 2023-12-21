@@ -751,50 +751,6 @@ class RiskPendingForm(forms.ModelForm):
             raise ValidationError("Accepted_by key no found")
         return data
 
-class RiskAcceptancePendingForm(EditRiskAcceptanceForm):
-    accepted_findings = forms.ModelMultipleChoiceField(
-        queryset=Finding.objects.none(), required=True,
-        widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
-        help_text=('Active, verified findings listed, please select to add findings.'))
-    notes = forms.CharField(required=False, max_length=2400,
-                            widget=forms.Textarea,
-                            label='Notes')
-    accepted_by = forms.ModelMultipleChoiceField(
-        queryset=Dojo_User.objects.none(),
-        widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
-        help_text=('select acceptors depending on the severity of the risk')
-    )
-
-    class Meta:
-        model = Risk_Acceptance
-        exclude = ['acceptances_confirmed', 'expiration_date_handled', 'severity']
-
-    def __init__(self, *args, **kwargs):
-        severity = kwargs.pop("severity", None)
-        super().__init__(*args, **kwargs)
-        expiration_delta_days = get_system_setting('risk_acceptance_form_default_days')
-        logger.debug('expiration_delta_days: %i', expiration_delta_days)
-        if expiration_delta_days > 0:
-            expiration_date = timezone.now().date() + relativedelta(days=expiration_delta_days)
-            # logger.debug('setting default expiration_date: %s', expiration_date)
-            self.fields['expiration_date'].initial = expiration_date
-        # self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
-        self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
-        self.fields['accepted_by'].queryset = get_authorized_contacts(severity)
-        self.fields['reactivate_expired'].disabled = True
-    
-    def clean(self):
-        data = self.cleaned_data
-        if "accepted_by" in data.keys():
-            accepted_by = data["accepted_by"]
-            contacts = accepted_by.values()
-            contact = [contact["username"] for contact in contacts]
-            data["accepted_by"] = contact
-        else:
-            raise ValidationError("Accepted_by key no found")
-        return data
-
-
 class RiskAcceptanceForm(EditRiskAcceptanceForm):
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.none(), required=True,
@@ -858,7 +814,7 @@ class AddFindingsRiskAcceptanceForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
+        self.fields['accepted_findings'].queryset = get_authorized_findings(permission=Permissions.Risk_Acceptance)
 
 
 class CheckForm(forms.ModelForm):
