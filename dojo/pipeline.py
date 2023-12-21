@@ -206,6 +206,8 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
                 Global_Role.objects.get_or_create(user=user, role=Role.objects.get(id=Roles.Maintainer))
             elif office_location in settings.AZURE_DEVOPS_OFFICES_LOCATION.split(",")[2]:
                 Global_Role.objects.get_or_create(user=user, role=Role.objects.get(id=Roles.Reader))
+            elif office_location in settings.AZURE_DEVOPS_OFFICES_LOCATION.split(",")[3]:
+                Global_Role.objects.get_or_create(user=user, role=Role.objects.get(id=Roles.Risk))
 
             # Assign specific role
             organization_url = settings.AZURE_DEVOPS_ORGANIZATION_URL
