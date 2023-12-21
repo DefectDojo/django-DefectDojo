@@ -223,7 +223,8 @@ env = environ.Env(
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
     # new feature that tracks history across multiple reimports for the same test
     DD_TRACK_IMPORT_HISTORY=(bool, True),
-
+    # Delete Auditlogs older than x month; -1 to keep all logs
+    DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, 12),
     # Allow grouping of findings in the same test, for example to group findings per dependency
     # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
     DD_FEATURE_FINDING_GROUPS=(bool, True),
@@ -1130,6 +1131,10 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': timedelta(minutes=1),
         'args': [timedelta(minutes=1)]
     },
+    'flush_auditlog': {
+        'task': 'dojo.tasks.flush_auditlog',
+        'schedule': timedelta(hours=8),
+    },
     'update-findings-from-source-issues': {
         'task': 'dojo.tools.tool_issue_updater.update_findings_from_source_issues',
         'schedule': timedelta(hours=3),
@@ -1704,4 +1709,8 @@ ADDITIONAL_HEADERS = env('DD_ADDITIONAL_HEADERS')
 # Dictates whether cloud banner is created or not
 CREATE_CLOUD_BANNER = env('DD_CREATE_CLOUD_BANNER')
 
+# ------------------------------------------------------------------------------
+# Auditlog
+# ------------------------------------------------------------------------------
+AUDITLOG_FLUSH_RETENTION_PERIOD = env('DD_AUDITLOG_FLUSH_RETENTION_PERIOD')
 ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')

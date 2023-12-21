@@ -87,6 +87,29 @@ def cleanup_alerts(*args, **kwargs):
 
 
 @app.task(bind=True)
+def flush_auditlog(*args, **kwargs):
+    try:
+        retention_period = settings.AUDITLOG_FLUSH_RETENTION_PERIOD
+    except System_Settings.DoesNotExist:
+        retention_period = -1    
+
+    if retention_period < 0:
+        logger.info("Flushing auditlog is disabled")
+        return
+
+    logger.info("Running Cleanup Task for Logentries with %d Months retention", retention_period)
+    retention_date = date.today() - relativedelta(months=retention_period)
+    subset = LogEntry.objects.filter(timestamp__date__lt=retention_date)
+    event_count = subset.count()
+    logger.debug("Initially received %d Logentries", event_count)
+    if event_count > 0:
+        subset._raw_delete(subset.db)
+        logger.debug('Total number of audit log entries deleted: %s', event_count)
+    else:
+        logger.debug('No outdated Logentries found')
+
+
+@app.task(bind=True)
 def async_dupe_delete(*args, **kwargs):
     try:
         system_settings = System_Settings.objects.get()
