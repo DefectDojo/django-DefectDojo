@@ -114,6 +114,7 @@ class PWNSASTParser(object):
                             nb_occurences=1,
                             steps_to_reproduce=steps_to_reproduce,
                             file_path=offending_file,
+                            unique_id_from_tool=unique_finding_key,
                         )
                         findings[unique_finding_key] = finding
 
