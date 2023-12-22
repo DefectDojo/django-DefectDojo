@@ -1818,6 +1818,9 @@ class Endpoint(models.Model):
     def from_uri(uri):
         try:
             url = hyperlink.parse(url=uri)
+        except UnicodeDecodeError:
+            from urllib.parse import urlparse
+            url = hyperlink.parse(url="//" + urlparse(uri).netloc)
         except hyperlink.URLParseError as e:
             raise ValidationError('Invalid URL format: {}'.format(e))
 
