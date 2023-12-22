@@ -1,3 +1,4 @@
+---
 name: "release-X: Release helm chart"
 
 env:
