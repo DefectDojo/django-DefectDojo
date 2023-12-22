@@ -106,14 +106,19 @@ class BurpApiParser(object):
         if value is not None:
             for segment in value:
                 if segment["type"] == "DataSegment":
-                    output += base64.b64decode(segment["data"]).decode()
+                    data = base64.b64decode(segment["data"])
+                    try:
+                        output += data.decode()
+                    except UnicodeDecodeError:
+                        output += "Decoding of the DataSegment failed. Thus, decoded with `latin1`. The result is the following one:\n"
+                        output += data.decode('latin1')
                 elif segment["type"] == "SnipSegment":
                     output += f"\n<...> ({segment['length']} bytes)"
                 elif segment["type"] == "HighlightSegment":
                     output += "\n\n------------------------------------------------------------------\n\n"
                 else:
                     raise ValueError(
-                        f"uncknown segment type in Burp data {segment['type']}"
+                        f"unknown segment type in Burp data {segment['type']}"
                     )
         return output
 
