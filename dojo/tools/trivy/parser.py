@@ -125,20 +125,20 @@ class TrivyParser:
                         test, service.get("Results", []), service_name
                     )
                 resources = data.get("Resources", [])
-                for resouce in resources:
-                    namespace = resouce.get("Namespace")
-                    kind = resouce.get("Kind")
-                    name = resouce.get("Name")
+                for resource in resources:
+                    namespace = resource.get("Namespace")
+                    kind = resource.get("Kind")
+                    name = resource.get("Name")
                     if namespace:
-                        resouce_name = f"{namespace} / "
+                        resource_name = f"{namespace} / "
                     if kind:
-                        resouce_name += f"{kind} / "
+                        resource_name += f"{kind} / "
                     if name:
-                        resouce_name += f"{name} / "
-                    if len(resouce_name) >= 3:
-                        resouce_name = resouce_name[:-3]
+                        resource_name += f"{name} / "
+                    if len(resource_name) >= 3:
+                        resource_name = resource_name[:-3]
                     findings += self.get_result_items(
-                        test, resouce.get("Results", []), resouce_name
+                        test, resource.get("Results", []), resource_name
                     )
                 return findings
             else:
