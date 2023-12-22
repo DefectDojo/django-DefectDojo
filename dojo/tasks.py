@@ -90,10 +90,7 @@ def cleanup_alerts(*args, **kwargs):
 
 @app.task(bind=True)
 def flush_auditlog(*args, **kwargs):
-    try:
-        retention_period = settings.AUDITLOG_FLUSH_RETENTION_PERIOD
-    except System_Settings.DoesNotExist:
-        retention_period = -1
+    retention_period = settings.AUDITLOG_FLUSH_RETENTION_PERIOD
 
     if retention_period < 0:
         logger.info("Flushing auditlog is disabled")
