@@ -19,8 +19,8 @@ class TestFlushAuditlog(DojoTestCase):
         entries_after = LogEntry.objects.all().count()
         self.assertEqual(entries_before, entries_after)
 
+    @override_settings(AUDITLOG_FLUSH_RETENTION_PERIOD = 0)
     def test_delete_all_entries(self):
-        settings.AUDITLOG_FLUSH_RETENTION_PERIOD = 0
         entries_before = LogEntry.objects.filter(timestamp__date__lt=date.today()).count()
         flush_auditlog()
         entries_after = LogEntry.objects.filter(timestamp__date__lt=date.today()).count()
