@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 class TestFlushAuditlog(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
+    @override_settings(AUDITLOG_FLUSH_RETENTION_PERIOD = -1)
     def test_flush_auditlog_disabled(self):
-        settings.AUDITLOG_FLUSH_RETENTION_PERIOD = -1
         entries_before = LogEntry.objects.all().count()
         flush_auditlog()
         entries_after = LogEntry.objects.all().count()
