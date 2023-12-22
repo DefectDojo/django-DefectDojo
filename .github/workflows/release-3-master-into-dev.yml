@@ -55,7 +55,23 @@ jobs:
           grep version dojo/__init__.py
           grep appVersion helm/defectdojo/Chart.yaml
           grep version components/package.json
-      
+
+      - name: Create upgrade notes to documentation
+        run: |
+          minorv=$(echo ${{ github.event.inputs.release_number_dev }} | cut -d '.' -f -2)
+          patchv=$(echo ${{ github.event.inputs.release_number_dev }} | cut -d '-' -f -1)
+          weight=$(date +%Y%m%d)
+          echo -n "---
+          title: 'Upgrading to DefectDojo Version $minorv.x'
+          toc_hide: true
+          weight: -$weight
+          description: No special instructions.
+          ---
+          There are no special instructions for upgrading to $minorv.x. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/$patchv) for the contents of the release.
+          " > docs/content/en/getting_started/upgrading/$minorv.md
+          git add docs/content/en/getting_started/upgrading/$minorv.md
+        if: endsWith(github.event.inputs.release_number_new, '.0') && endsWith(github.event.inputs.release_number_dev, '.0-dev')
+
       - name: Push version changes
         uses: stefanzweifel/git-auto-commit-action@v5.0.0
         with:
@@ -70,7 +86,7 @@ jobs:
       - name: Create Pull Request
         env:
           REPO_ORG: ${{ env.repoorg }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -136,7 +152,7 @@ jobs:
       - name: Create Pull Request
         env:
           REPO_ORG: ${{ env.repoorg }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

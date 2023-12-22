@@ -37,7 +37,6 @@ import tagulous.admin
 from django.db.models import JSONField
 import hyperlink
 from cvss import CVSS3
-from dojo.settings.settings import SLA_BUSINESS_DAYS
 
 
 logger = logging.getLogger(__name__)
@@ -271,15 +270,6 @@ class Role(models.Model):
 
 
 class System_Settings(models.Model):
-    enable_auditlog = models.BooleanField(
-        default=True,
-        blank=False,
-        verbose_name=_('Enable audit logging'),
-        help_text=_("With this setting turned on, Dojo maintains an audit log "
-                  "of changes made to entities (Findings, Tests, Engagements, Procuts, ...)"
-                  "If you run big import you may want to disable this "
-                  "because the way django-auditlog currently works, there's a "
-                  "big performance hit. Especially during (re-)imports."))
     enable_deduplication = models.BooleanField(
         default=False,
         blank=False,
@@ -2762,7 +2752,7 @@ class Finding(models.Model):
 
     def _age(self, start_date):
         from dojo.utils import get_work_days
-        if SLA_BUSINESS_DAYS:
+        if settings.SLA_BUSINESS_DAYS:
             if self.mitigated:
                 days = get_work_days(self.date, self.mitigated.date())
             else:
@@ -2967,20 +2957,41 @@ class Finding(models.Model):
                 'url': reverse('view_finding', args=(self.id,))}]
         return bc
 
+    def get_valid_request_response_pairs(self):
+        empty_value = base64.b64encode("".encode())
+        # Get a list of all req/resp pairs
+        all_req_resps = self.burprawrequestresponse_set.all()
+        # Filter away those that do not have any contents
+        valid_req_resps = all_req_resps.exclude(
+            burpRequestBase64__exact=empty_value,
+            burpResponseBase64__exact=empty_value,
+        )
+
+        return valid_req_resps
+
     def get_report_requests(self):
-        if self.burprawrequestresponse_set.count() >= 3:
-            return self.burprawrequestresponse_set.all()[0:3]
-        elif self.burprawrequestresponse_set.count() > 0:
-            return self.burprawrequestresponse_set.all()
+        # Get the list of request response pairs that are non empty
+        request_response_pairs = self.get_valid_request_response_pairs()
+        # Determine how many to return
+        if request_response_pairs.count() >= 3:
+            return request_response_pairs[0:3]
+        elif request_response_pairs.count() > 0:
+            return request_response_pairs
 
     def get_request(self):
-        if self.burprawrequestresponse_set.count() > 0:
-            reqres = self.burprawrequestresponse_set().first()
+        # Get the list of request response pairs that are non empty
+        request_response_pairs = self.get_valid_request_response_pairs()
+        # Determine what to return
+        if request_response_pairs.count() > 0:
+            reqres = request_response_pairs.first()
         return base64.b64decode(reqres.burpRequestBase64)
 
     def get_response(self):
-        if self.burprawrequestresponse_set.count() > 0:
-            reqres = self.burprawrequestresponse_set.first()
+        # Get the list of request response pairs that are non empty
+        request_response_pairs = self.get_valid_request_response_pairs()
+        # Determine what to return
+        if request_response_pairs.count() > 0:
+            reqres = request_response_pairs.first()
         res = base64.b64decode(reqres.burpResponseBase64)
         # Removes all blank lines
         res = re.sub(r'\n\s*\n', '\n', res)
@@ -3733,12 +3744,19 @@ class JIRA_Issue(models.Model):
         return text + " | Jira Key: " + str(self.jira_key)
 
 
+NOTIFICATION_CHOICE_SLACK = ("slack", "slack")
+NOTIFICATION_CHOICE_MSTEAMS = ("msteams", "msteams")
+NOTIFICATION_CHOICE_MAIL = ("mail", "mail")
+NOTIFICATION_CHOICE_ALERT = ("alert", "alert")
+
 NOTIFICATION_CHOICES = (
-    ("slack", "slack"), ("msteams", "msteams"), ("mail", "mail"),
-    ("alert", "alert")
+    NOTIFICATION_CHOICE_SLACK,
+    NOTIFICATION_CHOICE_MSTEAMS,
+    NOTIFICATION_CHOICE_MAIL,
+    NOTIFICATION_CHOICE_ALERT,
 )
 
-DEFAULT_NOTIFICATION = ("alert", "alert")
+DEFAULT_NOTIFICATION = NOTIFICATION_CHOICE_ALERT
 
 
 class Notifications(models.Model):
@@ -3748,6 +3766,7 @@ class Notifications(models.Model):
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
 
     scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True, help_text=_('Triggered whenever an (re-)import has been done that created/updated/closed findings.'))
+    scan_added_empty = MultiSelectField(choices=NOTIFICATION_CHOICES, default=[], blank=True, help_text=_('Triggered whenever an (re-)import has been done (even if that created/updated/closed no findings).'))
     jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True, verbose_name=_("JIRA problems"), help_text=_("JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe"))
     upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
     stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
@@ -3763,7 +3782,7 @@ class Notifications(models.Model):
     sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
         verbose_name=_('SLA breach'),
         help_text=_('Get notified of (upcoming) SLA breaches'))
-    risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
+    risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
         verbose_name=_('Risk Acceptance Expiration'),
         help_text=_('Get notified of (upcoming) Risk Acceptance expiries'))
 
@@ -3808,6 +3827,18 @@ class Notifications(models.Model):
                 result.risk_acceptance_expiration = merge_sets_safe(result.risk_acceptance_expiration, notifications.risk_acceptance_expiration)
 
         return result
+
+    def __str__(self):
+        return f"Notifications about {self.product or 'all projects'} for {self.user or 'system notifications'}"
+
+
+class NotificationsAdmin(admin.ModelAdmin):
+    list_filter = ('user', 'product')
+
+    def get_list_display(self, request):
+        list_fields = ['user', 'product']
+        list_fields += [field.name for field in self.model._meta.fields if field.name not in list_fields]
+        return list_fields
 
 
 class Tool_Product_Settings(models.Model):
@@ -4260,34 +4291,21 @@ class ChoiceAnswer(Answer):
             return 'No Response'
 
 
-def enable_disable_auditlog(enable=True):
-    if enable:
-        # Register for automatic logging to database
-        logger.info('enabling audit logging')
-        auditlog.register(Dojo_User, exclude_fields=['password'])
-        auditlog.register(Endpoint)
-        auditlog.register(Engagement)
-        auditlog.register(Finding)
-        auditlog.register(Product)
-        auditlog.register(Test)
-        auditlog.register(Risk_Acceptance)
-        auditlog.register(Finding_Template)
-        auditlog.register(Cred_User, exclude_fields=['password'])
-    else:
-        logger.info('disabling audit logging')
-        auditlog.unregister(Dojo_User)
-        auditlog.unregister(Endpoint)
-        auditlog.unregister(Engagement)
-        auditlog.unregister(Finding)
-        auditlog.unregister(Product)
-        auditlog.unregister(Test)
-        auditlog.unregister(Risk_Acceptance)
-        auditlog.unregister(Finding_Template)
-        auditlog.unregister(Cred_User)
+if settings.ENABLE_AUDITLOG:
+    # Register for automatic logging to database
+    logger.info('enabling audit logging')
+    auditlog.register(Dojo_User, exclude_fields=['password'])
+    auditlog.register(Endpoint)
+    auditlog.register(Engagement)
+    auditlog.register(Finding)
+    auditlog.register(Product_Type)
+    auditlog.register(Product)
+    auditlog.register(Test)
+    auditlog.register(Risk_Acceptance)
+    auditlog.register(Finding_Template)
+    auditlog.register(Cred_User, exclude_fields=['password'])
 
-
-from dojo.utils import calculate_grade, get_system_setting, to_str_typed
-enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on startup choose safe to retrieve system settiung)
+from dojo.utils import calculate_grade, to_str_typed
 
 tagulous.admin.register(Product.tags)
 tagulous.admin.register(Test.tags)
@@ -4383,7 +4401,7 @@ admin.site.register(BurpRawRequestResponse)
 admin.site.register(Announcement)
 admin.site.register(UserAnnouncement)
 admin.site.register(BannerConf)
-admin.site.register(Notifications)
+admin.site.register(Notifications, NotificationsAdmin)
 admin.site.register(Tool_Product_History)
 admin.site.register(General_Survey)
 admin.site.register(Test_Import)
