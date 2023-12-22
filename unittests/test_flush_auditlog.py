@@ -27,8 +27,8 @@ class TestFlushAuditlog(DojoTestCase):
         # we have three old log entries in our testdata
         self.assertEqual(entries_before - 3, entries_after)
 
+    @override_settings(AUDITLOG_FLUSH_RETENTION_PERIOD = 1)
     def test_delete_entries_with_retention_period(self):
-        settings.AUDITLOG_FLUSH_RETENTION_PERIOD = 1
         entries_before = LogEntry.objects.filter(timestamp__date__lt=date.today()).count()
         two_weeks_ago = datetime.today() - relativedelta(weeks=2)
         log_entry = LogEntry.objects.log_create(
