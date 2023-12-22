@@ -56,7 +56,7 @@ jobs:
              helm dependency list ./helm/defectdojo
              helm dependency update ./helm/defectdojo
       
-            - name: Add yq
+      - name: Add yq
         uses: mikefarah/yq@master
 
       - name: Pin version docker version
