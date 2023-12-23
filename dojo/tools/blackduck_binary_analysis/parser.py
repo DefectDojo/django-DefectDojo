@@ -35,6 +35,7 @@ class BlackduckBinaryAnalysisParser(object):
     def ingest_findings(self, sorted_findings, test):
         findings = dict()
         for i in sorted_findings:
+            file_path = str(i.object_full_path)
             object_sha1 = i.object_sha1
             cve = i.cve
             cwe = 1357
@@ -65,7 +66,7 @@ class BlackduckBinaryAnalysisParser(object):
             references = self.format_references(i)
 
             unique_finding_key = hashlib.sha256(
-                "{}".format(object_sha1 + title).encode("utf-8")
+                "{}".format(file_path + object_sha1 + title).encode("utf-8")
             ).hexdigest()
 
             if unique_finding_key in findings:
@@ -85,13 +86,13 @@ class BlackduckBinaryAnalysisParser(object):
                     cwe=int(cwe),
                     nb_occurences=1,
                     references=references,
-                    file_path=i.object_full_path,
+                    file_path=file_path,
                     url=i.vulnerability_url,
                     vuln_id_from_tool=str(cve),
                     severity_justification=cvss_vectors,
                     component_name=i.component,
                     component_version=i.version,
-                    unique_id_from_tool=object_sha1,
+                    unique_id_from_tool=unique_finding_key,
                 )
 
                 if cvss_v3:
@@ -104,19 +105,14 @@ class BlackduckBinaryAnalysisParser(object):
         return findings.values()
 
     def format_title(self, i):
+        title = "{}: {} {} Vulnerable".format(
+            i.object_name,
+            i.component,
+            i.version,
+        )
+
         if i.cve is not None:
-            title = "{}: {} {} Vulnerable to {}".format(
-                i.object_name,
-                i.component,
-                i.version,
-                i.cve,
-            )
-        else:
-            title = "{}: {} {} Vulnerable".format(
-                i.object_name,
-                i.component,
-                i.version,
-            )
+            title += f" to {i.cve}"
 
         return title
 
