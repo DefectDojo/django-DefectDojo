@@ -29,8 +29,8 @@ class ClairParser(object):
         items = {}
 
         for node in tree:
-            item = get_item(node, test)
-            unique_key = str(node["vulnerability"]) + str(node["featurename"])
+            item = get_item(tree[node], test)
+            unique_key = str(tree[node]["name"]) + str(tree[node]["package"]["name"])
             items[unique_key] = item
 
         return list(items.values())
@@ -38,38 +38,36 @@ class ClairParser(object):
 
 def get_item(item_node, test):
     if (
-        item_node["severity"] == "Negligible"
-        or item_node["severity"] == "Unknown"
+        item_node["severity"] == "unimportant"
+        or item_node["normalized_severity"] == "Unknown"
     ):
         severity = "Info"
     else:
-        severity = item_node["severity"]
+        severity = item_node["normalized_severity"]
 
     finding = Finding(
-        title=item_node["vulnerability"]
+        title=item_node["name"]
         + " - "
         + "("
-        + item_node["featurename"]
+        + item_node["package"]["name"]
         + ", "
-        + item_node["featureversion"]
+        + item_node["package"]["version"]
         + ")",
         test=test,
         severity=severity,
         description=item_node["description"]
         + "\n Vulnerable feature: "
-        + item_node["featurename"]
+        + item_node["package"]["name"]
         + "\n Vulnerable Versions: "
-        + str(item_node["featureversion"])
+        + str(item_node["package"]["version"])
         + "\n Fixed by: "
-        + str(item_node["fixedby"])
-        + "\n Namespace: "
-        + str(item_node["namespace"])
+        + str(item_node["fixed_in_version"])
         + "\n CVE: "
-        + str(item_node["vulnerability"]),
-        mitigation=item_node["fixedby"],
-        references=item_node["link"],
-        component_name=item_node["featurename"],
-        component_version=item_node["featureversion"],
+        + str(item_node["name"]),
+        mitigation=item_node["fixed_in_version"],
+        references=item_node["links"],
+        component_name=item_node["package"]["name"],
+        component_version=item_node["package"]["version"],
         false_p=False,
         duplicate=False,
         out_of_scope=False,
@@ -79,7 +77,7 @@ def get_item(item_node, test):
         impact="No impact provided",
     )
 
-    if item_node["vulnerability"]:
-        finding.unsaved_vulnerability_ids = [item_node["vulnerability"]]
+    if item_node["name"]:
+        finding.unsaved_vulnerability_ids = [item_node["name"]]
 
     return finding
