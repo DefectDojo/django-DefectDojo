@@ -18,20 +18,31 @@ class TestBlackduckBinaryAnalysisParser(DojoTestCase):
         self.assertEqual(1, len(findings))
         for finding in findings:
             self.assertIsNotNone(finding.title)
+            self.assertEqual(
+                "instrument.dll: zlib 1.2.13 Vulnerable to CVE-2023-45853",
+                finding.title
+            )
+
             self.assertIsNotNone(finding.description)
             self.assertIsNotNone(finding.severity)
-            self.assertIsNotNone(finding.component_name)
-            self.assertIsNotNone(finding.component_version)
-            self.assertIsNotNone(finding.file_path)
-            self.assertIsNotNone(finding.vuln_id_from_tool)
-            self.assertIsNotNone(finding.unique_id_from_tool)
+            self.assertEqual("Critical", finding.severity)
 
-        self.assertEqual("instrument.dll: zlib 1.2.13 Vulnerable to CVE-2023-45853", findings[0].title)
-        self.assertEqual("Critical", findings[0].severity)
-        self.assertEqual("zlib", findings[0].component_name)
-        self.assertEqual("1.2.13", findings[0].component_version)
-        self.assertEqual("JRE.msi:JRE.msi-30276-90876123.cab:instrument.dll", findings[0].file_path)
-        self.assertEqual("CVE-2023-45853", findings[0].vuln_id_from_tool)
+            self.assertIsNotNone(finding.component_name)
+            self.assertEqual("zlib", finding.component_name)
+
+            self.assertIsNotNone(finding.component_version)
+            self.assertEqual("1.2.13", finding.component_version)
+
+            self.assertIsNotNone(finding.file_path)
+            self.assertEqual(
+                "JRE.msi:JRE.msi-30276-90876123.cab:instrument.dll",
+                finding.file_path
+            )
+
+            self.assertIsNotNone(finding.vuln_id_from_tool)
+            self.assertEqual("CVE-2023-45853", finding.vuln_id_from_tool)
+
+            self.assertIsNotNone(finding.unique_id_from_tool)
 
     def test_parse_many_vulns(self):
         testfile = Path(get_unit_tests_path() + "/scans/blackduck_binary_analysis/many_vulns.csv")
