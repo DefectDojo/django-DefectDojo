@@ -27,7 +27,7 @@ class TestBlackduckBinaryAnalysisParser(DojoTestCase):
             self.assertIsNotNone(finding.unique_id_from_tool)
 
         self.assertEqual("instrument.dll: zlib 1.2.13 Vulnerable to CVE-2023-45853", findings[0].title)
-        self.assertEqual("Critial", findings[0].severity)
+        self.assertEqual("Critical", findings[0].severity)
         self.assertEqual("zlib", findings[0].component_name)
         self.assertEqual("1.2.13", findings[0].component_version)
         self.assertEqual("JRE.msi:JRE.msi-30276-90876123.cab:instrument.dll", findings[0].file_path)
