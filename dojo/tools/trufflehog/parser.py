@@ -128,6 +128,8 @@ class TruffleHogParser(object):
             structured_data = json_data.get("StructuredData", {})
             extra_data = json_data.get("ExtraData", {})
             verified = json_data.get("Verified", "")
+            raw = json_data.get("Raw", "")
+            rawV2 = json_data.get("RawV2", "")
 
             titleText = f"Hard Coded {detector_name} secret in: {file}"
 
@@ -166,7 +168,7 @@ class TruffleHogParser(object):
                     severity = "Medium"
 
             dupe_key = hashlib.md5(
-                (file + detector_name).encode("utf-8")
+                (file + detector_name + str(line_number) + commit + (raw + rawV2)).encode("utf-8")
             ).hexdigest()
 
             if dupe_key in dupes:
@@ -191,9 +193,8 @@ class TruffleHogParser(object):
                     url="N/A",
                     dynamic_finding=False,
                     static_finding=True,
-                    nb_occurences=1,
+                    nb_occurences=1
                 )
-
                 dupes[dupe_key] = finding
 
         return list(dupes.values())

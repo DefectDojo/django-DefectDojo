@@ -733,7 +733,7 @@ class EngagementDirectFilter(DojoFilter):
         queryset=Product_Type.objects.none(),
         label="Product Type")
     test__engagement__product__lifecycle = MultipleChoiceFilter(
-        choices=Product.LIFECYCLE_CHOICES, label='Product lifecycle')
+        choices=Product.LIFECYCLE_CHOICES, label='Product lifecycle', null_label='Empty')
     status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
                                               label="Status")
 
@@ -799,7 +799,7 @@ class EngagementFilter(DojoFilter):
         queryset=Product_Type.objects.none(),
         label="Product Type")
     engagement__product__lifecycle = MultipleChoiceFilter(
-        choices=Product.LIFECYCLE_CHOICES, label='Product lifecycle')
+        choices=Product.LIFECYCLE_CHOICES, label='Product lifecycle', null_label='Empty')
     engagement__status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
                                               label="Status")
 
@@ -955,10 +955,10 @@ class ProductFilter(DojoFilter):
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
-    business_criticality = MultipleChoiceFilter(choices=Product.BUSINESS_CRITICALITY_CHOICES)
-    platform = MultipleChoiceFilter(choices=Product.PLATFORM_CHOICES)
-    lifecycle = MultipleChoiceFilter(choices=Product.LIFECYCLE_CHOICES)
-    origin = MultipleChoiceFilter(choices=Product.ORIGIN_CHOICES)
+    business_criticality = MultipleChoiceFilter(choices=Product.BUSINESS_CRITICALITY_CHOICES, null_label="Empty")
+    platform = MultipleChoiceFilter(choices=Product.PLATFORM_CHOICES, null_label="Empty")
+    lifecycle = MultipleChoiceFilter(choices=Product.LIFECYCLE_CHOICES, null_label="Empty")
+    origin = MultipleChoiceFilter(choices=Product.ORIGIN_CHOICES, null_label="Empty")
     external_audience = BooleanFilter(field_name='external_audience')
     internet_accessible = BooleanFilter(field_name='internet_accessible')
 
