@@ -1069,10 +1069,10 @@
                                                                     </li>
                                                                 {% endif %}
                                                                 {% if finding.test.engagement.product.enable_full_risk_acceptance %}
-                                                                    {% if finding.risk_accepted %}
+                                                                    {% if finding.risk_accepted or finding.risk_status == "Risk Pending"%}
                                                                         <li role="presentation">
                                                                             <a rel="noopener noreferrer">
-                                                                                <i class="fa-solid fa-circle-exclamation"></i><span style={% if finding.risk_accepted %}"color: grey" {% else %} "color: black" {% endif %}> {% trans "Add Risk Acceptance..." %}<span>
+                                                                                <i class="fa-solid fa-circle-exclamation"></i><span style="color: grey"> {% trans "Add Risk Acceptance..." %}<span>
                                                                             </a>
                                                                         </li>  
                                                                     {% else %}
