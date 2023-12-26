@@ -1645,8 +1645,8 @@ def request_finding_review(request, fid):
             finding.last_reviewed = now
             finding.last_reviewed_by = request.user
 
-            users = form.cleaned_data["reviewers"]
-            finding.reviewers.set(users)
+            reviewers = form.cleaned_data["reviewers"]
+            finding.reviewers.set(reviewers)
 
             # Manage the jira status changes
             push_to_jira = False
@@ -1670,24 +1670,20 @@ def request_finding_review(request, fid):
             if push_to_jira and finding_in_group:
                 jira_helper.push_to_jira(finding.finding_group)
 
-            reviewers = ""
-            reviewers_short = []
-            for user in form.cleaned_data["reviewers"]:
-                full_user = Dojo_User.generate_full_name(
-                    Dojo_User.objects.get(id=user)
-                )
-                logger.debug("Asking %s for review", full_user)
-                reviewers += str(full_user) + ", "
-                reviewers_short.append(Dojo_User.objects.get(id=user).username)
-            reviewers = reviewers[:-2]
+            reviewers = Dojo_User.objects.filter(id__in=form.cleaned_data["reviewers"])
+            reviewers_string = ", ".join([str(user) for user in reviewers])
+            reviewers_usernames = [user.username for user in reviewers]
+            logger.debug(f"Asking {reviewers_string} for review")
 
             create_notification(
                 event="review_requested",
                 title="Finding review requested",
+                requested_by=user,
+                note=new_note,
                 finding=finding,
-                recipients=reviewers_short,
-                description='User %s has requested that user(s) %s review the finding "%s" for accuracy:\n\n%s'
-                % (user, reviewers, finding.title, new_note),
+                reviewers=reviewers,
+                recipients=reviewers_usernames,
+                description=f"User {user.get_full_name()} has requested that user(s) {reviewers_string} review the finding \"{finding.title}\" for accuracy:\n\n{new_note}",
                 icon="check",
                 url=reverse("view_finding", args=(finding.id,)),
             )
