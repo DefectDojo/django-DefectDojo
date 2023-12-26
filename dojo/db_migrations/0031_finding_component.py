@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='finding',
             name='component_version',
-            field=models.CharField(blank=True, help_text='Version of the component.', max_length=200, null=True),
+            field=models.CharField(blank=True, help_text='Version of the component.', max_length=100, null=True),
         ),
         migrations.AlterField(
             model_name='child_rule',
