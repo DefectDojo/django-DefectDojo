@@ -1061,6 +1061,7 @@ def add_risk_acceptance(request, eid, fid=None):
 
     finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
 
+
     form.fields['accepted_findings'].queryset = finding_choices
     if fid:
         form.fields['accepted_findings'].initial = {fid}
