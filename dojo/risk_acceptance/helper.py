@@ -9,6 +9,7 @@ from django.urls import reverse
 from dojo.celery import app
 from dojo.models import System_Settings, Risk_Acceptance
 import logging
+import crum
 
 logger = logging.getLogger(__name__)
 
@@ -133,11 +134,13 @@ def add_severity_to_risk_acceptance(risk_acceptance: Risk_Acceptance, severity: 
 
 
 def add_findings_to_risk_acceptance(risk_acceptance: Risk_Acceptance, findings):
+    user = crum.get_current_user()
     for finding in findings:
         if not finding.duplicate or finding.risk_accepted:
             add_severity_to_risk_acceptance(risk_acceptance, finding.severity)
             finding.active = False
             finding.risk_accepted = True
+            finding.accepted_by = user.username
             finding.risk_status = "Risk Accepted"
             finding.save(dedupe_option=False)
             risk_acceptance.accepted_findings.add(finding)

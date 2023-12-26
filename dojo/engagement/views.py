@@ -916,8 +916,6 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
             extra_tags='alert-danger')
             return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
 
-    # risk_status = rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type)
-        # if risk_status:
     form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity)
 
     if form.is_valid():

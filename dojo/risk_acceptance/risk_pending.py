@@ -66,7 +66,6 @@ def risk_accepted_succesfully(
     finding.risk_status = "Risk Accepted"
     finding.risk_accepted = True
     finding.active = False
-    finding.accepted_by = user.username
     finding.save()
     # Send notification
     if send_notification:
