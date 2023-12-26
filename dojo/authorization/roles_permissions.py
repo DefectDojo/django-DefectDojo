@@ -535,6 +535,7 @@ def get_roles_with_permissions():
             Permissions.Product_Configure_Notifications,
             Permissions.Product_Edit,
             Permissions.Engagement_View,
+            Permissions.Risk_Acceptance,
             Permissions.Test_View,
             Permissions.Finding_View,
             Permissions.Finding_Group_View,
