@@ -137,8 +137,6 @@ class ImportReimportMixin(object):
         # no notes expected
         self.assertEqual(notes_count_before, self.db_notes_count())
 
-        return test_id
-
     # import zap scan, testing:
     # - import
     # - active/verifed = False
@@ -179,8 +177,6 @@ class ImportReimportMixin(object):
         # no notes expected
         self.assertEqual(notes_count_before, self.db_notes_count())
 
-        return test_id
-
     # Test Scan_Date logic for Import. Reimport without a test_id cannot work for UI, so those tests are only in the API class below.
 
     # import zap scan without dates
@@ -199,8 +195,6 @@ class ImportReimportMixin(object):
         date = findings['results'][0]['date']
         self.assertEqual(date, str(timezone.localtime(timezone.now()).date()))
 
-        return test_id
-
     # import acunetix scan with dates
     # - import
     # - no scan scan_date does not overrides date set by parser
@@ -216,8 +210,6 @@ class ImportReimportMixin(object):
         # Get the date
         date = findings['results'][0]['date']
         self.assertEqual(date, '2018-09-24')
-
-        return test_id
 
     # import zap scan without dates
     # - import
@@ -235,8 +227,6 @@ class ImportReimportMixin(object):
         date = findings['results'][0]['date']
         self.assertEqual(date, '2006-12-26')
 
-        return test_id
-
     # import acunetix scan with dates
     # - import
     # - set scan_date overrides date set by parser
@@ -252,8 +242,6 @@ class ImportReimportMixin(object):
         # Get the date
         date = findings['results'][0]['date']
         self.assertEqual(date, '2006-12-26')
-
-        return test_id
 
     # Test Scan_Date for reimport in UI. UI can only rupload for existing tests, non UI tests are in API class below
 
@@ -345,8 +333,6 @@ class ImportReimportMixin(object):
         # no notes expected
         self.assertEqual(notes_count_before, self.db_notes_count())
 
-        return test_id
-
     # Test re-import with unique_id_from_tool_or_hash_code algorithm
     # import veracode scan, testing:
     # - import
@@ -367,8 +353,6 @@ class ImportReimportMixin(object):
 
         # no notes expected
         self.assertEqual(notes_count_before, self.db_notes_count())
-
-        return test_id
 
     # import veracode and then reimport veracode again
     # - reimport, findings stay the same, stay active
@@ -1680,8 +1664,6 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         date = findings['results'][0]['date']
         self.assertEqual(date, str(timezone.localtime(timezone.now()).date()))
 
-        return test_id
-
     # reimport acunetix scan with dates (non existing test, so import is called inside DD)
     # - reimport
     # - deafult scan_date (today) does not overrides date set by parser
@@ -1698,8 +1680,6 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         # Get the date
         date = findings['results'][0]['date']
         self.assertEqual(date, '2018-09-24')
-
-        return test_id
 
     # reimport zap scan without dates (non existing test, so import is called inside DD)
     # - reimport
@@ -1718,8 +1698,6 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         date = findings['results'][0]['date']
         self.assertEqual(date, '2006-12-26')
 
-        return test_id
-
     # reimport acunetix scan with dates (non existing test, so import is called inside DD)
     # - reimport
     # - set scan_date overrides date set by parser
@@ -1736,8 +1714,6 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         # Get the date
         date = findings['results'][0]['date']
         self.assertEqual(date, '2006-12-26')
-
-        return test_id
 
 
 class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
