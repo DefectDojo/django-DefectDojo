@@ -83,3 +83,4 @@ boto3==1.34.6  # Required for Celery Broker AWS (SQS) support
 netaddr==0.8.0
 vulners==2.1.1
 fontawesomefree==6.5.1
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
