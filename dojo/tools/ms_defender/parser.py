@@ -28,7 +28,7 @@ class MSDefenderParser(object):
             for vulnerability in vulnerabilitydata:
                 self.process_json(vulnerability)
         elif str(file).endswith('.zip'):
-            input_zip=zipfile.ZipFile(file, 'r')
+            input_zip = zipfile.ZipFile(file, 'r')
             zipdata = {name: input_zip.read(name) for name in input_zip.namelist()}
             if zipdata.get('machines/') is None or zipdata.get('vulnerabilities/') is None:
                 return []
@@ -39,7 +39,7 @@ class MSDefenderParser(object):
                     if "vulnerabilities/" in content and "vulnerabilities/" != content:
                         vulnerabilityfiles.append(content)
                     if "machines/" in content and "machines/" != content:
-                        machinefiles.append(content)#
+                        machinefiles.append(content)
                 vulnerabilities = list()
                 machines = list()
                 for vulnerabilityfile in vulnerabilityfiles:
