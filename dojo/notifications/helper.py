@@ -312,6 +312,7 @@ def send_alert_notification(event, user=None, *args, **kwargs):
             description=create_notification_message(event, user, 'alert', *args, **kwargs)[:2000],
             url=kwargs.get('url', reverse('alerts')),
             icon=icon[:25],
+            color_icon=kwargs.get("color_icon", "#262626"),
             source=Notifications._meta.get_field(event).verbose_name.title()[:100]
         )
         # relative urls will fail validation
@@ -369,6 +370,7 @@ def log_alert(e, notification_type=None, *args, **kwargs):
             title=kwargs.get('title', 'Notification issue')[:250],
             description=kwargs.get('description', '%s' % e)[:2000],
             icon="exclamation-triangle",
+            color_icon=kwargs.get("color_icon", "#262626"),
             source=notification_type[:100] if notification_type else kwargs.get('source', 'unknown')[:100])
         # relative urls will fail validation
         alert.clean_fields(exclude=['url'])

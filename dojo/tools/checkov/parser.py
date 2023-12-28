@@ -99,4 +99,5 @@ def get_item(vuln, test, check_type):
         component_name=resource,
         static_finding=True,
         dynamic_finding=False,
+        vuln_id_from_tool= vuln['check_id']
     )

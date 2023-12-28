@@ -370,13 +370,15 @@
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h4> Risk Acceptance
-                                {% if eng.product.enable_full_risk_acceptance %}
-                                    {% if eng|has_object_permission:"Risk_Acceptance" %}
-                                        <a rel="noopener noreferrer" title="Add Risk Acceptance..." class="pull-right btn btn-sm btn-primary"
-                                            href="{% url 'add_risk_acceptance' eng.id %}?return_url={{ request.get_full_path|urlencode }}"><span class="fa-solid fa-plus"></span></a>
-                                        </a>
+                                {% if risk_status == "Risk Active"%}
+                                    {% if eng.product.enable_full_risk_acceptance %}
+                                        {% if eng|has_object_permission:"Risk_Acceptance" %}
+                                            <a rel="noopener noreferrer" title="Add Risk Acceptance..." class="pull-right btn btn-sm btn-primary"
+                                                href="{% url 'add_risk_acceptance' eng.id %}?return_url={{ request.get_full_path|urlencode }}"><span class="fa-solid fa-plus"></span></a>
+                                            </a>
+                                        {% endif %}
                                     {% endif %}
-                                {% endif %}
+                                {% endif%}
                             </h4>
                         </div>
                         {% if risks_accepted %}

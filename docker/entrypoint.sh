@@ -16,10 +16,6 @@ if [ ! -f "/opt/django-DefectDojo/static/docker_complete" ]; then
   python3 manage.py makemigrations --merge --noinput
   python3 manage.py migrate
 
-  if [ -z "$DD_ADMIN_PASSWORD" ]; then
-      DD_ADMIN_PASSWORD="admin"
-  fi
-
   # The '&&' is critical here. If the admin user is already created, setting the
   # password will not be done.
   python3 manage.py createsuperuser \

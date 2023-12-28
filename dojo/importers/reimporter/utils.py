@@ -17,7 +17,6 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 Common code for reimporting from APIV2 or from the GUI
 """
 
-
 def match_new_finding_to_existing_finding(new_finding, test, deduplication_algorithm):
     # This code should match the logic used for deduplication out of the re-import feature.
     # See utils.py deduplicate_* functions

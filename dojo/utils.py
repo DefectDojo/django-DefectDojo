@@ -2639,3 +2639,10 @@ def get_open_findings_burndown(product):
     past_90_days['y_min'] = running_min
 
     return past_90_days
+
+
+class Response:
+
+    def __init__(self, status, message) -> None:
+        self.status = status
+        self.message = message

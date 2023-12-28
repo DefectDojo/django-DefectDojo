@@ -2131,6 +2131,11 @@ class Test_Import_Finding_Action(TimeStampedModel):
 
 class Finding(models.Model):
 
+    STATUS_CHOICES = (('Risk Pending', 'Risk Pending'),
+                      ('Risk Rejected', 'Risk Rejected'),
+                      ('Risk Accepted', 'Risk Accepted'),
+                      ('Risk Active', 'Risk Active'))
+
     title = models.CharField(max_length=511,
                              verbose_name=_('Title'),
                              help_text=_("A short description of the flaw."))
@@ -2228,6 +2233,16 @@ class Finding(models.Model):
     out_of_scope = models.BooleanField(default=False,
                                        verbose_name=_('Out Of Scope'),
                                        help_text=_("Denotes if this flaw falls outside the scope of the test and/or engagement."))
+    acceptances_confirmed = models.IntegerField(default=0,
+                                       null=True,
+                                       verbose_name=_('Acceptances confirmed'),
+                                       help_text=_("number of confirmed acceptances for finding"))
+    risk_status = models.CharField(default="Risk Active",
+                                       null=True,
+                                       verbose_name=_('Risk Status'),
+                                       choices=STATUS_CHOICES,
+                                       max_length=20,
+                                       help_text=_("Denotes the type of finding status, (pending, rejected)."))
     risk_accepted = models.BooleanField(default=False,
                                        verbose_name=_('Risk Accepted'),
                                        help_text=_("Denotes if this finding has been marked as an accepted risk."))
@@ -2283,6 +2298,12 @@ class Finding(models.Model):
                                      on_delete=models.RESTRICT,
                                      verbose_name=_('Mitigated By'),
                                      help_text=_("Documents who has marked this flaw as fixed."))
+    accepted_by = models.CharField(max_length=200,
+                                   default="",
+                                   null=True,
+                                   blank=True,
+                                   verbose_name=_('Accepted By'),
+                                   help_text=_("The person that accepts the risk, can be outside of DefectDojo."))
     reporter = models.ForeignKey(Dojo_User,
                                  editable=False,
                                  default=1,
@@ -2762,7 +2783,11 @@ class Finding(models.Model):
             status += ['Out Of Scope']
         if self.duplicate:
             status += ['Duplicate']
-        if self.risk_accepted:
+        if self.risk_status == "Risk Pending":
+            status += ['Risk pending']
+        if self.risk_status == "Risk Rejected":
+            status += ['Risk Rejected']
+        elif self.risk_accepted:
             status += ['Risk Accepted']
         if not len(status):
             status += ['Initial']
@@ -3401,6 +3426,11 @@ class Risk_Acceptance(models.Model):
         (TREATMENT_TRANSFER, 'Transfer (The risk is transferred to a 3rd party)'),
     ]
 
+    SEVERITY_CHOICES = [("Critial", "Critical"),
+                        ("Hight", "Hight"),
+                        ("Medium", "Medium"),
+                        ("Low", "Low")]
+
     TREATMENT_TRANSLATIONS = {
         'A': 'Accept (The risk is acknowledged, yet remains)',
         'V': 'Avoid (Do not engage with whatever creates the risk)',
@@ -3412,6 +3442,11 @@ class Risk_Acceptance(models.Model):
     name = models.CharField(max_length=300, null=False, blank=False, help_text=_("Descriptive name which in the future may also be used to group risk acceptances together across engagements and products"))
 
     accepted_findings = models.ManyToManyField(Finding)
+    severity = models.CharField(choices=SEVERITY_CHOICES,
+                                max_length=10,
+                                null=True,
+                                blank=True,
+                                help_text=_("type of severity admitted"))
 
     recommendation = models.CharField(choices=TREATMENT_CHOICES, max_length=2, null=False, default=TREATMENT_FIX, help_text=_("Recommendation from the security team."), verbose_name=_('Security Recommendation'))
 
@@ -3811,7 +3846,9 @@ class Notifications(models.Model):
     risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
         verbose_name=_('Risk Acceptance Expiration'),
         help_text=_('Get notified of (upcoming) Risk Acceptance expiries'))
-
+    risk_acceptance_request = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
+        verbose_name=_('Risk Acceptance Request'),
+        help_text=_('Send notification to the contacts of the product type'))
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['user', 'product'], name="notifications_user_product")
@@ -3883,6 +3920,7 @@ class Alerts(models.Model):
     url = models.URLField(max_length=2000, null=True, blank=True)
     source = models.CharField(max_length=100, default='Generic')
     icon = models.CharField(max_length=25, default='icon-user-check')
+    color_icon = models.CharField(max_length=10, null=True, blank=True, default="#262626")
     user_id = models.ForeignKey(Dojo_User, null=True, editable=False, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True, null=False)
 

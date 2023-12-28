@@ -52,7 +52,11 @@ class Permissions(IntEnum):
     Engagement_Add = 1203
     Engagement_Edit = 1206
     Engagement_Delete = 1207
+
     Risk_Acceptance = 1208
+    Risk_Acceptance_Edit = 1209
+    Risk_Acceptance_Add = 1210
+    Risk_Acceptance_Delete = 1211
 
     Test_View = 1302
     Test_Add = 1303
@@ -144,6 +148,7 @@ class Permissions(IntEnum):
             Permissions.Engagement_Edit,
             Permissions.Engagement_Delete,
             Permissions.Risk_Acceptance,
+            Permissions.Risk_Acceptance_Edit,
             Permissions.Test_Add,
             Permissions.Import_Scan_Result,
             Permissions.Note_Add,
@@ -512,6 +517,7 @@ def get_roles_with_permissions():
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
+            Permissions.Risk_Acceptance
         },
         Roles.Leader: {
             Permissions.Product_Type_View,
@@ -539,6 +545,7 @@ def get_roles_with_permissions():
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
+            Permissions.Risk_Acceptance_Edit,
         },
         Roles.Cibersecurity: {
             Permissions.Product_Type_View,

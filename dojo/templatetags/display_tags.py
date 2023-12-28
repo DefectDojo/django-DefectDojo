@@ -712,7 +712,22 @@ def finding_display_status(finding):
     # add urls for some statuses
     # outputs html, so make sure to escape user provided fields
     display_status = finding.status()
-    if 'Risk Accepted' in display_status:
+    if 'Risk Rejected' in display_status:
+        ra = finding.risk_acceptance
+        if ra:
+            url = reverse('view_risk_acceptance', args=(finding.test.engagement.id, ra.id, ))
+            info = ra.name_and_expiration_info
+            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Rejected"><span style="color: red;">Risk Rejected</span></a>'
+            display_status = display_status.replace('Risk Rejected', link)
+
+    if 'Risk pending' in display_status:
+        ra = finding.risk_acceptance
+        if ra:
+            url = reverse('view_risk_acceptance', args=(finding.test.engagement.id, ra.id, ))
+            info = ra.name_and_expiration_info
+            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Pending"><span style="color: blue;">Risk pending</span></a>'
+            display_status = display_status.replace('Risk pending', link)
+    elif 'Risk Accepted' in display_status:
         ra = finding.risk_acceptance
         if ra:
             url = reverse('view_risk_acceptance', args=(finding.test.engagement.id, ra.id, ))
@@ -883,6 +898,16 @@ def product_findings(product, findings):
 @register.filter
 def class_name(value):
     return value.__class__.__name__
+
+@register.filter
+def status_style_color(status: str):
+    dict_style_color = {
+        "Risk Pending": f'<span style="color:blue">{status}</span>',
+        "Risk Accepted": f'<span style="color:green">{status}</span>',
+        "Risk Rejected": f'<span style="color:red">{status}</span>',
+        "Risk Active": f'<span style="color:gray">{status}</span>',
+    }
+    return mark_safe(dict_style_color.get(status, f'<span>{status}</span>'))
 
 
 @register.filter(needs_autoescape=True)
