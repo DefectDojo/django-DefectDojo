@@ -77,7 +77,7 @@ steps:
         sonar.sources=dojo
         sonar.tests=unittests
         sonar.python.coverage.reportPaths=*coverage.xml
-        sonar.exclusions=**/dojo/db_migrations/**,**/dojo/management/**,**/dojo/static/dojo/js/**,/dojo/settings/unittest.py
+        sonar.exclusions=**/dojo/db_migrations/**,**/dojo/management/**,**/dojo/static/dojo/js/**,/dojo/settings/unittest.py,**/dojo/templates/notifications/**
         sonar.language=py
         sonar.python.version=3.10
 
