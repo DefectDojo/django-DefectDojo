@@ -2763,7 +2763,7 @@ class Finding(models.Model):
         return None
 
     def __str__(self):
-        return self.title
+        return f"{self.id} - {self.title}"
 
     def status(self):
         status = []

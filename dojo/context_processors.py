@@ -24,6 +24,7 @@ def globalize_vars(request):
             'SAML2_LOGOUT_URL': settings.SAML2_LOGOUT_URL,
             'DOCUMENTATION_URL': settings.DOCUMENTATION_URL,
             'API_TOKENS_ENABLED': settings.API_TOKENS_ENABLED,
+            'RISK_PENDING': settings.RISK_PENDING,
             }
 
 

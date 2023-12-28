@@ -1604,7 +1604,10 @@ def simple_risk_accept(request, fid):
 @user_is_authorized(Finding, Permissions.Risk_Acceptance, "fid")
 def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-    ra_helper.risk_unaccept(finding)
+    if settings.RISK_PENDING:
+        rp_helper.risk_unaccept(finding)
+    else:
+        ra_helper.risk_unaccept(finding)
 
     messages.add_message(
         request,
