@@ -163,7 +163,14 @@ class TrivyParser:
                             severity = TRIVY_SEVERITIES[vuln["Severity"]]
                     else:
                         severity = TRIVY_SEVERITIES[vuln["Severity"]]
-                    file_path = vuln.get("PkgPath")
+                    if target_class == "os-pkgs" or target_class == "lang-pkgs":
+                        file_path = vuln.get("PkgPath")
+                        if file_path is None:
+                            file_path = target_target
+                    elif target_class == "config":
+                        file_path = target_target
+                    else:
+                        file_path = None
                 except KeyError as exc:
                     logger.warning("skip vulnerability due %r", exc)
                     continue
