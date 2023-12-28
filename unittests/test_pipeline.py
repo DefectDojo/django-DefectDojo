@@ -19,7 +19,7 @@ class PipelineTest(DojoTestCase):
         settings.AZURE_DEVOPS_TOKEN = "test"
         settings.AZURE_DEVOPS_MAIN_SECURITY_GROUP = "dummy_group_name"
         settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS = "[A-Za-z0-9]+.\\s-\\s.+//^(CDE|EVC)\\s.*"
-        settings.AZURE_DEVOPS_OFFICES_LOCATION = "office1,office2,office3"
+        settings.AZURE_DEVOPS_OFFICES_LOCATION = "office1,office2,office3,office4"
         settings.AZURE_DEVOPS_JOBS_TITLE = "job1,job2-job3-job4"
 
     def dummy_search_azure_groups(self, *args, **kwargs):

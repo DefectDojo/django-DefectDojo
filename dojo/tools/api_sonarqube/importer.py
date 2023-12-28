@@ -197,6 +197,7 @@ class SonarQubeApiImporter(object):
                     static_finding=True,
                     sonarqube_issue=sonarqube_issue,
                     unique_id_from_tool=issue.get("key"),
+                    vuln_id_from_tool=rule_id,
                 )
                 items.append(find)
 
@@ -319,6 +320,7 @@ class SonarQubeApiImporter(object):
                     scanner_confidence=scanner_confidence,
                     sonarqube_issue=sonarqube_issue,
                     unique_id_from_tool=f"hotspot:{hotspot.get('key')}",
+                    vuln_id_from_tool=rule_id,
                 )
                 items.append(find)
 
