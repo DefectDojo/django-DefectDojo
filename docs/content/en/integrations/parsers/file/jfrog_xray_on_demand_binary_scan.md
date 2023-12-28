@@ -1,9 +1,9 @@
 ---
-title: "Jfrog xray on demand binary Scan"
+title: "JFrog Xray On Demand Binary Scan"
 toc_hide: true
 ---
-Import the JSON format for the \"Jfrog xray on demand binary Scan\" file. Use this importer for Xray version 2.X
+Import the JSON format for the \"JFrog Xray On Demand Binary Scan\" file. Use this importer for Xray version 3.X
 -- 
- jfron file documentation
+ JFrog file documentation:
 
 https://jfrog.com/help/r/jfrog-cli/on-demand-binary-scan
