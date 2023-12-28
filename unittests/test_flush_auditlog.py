@@ -1,6 +1,6 @@
 from dojo.tasks import flush_auditlog
 from .dojo_test_case import DojoTestCase
-from django.conf import settings
+from django.test import override_settings
 from auditlog.models import LogEntry
 from datetime import date, datetime
 from dojo.models import Finding
