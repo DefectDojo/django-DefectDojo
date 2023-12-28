@@ -394,3 +394,20 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
     color_icon="#1B30DE",
     url=reverse('view_risk_acceptance', args=(risk_pending.engagement.id, risk_pending.id, )))
     post_jira_comments(risk_pending, findings, ra_helper.accepted_message_creator)
+
+def risk_unaccept(finding, perform_save=True):
+    logger.debug('unaccepting finding %i:%s if it is currently risk accepted', finding.id, finding)
+    if finding.risk_accepted:
+        logger.debug('unaccepting finding %i:%s', finding.id, finding)
+        risk_acceptance = finding.risk_acceptance
+        ra_helper.remove_from_any_risk_acceptance(finding)
+        if not finding.mitigated and not finding.false_p and not finding.out_of_scope:
+            finding.active = True
+        finding.risk_accepted = False
+        finding.risk_status = "Risk Active"
+        finding.acceptances_confirmed = ""
+        if perform_save:
+            logger.debug('saving unaccepted finding %i:%s', finding.id, finding)
+            finding.save(dedupe_option=False)
+        ra_helper.post_jira_comment(finding, ra_helper.unaccepted_message_creator)
+
