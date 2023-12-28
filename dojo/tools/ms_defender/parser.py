@@ -20,14 +20,12 @@ class MSDefenderParser(object):
         return ("MSDefender findings can be retrieved using the REST API")
 
     def get_findings(self, file, test):
-        if not file:
-            file = test
-        if str(file).endswith('.json'):
+        if str(file.name).endswith('.json'):
             vulnerabilityfile = json.load(file)
             vulnerabilitydata = vulnerabilityfile['value']
             for vulnerability in vulnerabilitydata:
                 self.process_json(vulnerability)
-        elif str(file).endswith('.zip'):
+        elif str(file.name).endswith('.zip'):
             input_zip = zipfile.ZipFile(file, 'r')
             zipdata = {name: input_zip.read(name) for name in input_zip.namelist()}
             if zipdata.get('machines/') is None or zipdata.get('vulnerabilities/') is None:
