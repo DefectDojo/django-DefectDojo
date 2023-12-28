@@ -26,7 +26,10 @@ class MSDefenderParser(object):
             for vulnerability in vulnerabilitydata:
                 self.process_json(vulnerability)
         elif str(file.name).endswith('.zip'):
-            input_zip = zipfile.ZipFile(file, 'r')
+            if str(file.__class__) == "<class '_io.TextIOWrapper'>":
+                input_zip = zipfile.ZipFile(file.name, 'r')
+            else:
+                input_zip = zipfile.ZipFile(file, 'r')
             zipdata = {name: input_zip.read(name) for name in input_zip.namelist()}
             if zipdata.get('machines/') is None or zipdata.get('vulnerabilities/') is None:
                 return []
