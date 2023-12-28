@@ -6,7 +6,7 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("dojo", "0192_alerts_color_icon_finding_acceptances_confirmed_and_more"),
+        ("dojo", "0193_alerts_color_icon_finding_acceptances_confirmed_and_more"),
     ]
 
     operations = [
