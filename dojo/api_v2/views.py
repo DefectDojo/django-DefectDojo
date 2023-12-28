@@ -167,10 +167,23 @@ from drf_spectacular.utils import (
     extend_schema,
     extend_schema_view,
 )
+from drf_spectacular.views import SpectacularAPIView
+from drf_spectacular.renderers import OpenApiJsonRenderer2
 from dojo.authorization.roles_permissions import Permissions
 from dojo.user.utils import get_configuration_permissions_codenames
 
 logger = logging.getLogger(__name__)
+
+
+class DojoOpenApiJsonRenderer(OpenApiJsonRenderer2):
+    def get_indent(self, accepted_media_type, renderer_context):
+        if accepted_media_type and 'indent' in accepted_media_type:
+            return super().get_indent(accepted_media_type, renderer_context)
+        return renderer_context.get('indent', None)
+
+
+class DojoSpectacularAPIView(SpectacularAPIView):
+    renderer_classes = [DojoOpenApiJsonRenderer] + SpectacularAPIView.renderer_classes
 
 
 # Authorization: authenticated users
