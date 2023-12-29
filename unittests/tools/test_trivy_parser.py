@@ -208,3 +208,4 @@ Number  Content
         self.assertEqual(len(findings), 37)
         finding = findings[0]
         self.assertEqual("Low", finding.severity)
+        self.assertEqual("KSV116 - Runs with a root primary or supplementary GID", finding.title)
