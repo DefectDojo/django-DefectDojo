@@ -72,7 +72,7 @@ class TenableCSVParser(object):
         reader = csv.DictReader(io.StringIO(content))
         dupes = {}
         # Iterate over each line and create findings
-        for row in reader:
+        for index, row in enumerate(reader):
             # title: Could come from "Name" or "Plugin Name"
             title = row.get("Name", row.get("Plugin Name"))
             if title is None or title == "":
@@ -134,7 +134,8 @@ class TenableCSVParser(object):
                         LOGGER.debug(
                             "more than one CPE for a finding. NOT supported by Nessus CSV parser"
                         )
-                    cpe_decoded = CPE(detected_cpe[0])
+                    cpe_decoded = re.sub(r'[\n\r\t\\+]', '', str(detected_cpe[0]))
+                    cpe_decoded = CPE(cpe_decoded)
                     find.component_name = (
                         cpe_decoded.get_product()[0]
                         if len(cpe_decoded.get_product()) > 0
