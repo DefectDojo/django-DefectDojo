@@ -31,7 +31,11 @@ class EdgescanAPI(object):
                 raise ValueError("JSON not provided in Extras field.")
 
     def get_findings(self, asset_ids):
-        url = f"{self.url}/api/v1/vulnerabilities/export.json?c[asset_id_in]={asset_ids}&c[status]=open"
+        if asset_ids:
+            url = f"{self.url}/api/v1/vulnerabilities/export.json?c[asset_id_in]={asset_ids}&c[status]=open"
+        else:
+            url = f"{self.url}/api/v1/vulnerabilities/export.json?c[status]=open"
+
         if self.options and "date" in self.options:
             url += f"&c[date_opened_after]={self.options['date']}"
 
