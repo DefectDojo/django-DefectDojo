@@ -1818,6 +1818,9 @@ class Endpoint(models.Model):
     def from_uri(uri):
         try:
             url = hyperlink.parse(url=uri)
+        except UnicodeDecodeError:
+            from urllib.parse import urlparse
+            url = hyperlink.parse(url="//" + urlparse(uri).netloc)
         except hyperlink.URLParseError as e:
             raise ValidationError('Invalid URL format: {}'.format(e))
 
@@ -2322,7 +2325,7 @@ class Finding(models.Model):
                                  help_text=_('Identified file(s) containing the flaw.'))
     component_name = models.CharField(null=True,
                                       blank=True,
-                                      max_length=200,
+                                      max_length=500,
                                       verbose_name=_('Component name'),
                                       help_text=_('Name of the affected component (library name, part of a system, ...).'))
     component_version = models.CharField(null=True,
@@ -2553,7 +2556,7 @@ class Finding(models.Model):
 
         # Make sure that we have a cwe if we need one
         if self.cwe == 0 and not self.test.hash_code_allows_null_cwe:
-            deduplicationLogger.warn(
+            deduplicationLogger.warning(
                 "Cannot compute hash_code based on configured fields because cwe is 0 for finding of title '" + self.title + "' found in file '" + str(self.file_path) +
                 "'. Fallback to legacy mode for this finding.")
             return self.compute_hash_code_legacy()
@@ -3828,6 +3831,18 @@ class Notifications(models.Model):
 
         return result
 
+    def __str__(self):
+        return f"Notifications about {self.product or 'all projects'} for {self.user or 'system notifications'}"
+
+
+class NotificationsAdmin(admin.ModelAdmin):
+    list_filter = ('user', 'product')
+
+    def get_list_display(self, request):
+        list_fields = ['user', 'product']
+        list_fields += [field.name for field in self.model._meta.fields if field.name not in list_fields]
+        return list_fields
+
 
 class Tool_Product_Settings(models.Model):
     name = models.CharField(max_length=200, null=False)
@@ -4389,7 +4404,7 @@ admin.site.register(BurpRawRequestResponse)
 admin.site.register(Announcement)
 admin.site.register(UserAnnouncement)
 admin.site.register(BannerConf)
-admin.site.register(Notifications)
+admin.site.register(Notifications, NotificationsAdmin)
 admin.site.register(Tool_Product_History)
 admin.site.register(General_Survey)
 admin.site.register(Test_Import)
