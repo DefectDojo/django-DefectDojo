@@ -200,3 +200,11 @@ Number  Content
         finding = findings[0]
         self.assertEqual("Critical", finding.severity)
         self.assertEqual(finding.file_path, "requirements.txt")
+
+    def test_issue_9170(self):
+        test_file = open(sample_path("issue_9170.json"))
+        parser = TrivyParser()
+        findings = parser.get_findings(test_file, Test())
+        self.assertEqual(len(findings), 37)
+        finding = findings[0]
+        self.assertEqual("Low", finding.severity)

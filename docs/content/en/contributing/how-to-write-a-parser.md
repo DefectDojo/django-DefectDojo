@@ -227,6 +227,8 @@ Bad example (DIY):
 
 By default a new parser uses the 'legacy' deduplication algorithm documented at https://documentation.defectdojo.com/usage/features/#deduplication-algorithms
 
+Please use a pre-defined deduplication algorithm where applicable.
+
 ## Unit tests
 
 Each parser must have unit tests, at least to test for 0 vuln, 1 vuln and many vulns. You can take a look at how other parsers have them for starters. The more quality tests, the better.

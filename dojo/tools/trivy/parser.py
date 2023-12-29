@@ -124,6 +124,22 @@ class TrivyParser:
                     findings += self.get_result_items(
                         test, service.get("Results", []), service_name
                     )
+                resources = data.get("Resources", [])
+                for resource in resources:
+                    namespace = resource.get("Namespace")
+                    kind = resource.get("Kind")
+                    name = resource.get("Name")
+                    if namespace:
+                        resource_name = f"{namespace} / "
+                    if kind:
+                        resource_name += f"{kind} / "
+                    if name:
+                        resource_name += f"{name} / "
+                    if len(resource_name) >= 3:
+                        resource_name = resource_name[:-3]
+                    findings += self.get_result_items(
+                        test, resource.get("Results", []), resource_name
+                    )
                 return findings
             else:
                 raise ValueError(
