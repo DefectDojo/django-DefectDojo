@@ -30,3 +30,15 @@ class TestSSHAuditParser(DojoTestCase):
         self.assertEqual(findings[1].title, "SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.4_ecdh-sha2-nistp384")
         self.assertEqual(findings[0].severity, "High")
         self.assertEqual(findings[9].severity, "Medium")
+
+    def test_parse_file_with_many_vuln_bug_fix(self):
+        testfile = open("unittests/scans/ssh_audit/bug_fix.json")
+        parser = SSHAuditParser()
+        findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(13, len(findings))
+        self.assertEqual(findings[0].title, "SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.5_ecdh-sha2-nistp256")
+        self.assertEqual(findings[1].title, "SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.5_ecdh-sha2-nistp384")
+        self.assertEqual(findings[0].severity, "High")
