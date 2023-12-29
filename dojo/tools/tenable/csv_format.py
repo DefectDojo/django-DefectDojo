@@ -72,7 +72,7 @@ class TenableCSVParser(object):
         reader = csv.DictReader(io.StringIO(content))
         dupes = {}
         # Iterate over each line and create findings
-        for index, row in enumerate(reader):
+        for row in reader:
             # title: Could come from "Name" or "Plugin Name"
             title = row.get("Name", row.get("Plugin Name"))
             if title is None or title == "":
