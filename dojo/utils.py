@@ -1722,11 +1722,7 @@ def max_safe(list):
 
 
 def get_full_url(relative_url):
-    if settings.SITE_URL:
-        return settings.SITE_URL + relative_url
-    else:
-        logger.warning('SITE URL undefined in settings, full_url cannot be created')
-        return "settings.SITE_URL" + relative_url
+    return f"{get_site_url()}{relative_url}"
 
 
 def get_site_url():
