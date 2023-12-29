@@ -109,10 +109,14 @@ spec:
         image: {{ .Values.monitoring.prometheus.image }}
         imagePullPolicy: {{ .Values.monitoring.prometheus.imagePullPolicy }}
         command: [ '/usr/bin/nginx-prometheus-exporter', '-nginx.scrape-uri', 'http://127.0.0.1:8080/nginx_status']
+        ports:
+        - name: http-metrics
+          protocol: TCP
+          containerPort: 9113
         livenessProbe:
           httpGet:
             path: /metrics
-            port: 9113
+            port: http-metrics
           periodSeconds: 20
           initialDelaySeconds: 15
           timeoutSeconds: 5
@@ -144,7 +148,7 @@ spec:
           mountPath: {{.Values.extraConfigs.DD_MEDIA_ROOT | default "/app/media" | quote }}
         {{- end }}
         ports:
-        - name: http
+        - name: http-uwsgi
           protocol: TCP
           containerPort: 8081
         {{- if .Values.django.uwsgi.enable_debug }}
@@ -207,7 +211,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /login?force_login_form&next=/
-            port: http
+            port: http-uwsgi
             httpHeaders:
             - name: Host
               value: {{ .Values.host }}

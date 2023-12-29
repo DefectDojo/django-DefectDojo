@@ -271,7 +271,11 @@ env = environ.Env(
     # Set deduplication algorithms per parser, via en env variable that contains a JSON string
     DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, ''),
     # Dictates whether cloud banner is created or not
-    DD_CREATE_CLOUD_BANNER=(bool, True)
+    DD_CREATE_CLOUD_BANNER=(bool, True),
+    # With this setting turned on, Dojo maintains an audit log of changes made to entities (Findings, Tests, Engagements, Procuts, ...)
+    # If you run big import you may want to disable this because the way django-auditlog currently works, there's
+    # a big performance hit. Especially during (re-)imports.
+    DD_ENABLE_AUDITLOG=(bool, True),
 )
 
 
@@ -787,8 +791,8 @@ SPECTACULAR_SETTINGS = {
 }
 
 if not env('DD_DEFAULT_SWAGGER_UI'):
-    SPECTACULAR_SETTINGS['SWAGGER_UI_DIST'] = f'{STATIC_URL}drf-yasg/swagger-ui-dist'
-    SPECTACULAR_SETTINGS['SWAGGER_UI_FAVICON_HREF'] = f'{STATIC_URL}drf-yasg/swagger-ui-dist/favicon-32x32.png'
+    SPECTACULAR_SETTINGS['SWAGGER_UI_DIST'] = 'SIDECAR'
+    SPECTACULAR_SETTINGS['SWAGGER_UI_FAVICON_HREF'] = 'SIDECAR'
 
 # ------------------------------------------------------------------------------
 # TEMPLATES
@@ -844,6 +848,7 @@ INSTALLED_APPS = (
     'social_django',
     'drf_yasg',
     'drf_spectacular',
+    'drf_spectacular_sidecar',  # required for Django collectstatic discovery
     'tagulous',
     'fontawesomefree'
 )
@@ -1197,7 +1202,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'SonarQube API Import': ['title', 'file_path', 'line'],
     'Dependency Check Scan': ['title', 'cwe', 'file_path'],
     'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
-    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'vulnerability_ids'],
+    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'vulnerability_ids', 'severity'],
     'Mobsfscan Scan': ['title', 'severity', 'cwe'],
     'Tenable Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     'Nexpose Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
@@ -1228,15 +1233,10 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'JFrog Xray Unified Scan': ['vulnerability_ids', 'file_path', 'component_name', 'component_version'],
     'JFrog Xray On Demand Binary Scan': ["title", "component_name", "component_version"],
     'Scout Suite Scan': ['file_path', 'vuln_id_from_tool'],  # for now we use file_path as there is no attribute for "service"
-    'AWS Security Hub Scan': ['unique_id_from_tool'],
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
-    'Govulncheck Scanner': ['unique_id_from_tool'],
     'Github Vulnerability Scan': ['title', 'severity', 'component_name', 'vulnerability_ids', 'file_path'],
-    'Azure Security Center Recommendations Scan': ['unique_id_from_tool'],
     'Solar Appscreener Scan': ['title', 'file_path', 'line', 'severity'],
     'pip-audit Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
-    'Edgescan Scan': ['unique_id_from_tool'],
-    'Bugcrowd API Import': ['unique_id_from_tool'],
     'Rubocop Scan': ['vuln_id_from_tool', 'file_path', 'line'],
     'JFrog Xray Scan': ['title', 'description', 'component_name', 'component_version'],
     'CycloneDX Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
@@ -1246,25 +1246,23 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'StackHawk HawkScan': ['vuln_id_from_tool', 'component_name', 'component_version'],
     'Hydra Scan': ['title', 'description'],
     'DrHeader JSON Importer': ['title', 'description'],
-    'PWN SAST': ['title', 'description'],
     'Whispers': ['vuln_id_from_tool', 'file_path', 'line'],
     'Blackduck Hub Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
-    'BlackDuck API': ['unique_id_from_tool'],
-    'docker-bench-security Scan': ['unique_id_from_tool'],
     'Veracode SourceClear Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version', 'severity'],
     'Vulners Scan': ['vuln_id_from_tool', 'component_name'],
     'Twistlock Image Scan': ['title', 'severity', 'component_name', 'component_version'],
     'NeuVector (REST)': ['title', 'severity', 'component_name', 'component_version'],
     'NeuVector (compliance)': ['title', 'vuln_id_from_tool', 'description'],
     'Wpscan': ['title', 'description', 'severity'],
-    'Codechecker Report native': ['unique_id_from_tool'],
     'Popeye Scan': ['title', 'description'],
     'Wazuh Scan': ['title'],
     'Nuclei Scan': ['title', 'cwe', 'severity'],
     'KubeHunter Scan': ['title', 'description'],
     'kube-bench Scan': ['title', 'vuln_id_from_tool', 'description'],
     'Threagile risks report': ['title', 'cwe', "severity"],
+    'Trufflehog Scan': ['title', 'description', 'line'],
     'Humble Json Importer': ['title'],
+    'MSDefender API': ['title', 'description'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1436,12 +1434,13 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Hadolint Dockerfile check': DEDUPE_ALGO_HASH_CODE,
     'Semgrep JSON Report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Generic Findings Import': DEDUPE_ALGO_HASH_CODE,
+    'Trufflehog Scan': DEDUPE_ALGO_HASH_CODE,
     'Trufflehog3 Scan': DEDUPE_ALGO_HASH_CODE,
     'Detect-secrets Scan': DEDUPE_ALGO_HASH_CODE,
     'Solar Appscreener Scan': DEDUPE_ALGO_HASH_CODE,
     'Gitleaks Scan': DEDUPE_ALGO_HASH_CODE,
     'pip-audit Scan': DEDUPE_ALGO_HASH_CODE,
-    'Edgescan Scan': DEDUPE_ALGO_HASH_CODE,
+    'Edgescan Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Bugcrowd API Import': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Rubocop Scan': DEDUPE_ALGO_HASH_CODE,
     'JFrog Xray Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1452,12 +1451,12 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'StackHawk HawkScan': DEDUPE_ALGO_HASH_CODE,
     'Hydra Scan': DEDUPE_ALGO_HASH_CODE,
     'DrHeader JSON Importer': DEDUPE_ALGO_HASH_CODE,
-    'PWN SAST': DEDUPE_ALGO_HASH_CODE,
+    'PWN SAST': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Whispers': DEDUPE_ALGO_HASH_CODE,
     'Blackduck Hub Scan': DEDUPE_ALGO_HASH_CODE,
     'BlackDuck API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Blackduck Binary Analysis': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'docker-bench-security Scan': DEDUPE_ALGO_HASH_CODE,
+    'docker-bench-security Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Vulners Scan': DEDUPE_ALGO_HASH_CODE,
     'Twistlock Image Scan': DEDUPE_ALGO_HASH_CODE,
     'NeuVector (REST)': DEDUPE_ALGO_HASH_CODE,
@@ -1469,6 +1468,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'kube-bench Scan': DEDUPE_ALGO_HASH_CODE,
     'Threagile risks report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Humble Json Importer': DEDUPE_ALGO_HASH_CODE,
+    'MSDefender API': DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1698,3 +1698,5 @@ AUDITLOG_DISABLE_ON_RAW_SAVE = False
 ADDITIONAL_HEADERS = env('DD_ADDITIONAL_HEADERS')
 # Dictates whether cloud banner is created or not
 CREATE_CLOUD_BANNER = env('DD_CREATE_CLOUD_BANNER')
+
+ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')

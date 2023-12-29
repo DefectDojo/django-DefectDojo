@@ -37,6 +37,8 @@ class TestAwsSecurityHubParser(DojoTestCase):
             parser = AwsSecurityHubParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(3, len(findings))
+            finding = findings[0]
+            self.assertEqual(finding.component_name, "AwsAccount")
 
     def test_repeated_findings(self):
         with open(get_unit_tests_path() + sample_path("config_repeated_findings.json")) as test_file:
@@ -70,6 +72,8 @@ class TestAwsSecurityHubParser(DojoTestCase):
             parser = AwsSecurityHubParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(1, len(findings))
+            finding = findings[0]
+            self.assertEqual(finding.component_name, "AwsEc2Instance")
 
     def test_inspector_ec2_ghsa(self):
         with open(get_unit_tests_path() + sample_path("inspector_ec2_ghsa.json")) as test_file:
