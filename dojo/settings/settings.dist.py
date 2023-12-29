@@ -1262,6 +1262,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Threagile risks report': ['title', 'cwe', "severity"],
     'Trufflehog Scan': ['title', 'description', 'line'],
     'Humble Json Importer': ['title'],
+    'MSDefender API': ['title', 'description'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1466,6 +1467,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'kube-bench Scan': DEDUPE_ALGO_HASH_CODE,
     'Threagile risks report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Humble Json Importer': DEDUPE_ALGO_HASH_CODE,
+    'MSDefender API': DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
