@@ -7,7 +7,7 @@ class WazuhParser(object):
     """
     IMPORTANT: Please use the script available here https://github.com/quirinziessler/wazuh-findings-exporter to generate
     the report for DefectDojo. This script fetches the findings from wazuh based on a single Wazuh group. 
-    In DD please configure on engagement per group and upload the report.
+    In DD please configure one engagement per group and upload the report.
 
     The vulnerabilities with condition "Package unfixed" are skipped because there is no fix out yet.
     https://github.com/wazuh/wazuh/issues/14560
