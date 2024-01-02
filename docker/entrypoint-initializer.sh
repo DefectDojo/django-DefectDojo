@@ -66,6 +66,46 @@ do
 done
 echo
 
+echo "Checking ENABLE_AUDITLOG"
+cat <<EOD | python manage.py shell
+from django.db import connections, DEFAULT_DB_ALIAS
+from django.db.utils import ProgrammingError
+from dojo.settings import settings
+def dictfetchall(cursor):
+    columns = [col[0] for col in cursor.description]
+    return [dict(zip(columns, row)) for row in cursor.fetchall()]
+with connections[DEFAULT_DB_ALIAS].cursor() as c:
+    try:
+        c.execute('select * from dojo_system_settings limit 1')
+    except ProgrammingError as e:
+        err_msg = str(e)
+        if "does not exist" in err_msg or "doesn't exist" in err_msg:
+            print('Django has not been initialized. Nothing to check.')
+            exit(0)
+        else:
+            raise
+    raw_row = dictfetchall(c)[0]
+if 'enable_auditlog' in raw_row:  # db is not migrated yet
+    print("Database has not been migrated yet. Good we can check the latest values.")
+    if not raw_row['enable_auditlog']:
+        print("Auditlog has been disabled. Ok, let's check setting of environmental variable DD_ENABLE_AUDITLOG.")
+        if settings.ENABLE_AUDITLOG:
+            print("Misconfiguration detected")
+            exit(47)
+        else:
+            print("It was disabled as well so we are good.")
+    else:
+        print("Auditlog has not been disabled. Good, we can continue.")
+else:
+    print("Database has been already migrated. Nothing to check.")
+EOD
+if [ $? -ne 0 ]
+then
+  echo "You have set 'enable_auditlog' to False in the past. It is not possible to manage auditlog in System settings anymore. If you would like to keep auditlog disabled, you need to set environmental variable DD_ENABLE_AUDITLOG to False for all Django containers (uwsgi, celeryworker & initializer)."
+  echo "Or there is some other error in checking script. Check logs of this container."
+  exit 47
+fi
+
 echo "Making migrations"
 python3 manage.py makemigrations dojo
 echo "Migrating"

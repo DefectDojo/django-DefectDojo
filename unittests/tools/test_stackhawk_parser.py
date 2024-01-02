@@ -240,7 +240,7 @@ class TestStackHawkParser(DojoTestCase):
         self.assertEqual(severity, actual_finding.severity)
         self.assertEqual("View this finding in the StackHawk platform at:\n[" + finding_url + '](' + finding_url + ')',
                          actual_finding.description)
-        self.assertRegexpMatches(
+        self.assertRegex(
             actual_finding.steps_to_reproduce,
             "Use a specific message link and click 'Validate' to see the cURL!.*"
         )

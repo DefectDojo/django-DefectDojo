@@ -1,0 +1,50 @@
+name: Fetch OpenAPI Specifications
+
+on:
+  workflow_call:
+
+jobs:
+  oas_fetch:
+    name: Fetch OpenAPI Specifications
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        file-type: [yaml, json]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # load docker images from build jobs
+      - name: Load images from artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Load docker images
+        run: |-
+             docker load -i nginx/nginx-alpine_img
+             docker load -i django/django-alpine_img
+             docker images
+
+      - name: Start Dojo
+        run: docker-compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env up --no-deps -d postgres nginx uwsgi
+        env:
+          DJANGO_VERSION: alpine
+          NGINX_VERSION: alpine
+
+      - name: Download OpenAPI Specifications
+        run: |-
+             wget 'http://localhost:8080/api/v2/oa3/schema/?format=${{ matrix.file-type }}' -O oas.${{ matrix.file-type }} --tries=10 --retry-on-http-error=502
+
+      - name: Logs
+        if: always()
+        run: docker-compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env logs --tail="2500"
+
+      - name: Shutdown
+        if: always()
+        run: docker-compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env down
+
+      - name: Upload oas.${{ matrix.file-type }} as artifact
+        uses:  actions/upload-artifact@v3
+        with:
+          name: oas-${{ matrix.file-type }}
+          path: oas.${{ matrix.file-type }}
+          retention-days: 1
