@@ -79,7 +79,6 @@ def split_cvss(value, _temp):
             _temp["CVSS_value"] = float(value)
 
 
-
 def parse_finding(host, tree):
     ret_rows = []
     issue_row = {}
