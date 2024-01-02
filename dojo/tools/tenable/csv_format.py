@@ -134,7 +134,8 @@ class TenableCSVParser(object):
                         LOGGER.debug(
                             "more than one CPE for a finding. NOT supported by Nessus CSV parser"
                         )
-                    cpe_decoded = CPE(detected_cpe[0])
+                    cpe_decoded = re.sub(r'[\n\r\t\\+]', '', str(detected_cpe[0]))
+                    cpe_decoded = CPE(cpe_decoded)
                     find.component_name = (
                         cpe_decoded.get_product()[0]
                         if len(cpe_decoded.get_product()) > 0
