@@ -54,6 +54,19 @@ class TrivyParser:
     def get_description_for_scan_types(self, scan_type):
         return "Import trivy JSON scan report."
 
+    def convert_cvss_score(self, raw_value):
+        val = float(raw_value)
+        if val == 0.0:
+            return "Info"
+        elif val < 4.0:
+            return "Low"
+        elif val < 7.0:
+            return "Medium"
+        elif val < 9.0:
+            return "High"
+        else:
+            return "Critical"
+
     def get_findings(self, scan_file, test):
         scan_data = scan_file.read()
 
@@ -111,6 +124,22 @@ class TrivyParser:
                     findings += self.get_result_items(
                         test, service.get("Results", []), service_name
                     )
+                resources = data.get("Resources", [])
+                for resource in resources:
+                    namespace = resource.get("Namespace")
+                    kind = resource.get("Kind")
+                    name = resource.get("Name")
+                    if namespace:
+                        resource_name = f"{namespace} / "
+                    if kind:
+                        resource_name += f"{kind} / "
+                    if name:
+                        resource_name += f"{name} / "
+                    if len(resource_name) >= 3:
+                        resource_name = resource_name[:-3]
+                    findings += self.get_result_items(
+                        test, resource.get("Results", []), resource_name
+                    )
                 return findings
             else:
                 raise ValueError(
@@ -138,8 +167,26 @@ class TrivyParser:
                 try:
                     vuln_id = vuln.get("VulnerabilityID", "0")
                     package_name = vuln["PkgName"]
-                    severity = TRIVY_SEVERITIES[vuln["Severity"]]
-                    file_path = vuln.get("PkgPath")
+                    severity_source = vuln.get("SeveritySource", None)
+                    cvss = vuln.get("CVSS", None)
+                    cvssv3 = None
+                    if severity_source is not None and cvss is not None:
+                        cvssclass = cvss.get(severity_source, None)
+                        if cvssclass is not None:
+                            severity = self.convert_cvss_score(cvssclass.get("V3Score", None))
+                            cvssv3 = dict(cvssclass).get("V3Vector", None)
+                        else:
+                            severity = TRIVY_SEVERITIES[vuln["Severity"]]
+                    else:
+                        severity = TRIVY_SEVERITIES[vuln["Severity"]]
+                    if target_class == "os-pkgs" or target_class == "lang-pkgs":
+                        file_path = vuln.get("PkgPath")
+                        if file_path is None:
+                            file_path = target_target
+                    elif target_class == "config":
+                        file_path = target_target
+                    else:
+                        file_path = None
                 except KeyError as exc:
                     logger.warning("skip vulnerability due %r", exc)
                     continue
@@ -165,12 +212,6 @@ class TrivyParser:
                     fixed_version=mitigation,
                     description_text=vuln.get("Description", ""),
                 )
-                cvss = vuln.get("CVSS", None)
-                cvssv3 = None
-                if cvss is not None:
-                    nvd = cvss.get("nvd", None)
-                    if nvd is not None:
-                        cvssv3 = nvd.get("V3Vector", None)
                 finding = Finding(
                     test=test,
                     title=title,

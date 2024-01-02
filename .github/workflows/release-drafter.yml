@@ -13,14 +13,50 @@ on:
     # branches to consider in the event; optional, defaults to all
     branches:
       - master
-      - dev
 
 jobs:
+  build-docker-containers:
+    uses: ./.github/workflows/build-docker-images-for-testing.yml
+    secrets: inherit
+
+  oas-fetch:
+    needs: build-docker-containers
+    uses: ./.github/workflows/fetch-oas.yml
+    secrets: inherit
+
   update_release_draft:
+    needs: oas-fetch
     runs-on: ubuntu-latest
     steps:
-      - uses: release-drafter/release-drafter@v5.25.0
+      - name: Load OAS files from artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Create Release
+        id: create_release
+        uses: release-drafter/release-drafter@v5.25.0
         with:
           version: ${{github.event.inputs.version}}  
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Asset - OpenAPI Specification - YAML
+        id: upload-release-asset-yaml
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./oas-yaml/oas.yaml
+          asset_name: oas.yaml
+          asset_content_type: application/vnd.oai.openapi
+
+      - name: Upload Release Asset - OpenAPI Specification - JSON
+        id: upload-release-asset-json
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./oas-json/oas.json
+          asset_name: oas.json
+          asset_content_type: application/json

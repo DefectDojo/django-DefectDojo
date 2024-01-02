@@ -3,7 +3,7 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render
-from dojo.models import System_Settings, enable_disable_auditlog
+from dojo.models import System_Settings
 from dojo.utils import (add_breadcrumb,
                         get_celery_worker_status)
 from dojo.forms import SystemSettingsForm
@@ -72,7 +72,6 @@ def system_settings(request):
                     extra_tags='alert-warning')
             else:
                 new_settings = form.save()
-                enable_disable_auditlog(enable=new_settings.enable_auditlog)
                 messages.add_message(request,
                                     messages.SUCCESS,
                                     'Settings saved.',
