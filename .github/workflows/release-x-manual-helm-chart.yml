@@ -94,8 +94,10 @@ jobs:
           git config --global user.email "${{ env.GIT_EMAIL }}"
           git remote update
           git fetch --all
+          git stash
           git checkout helm-charts
           git pull
+          git stash pop
           if [ ! -f ./index.yaml ]; then
             helm repo index ./build --url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${{ github.event.inputs.release_number }}/"
           else
