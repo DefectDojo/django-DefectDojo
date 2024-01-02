@@ -25,10 +25,15 @@ spec:
     protocol: TCP
     {{- if .Values.django.nginx.tls.enabled }}
     port: 443
-    targetPort: 8443
     {{- else }}
     port: 80
-    targetPort: 8080
+    {{- end }}
+    targetPort: http
+    {{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
+  - name: http-metrics
+    protocol: TCP
+    port: 9113
+    targetPort: http-metrics
     {{- end }}
 {{- if .Values.django.serviceType }}
   type: {{ .Values.django.serviceType }}
