@@ -2898,7 +2898,7 @@ class Finding(models.Model):
                 cvss_object = CVSS3(self.cvssv3)
                 # use the environmental score, which is the most refined score
                 self.cvssv3_score = cvss_object.scores()[2]
-            except Exception as ex: 
+            except Exception as ex:
                 logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
 
         # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
@@ -2949,7 +2949,7 @@ class Finding(models.Model):
             finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
                 issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
         else:
-            logger.debug('no options selected that require finding post processing')        
+            logger.debug('no options selected that require finding post processing')
 
     # Check if a mandatory field is empty. If it's the case, fill it with "no <fieldName> given"
     def clean(self):
