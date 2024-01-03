@@ -86,6 +86,7 @@ from dojo.models import (
     Answered_Survey,
     General_Survey,
     Check_List,
+    Announcement,
 )
 
 from dojo.tools.factory import (
@@ -3147,3 +3148,20 @@ class QuestionnaireGeneralSurveySerializer(serializers.ModelSerializer):
     class Meta:
         model = General_Survey
         fields = "__all__"
+
+
+class AnnouncementSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Announcement
+        fields = "__all__"
+
+    def create(self, validated_data):
+        validated_data["id"] = 1
+        try:
+            return super().create(validated_data)
+        except IntegrityError as e:
+            if 'duplicate key value violates unique constraint "dojo_announcement_pkey"' in str(e):
+                raise serializers.ValidationError("No more than one Announcement is allowed")
+            else:
+                raise
