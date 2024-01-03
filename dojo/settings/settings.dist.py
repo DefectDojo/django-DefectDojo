@@ -224,7 +224,7 @@ env = environ.Env(
     # new feature that tracks history across multiple reimports for the same test
     DD_TRACK_IMPORT_HISTORY=(bool, True),
     # Delete Auditlogs older than x month; -1 to keep all logs
-    DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, 12),
+    DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, -1),
     # Allow grouping of findings in the same test, for example to group findings per dependency
     # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
     DD_FEATURE_FINDING_GROUPS=(bool, True),
