@@ -6,7 +6,7 @@ import multiselectfield.db.fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("dojo", "0192_notifications_scan_added_empty"),
+        ("dojo", "0191_alter_notifications_risk_acceptance_expiration"),
     ]
 
     operations = [
