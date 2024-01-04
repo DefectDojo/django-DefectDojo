@@ -51,19 +51,13 @@ class NiktoParser(object):
         if port is not None:
             port = int(port)
         for vulnerability in data.get("vulnerabilities", []):
+            description = "\n".join([
+                f"**id:** `{vulnerability.get('id')}`",
+                f"**msg:** `{vulnerability.get('msg')}`",
+                f"**HTTP Method:** `{vulnerability.get('method')}`",
+            ])
             if vulnerability.get('OSVDB') is not None:
-                description = "\n".join([
-                    f"**id:** `{vulnerability.get('id')}`",
-                    f"**msg:** `{vulnerability.get('msg')}`",
-                    f"**HTTP Method:** `{vulnerability.get('method')}`",
-                    f"**OSVDB:** `{vulnerability.get('OSVDB')}`",
-                ])
-            else:
-                description = "\n".join([
-                    f"**id:** `{vulnerability.get('id')}`",
-                    f"**msg:** `{vulnerability.get('msg')}`",
-                    f"**HTTP Method:** `{vulnerability.get('method')}`",
-                ])
+                description += "\n" + f"**OSVDB:** `{vulnerability.get('OSVDB')}`"
             finding = Finding(
                 title=vulnerability.get("msg"),
                 severity="Info",  # Nikto doesn't assign severity, default to Info
