@@ -349,3 +349,13 @@ class TestParser(DojoTestCase):
                 self.assertEqual("log4j-core", finding.component_name)
                 self.assertEqual("2.13.2", finding.component_version)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
+
+    def test_cyclonedx_issue_9277(self):
+        """CycloneDX version 1.4 JSON format"""
+        with open("unittests/scans/cyclonedx/issue_9277.json") as file:
+            parser = CycloneDXParser()
+            findings = parser.get_findings(file, Test())
+            for finding in findings:
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+                finding.clean()
+            self.assertEqual(14, len(findings))
