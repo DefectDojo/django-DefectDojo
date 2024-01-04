@@ -51,19 +51,26 @@ class NiktoParser(object):
         if port is not None:
             port = int(port)
         for vulnerability in data.get("vulnerabilities", []):
+            if vulnerability.get('OSVDB') is None:
+                description = "\n".join([
+                    f"**id:** `{vulnerability.get('id')}`",
+                    f"**msg:** `{vulnerability.get('msg')}`",
+                    f"**HTTP Method:** `{vulnerability.get('method')}`",
+                    f"**OSVDB:** `{vulnerability.get('OSVDB')}`",
+                ])
+            else:
+                description = "\n".join([
+                    f"**id:** `{vulnerability.get('id')}`",
+                    f"**msg:** `{vulnerability.get('msg')}`",
+                    f"**HTTP Method:** `{vulnerability.get('method')}`",
+                ])
             finding = Finding(
                 title=vulnerability.get("msg"),
                 severity="Info",  # Nikto doesn't assign severity, default to Info
-                description="\n".join(
-                    [
-                        f"**id:** `{vulnerability.get('id')}`",
-                        f"**msg:** `{vulnerability.get('msg')}`",
-                        f"**HTTP Method:** `{vulnerability.get('method')}`",
-                        f"**OSVDB:** `{vulnerability.get('OSVDB')}`",
-                    ]
-                ),
+                description=description,
                 vuln_id_from_tool=vulnerability.get("id"),
                 nb_occurences=1,
+                references=vulnerability.get("references")
             )
             # manage if we have an ID from OSVDB
             if "OSVDB" in vulnerability and "0" != vulnerability.get("OSVDB"):
