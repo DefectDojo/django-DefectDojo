@@ -20,7 +20,6 @@ class TestQualysParser(DojoTestCase):
         parser = QualysParser()
         findings = parser.get_findings(testfile, Test())
         for finding in findings:
-            for finding in findings:
                 if finding.unsaved_endpoints[0].host == "demo14.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
                     finding_cvssv3_score = finding
                 if finding.unsaved_endpoints[0].host == "demo13.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
