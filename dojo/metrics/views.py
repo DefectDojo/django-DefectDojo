@@ -718,8 +718,9 @@ def product_tag_counts(request):
     if request.method == 'GET' and 'month' in request.GET and 'year' in request.GET and 'product_tag' in request.GET:
         form = ProductTagCountsForm(request.GET)
         if form.is_valid():
+            prods = get_authorized_products(Permissions.Product_View)
+
             pt = form.cleaned_data['product_tag']
-            user_has_permission_or_403(request.user, pt, Permissions.Product_Type_View)  # FIXME
             month = int(form.cleaned_data['month'])
             year = int(form.cleaned_data['year'])
             first_of_month = first_of_month.replace(month=month, year=year)
@@ -737,23 +738,28 @@ def product_tag_counts(request):
                                 end_date.month, end_date.day,
                                 tzinfo=timezone.get_current_timezone())
 
-            oip = opened_in_period(start_date, end_date, test__engagement__product__tags__name=pt)
+            oip = opened_in_period(start_date, end_date,
+                test__engagement__product__tags__name=pt,
+                test__engagement__product__in=prods,
+            )
 
             # trending data - 12 months
             for x in range(12, 0, -1):
                 opened_in_period_list.append(
                     opened_in_period(start_date + relativedelta(months=-x), end_of_month + relativedelta(months=-x),
-                                     test__engagement__product__tags__name=pt))
+                                     test__engagement__product__tags__name=pt, test__engagement__product__in=prods))
 
             opened_in_period_list.append(oip)
 
             closed_in_period = Finding.objects.filter(mitigated__date__range=[start_date, end_date],
                                                       test__engagement__product__tags__name=pt,
+                                                      test__engagement__product__in=prods,
                                                       severity__in=('Critical', 'High', 'Medium', 'Low')).values(
                 'numerical_severity').annotate(Count('numerical_severity')).order_by('numerical_severity')
 
             total_closed_in_period = Finding.objects.filter(mitigated__date__range=[start_date, end_date],
                                                             test__engagement__product__tags__name=pt,
+                                                            test__engagement__product__in=prods,
                                                             severity__in=(
                                                                 'Critical', 'High', 'Medium', 'Low')).aggregate(
                 total=Sum(
@@ -768,6 +774,7 @@ def product_tag_counts(request):
                                                    out_of_scope=False,
                                                    mitigated__isnull=True,
                                                    test__engagement__product__tags__name=pt,
+                                                   test__engagement__product__in=prods,
                                                    severity__in=('Critical', 'High', 'Medium', 'Low')).values(
                 'numerical_severity').annotate(Count('numerical_severity')).order_by('numerical_severity')
 
@@ -778,6 +785,7 @@ def product_tag_counts(request):
                                                          out_of_scope=False,
                                                          mitigated__isnull=True,
                                                          test__engagement__product__tags__name=pt,
+                                                         test__engagement__product__in=prods,
                                                          severity__in=('Critical', 'High', 'Medium', 'Low')).aggregate(
                 total=Sum(
                     Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
@@ -791,6 +799,7 @@ def product_tag_counts(request):
                                                        out_of_scope=False,
                                                        mitigated__isnull=True,
                                                        test__engagement__product__tags__name=pt,
+                                                       test__engagement__product__in=prods,
                                                        severity__in=(
                                                            'Critical', 'High', 'Medium', 'Low')).prefetch_related(
                 'test__engagement__product',
@@ -807,7 +816,7 @@ def product_tag_counts(request):
                                              engagement__test__finding__mitigated__isnull=True,
                                              engagement__test__finding__severity__in=(
                                                  'Critical', 'High', 'Medium', 'Low'),
-                                             tags__name=pt)
+                                             tags__name=pt, engagement__product__in=prods)
             top_ten = severity_count(top_ten, 'annotate', 'engagement__test__finding__severity').order_by('-critical', '-high', '-medium', '-low')[:10]
 
             cip = {'S0': 0,
@@ -828,7 +837,7 @@ def product_tag_counts(request):
             for o in overall_in_pt:
                 aip[o['numerical_severity']] = o['numerical_severity__count']
         else:
-            messages.add_message(request, messages.ERROR, _("Please choose month and year and the Product Type."),
+            messages.add_message(request, messages.ERROR, _("Please choose month and year and the Product Tag."),
                                  extra_tags='alert-danger')
 
     add_breadcrumb(title=_("Bi-Weekly Metrics"), top_level=True, request=request)

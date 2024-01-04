@@ -2125,7 +2125,9 @@ class ProductTagCountsForm(ProductCountsFormBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['product_tag'].queryset = Product.tags.tag_model.objects.all()
+        prods = get_authorized_products(Permissions.Product_View)
+        tags_available_to_user = Product.tags.tag_model.objects.filter(product__in=prods)
+        self.fields['product_tag'].queryset = tags_available_to_user
 
 
 class APIKeyForm(forms.ModelForm):
