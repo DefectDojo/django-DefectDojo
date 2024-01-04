@@ -27,16 +27,15 @@ class TestParsers(DojoTestCase):
                     self.assertTrue(
                         os.path.isfile(doc_file),
                         f"Documentation file '{doc_file}' is missing or using different name"
-                    )
-                    
+                                    )
+
                     content = open(doc_file).read()
                     self.assertTrue(re.search("title:", content),
                                     f"Documentation file '{doc_file}' does not contain a title"
-                    )
+                                    )
                     self.assertTrue(re.search("toc_hide: true", content),
                                     f"Documentation file '{doc_file}' does not contain toc_hide: true"
-                    )
-
+                                    )
 
             if parser_dir.name not in [
                 # there is not exception for now
