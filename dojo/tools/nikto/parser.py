@@ -51,7 +51,7 @@ class NiktoParser(object):
         if port is not None:
             port = int(port)
         for vulnerability in data.get("vulnerabilities", []):
-            if vulnerability.get('OSVDB') is None:
+            if vulnerability.get('OSVDB') is not None:
                 description = "\n".join([
                     f"**id:** `{vulnerability.get('id')}`",
                     f"**msg:** `{vulnerability.get('msg')}`",
