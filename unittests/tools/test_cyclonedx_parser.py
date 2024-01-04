@@ -5,7 +5,7 @@ from dojo.models import Test, Finding
 from dojo.tools.cyclonedx.parser import CycloneDXParser
 
 
-class TestParser(DojoTestCase):
+class TestCyclonedxParser(DojoTestCase):
     def test_grype_report(self):
         with open("unittests/scans/cyclonedx/grype_dd_1_14_1.xml") as file:
             parser = CycloneDXParser()
@@ -351,7 +351,7 @@ class TestParser(DojoTestCase):
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
 
     def test_cyclonedx_issue_9277(self):
-        """CycloneDX version 1.4 JSON format"""
+        """CycloneDX version 1.5 JSON format"""
         with open("unittests/scans/cyclonedx/issue_9277.json") as file:
             parser = CycloneDXParser()
             findings = parser.get_findings(file, Test())
@@ -359,3 +359,6 @@ class TestParser(DojoTestCase):
                 self.assertIn(finding.severity, Finding.SEVERITIES)
                 finding.clean()
             self.assertEqual(14, len(findings))
+            with self.subTest(i=0):
+                finding = findings[1]
+                self.assertEqual("Description was not provided.", finding.description)
