@@ -33,13 +33,13 @@ class HCLAppScanParser(object):
                         case 'cwe':
                             cwe = item.text
                         case 'remediation':
-                            remediation = item.text
+                            remediation = item[0].text
                         case 'advisory':
-                            advisory = item.text
+                            advisory = item[0].text
                         case 'issue-type':
-                            title = item.text
-                            issuetypename = item.text
-                            description = description + "Issue-Type-Name: " + issuetypename + "\n"
+                            title = item[0].text
+                            issuetype = item[0].text
+                            description = description + "Issue-Type: " + issuetype + "\n"
                         case 'issue-type-name':
                             title = item.text
                             issuetypename = item.text
@@ -51,6 +51,20 @@ class HCLAppScanParser(object):
                             title += "_" + item.text
                             domain = item.text
                             description = description + "Domain: " + domain + "\n"
+                        case 'threat-class':
+                            threatclass = item[0].text
+                            description = description + "Threat-Class: " + threatclass + "\n"
+                        case 'entity':
+                            entity = item[0].text
+                            description = description + "Entity: " + entity + "\n"
+                        case 'security-risks':
+                            description = description + "Security-Risks:"
+                            for i in item:
+                                description = description + " " + i.text
+                            description = description + "\n"
+                        case 'cause-id':
+                            causeid = item[0].text
+                            description = description + "Cause-Id: " + causeid + "\n"
                         case 'url-name':
                             title += "_" + item.text
                             urlname = item.text
