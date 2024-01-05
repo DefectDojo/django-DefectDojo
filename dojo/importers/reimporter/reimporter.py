@@ -70,8 +70,6 @@ class DojoDefaultReImporter(object):
             deduplication_algorithm,
         )
         for item in items:
-            if apply_tags_to_findings:
-                item.tags.set(tags)
             # FIXME hack to remove when all parsers have unit tests for this attribute
             if item.severity.lower().startswith("info") and item.severity != "Info":
                 item.severity = "Info"
