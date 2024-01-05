@@ -24,26 +24,37 @@ class HCLAppScanParser(object):
         report = root.find("issue-group")
         if report is not None:
             for finding in report:
+                title = ""
                 description = ""
                 for item in finding:
                     match item.tag:
                         case 'severity':
-                            severity = item.text
+                            severity = item.text.capitalize()
                         case 'cwe':
                             cwe = item.text
                         case 'remediation':
                             remediation = item.text
                         case 'advisory':
                             advisory = item.text
+                        case 'issue-type':
+                            title = item.text
+                            issuetypename = item.text
+                            description = description + "Issue-Type-Name: " + issuetypename + "\n"
                         case 'issue-type-name':
+                            title = item.text
                             issuetypename = item.text
                             description = description + "Issue-Type-Name: " + issuetypename + "\n"
                         case 'location':
                             location = item.text
                             description = description + "Location: " + location + "\n"
                         case 'domain':
+                            title += "_" + item.text
                             domain = item.text
                             description = description + "Domain: " + domain + "\n"
+                        case 'url-name':
+                            title += "_" + item.text
+                            urlname = item.text
+                            description = description + "Url-Name: " + urlname + "\n"
                         case 'element':
                             element = item.text
                             description = description + "Element: " + element + "\n"
@@ -51,6 +62,7 @@ class HCLAppScanParser(object):
                             elementtype = item.text
                             description = description + "ElementType: " + elementtype + "\n"
                         case 'path':
+                            title += "_" + item.text
                             path = item.text
                             description = description + "Path: " + path + "\n"
                         case 'scheme':
@@ -62,22 +74,22 @@ class HCLAppScanParser(object):
                         case 'port':
                             port = item.text
                             description = description + "Port: " + port + "\n"
-                        case 'asoc-issue-id':
-                            asocissueid = item.text
                 finding = Finding(
-                    title=str(issuetypename + "_" + domain + "_" + path),
+                    title=title,
                     description=description,
                     severity=severity,
                     cwe=cwe,
                     mitigation="Remediation: " + remediation + "\nAdvisory: " + advisory,
                     dynamic_finding=True,
                     static_finding=False,
-                    unique_id_from_tool=asocissueid
                 )
                 findings.append(finding)
-                finding.unsaved_endpoints = list()
-                endpoint = Endpoint(host=host, port=port)
-                finding.unsaved_endpoints.append(endpoint)
+                try:
+                    finding.unsaved_endpoints = list()
+                    endpoint = Endpoint(host=host, port=port)
+                    finding.unsaved_endpoints.append(endpoint)
+                except UnboundLocalError:
+                    pass
             return findings
         else:
             return findings
