@@ -3043,7 +3043,7 @@ class Finding(models.Model):
         # https://bitbucket.org/<username>/<repository-slug>
         # but when you get repo url for git, its template is:
         # https://bitbucket.org/<username>/<repository-slug>.git
-        # so to create borwser url - git url should be recomposed like below:
+        # so to create browser url - git url should be recomposed like below:
 
         parts_uri = uri.split('.git')
         return parts_uri[0]
