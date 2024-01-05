@@ -13,6 +13,15 @@ class HCLAppScanParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import XML output of HCL AppScan."
 
+    def xmltreehelper(self, input):
+        if "\n" in input.text:
+            output = ""
+            for i in input:
+                output = output + " " + i.text
+        else:
+            output = " " + input.text
+        return output
+
     def get_findings(self, file, test):
         findings = []
         tree = ET.parse(file)
@@ -29,71 +38,70 @@ class HCLAppScanParser(object):
                 for item in finding:
                     match item.tag:
                         case 'severity':
-                            severity = item.text.capitalize()
+                            output = self.xmltreehelper(item)
+                            severity = output.strip(" ").capitalize()
                         case 'cwe':
-                            cwe = item.text
+                            cwe = int(self.xmltreehelper(item))
                         case 'remediation':
-                            remediation = item[0].text
+                            remediation = self.xmltreehelper(item)
                         case 'advisory':
-                            advisory = item[0].text
+                            advisory = self.xmltreehelper(item)
                         case 'issue-type':
-                            title = item[0].text
-                            issuetype = item[0].text
-                            description = description + "Issue-Type: " + issuetype + "\n"
+                            title = self.xmltreehelper(item)
+                            description = description + "Issue-Type:" + title + "\n"
                         case 'issue-type-name':
-                            title = item.text
-                            issuetypename = item.text
-                            description = description + "Issue-Type-Name: " + issuetypename + "\n"
+                            title = self.xmltreehelper(item)
+                            description = description + "Issue-Type-Name:" + title + "\n"
                         case 'location':
-                            location = item.text
-                            description = description + "Location: " + location + "\n"
+                            location = self.xmltreehelper(item)
+                            description = description + "Location:" + location + "\n"
                         case 'domain':
-                            title += "_" + item.text
-                            domain = item.text
-                            description = description + "Domain: " + domain + "\n"
+                            domain = self.xmltreehelper(item)
+                            title += "_" + domain
+                            description = description + "Domain:" + domain + "\n"
                         case 'threat-class':
-                            threatclass = item[0].text
-                            description = description + "Threat-Class: " + threatclass + "\n"
+                            threatclass = self.xmltreehelper(item)
+                            description = description + "Threat-Class:" + threatclass + "\n"
                         case 'entity':
-                            entity = item[0].text
-                            description = description + "Entity: " + entity + "\n"
+                            entity = self.xmltreehelper(item)
+                            title += "_" + entity
+                            description = description + "Entity:" + entity + "\n"
                         case 'security-risks':
-                            description = description + "Security-Risks:"
-                            for i in item:
-                                description = description + " " + i.text
-                            description = description + "\n"
+                            security_risks = self.xmltreehelper(item)
+                            description = description + "Security-Risks:" + security_risks + "\n"
                         case 'cause-id':
-                            causeid = item[0].text
-                            description = description + "Cause-Id: " + causeid + "\n"
+                            causeid = self.xmltreehelper(item)
+                            title += "_" + causeid
+                            description = description + "Cause-Id:" + causeid + "\n"
                         case 'url-name':
-                            title += "_" + item.text
-                            urlname = item.text
-                            description = description + "Url-Name: " + urlname + "\n"
+                            urlname = self.xmltreehelper(item)
+                            title += "_" + urlname
+                            description = description + "Url-Name:" + urlname + "\n"
                         case 'element':
-                            element = item.text
-                            description = description + "Element: " + element + "\n"
+                            element = self.xmltreehelper(item)
+                            description = description + "Element:" + element + "\n"
                         case 'element-type':
-                            elementtype = item.text
-                            description = description + "ElementType: " + elementtype + "\n"
+                            elementtype = self.xmltreehelper(item)
+                            description = description + "ElementType:" + elementtype + "\n"
                         case 'path':
-                            title += "_" + item.text
-                            path = item.text
-                            description = description + "Path: " + path + "\n"
+                            path = self.xmltreehelper(item)
+                            title += "_" + path
+                            description = description + "Path:" + path + "\n"
                         case 'scheme':
-                            scheme = item.text
-                            description = description + "Scheme: " + scheme + "\n"
+                            scheme = self.xmltreehelper(item)
+                            description = description + "Scheme:" + scheme + "\n"
                         case 'host':
-                            host = item.text
-                            description = description + "Host: " + host + "\n"
+                            host = self.xmltreehelper(item)
+                            description = description + "Host:" + host + "\n"
                         case 'port':
-                            port = item.text
-                            description = description + "Port: " + port + "\n"
+                            port = self.xmltreehelper(item)
+                            description = description + "Port:" + port + "\n"
                 finding = Finding(
                     title=title,
                     description=description,
                     severity=severity,
                     cwe=cwe,
-                    mitigation="Remediation: " + remediation + "\nAdvisory: " + advisory,
+                    mitigation="Remediation:" + remediation + "\nAdvisory:" + advisory,
                     dynamic_finding=True,
                     static_finding=False,
                 )
