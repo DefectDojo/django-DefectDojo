@@ -3050,7 +3050,7 @@ class Finding(models.Model):
 
     def bitbucket_public_prepare_scm_link(self, uri):
         # if commit hash or branch/tag is set for engagement/test -
-        # hash or barnch/tag should be appended to base browser link
+        # hash or branch/tag should be appended to base browser link
 
         link = self.bitbucket_public_prepare_scm_base_link(uri)
         if self.test.commit_hash:
