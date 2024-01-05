@@ -29,7 +29,7 @@ For CI/CD Engagement, where user could set commit hash, branch/tag and code line
 
 If user does not set commit hash or branch/tag in appropriate fields of CI/CD Engagement edit form, the URL should look like in Interactive Engagement edit form.
 
-SCM navigation URL is composed from Repo URL using SCM Type. Github/Gitlab SCM type is default, but user could set certain SCM type in Product custom field "scm-type".s
+SCM navigation URL is composed from Repo URL using SCM Type. Github/Gitlab SCM type is default, but user could set certain SCM type in Product custom field "scm-type".
 
 Product custom fields:
 
