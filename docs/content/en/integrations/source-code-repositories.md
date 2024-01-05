@@ -27,7 +27,7 @@ For CI/CD Engagement, where user could set commit hash, branch/tag and code line
 - for public BitBucket - like https://bitbucket.org/some-user/some-project.git (like git clone url)
 - for standalone/onpremise BitBucket https://bb.example.com/scm/some-project.git or https://bb.example.com/scm/some-user-name/some-repo.git for user public repo (like git clone url)
 
-If user does not set commit hash or branch/tag in appropriate fields of CI/CD Engagement edit form - the URL should be look like in Interactive Engagement edit form.
+If user does not set commit hash or branch/tag in appropriate fields of CI/CD Engagement edit form, the URL should look like in Interactive Engagement edit form.
 
 SCM navigation URL is composed from Repo URL using SCM Type. Github/Gitlab SCM type is default, but user could set certain SCM type in Product custom field "scm-type".s
 
