@@ -21,7 +21,9 @@ class TestHCLAppScanParser(DojoTestCase):
         self.assertEqual(findings[1].title, " Unencrypted Login Request_ mani-virtual-machine_ /dvja-1.0-SNAPSHOT/login.action;jsessionid=AD12F9CF7835CC92885A381859462BAC")
         self.assertEqual(findings[0].severity, "High")
         self.assertEqual(findings[9].severity, "Medium")
+        self.assertEqual(findings[1].description, "Issue-Type: attLoginNotOverSSL\nThreat-Class: catInsufficientTransLayerProtection\nEntity: 7521140967381157376\nSecurity-Risks: loginNotOverSSL\nCause-Id: sensitiveDataNotSSL\nIssue-Type-Name: Unencrypted Login Request\nLocation: http://mani-virtual-machine:9000/dvja-1.0-SNAPSHOT/login.action;jsessionid=AD12F9CF7835CC92885A381859462BAC\nDomain: mani-virtual-machine\nElement: password\nElementType: Parameter\nPath: /dvja-1.0-SNAPSHOT/login.action;jsessionid=AD12F9CF7835CC92885A381859462BAC\nScheme: http\nHost: mani-virtual-machine\nPort: 9000\n")
         self.assertEqual(findings[5].mitigation, "Remediation: fix_61640\nAdvisory: GD_autocompleteInForm")
+        self.assertEqual(findings[9].cwe, 522)
 
     def test_issue_9279(self):
         my_file_handle = open("unittests/scans/hcl_appscan/issue_9279.xml")
@@ -33,3 +35,5 @@ class TestHCLAppScanParser(DojoTestCase):
         self.assertEqual(findings[1].title, " attHttpsToHttp_ 7089695691196187648_ sensitiveDataNotSSL")
         self.assertEqual(findings[0].severity, "Low")
         self.assertEqual(findings[5].mitigation, "Remediation: fix_61771\nAdvisory: attReferrerPolicyHeaderExist")
+        self.assertEqual(findings[1].description, "Issue-Type: attHttpsToHttp\nThreat-Class: catInformationLeakage\nEntity: 7089695691196187648\nSecurity-Risks: sensitiveNotOverSSL\nCause-Id: sensitiveDataNotSSL\n")
+        self.assertEqual(findings[20].cwe, 525)
