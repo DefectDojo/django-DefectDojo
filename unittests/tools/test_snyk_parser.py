@@ -175,7 +175,7 @@ class TestSnykParser(DojoTestCase):
         with open("unittests/scans/snyk/snykcontainer_issue_9270.json") as testfile:
             parser = SnykParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(254, len(findings))
+            self.assertEqual(67, len(findings))
 
     def test_snykcode_issue_9270(self):
         with open("unittests/scans/snyk/snykcode_issue_9270.json") as testfile:

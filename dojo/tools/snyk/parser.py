@@ -41,6 +41,7 @@ class SnykParser(object):
         return tree
 
     def get_items(self, tree, test):
+        #code: tool, results, properties
         items = {}
         target_file = tree.get("displayTargetFile", None)
         upgrades = tree.get("remediation", {}).get("upgrade", None)
@@ -58,7 +59,19 @@ class SnykParser(object):
                     + str(node["id"])
                 )
                 items[unique_key] = item
-
+        elif "runs" in tree and tree["runs"][0].get("results"):
+            results = tree["runs"][0]["results"]
+            # for node in results:
+            #     item = self.get_item(
+            #         node, test, target_file=target_file, upgrades=upgrades
+            #     )
+            #     unique_key = node["title"] + str(
+            #         node["packageName"]
+            #         + str(node["version"])
+            #         + str(node["from"])
+            #         + str(node["id"])
+            #     )
+            #     items[unique_key] = item
         return list(items.values())
 
     def get_item(self, vulnerability, test, target_file=None, upgrades=None):
