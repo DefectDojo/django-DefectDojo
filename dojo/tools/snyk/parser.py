@@ -41,37 +41,26 @@ class SnykParser(object):
         return tree
 
     def get_items(self, tree, test):
-        #code: tool, results, properties
         items = {}
-        target_file = tree.get("displayTargetFile", None)
-        upgrades = tree.get("remediation", {}).get("upgrade", None)
+        iterator = 0
         if "vulnerabilities" in tree:
+            target_file = tree.get("displayTargetFile", None)
+            upgrades = tree.get("remediation", {}).get("upgrade", None)
             vulnerabilityTree = tree["vulnerabilities"]
-
             for node in vulnerabilityTree:
                 item = self.get_item(
                     node, test, target_file=target_file, upgrades=upgrades
                 )
-                unique_key = node["title"] + str(
-                    node["packageName"]
-                    + str(node["version"])
-                    + str(node["from"])
-                    + str(node["id"])
-                )
-                items[unique_key] = item
+                items[iterator] = item
+                iterator += 1
         elif "runs" in tree and tree["runs"][0].get("results"):
             results = tree["runs"][0]["results"]
-            # for node in results:
-            #     item = self.get_item(
-            #         node, test, target_file=target_file, upgrades=upgrades
-            #     )
-            #     unique_key = node["title"] + str(
-            #         node["packageName"]
-            #         + str(node["version"])
-            #         + str(node["from"])
-            #         + str(node["id"])
-            #     )
-            #     items[unique_key] = item
+            for node in results:
+                item = self.get_code_item(
+                    node, test
+                )
+                items[iterator] = item
+                iterator += 1
         return list(items.values())
 
     def get_item(self, vulnerability, test, target_file=None, upgrades=None):
@@ -224,5 +213,31 @@ class SnykParser(object):
                         current_pack_version, upgraded_pack
                     )
                     finding.mitigation += "\n - ".join(tertiary_upgrade_list)
+        return finding
 
+    def get_code_item(self, vulnerability, test):
+        ruleId = vulnerability["ruleId"]
+        score = vulnerability["properties"]["priorityScore"]
+        if score <= 399:
+            severity = "Low"
+        elif score <= 699:
+            severity = "Medium"
+        elif score <= 899:
+            severity = "High"
+        else:
+            severity = "Critical"
+        # create the finding object
+        finding = Finding(
+            title="TODO",
+            test=test,
+            severity=severity,
+            description="TODO",
+            component_name="TODO",
+            component_version="TODO",
+            false_p=False,
+            duplicate=False,
+            out_of_scope=False,
+            static_finding=True,
+            dynamic_finding=False,
+        )
         return finding
