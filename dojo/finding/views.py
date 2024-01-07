@@ -1170,8 +1170,9 @@ class DeleteFinding(View):
                 extra_tags="alert-success",
             )
 
-            # TODO this notification might be moved to "@receiver(post_delete, sender=Finding)" method as many other notifications
-            # However, it hasn't been migrated because it could generate too much noise, we keep it here only for findings created by hand in WebUI
+            # Note: this notification has not be moved to "@receiver(post_delete, sender=Finding)" method as many other notifications
+            # Because it could generate too much noise, we keep it here only for findings created by hand in WebUI
+            # TODO: but same should be implemented for API endpoint
 
             # Send a notification that the finding had been deleted
             create_notification(
@@ -1293,8 +1294,9 @@ def close_finding(request, fid):
                     extra_tags="alert-success",
                 )
 
-                # TODO this notification might be moved to "@receiver(pre_save, sender=Finding)" method as many other notifications
-                # However, it hasn't been migrated because it could generate too much noise, we keep it here only for findings created by hand in WebUI
+                # Note: this notification has not be moved to "@receiver(pre_save, sender=Finding)" method as many other notifications
+                # Because it could generate too much noise, we keep it here only for findings created by hand in WebUI
+                # TODO: but same should be implemented for API endpoint
 
                 create_notification(
                     event="finding_closed",
@@ -1460,8 +1462,9 @@ def reopen_finding(request, fid):
         request, messages.SUCCESS, "Finding Reopened.", extra_tags="alert-success"
     )
 
-    # TODO this notification might be moved to "@receiver(pre_save, sender=Finding)" method as many other notifications
-    # However, it hasn't been migrated because it could generate too much noise, we keep it here only for findings created by hand in WebUI
+    # Note: this notification has not be moved to "@receiver(pre_save, sender=Finding)" method as many other notifications
+    # Because it could generate too much noise, we keep it here only for findings created by hand in WebUI
+    # TODO: but same should be implemented for API endpoint
 
     create_notification(
         event="finding_reopened",
