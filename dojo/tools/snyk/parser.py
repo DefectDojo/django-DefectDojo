@@ -217,7 +217,16 @@ class SnykParser(object):
 
     def get_code_item(self, vulnerability, test):
         ruleId = vulnerability["ruleId"]
+        ruleIndex = vulnerability["ruleIndex"]
+        message = vulnerability["message"]["text"]
         score = vulnerability["properties"]["priorityScore"]
+        locations_uri = vulnerability["locations"][0]["physicalLocation"]["artifactLocation"]["uri"]
+        locations_uriBaseId = vulnerability["locations"][0]["physicalLocation"]["artifactLocation"]["uriBaseId"]
+        locations_startLine = vulnerability["locations"][0]["physicalLocation"]["region"]["startLine"]
+        locations_endLine = vulnerability["locations"][0]["physicalLocation"]["region"]["endLine"]
+        locations_startColumn = vulnerability["locations"][0]["physicalLocation"]["region"]["startColumn"]
+        locations_endColumn = vulnerability["locations"][0]["physicalLocation"]["region"]["endColumn"]
+        isAutofixable = vulnerability["properties"]["isAutofixable"]
         if score <= 399:
             severity = "Low"
         elif score <= 699:
@@ -228,12 +237,20 @@ class SnykParser(object):
             severity = "Critical"
         # create the finding object
         finding = Finding(
-            title="TODO",
+            title=ruleId + "_" + locations_uri,
             test=test,
             severity=severity,
-            description="TODO",
-            component_name="TODO",
-            component_version="TODO",
+            description="**ruleId**: " + str(ruleId) + "\n"
+            + "**ruleIndex**: " + str(ruleIndex) + "\n"
+            + "**message**: " + str(message) + "\n"
+            + "**score**: " + str(score) + "\n"
+            + "**uri**: " + locations_uri + "\n"
+            + "**uriBaseId**: " + locations_uriBaseId + "\n"
+            + "**startLine**: " + str(locations_startLine) + "\n"
+            + "**endLine**: " + str(locations_endLine) + "\n"
+            + "**startColumn**: " + str(locations_startColumn) + "\n"
+            + "**endColumn**: " + str(locations_endColumn) + "\n"
+            + "**isAutofixable**: " + str(isAutofixable) + "\n",
             false_p=False,
             duplicate=False,
             out_of_scope=False,
