@@ -242,6 +242,16 @@ class UserContactInfo(models.Model):
     block_execution = models.BooleanField(default=False, help_text=_("Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion."))
     force_password_reset = models.BooleanField(default=False, help_text=_('Forces this user to reset their password on next login.'))
 
+    def __str__(self):
+        return f"UserContactInfo<{self.user}>"
+
+
+class UserContactInfoAdmin(admin.ModelAdmin):
+
+    def get_list_display(self, request):
+        list_fields = [field.name for field in self.model._meta.fields]
+        return list_fields
+
 
 class Dojo_Group(models.Model):
     AZURE = 'AzureAD'
@@ -4360,7 +4370,7 @@ admin.site.register(Endpoint_Status)
 admin.site.register(Endpoint)
 admin.site.register(Product)
 admin.site.register(Product_Type)
-admin.site.register(UserContactInfo)
+admin.site.register(UserContactInfo, UserContactInfoAdmin)
 admin.site.register(Notes)
 admin.site.register(Note_Type)
 admin.site.register(Alerts)
