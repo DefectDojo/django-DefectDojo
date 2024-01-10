@@ -7,7 +7,7 @@ import multiselectfield.db.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0194_alter_finding_component_name'),
+        ('dojo', '0195_alter_announcement_dismissable'),
     ]
 
     operations = [
