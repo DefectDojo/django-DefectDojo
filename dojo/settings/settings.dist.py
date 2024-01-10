@@ -174,7 +174,7 @@ env = environ.Env(
     DD_AUTH_REMOTEUSER_GROUPS_HEADER=(str, ''),
     DD_AUTH_REMOTEUSER_GROUPS_CLEANUP=(bool, True),
     # Comma separated list of IP ranges with trusted proxies
-    DD_AUTH_REMOTEUSER_TRUSTED_PROXY=(list, ['127.0.0.0/32']),
+    DD_AUTH_REMOTEUSER_TRUSTED_PROXY=(list, ['127.0.0.1/32']),
     # REMOTE_USER will be processed only on login page. Check https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#using-remote-user-on-login-pages-only
     DD_AUTH_REMOTEUSER_LOGIN_ONLY=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
