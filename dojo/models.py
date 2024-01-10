@@ -3122,7 +3122,6 @@ class Finding(models.Model):
         _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
 
 
-
 class FindingAdmin(admin.ModelAdmin):
     # For efficiency with large databases, display many-to-many fields with raw
     # IDs rather than multi-select
