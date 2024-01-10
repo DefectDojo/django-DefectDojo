@@ -61,6 +61,9 @@ class KiuwanParser(object):
                 "**Software characteristic** : "
                 + row["Software characteristic"]
                 + "\n\n"
+                + "**Vulnerability type** : "
+                + row["Vulnerability type"]
+                + "\n\n"
                 + "**CWE Scope** : "
                 + row["CWE Scope"]
                 + "\n\n"
