@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 
 class RemoteUserAuthentication(OriginalRemoteUserAuthentication):
     def authenticate(self, request):
+        if not settings.AUTH_REMOTEUSER_ENABLED:
+            return None
+
         # process only if request is comming from the trusted proxy node
         if IPAddress(request.META['REMOTE_ADDR']) in settings.AUTH_REMOTEUSER_TRUSTED_PROXY:
             self.header = settings.AUTH_REMOTEUSER_USERNAME_HEADER
@@ -28,6 +31,9 @@ class RemoteUserAuthentication(OriginalRemoteUserAuthentication):
 
 class RemoteUserMiddleware(OriginalRemoteUserMiddleware):
     def process_request(self, request):
+        if not settings.AUTH_REMOTEUSER_ENABLED:
+            return
+
         # process only if request is comming from the trusted proxy node
         if IPAddress(request.META['REMOTE_ADDR']) in settings.AUTH_REMOTEUSER_TRUSTED_PROXY:
             self.header = settings.AUTH_REMOTEUSER_USERNAME_HEADER
@@ -49,6 +55,9 @@ class PersistentRemoteUserMiddleware(RemoteUserMiddleware):
 
 class RemoteUserBackend(OriginalRemoteUserBackend):
     def configure_user(self, request, user, created=True):
+        if not settings.AUTH_REMOTEUSER_ENABLED:
+            return user
+
         changed = False
 
         if settings.AUTH_REMOTEUSER_EMAIL_HEADER and \
