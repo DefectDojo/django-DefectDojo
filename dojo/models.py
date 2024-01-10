@@ -2811,8 +2811,9 @@ class Finding(models.Model):
         if sla_days:
             start_date = self.get_sla_start_date()
 
-            if self.mitigated:
-                start_date = self.mitigated.date()
+            from datetime import datetime
+            if isinstance(start_date, datetime):
+                start_date = start_date.date()
 
             from datetime import timedelta
             if settings.SLA_BUSINESS_DAYS:

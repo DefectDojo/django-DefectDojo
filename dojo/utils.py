@@ -1567,6 +1567,10 @@ def get_celery_worker_status():
 
 
 def add_work_days(start: date, days: int):
+    """
+    Math function to get date n business days away from start date.
+    Does not take specific country holidays or extra working days into account.
+    """
     business_days = days
     current_date = start
 
