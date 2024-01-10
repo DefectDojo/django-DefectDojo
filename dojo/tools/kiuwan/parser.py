@@ -116,6 +116,8 @@ class KiuwanParser(object):
                         + finding.title
                         + "|"
                         + finding.description
+                        + "|"
+                        + str(finding.cwe)
                     ).encode("utf-8")
                 ).hexdigest()
 
