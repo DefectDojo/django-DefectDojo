@@ -2809,18 +2809,30 @@ class Finding(models.Model):
         sla_days = self.get_sla_period()
 
         if sla_days:
+            age = self.sla_age
             start_date = self.get_sla_start_date()
+
+            print('\n\n')
+            print('sla days => ' + str(sla_days))
+            print('age => ' + str(age))
+            print('start date => ' + str(start_date))
+            print('\n\n')
+
+            days = sla_days - age
 
             from datetime import datetime
             if isinstance(start_date, datetime):
                 start_date = start_date.date()
 
+            if self.mitigated:
+                start_date = self.mitigated
+
             from datetime import timedelta
             if settings.SLA_BUSINESS_DAYS:
                 from dojo.utils import add_work_days
-                self.sla_expiration_date = add_work_days(start_date, sla_days)
+                self.sla_expiration_date = add_work_days(start_date, days)
             else:
-                self.sla_expiration_date = start_date + timedelta(days=sla_days)
+                self.sla_expiration_date = start_date + timedelta(days=days)
 
     def sla_days_remaining(self):
         if self.sla_expiration_date:
