@@ -421,9 +421,15 @@
                             {% endif %}
                         {% endif %}
                         </td>
-                        <td> {% for scanner in found_by %}
-                            {{ scanner }}
-                        {% endfor %}</td>
+                        <td> 
+                            {% if found_by %}
+                                {% for scanner in found_by %}
+                                    {{ scanner }}
+                                {% endfor %}
+                            {% else %}
+                                {{ finding.test.test_type }}
+                            {% endif %}
+                        </td>
                         {% endwith %}
                         {% if finding.vuln_id_from_tool %}
                             <td>{{ finding.vuln_id_from_tool }}</td>
