@@ -2816,9 +2816,11 @@ class Finding(models.Model):
 
     def sla_days_remaining(self):
         if self.sla_expiration_date:
-            return (self.sla_expiration_date - get_current_date()).days
-        else:
-            None
+            if self.mitigated:
+                return (self.sla_expiration_date - self.mitigated.date()).days
+            else:
+                return (self.sla_expiration_date - get_current_date()).days
+        return None
 
     def sla_deadline(self):
         return self.sla_expiration_date
