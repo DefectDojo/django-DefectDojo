@@ -108,6 +108,27 @@ class TestRemoteUser(DojoTestCase):
         AUTH_REMOTEUSER_ENABLED=True,
         AUTH_REMOTEUSER_USERNAME_HEADER="HTTP_REMOTE_USER",
         AUTH_REMOTEUSER_GROUPS_HEADER="HTTP_REMOTE_GROUPS",
+        AUTH_REMOTEUSER_GROUPS_CLEANUP=True,
+    )
+    def test_update_multiple_groups_cleanup(self):
+        resp = self.client1.get('/profile',
+                                # TODO - This can be replaced by following lines in the future
+                                # Using of "headers" is supported since Django 4.2
+                                HTTP_REMOTE_USER=self.user.username,
+                                HTTP_REMOTE_GROUPS=f"{self.group1.name},{self.group2.name}",
+                                # headers = {
+                                #     "Remote-User": self.user.username,
+                                #     "Remote-Groups": f"{self.group1.name},{self.group2.name}",
+                                # }
+                                )
+        self.assertEqual(resp.status_code, 200)
+        dgms = Dojo_Group_Member.objects.filter(user=self.user)
+        self.assertEqual(dgms.count(), 2)
+
+    @override_settings(
+        AUTH_REMOTEUSER_ENABLED=True,
+        AUTH_REMOTEUSER_USERNAME_HEADER="HTTP_REMOTE_USER",
+        AUTH_REMOTEUSER_GROUPS_HEADER="HTTP_REMOTE_GROUPS",
         AUTH_REMOTEUSER_GROUPS_CLEANUP=False,
     )
     def test_update_groups_no_cleanup(self):
