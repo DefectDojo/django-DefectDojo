@@ -3027,26 +3027,125 @@ class Finding(models.Model):
         link = self.get_file_path_with_raw_link()
         return create_bleached_link(link, self.file_path)
 
+    def get_scm_type(self):
+        # extract scm type from product custom field 'scm-type'
+
+        if hasattr(self.test.engagement, 'product'):
+            dojo_meta = DojoMeta.objects.filter(product=self.test.engagement.product, name='scm-type').first()
+            if dojo_meta:
+                st = dojo_meta.value.strip()
+                if st:
+                    return st.lower()
+        return 'github'
+
+    def bitbucket_public_prepare_scm_base_link(self, uri):
+        # bitbucket public (https://bitbucket.org) url template for browse is:
+        # https://bitbucket.org/<username>/<repository-slug>
+        # but when you get repo url for git, its template is:
+        # https://bitbucket.org/<username>/<repository-slug>.git
+        # so to create browser url - git url should be recomposed like below:
+
+        parts_uri = uri.split('.git')
+        return parts_uri[0]
+
+    def bitbucket_public_prepare_scm_link(self, uri):
+        # if commit hash or branch/tag is set for engagement/test -
+        # hash or branch/tag should be appended to base browser link
+
+        link = self.bitbucket_public_prepare_scm_base_link(uri)
+        if self.test.commit_hash:
+            link += '/src/' + self.test.commit_hash + '/' + self.file_path
+        elif self.test.engagement.commit_hash:
+            link += '/src/' + self.test.engagement.commit_hash + '/' + self.file_path
+        elif self.test.branch_tag:
+            link += '/src/' + self.test.branch_tag + '/' + self.file_path
+        elif self.test.engagement.branch_tag:
+            link += '/src/' + self.test.engagement.branch_tag + '/' + self.file_path
+        else:
+            link += '/src/master/' + self.file_path
+
+        return link
+
+    def bitbucket_standalone_prepare_scm_base_link(self, uri):
+        # bitbucket onpremise/standalone url template for browse is:
+        # https://bb.example.com/projects/<project-key>/repos/<repository-slug>
+        # but when you get repo url for git, its template is:
+        # https://bb.example.com/scm/<project-key>/<repository-slug>.git
+        # or for user public repo^
+        # https://bb.example.com/users/<username>/repos/<repository-slug>
+        # but when you get repo url for git, its template is:
+        # https://bb.example.com/scm/<username>/<repository-slug>.git (username often could be prefixed with ~)
+        # so to create borwser url - git url should be recomposed like below:
+
+        parts_uri = uri.split('.git')
+        parts_scm = parts_uri[0].split('/scm/')
+        parts_project = parts_scm[1].split('/')
+        project = parts_project[0]
+        if project.startswith('~'):
+            return parts_scm[0] + '/users/' + parts_project[0][1:] + '/repos/' + parts_project[1] + '/browse'
+        else:
+            return parts_scm[0] + '/projects/' + parts_project[0] + '/repos/' + parts_project[1] + '/browse'
+
+    def bitbucket_standalone_prepare_scm_link(self, uri):
+        # if commit hash or branch/tag is set for engagement/test -
+        # hash or barnch/tag should be appended to base browser link
+
+        link = self.bitbucket_standalone_prepare_scm_base_link(uri)
+        if self.test.commit_hash:
+            link += '/' + self.file_path + '?at=' + self.test.commit_hash
+        elif self.test.engagement.commit_hash:
+            link += '/' + self.file_path + '?at=' + self.test.engagement.commit_hash
+        elif self.test.branch_tag:
+            link += '/' + self.file_path + '?at=' + self.test.branch_tag
+        elif self.test.engagement.branch_tag:
+            link += '/' + self.file_path + '?at=' + self.test.engagement.branch_tag
+        else:
+            link += '/' + self.file_path
+
+        return link
+
+    def github_prepare_scm_link(self, uri):
+        link = uri
+
+        if self.test.commit_hash:
+            link += '/blob/' + self.test.commit_hash + '/' + self.file_path
+        elif self.test.engagement.commit_hash:
+            link += '/blob/' + self.test.engagement.commit_hash + '/' + self.file_path
+        elif self.test.branch_tag:
+            link += '/blob/' + self.test.branch_tag + '/' + self.file_path
+        elif self.test.engagement.branch_tag:
+            link += '/blob/' + self.test.engagement.branch_tag + '/' + self.file_path
+        else:
+            link += '/' + self.file_path
+
+        return link
+
     def get_file_path_with_raw_link(self):
         if self.file_path is None:
             return None
+
         link = self.test.engagement.source_code_management_uri
-        if (self.test.engagement.source_code_management_uri is not None
-                and "https://github.com/" in self.test.engagement.source_code_management_uri):
-            if self.test.commit_hash:
-                link += '/blob/' + self.test.commit_hash + '/' + self.file_path
-            elif self.test.engagement.commit_hash:
-                link += '/blob/' + self.test.engagement.commit_hash + '/' + self.file_path
-            elif self.test.branch_tag:
-                link += '/blob/' + self.test.branch_tag + '/' + self.file_path
-            elif self.test.engagement.branch_tag:
-                link += '/blob/' + self.test.engagement.branch_tag + '/' + self.file_path
+        scm_type = self.get_scm_type()
+        if (self.test.engagement.source_code_management_uri is not None):
+            if scm_type == 'github' or ("https://github.com/" in self.test.engagement.source_code_management_uri):
+                link = self.github_prepare_scm_link(link)
+            elif scm_type == 'bitbucket-standalone':
+                link = self.bitbucket_standalone_prepare_scm_link(link)
+            elif scm_type == 'bitbucket':
+                link = self.bitbucket_public_prepare_scm_link(link)
             else:
                 link += '/' + self.file_path
         else:
             link += '/' + self.file_path
+
+        # than - add line part to browser url
         if self.line:
-            link = link + '#L' + str(self.line)
+            if scm_type == 'github' or scm_type == 'gitlab':
+                link = link + '#L' + str(self.line)
+            elif scm_type == 'bitbucket-standalone':
+                link = link + '#' + str(self.line)
+            elif scm_type == 'bitbucket':
+                link = link + '#lines-' + str(self.line)
         return link
 
     def get_references_with_links(self):
