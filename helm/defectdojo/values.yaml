@@ -304,6 +304,7 @@ initializer:
     helm.sh/hook: "post-install,post-upgrade"
   }
   annotations: {}
+  labels: {}
   keepSeconds: 60
   affinity: {}
   nodeSelector: {}
