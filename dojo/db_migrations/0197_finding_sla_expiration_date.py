@@ -37,7 +37,8 @@ def calculate_sla_expiration_dates(apps, schema_editor):
     Product = apps.get_model('dojo', 'Product')
     Finding = apps.get_model('dojo', 'Finding')
 
-    if System_Settings.objects.get().enable_finding_sla:
+    ss, _ = System_Settings.objects.get_or_create()
+    if ss.enable_finding_sla:
         for p in Product.objects.all():
             sla_config = SLA_Configuration.objects.filter(id=p.sla_configuration_id).first()
             for f in Finding.objects.filter(test__engagement__product__id=p.id):
