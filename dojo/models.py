@@ -1005,6 +1005,15 @@ class Product(models.Model):
     class Meta:
         ordering = ('name',)
 
+    def save(self, *args, **kwargs):
+        old = type(self).objects.get(pk=self.pk) if self.pk else None
+        super(Product, self).save(*args, **kwargs)
+
+        if old and old.sla_configuration != self.sla_configuration:
+            for f in Finding.objects.filter(test__engagement__product=self):
+                f.set_sla_expiration_date()
+                f.save()
+
     @cached_property
     def findings_count(self):
         try:
