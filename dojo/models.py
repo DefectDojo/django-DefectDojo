@@ -2806,39 +2806,22 @@ class Finding(models.Model):
         if not system_settings.enable_finding_sla:
             return None
 
-        sla_days = self.get_sla_period()
+        days_remaining = None
+        sla_period = self.get_sla_period()
+        if sla_period:
+            days_remaining = sla_period - self.sla_age
 
-        if sla_days:
-            age = self.sla_age
-            start_date = self.get_sla_start_date()
-
-            print('\n\n')
-            print('sla days => ' + str(sla_days))
-            print('age => ' + str(age))
-            print('start date => ' + str(start_date))
-            print('\n\n')
-
-            days = sla_days - age
-
-            from datetime import datetime
-            if isinstance(start_date, datetime):
-                start_date = start_date.date()
-
+        if days_remaining:
             if self.mitigated:
-                start_date = self.mitigated
-
-            from datetime import timedelta
-            if settings.SLA_BUSINESS_DAYS:
-                from dojo.utils import add_work_days
-                self.sla_expiration_date = add_work_days(start_date, days)
+                self.sla_expiration_date = self.mitigated.date() + relativedelta(days=days_remaining)
             else:
-                self.sla_expiration_date = start_date + timedelta(days=days)
+                self.sla_expiration_date = get_current_date() + relativedelta(days=days_remaining)
 
     def sla_days_remaining(self):
         if self.sla_expiration_date:
             return (self.sla_expiration_date - timezone.now().date()).days
         else:
-            return None
+            None
 
     def sla_deadline(self):
         return self.sla_expiration_date
