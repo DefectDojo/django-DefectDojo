@@ -1005,6 +1005,15 @@ class Product(models.Model):
     class Meta:
         ordering = ('name',)
 
+    def save(self, *args, **kwargs):
+        old = type(self).objects.get(pk=self.pk) if self.pk else None
+        super(Product, self).save(*args, **kwargs)
+
+        if old and old.sla_configuration != self.sla_configuration:
+            for f in Finding.objects.filter(test__engagement__product=self):
+                f.set_sla_expiration_date()
+                f.save()
+
     @cached_property
     def findings_count(self):
         try:
@@ -1121,14 +1130,11 @@ class Product(models.Model):
         from django.urls import reverse
         return reverse('view_product', args=[str(self.id)])
 
-    @property
     def violates_sla(self):
         findings = Finding.objects.filter(test__engagement__product=self,
-                                        active=True)
-        for f in findings:
-            if f.violates_sla:
-                return True
-        return False
+                                          active=True,
+                                          sla_expiration_date__lt=timezone.now().date())
+        return findings.count() > 0
 
 
 class Product_Member(models.Model):
@@ -2121,13 +2127,16 @@ class Finding(models.Model):
     date = models.DateField(default=get_current_date,
                             verbose_name=_('Date'),
                             help_text=_("The date the flaw was discovered."))
-
     sla_start_date = models.DateField(
                             blank=True,
                             null=True,
                             verbose_name=_('SLA Start Date'),
                             help_text=_("(readonly)The date used as start date for SLA calculation. Set by expiring risk acceptances. Empty by default, causing a fallback to 'date'."))
-
+    sla_expiration_date = models.DateField(
+                            blank=True,
+                            null=True,
+                            verbose_name=_('SLA Expiration Date'),
+                            help_text=_("(readonly)The date SLA expires for this finding. Empty by default, causing a fallback to 'date'."))
     cwe = models.IntegerField(default=0, null=True, blank=True,
                               verbose_name=_("CWE"),
                               help_text=_("The CWE number associated with this flaw."))
@@ -2772,13 +2781,12 @@ class Finding(models.Model):
             days = diff.days
         return days if days > 0 else 0
 
-    @property
-    def age(self):
-        return self._age(self.date)
+     def age(self):
+         return self._age(self.date)
 
-    def get_sla_periods(self):
-        sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
-        return sla_configuration
+    @property
+    def sla_age(self):
+        return self._age(self.get_sla_start_date())
 
     def get_sla_start_date(self):
         if self.sla_start_date:
@@ -2786,25 +2794,34 @@ class Finding(models.Model):
         else:
             return self.date
 
-    @property
-    def sla_age(self):
-        return self._age(self.get_sla_start_date())
+    def get_sla_period(self):
+        sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
+        return getattr(sla_configuration, self.severity.lower(), None)
 
-    def sla_days_remaining(self):
-        sla_calculation = None
-        sla_periods = self.get_sla_periods()
-        sla_age = getattr(sla_periods, self.severity.lower(), None)
-        if sla_age:
-            sla_calculation = sla_age - self.sla_age
-        return sla_calculation
+    def set_sla_expiration_date(self):
+        system_settings = System_Settings.objects.get()
+        if not system_settings.enable_finding_sla:
+            return None
 
-    def sla_deadline(self):
-        days_remaining = self.sla_days_remaining()
+        days_remaining = None
+        sla_period = self.get_sla_period()
+        if sla_period:
+            days_remaining = sla_period - self.sla_age
+
         if days_remaining:
             if self.mitigated:
-                return self.mitigated.date() + relativedelta(days=days_remaining)
-            return get_current_date() + relativedelta(days=days_remaining)
-        return None
+                self.sla_expiration_date = self.mitigated.date() + relativedelta(days=days_remaining)
+            else:
+                self.sla_expiration_date = get_current_date() + relativedelta(days=days_remaining)
+
+    def sla_days_remaining(self):
+        if self.sla_expiration_date:
+            return (self.sla_expiration_date - get_current_date()).days
+        else:
+            None
+
+    def sla_deadline(self):
+        return self.sla_expiration_date
 
     def github(self):
         try:
@@ -2930,6 +2947,9 @@ class Finding(models.Model):
         super(Finding, self).save(*args, **kwargs)
 
         self.found_by.add(self.test.test_type)
+
+        # update the SLA expiration date last, after all other finding fields have been updated
+        self.set_sla_expiration_date()
 
         # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
         if dedupe_option or issue_updater_option or product_grading_option or push_to_jira:
