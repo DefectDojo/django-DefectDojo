@@ -1580,7 +1580,6 @@ def add_work_days(start: date, days: int):
     return current_date
 
 
-
 def get_work_days(start: date, end: date):
     """
     Math function to get workdays between 2 dates.
