@@ -1035,7 +1035,8 @@ class AddFindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve', 'inherited_tags',
-                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoints', 'sla_start_date')
+                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoints', 'sla_start_date',
+                   'sla_expiration_date')
 
 
 class AdHocFindingForm(forms.ModelForm):
@@ -1073,7 +1074,7 @@ class AdHocFindingForm(forms.ModelForm):
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
                    'severity_justification', 'endpoints', 'endpoints_to_add', 'references', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
-                   'risk_accepted', 'under_defect_review', 'sla_start_date')
+                   'risk_accepted', 'under_defect_review', 'sla_start_date', 'sla_expiration_date')
 
     def __init__(self, *args, **kwargs):
         req_resp = kwargs.pop('req_resp')
@@ -1113,7 +1114,8 @@ class AdHocFindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve', 'inherited_tags',
-                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
+                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date',
+                   'sla_expiration_date')
 
 
 class PromoteFindingForm(forms.ModelForm):
@@ -1139,9 +1141,9 @@ class PromoteFindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
-                   'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'endpoints_to_add', 'references',
-                   'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
+    field_order = ('title', 'group', 'date', 'sla_start_date', 'sla_expiration_date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3',
+                   'cvssv3_score', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce', 'severity_justification',
+                   'endpoints', 'endpoints_to_add', 'references', 'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
                    'out_of_scope', 'risk_accept', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
@@ -1211,9 +1213,9 @@ class FindingForm(forms.ModelForm):
             'invalid_choice': EFFORT_FOR_FIXING_INVALID_CHOICE})
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
-                   'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'endpoints_to_add', 'references',
-                   'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
+    field_order = ('title', 'group', 'date', 'sla_start_date', 'sla_expiration_date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3',
+                   'cvssv3_score', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce', 'severity_justification',
+                   'endpoints', 'endpoints_to_add', 'references', 'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
                    'out_of_scope', 'risk_accept', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
@@ -1251,6 +1253,7 @@ class FindingForm(forms.ModelForm):
             self.fields['duplicate'].help_text = "You can mark findings as duplicate only from the view finding page."
 
         self.fields['sla_start_date'].disabled = True
+        self.fields['sla_expiration_date'].disabled = True
 
         if self.can_edit_mitigated_data:
             if hasattr(self, 'instance'):

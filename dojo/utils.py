@@ -1566,6 +1566,21 @@ def get_celery_worker_status():
         return False
 
 
+def add_work_days(start: date, days: int):
+    business_days = days
+    current_date = start
+
+    while business_days > 0:
+        current_date += timedelta(days=1)
+        weekday = current_date.weekday()
+        if weekday >= 5:
+            continue
+        business_days -= 1
+    
+    return current_date
+
+
+
 def get_work_days(start: date, end: date):
     """
     Math function to get workdays between 2 dates.

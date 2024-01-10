@@ -1124,11 +1124,9 @@ class Product(models.Model):
     @property
     def violates_sla(self):
         findings = Finding.objects.filter(test__engagement__product=self,
-                                        active=True)
-        for f in findings:
-            if f.violates_sla:
-                return True
-        return False
+                                          active=True,
+                                          sla_expiration_date__lt=timezone.now().date())
+        return findings.count() > 0
 
 
 class Product_Member(models.Model):
@@ -2127,6 +2125,11 @@ class Finding(models.Model):
                             null=True,
                             verbose_name=_('SLA Start Date'),
                             help_text=_("(readonly)The date used as start date for SLA calculation. Set by expiring risk acceptances. Empty by default, causing a fallback to 'date'."))
+    sla_expiration_date = models.DateField(
+                            blank=True,
+                            null=True,
+                            verbose_name=_('SLA Expiration Date'),
+                            help_text=_("(readonly)The date SLA expires for this finding. Empty by default, causing a fallback to 'date'."))
 
     cwe = models.IntegerField(default=0, null=True, blank=True,
                               verbose_name=_("CWE"),
@@ -2776,35 +2779,54 @@ class Finding(models.Model):
     def age(self):
         return self._age(self.date)
 
-    def get_sla_periods(self):
-        sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
-        return sla_configuration
-
+    @property
+    def sla_age(self):
+        return self._age(self.get_sla_start_date())
+    
     def get_sla_start_date(self):
         if self.sla_start_date:
             return self.sla_start_date
         else:
             return self.date
 
-    @property
-    def sla_age(self):
-        return self._age(self.get_sla_start_date())
+    def get_sla_period(self):
+        sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
+        return getattr(sla_configuration, self.severity.lower(), None)
+
+    def set_sla_expiration_date(self):
+        system_settings = System_Settings.objects.get()
+        if not system_settings.enable_finding_sla:
+            return None
+        
+        sla_days = self.get_sla_period()
+        
+        if sla_days:
+            start_date = self.get_sla_start_date()
+
+            if self.mitigated:
+                start_date = self.mitigated.date()
+            
+            from datetime import timedelta
+            if settings.SLA_BUSINESS_DAYS:
+                from dojo.utils import add_work_days
+                self.sla_expiration_date = add_work_days(start_date, sla_days)
+            else:
+                self.sla_expiration_date = start_date + timedelta(days=sla_days)
 
     def sla_days_remaining(self):
-        sla_calculation = None
-        sla_periods = self.get_sla_periods()
-        sla_age = getattr(sla_periods, self.severity.lower(), None)
-        if sla_age:
-            sla_calculation = sla_age - self.sla_age
-        return sla_calculation
-
+        if self.sla_expiration_date:
+            return (self.sla_expiration_date - timezone.now().date()).days
+        else:
+            return None
+    
     def sla_deadline(self):
+        return self.sla_expiration_date
+
+    # REMOVE THIS AND REPLACE EXISTING REFERENCES
+    @property
+    def violates_sla(self):
         days_remaining = self.sla_days_remaining()
-        if days_remaining:
-            if self.mitigated:
-                return self.mitigated.date() + relativedelta(days=days_remaining)
-            return get_current_date() + relativedelta(days=days_remaining)
-        return None
+        return days_remaining < 0 if days_remaining else False
 
     def github(self):
         try:
@@ -2925,6 +2947,9 @@ class Finding(models.Model):
                 self.dynamic_finding = False
             elif (self.file_path is not None):
                 self.static_finding = True
+        
+        # update the SLA expiration date last, after all other finding fields have been updated
+        self.set_sla_expiration_date()
 
         logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
         super(Finding, self).save(*args, **kwargs)
@@ -3094,10 +3119,6 @@ class Finding(models.Model):
         incoming_inherited_tags = [tag.name for tag in self.test.engagement.product.tags.all()]
         _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
 
-    @property
-    def violates_sla(self):
-        days_remaining = self.sla_days_remaining()
-        return days_remaining < 0 if days_remaining else False
 
 
 class FindingAdmin(admin.ModelAdmin):
@@ -3197,7 +3218,7 @@ class Finding_Group(TimeStampedModel):
         if not self.findings.all():
             return None
 
-        return min([find.sla_deadline() for find in self.findings.all() if find.sla_deadline()], default=None)
+        return min([find.sla_expiration_date for find in self.findings.all() if find.sla_expiration_date], default=None)
 
     def status(self):
         if not self.findings.all():

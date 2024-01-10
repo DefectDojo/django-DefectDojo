@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0194_alter_finding_component_name'),
+        ('dojo', '0194_finding_sla_expiration_date'),
     ]
 
     operations = [

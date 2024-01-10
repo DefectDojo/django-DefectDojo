@@ -11,6 +11,7 @@ from auditlog.models import LogEntry
 from django.conf import settings
 import six
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
     BooleanFilter, NumberFilter, DateFilter
@@ -148,16 +149,12 @@ class FindingSLAFilter(ChoiceFilter):
         return qs
 
     def satisfies_sla(self, qs, name):
-        for finding in qs:
-            if finding.violates_sla:
-                qs = qs.exclude(id=finding.id)
-        return qs
+        # return findings that have an sla expiration date after today or no sla expiration date
+        return qs.filter(Q(sla_expiration_date__isnull=True) | Q(sla_expiration_date__gt=timezone.now().date()))
 
     def violates_sla(self, qs, name):
-        for finding in qs:
-            if not finding.violates_sla:
-                qs = qs.exclude(id=finding.id)
-        return qs
+        # return findings that have an sla expiration date before today
+        return qs.filter(sla_expiration_date__lt=timezone.now().date())
 
     options = {
         None: (_('Any'), any),
@@ -1466,9 +1463,8 @@ class FindingFilter(FindingFilterWithTags):
                    'endpoints', 'references',
                    'thread_id', 'notes', 'scanner_confidence',
                    'numerical_severity', 'line', 'duplicate_finding',
-                   'hash_code',
-                   'reviewers',
-                   'created', 'files', 'sla_start_date', 'cvssv3',
+                   'hash_code', 'reviewers', 'created', 'files',
+                   'sla_start_date', 'sla_expiration_date', 'cvssv3',
                    'severity_justification', 'steps_to_reproduce']
 
     def __init__(self, *args, **kwargs):
