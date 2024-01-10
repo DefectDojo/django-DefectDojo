@@ -1576,7 +1576,7 @@ def add_work_days(start: date, days: int):
         if weekday >= 5:
             continue
         business_days -= 1
-    
+
     return current_date
 
 

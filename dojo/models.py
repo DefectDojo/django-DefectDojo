@@ -1121,7 +1121,6 @@ class Product(models.Model):
         from django.urls import reverse
         return reverse('view_product', args=[str(self.id)])
 
-    @property
     def violates_sla(self):
         findings = Finding.objects.filter(test__engagement__product=self,
                                           active=True,
@@ -2782,7 +2781,7 @@ class Finding(models.Model):
     @property
     def sla_age(self):
         return self._age(self.get_sla_start_date())
-    
+
     def get_sla_start_date(self):
         if self.sla_start_date:
             return self.sla_start_date
@@ -2797,15 +2796,15 @@ class Finding(models.Model):
         system_settings = System_Settings.objects.get()
         if not system_settings.enable_finding_sla:
             return None
-        
+
         sla_days = self.get_sla_period()
-        
+
         if sla_days:
             start_date = self.get_sla_start_date()
 
             if self.mitigated:
                 start_date = self.mitigated.date()
-            
+
             from datetime import timedelta
             if settings.SLA_BUSINESS_DAYS:
                 from dojo.utils import add_work_days
@@ -2818,15 +2817,9 @@ class Finding(models.Model):
             return (self.sla_expiration_date - timezone.now().date()).days
         else:
             return None
-    
+
     def sla_deadline(self):
         return self.sla_expiration_date
-
-    # REMOVE THIS AND REPLACE EXISTING REFERENCES
-    @property
-    def violates_sla(self):
-        days_remaining = self.sla_days_remaining()
-        return days_remaining < 0 if days_remaining else False
 
     def github(self):
         try:
@@ -2947,7 +2940,7 @@ class Finding(models.Model):
                 self.dynamic_finding = False
             elif (self.file_path is not None):
                 self.static_finding = True
-        
+
         # update the SLA expiration date last, after all other finding fields have been updated
         self.set_sla_expiration_date()
 

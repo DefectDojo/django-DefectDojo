@@ -148,18 +148,18 @@ class FindingSLAFilter(ChoiceFilter):
     def any(self, qs, name):
         return qs
 
-    def satisfies_sla(self, qs, name):
+    def sla_satisfied(self, qs, name):
         # return findings that have an sla expiration date after today or no sla expiration date
         return qs.filter(Q(sla_expiration_date__isnull=True) | Q(sla_expiration_date__gt=timezone.now().date()))
 
-    def violates_sla(self, qs, name):
+    def sla_violated(self, qs, name):
         # return findings that have an sla expiration date before today
         return qs.filter(sla_expiration_date__lt=timezone.now().date())
 
     options = {
         None: (_('Any'), any),
-        0: (_('False'), satisfies_sla),
-        1: (_('True'), violates_sla),
+        0: (_('False'), sla_satisfied),
+        1: (_('True'), sla_violated),
     }
 
     def __init__(self, *args, **kwargs):
@@ -179,22 +179,22 @@ class ProductSLAFilter(ChoiceFilter):
     def any(self, qs, name):
         return qs
 
-    def satisfies_sla(self, qs, name):
+    def sla_satisifed(self, qs, name):
         for product in qs:
-            if product.violates_sla:
+            if product.violates_sla():
                 qs = qs.exclude(id=product.id)
         return qs
 
-    def violates_sla(self, qs, name):
+    def sla_violated(self, qs, name):
         for product in qs:
-            if not product.violates_sla:
+            if not product.violates_sla():
                 qs = qs.exclude(id=product.id)
         return qs
 
     options = {
         None: (_('Any'), any),
-        0: (_('False'), satisfies_sla),
-        1: (_('True'), violates_sla),
+        0: (_('False'), sla_satisifed),
+        1: (_('True'), sla_violated),
     }
 
     def __init__(self, *args, **kwargs):
