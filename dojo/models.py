@@ -2819,7 +2819,7 @@ class Finding(models.Model):
 
     def sla_days_remaining(self):
         if self.sla_expiration_date:
-            return (self.sla_expiration_date - timezone.now().date()).days
+            return (self.sla_expiration_date - get_current_date()).days
         else:
             None
 
