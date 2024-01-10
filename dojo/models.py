@@ -2781,8 +2781,8 @@ class Finding(models.Model):
             days = diff.days
         return days if days > 0 else 0
 
-     def age(self):
-         return self._age(self.date)
+    def age(self):
+        return self._age(self.date)
 
     @property
     def sla_age(self):
