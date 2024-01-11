@@ -31,6 +31,7 @@ from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
 from dateutil.relativedelta import relativedelta
+from datetime import datetime
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
 import tagulous.admin
@@ -2766,16 +2767,21 @@ class Finding(models.Model):
         from dojo.utils import get_work_days
         if settings.SLA_BUSINESS_DAYS:
             if self.mitigated:
-                days = get_work_days(self.date, self.mitigated.date())
+                mitigated_date = self.mitigated
+                if isinstance(mitigated_date, datetime):
+                    mitigated_date = self.mitigated.date()
+                days = get_work_days(self.date, mitigated_date)
             else:
                 days = get_work_days(self.date, get_current_date())
         else:
-            from datetime import datetime
             if isinstance(start_date, datetime):
                 start_date = start_date.date()
 
             if self.mitigated:
-                diff = self.mitigated.date() - start_date
+                mitigated_date = self.mitigated
+                if isinstance(mitigated_date, datetime):
+                    mitigated_date = self.mitigated.date()
+                diff = mitigated_date - start_date
             else:
                 diff = get_current_date() - start_date
             days = diff.days
@@ -2810,14 +2816,20 @@ class Finding(models.Model):
 
         if days_remaining:
             if self.mitigated:
-                self.sla_expiration_date = self.mitigated.date() + relativedelta(days=days_remaining)
+                mitigated_date = self.mitigated
+                if isinstance(mitigated_date, datetime):
+                    mitigated_date = self.mitigated.date()
+                self.sla_expiration_date = mitigated_date + relativedelta(days=days_remaining)
             else:
                 self.sla_expiration_date = get_current_date() + relativedelta(days=days_remaining)
 
     def sla_days_remaining(self):
         if self.sla_expiration_date:
             if self.mitigated:
-                return (self.sla_expiration_date - self.mitigated.date()).days
+                mitigated_date = self.mitigated
+                if isinstance(mitigated_date, datetime):
+                    mitigated_date = self.mitigated.date()
+                return (self.sla_expiration_date - mitigated_date).days
             else:
                 return (self.sla_expiration_date - get_current_date()).days
         return None
