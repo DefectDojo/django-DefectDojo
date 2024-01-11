@@ -1230,7 +1230,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Acunetix360 Scan': ['title', 'description'],
     'Terrascan Scan': ['vuln_id_from_tool', 'title', 'severity', 'file_path', 'line', 'component_name'],
     'Trivy Operator Scan': ['title', 'severity', 'vulnerability_ids'],
-    'Trivy Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
+    'Trivy Scan': ['title', 'severity', 'vulnerability_ids', 'cwe', 'description'],
     'TFSec Scan': ['severity', 'vuln_id_from_tool', 'file_path', 'line'],
     'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
     'GitLab Dependency Scanning Report': ['title', 'vulnerability_ids', 'file_path', 'component_name', 'component_version'],

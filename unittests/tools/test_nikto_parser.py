@@ -176,3 +176,12 @@ class TestNiktoParser(DojoTestCase):
             self.assertEqual(443, endpoint.port)
             self.assertEqual("64.220.43.153", endpoint.host)
             self.assertIsNone(endpoint.path)
+
+    def test_parse_file_issue_9274(self):
+        testfile = open("unittests/scans/nikto/issue_9274.json")
+        parser = NiktoParser()
+        findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(8, len(findings))

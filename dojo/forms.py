@@ -471,6 +471,12 @@ class ImportScanForm(forms.Form):
                                             label="Close old findings within this product",
                                             required=False,
                                             initial=False)
+    apply_tags_to_findings = forms.BooleanField(
+        help_text="If set to True, the tags will be applied to the findings",
+        label="Apply Tags to Findings",
+        required=False,
+        initial=False
+    )
 
     if is_finding_groups_enabled():
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
@@ -557,6 +563,12 @@ class ReImportScanForm(forms.Form):
     api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
     service = forms.CharField(max_length=200, required=False, help_text="A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set.")
     source_code_management_uri = forms.URLField(max_length=600, required=False, help_text="Resource link to source code")
+    apply_tags_to_findings = forms.BooleanField(
+        help_text="If set to True, the tags will be applied to the findings",
+        label="Apply Tags to Findings",
+        required=False,
+        initial=False
+    )
 
     if is_finding_groups_enabled():
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option')
@@ -2592,11 +2604,12 @@ class ProductNotificationsForm(forms.ModelForm):
             self.initial['test_added'] = ''
             self.initial['scan_added'] = ''
             self.initial['sla_breach'] = ''
+            self.initial['sla_breach_combined'] = ''
             self.initial['risk_acceptance_expiration'] = ''
 
     class Meta:
         model = Notifications
-        fields = ['engagement_added', 'close_engagement', 'test_added', 'scan_added', 'sla_breach', 'risk_acceptance_expiration']
+        fields = ['engagement_added', 'close_engagement', 'test_added', 'scan_added', 'sla_breach', 'sla_breach_combined', 'risk_acceptance_expiration']
 
 
 class AjaxChoiceField(forms.ChoiceField):
