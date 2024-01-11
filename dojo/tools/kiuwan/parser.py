@@ -67,6 +67,9 @@ class KiuwanParser(object):
                 + "**CWE Scope** : "
                 + row["CWE Scope"]
                 + "\n\n"
+                + "**File** : "
+                + row["File"]
+                + "\n\n"
                 + "**Line number** : "
                 + row["Line number"]
                 + "\n\n"
