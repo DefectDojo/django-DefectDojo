@@ -6,7 +6,6 @@ from dojo.models import Test
 class TestKiuwanParser(DojoTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
-
         testfile = open("unittests/scans/kiuwan/kiuwan_no_vuln.csv")
         parser = KiuwanParser()
         findings = parser.get_findings(testfile, Test())
@@ -23,6 +22,12 @@ class TestKiuwanParser(DojoTestCase):
         parser = KiuwanParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(131, len(findings))
+
+    def test_parse_file_with_defects(self):
+        testfile = open("unittests/scans/kiuwan/kiuwan_defects.csv")
+        parser = KiuwanParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
 
     def test_parse_file_issue_9308(self):
         testfile = open("unittests/scans/kiuwan/issue_9308.csv")
