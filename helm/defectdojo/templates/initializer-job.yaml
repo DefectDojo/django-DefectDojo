@@ -22,6 +22,9 @@ spec:
         defectdojo.org/component: initializer
         app.kubernetes.io/name: {{ include "defectdojo.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- if .Values.initializer.labels }}
+        {{- toYaml .Values.initializer.labels | nindent 8 }}
+        {{- end }}
       annotations:
       {{- with .Values.initializer.annotations }}
         {{- toYaml . | nindent 8 }}
