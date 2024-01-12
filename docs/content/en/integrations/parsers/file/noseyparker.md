@@ -4,7 +4,7 @@ toc_hide: true
 ---
 Input Type:
 -
-This parser takes JSON Lines Output from Nosey Parker. Supports version 0.15.0 of https://github.com/praetorian-inc/noseyparker 
+This parser takes JSON Lines Output from Nosey Parker. Supports version 0.16.0 of https://github.com/praetorian-inc/noseyparker 
 
 Things to note about the Nosey Parker Parser:
 - 
@@ -27,16 +27,14 @@ If the first line is expanded, it looks like this:
 ~~~
 {
     "type": "finding",
-    "rule_name": "Generic API Key",
+    "rule_name": "Generic Password (double quoted)",
     "match_content": "32ui1ffdasfhu239b4df2ac6609a9919",
-    "num_matches": 1,
+    "num_matches": 2,
+    "status": null,
+    "comment": null,
     "matches": [
         {
             "provenance": [
-                {
-                    "kind": "file",
-                    "path": "./app/schema/config.py"
-                },
                 {
                     "kind": "git_repo",
                     "repo_path": "./.git",
@@ -50,7 +48,7 @@ If the first line is expanded, it looks like this:
                             "author_name": "Princess Leia",
                             "author_email": "leia@test.com",
                             "author_timestamp": "1685495256 +0000",
-                            "message": "framework\n"
+                            "message": "first commit\n"
                         },
                         "blob_path": "app/schema/config.py"
                     }

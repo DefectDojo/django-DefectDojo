@@ -45,21 +45,23 @@ class NoseyParkerParser(object):
                     rule_name = line['rule_name']
                     secret = line['match_content']
                 except Exception:
-                    raise ValueError("Invalid Nosey Parker data, make sure to use Nosey Parker v0.15.0")
+                    raise ValueError("Invalid Nosey Parker data, make sure to use Nosey Parker v0.16.0")
 
                 # Set Finding details
                 for match in line['matches']:
 
-                    title = f"Secret(s) Found in Repository with Commit ID {match['blob_id']}"
-                    filepath = match['provenance'][0]['path']
+                    title = f"Secret(s) Found in Repository with Commit ID {match['provenance'][0]['commit_provenance']['commit_metadata']['commit_id']}"
+                    filepath = match['provenance'][0]['commit_provenance']['blob_path']
                     line_num = match['location']['source_span']['start']['line']
                     description = f"Secret found of type:   {rule_name} \n" \
-                                  f"SECRET starts with:  '{secret[:3]}' on line number {line_num} \n" \
-                                  f"Committer Name: {match['provenance'][1]['commit_provenance']['commit_metadata']['committer_name']}  \n" \
-                                  f"Committer Email: {match['provenance'][1]['commit_provenance']['commit_metadata']['committer_email']} \n \n"
+                                  f"SECRET starts with:  '{secret[:3]}' \n" \
+                                  f"Committer Name: {match['provenance'][0]['commit_provenance']['commit_metadata']['committer_name']}  \n" \
+                                  f"Committer Email: {match['provenance'][0]['commit_provenance']['commit_metadata']['committer_email']} \n" \
+                                  f"Commit ID: {match['provenance'][0]['commit_provenance']['commit_metadata']['commit_id']}  \n"
 
-                    reproduce = f"Location: {filepath} line #{line_num}" \
-                                f"Snippet: {match['snippet']['before']}***SECRET***{match['snippet']['after']} \n" \
+                    reproduce = f"Location: {filepath} \n " \
+                                f"Line #{line_num} \n " \
+                                f"Code Snippet Containing Secret: {match['snippet']['before']}***SECRET***{match['snippet']['after']} \n" \
 
                     description += reproduce
 
@@ -69,7 +71,7 @@ class NoseyParkerParser(object):
                     if key in dupes:
                         finding = dupes[key]
                         if finding.description:
-                            finding.description += "\n" + finding.description
+                            finding.description += "\n \n" + description
                         finding.nb_occurences += 1
                         dupes[key] = finding
                     else:
@@ -80,10 +82,8 @@ class NoseyParkerParser(object):
                             cwe=798,
                             title=title,
                             description=description,
-                            steps_to_reproduce=reproduce,
                             severity='High',
-                            mitigation="Reset the account/token and remove occurrences of this secret from source "
-                                       "code. Store secrets/tokens/passwords in secret managers or secure vaults.",
+                            mitigation="Reset the account/token. Store secrets/tokens/passwords in secret managers or secure vaults.",
                             date=datetime.today().strftime("%Y-%m-%d"),
                             verified=False,
                             active=True,

@@ -1267,7 +1267,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Threagile risks report': ['title', 'cwe', "severity"],
     'Trufflehog Scan': ['title', 'description', 'line'],
     'Humble Json Importer': ['title'],
-    'MSDefender Parser': ['title', 'description'],
+    'MSDefender Parser': ['title', 'description']
 }
 
 # Override the hardcoded settings here via the env var
@@ -1474,6 +1474,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Threagile risks report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Humble Json Importer': DEDUPE_ALGO_HASH_CODE,
     'MSDefender Parser': DEDUPE_ALGO_HASH_CODE,
+    'Nosey Parker Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL
 }
 
 # Override the hardcoded settings here via the env var
