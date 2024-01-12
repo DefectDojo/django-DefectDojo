@@ -115,6 +115,7 @@ from django.db.models import Q, QuerySet, Count
 from django.db.models.query import Prefetch
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
+import dojo.risk_acceptance.risk_pending as rp_helper
 import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import (
