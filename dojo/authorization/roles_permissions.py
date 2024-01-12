@@ -542,6 +542,7 @@ def get_roles_with_permissions():
             Permissions.Endpoint_View,
             Permissions.Benchmark_Edit,
             Permissions.Component_View,
+            Permissions.Note_Add,
             Permissions.Note_View_History,
             Permissions.Product_Group_View,
             Permissions.Product_Type_Group_View,

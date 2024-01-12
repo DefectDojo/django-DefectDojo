@@ -4,6 +4,9 @@ from django.conf import settings
 from dataclasses import dataclass
 from dojo.utils import Response
 from django.utils import timezone
+from dateutil.relativedelta import relativedelta
+from dojo.utils import get_system_setting, get_product, is_finding_groups_enabled, \
+    get_password_requirements_string, sla_expiration_risk_acceptance
 from django.urls import reverse
 from dojo.models import Engagement, Risk_Acceptance, Finding, Product_Type_Member, Role, Product_Member, \
     Product, Product_Type   
@@ -55,6 +58,13 @@ def risk_acceptance_decline(
         )
     return Response(status=status, message=message)
 
+def update_expiration_risk_accepted(finding: Finding):
+    expiration_delta_days = sla_expiration_risk_acceptance('RiskAcceptanceExpiration')
+    logger.debug(f"Update RiskAcceptanceExpiration: {expiration_delta_days}")
+    expiration_date = timezone.now().date() + relativedelta(days=expiration_delta_days.get(finding.severity.lower()))
+    created_date = timezone.now().date()
+    return expiration_date, created_date
+
 
 def risk_accepted_succesfully(
     user,
@@ -63,9 +73,16 @@ def risk_accepted_succesfully(
     risk_acceptance: Risk_Acceptance,
     send_notification: bool = True,
 ):
+    if not finding.active:
+        return True
+        
     finding.risk_status = "Risk Accepted"
     finding.risk_accepted = True
     finding.active = False
+    expiration_date, created_date = update_expiration_risk_accepted(finding)
+    risk_acceptance.expiration_date = expiration_date
+    risk_acceptance.created = created_date
+    risk_acceptance.save()
     finding.save()
     # Send notification
     if send_notification:
@@ -353,7 +370,7 @@ def delete(eng, risk_acceptance):
         finding.save(dedupe_option=False)
 
     # best effort jira integration, no status changes
-    post_jira_comments(risk_acceptance, findings, unaccepted_message_creator)
+    post_jira_comments(risk_acceptance, findings, ra_helper.unaccepted_message_creator)
 
     risk_acceptance.accepted_findings.clear()
     eng.risk_acceptance.remove(risk_acceptance)
@@ -395,19 +412,16 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
     url=reverse('view_risk_acceptance', args=(risk_pending.engagement.id, risk_pending.id, )))
     post_jira_comments(risk_pending, findings, ra_helper.accepted_message_creator)
 
-def risk_unaccept(finding, perform_save=True):
+def risk_unaccept(finding):
     logger.debug('unaccepting finding %i:%s if it is currently risk accepted', finding.id, finding)
     if finding.risk_accepted:
         logger.debug('unaccepting finding %i:%s', finding.id, finding)
-        risk_acceptance = finding.risk_acceptance
         ra_helper.remove_from_any_risk_acceptance(finding)
         if not finding.mitigated and not finding.false_p and not finding.out_of_scope:
             finding.active = True
-        finding.risk_accepted = False
-        finding.risk_status = "Risk Active"
-        finding.acceptances_confirmed = ""
-        if perform_save:
-            logger.debug('saving unaccepted finding %i:%s', finding.id, finding)
-            finding.save(dedupe_option=False)
+            finding.risk_accepted = False
+            finding.risk_status = "Risk Active"
+            finding.acceptances_confirmed = 0
+            finding.save()
         ra_helper.post_jira_comment(finding, ra_helper.unaccepted_message_creator)
 
