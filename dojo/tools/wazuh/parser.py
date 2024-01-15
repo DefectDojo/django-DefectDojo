@@ -2,6 +2,7 @@ import hashlib
 import json
 from dojo.models import Finding, Endpoint
 
+
 class WazuhParser(object):
     """
     The vulnerabilities with condition "Package unfixed" are skipped because there is no fix out yet.
