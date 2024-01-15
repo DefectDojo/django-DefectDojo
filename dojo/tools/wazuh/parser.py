@@ -2,13 +2,8 @@ import hashlib
 import json
 from dojo.models import Finding, Endpoint
 
-
 class WazuhParser(object):
     """
-    IMPORTANT: Please use the script available here https://github.com/quirinziessler/wazuh-findings-exporter to generate
-    the report for DefectDojo. This script fetches the findings from wazuh based on a single Wazuh group. 
-    In DD please configure one engagement per group and upload the report.
-
     The vulnerabilities with condition "Package unfixed" are skipped because there is no fix out yet.
     https://github.com/wazuh/wazuh/issues/14560
     """
@@ -76,9 +71,9 @@ class WazuhParser(object):
                             static_finding=True,
                             component_name=package_name,
                             component_version=package_version,
-                            cvssv3_score = cvssv3_score,
-                            publish_date = publish_date,
-                            unique_id_from_tool = dupe_key,
+                            cvssv3_score=cvssv3_score,
+                            publish_date=publish_date,
+                            unique_id_from_tool=dupe_key,
                         )
                         # in some cases the agent_ip is not the perfect way on how to identify a host. Thus prefer the agent_name, if existant.
                         if agent_ip and agent_name:
