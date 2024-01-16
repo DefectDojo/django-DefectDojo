@@ -39,3 +39,5 @@ else
   exit 0
 fi
 ```
+### Sample Scan Data
+Sample Talisman scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/talisman.

@@ -10,3 +10,5 @@ The current parser support 3 sources:
  - JSON output
 
 See: https://github.com/sullo/nikto
+### Sample Scan Data
+Sample Nikto scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/nikto.

@@ -12,3 +12,6 @@ https://portswigger.net/burp/documentation/enterprise/work-with-scan-results/gen
 
 ### Sample Reports
 A standard Burp Enterprise HTML Report can be found at https://github.com/DefectDojo/django-DefectDojo/blob/master/unittests/scans/burp_enterprise/many_vulns.html.
+
+### Sample Scan Data
+Sample Burp Enterprise Scan scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/burp_enterprise.
