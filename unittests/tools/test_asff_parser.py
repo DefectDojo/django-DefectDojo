@@ -5,6 +5,7 @@ from dojo.models import Test, Endpoint
 from dojo.tools.asff.parser import AsffParser
 from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
+
 def sample_path(file_name):
     return os.path.join(get_unit_tests_path(), "scans/asff", file_name)
 
@@ -14,15 +15,15 @@ class TestAsffParser(DojoTestCase):
         with open(sample_path(file_name), "r") as file:
             return json.load(file)
 
-    def common_check_finding(self, finding, data, index):
+    def common_check_finding(self, finding, data, index, guarddutydate=False):
         self.assertEqual(finding.title, data[index]["Title"])
         self.assertEqual(finding.description, data[index]["Description"])
-        self.assertEqual(
-            finding.date.date(),
-            datetime.strptime(
-                data[0]["CreatedAt"], "%Y-%m-%dT%H:%M:%SZ"
-            ).date(),
-        )
+        if guarddutydate:
+            self.assertEqual(finding.date.date(),
+                datetime.strptime(data[0]["CreatedAt"], "%Y-%m-%dT%H:%M:%S.%fZ").date())
+        else:
+            self.assertEqual(finding.date.date(),
+                datetime.strptime(data[0]["CreatedAt"], "%Y-%m-%dT%H:%M:%SZ").date())
         self.assertEqual(finding.severity.lower(), data[index]["Severity"]["Label"].lower())
         self.assertTrue(finding.active)
         expected_ipv4s = data[0]["Resources"][0]["Details"]["AwsEc2Instance"][
@@ -45,7 +46,7 @@ class TestAsffParser(DojoTestCase):
         with open(sample_path("many_vulns.json"), "r") as file:
             parser = AsffParser()
             findings = parser.get_findings(file, Test())
-            self.assertGreater(len(findings), 1)
+            self.assertEqual(len(findings), 5)
             for index, finding in enumerate(findings):
                 self.common_check_finding(finding, data, index)
 
@@ -54,7 +55,7 @@ class TestAsffParser(DojoTestCase):
         with open(sample_path("guardduty/Unusual Behaviors-User-Persistence IAMUser-NetworkPermissions.json"), "r") as file:
             parser = AsffParser()
             findings = parser.get_findings(file, Test())
-            print(findings)
-            self.assertGreater(len(findings), 1)
+            self.assertEqual(len(findings), 1)
             for index, finding in enumerate(findings):
-                self.common_check_finding(finding, data, index)
+                self.common_check_finding(finding, data, index, guarddutydate=True)
+            self.assertEqual(finding.unsaved_endpoints[0], Endpoint(host="10.0.0.1"))

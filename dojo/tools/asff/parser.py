@@ -12,6 +12,7 @@ SEVERITY_MAPPING = {
     "CRITICAL": "Critical",
 }
 
+
 class AsffParser(object):
     def get_scan_types(self):
         return ["AWS Security Finding Format (ASFF) Scan"]
@@ -26,7 +27,6 @@ class AsffParser(object):
     def get_findings(self, file, test):
         data = json.load(file)
         result = list()
-
         for item in data:
             if item.get("Remediation"):
                 mitigation = item.get("Remediation").get("Recommendation").get("Text")
