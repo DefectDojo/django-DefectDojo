@@ -616,10 +616,17 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <a target="#"
-                                            data-toggle="tooltip"
-                                            data-placement="bottom"
-                                            title="Test: {{ finding.test }}">{{ finding.found_by.all|join:", " }}</a>
+                                            {% if finding.found_by %}
+                                                <a target="#"
+                                                data-toggle="tooltip"
+                                                data-placement="bottom"
+                                                title="Test: {{ finding.test }}">{{ finding.found_by.all|join:", " }}</a>
+                                            {% else %}
+                                                <a target="#"
+                                                data-toggle="tooltip"
+                                                data-placement="bottom"
+                                                title="Test: {{ finding.test }}">{{ finding.test.test_type }}</a>
+                                            {% endif %}
                                         </td>
                                         <td class="nowrap">
                                             {{ finding|finding_display_status|safe }}&nbsp;{{ finding|import_history }}
