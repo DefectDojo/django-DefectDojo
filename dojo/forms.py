@@ -2591,7 +2591,7 @@ class NotificationsForm(forms.ModelForm):
 
     class Meta:
         model = Notifications
-        exclude = ['template']
+        exclude = ['template', 'user', 'product']
 
 
 class ProductNotificationsForm(forms.ModelForm):

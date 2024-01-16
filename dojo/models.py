@@ -3883,8 +3883,8 @@ class Notifications(models.Model):
     code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
     review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
     other = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    user = models.ForeignKey(Dojo_User, default=None, null=True, editable=False, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, default=None, null=True, editable=False, on_delete=models.CASCADE)
+    user = models.ForeignKey(Dojo_User, default=None, null=True, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, default=None, null=True, on_delete=models.CASCADE)
     template = models.BooleanField(default=False)
     sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
         verbose_name=_('SLA breach'),
@@ -3950,6 +3950,14 @@ class NotificationsAdmin(admin.ModelAdmin):
         list_fields = ['user', 'product']
         list_fields += [field.name for field in self.model._meta.fields if field.name not in list_fields]
         return list_fields
+
+    def get_exclude(self, request, obj=None):
+        """For clarity, User and Product fields are hidden when editing
+        an existing notification"""
+        if obj:
+            return ["user", "product"]
+        else:
+            return []
 
 
 class Tool_Product_Settings(models.Model):
