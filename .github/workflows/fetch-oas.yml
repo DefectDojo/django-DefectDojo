@@ -8,7 +8,7 @@ on:
         description: |
           The version to be associated with the GitHub release that's created or updated.
           This will override any version calculated by the release-drafter.
-        required: false
+        required: true
 
 jobs:
   oas_fetch:
