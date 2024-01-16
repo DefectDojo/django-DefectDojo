@@ -15,12 +15,7 @@ on:
       - master
 
 jobs:
-  build-docker-containers:
-    uses: ./.github/workflows/build-docker-images-for-testing.yml
-    secrets: inherit
-
   oas-fetch:
-    needs: build-docker-containers
     uses: ./.github/workflows/fetch-oas.yml
     secrets: inherit
 
