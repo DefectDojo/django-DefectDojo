@@ -16,8 +16,14 @@ class ChefInspectParser(object):
         val = float(raw_value)
         if val == 0.0:
             return "Info"
-        elif val == 1.0:
+        elif val < 4.0:
             return "Low"
+        elif val < 7.0:
+            return "Medium"
+        elif val < 9.0:
+            return "High"
+        else:
+            return "Critical"
 
     def get_findings(self, file, test):
         lines = file.read()
@@ -40,7 +46,7 @@ class ChefInspectParser(object):
                 description += "platform: " + str(json_object.get('platform')) + "\n"
                 description += "profile: " + str(json_object.get('profile')) + "\n"
                 description += "group: " + str(json_object.get('group')) + "\n"
-                description += "result: " + str(json_object.get('office')) + "\n"
+                description += "results: " + str(json_object.get('results')) + "\n"
                 result.append(
                     Finding(
                         title=json_object.get("title"),
