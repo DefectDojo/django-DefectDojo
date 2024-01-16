@@ -1,31 +1,21 @@
 name: Release Drafter
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       version:
+        type: string
         description: |
           The version to be associated with the GitHub release that's created or updated.
           This will override any version calculated by the release-drafter.
         required: false
 
-  push:
-    # branches to consider in the event; optional, defaults to all
-    branches:
-      - master
-
 jobs:
-  oas-fetch:
-    uses: ./.github/workflows/fetch-oas.yml
-    secrets: inherit
-
+  # Update the notes in the release drafter first
+  # If the following jobs fail, then we will at least have some release notes present
   update_release_draft:
-    needs: oas-fetch
     runs-on: ubuntu-latest
     steps:
-      - name: Load OAS files from artifacts
-        uses: actions/download-artifact@v3
-
       - name: Create Release
         id: create_release
         uses: release-drafter/release-drafter@v5.25.0
@@ -33,6 +23,20 @@ jobs:
           version: ${{github.event.inputs.version}}  
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # Generate the OAS schemas in another workflow
+  oas-fetch:
+    needs: update_release_draft
+    uses: ./.github/workflows/fetch-oas.yml
+    with:
+      version: ${{github.event.inputs.version}} 
+    secrets: inherit
+  # Upload the OAS schemas to the release object
+  add-oas-to-release:
+    needs: oas-fetch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Load OAS files from artifacts
+        uses: actions/download-artifact@v3
 
       - name: Upload Release Asset - OpenAPI Specification - YAML
         id: upload-release-asset-yaml
@@ -55,3 +59,5 @@ jobs:
           asset_path: ./oas-json/oas.json
           asset_name: oas.json
           asset_content_type: application/json
+
+    

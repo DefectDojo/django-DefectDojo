@@ -2,6 +2,13 @@ name: Fetch OpenAPI Specifications
 
 on:
   workflow_call:
+    inputs:
+      version:
+        type: string
+        description: |
+          The version to be associated with the GitHub release that's created or updated.
+          This will override any version calculated by the release-drafter.
+        required: false
 
 jobs:
   oas_fetch:
