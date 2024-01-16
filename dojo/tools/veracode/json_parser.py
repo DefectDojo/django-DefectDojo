@@ -43,11 +43,11 @@ class VeracodeJSONParser(object):
 
     # This mapping was found here: https://docs.veracode.com/r/c_integrated_license_agent
     license_mapping = {
+        0: ("Non OSS", "Non-OSS indicates that this file could be subject to commercial license terms. If so, you should refer to your applicable license agreement with such vendor for additional information."),
         1: ("Unrecognized", "Unrecognized indicates that no license was found for the component. However, this does not indicate that there is no risk associated with the license."),
         2: ("Low", "Low-risk licenses are typically permissive licenses that require you to preserve the copyright and license notices, but allow distribution under different terms without disclosing source code."),
         3: ("Medium", "Medium-risk licenses are typically weak copyleft licenses that require you to preserve the copyright and license notices, and require distributors to make the source code of the component and any modifications under the same terms."),
         4: ("High", "High-risk licenses are typically strong copyleft licenses that require you to preserve the copyright and license notices, and require distributors to make the source code of the component and any modifications under the same terms."),
-        5: ("Non OSS", "Non-OSS indicates that this file could be subject to commercial license terms. If so, you should refer to your applicable license agreement with such vendor for additional information."),
     }
 
     def get_findings(self, json_output, test):
