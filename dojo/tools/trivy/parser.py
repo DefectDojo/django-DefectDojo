@@ -173,7 +173,12 @@ class TrivyParser:
                     if severity_source is not None and cvss is not None:
                         cvssclass = cvss.get(severity_source, None)
                         if cvssclass is not None:
-                            severity = self.convert_cvss_score(cvssclass.get("V3Score", None))
+                            v3score = cvssclass.get("V3Score", None)
+                            # Check if the severity score V3score not none before parsing it
+                            if v3score is not None:
+                                severity = self.convert_cvss_score(cvssclass.get("V3Score", None))
+                            else:
+                                severity = TRIVY_SEVERITIES[vuln["Severity"]]
                             cvssv3 = dict(cvssclass).get("V3Vector", None)
                         else:
                             severity = TRIVY_SEVERITIES[vuln["Severity"]]
