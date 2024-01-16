@@ -182,7 +182,7 @@ class TrivyParser:
                             elif cvssclass.get("V2Score") is not None:
                                 severity = self.convert_cvss_score(cvssclass.get("V2Score"))
                             else:
-                                severity = self.convert_cvss_score(None)
+                                severity = TRIVY_SEVERITIES[vuln["Severity"]] # If not V2Score and V3Score assign Severity Default value to the severity variable
                         else:
                             severity = TRIVY_SEVERITIES[vuln["Severity"]]
                     else:
