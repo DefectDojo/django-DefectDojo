@@ -58,8 +58,11 @@ class KiuwanParser(object):
             findingdict["file"] = row["File"]
             findingdict["line_number"] = row["Line number"]
             findingdict["description"] = (
-                "**Vulnerability type** : "
+                "**Software characteristic** : "
                 + row["Software characteristic"]
+                + "\n\n"
+                + "**Vulnerability type** : "
+                + row["Vulnerability type"]
                 + "\n\n"
                 + "**CWE Scope** : "
                 + row["CWE Scope"]
@@ -116,6 +119,8 @@ class KiuwanParser(object):
                         + finding.title
                         + "|"
                         + finding.description
+                        + "|"
+                        + str(finding.cwe)
                     ).encode("utf-8")
                 ).hexdigest()
 
