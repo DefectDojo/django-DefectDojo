@@ -10,20 +10,6 @@ logger = get_task_logger(__name__)
 
 @dojo_async_task
 @app.task
-def update_sla_expiration_dates_product_async(product, *args, **kwargs):
-    update_sla_expiration_dates_product_sync(product)
-
-
-def update_sla_expiration_dates_product_sync(product):
-    logger.debug(f"Updating finding SLA expiration dates within product {product}")
-    # update each finding that is within the SLA configuration that was saved
-    for f in Finding.objects.filter(test__engagement__product=product):
-        f.set_sla_expiration_date()
-        f.save()
-
-
-@dojo_async_task
-@app.task
 def propagate_tags_on_product(product_id, *args, **kwargs):
     with contextlib.suppress(Product.DoesNotExist):
         product = Product.objects.get(id=product_id)

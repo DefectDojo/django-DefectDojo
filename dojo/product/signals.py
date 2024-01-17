@@ -9,25 +9,6 @@ from dojo.product import helpers as async_product_funcs
 logger = logging.getLogger(__name__)
 
 
-@receiver(signals.pre_save, sender=Product)
-def initial_product_save_sla_configuration(sender, instance, **kwargs):
-    # post save, it is not a guarantee that the product exists yet (i.e. a brand new product)
-    sla_config = getattr(Product.objects.filter(id=instance.id).first(), 'sla_configuration', None)
-    if sla_config:
-        instance._old_sla_configuration = sla_config
-
-
-@receiver(signals.post_save, sender=Product)
-def post_product_save_sla_configuration(sender, instance, **kwargs):
-    # post save, it is not a guarantee that the product went through the pre save signal
-    old_sla_config = getattr(instance, '_old_sla_configuration', None)
-
-    # check to see if the sla configuration changed (check pre save against post save attribute)
-    if old_sla_config and old_sla_config != instance.sla_configuration:
-        logger.debug(f"{instance} SLA configuration changed - updating the SLA expiration date on each finding")
-        async_product_funcs.update_sla_expiration_dates_product_async(instance)
-
-
 @receiver(signals.m2m_changed, sender=Product.tags.through)
 def product_tags_post_add_remove(sender, instance, action, **kwargs):
     if action in ["post_add", "post_remove"]:
