@@ -869,7 +869,9 @@ class SLA_Configuration(models.Model):
                                           help_text=_('number of days to remediate a medium finding.'))
     low = models.IntegerField(default=120, verbose_name=_('Low Finding SLA Days'),
                                           help_text=_('number of days to remediate a low finding.'))
-
+    async_updating = models.BooleanField(default=False,
+                                            help_text=_('Findings under this SLA configuration are asynchronously being updated'))
+    
     def clean(self):
 
         sla_days = [self.critical, self.high, self.medium, self.low]
@@ -999,6 +1001,8 @@ class Product(models.Model):
         blank=False,
         verbose_name=_("Disable SLA breach notifications"),
         help_text=_("Disable SLA breach notifications if configured in the global settings"))
+    async_updating = models.BooleanField(default=False,
+                                            help_text=_('Findings under this SLA configuration are asynchronously being updated'))
 
     def __str__(self):
         return self.name
