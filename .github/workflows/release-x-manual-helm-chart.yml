@@ -94,6 +94,7 @@ jobs:
           git config --global user.email "${{ env.GIT_EMAIL }}"
           git remote update
           git fetch --all
+          git stash
           git checkout helm-charts
           git pull
           if [ ! -f ./index.yaml ]; then

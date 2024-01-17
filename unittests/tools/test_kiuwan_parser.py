@@ -23,3 +23,9 @@ class TestKiuwanParser(DojoTestCase):
         parser = KiuwanParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(131, len(findings))
+
+    def test_parse_file_issue_9308(self):
+        testfile = open("unittests/scans/kiuwan/issue_9308.csv")
+        parser = KiuwanParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(2, len(findings))
