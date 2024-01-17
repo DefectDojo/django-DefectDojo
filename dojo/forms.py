@@ -477,6 +477,7 @@ class ImportScanForm(forms.Form):
         required=False,
         initial=False
     )
+    parser_custom_setting = forms.CharField(max_length=100, required=False, help_text="TODO.")
 
     if is_finding_groups_enabled():
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')

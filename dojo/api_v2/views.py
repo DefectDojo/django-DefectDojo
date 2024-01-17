@@ -3203,6 +3203,7 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             auto_create_context,
             deduplication_on_engagement,
             do_not_reactivate,
+            parser_custom_setting,
         ) = serializers.get_import_meta_data_from_dict(
             serializer.validated_data
         )
