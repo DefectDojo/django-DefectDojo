@@ -11,4 +11,4 @@ JSON output of the `twistcli` tool. Example:
 The CSV output from the UI is now also accepted.
 
 ### Sample Scan Data
-Sample Twistlock scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/twistlock.
+Sample Twistlock scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/twistlock).

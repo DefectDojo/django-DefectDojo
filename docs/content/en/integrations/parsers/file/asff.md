@@ -10,4 +10,4 @@ Reference: https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-
 Prowler tool can generate this format with option `-M json-asff`.
 
 ### Sample Scan Data
-Sample AWS Security Finding Format (ASFF) scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/asff.
+Sample AWS Security Finding Format (ASFF) scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/asff).

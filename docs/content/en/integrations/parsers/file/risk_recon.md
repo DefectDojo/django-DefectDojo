@@ -57,4 +57,4 @@ Import findings from Risk Recon via the API. Configure your own JSON report as f
     Risk Recon instance.
 
 ### Sample Scan Data
-Sample Risk Recon API Importer scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/risk_recon.
+Sample Risk Recon API Importer scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/risk_recon).

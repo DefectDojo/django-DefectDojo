@@ -13,4 +13,4 @@ Currently these columns are mandatory:
 Other supported attributes: `cwe`, `displayFile`, `occurrenceCount` and `firstDetected`
 
 ### Sample Scan Data
-Sample Coverity API scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/coverity_api.
+Sample Coverity API scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/coverity_api).

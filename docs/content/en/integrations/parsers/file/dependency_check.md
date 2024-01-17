@@ -10,4 +10,4 @@ OWASP Dependency Check output can be imported in Xml format. This parser ingests
 * Related vulnerable dependencies are tagged with `related` tag.
 
 ### Sample Scan Data
-Sample Dependency Check scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/dependency_check.
+Sample Dependency Check scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/dependency_check).

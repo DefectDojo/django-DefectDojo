@@ -11,4 +11,4 @@ imported in JSON format. See here for more info on this JSON format:
 <https://docs.dependencytrack.org/integrations/file-formats/>
 
 ### Sample Scan Data
-Sample Dependency Track scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/dependency_track.
+Sample Dependency Track scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/dependency_track).

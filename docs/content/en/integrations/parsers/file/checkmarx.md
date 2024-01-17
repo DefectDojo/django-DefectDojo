@@ -14,4 +14,4 @@ That will generate three files, two of which are needed for defectdojo. Build th
 Data for SAST, SCA and KICS are supported.
 
 ### Sample Scan Data
-Sample Checkmarx scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/checkmarx.
+Sample Checkmarx scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/checkmarx).

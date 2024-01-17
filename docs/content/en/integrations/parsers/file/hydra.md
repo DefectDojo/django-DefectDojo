@@ -40,4 +40,4 @@ Sample JSON report:
 ```
 
 ### Sample Scan Data
-Sample Hydra scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/hydra.
+Sample Hydra scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/hydra).

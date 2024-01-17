@@ -13,5 +13,6 @@ HTTP Return Code | Severity
 403              |  Medium
 407              |  Medium
 500              |  Low
+
 ### Sample Scan Data
-Sample Wfuzz JSON importer scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/wfuzz.
+Sample Wfuzz JSON importer scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/wfuzz).

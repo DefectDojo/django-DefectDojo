@@ -112,4 +112,4 @@ Example:
 ```
 
 ### Sample Scan Data
-Sample Generic Findings Import scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/generic.
+Sample Generic Findings Import scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/generic).

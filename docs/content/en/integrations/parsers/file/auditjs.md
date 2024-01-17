@@ -9,4 +9,4 @@ auditjs ossi --json > auditjs_report.json
 {{< /highlight >}}
 
 ### Sample Scan Data
-Sample AuditJS (OSSIndex) scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/auditjs.
+Sample AuditJS (OSSIndex) scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/auditjs).

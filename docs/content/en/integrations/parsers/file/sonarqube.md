@@ -21,4 +21,4 @@ To generate the report, see
 Version: \>= 1.1.0
 
 ### Sample Scan Data
-Sample SonarQube scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/sonarqube.
+Sample SonarQube scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/sonarqube).

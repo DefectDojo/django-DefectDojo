@@ -26,4 +26,4 @@ DEDUPLICATION_ALGORITHM_PER_PARSER["SARIF"] = DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR
 ```
 
 ### Sample Scan Data
-Sample SARIF scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/sarif.
+Sample SARIF scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/sarif).

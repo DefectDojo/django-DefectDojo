@@ -12,7 +12,6 @@ Anchore Grype JSON files are created using the Grype CLI, using the '-o json' op
 grype yourApp/example-page -o json > example_vulns.json
 {{< /highlight >}}
 
-
 ### Acceptable JSON Format
 All properties are expected as strings and are required by the parser.
 

@@ -62,4 +62,4 @@ Example:
     }
 
 ### Sample Scan Data
-Sample IntSights Report scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/intsights.
+Sample IntSights Report scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/intsights).
