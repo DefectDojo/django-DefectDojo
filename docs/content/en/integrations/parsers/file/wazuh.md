@@ -4,7 +4,6 @@ toc_hide: true
 ---
 
 ### File Types
-
 DefectDojo parser accepts a .json file from [Wazuh](https://wazuh.com). The export from Wazuh can be done via 2 ways. Choose the one which you prefer.
 
 - export the Wazuh findings from API and upload them to DefectDojo. This method may be the easiest one but does export all known vulnerabilities at once. It is not possible to sort them after clients or any other categories. You will receive all vulnerabilities in one engagement. It also does not output the endpoint of a finding.
@@ -13,7 +12,6 @@ DefectDojo parser accepts a .json file from [Wazuh](https://wazuh.com). The expo
 Independent of your above choice: Have in mind to adjust the max file size via "DD_SCAN_FILE_MAX_SIZE" if you see files larger than the default value of 100MB. Depending on the amount and category of integrated devices, the file size jumps rapidly.
 
 ### Acceptable JSON Format
-
 Parser expects a .json file structured as below.
 
 ~~~
