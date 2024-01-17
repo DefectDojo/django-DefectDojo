@@ -263,6 +263,10 @@ class ProductForm(forms.ModelForm):
         super(ProductForm, self).__init__(*args, **kwargs)
         self.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_Add_Product)
 
+        if self.instance.async_updating:
+            self.fields['sla_configuration'].disabled = True
+            self.fields['sla_configuration'].help_text = 'The SLA configuration for this product cannot be changed until all Findings have been updated.'
+
     class Meta:
         model = Product
         fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'sla_configuration', 'regulations',
@@ -2436,6 +2440,21 @@ class ToolConfigForm(forms.ModelForm):
 
 
 class SLAConfigForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SLAConfigForm, self).__init__(*args, **kwargs)
+
+        if self.instance.async_updating:
+            msg = 'Finding SLA expiration dates are currently being calculated from the last time this SLA \
+                configuration was saved. This field cannot be changed until the calculation is complete.'
+            self.fields['critical'].disabled = True
+            self.fields['critical'].help_text = msg
+            self.fields['high'].disabled = True
+            self.fields['high'].help_text = msg
+            self.fields['medium'].disabled = True
+            self.fields['medium'].help_text = msg
+            self.fields['low'].disabled = True
+            self.fields['low'].help_text = msg
+
     class Meta:
         model = SLA_Configuration
         fields = ['name', 'description', 'critical', 'high', 'medium', 'low']

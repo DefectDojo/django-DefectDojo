@@ -871,14 +871,43 @@ class SLA_Configuration(models.Model):
                                           help_text=_('number of days to remediate a low finding.'))
     async_updating = models.BooleanField(default=False,
                                             help_text=_('Findings under this SLA configuration are asynchronously being updated'))
-    
-    def clean(self):
 
+    def clean(self):
         sla_days = [self.critical, self.high, self.medium, self.low]
 
         for sla_day in sla_days:
             if sla_day < 1:
                 raise ValidationError('SLA Days must be at least 1')
+
+    def save(self, *args, **kwargs):
+        # get the sla config before product is saved
+        if self.pk is not None:
+            initial_sla_config = SLA_Configuration.objects.get(pk=self.pk)
+            # if findings are being updated, revert sla config before saving
+            if self.async_updating:
+                self.critical = initial_sla_config.critical
+                self.high = initial_sla_config.high
+                self.medium = initial_sla_config.medium
+                self.low = initial_sla_config.low
+
+        super(SLA_Configuration, self).save(*args, **kwargs)
+
+        # if findings are not already being updated
+        if not self.async_updating:
+            # check which sla days fields changed based on severity
+            severities = []
+            if initial_sla_config.critical != self.critical:
+                severities.append('Critical')
+            if initial_sla_config.high != self.high:
+                severities.append('High')
+            if initial_sla_config.medium != self.medium:
+                severities.append('Medium')
+            if initial_sla_config.low != self.low:
+                severities.append('Low')
+            # if severities have changed, update finding sla expiration dates
+            if len(severities):
+                from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async
+                update_sla_expiration_dates_sla_config_async(self, tuple(severities))
 
     def __str__(self):
         return self.name
@@ -1003,6 +1032,24 @@ class Product(models.Model):
         help_text=_("Disable SLA breach notifications if configured in the global settings"))
     async_updating = models.BooleanField(default=False,
                                             help_text=_('Findings under this SLA configuration are asynchronously being updated'))
+
+    def save(self, *args, **kwargs):
+        # get the sla config before product is saved
+        if self.pk is not None:
+            initial_sla_config = getattr(Product.objects.get(pk=self.pk), 'sla_configuration', None)
+            # if findings are being updated, revert sla config change before saving
+            if self.async_updating:
+                self.sla_configuration = initial_sla_config
+
+        super(Product, self).save(*args, **kwargs)
+
+        # if findings are not already being updated
+        if not self.async_updating:
+            new_sla_config = getattr(self, 'sla_configuration', None)
+            # if there is a new sla config and the sla config has changed, update all finding sla_expiration dates
+            if new_sla_config and initial_sla_config != new_sla_config:
+                from dojo.product.helpers import update_sla_expiration_dates_product_async
+                update_sla_expiration_dates_product_async(self)
 
     def __str__(self):
         return self.name
@@ -2953,13 +3000,14 @@ class Finding(models.Model):
             elif (self.file_path is not None):
                 self.static_finding = True
 
+        # update the SLA expiration date last, after all other finding fields have been updated
+        self.set_sla_expiration_date()
+
         logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
         super(Finding, self).save(*args, **kwargs)
 
         self.found_by.add(self.test.test_type)
 
-        # update the SLA expiration date last, after all other finding fields have been updated
-        self.set_sla_expiration_date()
 
         # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
         if dedupe_option or issue_updater_option or product_grading_option or push_to_jira:

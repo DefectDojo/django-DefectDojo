@@ -16,10 +16,15 @@ def update_sla_expiration_dates_product_async(product, *args, **kwargs):
 
 def update_sla_expiration_dates_product_sync(product):
     logger.debug(f"Updating finding SLA expiration dates within product {product}")
+    # set the async updating flag to true
+    product.async_updating = True
+    super(Product, product).save()
     # update each finding that is within the SLA configuration that was saved
     for f in Finding.objects.filter(test__engagement__product=product):
-        f.set_sla_expiration_date()
         f.save()
+    # reset the async updating flag back to false
+    product.async_updating = False
+    super(Product, product).save()
 
 
 @dojo_async_task

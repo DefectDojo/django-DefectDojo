@@ -66,12 +66,12 @@ def edit_sla_config(request, slaid):
     elif request.method == 'POST':
         form = SLAConfigForm(request.POST, instance=sla_config)
         if form.is_valid():
-            form.save()
+            # form.save()
+            form.save(commit=True)
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'SLA configuration successfully updated.',
                                  extra_tags='alert-success')
-            form.save(commit=True)
     else:
         form = SLAConfigForm(instance=sla_config)
 
