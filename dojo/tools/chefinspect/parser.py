@@ -16,11 +16,11 @@ class ChefInspectParser(object):
         val = float(raw_value)
         if val == 0.0:
             return "Info"
-        elif val < 4.0:
+        elif val < 0.4:
             return "Low"
-        elif val < 7.0:
+        elif val < 0.7:
             return "Medium"
-        elif val < 9.0:
+        elif val < 0.9:
             return "High"
         else:
             return "Critical"
