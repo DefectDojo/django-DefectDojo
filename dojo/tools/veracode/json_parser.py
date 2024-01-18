@@ -1,9 +1,10 @@
 import json
 import re
 from cvss import CVSS3
+from dateutil import parser
+from django.conf import settings
 
-from dojo.models import Finding
-from dojo.models import Endpoint
+from dojo.models import Finding, Endpoint
 
 
 class VeracodeJSONParser(object):
@@ -80,6 +81,15 @@ class VeracodeJSONParser(object):
             # not be supported yet
             if not finding:
                 continue
+            # Set the date of the finding from the report if it is present
+            try:
+                if settings.USE_FIRST_SEEN:
+                    finding.date = parser.parse(vuln.get("finding_status", {}).get("first_found_date", ""))
+                else:
+                    finding.date = parser.parse(vuln.get("finding_status", {}).get("last_found_date", ""))
+            except Exception:
+                pass
+            # Generate the description
             finding = self.parse_description(finding, vuln.get("description"), scan_type)
             finding.nb_occurences = vuln.get("count", 1)
             finding.test = test
