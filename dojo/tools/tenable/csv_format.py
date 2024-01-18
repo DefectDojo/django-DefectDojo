@@ -63,7 +63,7 @@ class TenableCSVParser(object):
         cpe_match = re.findall(r"cpe:/[^\n\ ]+", val)
         return cpe_match if cpe_match else None
 
-    def get_findings(self, filename: str, test:Test, parser_custom_setting=None):
+    def get_findings(self, filename: str, test: Test, parser_custom_setting=None):
         # Read the CSV
         content = filename.read()
         if isinstance(content, bytes):
