@@ -2137,8 +2137,8 @@ class ImportScanSerializer(serializers.Serializer):
         Validate that the file has an allowed extension.
         """
         if value.name:
-            allowed_extension = ["json", "csv", "xml"]
-            file_name, extension = os.path.splitext(value.name)
+            allowed_extension = ["json", "csv", "xml", "sarif"]
+            __, extension = os.path.splitext(value.name)
             extension = extension[1:]
             if len(extension.split('.')) == 1 and extension in allowed_extension:
                 return value
