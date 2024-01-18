@@ -16,7 +16,7 @@ class CrashtestSecurityJsonParser(object):
     @param test The test to which the finding belongs
     """
 
-    def get_findings(self, filename, test, parser_custom_setting=None):
+    def get_findings(self, file, test, parser_custom_setting=None):
         # Load the data
         tree = file.read()
         try:
