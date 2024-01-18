@@ -14,17 +14,17 @@ class Command(BaseCommand):
     help = 'No input commands for dedupe findings.'
 
     def handle(self, *args, **options):
-        rename_whitesource_finding()
+        rename_mend_finding()
 
 
-@app.task(name='rename_whitesource_finding_task')
-def rename_whitesource_finding():
-    whitesource_id = Test_Type.objects.get(name="Whitesource Scan").id
-    findings = Finding.objects.filter(found_by=whitesource_id)
+@app.task(name='rename_mend_finding_task')
+def rename_mend_finding():
+    mend_id = Test_Type.objects.get(name="Mend Scan").id
+    findings = Finding.objects.filter(found_by=mend_id)
     findings = findings.order_by('-pk')
     logger.info("######## Updating Hashcodes - deduplication is done in the background upon finding save ########")
     for finding in findings:
-        logger.info("Updating Whitesource Finding with id: %d" % finding.id)
+        logger.info("Updating Mend Finding with id: %d" % finding.id)
         lib_name_begin = re.search('\\*\\*Library Filename\\*\\* : ', finding.description).span(0)[1]
         lib_name_end = re.search('\\*\\*Library Description\\*\\*', finding.description).span(0)[0]
         lib_name = finding.description[lib_name_begin:lib_name_end - 1]

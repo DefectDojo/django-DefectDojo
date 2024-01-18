@@ -1211,7 +1211,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'Yarn Audit Scan': ['title', 'severity', 'file_path', 'vulnerability_ids', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on vulnerability_ids + file_path + severity
-    'Whitesource Scan': ['title', 'severity', 'description'],
+    'Mend Scan': ['title', 'severity', 'description'],
     'ZAP Scan': ['title', 'cwe', 'severity'],
     'Qualys Scan': ['title', 'severity', 'endpoints'],
     # 'Qualys Webapp Scan': ['title', 'unique_id_from_tool'],
@@ -1298,7 +1298,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Nexpose Scan': True,
     'NPM Audit Scan': True,
     'Yarn Audit Scan': True,
-    'Whitesource Scan': True,
+    'Mend Scan': True,
     'ZAP Scan': False,
     'Qualys Scan': True,
     'DSOP Scan': True,
@@ -1394,7 +1394,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Nexpose Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
-    'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
+    'Mend Scan': DEDUPE_ALGO_HASH_CODE,
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
     'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
     'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE,

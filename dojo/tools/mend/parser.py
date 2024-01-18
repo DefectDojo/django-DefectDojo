@@ -9,12 +9,12 @@ __author__ = "dr3dd589"
 logger = logging.getLogger(__name__)
 
 
-class WhitesourceParser(object):
+class MendParser(object):
     def get_scan_types(self):
-        return ["Whitesource Scan"]
+        return ["Mend Scan"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "Whitesource Scan"
+        return "Mend Scan"
 
     def get_description_for_scan_types(self, scan_type):
         return "Import JSON report"
