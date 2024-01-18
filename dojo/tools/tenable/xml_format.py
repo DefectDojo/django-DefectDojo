@@ -40,7 +40,7 @@ class TenableXMLParser(object):
                 return element_text or None
         return None
 
-    def get_findings(self, filename: str, test: Test, parser_custom_setting=None):
+    def get_findings(self, filename: str, test: Test, parser_custom_setting=None) -> list:
         # Read the XML
         nscan = ElementTree.parse(filename)
         root = nscan.getroot()
