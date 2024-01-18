@@ -8,7 +8,7 @@ import sys
 from cpe import CPE
 from cvss import CVSS3
 
-from dojo.models import Endpoint, Finding, Test
+from dojo.models import Endpoint, Finding
 
 LOGGER = logging.getLogger(__name__)
 
