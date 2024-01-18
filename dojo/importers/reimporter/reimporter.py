@@ -572,6 +572,7 @@ class DojoDefaultReImporter(object):
         do_not_reactivate=False,
         create_finding_groups_for_all_findings=True,
         apply_tags_to_findings=False,
+        parser_custom_setting=None,
     ):
 
         logger.debug(f"REIMPORT_SCAN: parameters: {locals()}")
@@ -607,7 +608,7 @@ class DojoDefaultReImporter(object):
         else:
             logger.debug("REIMPORT_SCAN: Parse findings")
             try:
-                parsed_findings = parser.get_findings(scan, test)
+                parsed_findings = parser.get_findings(scan, test, parser_custom_setting)
             except ValueError as e:
                 logger.warning(e)
                 raise ValidationError(e)
