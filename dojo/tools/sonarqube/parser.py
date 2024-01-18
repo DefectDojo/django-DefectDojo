@@ -3,6 +3,7 @@ import re
 
 from django.utils.html import strip_tags
 from lxml import etree
+import json
 
 from dojo.models import Finding
 
@@ -28,16 +29,80 @@ class SonarQubeParser(object):
             return "Import all findings from sonarqube html report. SonarQube output file can be imported in HTML format. Generate with https://github.com/soprasteria/sonar-report version >= 1.1.0"
 
     def get_findings(self, filename, test):
-        parser = etree.HTMLParser()
-        tree = etree.parse(filename, parser)
-        if self.mode not in [None, "detailed"]:
-            raise ValueError(
-                "Internal error: Invalid mode "
-                + self.mode
-                + ". Expected: one of None, 'detailed'"
-            )
+        if filename.endswith(".json"):
+            json_content = json.load(filename)
+            return self.get_json_items(json_content, test, self.mode)
+        else:
+            parser = etree.HTMLParser()
+            tree = etree.parse(filename, parser)
+            if self.mode not in [None, "detailed"]:
+                raise ValueError(
+                    "Internal error: Invalid mode "
+                    + self.mode
+                    + ". Expected: one of None, 'detailed'"
+                )
 
-        return self.get_items(tree, test, self.mode)
+            return self.get_items(tree, test, self.mode)
+
+    def get_json_items(self, json_content, test, mode):
+        dupes = dict()
+        rules = json_content["rules"]
+        issues = json_content["issues"]
+        for issue in issues:
+            key = issue["key"]
+            line = str(issue["line"])
+            mitigation = issue["message"]
+            title = issue["description"]
+            file_path = issue["component"]
+            severity = self.convert_sonar_severity(issue["severity"])
+            rule_id = issue["rule"]
+            if title is None or mitigation is None:
+                raise ValueError(
+                    "Parser ValueError: can't find a title or a mitigation for vulnerability of name "
+                    + rule_id
+                )
+
+            try:
+                issue_detail = rules[rule_id]
+                issue_description = self.get_description(issue_detail)
+                issue_references = self.get_references(
+                    rule_id, issue_detail
+                )
+                issue_cwe = self.get_cwe(issue_references)
+            except KeyError:
+                issue_description = "No description provided"
+                issue_references = ""
+                issue_cwe = 0
+
+            if mode is None:
+                self.process_result_file_name_aggregated(
+                    test,
+                    dupes,
+                    title,
+                    issue_cwe,
+                    issue_description,
+                    file_path,
+                    line,
+                    severity,
+                    mitigation,
+                    issue_references,
+                )
+            else:
+                self.process_result_detailed(
+                    test,
+                    dupes,
+                    title,
+                    issue_cwe,
+                    issue_description,
+                    file_path,
+                    line,
+                    severity,
+                    mitigation,
+                    issue_references,
+                    key,
+                )
+        return list(dupes.values())
+
 
     def get_items(self, tree, test, mode):
         # Check that there is at least one vulnerability (the vulnerabilities

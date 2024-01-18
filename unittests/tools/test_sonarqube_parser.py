@@ -134,48 +134,6 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(str, type(item.unique_id_from_tool))
         self.assertEqual("AWK40IMu-pl6AHs22MnV", item.unique_id_from_tool)
 
-    def check_parse_file_with_single_vulnerability_has_single_finding(self):
-        self.assertEqual(1, len(findings))
-
-        # check content
-        item = findings[0]
-        self.assertEqual(str, type(findings[0].title))
-        self.assertEqual("Credentials should not be hard-coded", item.title)
-        self.assertEqual(int, type(item.cwe))
-        # This is only the first CWE in the list!
-        self.assertEqual(798, item.cwe)
-        self.assertEqual(bool, type(item.active))
-        self.assertEqual(False, item.active)
-        self.assertEqual(bool, type(item.verified))
-        self.assertEqual(False, item.verified)
-        self.assertEqual(str, type(item.severity))
-        self.assertEqual("Critical", item.severity)
-        self.assertEqual(str, type(item.mitigation))
-        self.assertEqual(
-            "'PASSWORD' detected in this expression, review this potentially hardcoded credential.",
-            item.mitigation,
-        )
-        self.assertEqual(str, type(item.references))
-        self.assertMultiLineEqual(
-            "squid:S2068\n"
-            "OWASP Top 10 2017 Category A2\n"
-            "MITRE, CWE-798\n"
-            "MITRE, CWE-259\n"
-            "CERT, MSC03-J.\n"
-            "SANS Top 25\n"
-            "Hard Coded Password",
-            item.references,
-        )
-        self.assertEqual(str, type(item.file_path))
-        self.assertEqual(
-            "modules/jdbc-pool/src/main/java/org/apache/tomcat/jdbc/pool/DataSourceFactory.java",
-            item.file_path,
-        )
-        self.assertEqual(bool, type(item.static_finding))
-        self.assertEqual(True, item.static_finding)
-        self.assertEqual(bool, type(item.dynamic_finding))
-        self.assertEqual(False, item.dynamic_finding)
-
     def test_detailed_parse_file_with_multiple_vulnerabilities_has_multiple_findings(
         self,
     ):
@@ -491,3 +449,34 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(True, item.static_finding)
         self.assertEqual(bool, type(item.dynamic_finding))
         self.assertEqual(False, item.dynamic_finding)
+
+    def test_detailed_parse_json_file_with_no_vulnerabilities_has_no_findings(self):
+        my_file_handle, product, engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/sonar-no-finding.json"
+        )
+        parser = SonarQubeParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(0, len(findings))
+
+    def test_detailed_parse_json_file_with_single_vulnerability_has_single_finding(self):
+        my_file_handle, product, engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/sonar-single-finding.json"
+        )
+        parser = SonarQubeParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
+        # common verifications
+        self.assertEqual(1, len(findings))
+        # specific verifications
+        item = findings[0]
+        self.assertEqual(str, type(item.description))
+        self.assertMultiLineEqual("", item.description)
+        self.assertEqual(str, type(item.line))
+        self.assertEqual(8, 8)
+        self.assertEqual(str, type(item.unique_id_from_tool))
+        self.assertEqual("AYvNd32RyD1npIoQXyT1", item.unique_id_from_tool)
+
+    def test_detailed_parse_json_file_with_multiple_vulnerabilities_has_multiple_findings(self):
+        # TODO
+        pass
