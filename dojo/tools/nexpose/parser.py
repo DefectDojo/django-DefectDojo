@@ -26,7 +26,7 @@ class NexposeParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Use the full XML export template from Nexpose."
 
-    def get_findings(self, xml_output, test):
+    def get_findings(self, xml_output, test, parser_custom_setting=None):
         tree = ElementTree.parse(xml_output)
         vuln_definitions = self.get_vuln_definitions(tree)
         return self.get_items(tree, vuln_definitions, test)

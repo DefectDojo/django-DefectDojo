@@ -31,7 +31,7 @@ class SSHAuditParser(object):
         else:
             return "Critical"
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         items = []
         try:
             data = json.load(filename)

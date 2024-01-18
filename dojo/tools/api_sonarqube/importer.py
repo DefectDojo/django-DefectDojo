@@ -20,7 +20,7 @@ class SonarQubeApiImporter(object):
      findings.
     """
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         items = self.import_issues(test)
         if settings.SONARQUBE_API_PARSER_HOTSPOTS:
             if items:

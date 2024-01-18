@@ -84,7 +84,7 @@ class ScoutSuiteParser(object):
         tests.append(test)
         return tests
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         content = filename.read()
         if isinstance(content, bytes):
             content = content.decode("utf-8")

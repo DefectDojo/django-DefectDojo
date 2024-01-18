@@ -65,7 +65,7 @@ class ThreagileParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Threagile Risks Report in JSON format (risks.json)."
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         if file is None:
             return None
 

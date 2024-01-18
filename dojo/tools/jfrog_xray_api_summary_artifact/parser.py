@@ -24,7 +24,7 @@ class JFrogXrayApiSummaryArtifactParser(object):
         return "Import Xray findings in JSON format from the JFrog Xray API Summary/Artifact JSON response"
 
     # This function return a list of findings
-    def get_findings(self, json_output, test):
+    def get_findings(self, json_output, test, parser_custom_setting=None):
         tree = json.load(json_output)
         return self.get_items(tree, test)
 

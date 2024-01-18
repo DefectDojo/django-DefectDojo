@@ -26,7 +26,7 @@ class AsffParser(object):
         return """AWS Security Finding Format (ASFF).
         https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-findings-format-syntax.html"""
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         data = json.load(file)
         result = list()
         for item in data:

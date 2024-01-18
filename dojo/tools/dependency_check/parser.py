@@ -354,7 +354,7 @@ class DependencyCheckParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "OWASP Dependency Check output can be imported in Xml format."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         dupes = dict()
         namespace = ""
         content = filename.read()

@@ -19,7 +19,7 @@ class BurpGraphQLParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import Burp Enterprise Edition findings from the GraphQL API"
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         data = json.load(filename)
 
         if "Issues" not in data:

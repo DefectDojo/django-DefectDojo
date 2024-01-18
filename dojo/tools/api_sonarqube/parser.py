@@ -29,5 +29,5 @@ class ApiSonarQubeParser(object):
             "can be used for the Organization ID if using SonarCloud."
         )
 
-    def get_findings(self, json_output, test):
+    def get_findings(self, json_output, test, parser_custom_setting=None):
         return SonarQubeApiImporter().get_findings(json_output, test)

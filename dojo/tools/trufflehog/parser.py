@@ -14,7 +14,7 @@ class TruffleHogParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "JSON Output of Trufflehog. Supports version 2 and 3 of https://github.com/trufflesecurity/trufflehog"
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         data = filename.read()
         dict_strs = data.splitlines()
         if len(dict_strs) == 0:

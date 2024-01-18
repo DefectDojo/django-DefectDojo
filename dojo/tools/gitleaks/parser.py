@@ -18,7 +18,7 @@ class GitleaksParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import Gitleaks Scan findings in JSON format."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         """
         Converts a Gitleaks report to DefectDojo findings
         """

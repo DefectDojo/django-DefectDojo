@@ -21,7 +21,7 @@ class TrustwaveFusionAPIParser(object):
             "Trustwave Fusion API report file can be imported in JSON format"
         )
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         tree = json.load(file)
         items = {}
 

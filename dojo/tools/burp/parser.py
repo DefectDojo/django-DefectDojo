@@ -28,7 +28,7 @@ class BurpParser(object):
             "response fields. These fields will be processed and made available in the 'Finding View' page."
         )
 
-    def get_findings(self, xml_output, test):
+    def get_findings(self, xml_output, test, parser_custom_setting=None):
         tree = etree.parse(xml_output, etree.XMLParser())
         return self.get_items(tree, test)
 

@@ -19,7 +19,7 @@ class GitlabAPIFuzzingParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "GitLab API Fuzzing Report report file can be imported in JSON format (option --json)."
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         findings = []
         data = json.load(file)
         vulnerabilities = data["vulnerabilities"]

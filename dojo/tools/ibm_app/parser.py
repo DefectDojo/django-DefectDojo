@@ -18,7 +18,7 @@ class IbmAppParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "XML file from IBM App Scanner."
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         ibm_scan_tree = ElementTree.parse(file)
         root = ibm_scan_tree.getroot()
 

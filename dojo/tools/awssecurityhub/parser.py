@@ -14,7 +14,7 @@ class AwsSecurityHubParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "AWS Security Hub exports in JSON format."
 
-    def get_findings(self, filehandle, test):
+    def get_findings(self, filehandle, test, parser_custom_setting=None):
         tree = json.load(filehandle)
         if not isinstance(tree, dict):
             raise ValueError("Incorrect Security Hub report format")

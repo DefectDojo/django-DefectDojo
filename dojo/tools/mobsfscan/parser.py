@@ -24,7 +24,7 @@ class MobsfscanParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import JSON report for mobsfscan report file."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         data = json.load(filename)
         if len(data.get("results")) == 0:
             return []

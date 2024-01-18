@@ -16,7 +16,7 @@ class BundlerAuditParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "'bundler-audit check' output (in plain text)"
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         lines = filename.read()
         if isinstance(lines, bytes):
             lines = lines.decode("utf-8")  # passes in unittests, but would fail in production

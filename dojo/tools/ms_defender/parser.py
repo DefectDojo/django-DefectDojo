@@ -19,7 +19,7 @@ class MSDefenderParser(object):
     def get_description_for_scan_types(self, scan_type):
         return ("MSDefender findings can be retrieved using the REST API")
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         if str(file.name).endswith('.json'):
             vulnerabilityfile = json.load(file)
             vulnerabilitydata = vulnerabilityfile['value']

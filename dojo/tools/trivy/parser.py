@@ -70,7 +70,7 @@ class TrivyParser:
             else:
                 return "Critical"
 
-    def get_findings(self, scan_file, test):
+    def get_findings(self, scan_file, test, parser_custom_setting=None):
         scan_data = scan_file.read()
 
         try:

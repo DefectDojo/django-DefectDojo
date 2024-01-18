@@ -28,7 +28,7 @@ class SarifParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "SARIF report file can be imported in SARIF format."
 
-    def get_findings(self, filehandle, test):
+    def get_findings(self, filehandle, test, parser_custom_setting=None):
         """For simple interface of parser contract we just aggregate everything"""
         tree = json.load(filehandle)
         items = list()

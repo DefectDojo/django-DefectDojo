@@ -38,7 +38,7 @@ class DrHeaderParser(object):
             find.unsaved_endpoints = [Endpoint.from_uri(url)]
         return find
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         items = []
         try:
             data = json.load(filename)

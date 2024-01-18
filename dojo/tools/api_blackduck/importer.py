@@ -11,7 +11,7 @@ class BlackduckApiImporter(object):
 
     config_id = "BlackDuck API"
 
-    def get_findings(self, test):
+    def get_findings(self, test, parser_custom_setting=None):
         client, config = self.prepare_client(test)
         project = client.get_project_by_name(config.service_key_1)
         version = client.get_version_by_name(project, config.service_key_2)

@@ -37,7 +37,7 @@ class GovulncheckParser:
     def get_version(data, node):
         return data["Requires"]["Modules"][str(node)]["Version"]
 
-    def get_findings(self, scan_file, test):
+    def get_findings(self, scan_file, test, parser_custom_setting=None):
         findings = []
         try:
             data = json.load(scan_file)

@@ -16,7 +16,7 @@ class PipAuditParser:
     def requires_file(self, scan_type):
         return True
 
-    def get_findings(self, scan_file, test):
+    def get_findings(self, scan_file, test, parser_custom_setting=None):
         data = json.load(scan_file)
 
         findings = list()

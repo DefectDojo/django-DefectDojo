@@ -183,7 +183,7 @@ class IntSightsParser(object):
         )
         return description
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         duplicates = dict()
 
         if file.name.lower().endswith(".json"):

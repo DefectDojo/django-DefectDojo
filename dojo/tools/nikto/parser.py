@@ -33,7 +33,7 @@ class NiktoParser(object):
             'XML output (old and new nxvmlversion="1.2" type) or JSON output'
         )
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         if filename.name.lower().endswith(".xml"):
             return self.process_xml(filename, test)
         elif filename.name.lower().endswith(".json"):

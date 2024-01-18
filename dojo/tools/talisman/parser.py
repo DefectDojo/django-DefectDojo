@@ -27,7 +27,7 @@ class TalismanParser(object):
         """
         return "Import Talisman Scan findings in JSON format."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         """
         Converts a Talisman JSON report to DefectDojo findings
         """

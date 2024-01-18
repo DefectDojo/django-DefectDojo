@@ -16,7 +16,7 @@ class SpotbugsParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "XML report of textui cli."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         mitigation_patterns = dict()
         reference_patterns = dict()
         dupes = dict()

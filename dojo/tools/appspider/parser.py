@@ -16,7 +16,7 @@ class AppSpiderParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "AppSpider (Rapid7) - Use the VulnerabilitiesSummary.xml file found in the zipped report download."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         if filename is None:
             return
 

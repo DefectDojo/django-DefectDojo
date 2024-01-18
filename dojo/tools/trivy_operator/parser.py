@@ -37,7 +37,7 @@ class TrivyOperatorParser:
     def get_description_for_scan_types(self, scan_type):
         return "Import trivy-operator JSON scan report."
 
-    def get_findings(self, scan_file, test):
+    def get_findings(self, scan_file, test, parser_custom_setting=None):
         scan_data = scan_file.read()
 
         try:

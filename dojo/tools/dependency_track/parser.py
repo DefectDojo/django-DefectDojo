@@ -247,7 +247,7 @@ class DependencyTrackParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "The Finding Packaging Format (FPF) from OWASP Dependency Track can be imported in JSON format. See here for more info on this JSON format."
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
 
         # Exit if file is not provided
         if file is None:

@@ -23,7 +23,7 @@ class AnchoreGrypeParser(object):
             "format"
         )
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         data = json.load(file)
         dupes = dict()
         for item in data.get("matches", []):

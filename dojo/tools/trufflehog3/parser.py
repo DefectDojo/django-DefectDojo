@@ -14,7 +14,7 @@ class TruffleHog3Parser(object):
     def get_description_for_scan_types(self, scan_type):
         return "JSON Output of Trufflehog3, a fork of TruffleHog located at https://github.com/feeltheajf/truffleHog3"
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         data = json.load(filename)
 
         dupes = dict()

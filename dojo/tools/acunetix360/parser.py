@@ -16,7 +16,7 @@ class Acunetix360Parser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Acunetix360 JSON format."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         data = json.load(filename)
         dupes = dict()
         scan_date = parser.parse(data["Generated"])

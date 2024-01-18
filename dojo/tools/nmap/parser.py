@@ -15,7 +15,7 @@ class NmapParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "XML output (use -oX)"
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         tree = parse(file)
         root = tree.getroot()
         dupes = dict()

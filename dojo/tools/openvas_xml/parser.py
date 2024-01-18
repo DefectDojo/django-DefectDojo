@@ -26,7 +26,7 @@ class OpenVASXMLParser(object):
         else:
             return "Critical"
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         findings = []
         tree = ET.parse(file)
         root = tree.getroot()

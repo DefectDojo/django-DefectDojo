@@ -145,7 +145,7 @@ class NeuVectorComplianceParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Imports compliance scans returned by REST API."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         if filename is None:
             return list()
 

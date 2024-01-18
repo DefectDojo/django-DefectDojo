@@ -33,7 +33,7 @@ class RubocopParser:
     def requires_file(self, scan_type):
         return True
 
-    def get_findings(self, scan_file, test):
+    def get_findings(self, scan_file, test, parser_custom_setting=None):
         """Load a file as JSON file and create findings"""
         data = json.load(scan_file)
         findings = list()

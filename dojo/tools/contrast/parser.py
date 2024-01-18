@@ -19,7 +19,7 @@ class ContrastParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "CSV Report"
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         content = filename.read()
         if isinstance(content, bytes):
             content = content.decode("utf-8")

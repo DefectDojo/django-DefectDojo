@@ -17,7 +17,7 @@ class SolarAppscreenerParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Solar Appscreener report file can be imported in CSV format from Detailed_Results.csv."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         if filename is None:
             return ()
 

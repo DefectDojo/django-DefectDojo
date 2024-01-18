@@ -11,7 +11,7 @@ class BugcrowdApiImporter(object):
     Import from Bugcrowd API
     """
 
-    def get_findings(self, test):
+    def get_findings(self, test, parser_custom_setting=None):
         client, config = self.prepare_client(test)
         logger.debug(
             "Fetching submissions program {} and target {}".format(

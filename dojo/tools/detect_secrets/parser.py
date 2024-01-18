@@ -18,7 +18,7 @@ class DetectSecretsParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import JSON output for detect-secrets scan report."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         data = json.load(filename)
         dupes = {}
         if data.get("generated_at"):

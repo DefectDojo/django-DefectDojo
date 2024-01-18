@@ -16,7 +16,7 @@ class SslLabsParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "JSON Output of ssllabs-scan cli."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         tree = filename.read()
         try:
             data = json.loads(str(tree, "utf-8"))

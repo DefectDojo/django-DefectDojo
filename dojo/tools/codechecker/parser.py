@@ -16,7 +16,7 @@ class CodeCheckerParser(object):
     def get_requires_file(self, scan_type):
         return True
 
-    def get_findings(self, json_output, test):
+    def get_findings(self, json_output, test, parser_custom_setting=None):
         if json_output is None:
             return
 

@@ -18,7 +18,7 @@ class BlackduckComponentRiskParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Upload the zip file containing the security.csv and files.csv."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         """
         Function initializes the parser with a file and returns the items.
         :param filename: Input in Defect Dojo

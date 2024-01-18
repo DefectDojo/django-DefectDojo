@@ -34,7 +34,7 @@ class HydraParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Hydra Scan can be imported in JSON format."
 
-    def get_findings(self, json_output, test):
+    def get_findings(self, json_output, test, parser_custom_setting=None):
         report = self.__parse_json(json_output)
 
         metadata = HydraScanMetadata(report["generator"])

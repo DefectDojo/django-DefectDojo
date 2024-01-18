@@ -18,7 +18,7 @@ class MobSFParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Export a JSON file using the API, api/v1/report_json."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         tree = filename.read()
         try:
             data = json.loads(str(tree, 'utf-8'))

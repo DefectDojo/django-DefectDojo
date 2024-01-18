@@ -22,7 +22,7 @@ class CloudsploitParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Cloudsploit report file can be imported in JSON format (option --json)."
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         data = json.load(file)
         find_date = datetime.now()
         dupes = dict()

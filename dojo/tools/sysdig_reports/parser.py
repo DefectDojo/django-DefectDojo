@@ -19,7 +19,7 @@ class SysdigReportsParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import of Sysdig Pipeline, Registry and Runtime Vulnerability Report Scans in CSV format."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
 
         if filename is None:
             return ()

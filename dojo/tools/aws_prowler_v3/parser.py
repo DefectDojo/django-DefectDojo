@@ -19,7 +19,7 @@ class AWSProwlerV3Parser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Export of AWS Prowler JSON V3 format."
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         if file.name.lower().endswith('.json'):
             return self.process_json(file, test)
         else:

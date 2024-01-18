@@ -23,7 +23,7 @@ class AcunetixParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "XML format"
 
-    def get_findings(self, xml_output, test):
+    def get_findings(self, xml_output, test, parser_custom_setting=None):
         root = parse(xml_output).getroot()
 
         dupes = dict()

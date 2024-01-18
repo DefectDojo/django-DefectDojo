@@ -215,7 +215,7 @@ class TwistlockParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "JSON output of twistcli image scan or CSV."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         if filename is None:
             return list()
 

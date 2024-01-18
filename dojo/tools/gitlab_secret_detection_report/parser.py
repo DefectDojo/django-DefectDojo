@@ -18,7 +18,7 @@ class GitlabSecretDetectionReportParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "GitLab Secret Detection Report file can be imported in JSON format (option --json)."
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         # Load JSON data from uploaded file
         data = json.load(file)
 

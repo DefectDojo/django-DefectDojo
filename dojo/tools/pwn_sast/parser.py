@@ -18,7 +18,7 @@ class PWNSASTParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import pwn_sast Driver findings in JSON format."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         results = json.load(filename)
 
         if results is not None:

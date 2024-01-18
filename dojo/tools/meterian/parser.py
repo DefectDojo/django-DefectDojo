@@ -14,7 +14,7 @@ class MeterianParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Meterian JSON report output file can be imported."
 
-    def get_findings(self, report, test):
+    def get_findings(self, report, test, parser_custom_setting=None):
         findings = []
 
         report_json = json.load(report)

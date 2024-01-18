@@ -15,7 +15,7 @@ class GitlabSastParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import GitLab SAST Report vulnerabilities in JSON format."
 
-    def get_findings(self, json_output, test):
+    def get_findings(self, json_output, test, parser_custom_setting=None):
 
         if json_output is None:
             return

@@ -14,7 +14,7 @@ class VeracodeParser(object):
             "Reports can be imported as JSON or XML report formats."
         )
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         if filename.name.lower().endswith(".xml"):
             return VeracodeXMLParser().get_findings(filename, test)
         elif filename.name.lower().endswith(".json"):

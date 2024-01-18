@@ -35,7 +35,7 @@ class KiuwanParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import Kiuwan Scan in CSV format. Export as CSV Results on Kiuwan."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         content = filename.read()
         if isinstance(content, bytes):
             content = content.decode("utf-8")

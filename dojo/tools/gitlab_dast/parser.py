@@ -18,7 +18,7 @@ class GitlabDastParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "GitLab DAST Report in JSON format (option --json)."
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         if file is None:
             return None
 

@@ -14,7 +14,7 @@ class HumbleParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "JSON output of Humble scan."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         items = []
         try:
             data = json.load(filename)

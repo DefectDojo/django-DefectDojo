@@ -69,7 +69,7 @@ REFERENCES = "TLS recommendations of German BSI: " + BSI_LINK
 
 
 class SSLyzeJSONParser(object):
-    def get_findings(self, json_output, test):
+    def get_findings(self, json_output, test, parser_custom_setting=None):
         if json_output is None:
             return
 

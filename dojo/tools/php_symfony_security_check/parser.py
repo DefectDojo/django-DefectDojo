@@ -13,7 +13,7 @@ class PhpSymfonySecurityCheckParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import results from the PHP Symfony Security Checker by Sensioslabs."
 
-    def get_findings(self, json_file, test):
+    def get_findings(self, json_file, test, parser_custom_setting=None):
         tree = self.parse_json(json_file)
         return self.get_items(tree, test)
 

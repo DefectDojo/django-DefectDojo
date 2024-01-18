@@ -24,7 +24,7 @@ class WhiteHatSentinelParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "WhiteHat Sentinel output from api/vuln/query_site can be imported in JSON format."
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         findings_collection = json.load(file)
 
         if not findings_collection.keys():

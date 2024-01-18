@@ -50,7 +50,7 @@ class VeracodeJSONParser(object):
         4: ("High", "High-risk licenses are typically strong copyleft licenses that require you to preserve the copyright and license notices, and require distributors to make the source code of the component and any modifications under the same terms."),
     }
 
-    def get_findings(self, json_output, test):
+    def get_findings(self, json_output, test, parser_custom_setting=None):
         findings = []
         if json_output:
             json_data = json.load(json_output)

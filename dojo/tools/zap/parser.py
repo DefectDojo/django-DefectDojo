@@ -25,7 +25,7 @@ class ZapParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "ZAP XML report format."
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         tree = ET.parse(file)
         items = list()
         for node in tree.findall("site"):

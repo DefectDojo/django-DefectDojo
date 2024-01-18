@@ -22,7 +22,7 @@ class CredScanParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import CSV output of CredScan scan report."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         content = filename.read()
         if isinstance(content, bytes):
             content = content.decode("utf-8-sig")

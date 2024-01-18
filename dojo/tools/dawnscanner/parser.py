@@ -17,7 +17,7 @@ class DawnScannerParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Dawnscanner (-j) output file can be imported in JSON format."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         data = json.load(filename)
 
         find_date = parser.parse(data["scan_started"])

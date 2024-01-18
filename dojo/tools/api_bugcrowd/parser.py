@@ -46,7 +46,7 @@ class ApiBugcrowdParser(object):
             "if not supplied, will fetch all submissions in the program"
         )
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         api_scan_config = None
         if file is None:
             data, api_scan_config = BugcrowdApiImporter().get_findings(test)

@@ -14,7 +14,7 @@ class YarnAuditParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Yarn Audit Scan output file can be imported in JSON format."
 
-    def get_findings(self, json_output, test):
+    def get_findings(self, json_output, test, parser_custom_setting=None):
         if json_output is None:
             return list()
         tree = (json.loads(line) for line in json_output)

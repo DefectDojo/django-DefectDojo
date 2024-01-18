@@ -50,7 +50,7 @@ PROTOCOLS = ["sslv2", "sslv3", "tlsv1", "tlsv1_1", "tlsv1_2", "tlsv1_3"]
 
 
 class SSLyzeXMLParser(object):
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         tree = ET.parse(file)
         # get root of tree.
         root = tree.getroot()

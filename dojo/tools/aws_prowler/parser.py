@@ -20,7 +20,7 @@ class AWSProwlerParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Export of AWS Prowler in CSV or JSON format."
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         if file.name.lower().endswith(".csv"):
             return self.process_csv(file, test)
         elif file.name.lower().endswith(".json"):

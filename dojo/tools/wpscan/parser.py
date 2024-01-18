@@ -83,7 +83,7 @@ class WpscanParser(object):
             else:
                 dupes[dupe_key] = finding
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         tree = json.load(file)
 
         report_date = None

@@ -13,7 +13,7 @@ class KubeBenchParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import JSON reports of Kubernetes CIS benchmark scans."
 
-    def get_findings(self, json_output, test):
+    def get_findings(self, json_output, test, parser_custom_setting=None):
         tree = json.load(json_output)
         if "Controls" in tree:
             return self.get_chapters(tree["Controls"], test)

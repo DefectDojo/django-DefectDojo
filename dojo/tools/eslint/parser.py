@@ -21,7 +21,7 @@ class ESLintParser(object):
         else:
             return "Info"
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         tree = filename.read()
         try:
             data = json.loads(str(tree, "utf-8"))

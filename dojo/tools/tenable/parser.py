@@ -14,7 +14,7 @@ class TenableParser(object):
             "Reports can be imported as CSV or .nessus (XML) report formats."
         )
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         if filename.name.lower().endswith(
             ".xml"
         ) or filename.name.lower().endswith(".nessus"):

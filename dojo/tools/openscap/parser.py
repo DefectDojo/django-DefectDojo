@@ -18,7 +18,7 @@ class OpenscapParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import Openscap Vulnerability Scan in XML formats."
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         tree = parse(file)
         # get root of tree.
         root = tree.getroot()

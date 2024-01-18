@@ -11,7 +11,7 @@ class VulnersImporter(object):
     Import from Vulners API
     """
 
-    def get_findings(self, test):
+    def get_findings(self, test, parser_custom_setting=None):
         client, config = self.prepare_client(test)
         findings = client.get_findings()
         return findings

@@ -17,7 +17,7 @@ class ImmuniwebParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "XML Scan Result File from Imuniweb Scan."
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         ImmuniScanTree = ElementTree.parse(file)
         root = ImmuniScanTree.getroot()
         # validate XML file

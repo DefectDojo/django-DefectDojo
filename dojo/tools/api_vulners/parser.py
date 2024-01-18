@@ -38,7 +38,7 @@ class ApiVulnersParser(object):
     def requires_file(self, scan_type):
         return False
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         findings = []
 
         if file:

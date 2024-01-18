@@ -359,7 +359,7 @@ class CycloneDXParser(object):
         m = re.match(r"\{.*\}", element.tag)
         return m.group(0) if m else ""
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         if file.name.strip().lower().endswith(".json"):
             return self._get_findings_json(file, test)
         else:

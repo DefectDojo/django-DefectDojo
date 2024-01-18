@@ -25,7 +25,7 @@ class VeracodeXMLParser(object):
         5: "Critical",
     }
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         root = ElementTree.parse(filename).getroot()
 
         app_id = root.attrib["app_id"]

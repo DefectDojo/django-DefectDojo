@@ -13,7 +13,7 @@ class AnchoreCTLVulnsParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "AnchoreCTLs JSON vulnerability report format."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         data = json.load(filename)
         dupes = dict()
         for item in data:

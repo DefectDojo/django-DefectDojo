@@ -20,7 +20,7 @@ class BlackduckBinaryAnalysisParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Blackduck Binary Analysis CSV file containing vulnerable binaries."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         sorted_findings = self.sort_findings(filename)
         return self.ingest_findings(sorted_findings, test)
 

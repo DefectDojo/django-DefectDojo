@@ -13,7 +13,7 @@ class RustyhogParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Rusty Hog Scan - JSON Report"
 
-    def get_findings(self, json_output, test):
+    def get_findings(self, json_output, test, parser_custom_setting=None):
         tree = json.load(json_output)
         return self.get_items(tree, test)
 

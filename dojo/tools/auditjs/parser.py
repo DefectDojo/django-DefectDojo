@@ -32,7 +32,7 @@ class AuditJSParser(object):
         else:
             return "Informational"
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         try:
             data = json.load(filename)
         except JSONDecodeError:

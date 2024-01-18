@@ -19,7 +19,7 @@ class CheckmarxOsaParser(object):
             "CxOSAVulnerabilities.json CxOSALibraries.json`"
         )
 
-    def get_findings(self, filehandle, test):
+    def get_findings(self, filehandle, test, parser_custom_setting=None):
         tree = json.load(filehandle)
         if len(tree) != 2:
             logger.error(

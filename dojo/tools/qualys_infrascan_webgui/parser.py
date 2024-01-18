@@ -136,7 +136,7 @@ class QualysInfrascanWebguiParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Qualys WebGUI output files can be imported in XML format."
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         data = ElementTree.parse(file).getroot()
 
         # fetch scan date e.g.: <KEY value="DATE">2020-01-30T09:45:41Z</KEY>

@@ -18,7 +18,7 @@ class NpmAuditParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "NPM Audit Scan json output up to v6 can be imported in JSON format."
 
-    def get_findings(self, json_output, test):
+    def get_findings(self, json_output, test, parser_custom_setting=None):
         tree = self.parse_json(json_output)
         return self.get_items(tree, test)
 

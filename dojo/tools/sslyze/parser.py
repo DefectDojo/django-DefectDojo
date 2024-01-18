@@ -16,7 +16,7 @@ class SslyzeParser(object):
             return "Import JSON report of SSLyze version 3 and higher."
         return "Import XML report of SSLyze version 2 scan."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, parser_custom_setting=None):
         if filename is None:
             return list()
 

@@ -11,7 +11,7 @@ class CobaltApiImporter(object):
     Import from Cobalt.io API
     """
 
-    def get_findings(self, test):
+    def get_findings(self, test, parser_custom_setting=None):
         client, config = self.prepare_client(test)
         findings = client.get_findings(config.service_key_1)
         return findings

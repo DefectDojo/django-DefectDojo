@@ -21,7 +21,7 @@ class H1Parser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import HackerOne cases findings in JSON format."
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         """
         Converts a HackerOne reports to a DefectDojo finding
         """

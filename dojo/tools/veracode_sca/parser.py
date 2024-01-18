@@ -29,7 +29,7 @@ class VeracodeScaParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Veracode SourceClear CSV or JSON report format"
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         if file is None:
             return ()
 

@@ -37,7 +37,7 @@ class ApiCobaltParser(object):
             "be populated with the asset name while saving the configuration."
         )
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         if file is None:
             data = CobaltApiImporter().get_findings(test)
         else:

@@ -36,7 +36,7 @@ class ApiBlackduckParser(object):
             "<b>Service key 2</b> has to be set to the version of the project"
         )
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         if file is None:
             data = BlackduckApiImporter().get_findings(test)
         else:

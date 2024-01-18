@@ -18,7 +18,7 @@ class AzureSecurityCenterRecommendationsParser(object):
             "CSV format."
         )
 
-    def get_findings(self, file, test):
+    def get_findings(self, file, test, parser_custom_setting=None):
         if file.name.lower().endswith(".csv"):
             return self.process_csv(file, test)
         else:
