@@ -5,7 +5,7 @@ from cvss import CVSS3
 from defusedxml import ElementTree
 from hyperlink._url import SCHEME_PORT_MAP
 
-from dojo.models import Endpoint, Finding, Test
+from dojo.models import Endpoint, Finding
 
 LOGGER = logging.getLogger(__name__)
 
