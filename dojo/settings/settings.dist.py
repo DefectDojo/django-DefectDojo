@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 root = environ.Path(__file__) - 3  # Three folders back
 
 # reference: https://pypi.org/project/django-environ/
-env = environ.Env(
+env = environ.FileAwareEnv(
     # Set casting and default values
     DD_SITE_URL=(str, 'http://localhost:8080'),
     DD_DEBUG=(bool, False),
@@ -223,7 +223,8 @@ env = environ.Env(
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
     # new feature that tracks history across multiple reimports for the same test
     DD_TRACK_IMPORT_HISTORY=(bool, True),
-
+    # Delete Auditlogs older than x month; -1 to keep all logs
+    DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, -1),
     # Allow grouping of findings in the same test, for example to group findings per dependency
     # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
     DD_FEATURE_FINDING_GROUPS=(bool, True),
@@ -1131,6 +1132,10 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': timedelta(minutes=1),
         'args': [timedelta(minutes=1)]
     },
+    'flush_auditlog': {
+        'task': 'dojo.tasks.flush_auditlog',
+        'schedule': timedelta(hours=8),
+    },
     'update-findings-from-source-issues': {
         'task': 'dojo.tools.tool_issue_updater.update_findings_from_source_issues',
         'schedule': timedelta(hours=3),
@@ -1225,7 +1230,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Acunetix360 Scan': ['title', 'description'],
     'Terrascan Scan': ['vuln_id_from_tool', 'title', 'severity', 'file_path', 'line', 'component_name'],
     'Trivy Operator Scan': ['title', 'severity', 'vulnerability_ids'],
-    'Trivy Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
+    'Trivy Scan': ['title', 'severity', 'vulnerability_ids', 'cwe', 'description'],
     'TFSec Scan': ['severity', 'vuln_id_from_tool', 'file_path', 'line'],
     'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
     'GitLab Dependency Scanning Report': ['title', 'vulnerability_ids', 'file_path', 'component_name', 'component_version'],
@@ -1699,4 +1704,8 @@ ADDITIONAL_HEADERS = env('DD_ADDITIONAL_HEADERS')
 # Dictates whether cloud banner is created or not
 CREATE_CLOUD_BANNER = env('DD_CREATE_CLOUD_BANNER')
 
+# ------------------------------------------------------------------------------
+# Auditlog
+# ------------------------------------------------------------------------------
+AUDITLOG_FLUSH_RETENTION_PERIOD = env('DD_AUDITLOG_FLUSH_RETENTION_PERIOD')
 ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
