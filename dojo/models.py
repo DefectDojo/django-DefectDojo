@@ -857,9 +857,7 @@ class DojoMeta(models.Model):
 
 class SLA_Configuration(models.Model):
     name = models.CharField(max_length=128, unique=True, blank=False, verbose_name=_('Custom SLA Name'),
-        help_text=_('A unique name for the set of SLAs.')
-    )
-
+        help_text=_('A unique name for the set of SLAs.'))
     description = models.CharField(max_length=512, null=True, blank=True)
     critical = models.IntegerField(default=7, verbose_name=_('Critical Finding SLA Days'),
                                           help_text=_('number of days to remediate a critical finding.'))
@@ -880,12 +878,11 @@ class SLA_Configuration(models.Model):
                 raise ValidationError('SLA Days must be at least 1')
 
     def save(self, *args, **kwargs):
-        # get the sla config before product is saved (if it exists)
+        # get the initial sla config before saving (if this is an existing sla config)
         initial_sla_config = None
         if self.pk is not None:
             initial_sla_config = SLA_Configuration.objects.get(pk=self.pk)
-
-            # if initial config exists and findings are being currently updated, revert sla config before saving
+            # if initial config exists and async finding update is already running, revert sla config before saving
             if initial_sla_config and self.async_updating:
                 self.critical = initial_sla_config.critical
                 self.high = initial_sla_config.high
@@ -894,7 +891,7 @@ class SLA_Configuration(models.Model):
 
         super(SLA_Configuration, self).save(*args, **kwargs)
 
-        # if findings are not already being updated
+        # if the initial sla config exists and async finding update is not running
         if initial_sla_config is not None and not self.async_updating:
             # check which sla days fields changed based on severity
             severities = []
@@ -906,7 +903,7 @@ class SLA_Configuration(models.Model):
                 severities.append('Medium')
             if initial_sla_config.low != self.low:
                 severities.append('Low')
-            # if severities have changed, update finding sla expiration dates
+            # if severities have changed, update finding sla expiration dates with those severities
             if len(severities):
                 from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async
                 update_sla_expiration_dates_sla_config_async(self, tuple(severities))
@@ -1036,22 +1033,22 @@ class Product(models.Model):
                                             help_text=_('Findings under this SLA configuration are asynchronously being updated'))
 
     def save(self, *args, **kwargs):
-        # get the product's sla config before the product is saved (if product already exists)
+        # get the product's sla config before saving (if this is an existing product)
         initial_sla_config = None
         if self.pk is not None:
             initial_sla_config = getattr(Product.objects.get(pk=self.pk), 'sla_configuration', None)
-
-            # if initial product exists and findings are being updated, revert sla config change before saving
+            # if initial sla config exists and async finding update is already running, revert sla config before saving
             if initial_sla_config and self.async_updating:
                 self.sla_configuration = initial_sla_config
 
         super(Product, self).save(*args, **kwargs)
 
-        # if initial sla config and findings are not already being updated
+        # if the initial sla config exists and async finding update is not running
         if initial_sla_config is not None and not self.async_updating:
+            # get the new sla config from the saved product
             new_sla_config = getattr(self, 'sla_configuration', None)
-            # if there is a new sla config and the sla config has changed, update all finding sla_expiration dates
-            if new_sla_config and initial_sla_config != new_sla_config:
+            # if the sla config has changed, update finding sla expiration dates within this product
+            if new_sla_config and (initial_sla_config != new_sla_config):
                 from dojo.product.helpers import update_sla_expiration_dates_product_async
                 update_sla_expiration_dates_product_async(self)
 

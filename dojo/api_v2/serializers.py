@@ -2014,9 +2014,8 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
             old_sla_config = getattr(self.instance, 'sla_configuration', None)
             if new_sla_config and old_sla_config and new_sla_config != old_sla_config:
                 raise serializers.ValidationError(
-                    'The SLA Configuration for this product cannot be changed while findings are still being processed.'
+                    'Finding SLA expiration dates are currently being calculated. This field cannot be changed until the calculation is complete.'
                 )
-
         return data
 
     def get_findings_count(self, obj) -> int:
@@ -3054,11 +3053,10 @@ class SLAConfigurationSerializer(serializers.ModelSerializer):
             for field in ['critical', 'high', 'medium', 'low']:
                 old_days = getattr(self.instance, field, None)
                 new_days = data.get(field, None)
-                if old_days and new_days and old_days != new_days:
-                    msg = "Finding SLA expiration dates are currently being calculated from the last time this SLA configuration was saved. " + \
-                          f"The {field.capitalize()} Finding SLA Days field cannot be changed until the calculation is complete."
-                    raise serializers.ValidationError(msg)
-
+                if old_days and new_days and (old_days != new_days):
+                    raise serializers.ValidationError(
+                        'Finding SLA expiration dates are currently being calculated. This field cannot be changed until the calculation is complete.'
+                    )
         return data
 
 
