@@ -2544,7 +2544,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     do_not_reactivate=do_not_reactivate,
                     create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
                     apply_tags_to_findings=apply_tags_to_findings,
-                    parser_custom_setting = parser_custom_setting,
+                    parser_custom_setting=parser_custom_setting,
                 )
 
                 if test_import:
