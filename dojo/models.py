@@ -880,11 +880,13 @@ class SLA_Configuration(models.Model):
                 raise ValidationError('SLA Days must be at least 1')
 
     def save(self, *args, **kwargs):
-        # get the sla config before product is saved
+        # get the sla config before product is saved (if it exists)
+        initial_sla_config = None
         if self.pk is not None:
             initial_sla_config = SLA_Configuration.objects.get(pk=self.pk)
-            # if findings are being updated, revert sla config before saving
-            if self.async_updating:
+
+            # if initial config exists and findings are being currently updated, revert sla config before saving
+            if initial_sla_config and self.async_updating:
                 self.critical = initial_sla_config.critical
                 self.high = initial_sla_config.high
                 self.medium = initial_sla_config.medium
@@ -893,7 +895,7 @@ class SLA_Configuration(models.Model):
         super(SLA_Configuration, self).save(*args, **kwargs)
 
         # if findings are not already being updated
-        if not self.async_updating:
+        if initial_sla_config is not None and not self.async_updating:
             # check which sla days fields changed based on severity
             severities = []
             if initial_sla_config.critical != self.critical:
@@ -1034,17 +1036,19 @@ class Product(models.Model):
                                             help_text=_('Findings under this SLA configuration are asynchronously being updated'))
 
     def save(self, *args, **kwargs):
-        # get the sla config before product is saved
+        # get the product's sla config before the product is saved (if product already exists)
+        initial_sla_config = None
         if self.pk is not None:
             initial_sla_config = getattr(Product.objects.get(pk=self.pk), 'sla_configuration', None)
-            # if findings are being updated, revert sla config change before saving
-            if self.async_updating:
+
+            # if initial product exists and findings are being updated, revert sla config change before saving
+            if initial_sla_config and self.async_updating:
                 self.sla_configuration = initial_sla_config
 
         super(Product, self).save(*args, **kwargs)
 
-        # if findings are not already being updated
-        if not self.async_updating:
+        # if initial sla config and findings are not already being updated
+        if initial_sla_config is not None and not self.async_updating:
             new_sla_config = getattr(self, 'sla_configuration', None)
             # if there is a new sla config and the sla config has changed, update all finding sla_expiration dates
             if new_sla_config and initial_sla_config != new_sla_config:
