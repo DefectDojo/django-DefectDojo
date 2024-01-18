@@ -47,35 +47,35 @@ class HCLAppScanParser(object):
                         case 'advisory':
                             advisory = self.xmltreehelper(item)
                         case 'issue-type':
-                            title = self.xmltreehelper(item)
+                            title = self.xmltreehelper(item).strip()
                             description = description + "Issue-Type:" + title + "\n"
                         case 'issue-type-name':
-                            title = self.xmltreehelper(item)
+                            title = self.xmltreehelper(item).strip()
                             description = description + "Issue-Type-Name:" + title + "\n"
                         case 'location':
                             location = self.xmltreehelper(item)
                             description = description + "Location:" + location + "\n"
                         case 'domain':
                             domain = self.xmltreehelper(item)
-                            title += "_" + domain
+                            title += "_" + domain.strip()
                             description = description + "Domain:" + domain + "\n"
                         case 'threat-class':
                             threatclass = self.xmltreehelper(item)
                             description = description + "Threat-Class:" + threatclass + "\n"
                         case 'entity':
                             entity = self.xmltreehelper(item)
-                            title += "_" + entity
+                            title += "_" + entity.strip()
                             description = description + "Entity:" + entity + "\n"
                         case 'security-risks':
                             security_risks = self.xmltreehelper(item)
                             description = description + "Security-Risks:" + security_risks + "\n"
                         case 'cause-id':
                             causeid = self.xmltreehelper(item)
-                            title += "_" + causeid
+                            title += "_" + causeid.strip()
                             description = description + "Cause-Id:" + causeid + "\n"
                         case 'url-name':
                             urlname = self.xmltreehelper(item)
-                            title += "_" + urlname
+                            title += "_" + urlname.strip()
                             description = description + "Url-Name:" + urlname + "\n"
                         case 'element':
                             element = self.xmltreehelper(item)
@@ -85,7 +85,7 @@ class HCLAppScanParser(object):
                             description = description + "ElementType:" + elementtype + "\n"
                         case 'path':
                             path = self.xmltreehelper(item)
-                            title += "_" + path
+                            title += "_" + path.strip()
                             description = description + "Path:" + path + "\n"
                         case 'scheme':
                             scheme = self.xmltreehelper(item)
