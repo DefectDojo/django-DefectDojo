@@ -5,7 +5,7 @@ from cvss import CVSS3
 from defusedxml import ElementTree
 from hyperlink._url import SCHEME_PORT_MAP
 
-from dojo.models import Endpoint, Finding
+from dojo.models import Endpoint, Finding, Test
 
 LOGGER = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ class TenableXMLParser(object):
                 return element_text or None
         return None
 
-    def get_findings(self, filename: str, test, parser_custom_setting=None):
+    def get_findings(self, filename: str, test: Test, parser_custom_setting=None):
         # Read the XML
         nscan = ElementTree.parse(filename)
         root = nscan.getroot()
