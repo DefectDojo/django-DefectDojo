@@ -11,3 +11,5 @@ Import findings from Horusec scan.
 References:
  * [GitHub repository](https://github.com/ZupIT/horusec)
  
+### Sample Scan Data
+Sample Horusec scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/horusec).

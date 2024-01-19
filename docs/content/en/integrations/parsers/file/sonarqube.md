@@ -22,3 +22,6 @@ To generate the report, see
 Version: \>= 1.1.0.
 JSON format working well with version \>= 3.1.2
 
+
+### Sample Scan Data
+Sample SonarQube scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/sonarqube).
