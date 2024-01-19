@@ -15,14 +15,14 @@ def update_test(test, mend_test_type) -> None:
         test.save()
 
 
-# Update the found_by field to remove nessus/WAS and add tenable
+# Update the found_by field to remove whitesource and add mend
 def update_finding(finding, mend_test_type, whitesource_test_type) -> None:
     # Check if whitesource is in found by list and remove
     if whitesource_test_type in finding.found_by.all():
         finding.found_by.remove(whitesource_test_type.id)
     # Check if whitesource is in found by list and remove
-    if whitesource_was_test_type in finding.found_by.all():
-        finding.found_by.remove(whitesource_was_test_type.id)
+    if whitesource_test_type in finding.found_by.all():
+        finding.found_by.remove(whitesource_test_type.id)
     # Check if mend is already in list somehow before adding it
     if mend_test_type not in finding.found_by.all():
         finding.found_by.add(mend_test_type.id)
