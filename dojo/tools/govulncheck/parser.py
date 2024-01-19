@@ -58,7 +58,6 @@ class GovulncheckParser:
 
     def get_affected_version(self, data, osv_id):
         # Browse the findings to look for matching OSV-id. If the OSV-id is matching, extract the first affected version.
-        trace_info_strs = []
         for elem in data:
             if 'finding' in elem.keys():
                 finding = elem["finding"]

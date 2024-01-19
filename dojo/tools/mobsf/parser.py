@@ -153,7 +153,7 @@ class MobSFParser(object):
 
         # Manifest Analysis
         if "manifest_analysis" in data:
-            if data["manifest_analysis"] != {} and type(data["manifest_analysis"]) is dict:
+            if data["manifest_analysis"] != {} and isinstance(data["manifest_analysis"], dict):
                 if data["manifest_analysis"]["manifest_findings"]:
                     for details in data["manifest_analysis"]["manifest_findings"]:
                         mobsf_item = {
