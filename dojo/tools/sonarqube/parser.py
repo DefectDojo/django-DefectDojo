@@ -29,7 +29,7 @@ class SonarQubeParser(object):
             return "Import all findings from sonarqube html report. SonarQube output file can be imported in HTML format. Generate with https://github.com/soprasteria/sonar-report version >= 1.1.0"
 
     def get_findings(self, filename, test):
-        if filename.endswith(".json"):
+        if filename.name.strip().lower().endswith(".json"):
             json_content = json.load(filename)
             return self.get_json_items(json_content, test, self.mode)
         else:
@@ -56,6 +56,7 @@ class SonarQubeParser(object):
             file_path = issue["component"]
             severity = self.convert_sonar_severity(issue["severity"])
             rule_id = issue["rule"]
+
             if title is None or mitigation is None:
                 raise ValueError(
                     "Parser ValueError: can't find a title or a mitigation for vulnerability of name "
@@ -64,9 +65,12 @@ class SonarQubeParser(object):
 
             try:
                 issue_detail = rules[rule_id]
-                issue_description = self.get_description(issue_detail)
+                parser = etree.HTMLParser()
+                html_desc_as_e_tree = etree.fromstring(issue_detail["htmlDesc"], parser)
+                issue_description = self.get_description(html_desc_as_e_tree)
+                logger.debug(issue_description)
                 issue_references = self.get_references(
-                    rule_id, issue_detail
+                    rule_id, html_desc_as_e_tree
                 )
                 issue_cwe = self.get_cwe(issue_references)
             except KeyError:
