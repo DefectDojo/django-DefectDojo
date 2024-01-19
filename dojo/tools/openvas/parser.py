@@ -1,10 +1,10 @@
 import csv
 import hashlib
 import io
-
 from dateutil.parser import parse
-
-from dojo.models import Endpoint, Finding
+from xml.dom import NamespaceErr
+from defusedxml import ElementTree as ET
+from dojo.models import Finding, Endpoint
 
 
 class ColumnMappingStrategy(object):
@@ -194,7 +194,7 @@ class DuplicateColumnMappingStrategy(ColumnMappingStrategy):
         finding.duplicate = self.evaluate_bool_value(column_value)
 
 
-class OpenVASCsvParser(object):
+class OpenVASParser(object):
     def create_chain(self):
         date_column_strategy = DateColumnMappingStrategy()
         title_column_strategy = TitleColumnMappingStrategy()
@@ -240,62 +240,115 @@ class OpenVASCsvParser(object):
         return column_names
 
     def get_scan_types(self):
-        return ["OpenVAS CSV"]
+        return ["OpenVAS Parser"]
 
     def get_label_for_scan_types(self, scan_type):
         return scan_type  # no custom label for now
 
     def get_description_for_scan_types(self, scan_type):
-        return "Import OpenVAS Scan in CSV format. Export as CSV Results on OpenVAS."
+        return "Import CSV or XML output of Greenbone OpenVAS report."
+
+    def convert_cvss_score(self, raw_value):
+        val = float(raw_value)
+        if val == 0.0:
+            return "Info"
+        elif val < 4.0:
+            return "Low"
+        elif val < 7.0:
+            return "Medium"
+        elif val < 9.0:
+            return "High"
+        else:
+            return "Critical"
 
     def get_findings(self, filename, test):
-        column_names = dict()
-        dupes = dict()
-        chain = self.create_chain()
+        if str(filename.name).endswith('.csv'):
+            column_names = dict()
+            dupes = dict()
+            chain = self.create_chain()
 
-        content = filename.read()
-        if isinstance(content, bytes):
-            content = content.decode("utf-8")
-        reader = csv.reader(io.StringIO(content), delimiter=",", quotechar='"')
+            content = filename.read()
+            if isinstance(content, bytes):
+                content = content.decode("utf-8")
+            reader = csv.reader(io.StringIO(content), delimiter=",", quotechar='"')
 
-        row_number = 0
-        for row in reader:
-            finding = Finding(test=test)
-            finding.unsaved_endpoints = [Endpoint()]
+            row_number = 0
+            for row in reader:
+                finding = Finding(test=test)
+                finding.unsaved_endpoints = [Endpoint()]
 
-            if row_number == 0:
-                column_names = self.read_column_names(row)
+                if row_number == 0:
+                    column_names = self.read_column_names(row)
+                    row_number += 1
+                    continue
+
+                column_number = 0
+                for column in row:
+                    chain.process_column(
+                        column_names[column_number], column, finding
+                    )
+                    column_number += 1
+
+                if finding is not None and row_number > 0:
+                    if finding.title is None:
+                        finding.title = ""
+                    if finding.description is None:
+                        finding.description = ""
+
+                    key = hashlib.sha256(
+                        (
+                            str(finding.unsaved_endpoints[0])
+                            + "|"
+                            + finding.severity
+                            + "|"
+                            + finding.title
+                            + "|"
+                            + finding.description
+                        ).encode("utf-8")
+                    ).hexdigest()
+
+                    if key not in dupes:
+                        dupes[key] = finding
+
                 row_number += 1
-                continue
-
-            column_number = 0
-            for column in row:
-                chain.process_column(
-                    column_names[column_number], column, finding
+            return list(dupes.values())
+        elif str(filename.name).endswith('.xml'):
+            findings = []
+            tree = ET.parse(filename)
+            root = tree.getroot()
+            if "report" not in root.tag:
+                raise NamespaceErr(
+                    "This doesn't seem to be a valid Greenbone OpenVAS XML file."
                 )
-                column_number += 1
+            report = root.find("report")
+            results = report.find("results")
+            for result in results:
+                for finding in result:
+                    if finding.tag == "name":
+                        title = finding.text
+                        description = [f"**Name**: {finding.text}"]
+                    if finding.tag == "host":
+                        title = title + "_" + finding.text
+                        description.append(f"**Host**: {finding.text}")
+                    if finding.tag == "port":
+                        title = title + "_" + finding.text
+                        description.append(f"**Port**: {finding.text}")
+                    if finding.tag == "nvt":
+                        description.append(f"**NVT**: {finding.text}")
+                    if finding.tag == "severity":
+                        severity = self.convert_cvss_score(finding.text)
+                        description.append(f"**Severity**: {finding.text}")
+                    if finding.tag == "qod":
+                        description.append(f"**QOD**: {finding.text}")
+                    if finding.tag == "description":
+                        description.append(f"**Description**: {finding.text}")
 
-            if finding is not None and row_number > 0:
-                if finding.title is None:
-                    finding.title = ""
-                if finding.description is None:
-                    finding.description = ""
-
-                key = hashlib.sha256(
-                    (
-                        str(finding.unsaved_endpoints[0])
-                        + "|"
-                        + finding.severity
-                        + "|"
-                        + finding.title
-                        + "|"
-                        + finding.description
-                    ).encode("utf-8")
-                ).hexdigest()
-
-                if key not in dupes:
-                    dupes[key] = finding
-
-            row_number += 1
-
-        return list(dupes.values())
+                finding = Finding(
+                    title=str(title),
+                    description="\n".join(description),
+                    severity=severity,
+                    dynamic_finding=True,
+                    static_finding=False
+                )
+                findings.append(finding)
+            return findings
