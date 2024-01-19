@@ -12,3 +12,6 @@ Please switch to the new parser for ScoutSuite.
 {{% alert title="Warning" color="warning" %}}
 This parser is disactivated by default in releases >= 2.3.1 and will be removed in release >= 3.x.x.
 {{% /alert %}}
+
+### Sample Scan Data
+Sample AWS Scout2 Scanner (deprecated) scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/aws_scout2).
