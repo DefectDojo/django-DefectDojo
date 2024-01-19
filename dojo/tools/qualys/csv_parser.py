@@ -46,7 +46,8 @@ def get_report_findings(csv_reader) -> [dict]:
     for row in csv_reader:
         if row.get("Title") and row["Title"] != "Title":
             report_findings.append(row)
-
+        elif row.get("VULN TITLE"):
+            report_findings.append(row)
     return report_findings
 
 
@@ -108,7 +109,6 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
         "5": "Critical",
     }
     dojo_findings = []
-
     for report_finding in report_findings:
         if report_finding.get("FQDN"):
             endpoint = Endpoint.from_uri(report_finding.get("FQDN"))
@@ -129,44 +129,56 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
         if finding_with_id:
             finding = finding_with_id
         else:
-            finding = Finding(
-                title=f"QID-{report_finding['QID']} | {report_finding['Title']}",
-                mitigation=report_finding["Solution"],
-                description=f"{report_finding['Threat']}\nResult Evidence: \n{report_finding.get('Threat', 'Not available')}",
-                severity=severity_lookup.get(report_finding["Severity"], "Info"),
-                impact=report_finding["Impact"],
-                date=parser.parse(
-                    report_finding["Last Detected"].replace("Z", "")
-                ),
-                vuln_id_from_tool=report_finding["QID"],
-                cvssv3=cvssv3
-            )
+            if report_finding.get("Title"):
+                finding = Finding(
+                    title=f"QID-{report_finding['QID']} | {report_finding['Title']}",
+                    mitigation=report_finding["Solution"],
+                    description=f"{report_finding['Threat']}\nResult Evidence: \n{report_finding.get('Threat', 'Not available')}",
+                    severity=severity_lookup.get(report_finding["Severity"], "Info"),
+                    impact=report_finding["Impact"],
+                    date=parser.parse(
+                        report_finding["Last Detected"].replace("Z", "")
+                    ),
+                    vuln_id_from_tool=report_finding["QID"],
+                    cvssv3=cvssv3
+                )
+                cve_data = report_finding.get("CVE ID")
+                # Qualys reports regression findings as active, but with a Date Last
+                # Fixed.
+                if report_finding["Date Last Fixed"]:
+                    finding.mitigated = datetime.strptime(
+                        report_finding["Date Last Fixed"], "%m/%d/%Y %H:%M:%S"
+                    )
+                    finding.is_mitigated = True
+                else:
+                    finding.is_mitigated = False
 
-        cve_data = report_finding.get("CVE ID")
+                finding.active = report_finding["Vuln Status"] in (
+                    "Active",
+                    "Re-Opened",
+                    "New",
+                )
+
+                if finding.active:
+                    finding.mitigated = None
+                    finding.is_mitigated = False
+            elif report_finding.get("VULN TITLE"):
+                finding = Finding(
+                    title=f"QID-{report_finding['QID']} | {report_finding['VULN TITLE']}",
+                    mitigation=report_finding["SOLUTION"],
+                    description=f"{report_finding['THREAT']}\nResult Evidence: \n{report_finding.get('THREAT', 'Not available')}",
+                    severity=report_finding["SEVERITY"],
+                    impact=report_finding["IMPACT"],
+                    date=parser.parse(
+                        report_finding["LAST SCAN"].replace("Z", "")
+                    ),
+                    vuln_id_from_tool=report_finding["QID"]
+                )
+                cve_data = report_finding.get("CVEID")
+
         finding.unsaved_vulnerability_ids = (
             cve_data.split(",") if "," in cve_data else [cve_data]
         )
-
-        # Qualys reports regression findings as active, but with a Date Last
-        # Fixed.
-        if report_finding["Date Last Fixed"]:
-            finding.mitigated = datetime.strptime(
-                report_finding["Date Last Fixed"], "%m/%d/%Y %H:%M:%S"
-            )
-            finding.is_mitigated = True
-        else:
-            finding.is_mitigated = False
-
-        finding.active = report_finding["Vuln Status"] in (
-            "Active",
-            "Re-Opened",
-            "New",
-        )
-
-        if finding.active:
-            finding.mitigated = None
-            finding.is_mitigated = False
-
         finding.verified = True
         finding.unsaved_endpoints.append(endpoint)
         if not finding_with_id:
