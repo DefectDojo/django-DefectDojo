@@ -19,7 +19,7 @@ class TestSonarQubeParser(DojoTestCase):
 
     # SonarQube Scan - no finding
     def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_no_findings(
-        self,
+            self,
     ):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-no-finding.html"
@@ -40,7 +40,7 @@ class TestSonarQubeParser(DojoTestCase):
 
     # SonarQube Scan - report with one vuln
     def test_file_name_aggregated_parse_file_with_single_vulnerability_has_single_finding(
-        self,
+            self,
     ):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-single-finding.html"
@@ -135,7 +135,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual("AWK40IMu-pl6AHs22MnV", item.unique_id_from_tool)
 
     def test_detailed_parse_file_with_multiple_vulnerabilities_has_multiple_findings(
-        self,
+            self,
     ):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-6-findings.html"
@@ -147,7 +147,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(6, len(findings))
 
     def test_file_name_aggregated_parse_file_with_multiple_vulnerabilities_has_multiple_findings(
-        self,
+            self,
     ):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-6-findings.html"
@@ -472,143 +472,66 @@ class TestSonarQubeParser(DojoTestCase):
         item = findings[0]
         self.assertEqual(str, type(item.description))
         self.maxDiff = None
-        self.assertMultiLineEqual(r"""A cross-site request forgery (CSRF) attack occurs when a trusted user of a web application can be forced, by an attacker, to perform sensitive
-actions that he didn&#8217;t intend, such as updating his profile or sending a message, more generally anything that can change the state of the
-application.
-The attacker can trick the user/victim to click on a link, corresponding to the privileged action, or to visit a malicious web site that embeds a
-hidden web request and as web browsers automatically include cookies, the actions can be authenticated and sensitive.
-**Ask Yourself Whether**
-
-   The web application uses cookies to authenticate users. 
-   There exist sensitive operations in the web application that can be performed when the user is authenticated. 
-   The state / resources of the web application can be modified by doing HTTP POST or HTTP DELETE requests for example. 
-
-There is a risk if you answered yes to any of those questions.
-**Recommended Secure Coding Practices**
-
-   Protection against CSRF attacks is strongly recommended:
-    
-       to be activated by default for all unsafe HTTP
-      methods. 
-       implemented, for example, with an unguessable CSRF token 
-      
-   Of course all sensitive operations should not be performed with safe HTTP methods like GET which are designed to be
-  used only for information retrieval. 
-
-**Sensitive Code Example**
-For a Django application, the code is sensitive when,
-
-   django.middleware.csrf.CsrfViewMiddleware is not used in the Django settings: 
-
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-] # Sensitive: django.middleware.csrf.CsrfViewMiddleware is missing
-
-
-   the CSRF protection is disabled on a view: 
-
-
-@csrf_exempt # Sensitive
-def example(request):
-    return HttpResponse("default")
-
-For a Flask application, the code is sensitive when,
-
-   the WTF_CSRF_ENABLED setting is set to false: 
-
-
-app = Flask(__name__)
-app.config['WTF_CSRF_ENABLED'] = False # Sensitive
-
-
-   the application doesn&#8217;t use the CSRFProtect module: 
-
-
-app = Flask(__name__) # Sensitive: CSRFProtect is missing
-
-@app.route('/')
-def hello_world():
-    return 'Hello, World!'
-
-
-   the CSRF protection is disabled on a view: 
-
-
-app = Flask(__name__)
-csrf = CSRFProtect()
-csrf.init_app(app)
-
-@app.route('/example/', methods=['POST'])
-@csrf.exempt # Sensitive
-def example():
-    return 'example '
-
-
-   the CSRF protection is disabled on a form: 
-
-
-class unprotectedForm(FlaskForm):
-    class Meta:
-        csrf = False # Sensitive
-
-    name = TextField('name')
-    submit = SubmitField('submit')
-
-**Compliant Solution**
-For a Django application,
-
-   it is recommended to protect all the views with django.middleware.csrf.CsrfViewMiddleware: 
-
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware', # Compliant
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-
-   and to not disable the CSRF protection on specific views: 
-
-
-def example(request): # Compliant
-    return HttpResponse("default")
-
-For a Flask application,
-
-   the CSRFProtect module should be used (and not disabled further with WTF_CSRF_ENABLED set to false):
-  
-
-
-app = Flask(__name__)
-csrf = CSRFProtect()
-csrf.init_app(app) # Compliant
-
-
-   and it is recommended to not disable the CSRF protection on specific views or forms: 
-
-
-@app.route('/example/', methods=['POST']) # Compliant
-def example():
-    return 'example '
-
-class unprotectedForm(FlaskForm):
-    class Meta:
-        csrf = True # Compliant
-
-    name = TextField('name')
-    submit = SubmitField('submit')
-
-""".strip(), item.description)
+        self.assertMultiLineEqual('A cross-site request forgery (CSRF) attack occurs when a trusted user of a web '
+                                  'application can be forced, by an attacker, to perform sensitive\nactions that he '
+                                  'didn&#8217;t intend, such as updating his profile or sending a message, more generally '
+                                  'anything that can change the state of the\napplication.\nThe attacker can trick '
+                                  'the user/victim to click on a link, corresponding to the privileged action, '
+                                  'or to visit a malicious web site that embeds a\nhidden web request and as web '
+                                  'browsers automatically include cookies, the actions can be authenticated and '
+                                  'sensitive.\n**Ask Yourself Whether**\n\n   The web application uses cookies to '
+                                  'authenticate users. \n   There exist sensitive operations in the web application '
+                                  'that can be performed when the user is authenticated. \n   The state / resources '
+                                  'of the web application can be modified by doing HTTP POST or HTTP DELETE requests '
+                                  'for example. \n\nThere is a risk if you answered yes to any of those '
+                                  'questions.\n**Recommended Secure Coding Practices**\n\n   Protection against CSRF '
+                                  'attacks is strongly recommended:\n    \n       to be activated by default for all '
+                                  'unsafe HTTP\n      methods. \n       implemented, for example, with an unguessable '
+                                  'CSRF token \n      \n   Of course all sensitive operations should not be performed '
+                                  'with safe HTTP methods like GET which are designed to be\n  used only for '
+                                  'information retrieval. \n\n**Sensitive Code Example**\nFor a Django application, '
+                                  'the code is sensitive when,\n\n   django.middleware.csrf.CsrfViewMiddleware is not '
+                                  'used in the Django settings: \n\n\nMIDDLEWARE = [\n    '
+                                  '\'django.middleware.security.SecurityMiddleware\','
+                                  '\n    \'django.contrib.sessions.middleware.SessionMiddleware\','
+                                  '\n    \'django.middleware.common.CommonMiddleware\','
+                                  '\n    \'django.contrib.auth.middleware.AuthenticationMiddleware\','
+                                  '\n    \'django.contrib.messages.middleware.MessageMiddleware\','
+                                  '\n    \'django.middleware.clickjacking.XFrameOptionsMiddleware\',\n] # Sensitive: '
+                                  'django.middleware.csrf.CsrfViewMiddleware is missing\n\n\n   the CSRF protection '
+                                  'is disabled on a view: \n\n\n@csrf_exempt # Sensitive\ndef example(request):\n    '
+                                  'return HttpResponse("default")\n\nFor a Flask application, the code is sensitive '
+                                  'when,\n\n   the WTF_CSRF_ENABLED setting is set to false: \n\n\napp = Flask('
+                                  '__name__)\napp.config[\'WTF_CSRF_ENABLED\'] = False # Sensitive\n\n\n   the '
+                                  'application doesn&#8217;t use the CSRFProtect module: \n\n\napp = Flask(__name__) # '
+                                  'Sensitive: CSRFProtect is missing\n\n@app.route(\'/\')\ndef hello_world():\n    '
+                                  'return \'Hello, World!\'\n\n\n   the CSRF protection is disabled on a view: '
+                                  '\n\n\napp = Flask(__name__)\ncsrf = CSRFProtect()\ncsrf.init_app('
+                                  'app)\n\n@app.route(\'/example/\', methods=[\'POST\'])\n@csrf.exempt # '
+                                  'Sensitive\ndef example():\n    return \'example \'\n\n\n   the CSRF protection is '
+                                  'disabled on a form: \n\n\nclass unprotectedForm(FlaskForm):\n    class Meta:\n     '
+                                  '   csrf = False # Sensitive\n\n    name = TextField(\'name\')\n    submit = '
+                                  'SubmitField(\'submit\')\n\n**Compliant Solution**\nFor a Django application,'
+                                  '\n\n   it is recommended to protect all the views with '
+                                  'django.middleware.csrf.CsrfViewMiddleware: \n\n\nMIDDLEWARE = [\n    '
+                                  '\'django.middleware.security.SecurityMiddleware\','
+                                  '\n    \'django.contrib.sessions.middleware.SessionMiddleware\','
+                                  '\n    \'django.middleware.common.CommonMiddleware\','
+                                  '\n    \'django.middleware.csrf.CsrfViewMiddleware\', # Compliant\n    '
+                                  '\'django.contrib.auth.middleware.AuthenticationMiddleware\','
+                                  '\n    \'django.contrib.messages.middleware.MessageMiddleware\','
+                                  '\n    \'django.middleware.clickjacking.XFrameOptionsMiddleware\',\n]\n\n\n   and '
+                                  'to not disable the CSRF protection on specific views: \n\n\ndef example(request): '
+                                  '# Compliant\n    return HttpResponse("default")\n\nFor a Flask application,'
+                                  '\n\n   the CSRFProtect module should be used (and not disabled further with '
+                                  'WTF_CSRF_ENABLED set to false):\n  \n\n\napp = Flask(__name__)\ncsrf = '
+                                  'CSRFProtect()\ncsrf.init_app(app) # Compliant\n\n\n   and it is recommended to not '
+                                  'disable the CSRF protection on specific views or forms: \n\n\n@app.route('
+                                  '\'/example/\', methods=[\'POST\']) # Compliant\ndef example():\n    return '
+                                  '\'example \'\n\nclass unprotectedForm(FlaskForm):\n    class Meta:\n        csrf = '
+                                  'True # Compliant\n\n    name = TextField(\'name\')\n    submit = SubmitField('
+                                  '\'submit\')\n\n'.strip(),
+                                  item.description)
         self.assertEqual(str, type(item.line))
         self.assertEqual(8, 8)
         self.assertEqual(str, type(item.unique_id_from_tool))
