@@ -62,10 +62,13 @@ class KiuwanParser(object):
                 + row["Software characteristic"]
                 + "\n\n"
                 + "**Vulnerability type** : "
-                + row["Vulnerability type"]
+                + (row["Vulnerability type"] if "Vulnerability type" in row else "")
                 + "\n\n"
                 + "**CWE Scope** : "
                 + row["CWE Scope"]
+                + "\n\n"
+                + "**File** : "
+                + row["File"]
                 + "\n\n"
                 + "**Line number** : "
                 + row["Line number"]
