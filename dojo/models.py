@@ -2810,7 +2810,8 @@ class Finding(models.Model):
 
     def has_github_issue(self):
         try:
-            issue = self.github_issue
+            # Attempt to access the github issue if it exists. If not, an exception will be caught
+            _ = self.github_issue
             return True
         except GITHUB_Issue.DoesNotExist:
             return False
