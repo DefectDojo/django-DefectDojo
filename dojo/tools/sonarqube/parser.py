@@ -107,7 +107,6 @@ class SonarQubeParser(object):
                 )
         return list(dupes.values())
 
-
     def get_items(self, tree, test, mode):
         # Check that there is at least one vulnerability (the vulnerabilities
         # table is absent when no vuln are found)
