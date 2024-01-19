@@ -3,7 +3,6 @@ import io
 import logging
 import re
 from datetime import datetime
-from dateutil import parser
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
