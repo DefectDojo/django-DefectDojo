@@ -85,4 +85,4 @@ Parser expects a .json file, with an array of Findings contained within a single
 ~~~
 
 ### Sample Scan Data
-Sample scan data for testing purposes can be found at https://github.com/DefectDojo/sample-scan-files/tree/master/awssecurityhub.
+Sample scan data for testing purposes can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/awssecurityhub).
