@@ -104,3 +104,5 @@ Example GraphQL query to get issue details:
     }
 {{< /highlight >}}
 
+### Sample Scan Data
+Sample Burp GraphQL scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/burp_graphql).
