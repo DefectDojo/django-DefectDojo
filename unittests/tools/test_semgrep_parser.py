@@ -121,3 +121,10 @@ class TestSemgrepParser(DojoTestCase):
         self.assertEqual(len(findings_first), len(findings_second))
         for first, second in zip(findings_first, findings_second):
             self.assertEqual(first.unique_id_from_tool, second.unique_id_from_tool)
+
+    def test_parse_issue_8435(self):
+        testfile = open("unittests/scans/semgrep/issue_8435.json")
+        parser = SemgrepParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(1, len(findings))
