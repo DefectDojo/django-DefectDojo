@@ -10,7 +10,7 @@ To generate the report, see
 <https://github.com/soprasteria/sonar-report>
 
 Version: \>= 1.1.0
-JSON format working well with version \>= 3.1.2
+Recommend version for both format \>= 3.1.2
 
 ## SonarQube Scan Detailed (Import all findings from SonarQube html report.)
 
@@ -20,7 +20,7 @@ To generate the report, see
 <https://github.com/soprasteria/sonar-report>
 
 Version: \>= 1.1.0.
-JSON format working well with version \>= 3.1.2
+Recommend version for both format \>= 3.1.2
 
 
 ### Sample Scan Data
