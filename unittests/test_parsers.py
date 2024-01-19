@@ -36,7 +36,7 @@ class TestParsers(DojoTestCase):
                     self.assertTrue(re.search("toc_hide: true", content),
                                     f"Documentation file '{doc_file}' does not contain toc_hide: true"
                                     )
-                    if "api_" not in doc_file and "integrations/parsers/api/" not in doc_file:
+                    if category == "file":
                         self.assertTrue(re.search("### Sample Scan Data", content),
                                         f"Documentation file '{doc_file}' does not contain ### Sample Scan Data"
                                         )
