@@ -274,10 +274,10 @@ class System_Settings(models.Model):
         default=False,
         blank=False,
         verbose_name=_('Deduplicate findings'),
-        help_text=_("With this setting turned on, Dojo deduplicates findings by "
+        help_text=_("With this setting turned on, DefectDojo deduplicates findings by "
                   "comparing endpoints, cwe fields, and titles. "
                   "If two findings share a URL and have the same CWE or "
-                  "title, Dojo marks the less recent finding as a duplicate. "
+                  "title, DefectDojo marks the recent finding as a duplicate. "
                   "When deduplication is enabled, a list of "
                   "deduplicated findings is added to the engagement view."))
     delete_duplicates = models.BooleanField(default=False, blank=False, help_text=_("Requires next setting: maximum number of duplicates to retain."))
