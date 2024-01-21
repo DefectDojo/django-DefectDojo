@@ -130,3 +130,11 @@ class TestQualysParser(DojoTestCase):
                 self.assertEqual(
                     finding.severity, "Critical"
                 )
+
+    def test_parse_file_monthly_pci_issue6932(self):
+        testfile = open(
+            get_unit_tests_path() + "/scans/qualys/monthly_pci_issue6932.csv"
+        )
+        parser = QualysParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))

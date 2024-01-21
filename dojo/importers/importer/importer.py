@@ -72,7 +72,6 @@ class DojoDefaultImporter(object):
         new_findings = []
         items = parsed_findings
         logger.debug('starting import of %i items.', len(items) if items else 0)
-        i = 0
         group_names_to_findings_dict = {}
 
         for item in items:

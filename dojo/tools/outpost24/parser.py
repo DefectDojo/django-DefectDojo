@@ -57,9 +57,6 @@ class Outpost24Parser(object):
                 else:
                     severity = "Critical"
             cvss_description = detail.findtext("cvss_vector_description")
-            cvss_vector = detail.findtext("cvss_v3_vector") or detail.findtext(
-                "cvss_vector"
-            )
             severity_justification = "{}\n{}".format(
                 cvss_score, cvss_description
             )
