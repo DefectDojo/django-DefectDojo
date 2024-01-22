@@ -39,7 +39,7 @@ class Command(BaseCommand):
             # Get unique ploymorphic id for the system
             ctype_id = 0
             # First create a temp question to pull the polymorphic_ctype_id from
-            created_question = TextQuestion.objects.create(optional=False, order=1, text='What is love?')
+            TextQuestion.objects.create(optional=False, order=1, text='What is love?')
             # Get the ID used in this system
             cursor.execute("select polymorphic_ctype_id from dojo_question;")
             row = cursor.fetchone()

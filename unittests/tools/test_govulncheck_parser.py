@@ -20,21 +20,6 @@ class TestGovulncheckParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
-    def test_parse_new_version_findings(self):
-        testfile = open("unittests/scans/govulncheck/many_vulns_new_version.json")
-        parser = GovulncheckParser()
-        findings = parser.get_findings(testfile, Test())
-        self.assertEqual(1, len(findings))
-        with self.subTest(i=0):
-            finding = findings[0]
-            self.assertEqual("GO-2023-1840", finding.title)
-            self.assertEqual("Info", finding.severity)
-            self.assertEqual("CVE-2023-29403", finding.cve)
-            self.assertEqual("stdlib", finding.component_name)
-            self.assertEqual("1.3.1", finding.component_version)
-            self.assertIsNotNone(finding.description)
-            self.assertEqual("https://go.dev/issue/60272", finding.references)
-
     def test_parse_many_findings(self):
         testfile = open("unittests/scans/govulncheck/many_vulns.json")
         parser = GovulncheckParser()
@@ -81,3 +66,67 @@ class TestGovulncheckParser(DojoTestCase):
             self.assertIsNotNone(finding.impact)
             self.assertIsNotNone(finding.description)
             self.assertEqual("https://groups.google.com/g/golang-announce/c/x49AQzIVX-s", finding.references)
+
+    def test_parse_new_version_no_findings(self):
+        testfile = open("unittests/scans/govulncheck/no_vulns_new_version.json")
+        parser = GovulncheckParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(0, len(findings))
+
+    def test_parse_new_version_many_findings(self):
+        testfile = open("unittests/scans/govulncheck/many_vulns_new_version.json")
+        parser = GovulncheckParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+
+        self.assertEqual(1, len(findings))
+
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("GO-2023-1840 - stdlib - runtime", finding.title)
+            self.assertEqual("Info", finding.severity)
+            self.assertEqual("CVE-2023-29403", finding.cve)
+            self.assertEqual("stdlib", finding.component_name)
+            self.assertEqual("v1.20.1", finding.component_version)
+            self.assertEqual("GO-2023-1840", finding.unique_id_from_tool)
+            self.assertEqual("runtime", finding.file_path)
+            self.assertEqual("https://pkg.go.dev/vuln/GO-2023-1840", finding.url)
+            self.assertIsNotNone(finding.impact)
+            self.assertIsNotNone(finding.description)
+            self.assertIsNotNone(finding.references)
+
+    def test_parse_new_version_many_findings_custom_severity(self):
+        testfile = open("unittests/scans/govulncheck/many_vulns_new_version_custom_severity.json")
+        parser = GovulncheckParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+
+        self.assertEqual(2, len(findings))
+
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("Low", finding.severity)
+            self.assertEqual("GO-2021-0113 - golang.org/x/text - golang.org/x/text/language", finding.title)
+            self.assertEqual("CVE-2021-38561", finding.cve)
+            self.assertEqual("golang.org/x/text", finding.component_name)
+            self.assertEqual("v0.3.5", finding.component_version)
+            self.assertEqual("GO-2021-0113", finding.unique_id_from_tool)
+            self.assertEqual("golang.org/x/text/language", finding.file_path)
+            self.assertEqual("https://pkg.go.dev/vuln/GO-2021-0113", finding.url)
+            self.assertIsNotNone(finding.impact)
+            self.assertIsNotNone(finding.description)
+            self.assertIsNotNone(finding.references)
+
+        with self.subTest(i=1):
+            finding = findings[1]
+            self.assertEqual("High", finding.severity)
+            self.assertEqual("GO-2022-1059 - golang.org/x/text - golang.org/x/text/language", finding.title)
+            self.assertEqual("CVE-2022-32149", finding.cve)
+            self.assertEqual("golang.org/x/text", finding.component_name)
+            self.assertEqual("v0.3.5", finding.component_version)
+            self.assertEqual("GO-2022-1059", finding.unique_id_from_tool)
+            self.assertEqual("golang.org/x/text/language", finding.file_path)
+            self.assertEqual("https://pkg.go.dev/vuln/GO-2022-1059", finding.url)
+            self.assertIsNotNone(finding.impact)
+            self.assertIsNotNone(finding.description)
+            self.assertIsNotNone(finding.references)
