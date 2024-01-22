@@ -266,8 +266,8 @@ class ProductForm(forms.ModelForm):
         # if this product has findings being asynchronously updated, disable the sla config field
         if self.instance.async_updating:
             self.fields['sla_configuration'].disabled = True
-            self.fields['sla_configuration'].help_text = 'Finding SLA expiration dates are currently being calculated.' + \
-                                                         'This field cannot be changed until the calculation is complete.'
+            self.fields['sla_configuration'].widget.attrs['message'] = 'Finding SLA expiration dates are currently being calculated. ' + \
+                                                                       'This field cannot be changed until the calculation is complete.'
 
     class Meta:
         model = Product
@@ -2447,16 +2447,16 @@ class SLAConfigForm(forms.ModelForm):
 
         # if this sla config has findings being asynchronously updated, disable the days by severity fields
         if self.instance.async_updating:
-            msg = 'Finding SLA expiration dates are currently being calculated.' + \
+            msg = 'Finding SLA expiration dates are currently being calculated. ' + \
                   'This field cannot be changed until the calculation is complete.'
             self.fields['critical'].disabled = True
-            self.fields['critical'].help_text = msg
+            self.fields['critical'].widget.attrs['message'] = msg
             self.fields['high'].disabled = True
-            self.fields['high'].help_text = msg
+            self.fields['high'].widget.attrs['message'] = msg
             self.fields['medium'].disabled = True
-            self.fields['medium'].help_text = msg
+            self.fields['medium'].widget.attrs['message'] = msg
             self.fields['low'].disabled = True
-            self.fields['low'].help_text = msg
+            self.fields['low'].widget.attrs['message'] = msg
 
     class Meta:
         model = SLA_Configuration
