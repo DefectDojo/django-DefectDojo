@@ -115,6 +115,7 @@ from django.db.models import Q, QuerySet, Count
 from django.db.models.query import Prefetch
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
+import dojo.risk_acceptance.risk_pending as rp_helper
 import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import (
@@ -1604,7 +1605,10 @@ def simple_risk_accept(request, fid):
 @user_is_authorized(Finding, Permissions.Risk_Acceptance, "fid")
 def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-    ra_helper.risk_unaccept(finding)
+    if settings.RISK_PENDING:
+        rp_helper.risk_unaccept(finding)
+    else:
+        ra_helper.risk_unaccept(finding)
 
     messages.add_message(
         request,

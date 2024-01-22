@@ -54,7 +54,7 @@ titlecase==2.4.1
 social-auth-app-django==5.4.0
 social-auth-core==4.5.1
 Python-jose==3.3.0
-GitPython==3.1.40
+GitPython==3.1.41
 debugpy==1.8.0
 python-gitlab==4.3.0
 drf_yasg==1.21.5
@@ -143,7 +143,7 @@ xmlschema==2.3.1
 sqlparse==0.4.4
 cffi==1.15.1
 gitdb==4.0.10
-Jinja2==3.1.2
+Jinja2==3.1.3
 PyYAML==6.0
 click-plugins==1.1.1
 ruamel.yaml.clib==0.2.7
@@ -177,3 +177,5 @@ jsonschema-specifications==2023.6.1
 googleapis-common-protos==1.60.0
 grpcio==1.57.0
 zipp==3.16.2
+sniffio==1.3.0
+anyio==4.2.0

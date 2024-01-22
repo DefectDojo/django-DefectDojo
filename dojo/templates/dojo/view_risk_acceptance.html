@@ -123,35 +123,60 @@
         </div>
 
         <div class="panel panel-default table-responsive">
-            <div class="panel-heading">
-                <h3>Decision & Recommendation</h3>
-            </div>
-            <table class="table table-condensed">
-                <thead>
-                    <tr>
-                        <th>Recommendation</th>
-                        <th>Details</th>
-                        <th>Decision</th>
-                        <th>Details</th>
-                    <tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td width="10%">
-                            {{ risk_acceptance.get_recommendation_display }}
-                        </td>
-                        <td width="40%">
-                            {{ risk_acceptance.recommendation_details|markdown_render }}
-                        </td>
-                        <td width="10%">
-                            {{ risk_acceptance.get_decision_display }}
-                        </td>
-                        <td width="40%">
-                            {{ risk_acceptance.decision_details|markdown_render }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            {% if RISK_PENDING %}
+                <div class="panel-heading">
+                    <h3>Recommendation</h3>
+                </div>
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Recommendation</th>
+                            <th>Details</th>
+                        <tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td width="10%">
+                                {{ risk_acceptance.get_recommendation_display }}
+                            </td>
+                            <td width="40%">
+                                {{ risk_acceptance.recommendation_details|markdown_render }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            {% else %}
+                <div class="panel-heading">
+                    <h3>Decision & Recommendation</h3>
+                </div>
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Recommendation</th>
+                            <th>Details</th>
+                            <th>Decision</th>
+                            <th>Details</th>
+                        <tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td width="10%">
+                                {{ risk_acceptance.get_recommendation_display }}
+                            </td>
+                            <td width="40%">
+                                {{ risk_acceptance.recommendation_details|markdown_render }}
+                            </td>
+                            <td width="10%">
+                                {{ risk_acceptance.get_decision_display }}
+                            </td>
+                            <td width="40%">
+                                {{ risk_acceptance.decision_details|markdown_render }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            {% endif%}
         </div>
     {% endif %}
 
@@ -187,17 +212,17 @@
                         {% comment %} <td><span style="color: {{ finding.risk_status|status_style_color.color }}">{{ finding.risk_status|status_style_color.text }}</span></td> {% endcomment %}
                         <td> <span style="color: green;">{{ finding.accepted_by}} </span></td>
                         <td>
-                            {% if engagement|has_object_permission:"Risk_Acceptance_Edit" and engagement|has_risk_acceptance_permission:finding%}
+                            {% if engagement|has_object_permission:"Risk_Acceptance" and engagement|has_risk_acceptance_permission:finding%}
                                 <form method="post">
                                     {% csrf_token %}
+                                    <input class="btn btn-sm btn-success" type="submit" name="risk_accept_pending"
+                                    value="Accept"/>
                                     <input type="hidden" name="remove_finding_id" value="{{ finding.id }}"/>
                                     <input class="btn btn-sm btn-warning" type="submit" name="remove_finding"
-                                           value="Remove"/>
+                                        value="Remove"/>
                                     <input type="hidden" name="risk_accept_finding_id" value="{{ finding.id }}"/>
                                     <input class="btn btn-sm btn-danger" type="submit" name="risk_accept_decline"
-                                           value="Decline"/>
-                                    <input class="btn btn-sm btn-success" type="submit" name="risk_accept_pending"
-                                           value="Accept"/>
+                                        value="Reject"/>
                                 </form>
                             {% else %}
                                 Not Authorized

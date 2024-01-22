@@ -469,7 +469,7 @@
                                                         {% endif %}
                                                         <li class="divider"></li>
                                                         {% if finding|has_object_permission:"Risk_Acceptance" %}
-                                                            {% if finding.risk_accepted %}
+                                                            {% if finding.risk_accepted and "Unaccept Risk"|has_global_permission %}
                                                                 <li role="presentation">
                                                                     <a rel="noopener noreferrer" href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                                         <i class="fa-solid fa-circle-exclamation"></i> {% trans "Unaccept Risk" %}

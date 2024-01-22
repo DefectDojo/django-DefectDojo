@@ -328,7 +328,7 @@ env = environ.Env(
 
     # ---------------RISK PENDING-------------------------
     # The variable that allows enabling pending risk acceptance.
-    DD_RISK_PENDING=(bool, False), 
+    DD_RISK_PENDING=(bool, False),
     # Role that allows risk acceptance bypassing restrictions.
     DD_ROLE_ALLOWED_TO_ACCEPT_RISKS=(list, ["Maintainer"]),
     # Blacklist to define CVEs that will not be accepted for any reason.
@@ -339,6 +339,17 @@ env = environ.Env(
     # num_acceptors: number of acceptors required for risk acceptance
     # roles: roles with permission to accept the risk
     # type_contacts: users with allowed contact types for risk acceptance at a specific severity
+    # ----------------
+    # Abuse Control
+    DD_LIMIT_ASSUMPTION_OF_VULNERABILITY=(int, 1),
+    DD_LIMIT_OF_TEMPORARILY_ASSUMED_VULNERABILITIES_LIMITED_TO_TOLERANCE=(int, 0),
+    DD_PERCENTAGE_OF_VULNERABILITIES_CLOSED=(dict,
+                                             {
+                                                 "month": 3,
+                                                 "percentage": 0.82
+                                             }),
+    DD_TEMPORARILY_ASSUMED_VULNERABILITIES=(float, 0.40),
+
     DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY=(dict, {
         "Low": {
             "number_acceptors": 0,
@@ -1885,5 +1896,10 @@ ROLE_ALLOWED_TO_ACCEPT_RISKS = env("DD_ROLE_ALLOWED_TO_ACCEPT_RISKS")
 BLACK_LIST_FINDING = env("DD_BLACK_LIST_FINDING")
 WHITE_LIST_FINDING = env("DD_WHITE_LIST_FINDING")
 RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = env("DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY")
+# Abuse Control
+LIMIT_ASSUMPTION_OF_VULNERABILITY = env("DD_LIMIT_ASSUMPTION_OF_VULNERABILITY")
+LIMIT_OF_TEMPORARILY_ASSUMED_VULNERABILITIES_LIMITED_TO_TOLERANCE = env("DD_LIMIT_OF_TEMPORARILY_ASSUMED_VULNERABILITIES_LIMITED_TO_TOLERANCE")
+PERCENTAGE_OF_VULNERABILITIES_CLOSED = env("DD_PERCENTAGE_OF_VULNERABILITIES_CLOSED")
+TEMPORARILY_ASSUMED_VULNERABILITIES = env("DD_TEMPORARILY_ASSUMED_VULNERABILITIES")
 
 
