@@ -7,7 +7,7 @@ weight: 2
 
 ## Product Health Grading
 
-Within DefectDojo's system settings, you have the opportunity to enable a grading system for your products. For that you have to enable ("Enable Product Grading"). Then, the products are gradet with the following possible grades:
+Within DefectDojo's system settings, you have the opportunity to enable a grading system for your products. For that you have to enable ("Enable Product Grading"). Then, the products are graded with the following possible grades:
 - Grade A
 - Grade B
 - Grade C
@@ -17,7 +17,7 @@ Within DefectDojo's system settings, you have the opportunity to enable a gradin
 The best grade is A going down to the worst grade F. By default the grades stick to the achieved percentage mentioned in grade converation [here](https://en.wikipedia.org/wiki/Academic_grading_in_the_United_States). 
 
 ### Calculation of the grades
-The code how the grades are calculated can be found [here](https://github.com/DefectDojo/django-DefectDojo/blob/76e11c21e88fb84b67b6da27c78fbbe1899e7e78/dojo/management/commands/system_settings.py#L8).
+The code that performs the grade calculations can be found [here](https://github.com/DefectDojo/django-DefectDojo/blob/76e11c21e88fb84b67b6da27c78fbbe1899e7e78/dojo/management/commands/system_settings.py#L8).
 
 The highest health score is 100 and it decreases based on the number of findings for each severity (critical, high, medium, low) within the product. In the following code snippet you can see the rules. 
 Note that the following abbreviations were used:
