@@ -1,3 +1,6 @@
+import datetime
+from django.test import override_settings
+
 from ..dojo_test_case import DojoTestCase
 from dojo.tools.nexpose.parser import NexposeParser
 from dojo.models import Test, Engagement, Product
@@ -202,3 +205,19 @@ class TestNexposeParser(DojoTestCase):
         self.assertEqual('dns', str(finding.unsaved_endpoints[0].protocol))
         self.assertEqual('udp', str(finding.unsaved_endpoints[0].fragment))
         self.assertEqual('dns://192.168.1.1#udp', str(finding.unsaved_endpoints[0]))
+
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_nexpose_parser_use_first_seen(self):
+        testfile = open("unittests/scans/nexpose/dns.xml")
+        parser = NexposeParser()
+        findings = parser.get_findings(testfile, Test())
+
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+
+        self.assertEqual(6, len(findings))
+        finding = findings[2]
+        self.assertEqual(datetime.datetime(2021, 2, 11, 16, 45, 6, 81000), finding.date, finding.title)
+        finding = findings[4]
+        self.assertEqual(datetime.datetime(2021, 2, 11, 16, 45, 6, 81000), finding.date, finding.title)

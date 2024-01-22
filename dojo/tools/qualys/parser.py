@@ -3,6 +3,7 @@ import logging
 import html2text
 from defusedxml import ElementTree as etree
 from cvss import CVSS3
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
 from dojo.tools.qualys import csv_parser
@@ -109,9 +110,17 @@ def parse_finding(host, tree):
         _last_found = str(vuln_details.findtext("LAST_FOUND"))
         _times_found = str(vuln_details.findtext("TIMES_FOUND"))
 
-        _temp["date"] = datetime.datetime.strptime(
-            vuln_details.findtext("LAST_FOUND"), "%Y-%m-%dT%H:%M:%SZ"
-        ).date()
+        # Get the date based on the first_seen setting
+        try:
+            if settings.USE_FIRST_SEEN:
+                if date := vuln_details.findtext("FIRST_FOUND"):
+                    _temp["date"] = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
+            else:
+                if date := vuln_details.findtext("LAST_FOUND"):
+                    _temp["date"] = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
+        except Exception:
+            _temp["date"] = None
+
         # Vuln_status
         status = vuln_details.findtext("VULN_STATUS")
         if status == "Active" or status == "Re-Opened" or status == "New":
@@ -222,6 +231,7 @@ def parse_finding(host, tree):
                 sev = "Critical"
         elif sev is None:
             sev = "Informational"
+
         finding = None
         if _temp_cve_details:
             refs = "\n".join(list(_cl.values()))
