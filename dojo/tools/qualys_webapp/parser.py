@@ -193,7 +193,6 @@ def get_unique_vulnerabilities(
     # Iterate through all vulnerabilites to pull necessary info
     for vuln in vulnerabilities:
         urls = []
-        requests = response = ""
         qid = int(vuln.findtext("QID"))
         url = vuln.findtext("URL")
         if url is not None:
@@ -261,7 +260,6 @@ def get_vulnerabilities(
     # Iterate through all vulnerabilites to pull necessary info
     for vuln in vulnerabilities:
         urls = []
-        requests = response = ""
         qid = int(vuln.findtext("QID"))
         url = vuln.findtext("URL")
         if url is not None:

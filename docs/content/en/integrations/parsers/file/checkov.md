@@ -49,4 +49,4 @@ JSON files can be created from the Checkov CLI: https://www.checkov.io/2.Basics/
 ~~~
 
 ### Sample Scan Data
-Sample Checkov scans can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/checkov
+Sample Checkov scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/checkov).

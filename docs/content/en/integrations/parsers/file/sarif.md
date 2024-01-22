@@ -24,3 +24,6 @@ It's possible to activate de-duplication based on this data by customizing setti
 # in your settings.py file
 DEDUPLICATION_ALGORITHM_PER_PARSER["SARIF"] = DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE
 ```
+
+### Sample Scan Data
+Sample SARIF scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/sarif).

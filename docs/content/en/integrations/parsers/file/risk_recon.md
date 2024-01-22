@@ -55,3 +55,6 @@ Import findings from Risk Recon via the API. Configure your own JSON report as f
     the \"companies\" field.
 -   Removing both fields will allow retrieval of all findings in the
     Risk Recon instance.
+
+### Sample Scan Data
+Sample Risk Recon API Importer scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/risk_recon).

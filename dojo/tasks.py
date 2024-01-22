@@ -1,5 +1,7 @@
 import logging
-from datetime import timedelta
+from auditlog.models import LogEntry
+from datetime import timedelta, date
+from dateutil.relativedelta import relativedelta
 from django.db.models import Count, Prefetch
 from django.conf import settings
 from django.urls import reverse
@@ -84,6 +86,26 @@ def cleanup_alerts(*args, **kwargs):
             total_deleted_count += len(alerts_to_delete)
             Alerts.objects.filter(pk__in=list(alerts_to_delete)).delete()
         logger.info('total number of alerts deleted: %s', total_deleted_count)
+
+
+@app.task(bind=True)
+def flush_auditlog(*args, **kwargs):
+    retention_period = settings.AUDITLOG_FLUSH_RETENTION_PERIOD
+
+    if retention_period < 0:
+        logger.info("Flushing auditlog is disabled")
+        return
+
+    logger.info("Running Cleanup Task for Logentries with %d Months retention", retention_period)
+    retention_date = date.today() - relativedelta(months=retention_period)
+    subset = LogEntry.objects.filter(timestamp__date__lt=retention_date)
+    event_count = subset.count()
+    logger.debug("Initially received %d Logentries", event_count)
+    if event_count > 0:
+        subset._raw_delete(subset.db)
+        logger.debug('Total number of audit log entries deleted: %s', event_count)
+    else:
+        logger.debug('No outdated Logentries found')
 
 
 @app.task(bind=True)
