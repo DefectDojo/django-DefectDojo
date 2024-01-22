@@ -41,9 +41,7 @@ class TestTrivyParser(DojoTestCase):
         test_file = open(sample_path("scheme_2_many_vulns.json"))
         parser = TrivyParser()
         findings = parser.get_findings(test_file, Test())
-
         self.assertEqual(len(findings), 5)
-
         finding = findings[0]
         self.assertEqual("Medium", finding.severity)
         self.assertEqual('CVE-2020-15999 freetype 2.9.1-r2', finding.title)
@@ -59,7 +57,6 @@ class TestTrivyParser(DojoTestCase):
         self.assertEqual('CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H', finding.cvssv3)
         self.assertTrue(finding.static_finding)
         self.assertFalse(finding.dynamic_finding)
-
         finding = findings[1]
         self.assertEqual("High", finding.severity)
         self.assertEqual('CVE-2020-28196 krb5-libs 1.15.5-r0', finding.title)
@@ -80,9 +77,7 @@ class TestTrivyParser(DojoTestCase):
         test_file = open(sample_path("misconfigurations_and_secrets.json"))
         parser = TrivyParser()
         findings = parser.get_findings(test_file, Test())
-
         self.assertEqual(len(findings), 5)
-
         finding = findings[2]
         self.assertEqual('DS002 - Image user should not be \'root\'', finding.title)
         self.assertEqual('High', finding.severity)
@@ -98,7 +93,6 @@ Specify at least 1 USER command in Dockerfile with non-root user as argument
 https://docs.docker.com/develop/develop-images/dockerfile_best-practices/'''
         self.assertEqual(references, finding.references)
         self.assertEqual(['config', 'dockerfile'], finding.tags)
-
         finding = findings[3]
         self.assertEqual('Secret detected in Dockerfile - GitHub Personal Access Token', finding.title)
         self.assertEqual('Critical', finding.severity)
@@ -115,9 +109,7 @@ https://docs.docker.com/develop/develop-images/dockerfile_best-practices/'''
         test_file = open(sample_path("kubernetes.json"))
         parser = TrivyParser()
         findings = parser.get_findings(test_file, Test())
-
         self.assertEqual(len(findings), 20)
-
         finding = findings[0]
         self.assertEqual('CVE-2020-27350 apt 1.8.2.1', finding.title)
         self.assertEqual('Medium', finding.severity)
@@ -136,7 +128,7 @@ APT had several integer overflows and underflows while parsing .deb packages, ak
         self.assertEqual('apt', finding.component_name)
         self.assertEqual('1.8.2.1', finding.component_version)
         self.assertEqual('default / Deployment / redis-follower', finding.service)
-
+        self.assertEqual(finding.file_path, "gcr.io/google_samples/gb-redis-follower:v2 (debian 10.4)")
         finding = findings[5]
         self.assertEqual('CVE-2020-27350 apt 1.8.2.1', finding.title)
         self.assertEqual('Medium', finding.severity)
@@ -155,7 +147,6 @@ APT had several integer overflows and underflows while parsing .deb packages, ak
         self.assertEqual('apt', finding.component_name)
         self.assertEqual('1.8.2.1', finding.component_version)
         self.assertEqual('default / Deployment / redis-leader', finding.service)
-
         finding = findings[10]
         self.assertEqual('KSV001 - Process can elevate its own privileges', finding.title)
         self.assertEqual('Medium', finding.severity)
@@ -189,7 +180,6 @@ Number  Content
         test_file = open(sample_path("license_scheme.json"))
         parser = TrivyParser()
         findings = parser.get_findings(test_file, Test())
-
         self.assertEqual(len(findings), 19)
         finding = findings[0]
         self.assertEqual("High", finding.severity)
@@ -201,3 +191,21 @@ Number  Content
 **Package:** alpine-baselayout
 '''
         self.assertEqual(description, finding.description)
+
+    def test_issue_9092(self):
+        test_file = open(sample_path("issue_9092.json"))
+        parser = TrivyParser()
+        findings = parser.get_findings(test_file, Test())
+        self.assertEqual(len(findings), 1)
+        finding = findings[0]
+        self.assertEqual("Critical", finding.severity)
+        self.assertEqual(finding.file_path, "requirements.txt")
+
+    def test_issue_9170(self):
+        test_file = open(sample_path("issue_9170.json"))
+        parser = TrivyParser()
+        findings = parser.get_findings(test_file, Test())
+        self.assertEqual(len(findings), 37)
+        finding = findings[0]
+        self.assertEqual("Low", finding.severity)
+        self.assertEqual("KSV116 - Runs with a root primary or supplementary GID", finding.title)

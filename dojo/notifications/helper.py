@@ -20,14 +20,22 @@ logger = logging.getLogger(__name__)
 def create_notification(event=None, **kwargs):
     system_settings = System_Settings.objects.get()
     kwargs["system_settings"] = system_settings
+    # System notifications
+    try:
+        system_notifications = Notifications.objects.get(user=None, template=False)
+    except Exception:
+        system_notifications = Notifications()
 
     if 'recipients' in kwargs:
         # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
         logger.debug('creating notifications for recipients: %s', kwargs['recipients'])
         for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True, product=None):
-            # kwargs.update({'user': recipient_notifications.user})
-            logger.debug('Sent notification to %s', recipient_notifications.user)
-            process_notifications(event, recipient_notifications, **kwargs)
+            # merge the system level notifications with the personal level
+            # this allows for system to trump the personal
+            merged_notifications = Notifications.merge_notifications_list([system_notifications, recipient_notifications])
+            merged_notifications.user = recipient_notifications.user
+            logger.debug('Sent notification to %s', merged_notifications.user)
+            process_notifications(event, merged_notifications, **kwargs)
 
     else:
         logger.debug('creating system notifications for event: %s', event)
@@ -60,12 +68,6 @@ def create_notification(event=None, **kwargs):
             from dojo.utils import get_product
             product = get_product(kwargs['obj'])
             logger.debug("Defined product of obj %s", product)
-
-        # System notifications
-        try:
-            system_notifications = Notifications.objects.get(user=None, template=False)
-        except Exception:
-            system_notifications = Notifications()
 
         # System notifications are sent one with user=None, which will trigger email to configured system email, to global slack channel, etc.
         process_notifications(event, system_notifications, **kwargs)
