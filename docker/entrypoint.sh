@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Waits for the database to come up.
-./docker/wait-for-it.sh $DD_DATABASE_HOST:$DD_DATABASE_PORT
+./docker/wait-for-it.sh "$DD_DATABASE_HOST":"$DD_DATABASE_PORT"
 
 if [ -z "$DD_DATABASE_URL" ]; then
   if [ -z "$DD_DATABASE_PASSWORD" ]; then

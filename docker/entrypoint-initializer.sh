@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 initialize_data()
 {
@@ -40,7 +40,7 @@ fi
 FILES=$(ls /app/docker/extra_settings/* 2>/dev/null)
 NUM_FILES=$(echo "$FILES" | wc -w)
 if [ "$NUM_FILES" -gt 0 ]; then
-    COMMA_LIST=$(echo $FILES | tr -s '[:blank:]' ', ')
+    COMMA_LIST=$(echo "$FILES" | tr -s '[:blank:]' ', ')
     echo "============================================================"
     echo "     Overriding DefectDojo's local_settings.py with multiple"
     echo "     Files: $COMMA_LIST"
@@ -67,7 +67,7 @@ done
 echo
 
 echo "Checking ENABLE_AUDITLOG"
-cat <<EOD | python manage.py shell
+cat <<EOD | if ! python manage.py shell
 from django.db import connections, DEFAULT_DB_ALIAS
 from django.db.utils import ProgrammingError
 from dojo.settings import settings
@@ -99,7 +99,6 @@ if 'enable_auditlog' in raw_row:  # db is not migrated yet
 else:
     print("Database has been already migrated. Nothing to check.")
 EOD
-if [ $? -ne 0 ]
 then
   echo "You have set 'enable_auditlog' to False in the past. It is not possible to manage auditlog in System settings anymore. If you would like to keep auditlog disabled, you need to set environmental variable DD_ENABLE_AUDITLOG to False for all Django containers (uwsgi, celeryworker & initializer)."
   echo "Or there is some other error in checking script. Check logs of this container."
@@ -114,7 +113,7 @@ python3 manage.py migrate
 echo "Admin user: ${DD_ADMIN_USER}"
 ADMIN_EXISTS=$(echo "SELECT * from auth_user;" | python manage.py dbshell | grep "${DD_ADMIN_USER}")
 # Abort if the admin user already exists, instead of giving a new fake password that won't work
-if [ ! -z "$ADMIN_EXISTS" ]
+if [ -n "$ADMIN_EXISTS" ]
 then
     echo "Admin password: Initialization detected that the admin user ${DD_ADMIN_USER} already exists in your database."
     echo "If you don't remember the ${DD_ADMIN_USER} password, you can create a new superuser with:"
@@ -126,14 +125,16 @@ fi
 
 if [ -z "${DD_ADMIN_PASSWORD}" ]
 then
-  export DD_ADMIN_PASSWORD="$(cat /dev/urandom | LC_ALL=C tr -dc a-zA-Z0-9 | \
+  DD_ADMIN_PASSWORD="$(LC_ALL=C tr -dc a-zA-Z0-9 < /dev/urandom | \
     head -c 22)"
+  export DD_ADMIN_PASSWORD
   echo "Admin password: ${DD_ADMIN_PASSWORD}"
 fi
 
 if [ -z "${DD_JIRA_WEBHOOK_SECRET}" ]
 then
-  export DD_JIRA_WEBHOOK_SECRET="$(uuidgen)"
+  DD_JIRA_WEBHOOK_SECRET="$(uuidgen)"
+  export DD_JIRA_WEBHOOK_SECRET
   echo "JIRA Webhook Secret: ${DD_JIRA_WEBHOOK_SECRET}"
 fi
 
@@ -161,9 +162,9 @@ EOD
 
   echo "Importing extra fixtures"
   # If there is extra fixtures, load them
-  for i in $(ls dojo/fixtures/extra_*.json | sort -n 2>/dev/null) ; do
+  for i in $(find dojo/fixtures/extra_*.json | sort -n 2>/dev/null) ; do
     echo "Loading $i"
-    python3 manage.py loaddata ${i%.*}
+    python3 manage.py loaddata "${i%.*}"
   done
 
   echo "Installing watson search index"
