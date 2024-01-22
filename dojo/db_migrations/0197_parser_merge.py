@@ -1,6 +1,7 @@
 from django.db import migrations
 import logging
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -15,11 +16,13 @@ def update_openvas_test(test, openvas_test_type) -> None:
         test.scan_type = openvas_test_type.name
         test.save()
 
+
 def update_clairklar_test(test, clairklar_test_type) -> None:
     if test.test_type.name in CLAIRKLAR_REFERENCES or test.scan_type in CLAIRKLAR_REFERENCES:
         test.test_type = clairklar_test_type
         test.scan_type = clairklar_test_type.name
         test.save()
+
 
 # Update the found_by field to remove OpenVAS CSV/ OpenVAS XML and add OpenVAS Parser
 def update_openvas_finding(finding, openvas_test_type, openvascsv_test_type, openvasxml_test_type) -> None:
@@ -34,6 +37,7 @@ def update_openvas_finding(finding, openvas_test_type, openvascsv_test_type, ope
         finding.found_by.add(openvas_test_type.id)
     finding.save()
 
+
 # Update the found_by field to remove Clair Klar Scan and add Clair Scan
 def update_clairklar_finding(finding, clair_test_type, clairklar_test_type) -> None:
     # Check if nessus is in found by list and remove
@@ -43,6 +47,7 @@ def update_clairklar_finding(finding, clair_test_type, clairklar_test_type) -> N
     if clair_test_type not in finding.found_by.all():
         finding.found_by.add(clair_test_type.id)
     finding.save()
+
 
 # Update all finding objects that came from OpenVAS CSV /XML reports
 def migrate_openvas_parsers(apps, schema_editor):
@@ -61,6 +66,7 @@ def migrate_openvas_parsers(apps, schema_editor):
         update_openvas_finding(finding, openvas_test_type, openvascsv_test_type, openvasxml_test_type)
         # Update the test object
         update_openvas_test(finding.test, openvas_test_type)
+
 
 # Update all finding objects that came from Clair Klar reports
 def migrate_clairklar_parsers(apps, schema_editor):
