@@ -1,4 +1,5 @@
 import datetime
+from django.test import override_settings
 
 from ..dojo_test_case import DojoTestCase
 from dojo.tools.veracode_sca.parser import VeracodeScaParser
@@ -9,7 +10,14 @@ from dateutil.tz import UTC
 
 class TestVeracodeScaScannerParser(DojoTestCase):
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_parse_csv_first_seen(self):
+        self.parse_csv()
+
     def test_parse_csv(self):
+        self.parse_csv()
+
+    def parse_csv(self):
         testfile = open("unittests/scans/veracode_sca/veracode_sca.csv")
         parser = VeracodeScaParser()
         findings = parser.get_findings(testfile, Test())
@@ -51,7 +59,14 @@ class TestVeracodeScaScannerParser(DojoTestCase):
         self.assertEqual("126041205", finding.unique_id_from_tool)
         self.assertEqual(datetime.datetime(2022, 7, 2, 23, 19, 0), finding.date)
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_parse_json_first_seen(self):
+        self.parse_json()
+
     def test_parse_json(self):
+        self.parse_json()
+
+    def parse_json(self):
         testfile = open("unittests/scans/veracode_sca/veracode_sca.json")
         parser = VeracodeScaParser()
         findings = parser.get_findings(testfile, Test())
@@ -70,7 +85,14 @@ class TestVeracodeScaScannerParser(DojoTestCase):
         self.assertEqual("ddcc6e1b-3ed9-45c8-b77a-ead759fb5e2c", finding.unique_id_from_tool)
         self.assertEqual(datetime.datetime(2022, 7, 29, 5, 13, 0, 924000).astimezone(UTC), finding.date)
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_parse_json_fixed_first_seen(self):
+        self.parse_json_fixed()
+
     def test_parse_json_fixed(self):
+        self.parse_json_fixed()
+
+    def parse_json_fixed(self):
         testfile = open("unittests/scans/veracode_sca/veracode_sca_fixed.json")
         parser = VeracodeScaParser()
         findings = parser.get_findings(testfile, Test())
