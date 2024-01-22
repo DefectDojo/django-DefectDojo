@@ -277,6 +277,8 @@ env = environ.FileAwareEnv(
     # If you run big import you may want to disable this because the way django-auditlog currently works, there's
     # a big performance hit. Especially during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
+    # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
+    DD_USE_FIRST_SEEN=(bool, False),
 )
 
 
@@ -1709,3 +1711,4 @@ CREATE_CLOUD_BANNER = env('DD_CREATE_CLOUD_BANNER')
 # ------------------------------------------------------------------------------
 AUDITLOG_FLUSH_RETENTION_PERIOD = env('DD_AUDITLOG_FLUSH_RETENTION_PERIOD')
 ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
+USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
