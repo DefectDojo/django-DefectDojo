@@ -7,7 +7,7 @@ from dojo.jira_link.helper import escape_for_jira
 from dojo.notifications.helper import create_notification
 from django.urls import reverse
 from dojo.celery import app
-from dojo.models import System_Settings, Risk_Acceptance
+from dojo.models import System_Settings, Risk_Acceptance, Finding
 import logging
 
 logger = logging.getLogger(__name__)
@@ -23,6 +23,8 @@ def expire_now(risk_acceptance):
                 logger.debug('%i:%s: unaccepting a.k.a reactivating finding.', finding.id, finding)
                 finding.active = True
                 finding.risk_accepted = False
+                # Update any endpoint statuses on each of the findings
+                update_endpoint_statuses(finding, False)
 
                 if risk_acceptance.restart_sla_expired:
                     finding.sla_start_date = timezone.now().date()
@@ -63,6 +65,8 @@ def reinstate(risk_acceptance, old_expiration_date):
                 logger.debug('%i:%s: accepting a.k.a. deactivating finding', finding.id, finding)
                 finding.active = False
                 finding.risk_accepted = True
+                # Update any endpoint statuses on each of the findings
+                update_endpoint_statuses(finding, True)
                 finding.save(dedupe_option=False)
                 reinstated_findings.append(finding)
             else:
@@ -81,6 +85,8 @@ def delete(eng, risk_acceptance):
     for finding in findings:
         finding.active = True
         finding.risk_accepted = False
+        # Update any endpoint statuses on each of the findings
+        update_endpoint_statuses(finding, False)
         finding.save(dedupe_option=False)
 
     # best effort jira integration, no status changes
@@ -102,6 +108,8 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
     risk_acceptance.accepted_findings.remove(finding)
     finding.active = True
     finding.risk_accepted = False
+    # Update any endpoint statuses on each of the findings
+    update_endpoint_statuses(finding, False)
     finding.save(dedupe_option=False)
     # best effort jira integration, no status changes
     post_jira_comments(risk_acceptance, [finding], unaccepted_message_creator)
@@ -113,6 +121,8 @@ def add_findings_to_risk_acceptance(risk_acceptance, findings):
             finding.active = False
             finding.risk_accepted = True
             finding.save(dedupe_option=False)
+            # Update any endpoint statuses on each of the findings
+            update_endpoint_statuses(finding, True)
             risk_acceptance.accepted_findings.add(finding)
     risk_acceptance.save()
 
@@ -267,6 +277,8 @@ def simple_risk_accept(finding, perform_save=True):
     finding.risk_accepted = True
     # risk accepted, so finding no longer considered active
     finding.active = False
+    # Update any endpoint statuses on each of the findings
+    update_endpoint_statuses(finding, True)
     if perform_save:
         finding.save(dedupe_option=False)
     # post_jira_comment might reload from database so see unaccepted finding. but the comment
@@ -285,6 +297,8 @@ def risk_unaccept(finding, perform_save=True):
         if not finding.mitigated and not finding.false_p and not finding.out_of_scope:
             finding.active = True
         finding.risk_accepted = False
+        # Update any endpoint statuses on each of the findings
+        update_endpoint_statuses(finding, False)
         if perform_save:
             logger.debug('saving unaccepted finding %i:%s', finding.id, finding)
             finding.save(dedupe_option=False)
@@ -297,3 +311,17 @@ def risk_unaccept(finding, perform_save=True):
 def remove_from_any_risk_acceptance(finding):
     for r in finding.risk_acceptance_set.all():
         r.accepted_findings.remove(finding)
+
+
+def update_endpoint_statuses(finding: Finding, accept_risk: bool) -> None:
+    for status in finding.status_finding.all():
+        if accept_risk:
+            status.active = False
+            status.mitigated = True
+            status.risk_accepted = True
+        else:
+            status.active = True
+            status.mitigated = False
+            status.risk_accepted = False
+        status.last_modified = timezone.now()
+        status.save()
