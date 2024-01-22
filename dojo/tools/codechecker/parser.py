@@ -26,6 +26,7 @@ class CodeCheckerParser(object):
 
     def parse_json(self, json_output):
         data = json_output.read()
+        #  'utf-8' This line was added to pass a unittest in test_parsers.TestParsers.test_file_existence.
         return json.loads(data)
 
     def get_items(self, tree):

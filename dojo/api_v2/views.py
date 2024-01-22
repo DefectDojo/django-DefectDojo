@@ -186,10 +186,23 @@ class DojoSpectacularAPIView(SpectacularAPIView):
     renderer_classes = [DojoOpenApiJsonRenderer] + SpectacularAPIView.renderer_classes
 
 
-# Authorization: authenticated users
-class RoleViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+class DojoModelViewSet(
+    viewsets.ModelViewSet,
+    dojo_mixins.DeletePreviewModelMixin,
 ):
+    pass
+
+
+class PrefetchDojoModelViewSet(
+    prefetch.PrefetchListMixin,
+    prefetch.PrefetchRetrieveMixin,
+    DojoModelViewSet,
+):
+    pass
+
+
+# Authorization: authenticated users
+class RoleViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = serializers.RoleSerializer
     queryset = Role.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -223,15 +236,7 @@ class RoleViewSet(
     ),
 )
 class DojoGroupViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.DojoGroupSerializer
     queryset = Dojo_Group.objects.none()
@@ -276,15 +281,7 @@ class DojoGroupViewSet(
     ),
 )
 class DojoGroupMemberViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.DojoGroupMemberSerializer
     queryset = Dojo_Group_Member.objects.none()
@@ -302,6 +299,12 @@ class DojoGroupMemberViewSet(
     def get_queryset(self):
         return get_authorized_group_members(Permissions.Group_View).distinct()
 
+    @extend_schema(
+        exclude=True
+    )
+    @swagger_auto_schema(
+        auto_schema=None
+    )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
         response = {"message": "Patch function is not offered in this path."}
@@ -310,15 +313,7 @@ class DojoGroupMemberViewSet(
 
 # Authorization: superuser
 class GlobalRoleViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.GlobalRoleSerializer
     queryset = Global_Role.objects.all()
@@ -333,15 +328,7 @@ class GlobalRoleViewSet(
 
 # Authorization: object-based
 class EndPointViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.EndpointSerializer
     queryset = Endpoint.objects.none()
@@ -402,15 +389,7 @@ class EndPointViewSet(
 
 # Authorization: object-based
 class EndpointStatusViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.EndpointStatusSerializer
     queryset = Endpoint_Status.objects.none()
@@ -441,16 +420,8 @@ class EndpointStatusViewSet(
 
 # Authorization: object-based
 class EngagementViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
+    PrefetchDojoModelViewSet,
     ra_api.AcceptedRisksMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.EngagementSerializer
     queryset = Engagement.objects.none()
@@ -777,11 +748,9 @@ class EngagementViewSet(
 class RiskAcceptanceViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin,
     mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ReadOnlyModelViewSet,
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.RiskAcceptanceSerializer
@@ -848,15 +817,7 @@ class RiskAcceptanceViewSet(
 # These are technologies in the UI and the API!
 # Authorization: object-based
 class AppAnalysisViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.AppAnalysisSerializer
     queryset = App_Analysis.objects.none()
@@ -877,15 +838,7 @@ class AppAnalysisViewSet(
 
 # Authorization: object-based
 class CredentialsViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.CredentialSerializer
     queryset = Cred_User.objects.all()
@@ -899,15 +852,7 @@ class CredentialsViewSet(
 
 # Authorization: configuration
 class CredentialsMappingViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.CredentialMappingSerializer
     queryset = Cred_Mapping.objects.none()
@@ -928,13 +873,7 @@ class CredentialsMappingViewSet(
 
 # Authorization: configuration
 class FindingTemplatesViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    DojoModelViewSet,
 ):
     serializer_class = serializers.FindingTemplateSerializer
     queryset = Finding_Template.objects.all()
@@ -1807,13 +1746,7 @@ class FindingViewSet(
 
 # Authorization: configuration
 class JiraInstanceViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    DojoModelViewSet,
 ):
     serializer_class = serializers.JIRAInstanceSerializer
     queryset = JIRA_Instance.objects.all()
@@ -1824,15 +1757,7 @@ class JiraInstanceViewSet(
 
 # Authorization: object-based
 class JiraIssuesViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.JIRAIssueSerializer
     queryset = JIRA_Issue.objects.none()
@@ -1860,15 +1785,7 @@ class JiraIssuesViewSet(
 
 # Authorization: object-based
 class JiraProjectViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.JIRAProjectSerializer
     queryset = JIRA_Project.objects.none()
@@ -1899,13 +1816,7 @@ class JiraProjectViewSet(
 
 # Authorization: superuser
 class SonarqubeIssueViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    DojoModelViewSet,
 ):
     serializer_class = serializers.SonarqubeIssueSerializer
     queryset = Sonarqube_Issue.objects.all()
@@ -1916,13 +1827,7 @@ class SonarqubeIssueViewSet(
 
 # Authorization: superuser
 class SonarqubeIssueTransitionViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    DojoModelViewSet,
 ):
     serializer_class = serializers.SonarqubeIssueTransitionSerializer
     queryset = Sonarqube_Issue_Transition.objects.all()
@@ -1939,15 +1844,7 @@ class SonarqubeIssueTransitionViewSet(
 
 # Authorization: object-based
 class ProductAPIScanConfigurationViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.ProductAPIScanConfigurationSerializer
     queryset = Product_API_Scan_Configuration.objects.none()
@@ -2004,15 +1901,7 @@ class ProductAPIScanConfigurationViewSet(
     ),
 )
 class DojoMetaViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.MetaSerializer
     queryset = DojoMeta.objects.none()
@@ -2197,15 +2086,7 @@ class ProductViewSet(
     ),
 )
 class ProductMemberViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.ProductMemberSerializer
     queryset = Product_Member.objects.none()
@@ -2226,12 +2107,10 @@ class ProductMemberViewSet(
         ).distinct()
 
     @extend_schema(
-        request=OpenApiTypes.NONE,
-        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+        exclude=True
     )
     @swagger_auto_schema(
-        request_body=no_body,
-        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+        auto_schema=None
     )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
@@ -2265,15 +2144,7 @@ class ProductMemberViewSet(
     ),
 )
 class ProductGroupViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.ProductGroupSerializer
     queryset = Product_Group.objects.none()
@@ -2294,12 +2165,10 @@ class ProductGroupViewSet(
         ).distinct()
 
     @extend_schema(
-        request=OpenApiTypes.NONE,
-        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+        exclude=True
     )
     @swagger_auto_schema(
-        request_body=no_body,
-        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+        auto_schema=None
     )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
@@ -2333,15 +2202,7 @@ class ProductGroupViewSet(
     ),
 )
 class ProductTypeViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.ProductTypeSerializer
     queryset = Product_Type.objects.none()
@@ -2457,15 +2318,7 @@ class ProductTypeViewSet(
     ),
 )
 class ProductTypeMemberViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.ProductTypeMemberSerializer
     queryset = Product_Type_Member.objects.none()
@@ -2500,12 +2353,10 @@ class ProductTypeMemberViewSet(
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(
-        request=OpenApiTypes.NONE,
-        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+        exclude=True
     )
     @swagger_auto_schema(
-        request_body=no_body,
-        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+        auto_schema=None
     )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
@@ -2539,15 +2390,7 @@ class ProductTypeMemberViewSet(
     ),
 )
 class ProductTypeGroupViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.ProductTypeGroupSerializer
     queryset = Product_Type_Group.objects.none()
@@ -2568,12 +2411,10 @@ class ProductTypeGroupViewSet(
         ).distinct()
 
     @extend_schema(
-        request=OpenApiTypes.NONE,
-        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+        exclude=True
     )
     @swagger_auto_schema(
-        request_body=no_body,
-        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+        auto_schema=None
     )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
@@ -2583,15 +2424,7 @@ class ProductTypeGroupViewSet(
 
 # Authorization: object-based
 class StubFindingsViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.StubFindingSerializer
     queryset = Stub_Finding.objects.none()
@@ -2620,13 +2453,7 @@ class StubFindingsViewSet(
 
 # Authorization: authenticated, configuration
 class DevelopmentEnvironmentViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    DojoModelViewSet,
 ):
     serializer_class = serializers.DevelopmentEnvironmentSerializer
     queryset = Development_Environment.objects.all()
@@ -2636,16 +2463,8 @@ class DevelopmentEnvironmentViewSet(
 
 # Authorization: object-based
 class TestsViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
+    PrefetchDojoModelViewSet,
     ra_api.AcceptedRisksMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.TestSerializer
     queryset = Test.objects.none()
@@ -2881,11 +2700,9 @@ class TestsViewSet(
 
 # Authorization: authenticated, configuration
 class TestTypesViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ReadOnlyModelViewSet,
 ):
     serializer_class = serializers.TestTypeSerializer
     queryset = Test_Type.objects.all()
@@ -2921,15 +2738,7 @@ class TestTypesViewSet(
     ),
 )
 class TestImportViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.TestImportSerializer
     queryset = Test_Import.objects.none()
@@ -2991,15 +2800,7 @@ class TestImportViewSet(
 
 # Authorization: configurations
 class ToolConfigurationsViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.ToolConfigurationSerializer
     queryset = Tool_Configuration.objects.all()
@@ -3020,15 +2821,7 @@ class ToolConfigurationsViewSet(
 
 # Authorization: object-based
 class ToolProductSettingsViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.ToolProductSettingsSerializer
     queryset = Tool_Product_Settings.objects.none()
@@ -3056,13 +2849,7 @@ class ToolProductSettingsViewSet(
 
 # Authorization: configuration
 class ToolTypesViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    DojoModelViewSet,
 ):
     serializer_class = serializers.ToolTypeSerializer
     queryset = Tool_Type.objects.all()
@@ -3073,13 +2860,7 @@ class ToolTypesViewSet(
 
 # Authorization: authenticated, configuration
 class RegulationsViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    DojoModelViewSet,
 ):
     serializer_class = serializers.RegulationSerializer
     queryset = Regulation.objects.all()
@@ -3090,13 +2871,7 @@ class RegulationsViewSet(
 
 # Authorization: configuration
 class UsersViewSet(
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    DojoModelViewSet,
 ):
     serializer_class = serializers.UserSerializer
     queryset = User.objects.all()
@@ -3149,15 +2924,7 @@ class UsersViewSet(
     ),
 )
 class UserContactInfoViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.UserContactInfoSerializer
     queryset = UserContactInfo.objects.all()
@@ -3316,13 +3083,7 @@ class EndpointMetaImporterView(
 
 # Authorization: configuration
 class LanguageTypeViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    DojoModelViewSet,
 ):
     serializer_class = serializers.LanguageTypeSerializer
     queryset = Language_Type.objects.all()
@@ -3357,15 +3118,7 @@ class LanguageTypeViewSet(
     ),
 )
 class LanguageViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.LanguageSerializer
     queryset = Languages.objects.none()
@@ -3487,13 +3240,7 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 # Authorization: configuration
 class NoteTypeViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    DojoModelViewSet,
 ):
     serializer_class = serializers.NoteTypeSerializer
     queryset = Note_Type.objects.all()
@@ -3511,10 +3258,8 @@ class NoteTypeViewSet(
 
 # Authorization: superuser
 class NotesViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ReadOnlyModelViewSet,
 ):
     serializer_class = serializers.NoteSerializer
     queryset = Notes.objects.all()
@@ -3879,15 +3624,7 @@ class SystemSettingsViewSet(
     ),
 )
 class NotificationsViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.NotificationsSerializer
     queryset = Notifications.objects.all()
@@ -3901,15 +3638,7 @@ class NotificationsViewSet(
 
 
 class EngagementPresetsViewset(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.EngagementPresetsSerializer
     queryset = Engagement_Presets.objects.none()
@@ -3929,15 +3658,7 @@ class EngagementPresetsViewset(
 
 
 class EngagementCheckListViewset(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.EngagementCheckListSerializer
     queryset = Check_List.objects.none()
@@ -3956,13 +3677,7 @@ class EngagementCheckListViewset(
 
 
 class NetworkLocationsViewset(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    DojoModelViewSet,
 ):
     serializer_class = serializers.NetworkLocationsSerializer
     queryset = Network_Locations.objects.all()
@@ -3973,7 +3688,7 @@ class NetworkLocationsViewset(
 
 # Authorization: superuser
 class ConfigurationPermissionViewSet(
-    mixins.RetrieveModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet
+    viewsets.ReadOnlyModelViewSet,
 ):
     serializer_class = serializers.ConfigurationPermissionSerializer
     queryset = Permission.objects.filter(
@@ -3985,13 +3700,7 @@ class ConfigurationPermissionViewSet(
 
 
 class SLAConfigurationViewset(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    DojoModelViewSet,
 ):
     serializer_class = serializers.SLAConfigurationSerializer
     queryset = SLA_Configuration.objects.all()
@@ -4000,9 +3709,7 @@ class SLAConfigurationViewset(
 
 
 class QuestionnaireQuestionViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ReadOnlyModelViewSet,
     dojo_mixins.QuestionSubClassFieldsMixin,
 ):
     serializer_class = serializers.QuestionnaireQuestionSerializer
@@ -4015,9 +3722,7 @@ class QuestionnaireQuestionViewSet(
 
 
 class QuestionnaireAnswerViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ReadOnlyModelViewSet,
     dojo_mixins.AnswerSubClassFieldsMixin,
 ):
     serializer_class = serializers.QuestionnaireAnswerSerializer
@@ -4030,7 +3735,7 @@ class QuestionnaireAnswerViewSet(
 
 
 class QuestionnaireGeneralSurveyViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    viewsets.ReadOnlyModelViewSet,
 ):
     serializer_class = serializers.QuestionnaireGeneralSurveySerializer
     queryset = General_Survey.objects.all()
@@ -4042,7 +3747,7 @@ class QuestionnaireGeneralSurveyViewSet(
 
 
 class QuestionnaireEngagementSurveyViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    viewsets.ReadOnlyModelViewSet
 ):
     serializer_class = serializers.QuestionnaireEngagementSurveySerializer
     queryset = Engagement_Survey.objects.all()
@@ -4056,9 +3761,7 @@ class QuestionnaireEngagementSurveyViewSet(
 class QuestionnaireAnsweredSurveyViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.ReadOnlyModelViewSet,
 ):
     serializer_class = serializers.QuestionnaireAnsweredSurveySerializer
     queryset = Answered_Survey.objects.all()

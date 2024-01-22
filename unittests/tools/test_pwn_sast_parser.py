@@ -39,3 +39,4 @@ class TestPWNSASTParser(DojoTestCase):
         self.assertIsInstance(findings, list)
         for finding in findings:
             self.assertIsNotNone(finding.title)
+            self.assertIsNotNone(finding.unique_id_from_tool)

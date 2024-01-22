@@ -29,7 +29,7 @@ class ApiEdgescanParser(object):
         return "Edgescan"
 
     def api_scan_configuration_hint(self):
-        return "the field <b>Service key 1</b> has to be set with the Edgescan asset id."
+        return "In the field <b>Service key 1</b>, provide the Edgescan asset ID(s). Leaving it blank will import all assets' findings."
 
     def get_findings(self, file, test):
         if file:

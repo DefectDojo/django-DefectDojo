@@ -13,7 +13,7 @@ individual hosts vulnerable.
 
 ![Import Form](../../images/imp_1.png)
 
-This approach will create a new Test for each upload. This can result a lot of findings. If deduplication is enabled, new findings that are identical to existing findings get marked as a duplicate.
+This approach will create a new Test for each upload. This can result in a lot of findings. If deduplication is enabled, new Findings that are identical to existing Findings get marked as a duplicate.
 
 ## Reimport
 
@@ -37,9 +37,9 @@ Clicking on a reimport changset will show the affected findings, as well as a st
 ![Import History details](../../images/import_history_details1.png)
 
 ### Triage-less scanners
-Some scanners might not include triage information in their reports, such as tfsec for example. They simply scan code or dependencies, flag issues, and return everything. Removing some findings requires you to add comments in your code perhaps, but there is no simple way to filter out findings from the reports. 
+Some scanners might not include triage information in their reports (e.g. tfsec). They simply scan code or dependencies, flag issues, and return everything. Removing some findings requires you to add comments in your code perhaps, but there is no simple way to filter out findings from the reports.
 
-That is why DefectDojo also includes a "Do not reactivate" checkbox in uploading reports (also in the reimport API), so you can persist the triages that have been done in Defectdojo without reactivating issues on every upload. 
+That is why DefectDojo also includes a "Do not reactivate" checkbox in uploading reports (also in the reimport API), so you can persist the triages that have been done in Defectdojo without reactivating Findings on every upload.
 
 For context, see [#6892](https://github.com/DefectDojo/django-DefectDojo/issues/6892)
 
@@ -88,7 +88,7 @@ A classic way of importing a scan is by specifying the ID of the engagement inst
 ## Reimport
 ReImporting via the API is performed via the [reimport-scan](https://demo.defectdojo.org/api/v2/doc/) endpoint.
 
-An reimport can be performed by specifying the names of these entities in the API request:
+A reimport can be performed by specifying the names of these entities in the API request:
 
 
 ```JSON
@@ -110,9 +110,9 @@ When `auto_create_context` is `True`, the product and engagement will be created
 
 When `do_not_reactivate` is `True`, the importing/reimporting will ignore uploaded active findings and not reactivate previously closed findings, while still creating new findings if there are new ones. You will get a note on the finding to explain that it was not reactivated for that reason.
 
-A Reimport will automatically select the latest test inside the provided engagement that satisifes the provided `scan_type` and (optionally) provided `test_title`
+A reimport will automatically select the latest test inside the provided engagement that satisifes the provided `scan_type` and (optionally) provided `test_title`.
 
-If no existing Test is found, the reimport endpoint will use the import function to import the provided report into a new Test. This means a (CI/CD) script using the API doesn't need to know if a Test already exist, or if it is a first time upload for this product / engagement.
+If no existing Test is found, the reimport endpoint will use the import function to import the provided report into a new Test. This means a (CI/CD) script using the API doesn't need to know if a Test already exists, or if it is a first time upload for this Product / Engagement.
 
 A classic way of reimporting a scan is by specifying the ID of the test instead:
 

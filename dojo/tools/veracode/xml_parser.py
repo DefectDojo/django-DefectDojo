@@ -1,11 +1,11 @@
 import re
 import uuid
 from datetime import datetime
+from django.conf import settings
 
 from defusedxml import ElementTree
 
-from dojo.models import Finding
-from dojo.models import Endpoint
+from dojo.models import Finding, Endpoint
 
 XML_NAMESPACE = {"x": "https://www.veracode.com/schema/reports/export/1.0"}
 
@@ -168,13 +168,16 @@ class VeracodeXMLParser(object):
             + xml_node.attrib["issueid"]
         )
 
-        _date_found = test.target_start
-        if "date_first_occurrence" in xml_node.attrib:
-            _date_found = datetime.strptime(
-                xml_node.attrib["date_first_occurrence"],
-                "%Y-%m-%d %H:%M:%S %Z",
-            )
-        finding.date = _date_found
+        # Get the date based on the first_seen setting
+        try:
+            if settings.USE_FIRST_SEEN:
+                if date := xml_node.get("date_first_occurrence", None):
+                    finding.date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S %Z")
+            else:
+                if date := xml_node.get("date_last_occurrence", None):
+                    finding.date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S %Z")
+        except Exception:
+            finding.date = test.target_start
 
         _is_mitigated = False
         _mitigated_date = None

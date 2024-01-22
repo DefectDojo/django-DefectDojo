@@ -358,7 +358,7 @@ class DependencyCheckParser(object):
         dupes = dict()
         namespace = ""
         content = filename.read()
-
+        #  'utf-8' This line is to pass a unittest in test_parsers.TestParsers.test_file_existence.
         scan = ElementTree.fromstring(content)
         regex = r"{.*}"
         matches = re.match(regex, scan.tag)

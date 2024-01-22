@@ -1,5 +1,6 @@
 from .dojo_test_case import DojoTestCase, get_unit_tests_path
 import os
+import re
 
 basedir = os.path.join(get_unit_tests_path(), '..')
 
@@ -26,7 +27,15 @@ class TestParsers(DojoTestCase):
                     self.assertTrue(
                         os.path.isfile(doc_file),
                         f"Documentation file '{doc_file}' is missing or using different name"
-                    )
+                                    )
+
+                    content = open(doc_file).read()
+                    self.assertTrue(re.search("title:", content),
+                                    f"Documentation file '{doc_file}' does not contain a title"
+                                    )
+                    self.assertTrue(re.search("toc_hide: true", content),
+                                    f"Documentation file '{doc_file}' does not contain toc_hide: true"
+                                    )
 
             if parser_dir.name not in [
                 # there is not exception for now
@@ -59,3 +68,21 @@ class TestParsers(DojoTestCase):
                             os.path.isfile(importer_test_file),
                             f"Unittest of importer '{importer_test_file}' is missing or using different name"
                         )
+            for file in os.scandir(os.path.join(basedir, 'dojo', 'tools', parser_dir.name)):
+                if file.is_file() and file.name != '__pycache__' and file.name != "__init__.py":
+                    f = os.path.join(basedir, 'dojo', 'tools', parser_dir.name, file.name)
+                    read_true = False
+                    for line in open(f, "r").readlines():
+                        if read_true is True:
+                            if ('"utf-8"' in str(line) or "'utf-8'" in str(line) or '"utf-8-sig"' in str(line) or "'utf-8-sig'" in str(line)) and i <= 4:
+                                read_true = False
+                                i = 0
+                            elif i > 4:
+                                self.assertTrue(False, "In file " + str(os.path.join('dojo', 'tools', parser_dir.name, file.name)) + " the test is failing because you don't have utf-8 after .read()")
+                                i = 0
+                                read_true = False
+                            else:
+                                i += 1
+                        if ".read()" in str(line):
+                            read_true = True
+                            i = 0
