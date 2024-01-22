@@ -22,6 +22,8 @@ jobs:
   # If the following jobs fail, then we will at least have some release notes present
   update_release_draft:
     runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Create Release
         id: create_release
@@ -39,7 +41,9 @@ jobs:
     secrets: inherit
   # Upload the OAS schemas to the release object
   add-oas-to-release:
-    needs: oas-fetch
+    needs: 
+      - update_release_draft
+      - oas-fetch
     runs-on: ubuntu-latest
     steps:
       - name: Load OAS files from artifacts
@@ -51,7 +55,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ needs.update_release_draft.outputs.upload_url }}
           asset_path: ./oas-yaml/oas.yaml
           asset_name: oas.yaml
           asset_content_type: application/vnd.oai.openapi
@@ -62,7 +66,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ needs.update_release_draft.outputs.upload_url }}
           asset_path: ./oas-json/oas.json
           asset_name: oas.json
           asset_content_type: application/json
