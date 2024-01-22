@@ -2142,7 +2142,16 @@ class Finding(models.Model):
                                         blank=True,
                                         verbose_name=_('CVSSv3 score'),
                                         help_text=_("Numerical CVSSv3 score for the vulnerability. If the vector is given, the score is updated while saving the finding"))
-
+    cvssv4_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|AT:[NP]|PR:[NLH]|UI:[NPA]|VC:[HLN]|[VI]:[HLN]|[VA]:[HLN]|[SC]:[HLN]|[SI]:[HLN]|[SA]:[HLN]', message="CVSS must be entered in format: 'AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N'")
+    cvssv4 = models.TextField(validators=[cvssv4_regex],
+                              max_length=117,
+                              null=True,
+                              verbose_name=_('CVSS v4'),
+                              help_text=_('Common Vulnerability Scoring System version 4 (CVSSv4) score associated with this flaw.'))
+    cvssv4_score = models.FloatField(null=True,
+                                        blank=True,
+                                        verbose_name=_('CVSSv4 score'),
+                                        help_text=_("Numerical CVSSv4 score for the vulnerability. If the vector is given, the score is updated while saving the finding"))
     url = models.TextField(null=True,
                            blank=True,
                            editable=False,
