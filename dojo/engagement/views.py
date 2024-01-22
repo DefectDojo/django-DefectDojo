@@ -514,8 +514,6 @@ class ViewEngagement(View):
 
         notes = eng.notes.all()
         note_type_activation = Note_Type.objects.filter(is_active=True).count()
-        if note_type_activation:
-            available_note_types = find_available_notetypes(notes)
         form = DoneForm()
 
         if note_type_activation:
