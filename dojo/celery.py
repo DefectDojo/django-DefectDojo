@@ -1,6 +1,6 @@
 import os
 from celery import Celery
-from celery.signals import setup_logging, beat_init, worker_ready, worker_shutdown, after_task_publish, task_success
+from celery.signals import setup_logging, beat_init, worker_ready, worker_shutdown, after_task_publish
 from django.conf import settings
 from pathlib import Path
 from dojo.bootstraps import LivenessProbe
@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 
 # File for validating worker readiness
 READINESS_FILE = Path('/tmp/celery_ready')
+# File for validating beat liveness
+HEARTBEAT_FILE = Path('/tmp/celery_live')
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dojo.settings.settings')
@@ -46,11 +48,15 @@ def worker_ready(**_):
 def worker_shutdown(**_):
     READINESS_FILE.unlink(missing_ok=True)
 
-# celery beat rediness checkc
+# celery beat readiness and liveness checks
 
 @beat_init.connect
 def beat_ready(**_):
     READINESS_FILE.touch()
+
+@after_task_publish.connect(sender="healthcheck.tasks.celery_heartbeat")
+def task_published(**_):
+    HEARTBEAT_FILE.touch()
 
 # from celery import current_app
 
