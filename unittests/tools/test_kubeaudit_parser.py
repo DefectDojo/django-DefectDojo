@@ -6,7 +6,7 @@ from dojo.models import Test
 class TestKubeAuditParser(DojoTestCase):
 
     def test_parse_file_has_no_findings(self):
-        testfile = open("unittests/scans/drheader/kubeaudit.json")
+        testfile = open("unittests/scans/kubeaudit/kubeaudit.json")
         parser = KubeAuditParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
