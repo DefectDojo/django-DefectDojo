@@ -17,6 +17,8 @@ class KubeAuditParser(object):
             severity = "Medium"
         elif input == "error":
             severity = "High"
+        elif input == "info":
+            severity = "Info"
         else:
             severity = "Low"
         return severity
@@ -25,8 +27,10 @@ class KubeAuditParser(object):
         lines = filename.readlines()
         findings = list()
         for line in lines:
-            jsoncontent = line.decode("utf-8")
-            tree = json.loads(jsoncontent)
+            try:
+                tree = json.loads(str(line, "utf-8"))
+            except BaseException:
+                tree = json.loads(line)
             AuditResultName = tree.get('AuditResultName', None)
             DeprecatedMajor = tree.get('DeprecatedMajor', None)
             DeprecatedMinor = tree.get('DeprecatedMinor', None)
