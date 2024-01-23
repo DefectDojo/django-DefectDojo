@@ -37,12 +37,8 @@ class SysdigReportsParser(object):
             return ()
 
     def parse_json(self, data, test):
-        try:
-            vulnerability = data["data"]  # json output of https://pypi.org/project/harborapi/
-        except (KeyError):
-            pass
-        # Early exit if empty
-        if 'data' not in locals() or vulnerability is None:
+        vulnerability = data.get("data", None)
+        if not vulnerability:
             return list()
         findings = list()
         for item in vulnerability:
