@@ -39,7 +39,8 @@ def bind_alert_count(request):
     if not settings.DISABLE_ALERT_COUNTER:
         from dojo.models import Alerts
 
-        if request.user.is_authenticated:
+
+        if hasattr(request, "user") and request.user.is_authenticated:
             return {"alert_count": Alerts.objects.filter(user_id=request.user).count()}
     return {}
 

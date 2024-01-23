@@ -22,7 +22,7 @@ class TwistlockCSVParser(object):
         row.get("Id", "")
         data_severity = row.get("Severity", "")
         data_cvss = row.get("CVSS", "")
-        data_description = description_column = row.get("Description", "")
+        data_description = row.get("Description", "")
 
         if data_vulnerability_id and data_package_name:
             title = (

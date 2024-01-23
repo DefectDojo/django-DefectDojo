@@ -3,6 +3,7 @@ import logging
 import html2text
 from defusedxml import ElementTree as etree
 from cvss import CVSS3
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
 from dojo.tools.qualys import csv_parser
@@ -67,13 +68,16 @@ def split_cvss(value, _temp):
         return
     if len(value) > 4:
         split = value.split(" (")
-        _temp["CVSS_value"] = float(split[0])
-        # remove ")" at the end
-        _temp["CVSS_vector"] = CVSS3(
-            "CVSS:3.0/" + split[1][:-1]
-        ).clean_vector()
+        if _temp.get("CVSS_value") is None:
+            _temp["CVSS_value"] = float(split[0])
+            # remove ")" at the end
+        if _temp.get("CVSS_vector") is None:
+            _temp["CVSS_vector"] = CVSS3(
+                "CVSS:3.0/" + split[1][:-1]
+            ).clean_vector()
     else:
-        _temp["CVSS_value"] = float(value)
+        if _temp.get("CVSS_value") is None:
+            _temp["CVSS_value"] = float(value)
 
 
 def parse_finding(host, tree):
@@ -109,9 +113,17 @@ def parse_finding(host, tree):
         _last_found = str(vuln_details.findtext("LAST_FOUND"))
         _times_found = str(vuln_details.findtext("TIMES_FOUND"))
 
-        _temp["date"] = datetime.datetime.strptime(
-            vuln_details.findtext("LAST_FOUND"), "%Y-%m-%dT%H:%M:%SZ"
-        ).date()
+        # Get the date based on the first_seen setting
+        try:
+            if settings.USE_FIRST_SEEN:
+                if date := vuln_details.findtext("FIRST_FOUND"):
+                    _temp["date"] = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
+            else:
+                if date := vuln_details.findtext("LAST_FOUND"):
+                    _temp["date"] = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
+        except Exception:
+            _temp["date"] = None
+
         # Vuln_status
         status = vuln_details.findtext("VULN_STATUS")
         if status == "Active" or status == "Re-Opened" or status == "New":
@@ -222,6 +234,7 @@ def parse_finding(host, tree):
                 sev = "Critical"
         elif sev is None:
             sev = "Informational"
+
         finding = None
         if _temp_cve_details:
             refs = "\n".join(list(_cl.values()))
@@ -252,6 +265,8 @@ def parse_finding(host, tree):
         finding.active = _temp["active"]
         if _temp.get("CVSS_vector") is not None:
             finding.cvssv3 = _temp.get("CVSS_vector")
+        if _temp.get("CVSS_value") is not None:
+            finding.cvssv3_score = _temp.get("CVSS_value")
         finding.verified = True
         finding.unsaved_endpoints = list()
         finding.unsaved_endpoints.append(ep)

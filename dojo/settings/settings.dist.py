@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 root = environ.Path(__file__) - 3  # Three folders back
 
 # reference: https://pypi.org/project/django-environ/
-env = environ.Env(
+env = environ.FileAwareEnv(
     # Set casting and default values
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),
@@ -240,6 +240,8 @@ env = environ.Env(
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
     # new feature that tracks history across multiple reimports for the same test
     DD_TRACK_IMPORT_HISTORY=(bool, True),
+    # Delete Auditlogs older than x month; -1 to keep all logs
+    DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, -1),
     # Allow grouping of findings in the same test, for example to group findings per dependency
     # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
     DD_FEATURE_FINDING_GROUPS=(bool, True),
@@ -309,6 +311,8 @@ env = environ.Env(
     # If you run big import you may want to disable this because the way django-auditlog currently works, there's
     # a big performance hit. Especially during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
+    # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
+    DD_USE_FIRST_SEEN=(bool, False),
 )
 
 
@@ -1124,32 +1128,32 @@ if SAML2_ENABLED:
 # REMOTE_USER
 # ------------------------------------------------------------------------------
 
-AUTH_REMOTEUSER_ENABLED = env("DD_AUTH_REMOTEUSER_ENABLED")
+AUTH_REMOTEUSER_ENABLED = env('DD_AUTH_REMOTEUSER_ENABLED')
+AUTH_REMOTEUSER_USERNAME_HEADER = env('DD_AUTH_REMOTEUSER_USERNAME_HEADER')
+AUTH_REMOTEUSER_EMAIL_HEADER = env('DD_AUTH_REMOTEUSER_EMAIL_HEADER')
+AUTH_REMOTEUSER_FIRSTNAME_HEADER = env('DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER')
+AUTH_REMOTEUSER_LASTNAME_HEADER = env('DD_AUTH_REMOTEUSER_LASTNAME_HEADER')
+AUTH_REMOTEUSER_GROUPS_HEADER = env('DD_AUTH_REMOTEUSER_GROUPS_HEADER')
+AUTH_REMOTEUSER_GROUPS_CLEANUP = env('DD_AUTH_REMOTEUSER_GROUPS_CLEANUP')
+
+AUTH_REMOTEUSER_TRUSTED_PROXY = IPSet()
+for ip_range in env('DD_AUTH_REMOTEUSER_TRUSTED_PROXY'):
+    AUTH_REMOTEUSER_TRUSTED_PROXY.add(IPNetwork(ip_range))
+
+if env('DD_AUTH_REMOTEUSER_LOGIN_ONLY'):
+    RemoteUserMiddleware = 'dojo.remote_user.PersistentRemoteUserMiddleware'
+else:
+    RemoteUserMiddleware = 'dojo.remote_user.RemoteUserMiddleware'
+# we need to add middleware just behindAuthenticationMiddleware as described in https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#configuration
+for i in range(len(MIDDLEWARE)):
+    if MIDDLEWARE[i] == 'django.contrib.auth.middleware.AuthenticationMiddleware':
+        MIDDLEWARE.insert(i + 1, RemoteUserMiddleware)
+        break
+
 if AUTH_REMOTEUSER_ENABLED:
-    AUTH_REMOTEUSER_USERNAME_HEADER = env("DD_AUTH_REMOTEUSER_USERNAME_HEADER")
-    AUTH_REMOTEUSER_EMAIL_HEADER = env("DD_AUTH_REMOTEUSER_EMAIL_HEADER")
-    AUTH_REMOTEUSER_FIRSTNAME_HEADER = env("DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER")
-    AUTH_REMOTEUSER_LASTNAME_HEADER = env("DD_AUTH_REMOTEUSER_LASTNAME_HEADER")
-    AUTH_REMOTEUSER_GROUPS_HEADER = env("DD_AUTH_REMOTEUSER_GROUPS_HEADER")
-    AUTH_REMOTEUSER_GROUPS_CLEANUP = env("DD_AUTH_REMOTEUSER_GROUPS_CLEANUP")
-
-    AUTH_REMOTEUSER_TRUSTED_PROXY = IPSet()
-    for ip_range in env("DD_AUTH_REMOTEUSER_TRUSTED_PROXY"):
-        AUTH_REMOTEUSER_TRUSTED_PROXY.add(IPNetwork(ip_range))
-
-    if env("DD_AUTH_REMOTEUSER_LOGIN_ONLY"):
-        RemoteUserMiddleware = "dojo.remote_user.PersistentRemoteUserMiddleware"
-    else:
-        RemoteUserMiddleware = "dojo.remote_user.RemoteUserMiddleware"
-    # we need to add middleware just behindAuthenticationMiddleware as described in https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#configuration
-    for i in range(len(MIDDLEWARE)):
-        if MIDDLEWARE[i] == "django.contrib.auth.middleware.AuthenticationMiddleware":
-            MIDDLEWARE.insert(i + 1, RemoteUserMiddleware)
-            break
-
-    REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = (
-        "dojo.remote_user.RemoteUserAuthentication",
-    ) + REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"]
+    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = \
+        ('dojo.remote_user.RemoteUserAuthentication',) + \
+        REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES']
 
     SWAGGER_SETTINGS["SECURITY_DEFINITIONS"]["remoteUserAuth"] = {
         "type": "apiKey",
@@ -1207,9 +1211,13 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": timedelta(minutes=1),
         "args": [timedelta(minutes=1)],
     },
-    "update-findings-from-source-issues": {
-        "task": "dojo.tools.tool_issue_updater.update_findings_from_source_issues",
-        "schedule": timedelta(hours=3),
+    'flush_auditlog': {
+        'task': 'dojo.tasks.flush_auditlog',
+        'schedule': timedelta(hours=8),
+    },
+    'update-findings-from-source-issues': {
+        'task': 'dojo.tools.tool_issue_updater.update_findings_from_source_issues',
+        'schedule': timedelta(hours=3),
     },
     "compute-sla-age-and-notify": {
         "task": "dojo.tasks.async_sla_compute_and_notify_task",
@@ -1334,108 +1342,50 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Clair Scan": ["title", "vulnerability_ids", "description", "severity"],
     "Clair Klar Scan": ["title", "description", "severity"],
     # for backwards compatibility because someone decided to rename this scanner:
-    "Symfony Security Check": ["title", "vulnerability_ids"],
-    "DSOP Scan": ["vulnerability_ids"],
-    "Acunetix Scan": ["title", "description"],
-    "Acunetix360 Scan": ["title", "description"],
-    "Terrascan Scan": [
-        "vuln_id_from_tool",
-        "title",
-        "severity",
-        "file_path",
-        "line",
-        "component_name",
-    ],
-    "Trivy Operator Scan": ["title", "severity", "vulnerability_ids"],
-    "Trivy Scan": ["title", "severity", "vulnerability_ids", "cwe"],
-    "TFSec Scan": ["severity", "vuln_id_from_tool", "file_path", "line"],
-    "Snyk Scan": [
-        "vuln_id_from_tool",
-        "file_path",
-        "component_name",
-        "component_version",
-    ],
-    "GitLab Dependency Scanning Report": [
-        "title",
-        "vulnerability_ids",
-        "file_path",
-        "component_name",
-        "component_version",
-    ],
-    "SpotBugs Scan": ["cwe", "severity", "file_path", "line"],
-    "JFrog Xray Unified Scan": [
-        "vulnerability_ids",
-        "file_path",
-        "component_name",
-        "component_version",
-    ],
-    "JFrog Xray On Demand Binary Scan": [
-        "title",
-        "component_name",
-        "component_version",
-    ],
-    "Scout Suite Scan": [
-        "file_path",
-        "vuln_id_from_tool",
-    ],  # for now we use file_path as there is no attribute for "service"
-    "Meterian Scan": [
-        "cwe",
-        "component_name",
-        "component_version",
-        "description",
-        "severity",
-    ],
-    "Github Vulnerability Scan": [
-        "title",
-        "severity",
-        "component_name",
-        "vulnerability_ids",
-        "file_path",
-    ],
-    "Solar Appscreener Scan": ["title", "file_path", "line", "severity"],
-    "pip-audit Scan": ["vuln_id_from_tool", "component_name", "component_version"],
-    "Rubocop Scan": ["vuln_id_from_tool", "file_path", "line"],
-    "JFrog Xray Scan": ["title", "description", "component_name", "component_version"],
-    "CycloneDX Scan": ["vuln_id_from_tool", "component_name", "component_version"],
-    "SSLyze Scan (JSON)": ["title", "description"],
-    "Harbor Vulnerability Scan": ["title", "mitigation"],
-    "Rusty Hog Scan": ["file_path", "payload"],
-    "StackHawk HawkScan": ["vuln_id_from_tool", "component_name", "component_version"],
-    "Hydra Scan": ["title", "description"],
-    "DrHeader JSON Importer": ["title", "description"],
-    "Whispers": ["vuln_id_from_tool", "file_path", "line"],
-    "Blackduck Hub Scan": [
-        "title",
-        "vulnerability_ids",
-        "component_name",
-        "component_version",
-    ],
-    "Veracode SourceClear Scan": [
-        "title",
-        "vulnerability_ids",
-        "component_name",
-        "component_version",
-        "severity",
-    ],
-    "Vulners Scan": ["vuln_id_from_tool", "component_name"],
-    "Twistlock Image Scan": [
-        "title",
-        "severity",
-        "component_name",
-        "component_version",
-    ],
-    "NeuVector (REST)": ["title", "severity", "component_name", "component_version"],
-    "NeuVector (compliance)": ["title", "vuln_id_from_tool", "description"],
-    "Wpscan": ["title", "description", "severity"],
-    "Popeye Scan": ["title", "description"],
-    "Wazuh Scan": ["title"],
-    "Nuclei Scan": ["title", "cwe", "severity"],
-    "KubeHunter Scan": ["title", "description"],
-    "kube-bench Scan": ["title", "vuln_id_from_tool", "description"],
-    "Threagile risks report": ["title", "cwe", "severity"],
-    "Trufflehog Scan": ["title", "description", "line"],
-    "Humble Json Importer": ["title"],
-    "MSDefender Parser": ["title", "description"],
+    'Symfony Security Check': ['title', 'vulnerability_ids'],
+    'DSOP Scan': ['vulnerability_ids'],
+    'Acunetix Scan': ['title', 'description'],
+    'Acunetix360 Scan': ['title', 'description'],
+    'Terrascan Scan': ['vuln_id_from_tool', 'title', 'severity', 'file_path', 'line', 'component_name'],
+    'Trivy Operator Scan': ['title', 'severity', 'vulnerability_ids'],
+    'Trivy Scan': ['title', 'severity', 'vulnerability_ids', 'cwe', 'description'],
+    'TFSec Scan': ['severity', 'vuln_id_from_tool', 'file_path', 'line'],
+    'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
+    'GitLab Dependency Scanning Report': ['title', 'vulnerability_ids', 'file_path', 'component_name', 'component_version'],
+    'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
+    'JFrog Xray Unified Scan': ['vulnerability_ids', 'file_path', 'component_name', 'component_version'],
+    'JFrog Xray On Demand Binary Scan': ["title", "component_name", "component_version"],
+    'Scout Suite Scan': ['file_path', 'vuln_id_from_tool'],  # for now we use file_path as there is no attribute for "service"
+    'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
+    'Github Vulnerability Scan': ['title', 'severity', 'component_name', 'vulnerability_ids', 'file_path'],
+    'Solar Appscreener Scan': ['title', 'file_path', 'line', 'severity'],
+    'pip-audit Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
+    'Rubocop Scan': ['vuln_id_from_tool', 'file_path', 'line'],
+    'JFrog Xray Scan': ['title', 'description', 'component_name', 'component_version'],
+    'CycloneDX Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
+    'SSLyze Scan (JSON)': ['title', 'description'],
+    'Harbor Vulnerability Scan': ['title', 'mitigation'],
+    'Rusty Hog Scan': ['file_path', 'payload'],
+    'StackHawk HawkScan': ['vuln_id_from_tool', 'component_name', 'component_version'],
+    'Hydra Scan': ['title', 'description'],
+    'DrHeader JSON Importer': ['title', 'description'],
+    'Whispers': ['vuln_id_from_tool', 'file_path', 'line'],
+    'Blackduck Hub Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
+    'Veracode SourceClear Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version', 'severity'],
+    'Vulners Scan': ['vuln_id_from_tool', 'component_name'],
+    'Twistlock Image Scan': ['title', 'severity', 'component_name', 'component_version'],
+    'NeuVector (REST)': ['title', 'severity', 'component_name', 'component_version'],
+    'NeuVector (compliance)': ['title', 'vuln_id_from_tool', 'description'],
+    'Wpscan': ['title', 'description', 'severity'],
+    'Popeye Scan': ['title', 'description'],
+    'Wazuh Scan': ['title'],
+    'Nuclei Scan': ['title', 'cwe', 'severity'],
+    'KubeHunter Scan': ['title', 'description'],
+    'kube-bench Scan': ['title', 'vuln_id_from_tool', 'description'],
+    'Threagile risks report': ['title', 'cwe', "severity"],
+    'Trufflehog Scan': ['title', 'description', 'line'],
+    'Humble Json Importer': ['title'],
+    'MSDefender Parser': ['title', 'description'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1900,4 +1850,10 @@ ADDITIONAL_HEADERS = env("DD_ADDITIONAL_HEADERS")
 # Dictates whether cloud banner is created or not
 CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 
-ENABLE_AUDITLOG = env("DD_ENABLE_AUDITLOG")
+
+# ------------------------------------------------------------------------------
+# Auditlog
+# ------------------------------------------------------------------------------
+AUDITLOG_FLUSH_RETENTION_PERIOD = env('DD_AUDITLOG_FLUSH_RETENTION_PERIOD')
+ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
+USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')

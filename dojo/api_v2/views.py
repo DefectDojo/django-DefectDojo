@@ -82,6 +82,7 @@ from dojo.models import (
     Answered_Survey,
     General_Survey,
     Check_List,
+    Announcement,
 )
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import (
@@ -110,7 +111,6 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
 from dojo.utils import (
-    get_period_counts_legacy,
     get_system_setting,
     get_setting,
     async_delete,
@@ -580,9 +580,6 @@ class EngagementViewSet(
 
             serialized_note = serializers.NoteSerializer(
                 {"author": author, "entry": entry, "private": private}
-            )
-            result = serializers.EngagementToNotesSerializer(
-                {"engagement_id": engagement, "notes": [serialized_note.data]}
             )
             return Response(
                 serialized_note.data, status=status.HTTP_201_CREATED
@@ -1227,9 +1224,6 @@ class FindingViewSet(
 
             serialized_note = serializers.NoteSerializer(
                 {"author": author, "entry": entry, "private": private}
-            )
-            result = serializers.FindingToNotesSerializer(
-                {"finding_id": finding, "notes": [serialized_note.data]}
             )
             return Response(
                 serialized_note.data, status=status.HTTP_201_CREATED
@@ -2591,9 +2585,6 @@ class TestsViewSet(
             serialized_note = serializers.NoteSerializer(
                 {"author": author, "entry": entry, "private": private}
             )
-            result = serializers.TestToNotesSerializer(
-                {"test_id": test, "notes": [serialized_note.data]}
-            )
             return Response(
                 serialized_note.data, status=status.HTTP_201_CREATED
             )
@@ -3285,7 +3276,6 @@ def report_generate(request, obj, options):
     test = None
     endpoint = None
     endpoints = None
-    endpoint_monthly_counts = None
 
     include_finding_notes = False
     include_finding_images = False
@@ -3319,16 +3309,7 @@ def report_generate(request, obj, options):
                 )
             ),
         )
-        products = Product.objects.filter(
-            prod_type=product_type, engagement__test__finding__in=findings.qs
-        ).distinct()
-        engagements = Engagement.objects.filter(
-            product__prod_type=product_type, test__finding__in=findings.qs
-        ).distinct()
-        tests = Test.objects.filter(
-            engagement__product__prod_type=product_type,
-            finding__in=findings.qs,
-        ).distinct()
+
         if len(findings.qs) > 0:
             start_date = timezone.make_aware(
                 datetime.combine(findings.qs.last().date, datetime.min.time())
@@ -3343,15 +3324,6 @@ def report_generate(request, obj, options):
         # include current month
         months_between += 1
 
-        endpoint_monthly_counts = get_period_counts_legacy(
-            findings.qs.order_by("numerical_severity"),
-            findings.qs.order_by("numerical_severity"),
-            None,
-            months_between,
-            start_date,
-            relative_delta="months",
-        )
-
     elif type(obj).__name__ == "Product":
         product = obj
 
@@ -3364,11 +3336,6 @@ def report_generate(request, obj, options):
                 Finding.objects.filter(test__engagement__product=product)
             ),
         )
-        ids = set(finding.id for finding in findings.qs)
-        engagements = Engagement.objects.filter(
-            test__finding__id__in=ids
-        ).distinct()
-        tests = Test.objects.filter(finding__id__in=ids).distinct()
         ids = get_endpoint_ids(
             Endpoint.objects.filter(product=product).distinct()
         )
@@ -3386,7 +3353,6 @@ def report_generate(request, obj, options):
         report_name = "Engagement Report: " + str(engagement)
 
         ids = set(finding.id for finding in findings.qs)
-        tests = Test.objects.filter(finding__id__in=ids).distinct()
         ids = get_endpoint_ids(
             Endpoint.objects.filter(product=engagement.product).distinct()
         )
@@ -3777,3 +3743,14 @@ class QuestionnaireAnsweredSurveyViewSet(
         ],
         serializers.QuestionnaireAnsweredSurveySerializer,
     ).to_schema()
+
+
+# Authorization: configuration
+class AnnouncementViewSet(
+    DojoModelViewSet
+):
+    serializer_class = serializers.AnnouncementSerializer
+    queryset = Announcement.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = "__all__"
+    permission_classes = (permissions.UserHasConfigurationPermissionStaff,)

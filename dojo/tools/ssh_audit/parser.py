@@ -35,7 +35,7 @@ class SSHAuditParser(object):
         items = []
         try:
             data = json.load(filename)
-        except ValueError as err:
+        except ValueError:
             data = {}
         if data != {}:
             title = data['banner']['raw']

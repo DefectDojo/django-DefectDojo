@@ -138,6 +138,7 @@ class WpscanParser(object):
             finding = Finding(
                 title=f"Interesting finding: {interesting_finding.get('to_s')}",
                 description=description,
+                references=references,
                 severity="Info",
                 dynamic_finding=True,
                 static_finding=False,
