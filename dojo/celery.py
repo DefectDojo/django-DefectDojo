@@ -5,7 +5,6 @@ from django.conf import settings
 from pathlib import Path
 from dojo.bootstraps import LivenessProbe
 import logging
-from .tasks import celery_status
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +24,9 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
+# Add liveness probe for k8s
+app.steps["worker"].add(LivenessProbe)
+
 @app.task(bind=True)
 def debug_task(self):
     logger.debug(('Request: {0!r}'.format(self.request)))
@@ -35,8 +37,6 @@ def config_loggers(*args, **kwags):
     from logging.config import dictConfig
     dictConfig(settings.LOGGING)
 
-# Add liveness probe for k8s
-app.steps["worker"].add(LivenessProbe)
 
 # celery worker rediness and liveness checks
 
@@ -47,10 +47,6 @@ def worker_ready(**_):
 @worker_shutdown.connect
 def worker_shutdown(**_):
     READINESS_FILE.unlink(missing_ok=True)
-
-@task_success.connect(sender=celery_status)
-def heartbeat(**_):
-    HEARTBEAT_FILE.touch()
 
 # celery beat rediness and liveness checks
 
