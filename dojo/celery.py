@@ -54,7 +54,7 @@ def worker_shutdown(**_):
 def beat_ready(**_):
     READINESS_FILE.touch()
 
-@after_task_publish.connect(sender="healthcheck.tasks.celery_heartbeat")
+@after_task_publish.connect
 def task_published(**_):
     HEARTBEAT_FILE.touch()
 
