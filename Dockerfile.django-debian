@@ -81,7 +81,7 @@ COPY \
   docker/entrypoint-unit-tests-devDocker.sh \
   docker/wait-for-it.sh \
   docker/celery_readiness.py \
-  docker/celery_liveness.py \
+  docker/celery_beat_liveness.py \
   docker/celery_worker_liveness.py \
   docker/certs/* \
   /
