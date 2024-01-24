@@ -332,7 +332,6 @@ class TestFindingSLAExpiration(DojoTestCase):
 
         finding.severity = 'Medium'
         finding.set_sla_expiration_date()
-        # finding.save()
 
         expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
         self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
@@ -372,7 +371,6 @@ class TestFindingSLAExpiration(DojoTestCase):
         product.save()
 
         finding.set_sla_expiration_date()
-        # finding.save()
 
         expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
         self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
@@ -406,7 +404,6 @@ class TestFindingSLAExpiration(DojoTestCase):
         sla_config.save()
 
         finding.set_sla_expiration_date()
-        # finding.save()
 
         expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
         self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
