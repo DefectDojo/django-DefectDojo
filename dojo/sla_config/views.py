@@ -70,8 +70,9 @@ def edit_sla_config(request, slaid):
             form.save(commit=True)
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'SLA configuration successfully updated.',
+                                 'SLA configuration successfully updated. All SLA expiration dates for findings within this SLA configuration will be recalculated asynchronously.',
                                  extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('sla_config', ))
     else:
         form = SLAConfigForm(instance=sla_config)
 

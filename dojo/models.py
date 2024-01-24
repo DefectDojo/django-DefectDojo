@@ -905,8 +905,17 @@ class SLA_Configuration(models.Model):
                 severities.append('Low')
             # if severities have changed, update finding sla expiration dates with those severities
             if len(severities):
+                # set the async updating flag to true for this sla config
+                self.async_updating = True
+                super(SLA_Configuration, self).save(*args, **kwargs)
+                # set the async updating flag to true for all products using this sla config
+                products = Product.objects.filter(sla_configuration=self)
+                for product in products:
+                    product.async_updating = True
+                    super(Product, product).save()
+                # launch the async task to update all finding sla expiration dates
                 from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async
-                update_sla_expiration_dates_sla_config_async(self, tuple(severities))
+                update_sla_expiration_dates_sla_config_async(self, tuple(severities), products)
 
     def __str__(self):
         return self.name
@@ -1049,8 +1058,17 @@ class Product(models.Model):
             new_sla_config = getattr(self, 'sla_configuration', None)
             # if the sla config has changed, update finding sla expiration dates within this product
             if new_sla_config and (initial_sla_config != new_sla_config):
+                # set the async updating flag to true for this product
+                self.async_updating = True
+                super(Product, self).save(*args, **kwargs)
+                # set the async updating flag to true for the sla config assigned to this product
+                sla_config = getattr(self, 'sla_configuration', None)
+                if sla_config:
+                    sla_config.async_updating = True
+                    super(SLA_Configuration, sla_config).save()
+                # launch the async task to update all finding sla expiration dates
                 from dojo.product.helpers import update_sla_expiration_dates_product_async
-                update_sla_expiration_dates_product_async(self)
+                update_sla_expiration_dates_product_async(self, sla_config)
 
     def __str__(self):
         return self.name
