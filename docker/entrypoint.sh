@@ -44,6 +44,6 @@ fi
 gunicorn \
     --env DJANGO_SETTINGS_MODULE=dojo.settings.settings \
     dojo.wsgi:application \
-    --bind 127.0.0.1:8000 \
+    --bind 0.0.0.0:8000 \
     --workers 3 &
 celery -A dojo worker -l info --concurrency 3
