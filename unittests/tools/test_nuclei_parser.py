@@ -8,7 +8,7 @@ from dateutil.tz import tzoffset
 class TestNucleiParser(DojoTestCase):
 
     def test_parse_no_empty(self):
-        testfile = open("unittests/scans/nuclei/empty.jsonl")
+        testfile = open("unittests/scans/nuclei/empty.json")
         parser = NucleiParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
@@ -19,6 +19,16 @@ class TestNucleiParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
+    def test_parse_issue_9201(self):
+        testfile = open("unittests/scans/nuclei/issue_9201.json")
+        parser = NucleiParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual("example.com", finding.unsaved_endpoints[0].host)
+
     def test_parse_many_findings(self):
         testfile = open("unittests/scans/nuclei/many_findings.json")
         parser = NucleiParser()
@@ -27,7 +37,6 @@ class TestNucleiParser(DojoTestCase):
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-
         self.assertEqual(16, len(findings))
 
         with self.subTest(i=0):

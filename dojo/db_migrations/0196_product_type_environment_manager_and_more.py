@@ -6,7 +6,7 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("dojo", "0193_notifications_scan_added_empty"),
+        ("dojo", "0195_alter_finding_component_name"),
     ]
 
     operations = [

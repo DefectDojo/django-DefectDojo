@@ -103,7 +103,8 @@ def get_item(finding: dict, test):
 
     title_suffix = ""
     for resource in finding.get("Resources", []):
-        if resource.get("Type") == "AwsEcrContainerImage":
+        component_name = resource.get("Type")
+        if component_name == "AwsEcrContainerImage":
             details = resource.get("Details", {}).get("AwsEcrContainerImage")
             arn = resource.get("Id")
             if details:
@@ -137,6 +138,7 @@ def get_item(finding: dict, test):
         is_mitigated=is_Mitigated,
         static_finding=True,
         dynamic_finding=False,
+        component_name=component_name,
     )
     # Add the unsaved vulnerability ids
     result.unsaved_vulnerability_ids = unsaved_vulnerability_ids

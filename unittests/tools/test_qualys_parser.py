@@ -1,3 +1,6 @@
+import datetime
+from django.test import override_settings
+
 from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.models import Test
 from dojo.tools.qualys.parser import QualysParser
@@ -5,7 +8,14 @@ from dojo.tools.qualys.parser import QualysParser
 
 class TestQualysParser(DojoTestCase):
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_parse_file_with_no_vuln_has_no_findings_first_seen(self):
+        self.parse_file_with_no_vuln_has_no_findings()
+
     def test_parse_file_with_no_vuln_has_no_findings(self):
+        self.parse_file_with_no_vuln_has_no_findings()
+
+    def parse_file_with_no_vuln_has_no_findings(self):
         testfile = open(
             get_unit_tests_path() + "/scans/qualys/empty.xml"
         )
@@ -13,7 +23,16 @@ class TestQualysParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_parse_file_with_multiple_vuln_has_multiple_findings_first_seen(self):
+        finding = self.parse_file_with_multiple_vuln_has_multiple_findings()
+        self.assertEqual(datetime.datetime(2019, 7, 31).date(), finding.date)
+
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
+        finding = self.parse_file_with_multiple_vuln_has_multiple_findings()
+        self.assertEqual(datetime.datetime(2019, 7, 31).date(), finding.date)
+
+    def parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open(
             get_unit_tests_path() + "/scans/qualys/Qualys_Sample_Report.xml"
         )
@@ -51,8 +70,16 @@ class TestQualysParser(DojoTestCase):
         self.assertEqual(
             finding_cvssv3_vector.severity, "Critical"
         )
+        return finding
+
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_parse_file_with_no_vuln_has_no_findings_csv_first_seen(self):
+        self.parse_file_with_no_vuln_has_no_findings_csv()
 
     def test_parse_file_with_no_vuln_has_no_findings_csv(self):
+        self.parse_file_with_no_vuln_has_no_findings_csv()
+
+    def parse_file_with_no_vuln_has_no_findings_csv(self):
         testfile = open(
             get_unit_tests_path() + "/scans/qualys/empty.csv"
         )
@@ -60,7 +87,16 @@ class TestQualysParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_parse_file_with_multiple_vuln_has_multiple_findings_csv_first_seen(self):
+        finding = self.parse_file_with_multiple_vuln_has_multiple_findings_csv()
+        self.assertEqual(datetime.datetime(2021, 5, 13).date(), finding.date)
+
     def test_parse_file_with_multiple_vuln_has_multiple_findings_csv(self):
+        finding = self.parse_file_with_multiple_vuln_has_multiple_findings_csv()
+        self.assertEqual(datetime.datetime(2021, 5, 25).date(), finding.date)
+
+    def parse_file_with_multiple_vuln_has_multiple_findings_csv(self):
         testfile = open(
             get_unit_tests_path() + "/scans/qualys/Qualys_Sample_Report.csv"
         )
@@ -94,3 +130,4 @@ class TestQualysParser(DojoTestCase):
                 self.assertEqual(
                     finding.severity, "Critical"
                 )
+        return findings[0]

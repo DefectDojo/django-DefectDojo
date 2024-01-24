@@ -1,4 +1,5 @@
 from dojo.group.utils import get_auth_group_name
+import os
 from django.contrib.auth.models import Group
 from typing import List
 from drf_spectacular.utils import extend_schema_field
@@ -2130,6 +2131,19 @@ class ImportScanSerializer(serializers.Serializer):
     product_type_id = serializers.IntegerField(read_only=True)
 
     statistics = ImportStatisticsSerializer(read_only=True, required=False)
+
+    def validate_file(self, value):
+        """
+        Validate that the file has an allowed extension.
+        """
+        if value.name:
+            allowed_extension = ["json", "csv", "xml", "sarif", "html"]
+            __, extension = os.path.splitext(value.name)
+            extension = extension[1:]
+            if len(extension.split('.')) == 1 and extension in allowed_extension:
+                return value
+            else:
+                raise serializers.ValidationError('file not allowed')
 
     def save(self, push_to_jira=False):
         data = self.validated_data

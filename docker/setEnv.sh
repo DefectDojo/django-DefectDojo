@@ -31,7 +31,8 @@ function get_current {
             # Maintain the cleaner way
             symlink=$(readlink -f docker-compose.override.yml)
         fi
-        current_env=$(expr $(basename $symlink) : "^docker-compose.override.\(.*\).yml$")
+        basename_symlink=$(basename "$symlink")
+        current_env=$(expr "$basename_symlink" : "^docker-compose.override.\(.*\).yml$")
     else
         current_env=release
     fi
@@ -129,9 +130,9 @@ function set_integration_tests {
 }
 
 # Change directory to allow working with relative paths.
-cd ${target_dir}
+cd "${target_dir}" || exit
 
-if [ ${#} -eq 1 ] && [[ 'dev debug unit_tests unit_tests_cicd integration_tests release' =~ "${1}" ]]
+if [ ${#} -eq 1 ] && [[ 'dev debug unit_tests unit_tests_cicd integration_tests release' =~ ${1} ]]
 then
     set_"${1}"
 else

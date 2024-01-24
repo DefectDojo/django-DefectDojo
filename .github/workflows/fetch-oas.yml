@@ -1,0 +1,55 @@
+name: Fetch OpenAPI Specifications
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        description: |
+          The version to be associated with the GitHub release that's created or updated.
+          This will override any version calculated by the release-drafter.
+        required: true
+
+jobs:
+  oas_fetch:
+    name: Fetch OpenAPI Specifications
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        file-type: [yaml, json]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{github.event.inputs.version}}
+
+      - name: Load docker images
+        run: |-
+             docker pull defectdojo/defectdojo-django:${{github.event.inputs.version}}-alpine
+             docker pull defectdojo/defectdojo-nginx:${{github.event.inputs.version}}-alpine
+             docker images
+
+      - name: Start Dojo
+        run: docker-compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env up --no-deps -d postgres nginx uwsgi
+        env:
+          DJANGO_VERSION: ${{github.event.inputs.version}}-alpine
+          NGINX_VERSION: ${{github.event.inputs.version}}-alpine
+
+      - name: Download OpenAPI Specifications
+        run: |-
+             wget 'http://localhost:8080/api/v2/oa3/schema/?format=${{ matrix.file-type }}' -O oas.${{ matrix.file-type }} --tries=10 --retry-on-http-error=502
+
+      - name: Logs
+        if: always()
+        run: docker-compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env logs --tail="2500"
+
+      - name: Shutdown
+        if: always()
+        run: docker-compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env down
+
+      - name: Upload oas.${{ matrix.file-type }} as artifact
+        uses:  actions/upload-artifact@v3
+        with:
+          name: oas-${{ matrix.file-type }}
+          path: oas.${{ matrix.file-type }}
+          retention-days: 1

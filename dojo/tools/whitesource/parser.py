@@ -73,10 +73,10 @@ class WhitesourceParser(object):
                 cvss_sev = node.get("severity")
             severity = cvss_sev.lower().capitalize()
 
-            cvss3_score = node.get("cvss3_score", "N/A")
-            cvss3_vector = node.get("scoreMetadataVector", "N/A")
+            cvss3_score = node.get("cvss3_score", None)
+            cvss3_vector = node.get("scoreMetadataVector", None)
             severity_justification = "CVSS v3 score: {} ({})".format(
-                cvss3_score, cvss3_vector
+                cvss3_score if cvss3_score is not None else "N/A", cvss3_vector if cvss3_vector is not None else "N/A"
             )
             cwe = 1035  # default OWASP a9 until the report actually has them
 
@@ -102,56 +102,31 @@ class WhitesourceParser(object):
                         "Error handling local paths for vulnerability."
                     )
 
-            return {
-                "title": title,
-                "description": description,
-                "severity": severity,
-                "mitigation": mitigation,
-                "cve": cve,
-                "cwe": cwe,
-                "severity_justification": severity_justification,
-                "file_path": ", ".join(filepaths),
-                "component_name": component_name,
-                "component_version": component_version,
-            }
+            new_finding = Finding(
+                title=title,
+                test=test,
+                description=description,
+                severity=severity,
+                cwe=cwe,
+                mitigation=mitigation,
+                file_path=", ".join(filepaths),
+                component_name=component_name,
+                component_version=component_version,
+                severity_justification=severity_justification,
+                dynamic_finding=True,
+                cvssv3=cvss3_vector,
+                cvssv3_score=float(cvss3_score) if cvss3_score is not None else None
+            )
+            if cve:
+                new_finding.unsaved_vulnerability_ids = [cve]
 
-        def _dedup_and_create_finding(dupes, vuln):
-            dupe_key = hashlib.md5(
-                vuln.get("description").encode("utf-8")
-                + vuln.get("title").encode("utf-8")
-            ).hexdigest()
+            return new_finding
 
-            if dupe_key in dupes:
-                finding = dupes[dupe_key]
-                if finding.description:
-                    finding.description = finding.description
-                dupes[dupe_key] = finding
-            else:
-                dupes[dupe_key] = True
-
-                finding = Finding(
-                    title=vuln.get("title"),
-                    test=test,
-                    description=vuln.get("description"),
-                    severity=vuln.get("severity"),
-                    cwe=vuln.get("cwe"),
-                    mitigation=vuln.get("mitigation"),
-                    references=vuln.get("references"),
-                    file_path=vuln.get("file_path"),
-                    component_name=vuln.get("component_name"),
-                    component_version=vuln.get("component_version"),
-                    severity_justification=vuln.get("severity_justification"),
-                    dynamic_finding=True,
-                )
-                if vuln.get("cve"):
-                    finding.unsaved_vulnerability_ids = [vuln.get("cve")]
-                dupes[dupe_key] = finding
-
-        output = []
+        findings = []
         if "libraries" in content:
             # we are likely dealing with a report generated from CLI with -generateScanReport,
             # which will output vulnerabilities as an array of a library
-            # In this scenario, build up a an array
+            # In this scenario, build up an array
             tree_libs = content.get("libraries")
             for lib_node in tree_libs:
                 # get the overall lib info here, before going into vulns
@@ -160,7 +135,7 @@ class WhitesourceParser(object):
                     and len(lib_node.get("vulnerabilities")) > 0
                 ):
                     for vuln in lib_node.get("vulnerabilities"):
-                        output.append(
+                        findings.append(
                             _build_common_output(vuln, lib_node.get("name"))
                         )
 
@@ -169,10 +144,21 @@ class WhitesourceParser(object):
             # Vulns are standalone, and library is a property.
             tree_node = content["vulnerabilities"]
             for node in tree_node:
-                output.append(_build_common_output(node))
+                findings.append(_build_common_output(node))
+
+        def create_finding_key(f: Finding) -> str:
+            """
+            Hashes the finding's description and title to retrieve a key for deduplication.
+            """
+            return hashlib.md5(
+                f.description.encode("utf-8")
+                + f.title.encode("utf-8")
+            ).hexdigest()
 
         dupes = dict()
-        for vuln in output:
-            _dedup_and_create_finding(dupes, vuln)
+        for finding in findings:
+            dupe_key = create_finding_key(finding)
+            if dupe_key not in dupes:
+                dupes[dupe_key] = finding
 
         return dupes.values()

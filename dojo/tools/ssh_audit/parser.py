@@ -60,7 +60,8 @@ class SSHAuditParser(object):
                     description = [f"**Algorithm**: {kexname}"]
                     description.append(f"**Description Failure**: {kex['notes']['fail']}")
                     description.append(f"**Description Warning**: {kex['notes']['warn']}")
-                    description.append(f"**Info**: {kex['notes']['info']}")
+                    if kex['notes'].get('info'):
+                        description.append(f"**Info**: {kex['notes']['info']}")
                     severity = "High"
                     finding = Finding(title=str(title) + "_" + str(kexname),
                             test=test,
@@ -75,7 +76,8 @@ class SSHAuditParser(object):
                     kexname = kex['algorithm']
                     description = [f"**Algorithm**: {kexname}"]
                     description.append(f"**Description Failure**: {kex['notes']['fail']}")
-                    description.append(f"**Info**: {kex['notes']['info']}")
+                    if kex['notes'].get('info'):
+                        description.append(f"**Info**: {kex['notes']['info']}")
                     severity = "High"
                     finding = Finding(title=str(title) + "_" + str(kexname),
                             test=test,
@@ -90,7 +92,8 @@ class SSHAuditParser(object):
                     kexname = kex['algorithm']
                     description = [f"**Algorithm**: {kexname}"]
                     description.append(f"**Description Warning**: {kex['notes']['warn']}")
-                    description.append(f"**Info**: {kex['notes']['info']}")
+                    if kex['notes'].get('info'):
+                        description.append(f"**Info**: {kex['notes']['info']}")
                     severity = "Medium"
                     finding = Finding(title=str(title) + "_" + str(kexname),
                             test=test,
@@ -109,7 +112,8 @@ class SSHAuditParser(object):
                     description.append(f"**Description Warning**: {key['notes']['warn']}")
                     if 'keysize' in key:
                         description.append(f"**KeySize**: {key['keysize']}")
-                    description.append(f"**Info**: {key['notes']['info']}")
+                    if key['notes'].get('info'):
+                        description.append(f"**Info**: {key['notes']['info']}")
                     severity = "High"
                     finding = Finding(title=str(title) + "_" + str(keyname),
                             test=test,
@@ -126,7 +130,8 @@ class SSHAuditParser(object):
                     description.append(f"**Description Failure**: {key['notes']['fail']}")
                     if 'keysize' in key:
                         description.append(f"**KeySize**: {key['keysize']}")
-                    description.append(f"**Info**: {key['notes']['info']}")
+                    if key['notes'].get('info'):
+                        description.append(f"**Info**: {key['notes']['info']}")
                     severity = "High"
                     finding = Finding(title=str(title) + "_" + str(keyname),
                             test=test,
@@ -143,7 +148,8 @@ class SSHAuditParser(object):
                     description.append(f"**Description Warning**: {key['notes']['warn']}")
                     if 'keysize' in key:
                         description.append(f"**KeySize**: {key['keysize']}")
-                    description.append(f"**Info**: {key['notes']['info']}")
+                    if key['notes'].get('info'):
+                        description.append(f"**Info**: {key['notes']['info']}")
                     severity = "Medium"
                     finding = Finding(title=str(title) + "_" + str(keyname),
                             test=test,
@@ -160,7 +166,8 @@ class SSHAuditParser(object):
                     description = [f"**Algorithm**: {macname}"]
                     description.append(f"**Description Failure**: {mac['notes']['fail']}")
                     description.append(f"**Description Warning**: {mac['notes']['warn']}")
-                    description.append(f"**Info**: {mac['notes']['info']}")
+                    if mac['notes'].get('info'):
+                        description.append(f"**Info**: {mac['notes']['info']}")
                     severity = "High"
                     finding = Finding(title=str(title) + "_" + str(macname),
                             test=test,
@@ -175,7 +182,8 @@ class SSHAuditParser(object):
                     macname = mac['algorithm']
                     description = [f"**Algorithm**: {macname}"]
                     description.append(f"**Description Failure**: {mac['notes']['fail']}")
-                    description.append(f"**Info**: {mac['notes']['info']}")
+                    if mac['notes'].get('info'):
+                        description.append(f"**Info**: {mac['notes']['info']}")
                     severity = "High"
                     finding = Finding(title=str(title) + "_" + str(macname),
                             test=test,
@@ -190,7 +198,8 @@ class SSHAuditParser(object):
                     macname = mac['algorithm']
                     description = [f"**Algorithm**: {macname}"]
                     description.append(f"**Description Warning**: {mac['notes']['warn']}")
-                    description.append(f"**Info**: {mac['notes']['info']}")
+                    if mac['notes'].get('info'):
+                        description.append(f"**Info**: {mac['notes']['info']}")
                     severity = "Medium"
                     finding = Finding(title=str(title) + "_" + str(macname),
                             test=test,
