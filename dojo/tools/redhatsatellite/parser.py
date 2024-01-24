@@ -1,6 +1,4 @@
 import json
-from datetime import datetime
-
 from dojo.models import Endpoint, Finding
 
 
@@ -54,7 +52,6 @@ class RedHatSatelliteParser(object):
             packages = result.get("packages", None)
             module_streams = result.get("module_streams", None)
             installable = result.get("installable", None)
-            
             find = Finding(
                 title=title,
                 test=test,
@@ -66,5 +63,4 @@ class RedHatSatelliteParser(object):
                 dynamic_finding=True,
             )
             findings.append(find)
-            
         return findings
