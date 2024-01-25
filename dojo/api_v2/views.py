@@ -745,6 +745,7 @@ class EngagementViewSet(
 class RiskAcceptanceViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
+    mixins.CreateModelMixin,
     mixins.DestroyModelMixin,
     mixins.UpdateModelMixin,
     viewsets.ReadOnlyModelViewSet,
