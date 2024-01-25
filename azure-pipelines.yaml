@@ -45,7 +45,7 @@ steps:
       sudo apt-get install python3.11-dev
       sudo apt-get install libgnutls28-dev
       sudo apt-get install libgnutls28-dev
-      pip install -r requirements.txt -i $(registry) --trusted-host $(trusted-host)
+      pip install -r requirements.txt
 
       echo -e "\033[94m--------defectdojo unit test--------\033[0m"
       unset DD_DATABASE_URL
