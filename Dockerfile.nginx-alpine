@@ -34,7 +34,7 @@ RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 FROM build AS collectstatic
 
 # Node installation from https://github.com/nodejs/docker-node
-ENV NODE_VERSION 14.21.2
+ENV NODE_VERSION 20.11.0
 
 RUN addgroup -g 1000 node \
     && adduser -u 1000 -G node -s /bin/sh -D node \

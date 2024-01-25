@@ -1,0 +1,69 @@
+{
+    "errors": [
+    ],
+    "results": [
+        {
+            "check_id": "generic.secrets.security.detected-twitter-oauth.detected-twitter-oauth",
+            "end": {
+                "col": 38431,
+                "line": 1,
+                "offset": 38430
+            },
+            "extra": {
+                "engine_kind": "OSS",
+                "fingerprint": "fc255e575f2b938f11bf70bb737def0a1aa3ea044296972c9c6ff5b66b0d931064731b30406fc873b300c2bcf73cb66797513b709991e334fd355599d60d53d8_0",
+                "is_ignored": false,
+                "lines": "<![A-Z]>",
+                "message": "Twitter OAuth detected",
+                "metadata": {
+                    "category": "security",
+                    "confidence": "LOW",
+                    "cwe": [
+                        "CWE-798: Use of Hard-coded Credentials"
+                    ],
+                    "cwe2021-top25": true,
+                    "cwe2022-top25": true,
+                    "impact": "MEDIUM",
+                    "license": "Commons Clause License Condition v1.0[LGPL-2.1-only]",
+                    "likelihood": "LOW",
+                    "owasp": [
+                        "A07:2021 - Identification and Authentication Failures"
+                    ],
+                    "references": [
+                        "https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures"
+                    ],
+                    "semgrep.dev": {
+                        "rule": {
+                            "origin": "community",
+                            "rule_id": "BYUNq8",
+                            "url": "https://semgrep.dev/playground/r/A8TRG6/generic.secrets.security.detected-twitter-oauth.detected-twitter-oauth",
+                            "version_id": "A8TRG6"
+                        }
+                    },
+                    "shortlink": "https://sg.run/Lwb7",
+                    "source": "https://semgrep.dev/r/generic.secrets.security.detected-twitter-oauth.detected-twitter-oauth",
+                    "source-rule-url": "https://github.com/dxa4481/truffleHogRegexes/blob/master/truffleHogRegexes/regexes.json",
+                    "subcategory": [
+                        "audit"
+                    ],
+                    "technology": [
+                        "secrets",
+                        "twitter"
+                    ],
+                    "vulnerability_class": [
+                        "Hard-coded Secrets"
+                    ]
+                },
+                "metavars": {},
+                "severity": "ERROR"
+            },
+            "path": "/somedir/somefile.js",
+            "start": {
+                "col": 37650,
+                "line": 1,
+                "offset": 37649
+            }
+        }
+  ],
+    "version": "1.33.2"
+}

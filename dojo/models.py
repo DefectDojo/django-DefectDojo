@@ -1774,7 +1774,6 @@ class Endpoint(models.Model):
             mitigated__isnull=True,
             false_p=False,
             duplicate=False,
-            status_finding__mitigated=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False
@@ -1789,7 +1788,6 @@ class Endpoint(models.Model):
             mitigated__isnull=True,
             false_p=False,
             duplicate=False,
-            status_finding__mitigated=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False
@@ -1844,7 +1842,6 @@ class Endpoint(models.Model):
             mitigated__isnull=True,
             false_p=False,
             duplicate=False,
-            status_finding__mitigated=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False,
@@ -1860,7 +1857,6 @@ class Endpoint(models.Model):
             mitigated__isnull=True,
             false_p=False,
             duplicate=False,
-            status_finding__mitigated=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False,
@@ -2907,7 +2903,8 @@ class Finding(models.Model):
 
     def has_github_issue(self):
         try:
-            issue = self.github_issue
+            # Attempt to access the github issue if it exists. If not, an exception will be caught
+            _ = self.github_issue
             return True
         except GITHUB_Issue.DoesNotExist:
             return False
