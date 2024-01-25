@@ -33,18 +33,17 @@ class RedHatSatelliteParser(object):
         except Exception:
             data = json.loads(tree)
         for result in data["results"]:
-            id = result.get("id", None)
+            vulnid = result.get("id", None)
             pulp_id = result.get("pulp_id", None)
             title = result.get("title", None)
             errata_id = result.get("errata_id", None)
             severity = result.get("severity", None)
-            description = result.get("description", None)
+            description = result.get("description", None) + "\n"
             solution = result.get("solution", None)
             summary = result.get("summary", None)
-            reboot_suggested = result.get("reboot_suggested", None)
             uuid = result.get("uuid", None)
             name = result.get("name", None)
-            type = result.get("type", None)
+            vulntype = result.get("type", None)
             cves = result.get("cves", None)
             bugs = result.get("bugs", None)
             hosts_available_count = result.get("hosts_available_count", None)
@@ -52,14 +51,26 @@ class RedHatSatelliteParser(object):
             packages = result.get("packages", None)
             module_streams = result.get("module_streams", None)
             installable = result.get("installable", None)
+            description += "**id:** " + str(vulnid) + "\n"
+            description += "**pulp_id:** " + pulp_id + "\n"
+            description += "**summary:** " + summary + "\n"
+            description += "**uuid:** " + uuid + "\n"
+            description += "**name:** " + name + "\n"
+            description += "**type:** " + vulntype + "\n"
+            description += "**hosts_available_count:** " + str(hosts_available_count) + "\n"
+            description += "**hosts_applicable_count:** " + str(hosts_applicable_count) + "\n"
+            description += "**installable:** " + str(installable) + "\n"
+            description += "**cves:** " + str(cves) + "\n"
+            description += "**bugs:** " + str(bugs) + "\n"
+            description += "**module_streams:** " + str(module_streams) + "\n"
             find = Finding(
                 title=title,
                 test=test,
                 description=description,
                 severity=self.severity_mapping(input=severity),
                 mitigation=solution,
-                # impact=impact,
-                # references=references,
+                cve=errata_id,
+                component_name=packages,
                 dynamic_finding=True,
             )
             findings.append(find)
