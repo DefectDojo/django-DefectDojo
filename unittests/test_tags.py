@@ -40,10 +40,10 @@ class TagTests(DojoAPITestCase):
 
     def test_finding_filter_tags(self):
         tags = ['tag1', 'tag2']
-        finding_id = self.create_finding_with_tags(tags)
+        self.create_finding_with_tags(tags)
 
         tags2 = ['tag1', 'tag3']
-        finding_id2 = self.create_finding_with_tags(tags2)
+        self.create_finding_with_tags(tags2)
 
         response = self.get_finding_api_filter_tags('tag1')
         self.assertEqual(response['count'], 2)
@@ -236,13 +236,13 @@ class TagTests(DojoAPITestCase):
             self.assertTrue(tag in response['tags'])
 
         # reimport, do not specify tags: should retain tags
-        reimport = self.reimport_scan_with_params(test_id, self.zap_sample5_filename)
+        self.reimport_scan_with_params(test_id, self.zap_sample5_filename)
         self.assertEqual(len(tags), len(response.get('tags')))
         for tag in tags:
             self.assertTrue(tag in response['tags'])
 
         # reimport, specify tags others: currently reimport doesn't do anything with tags param and silently ignores them
-        reimport = self.reimport_scan_with_params(test_id, self.zap_sample5_filename, tags=['tag3', 'tag4'])
+        self.reimport_scan_with_params(test_id, self.zap_sample5_filename, tags=['tag3', 'tag4'])
         self.assertEqual(len(tags), len(response.get('tags')))
         for tag in tags:
             self.assertTrue(tag in response['tags'])
