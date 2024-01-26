@@ -4,6 +4,7 @@ import re
 from cvss import CVSS3
 
 from dojo.models import Finding
+from django.conf import settings
 
 
 class JFrogXrayOnDemandBinaryScanParser(object):
@@ -183,6 +184,7 @@ def get_item_set(vulnerability):
             dynamic_finding=False,
             cvssv3=cvssv3,
             vuln_id_from_tool=vuln_id_from_tool,
+            tags=[settings.DD_CUSTOM_TAG_PARSER.get("xray_on_demand")],
         )
         if vulnerability_ids:
             finding.unsaved_vulnerability_ids = vulnerability_ids

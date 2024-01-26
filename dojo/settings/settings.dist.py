@@ -325,6 +325,7 @@ env = environ.Env(
     DD_ENABLE_AUDITLOG=(bool, True),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
+    DD_CUSTOM_TAG_PARSER=(dict, {}),
 
     # ---------------RISK PENDING-------------------------
     # The variable that allows enabling pending risk acceptance.
@@ -1889,6 +1890,7 @@ CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 
 ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
 USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
+DD_CUSTOM_TAG_PARSER = env('DD_CUSTOM_TAG_PARSER')
 
 # Risk Pending
 RISK_PENDING = env("DD_RISK_PENDING")

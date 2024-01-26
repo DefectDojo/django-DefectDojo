@@ -1,7 +1,7 @@
 import json
 
 from dojo.models import Finding
-
+from django.conf import settings
 
 class CheckovParser(object):
     def get_scan_types(self):
@@ -99,5 +99,6 @@ def get_item(vuln, test, check_type):
         component_name=resource,
         static_finding=True,
         dynamic_finding=False,
-        vuln_id_from_tool= vuln['check_id']
+        vuln_id_from_tool= vuln['check_id'],
+        tags=[settings.DD_CUSTOM_TAG_PARSER.get("checkov")],
     )
