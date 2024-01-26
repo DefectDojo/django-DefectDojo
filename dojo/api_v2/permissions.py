@@ -22,6 +22,7 @@ from dojo.models import (
     Finding_Group,
     Product_Type,
     Product,
+    Risk_Acceptance,
     Test,
     Dojo_Group,
     Cred_Mapping,
@@ -333,8 +334,8 @@ class UserHasEngagementPermission(permissions.BasePermission):
 class UserHasRiskAcceptancePermission(permissions.BasePermission):
     # Permission checks for related objects (like notes or metadata) can be moved
     # into a seperate class, when the legacy authorization will be removed.
-    path_risk_acceptance_post = re.compile(r"^/api/v2/risk_acceptances/$")
-    path_risk_acceptance = re.compile(r"^/api/v2/risk_acceptances/\d+/$")
+    path_risk_acceptance_post = re.compile(r"^/api/v2/risk_acceptance/$")
+    path_risk_acceptance = re.compile(r"^/api/v2/risk_acceptance/\d+/$")
 
     def has_permission(self, request, view):
         if UserHasRiskAcceptancePermission.path_risk_acceptance_post.match(
@@ -343,7 +344,7 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
             request.path
         ):
             return check_post_permission(
-                request, Product, "product", Permissions.Risk_Acceptance
+                request, Risk_Acceptance, "id", Permissions.Risk_Acceptance
             )
         else:
             # related object only need object permission
