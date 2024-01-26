@@ -42,7 +42,7 @@
                             {% if page.paginator.count > 500 %}
                                 <li><a rel="noopener noreferrer" href="?{% url_replace request page_size_param 500 %}">500</a></li>
                             {% endif %}
-                            <li><a rel="noopener noreferrer" href="?{% url_replace request page_size_param page.paginator.count %}">{% trans "All" %}</a></li>
+                            <!-- <li><a rel="noopener noreferrer" href="?{% url_replace request page_size_param page.paginator.count %}">{% trans "All" %}</a></li> -->
                         </ul>
                     </div>
                 </li>
