@@ -2,7 +2,7 @@ import hashlib
 import json
 
 from dojo.models import Finding
-
+from django.conf import settings
 
 class TruffleHogParser(object):
     def get_scan_types(self):
@@ -94,6 +94,7 @@ class TruffleHogParser(object):
                     dynamic_finding=False,
                     static_finding=True,
                     nb_occurences=1,
+                    tags=[settings.DD_CUSTOM_TAG_PARSER.get("trufflehog")],
                 )
 
                 dupes[dupe_key] = finding
@@ -193,7 +194,8 @@ class TruffleHogParser(object):
                     url="N/A",
                     dynamic_finding=False,
                     static_finding=True,
-                    nb_occurences=1
+                    nb_occurences=1,
+                    tags=[settings.DD_CUSTOM_TAG_PARSER.get("trufflehog")],
                 )
                 dupes[dupe_key] = finding
 

@@ -188,7 +188,7 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
         if (
             group_names is not None
             and len(group_names) > 0
-            and settings.AZURE_DEVOPS_MAIN_SECURITY_GROUP in group_names
+            and any(map(group_names.__contains__, settings.AZURE_DEVOPS_MAIN_SECURITY_GROUP.split(',')))
         ):
             user_login = kwargs["details"]["email"]
             request_headers = {"Authorization": "Bearer " + token}
@@ -242,7 +242,7 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
                     graph_client,
                     settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[0],
                 )
-
+                
                 if group_team_leve1 is not None:
                     group_team_leve2 = custom_filter_group(
                         graph_client.get_membership(group_team_leve1.descriptor, None).additional_properties["value"],

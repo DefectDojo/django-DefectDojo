@@ -14,6 +14,7 @@ SEVERITY_MAPPING = {
     "CRITICAL": "Critical",
 }
 
+from django.conf import settings
 
 class AsffParser(object):
     def get_scan_types(self):
@@ -61,6 +62,7 @@ class AsffParser(object):
                     severity=self.get_severity(item.get("Severity")),
                     active=True,  # TODO manage attribute 'RecordState'
                     unique_id_from_tool=item.get("Id"),
+                    tags=[settings.DD_CUSTOM_TAG_PARSER.get("asff")],
                 )
             )
         return result
