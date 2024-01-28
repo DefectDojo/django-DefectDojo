@@ -1,5 +1,5 @@
 import json
-from dojo.models import Endpoint, Finding
+from dojo.models import Finding
 
 
 class KubescapeParser(object):
@@ -37,7 +37,10 @@ class KubescapeParser(object):
             for control in controls:
                 controlID = control['controlID']
                 description = control["name"] + "\n\n"
-                description += "**Rules:** " + str(control["rules"])
+                description += "**resourceID:** " + resourceid + "\n"
+                description += "**resource object:** " + str(resource["object"]) + "\n"
+                description += "**controlID:** " + controlID + "\n"
+                description += "**Rules:** " + str(control["rules"]) + "\n"
                 """TODO, PARSE THE RIGHT VALUES INTO THE FINDING"""
                 if self.severity_mapper(prioritizedResource) is None:
                     severity = "Info"
