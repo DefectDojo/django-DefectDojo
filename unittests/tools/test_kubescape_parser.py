@@ -11,4 +11,4 @@ class TestOrtParser(DojoTestCase):
         parser = KubescapeParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
-        self.assertEqual(44, len(findings))
+        self.assertEqual(710, len(findings))

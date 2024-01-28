@@ -35,15 +35,15 @@ class KubescapeParser(object):
             except KeyError:
                 prioritizedResource = "Info"
             for control in controls:
-                controlID = control['controlID']#.get('name')
+                controlID = control['controlID']
                 description = control["name"] + "\n\n"
                 description += "**Rules:** " + str(control["rules"])
                 """TODO, PARSE THE RIGHT VALUES INTO THE FINDING"""
-                if self.severity_mapper(prioritizedResource) == None:
+                if self.severity_mapper(prioritizedResource) is None:
                     severity = "Info"
                 else:
                     severity = self.severity_mapper(prioritizedResource)
-                find = Finding(title=resourceid+"_"+str(controlID),
+                find = Finding(title=resourceid + "_" + str(controlID),
                 test=test,
                 description=description,
                 severity=severity,
