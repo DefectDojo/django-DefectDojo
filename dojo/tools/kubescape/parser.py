@@ -26,7 +26,6 @@ class KubescapeParser(object):
             data = json.load(filename)
         except ValueError:
             data = {}
-        i=0
         for resource in data["resources"]:
             resourceid = resource["resourceID"]
             results = ([each for each in data["results"] if each.get('resourceID') == resourceid])
@@ -36,16 +35,18 @@ class KubescapeParser(object):
             except KeyError:
                 prioritizedResource = "Info"
             for control in controls:
+                controlID = control['controlID']#.get('name')
+                description = control["name"] + "\n\n"
+                description += "**Rules:** " + str(control["rules"])
                 """TODO, PARSE THE RIGHT VALUES INTO THE FINDING"""
                 if self.severity_mapper(prioritizedResource) == None:
                     severity = "Info"
                 else:
                     severity = self.severity_mapper(prioritizedResource)
-                i+=1
-                find = Finding(title="title"+str(i),
+                find = Finding(title=resourceid+"_"+str(controlID),
                 test=test,
-                description="message",
+                description=description,
                 severity=severity,
-                static_finding=False)
+                static_finding=True)
                 findings.append(find)
         return findings
