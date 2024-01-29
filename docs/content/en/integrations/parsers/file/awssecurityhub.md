@@ -7,7 +7,6 @@ DefectDojo parser accepts a .json file.
 
 JSON reports can be created from the [AWS Security Hub CLI](https://docs.aws.amazon.com/cli/latest/reference/securityhub/get-findings.html) using the following command: `aws securityhub get-findings`.
 
-
 ### Acceptable JSON Format
 Parser expects a .json file, with an array of Findings contained within a single JSON object.  All properties are strings and are required by the parser.
 

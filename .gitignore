@@ -38,6 +38,7 @@ pip-delete-this-directory.txt
 .tox/
 .coverage
 .cache
+.ruff_cache
 nosetests.xml
 coverage.xml
 

@@ -13,3 +13,6 @@ DefectDojo currently supports the parsing of the following Rusty Hog JSON output
 
 RustyHog scans only one target at a time. This is not efficient if you want to scan all targets (e.g. all JIRA tickets) and upload each single report to DefectDojo.
 [Rusty-Hog-Wrapper](https://github.com/manuel-sommer/Rusty-Hog-Wrapper) deals with this and scans a whole JIRA Project or Confluence Space, merges the findings into a valid file which can be uploaded to DefectDojo. (This is no official recommendation from DefectDojo, but rather a pointer in a direction on how to use this vulnerability scanner in a more efficient way.)
+
+### Sample Scan Data
+Sample Rusty Hog parser scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/rusty_hog).
