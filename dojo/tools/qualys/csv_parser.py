@@ -3,7 +3,7 @@ import io
 import logging
 import re
 from datetime import datetime
-from dateutil import parser
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
 
@@ -125,6 +125,17 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
             cvssv3 = _extract_cvss_vectors(
                         report_finding["CVSS3.1 Base"], report_finding["CVSS3.1 Temporal"]
                     )
+        # Get the date based on the first_seen setting
+        try:
+            if settings.USE_FIRST_SEEN:
+                if date := report_finding.get("First Detected"):
+                    date = datetime.strptime(date, "%m/%d/%Y %H:%M:%S").date()
+            else:
+                if date := report_finding.get("Last Detected"):
+                    date = datetime.strptime(date, "%m/%d/%Y %H:%M:%S").date()
+        except Exception:
+            date = None
+
         finding_with_id = next((obj for obj in dojo_findings if obj.vuln_id_from_tool == report_finding["QID"]), None)
         if finding_with_id:
             finding = finding_with_id
@@ -136,9 +147,7 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
                     description=f"{report_finding['Threat']}\nResult Evidence: \n{report_finding.get('Threat', 'Not available')}",
                     severity=severity_lookup.get(report_finding["Severity"], "Info"),
                     impact=report_finding["Impact"],
-                    date=parser.parse(
-                        report_finding["Last Detected"].replace("Z", "")
-                    ),
+                    date=date,
                     vuln_id_from_tool=report_finding["QID"],
                     cvssv3=cvssv3
                 )
@@ -163,15 +172,24 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
                     finding.mitigated = None
                     finding.is_mitigated = False
             elif report_finding.get("VULN TITLE"):
+                # Get the date based on the first_seen setting
+                try:
+                    if settings.USE_FIRST_SEEN:
+                        if date := report_finding.get("LAST SCAN"):
+                            date = parser.parse(date.replace("Z", ""))
+                    else:
+                        if date := report_finding.get("LAST SCAN"):
+                            date = parser.parse(date.replace("Z", ""))
+                except Exception:
+                    date = None
+
                 finding = Finding(
                     title=f"QID-{report_finding['QID']} | {report_finding['VULN TITLE']}",
                     mitigation=report_finding["SOLUTION"],
                     description=f"{report_finding['THREAT']}\nResult Evidence: \n{report_finding.get('THREAT', 'Not available')}",
                     severity=report_finding["SEVERITY"],
                     impact=report_finding["IMPACT"],
-                    date=parser.parse(
-                        report_finding["LAST SCAN"].replace("Z", "")
-                    ),
+                    date=date,
                     vuln_id_from_tool=report_finding["QID"]
                 )
                 cve_data = report_finding.get("CVEID")
