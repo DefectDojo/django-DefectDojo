@@ -149,7 +149,7 @@ services:
     volumes:
       - defectdojo_postgres:/var/lib/postgresql/data
   rabbitmq:
-    image: rabbitmq:3.12.12-alpine@sha256:9ab2478b7f459334d0afb70fb5dfce2d3e74152cfa3c82913843798f03b40f72
+    image: rabbitmq:3.12.12-alpine@sha256:247836781160ab6be150b97eac53b1e13e6511ba1a2a88fb2d11cc27cb912e2e
     profiles: 
       - mysql-rabbitmq
       - postgres-rabbitmq
