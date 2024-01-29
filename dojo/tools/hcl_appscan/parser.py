@@ -13,6 +13,15 @@ class HCLAppScanParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import XML output of HCL AppScan."
 
+    def xmltreehelper(self, input):
+        if "\n" in input.text:
+            output = ""
+            for i in input:
+                output = output + " " + i.text
+        else:
+            output = " " + input.text
+        return output
+
     def get_findings(self, file, test):
         findings = []
         tree = ET.parse(file)
@@ -24,60 +33,85 @@ class HCLAppScanParser(object):
         report = root.find("issue-group")
         if report is not None:
             for finding in report:
+                title = ""
                 description = ""
                 for item in finding:
                     match item.tag:
                         case 'severity':
-                            severity = item.text
+                            output = self.xmltreehelper(item)
+                            severity = output.strip(" ").capitalize()
                         case 'cwe':
-                            cwe = item.text
+                            cwe = int(self.xmltreehelper(item))
                         case 'remediation':
-                            remediation = item.text
+                            remediation = self.xmltreehelper(item)
                         case 'advisory':
-                            advisory = item.text
+                            advisory = self.xmltreehelper(item)
+                        case 'issue-type':
+                            title = self.xmltreehelper(item).strip()
+                            description = description + "Issue-Type:" + title + "\n"
                         case 'issue-type-name':
-                            issuetypename = item.text
-                            description = description + "Issue-Type-Name: " + issuetypename + "\n"
+                            title = self.xmltreehelper(item).strip()
+                            description = description + "Issue-Type-Name:" + title + "\n"
                         case 'location':
-                            location = item.text
-                            description = description + "Location: " + location + "\n"
+                            location = self.xmltreehelper(item)
+                            description = description + "Location:" + location + "\n"
                         case 'domain':
-                            domain = item.text
-                            description = description + "Domain: " + domain + "\n"
+                            domain = self.xmltreehelper(item)
+                            title += "_" + domain.strip()
+                            description = description + "Domain:" + domain + "\n"
+                        case 'threat-class':
+                            threatclass = self.xmltreehelper(item)
+                            description = description + "Threat-Class:" + threatclass + "\n"
+                        case 'entity':
+                            entity = self.xmltreehelper(item)
+                            title += "_" + entity.strip()
+                            description = description + "Entity:" + entity + "\n"
+                        case 'security-risks':
+                            security_risks = self.xmltreehelper(item)
+                            description = description + "Security-Risks:" + security_risks + "\n"
+                        case 'cause-id':
+                            causeid = self.xmltreehelper(item)
+                            title += "_" + causeid.strip()
+                            description = description + "Cause-Id:" + causeid + "\n"
+                        case 'url-name':
+                            urlname = self.xmltreehelper(item)
+                            title += "_" + urlname.strip()
+                            description = description + "Url-Name:" + urlname + "\n"
                         case 'element':
-                            element = item.text
-                            description = description + "Element: " + element + "\n"
+                            element = self.xmltreehelper(item)
+                            description = description + "Element:" + element + "\n"
                         case 'element-type':
-                            elementtype = item.text
-                            description = description + "ElementType: " + elementtype + "\n"
+                            elementtype = self.xmltreehelper(item)
+                            description = description + "ElementType:" + elementtype + "\n"
                         case 'path':
-                            path = item.text
-                            description = description + "Path: " + path + "\n"
+                            path = self.xmltreehelper(item)
+                            title += "_" + path.strip()
+                            description = description + "Path:" + path + "\n"
                         case 'scheme':
-                            scheme = item.text
-                            description = description + "Scheme: " + scheme + "\n"
+                            scheme = self.xmltreehelper(item)
+                            description = description + "Scheme:" + scheme + "\n"
                         case 'host':
-                            host = item.text
-                            description = description + "Host: " + host + "\n"
+                            host = self.xmltreehelper(item)
+                            description = description + "Host:" + host + "\n"
                         case 'port':
-                            port = item.text
-                            description = description + "Port: " + port + "\n"
-                        case 'asoc-issue-id':
-                            asocissueid = item.text
+                            port = self.xmltreehelper(item)
+                            description = description + "Port:" + port + "\n"
                 finding = Finding(
-                    title=str(issuetypename + "_" + domain + "_" + path),
+                    title=title,
                     description=description,
                     severity=severity,
                     cwe=cwe,
-                    mitigation="Remediation: " + remediation + "\nAdvisory: " + advisory,
+                    mitigation="Remediation:" + remediation + "\nAdvisory:" + advisory,
                     dynamic_finding=True,
                     static_finding=False,
-                    unique_id_from_tool=asocissueid
                 )
                 findings.append(finding)
-                finding.unsaved_endpoints = list()
-                endpoint = Endpoint(host=host, port=port)
-                finding.unsaved_endpoints.append(endpoint)
+                try:
+                    finding.unsaved_endpoints = list()
+                    endpoint = Endpoint(host=host, port=port)
+                    finding.unsaved_endpoints.append(endpoint)
+                except UnboundLocalError:
+                    pass
             return findings
         else:
             return findings

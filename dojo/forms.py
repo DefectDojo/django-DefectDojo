@@ -49,6 +49,7 @@ from dojo.finding.queries import get_authorized_findings
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users
 from dojo.user.utils import get_configuration_permissions_fields
 from dojo.group.queries import get_authorized_groups, get_group_member_roles
+import dojo.jira_link.helper as jira_helper
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +112,6 @@ class MonthYearWidget(Widget):
                 if match:
                     year_val,
                     month_val,
-                    day_val = [int(v) for v in match.groups()]
 
         output = []
 
@@ -471,6 +471,12 @@ class ImportScanForm(forms.Form):
                                             label="Close old findings within this product",
                                             required=False,
                                             initial=False)
+    apply_tags_to_findings = forms.BooleanField(
+        help_text="If set to True, the tags will be applied to the findings",
+        label="Apply Tags to Findings",
+        required=False,
+        initial=False
+    )
 
     if is_finding_groups_enabled():
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
@@ -557,6 +563,12 @@ class ReImportScanForm(forms.Form):
     api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
     service = forms.CharField(max_length=200, required=False, help_text="A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set.")
     source_code_management_uri = forms.URLField(max_length=600, required=False, help_text="Resource link to source code")
+    apply_tags_to_findings = forms.BooleanField(
+        help_text="If set to True, the tags will be applied to the findings",
+        label="Apply Tags to Findings",
+        required=False,
+        initial=False
+    )
 
     if is_finding_groups_enabled():
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option')
@@ -661,7 +673,7 @@ class MergeFindings(forms.ModelForm):
         help_text="The action to take on the merged finding. Set the findings to inactive or delete the findings.")
 
     def __init__(self, *args, **kwargs):
-        finding = kwargs.pop('finding')
+        _ = kwargs.pop('finding')
         findings = kwargs.pop('findings')
         super(MergeFindings, self).__init__(*args, **kwargs)
 
@@ -2267,7 +2279,8 @@ class JIRAForm(forms.ModelForm):
         form_data = self.cleaned_data
 
         try:
-            jira = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'])
+            # Attempt to validate the credentials before moving forward
+            _ = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'])
             logger.debug('valid JIRA config!')
         except Exception as e:
             # form only used by admins, so we can show full error message using str(e) which can help debug any problems
@@ -2294,7 +2307,8 @@ class ExpressJIRAForm(forms.ModelForm):
         form_data = self.cleaned_data
 
         try:
-            jira = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'],)
+            # Attempt to validate the credentials before moving forward
+            _ = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'],)
             logger.debug('valid JIRA config!')
         except Exception as e:
             # form only used by admins, so we can show full error message using str(e) which can help debug any problems
@@ -2592,11 +2606,12 @@ class ProductNotificationsForm(forms.ModelForm):
             self.initial['test_added'] = ''
             self.initial['scan_added'] = ''
             self.initial['sla_breach'] = ''
+            self.initial['sla_breach_combined'] = ''
             self.initial['risk_acceptance_expiration'] = ''
 
     class Meta:
         model = Notifications
-        fields = ['engagement_added', 'close_engagement', 'test_added', 'scan_added', 'sla_breach', 'risk_acceptance_expiration']
+        fields = ['engagement_added', 'close_engagement', 'test_added', 'scan_added', 'sla_breach', 'sla_breach_combined', 'risk_acceptance_expiration']
 
 
 class AjaxChoiceField(forms.ChoiceField):
@@ -2804,8 +2819,7 @@ class JIRAFindingForm(forms.Form):
 
     def clean(self):
         logger.debug('jform clean')
-        import dojo.jira_link.helper as jira_helper
-        cleaned_data = super(JIRAFindingForm, self).clean()
+        super(JIRAFindingForm, self).clean()
         jira_issue_key_new = self.cleaned_data.get('jira_issue')
         finding = self.instance
         jira_project = self.jira_project
@@ -2932,16 +2946,9 @@ class LoginBanner(forms.Form):
 
 
 class AnnouncementCreateForm(forms.ModelForm):
-    dismissable = forms.BooleanField(
-        label=_('Dismissable?'),
-        initial=False,
-        required=False,
-        help_text=_('Ticking this box allows users to dismiss the current announcement')
-    )
-
     class Meta:
         model = Announcement
-        fields = ['message', 'style']
+        fields = "__all__"
 
 
 class AnnouncementRemoveForm(AnnouncementCreateForm):
@@ -3015,8 +3022,6 @@ class TextQuestionForm(QuestionForm):
             initial=initial_answer,
         )
 
-        answer = self.fields['answer']
-
     def save(self):
         if not self.is_valid():
             raise forms.ValidationError('form is not valid')
@@ -3089,7 +3094,7 @@ class ChoiceQuestionForm(QuestionForm):
         real_answer = self.cleaned_data.get('answer')
 
         # for single choice questions, the selected answer is a single string
-        if type(real_answer) is not list:
+        if not isinstance(real_answer, list):
             real_answer = [real_answer]
         return real_answer
 

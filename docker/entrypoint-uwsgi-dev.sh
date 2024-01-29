@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /secret-file-loader.sh
+
 
 cd /app || exit
 

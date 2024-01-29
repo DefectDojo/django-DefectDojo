@@ -71,7 +71,7 @@ class ZapParser(object):
                         # The report is in the regular XML format, without requests and responses.
                         # Use the default settings for constructing the request
                         # and response fields.
-                        request = f"{instance.findtext('method')} {endpoint.query}#{endpoint.fragment}"
+                        request = f"Method:           {instance.findtext('method')} \nParam:            {instance.findtext('param')} \nAttack:           {instance.findtext('attack')} \nEndpointQuery:    {endpoint.query} \nEndpointFragment: {endpoint.fragment}"
                         response = f"{instance.findtext('evidence')}"
 
                     # we remove query and fragment because with some configuration

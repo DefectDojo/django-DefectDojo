@@ -85,7 +85,7 @@ class OktaOpenIdConnect(OktaOAuth2, OpenIdConnectAuth):
             except ExpiredSignatureError:
                 k = key
                 break
-            except JWTError as e:
+            except JWTError:
                 if k is None and client_id == 'a-key':
                     k = self.get_jwks_keys()[0]
                 pass

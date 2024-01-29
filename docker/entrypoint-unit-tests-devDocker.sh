@@ -6,6 +6,8 @@ set -x
 set -e
 set -v
 
+. /secret-file-loader.sh
+
 cd /app
 # Unset the database URL so that we can force the DD_TEST_DATABASE_NAME (see django "DATABASES" configuration in settings.dist.py)
 unset DD_DATABASE_URL
