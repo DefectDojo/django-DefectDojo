@@ -220,4 +220,4 @@ def access_file(request, fid, oid, obj_type, url=False):
         media_root=settings.MEDIA_ROOT,
         file_name=file.file.url.lstrip(settings.MEDIA_URL))
     print(redirect_url)
-    return FileResponse(open(redirect_url))
+    return FileResponse(open(redirect_url, "rb"))
