@@ -41,12 +41,11 @@ class KubescapeParser(object):
                 description += "**resource object:** " + str(resource["object"]) + "\n"
                 description += "**controlID:** " + controlID + "\n"
                 description += "**Rules:** " + str(control["rules"]) + "\n"
-                """TODO, PARSE THE RIGHT VALUES INTO THE FINDING"""
                 if self.severity_mapper(prioritizedResource) is None:
                     severity = "Info"
                 else:
                     severity = self.severity_mapper(prioritizedResource)
-                find = Finding(title=resourceid + "_" + str(controlID),
+                find = Finding(title=str(controlID),
                 test=test,
                 description=description,
                 severity=severity,
