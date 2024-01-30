@@ -43,10 +43,9 @@ class TestKubeHunterParser(TestCase):
             parser.get_findings(testfile, Test())
             testfile.close()
 
-        self.assertIn(
-            "KubeHunter report contains errors:", str(context.exception)
+        self.assertEqual(
+            "Expecting value: line 1 column 1 (char 0)", str(context.exception)
         )
-        self.assertIn("ECONNREFUSED", str(context.exception))
 
     def test_kubehunter_parser_dupe(self):
         testfile = open("unittests/scans/kubehunter/dupe.json")

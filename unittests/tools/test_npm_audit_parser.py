@@ -83,10 +83,9 @@ class TestNpmAuditParser(DojoTestCase):
         with self.assertRaises(ValueError) as context:
             testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/many_vuln_npm7.json"))
             parser = NpmAuditParser()
-            findings = parser.get_findings(testfile, Test())
+            parser.get_findings(testfile, Test())
             testfile.close()
         self.assertIn("npm7 with auditReportVersion 2 or higher not yet supported", str(context.exception))
-        self.assertEqual(findings, None)
 
     def test_npm_audit_censored_hash(self):
         path = "77d76e075ae87483063c4c74885422f98300f9fc0ecbd3b8dfb60152a36e5269>axios"

@@ -188,6 +188,6 @@ class TestCheckmarxOsaParser(DojoTestCase):
             parser = CheckmarxOsaParser()
             parser.get_findings(my_file_handle, test)
             self.teardown(my_file_handle)
-        self.assertTrue(
-            "Invalid format: missing mandatory field libraryId:" in str(context.exception)
+        self.assertEqual(
+            "Invalid format: missing mandatory field libraryId", str(context.exception)
         )

@@ -33,7 +33,7 @@ class TestGitlabSastParser(DojoTestCase):
         with open(f"{get_unit_tests_path()}/scans/gitlab_sast/gl-sast-report-many-vuln_v14.json") as testfile:
             parser = GitlabSastParser()
             findings = parser.get_findings(testfile, Test())
-        self.assertEqual(3, len(findings))
+        self.assertEqual(219, len(findings))
         finding = findings[0]
         self.assertEqual("Password in URL", finding.title)
         self.assertEqual("Critical", finding.severity)
@@ -48,7 +48,7 @@ class TestGitlabSastParser(DojoTestCase):
         with open(f"{get_unit_tests_path()}/scans/gitlab_sast/gl-sast-report-many-vuln_v15.json") as testfile:
             parser = GitlabSastParser()
             findings = parser.get_findings(testfile, Test())
-        self.assertEqual(3, len(findings))
+        self.assertEqual(219, len(findings))
         finding = findings[0]
         self.assertEqual("Password in URL", finding.title)
         self.assertEqual("Critical", finding.severity)

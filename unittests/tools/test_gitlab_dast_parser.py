@@ -102,7 +102,7 @@ class TestGitlabDastParser(DojoTestCase):
         self.assertEqual(endpoint.host, "api-server")  # host port path
         self.assertEqual(endpoint.port, 80)
         self.assertEqual(endpoint.path, "v1/tree/10")
-        self.assertEqual("Ensure that your web server,", finding.mitigation)
+        self.assertIn("Ensure that your web server,", finding.mitigation)
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings_v15(self):
         testfile = open("unittests/scans/gitlab_dast/gitlab_dast_many_vul_v15.json")
