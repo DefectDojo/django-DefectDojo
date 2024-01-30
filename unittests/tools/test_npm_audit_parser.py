@@ -76,8 +76,8 @@ class TestNpmAuditParser(DojoTestCase):
             parser = NpmAuditParser()
             parser.get_findings(testfile, Test())
             testfile.close()
-        self.assertTrue("npm audit report contains errors:" in str(context.exception))
-        self.assertTrue("ENOAUDIT" in str(context.exception))
+        self.assertIn("npm audit report contains errors:", str(context.exception))
+        self.assertIn("ENOAUDIT", str(context.exception))
 
     def test_npm_audit_parser_many_vuln_npm7(self):
         with self.assertRaises(ValueError) as context:
@@ -85,7 +85,7 @@ class TestNpmAuditParser(DojoTestCase):
             parser = NpmAuditParser()
             findings = parser.get_findings(testfile, Test())
             testfile.close()
-        self.assertTrue("npm7 with auditReportVersion 2 or higher not yet supported" in str(context.exception))
+        self.assertIn("npm7 with auditReportVersion 2 or higher not yet supported", str(context.exception))
         self.assertEqual(findings, None)
 
     def test_npm_audit_censored_hash(self):
