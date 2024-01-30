@@ -319,7 +319,6 @@ def get_finding_filterset_fields(metrics=False, similar=False):
                 'is_mitigated',
                 'out_of_scope',
                 'false_p',
-                'risk_accepted',
                 'has_component',
                 'has_notes',
                 'file_path',
@@ -584,7 +583,7 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
         None: (_('Either'), any),
         1: (_('Yes'), accepted),
         2: (_('No'), not_accepted),
-        3: (_('Was'), was_accepted),
+        3: (_('Expired'), was_accepted),
     }
 
     def __init__(self, *args, **kwargs):
