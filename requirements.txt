@@ -30,7 +30,7 @@ gunicorn==21.2.0
 html2text==2020.1.16
 humanize==4.9.0
 jira==3.6.0
-PyGithub==1.58.2
+PyGithub==2.2.0
 lxml==5.1.0
 Markdown==3.5.2
 mysqlclient==2.1.1
