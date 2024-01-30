@@ -71,7 +71,7 @@ class TestYarnAuditParser(DojoTestCase):
             parser = YarnAuditParser()
             parser.get_findings(testfile, self.get_test())
             testfile.close()
-            self.assertTrue(
-                "yarn audit report contains errors:" in str(context.exception)
-            )
-            self.assertTrue("ECONNREFUSED" in str(context.exception))
+        self.assertTrue(
+            "yarn audit report contains errors:" in str(context.exception)
+        )
+        self.assertTrue("ECONNREFUSED" in str(context.exception))

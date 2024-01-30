@@ -43,10 +43,10 @@ class TestKubeHunterParser(TestCase):
             parser.get_findings(testfile, Test())
             testfile.close()
 
-            self.assertTrue(
-                "KubeHunter report contains errors:" in str(context.exception)
-            )
-            self.assertTrue("ECONNREFUSED" in str(context.exception))
+        self.assertTrue(
+            "KubeHunter report contains errors:" in str(context.exception)
+        )
+        self.assertTrue("ECONNREFUSED" in str(context.exception))
 
     def test_kubehunter_parser_dupe(self):
         testfile = open("unittests/scans/kubehunter/dupe.json")
