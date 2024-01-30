@@ -43,7 +43,7 @@ class NiktoParser(object):
 
     def process_json(self, file, test):
         data = json.load(file)
-        if len(data) == 1 and type(data) is list:
+        if len(data) == 1 and isinstance(data, list):
             data = data[0]
         dupes = dict()
         host = data.get("host")
