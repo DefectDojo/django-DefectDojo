@@ -61,7 +61,6 @@ class AsffParser(object):
                     severity=self.get_severity(item.get("Severity")),
                     active=True,  # TODO manage attribute 'RecordState'
                     unique_id_from_tool=item.get("Id"),
-                    tags=[settings.DD_CUSTOM_TAG_PARSER.get("asff")],
                 )
             finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("asff")]
             result.append(finding)
