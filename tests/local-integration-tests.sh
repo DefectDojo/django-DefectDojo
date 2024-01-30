@@ -115,17 +115,17 @@ fi
 test="Check Various Pages integration test"
 echo "Running: $test"
 if python3 tests/check_various_pages.py ; then
-    success $test
+    success "$test"
 else
-    fail $test
+    fail "$test"
 fi
 
 test="Test notifications"
 echo "Running: $test"
 if python3 tests/notifications_test.py ; then
-    success $test
+    success "$test"
 else
-    fail $test
+    fail "$test"
 fi
 
 # The below tests are commented out because they are still an unstable work in progress
