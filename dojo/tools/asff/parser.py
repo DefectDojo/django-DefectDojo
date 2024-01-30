@@ -52,8 +52,7 @@ class AsffParser(object):
             else:
                 mitigation = None
                 references = None
-            result.append(
-                Finding(
+            finding = Finding(
                     title=item.get("Title"),
                     description=self.get_description(item),
                     date=dateutil.parser.parse(item.get("CreatedAt")),
@@ -64,7 +63,8 @@ class AsffParser(object):
                     unique_id_from_tool=item.get("Id"),
                     tags=[settings.DD_CUSTOM_TAG_PARSER.get("asff")],
                 )
-            )
+            finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("asff")]
+            result.append(finding)
         return result
 
     def get_severity(self, data):

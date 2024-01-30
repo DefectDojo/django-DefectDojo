@@ -184,8 +184,8 @@ def get_item_set(vulnerability):
             dynamic_finding=False,
             cvssv3=cvssv3,
             vuln_id_from_tool=vuln_id_from_tool,
-            tags=[settings.DD_CUSTOM_TAG_PARSER.get("xray_on_demand")],
         )
+        finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("xray_on_demand")]
         if vulnerability_ids:
             finding.unsaved_vulnerability_ids = vulnerability_ids
         item_set.append(finding)

@@ -70,8 +70,9 @@ class NucleiParser(object):
                 severity=severity,
                 nb_occurences=1,
                 vuln_id_from_tool=template_id,
-                tags=[settings.DD_CUSTOM_TAG_PARSER.get("nuclei")],
             )
+            custom_tags = [settings.DD_CUSTOM_TAG_PARSER.get("nuclei")]
+
             if item.get("timestamp"):
                 finding.date = date_parser.parse(item.get("timestamp"))
             if info.get("description"):
@@ -81,7 +82,7 @@ class NucleiParser(object):
                     item.get("extracted-results")
                 )
             if info.get("tags"):
-                finding.unsaved_tags = info.get("tags")
+                finding.unsaved_tags = custom_tags.extend(info.get("tags"))
             if info.get("reference"):
                 reference = info.get("reference")
                 if isinstance(reference, list):

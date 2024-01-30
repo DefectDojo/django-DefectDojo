@@ -433,7 +433,7 @@ def get_item(result, rules, artifacts, run_date):
     # manage tags provided in the report and rule and remove duplicated
     tags = list(set(get_properties_tags(rule) + get_properties_tags(result)))
     tags = [s.removeprefix('external/cwe/') for s in tags]
-    finding.tags = tags
+    finding.unsaved_tags = tags
 
     # manage fingerprints
     # fingerprinting in SARIF is more complete than in current implementation

@@ -195,8 +195,8 @@ class TruffleHogParser(object):
                     dynamic_finding=False,
                     static_finding=True,
                     nb_occurences=1,
-                    tags=[settings.DD_CUSTOM_TAG_PARSER.get("trufflehog")],
                 )
+                finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("trufflehog")]
                 dupes[dupe_key] = finding
 
         return list(dupes.values())
