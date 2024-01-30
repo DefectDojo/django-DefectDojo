@@ -1,4 +1,5 @@
 import datetime
+from django.test import override_settings
 
 from ..dojo_test_case import DojoTestCase
 from dojo.tools.veracode.parser import VeracodeParser
@@ -14,13 +15,27 @@ class TestVeracodeScannerParser(DojoTestCase):
 
         self.test = Test(engagement=engagement)
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_parse_file_with_one_finding_first_seen(self):
+        self.parse_file_with_one_finding()
+
     def test_parse_file_with_one_finding(self):
+        self.parse_file_with_one_finding()
+
+    def parse_file_with_one_finding(self):
         testfile = open("unittests/scans/veracode/one_finding.xml")
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_parse_file_many_findings_different_hash_code_different_unique_id_first_seen(self):
+        self.parse_file_many_findings_different_hash_code_different_unique_id()
+
     def test_parse_file_many_findings_different_hash_code_different_unique_id(self):
+        self.parse_file_many_findings_different_hash_code_different_unique_id()
+
+    def parse_file_many_findings_different_hash_code_different_unique_id(self):
         testfile = open("unittests/scans/veracode/many_findings_different_hash_code_different_unique_id.xml")
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
@@ -44,7 +59,14 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.assertEqual("Vulnerable component: library:1234", finding.title)
         self.assertFalse(finding.is_mitigated)
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_parse_file_with_multiple_finding_first_seen(self):
+        self.parse_file_with_multiple_finding()
+
     def test_parse_file_with_multiple_finding(self):
+        self.parse_file_with_multiple_finding()
+
+    def parse_file_with_multiple_finding(self):
         testfile = open("unittests/scans/veracode/many_findings.xml")
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
@@ -80,7 +102,16 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.assertFalse(finding.is_mitigated)
         self.assertIn('sca', finding.unsaved_tags)
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_parse_file_with_multiple_finding2_first_seen(self):
+        finding = self.parse_file_with_multiple_finding2()
+        self.assertEqual(datetime.datetime(2018, 2, 17, 0, 35, 18), finding.date)  # date_first_occurrence="2018-02-17 00:35:18 UTC"
+
     def test_parse_file_with_multiple_finding2(self):
+        finding = self.parse_file_with_multiple_finding2()
+        self.assertEqual(datetime.datetime.today().date(), finding.date)
+
+    def parse_file_with_multiple_finding2(self):
         testfile = open("unittests/scans/veracode/veracode_scan.xml")
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
@@ -89,7 +120,6 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.assertEqual("Information Exposure Through Sent Data", finding.title)
         self.assertEqual("Low", finding.severity)
         self.assertEqual(201, finding.cwe)
-        self.assertEqual(datetime.datetime(2018, 2, 17, 0, 35, 18), finding.date)  # date_first_occurrence="2018-02-17 00:35:18 UTC"
         finding = findings[1]
         self.assertEqual("Low", finding.severity)
         self.assertEqual(201, finding.cwe)
@@ -106,8 +136,16 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.assertEqual("commons-httpclient", finding.component_name)
         self.assertEqual("3.1", finding.component_version)
         self.assertEqual(4.3, finding.cvssv3_score)
+        return findings[0]
+
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_parse_file_with_mitigated_finding_first_seen(self):
+        self.parse_file_with_mitigated_finding()
 
     def test_parse_file_with_mitigated_finding(self):
+        self.parse_file_with_mitigated_finding()
+
+    def parse_file_with_mitigated_finding(self):
         testfile = open("unittests/scans/veracode/mitigated_finding.xml")
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, self.test)
@@ -121,7 +159,14 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.assertEqual(90, finding.sla_days_remaining())
         self.assertEqual((datetime.datetime(2020, 6, 1, 10, 2, 1) + datetime.timedelta(days=90)).date(), finding.sla_deadline())
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_parse_file_with_mitigated_fixed_finding_first_seen(self):
+        self.parse_file_with_mitigated_fixed_finding()
+
     def test_parse_file_with_mitigated_fixed_finding(self):
+        self.parse_file_with_mitigated_fixed_finding()
+
+    def parse_file_with_mitigated_fixed_finding(self):
         testfile = open("unittests/scans/veracode/mitigated_fixed_finding.xml")
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
@@ -131,7 +176,14 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.assertTrue(finding.is_mitigated)
         self.assertEqual("app-1234_issue-1", finding.unique_id_from_tool)
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_parse_file_with_mitigated_sca_finding_first_seen(self):
+        self.parse_file_with_mitigated_sca_finding()
+
     def test_parse_file_with_mitigated_sca_finding(self):
+        self.parse_file_with_mitigated_sca_finding()
+
+    def parse_file_with_mitigated_sca_finding(self):
         testfile = open("unittests/scans/veracode/veracode_scan_sca_mitigated.xml")
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
@@ -141,7 +193,16 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.assertTrue(finding.is_mitigated)
         self.assertEqual(datetime.datetime(2022, 9, 12, 14, 29, 18), finding.mitigated)
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_parse_file_with_dynamic_finding_first_seen(self):
+        finding = self.parse_file_with_dynamic_finding()
+        self.assertEqual(datetime.datetime(2021, 9, 3, 10, 0, 0), finding.date)
+
     def test_parse_file_with_dynamic_finding(self):
+        finding = self.parse_file_with_dynamic_finding()
+        self.assertEqual(datetime.datetime.today().date(), finding.date)
+
+    def parse_file_with_dynamic_finding(self):
         testfile = open("unittests/scans/veracode/dynamic_finding.xml")
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
@@ -153,15 +214,22 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.assertEqual("catname", finding.title)
         self.assertEqual("Description", finding.description)
         self.assertFalse(finding.is_mitigated)
-        self.assertEqual(datetime.datetime(2021, 9, 3, 10, 0, 0), finding.date)
         self.assertIn('dast', finding.unsaved_tags)
         self.assertEqual(1, len(finding.unsaved_endpoints))
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual('https', endpoint.protocol)
         self.assertEqual('www.example.com', endpoint.host)
         self.assertEqual('index.html', endpoint.path)
+        return finding
+
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_parse_file_with_changed_severity_first_seen(self):
+        self.parse_file_with_changed_severity()
 
     def test_parse_file_with_changed_severity(self):
+        self.parse_file_with_changed_severity()
+
+    def parse_file_with_changed_severity(self):
         testfile = open("unittests/scans/veracode/veracode_scan_changed_severity.xml")
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
@@ -176,7 +244,14 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.assertEqual("3.1", finding.component_version)
         self.assertEqual(4.3, finding.cvssv3_score)
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_maven_component_name_first_seen(self):
+        self.maven_component_name()
+
     def test_maven_component_name(self):
+        self.maven_component_name()
+
+    def maven_component_name(self):
         testfile = open("unittests/scans/veracode/veracode_maven.xml")
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
@@ -246,10 +321,24 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.assertEqual(finding.sast_sink_object, "lambda_3")
         self.assertEqual(finding.unsaved_tags, ["policy-violation"])
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_json_static_findings_list_format_first_seen(self):
+        self.json_static_findings_list_format()
+
     def test_json_static_findings_list_format(self):
+        self.json_static_findings_list_format()
+
+    def json_static_findings_list_format(self):
         self.json_static_findings_test("unittests/scans/veracode/static_findings_list_format.json")
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_json_static_embedded_format_first_seen(self):
+        self.json_static_embedded_format()
+
     def test_json_static_embedded_format(self):
+        self.json_static_embedded_format()
+
+    def json_static_embedded_format(self):
         self.json_static_findings_test("unittests/scans/veracode/static_embedded_format.json")
 
     def json_dynamic_findings_test(self, file_name):
@@ -304,10 +393,24 @@ class TestVeracodeScannerParser(DojoTestCase):
             query="param=wild-things"
         ))
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_json_dynamic_findings_list_format_first_seen(self):
+        self.json_dynamic_findings_list_format()
+
     def test_json_dynamic_findings_list_format(self):
+        self.json_dynamic_findings_list_format()
+
+    def json_dynamic_findings_list_format(self):
         self.json_dynamic_findings_test("unittests/scans/veracode/dynamic_findings_list_format.json")
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_json_dynamic_embedded_format_first_seen(self):
+        self.json_dynamic_embedded_format()
+
     def test_json_dynamic_embedded_format(self):
+        self.json_dynamic_embedded_format()
+
+    def json_dynamic_embedded_format(self):
         self.json_dynamic_findings_test("unittests/scans/veracode/dynamic_embedded_format.json")
 
     def json_sca_findings_test(self, file_name):
@@ -379,8 +482,22 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.assertEqual(finding.unsaved_tags, ["policy-violation"])
         self.assertEqual(finding.unsaved_vulnerability_ids, ["SRCCLR-SID-41137"])
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_json_sca_findings_list_format_first_seen(self):
+        self.json_sca_findings_list_format()
+
     def test_json_sca_findings_list_format(self):
+        self.json_sca_findings_list_format()
+
+    def json_sca_findings_list_format(self):
         self.json_sca_findings_test("unittests/scans/veracode/sca_findings_list_format.json")
 
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_json_sca_embedded_format_first_seen(self):
+        self.json_sca_embedded_format()
+
     def test_json_sca_embedded_format(self):
+        self.json_sca_embedded_format()
+
+    def json_sca_embedded_format(self):
         self.json_sca_findings_test("unittests/scans/veracode/sca_embedded_format.json")

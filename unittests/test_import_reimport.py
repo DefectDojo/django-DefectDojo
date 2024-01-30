@@ -79,8 +79,8 @@ class ImportReimportMixin(object):
         self.veracode_mitigated_findings = self.scans_path + 'veracode/mitigated_finding.xml'
         self.scan_type_veracode = 'Veracode Scan'
 
-        self.clair_few_findings = self.scans_path + 'clair/few_vuln.json'
-        self.clair_empty = self.scans_path + 'clair/empty.json'
+        self.clair_few_findings = self.scans_path + 'clair/clair_few_vuln.json'
+        self.clair_empty = self.scans_path + 'clair/clair_empty.json'
         self.scan_type_clair = 'Clair Scan'
 
         self.generic_filename_with_file = self.scans_path + "generic/test_with_image.json"

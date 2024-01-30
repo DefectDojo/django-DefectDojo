@@ -19,3 +19,6 @@ To generate the report, see
 <https://github.com/soprasteria/sonar-report>
 
 Version: \>= 1.1.0
+
+### Sample Scan Data
+Sample SonarQube scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/sonarqube).
