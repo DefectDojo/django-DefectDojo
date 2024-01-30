@@ -362,3 +362,13 @@ class TestCyclonedxParser(DojoTestCase):
             with self.subTest(i=0):
                 finding = findings[1]
                 self.assertEqual("Description was not provided.", finding.description)
+
+    def test_cyclonedx_issue_8022(self):
+        """CycloneDX version 1.4 JSON format"""
+        with open("unittests/scans/cyclonedx/issue_8022.json") as file:
+            parser = CycloneDXParser()
+            findings = parser.get_findings(file, Test())
+            for finding in findings:
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+                finding.clean()
+            self.assertEqual(1, len(findings))
