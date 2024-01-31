@@ -325,4 +325,12 @@ If you want to take a look at previous parsers that are now part of DefectDojo, 
 
 ## Update the import page documentation
 
-Please update [`docs/content/en/integrations/parsers.md`] with the details of your new parser.
+Please add a new .md file in [`docs/content/en/integrations/parsers`] with the details of your new parser.  Include the following content headings:
+
+* Acceptable File Type(s) - please include how to generate this type of file from the related tool, as some tools have multiple methods or require specific commands.
+* An example unit test block, if applicable.
+* A link to the relevant unit tests folder so that users can quickly navigate there from Documentation.
+* A link to the scanner itself - (e.g. GitHub or vendor link)
+
+Here is an example of a completed Parser documentation page: https://defectdojo.github.io/django-DefectDojo/integrations/parsers/file/awssecurityhub/
+
