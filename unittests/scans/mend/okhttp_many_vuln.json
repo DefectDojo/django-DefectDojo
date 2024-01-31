@@ -1,0 +1,325 @@
+{  
+   "vulnerabilities":[  
+      {  
+         "name":"WS-2009-0001",
+         "type":"WS",
+         "severity":"low",
+         "score":"0.0",
+         "publishDate":"2007-10-07",
+         "lastUpdatedDate":"2009-08-06",
+         "url":"https://issues.apache.org/jira/browse/CODEC-55",
+         "description":"Not all \"business\" method implementations of public API in Apache Commons Codec 1.x are thread safe, which might disclose the wrong data or allow an attacker to change non-private fields.\n\nUpdated 2018-10-07 - an additional review by WhiteSource research team could not indicate on a clear security vulnerability",
+         "project":"okhttp",
+         "product":"okhttp",
+         "library":{  
+            "keyUuid":"9aa14ac7-e415-4ed5-be35-bd2957fd7fd2",
+            "filename":"commons-codec-1.3.jar",
+            "name":"Codec",
+            "groupId":"commons-codec",
+            "artifactId":"commons-codec",
+            "version":"1.3",
+            "sha1":"fd32786786e2adb664d5ecc965da47629dca14ba",
+            "type":"MAVEN_ARTIFACT",
+            "description":"The codec package contains simple encoder and decoders for\n   various formats such as Base64 and Hexadecimal.  In addition to these\n   widely used encoders and decoders, the codec package also maintains a\n   collection of phonetic encoding utilities.",
+            "architecture":"",
+            "languageVersion":""
+         }
+      },
+      {  
+         "name":"WS-2010-0001",
+         "type":"WS",
+         "severity":"medium",
+         "score":"5.0",
+         "publishDate":"2010-02-26",
+         "lastUpdatedDate":"2012-04-12",
+         "url":"https://issues.apache.org/jira/browse/CODEC-96",
+         "description":"Base64 encode() method is no longer thread-safe in Apache Commons Codec before version 1.7, which might disclose the wrong data or allow an attacker to change non-private fields.",
+         "project":"okhttp",
+         "product":"okhttp",
+         "library":{  
+            "keyUuid":"9aa14ac7-e415-4ed5-be35-bd2957fd7fd2",
+            "filename":"commons-codec-1.3.jar",
+            "name":"Codec",
+            "groupId":"commons-codec",
+            "artifactId":"commons-codec",
+            "version":"1.3",
+            "sha1":"fd32786786e2adb664d5ecc965da47629dca14ba",
+            "type":"MAVEN_ARTIFACT",
+            "description":"The codec package contains simple encoder and decoders for\n   various formats such as Base64 and Hexadecimal.  In addition to these\n   widely used encoders and decoders, the codec package also maintains a\n   collection of phonetic encoding utilities.",
+            "architecture":"",
+            "languageVersion":""
+         },
+         "topFix":{  
+            "vulnerability":"WS-2010-0001",
+            "type":"UPGRADE_VERSION",
+            "origin":"WHITESOURCE_EXPERT",
+            "url":"https://issues.apache.org/jira/browse/CODEC-96",
+            "fixResolution":"Upgrade To Version 1.7",
+            "date":"2017-01-31 17:30:27",
+            "message":"Upgrade To Version"
+         }
+      },
+      {  
+         "name":"CVE-2011-1498",
+         "type":"CVE",
+         "severity":"medium",
+         "score":"4.3",
+         "publishDate":"2011-07-07",
+         "lastUpdatedDate":"2011-09-22",
+         "url":"https://cve.mitre.org/cgi-bin/cvename.cgi?name\u003dCVE-2011-1498",
+         "description":"Apache HttpClient 4.x before 4.1.1 in Apache HttpComponents, when used with an authenticating proxy server, sends the Proxy-Authorization header to the origin server, which allows remote web servers to obtain sensitive information by logging this header.",
+         "project":"okhttp",
+         "product":"okhttp",
+         "library":{  
+            "keyUuid":"685abccb-3b38-4143-91bc-dda428d5d4f7",
+            "filename":"httpclient-4.0.1.jar",
+            "name":"HttpClient",
+            "groupId":"org.apache.httpcomponents",
+            "artifactId":"httpclient",
+            "version":"4.0.1",
+            "sha1":"1d7d28fa738bdbfe4fbd895d9486308999bdf440",
+            "type":"MAVEN_ARTIFACT",
+            "description":"HttpComponents Client (base module)",
+            "architecture":"",
+            "languageVersion":""
+         },
+         "topFix":{  
+            "vulnerability":"CVE-2011-1498",
+            "type":"UPGRADE_VERSION",
+            "origin":"WHITESOURCE_EXPERT",
+            "url":"https://nvd.nist.gov/vuln/detail/CVE-2011-1498",
+            "fixResolution":"Upgrade To Version 4.1.1",
+            "date":"2011-07-07 21:55:02",
+            "message":"Upgrade To Version"
+         },
+         "allFixes":[  
+            {  
+               "vulnerability":"CVE-2011-1498",
+               "type":"UPGRADE_VERSION",
+               "origin":"WHITESOURCE_EXPERT",
+               "url":"https://nvd.nist.gov/vuln/detail/CVE-2011-1498",
+               "fixResolution":"Upgrade To Version 4.1.1",
+               "date":"2011-07-07 21:55:02",
+               "message":"Upgrade To Version"
+            },
+            {  
+               "vulnerability":"CVE-2011-1498",
+               "type":"UPGRADE_VERSION",
+               "origin":"BUGZILLA",
+               "url":"https://bugzilla.redhat.com/show_bug.cgi?id\u003d709531",
+               "fixResolution":"Upgrade to version httpcomponents-client 4.1.1 or greater",
+               "date":"2017-12-31 16:41:02",
+               "message":"CVE-2011-1498 httpcomponents-client: sends Proxy-Authorization header to host when tunneling requests through authenticated proxy server",
+               "extraData":"key\u003d709531\u0026assignee\u003dRed Hat Product Security"
+            },
+            {  
+               "vulnerability":"CVE-2011-1498",
+               "type":"UPGRADE_VERSION",
+               "origin":"JIRA",
+               "url":"https://issues.apache.org/jira/browse/HTTPCLIENT-1061",
+               "fixResolution":"Upgrade to version 4.1.1 or greater",
+               "date":"2011-02-25 11:29:47",
+               "message":"Proxy-Authorization header received on server side",
+               "extraData":"key\u003dHTTPCLIENT-1061"
+            }
+         ]
+      },
+      {  
+         "name":"CVE-2012-6153",
+         "type":"CVE",
+         "severity":"medium",
+         "score":"4.3",
+         "publishDate":"2014-09-04",
+         "lastUpdatedDate":"2018-01-05",
+         "url":"https://cve.mitre.org/cgi-bin/cvename.cgi?name\u003dCVE-2012-6153",
+         "description":"http/conn/ssl/AbstractVerifier.java in Apache Commons HttpClient before 4.2.3 does not properly verify that the server hostname matches a domain name in the subject\u0027s Common Name (CN) or subjectAltName field of the X.509 certificate, which allows man-in-the-middle attackers to spoof SSL servers via a certificate with a subject that specifies a common name in a field that is not the CN field.  NOTE: this issue exists because of an incomplete fix for CVE-2012-5783.",
+         "project":"okhttp",
+         "product":"okhttp",
+         "library":{  
+            "keyUuid":"685abccb-3b38-4143-91bc-dda428d5d4f7",
+            "filename":"httpclient-4.0.1.jar",
+            "name":"HttpClient",
+            "groupId":"org.apache.httpcomponents",
+            "artifactId":"httpclient",
+            "version":"4.0.1",
+            "sha1":"1d7d28fa738bdbfe4fbd895d9486308999bdf440",
+            "type":"MAVEN_ARTIFACT",
+            "description":"HttpComponents Client (base module)",
+            "architecture":"",
+            "languageVersion":""
+         },
+         "topFix":{  
+            "vulnerability":"CVE-2012-6153",
+            "type":"UPGRADE_VERSION",
+            "origin":"WHITESOURCE_EXPERT",
+            "url":"https://nvd.nist.gov/vuln/detail/CVE-2012-6153",
+            "fixResolution":"Upgrade To Version 4.2.3",
+            "date":"2014-09-04 17:55:05",
+            "message":"Upgrade To Version"
+         },
+         "allFixes":[  
+            {  
+               "vulnerability":"CVE-2012-6153",
+               "type":"UPGRADE_VERSION",
+               "origin":"WHITESOURCE_EXPERT",
+               "url":"https://nvd.nist.gov/vuln/detail/CVE-2012-6153",
+               "fixResolution":"Upgrade To Version 4.2.3",
+               "date":"2014-09-04 17:55:05",
+               "message":"Upgrade To Version"
+            },
+            {  
+               "vulnerability":"CVE-2012-6153",
+               "type":"UPGRADE_VERSION",
+               "origin":"BUGZILLA",
+               "url":"https://bugzilla.redhat.com/show_bug.cgi?id\u003d1129916",
+               "fixResolution":"Upgrade to version httpcomponents-client 4.2.3 or greater",
+               "date":"2017-12-31 21:56:01",
+               "message":"CVE-2012-6153 Apache HttpComponents client / Apache CXF: SSL hostname verification bypass, incomplete CVE-2012-5783 fix",
+               "extraData":"key\u003d1129916\u0026assignee\u003dRed Hat Product Security"
+            },
+            {  
+               "vulnerability":"CVE-2012-6153",
+               "type":"CHANGE_FILES",
+               "origin":"GITHUB_COMMIT",
+               "url":"https://github.com/apache/httpcomponents-client/commit/6e14fc146a66e0f3eb362f45f95d1a58ee18886a",
+               "fixResolution":"Replace or update the following files: AbstractVerifier.java, TestHostnameVerifier.java",
+               "date":"2012-11-20 00:00:00",
+               "message":"Fixed CN extraction from DN of X500 principal\n\ngit-svn-id: https://svn.apache.org/repos/asf/httpcomponents/httpclient/trunk@1411702 13f79535-47bb-0310-9956-ffa450edef68",
+               "extraData":"key\u003d6e14fc1\u0026committerName\u003dok2c\u0026committerUrl\u003dhttps://github.com/ok2c\u0026committerAvatar\u003dhttps://avatars0.githubusercontent.com/u/235972?v\u003d4"
+            }
+         ]
+      },
+      {  
+         "name":"CVE-2014-3577",
+         "type":"CVE",
+         "severity":"medium",
+         "score":"5.8",
+         "publishDate":"2014-08-21",
+         "lastUpdatedDate":"2018-07-19",
+         "url":"https://cve.mitre.org/cgi-bin/cvename.cgi?name\u003dCVE-2014-3577",
+         "description":"org.apache.http.conn.ssl.AbstractVerifier in Apache HttpComponents HttpClient before 4.3.5 and HttpAsyncClient before 4.0.2 does not properly verify that the server hostname matches a domain name in the subject\u0027s Common Name (CN) or subjectAltName field of the X.509 certificate, which allows man-in-the-middle attackers to spoof SSL servers via a \"CN\u003d\" string in a field in the distinguished name (DN) of a certificate, as demonstrated by the \"foo,CN\u003dwww.apache.org\" string in the O field.",
+         "project":"okhttp",
+         "product":"okhttp",
+         "library":{  
+            "keyUuid":"685abccb-3b38-4143-91bc-dda428d5d4f7",
+            "filename":"httpclient-4.0.1.jar",
+            "name":"HttpClient",
+            "groupId":"org.apache.httpcomponents",
+            "artifactId":"httpclient",
+            "version":"4.0.1",
+            "sha1":"1d7d28fa738bdbfe4fbd895d9486308999bdf440",
+            "type":"MAVEN_ARTIFACT",
+            "description":"HttpComponents Client (base module)",
+            "architecture":"",
+            "languageVersion":""
+         },
+         "topFix":{  
+            "vulnerability":"CVE-2014-3577",
+            "type":"UPGRADE_VERSION",
+            "origin":"WHITESOURCE_EXPERT",
+            "url":"https://nvd.nist.gov/vuln/detail/CVE-2014-3577",
+            "fixResolution":"Upgrade To Version 4.3.5,4.0.2",
+            "date":"2014-08-21 14:55:05",
+            "message":"Upgrade To Version"
+         },
+         "allFixes":[  
+            {  
+               "vulnerability":"CVE-2014-3577",
+               "type":"UPGRADE_VERSION",
+               "origin":"WHITESOURCE_EXPERT",
+               "url":"https://nvd.nist.gov/vuln/detail/CVE-2014-3577",
+               "fixResolution":"Upgrade To Version 4.3.5,4.0.2",
+               "date":"2014-08-21 14:55:05",
+               "message":"Upgrade To Version"
+            },
+            {  
+               "vulnerability":"CVE-2014-3577",
+               "type":"UPGRADE_VERSION",
+               "origin":"SECURITY_TRACKER",
+               "url":"http://www.securitytracker.com/id/1030812",
+               "fixResolution":"The vendor has issued a fix.\n\nThe vendor\u0027s advisories are available at:\n\nhttps://rhn.redhat.com/errata/RHSA-2014-1162.html\nhttps://rhn.redhat.com/errata/RHSA-2014-1163.html\nhttps://rhn.redhat.com/errata/RHSA-2014-2019.html\nhttps://rhn.redhat.com/errata/RHSA-2014-2020.html",
+               "message":"Red Hat JBoss Certificate Validation Flaw Lets Remote Users Spoof SSL Servers",
+               "extraData":"key\u003d1030812"
+            },
+            {  
+               "vulnerability":"CVE-2014-3577",
+               "type":"CHANGE_FILES",
+               "origin":"GITHUB_COMMIT",
+               "url":"https://github.com/apache/httpcomponents-client/commit/6e14fc146a66e0f3eb362f45f95d1a58ee18886a",
+               "fixResolution":"Replace or update the following files: AbstractVerifier.java, TestHostnameVerifier.java",
+               "date":"2012-11-20 00:00:00",
+               "message":"Fixed CN extraction from DN of X500 principal\n\ngit-svn-id: https://svn.apache.org/repos/asf/httpcomponents/httpclient/trunk@1411702 13f79535-47bb-0310-9956-ffa450edef68",
+               "extraData":"key\u003d6e14fc1\u0026committerName\u003dok2c\u0026committerUrl\u003dhttps://github.com/ok2c\u0026committerAvatar\u003dhttps://avatars0.githubusercontent.com/u/235972?v\u003d4"
+            }
+         ]
+      },
+      {  
+         "name":"CVE-2019-9658",
+         "type":"CVE",
+         "severity":"medium",
+         "score":"5.0",
+         "cvss3_severity":"MEDIUM",
+         "cvss3_score":"5.3",
+         "publishDate":"2019-03-11",
+         "lastUpdatedDate":"2019-05-21",
+         "scoreMetadataVector":"CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+         "url":"https://cve.mitre.org/cgi-bin/cvename.cgi?name\u003dCVE-2019-9658",
+         "description":"Checkstyle before 8.18 loads external DTDs by default.",
+         "project":"slack",
+         "product":"okhttp",
+         "cvss3Attributes":{  
+            "attackVector":"NETWORK",
+            "attackComplexity":"LOW",
+            "userInteraction":"NONE",
+            "privilegesRequired":"NONE",
+            "scope":"UNCHANGED",
+            "confidentialityImpact":"LOW",
+            "integrityImpact":"NONE",
+            "availabilityImpact":"NONE"
+         },
+         "library":{  
+            "keyUuid":"31e26373-8f25-4c7c-9ada-63a688494afb",
+            "filename":"checkstyle-8.15.jar",
+            "name":"checkstyle",
+            "groupId":"com.puppycrawl.tools",
+            "artifactId":"checkstyle",
+            "version":"8.15",
+            "sha1":"8584d88c6aefcfb079adb8d102928b3eeb4de6ad",
+            "type":"MAVEN_ARTIFACT",
+            "description":"Checkstyle is a development tool to help programmers write Java code\n    that adheres to a coding standard",
+            "architecture":"",
+            "languageVersion":""
+         },
+         "topFix":{  
+            "vulnerability":"CVE-2019-9658",
+            "type":"UPGRADE_VERSION",
+            "origin":"WHITESOURCE_EXPERT",
+            "url":"https://github.com/checkstyle/checkstyle/issues/6474",
+            "fixResolution":"Upgrade To Version checkstyle-8.18",
+            "date":"2019-03-11 05:29:01",
+            "message":"Upgrade To Version"
+         },
+         "allFixes":[  
+            {  
+               "vulnerability":"CVE-2019-9658",
+               "type":"UPGRADE_VERSION",
+               "origin":"WHITESOURCE_EXPERT",
+               "url":"https://github.com/checkstyle/checkstyle/issues/6474",
+               "fixResolution":"Upgrade To Version checkstyle-8.18",
+               "date":"2019-03-11 05:29:01",
+               "message":"Upgrade To Version"
+            },
+            {  
+               "vulnerability":"CVE-2019-9658",
+               "type":"CHANGE_FILES",
+               "origin":"GITHUB_COMMIT",
+               "url":"https://github.com/checkstyle/checkstyle/commit/180b4fe37a2249d4489d584505f2b7b3ab162ec6",
+               "fixResolution":"Replace or update the following files: XmlLoader.java, ConfigurationLoaderTest.java, config_reporting.xml, pmd.xml, pom.xml, XmlLoaderTest.java",
+               "date":"2019-02-25 00:00:00",
+               "message":"Issue #6474: disable external dtd load by default",
+               "extraData":"key\u003d180b4fe\u0026committerName\u003dromani\u0026committerUrl\u003dhttps://github.com/romani\u0026committerAvatar\u003dhttps://avatars3.githubusercontent.com/u/812984?v\u003d4"
+            }
+         ]
+      }
+   ]
+}
