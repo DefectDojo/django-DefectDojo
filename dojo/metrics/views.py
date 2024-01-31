@@ -20,7 +20,7 @@ from django.utils.html import escape
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
 
-from dojo.filters import MetricsFindingFilter, UserFilter, MetricsEndpointFilter
+from dojo.filters import MetricsFindingFilter, UserFilter, MetricsEndpointF ilter
 from dojo.forms import SimpleMetricsForm, ProductTypeCountsForm, ProductTagCountsForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Risk_Acceptance, Dojo_User, Endpoint_Status
@@ -740,8 +740,7 @@ def product_tag_counts(request):
 
             oip = opened_in_period(start_date, end_date,
                 test__engagement__product__tags__name=pt,
-                test__engagement__product__in=prods,
-            )
+                test__engagement__product__in=prods)
 
             # trending data - 12 months
             for x in range(12, 0, -1):
