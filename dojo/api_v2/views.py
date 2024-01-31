@@ -743,13 +743,7 @@ class EngagementViewSet(
 
 
 class RiskAcceptanceViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.ReadOnlyModelViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
+    PrefetchDojoModelViewSet
 ):
     serializer_class = serializers.RiskAcceptanceSerializer
     queryset = Risk_Acceptance.objects.none()
