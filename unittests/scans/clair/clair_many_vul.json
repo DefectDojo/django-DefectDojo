@@ -1,0 +1,392 @@
+{
+  "image": "default-docker-3rdparty.bahnhub.tech.rz.db.de:443/ubuntu:bionic-20190912.1",
+  "unapproved": [
+      "CVE-2019-13050",
+      "CVE-2019-5094",
+      "CVE-2018-1000654",
+      "CVE-2016-2781",
+      "CVE-2019-18224",
+      "CVE-2019-12290",
+      "CVE-2018-20482",
+      "CVE-2019-17543",
+      "CVE-2017-8283",
+      "CVE-2019-17594",
+      "CVE-2019-17595",
+      "CVE-2018-7738",
+      "CVE-2016-10228",
+      "CVE-2018-11237",
+      "CVE-2016-10739",
+      "CVE-2019-7309",
+      "CVE-2018-19591",
+      "CVE-2018-20796",
+      "CVE-2019-9192",
+      "CVE-2018-11236",
+      "CVE-2015-8985",
+      "CVE-2019-9169",
+      "CVE-2009-5155",
+      "CVE-2019-13627",
+      "CVE-2019-12904",
+      "CVE-2017-7246",
+      "CVE-2017-7245",
+      "CVE-2017-11164",
+      "CVE-2018-16868",
+      "CVE-2018-16869",
+      "CVE-2018-20839",
+      "CVE-2019-3844",
+      "CVE-2019-3843",
+      "CVE-2013-4235",
+      "CVE-2018-7169"
+  ],
+  "vulnerabilities": [
+      {
+          "featurename": "systemd",
+          "featureversion": "237-3ubuntu10.29",
+          "vulnerability": "CVE-2018-20839",
+          "namespace": "ubuntu:18.04",
+          "description": "systemd 242 changes the VT1 mode upon a logout, which allows attackers to read cleartext passwords in certain circumstances, such as watching a shutdown, or using Ctrl-Alt-F1 and Ctrl-Alt-F2. This occurs because the KDGKBMODE (aka current keyboard mode) check is mishandled.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-20839",
+          "severity": "Medium",
+          "fixedby": ""
+      },
+      {
+          "featurename": "e2fsprogs",
+          "featureversion": "1.44.1-1ubuntu1.1",
+          "vulnerability": "CVE-2019-5094",
+          "namespace": "ubuntu:18.04",
+          "description": "An exploitable code execution vulnerability exists in the quota file functionality of E2fsprogs 1.45.3. A specially crafted ext4 partition can cause an out-of-bounds write on the heap, resulting in code execution. An attacker can corrupt a partition to trigger this vulnerability.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-5094",
+          "severity": "Medium",
+          "fixedby": "1.44.1-1ubuntu1.2"
+      },
+      {
+          "featurename": "glibc",
+          "featureversion": "2.27-3ubuntu1",
+          "vulnerability": "CVE-2018-11236",
+          "namespace": "ubuntu:18.04",
+          "description": "stdlib/canonicalize.c in the GNU C Library (aka glibc or libc6) 2.27 and earlier, when processing very long pathname arguments to the realpath function, could encounter an integer overflow on 32-bit architectures, leading to a stack-based buffer overflow and, potentially, arbitrary code execution.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-11236",
+          "severity": "Medium",
+          "fixedby": ""
+      },
+      {
+          "featurename": "gnupg2",
+          "featureversion": "2.2.4-1ubuntu1.2",
+          "vulnerability": "CVE-2019-13050",
+          "namespace": "ubuntu:18.04",
+          "description": "Interaction between the sks-keyserver code through 1.2.0 of the SKS keyserver network, and GnuPG through 2.2.16, makes it risky to have a GnuPG keyserver configuration line referring to a host on the SKS keyserver network. Retrieving data from this network may cause a persistent denial of service, because of a Certificate Spamming Attack.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-13050",
+          "severity": "Medium",
+          "fixedby": ""
+      },
+      {
+          "featurename": "libidn2",
+          "featureversion": "2.0.4-1.1build2",
+          "vulnerability": "CVE-2019-18224",
+          "namespace": "ubuntu:18.04",
+          "description": "idn2_to_ascii_4i in lib/lookup.c in GNU libidn2 before 2.1.1 has a heap-based buffer overflow via a long domain string.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-18224",
+          "severity": "Medium",
+          "fixedby": "2.0.4-1.1ubuntu0.2"
+      },
+      {
+          "featurename": "libidn2",
+          "featureversion": "2.0.4-1.1build2",
+          "vulnerability": "CVE-2019-12290",
+          "namespace": "ubuntu:18.04",
+          "description": "GNU libidn2 before 2.2.0 fails to perform the roundtrip checks specified in RFC3490 Section 4.2 when converting A-labels to U-labels. This makes it possible in some circumstances for one domain to impersonate another. By creating a malicious domain that matches a target domain except for the inclusion of certain punycoded Unicode characters (that would be discarded when converted first to a Unicode label and then back to an ASCII label), arbitrary domains can be impersonated.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-12290",
+          "severity": "Medium",
+          "fixedby": "2.0.4-1.1ubuntu0.2"
+      },
+      {
+          "featurename": "glibc",
+          "featureversion": "2.27-3ubuntu1",
+          "vulnerability": "CVE-2018-19591",
+          "namespace": "ubuntu:18.04",
+          "description": "In the GNU C Library (aka glibc or libc6) through 2.28, attempting to resolve a crafted hostname via getaddrinfo() leads to the allocation of a socket descriptor that is not closed. This is related to the if_nametoindex() function.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-19591",
+          "severity": "Medium",
+          "fixedby": ""
+      },
+      {
+          "featurename": "glibc",
+          "featureversion": "2.27-3ubuntu1",
+          "vulnerability": "CVE-2018-11237",
+          "namespace": "ubuntu:18.04",
+          "description": "An AVX-512-optimized implementation of the mempcpy function in the GNU C Library (aka glibc or libc6) 2.27 and earlier may write data beyond the target buffer, leading to a buffer overflow in __mempcpy_avx512_no_vzeroupper.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-11237",
+          "severity": "Medium",
+          "fixedby": ""
+      },
+      {
+          "featurename": "libgcrypt20",
+          "featureversion": "1.8.1-4ubuntu1.1",
+          "vulnerability": "CVE-2019-13627",
+          "namespace": "ubuntu:18.04",
+          "description": "It was discovered that there was a ECDSA timing attack in the libgcrypt20 cryptographic library. Version affected: 1.8.4-5, 1.7.6-2+deb9u3, and 1.6.3-2+deb8u4. Versions fixed: 1.8.5-2 and 1.6.3-2+deb8u7.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-13627",
+          "severity": "Medium",
+          "fixedby": ""
+      },
+      {
+          "featurename": "nettle",
+          "featureversion": "3.4-1",
+          "vulnerability": "CVE-2018-16869",
+          "namespace": "ubuntu:18.04",
+          "description": "A Bleichenbacher type side-channel based padding oracle attack was found in the way nettle handles endian conversion of RSA decrypted PKCS#1 v1.5 data. An attacker who is able to run a process on the same physical core as the victim process, could use this flaw extract plaintext or in some cases downgrade any TLS connections to a vulnerable server.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-16869",
+          "severity": "Low",
+          "fixedby": ""
+      },
+      {
+          "featurename": "systemd",
+          "featureversion": "237-3ubuntu10.29",
+          "vulnerability": "CVE-2019-3844",
+          "namespace": "ubuntu:18.04",
+          "description": "It was discovered that a systemd service that uses DynamicUser property can get new privileges through the execution of SUID binaries, which would allow to create binaries owned by the service transient group with the setgid bit set. A local attacker may use this flaw to access resources that will be owned by a potentially different service in the future, when the GID will be recycled.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-3844",
+          "severity": "Low",
+          "fixedby": ""
+      },
+      {
+          "featurename": "systemd",
+          "featureversion": "237-3ubuntu10.29",
+          "vulnerability": "CVE-2019-3843",
+          "namespace": "ubuntu:18.04",
+          "description": "It was discovered that a systemd service that uses DynamicUser property can create a SUID/SGID binary that would be allowed to run as the transient service UID/GID even after the service is terminated. A local attacker may use this flaw to access resources that will be owned by a potentially different service in the future, when the UID/GID will be recycled.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-3843",
+          "severity": "Low",
+          "fixedby": ""
+      },
+      {
+          "featurename": "gnutls28",
+          "featureversion": "3.5.18-1ubuntu1.1",
+          "vulnerability": "CVE-2018-16868",
+          "namespace": "ubuntu:18.04",
+          "description": "A Bleichenbacher type side-channel based padding oracle attack was found in the way gnutls handles verification of RSA decrypted PKCS#1 v1.5 data. An attacker who is able to run process on the same physical core as the victim process, could use this to extract plaintext or in some cases downgrade any TLS connections to a vulnerable server.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-16868",
+          "severity": "Low",
+          "fixedby": ""
+      },
+      {
+          "featurename": "lz4",
+          "featureversion": "0.0~r131-2ubuntu3",
+          "vulnerability": "CVE-2019-17543",
+          "namespace": "ubuntu:18.04",
+          "description": "LZ4 before 1.9.2 has a heap-based buffer overflow in LZ4_write32 (related to LZ4_compress_destSize), affecting applications that call LZ4_compress_fast with a large input. (This issue can also lead to data corruption.) NOTE: the vendor states \"only a few specific / uncommon usages of the API are at risk.\"",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-17543",
+          "severity": "Low",
+          "fixedby": ""
+      },
+      {
+          "featurename": "glibc",
+          "featureversion": "2.27-3ubuntu1",
+          "vulnerability": "CVE-2016-10739",
+          "namespace": "ubuntu:18.04",
+          "description": "In the GNU C Library (aka glibc or libc6) through 2.28, the getaddrinfo function would successfully parse a string that contained an IPv4 address followed by whitespace and arbitrary characters, which could lead applications to incorrectly assume that it had parsed a valid string, without the possibility of embedded HTTP headers or other potentially dangerous substrings.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2016-10739",
+          "severity": "Low",
+          "fixedby": ""
+      },
+      {
+          "featurename": "pcre3",
+          "featureversion": "2:8.39-9",
+          "vulnerability": "CVE-2017-11164",
+          "namespace": "ubuntu:18.04",
+          "description": "In PCRE 8.41, the OP_KETRMAX feature in the match function in pcre_exec.c allows stack exhaustion (uncontrolled recursion) when processing a crafted regular expression.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2017-11164",
+          "severity": "Low",
+          "fixedby": ""
+      },
+      {
+          "featurename": "tar",
+          "featureversion": "1.29b-2ubuntu0.1",
+          "vulnerability": "CVE-2018-20482",
+          "namespace": "ubuntu:18.04",
+          "description": "GNU Tar through 1.30, when --sparse is used, mishandles file shrinkage during read access, which allows local users to cause a denial of service (infinite read loop in sparse_dump_region in sparse.c) by modifying a file that is supposed to be archived by a different user's process (e.g., a system backup running as root).",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-20482",
+          "severity": "Low",
+          "fixedby": ""
+      },
+      {
+          "featurename": "coreutils",
+          "featureversion": "8.28-1ubuntu1",
+          "vulnerability": "CVE-2016-2781",
+          "namespace": "ubuntu:18.04",
+          "description": "chroot in GNU coreutils, when used with --userspec, allows local users to escape to the parent session via a crafted TIOCSTI ioctl call, which pushes characters to the terminal's input buffer.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2016-2781",
+          "severity": "Low",
+          "fixedby": ""
+      },
+      {
+          "featurename": "libgcrypt20",
+          "featureversion": "1.8.1-4ubuntu1.1",
+          "vulnerability": "CVE-2019-12904",
+          "namespace": "ubuntu:18.04",
+          "description": "In Libgcrypt 1.8.4, the C implementation of AES is vulnerable to a flush-and-reload side-channel attack because physical addresses are available to other processes. (The C implementation is used on platforms where an assembly-language implementation is unavailable.)",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-12904",
+          "severity": "Low",
+          "fixedby": ""
+      },
+      {
+          "featurename": "shadow",
+          "featureversion": "1:4.5-1ubuntu2",
+          "vulnerability": "CVE-2013-4235",
+          "namespace": "ubuntu:18.04",
+          "description": "TOCTOU race conditions by copying and removing directory trees",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2013-4235",
+          "severity": "Low",
+          "fixedby": ""
+      },
+      {
+          "featurename": "glibc",
+          "featureversion": "2.27-3ubuntu1",
+          "vulnerability": "CVE-2015-8985",
+          "namespace": "ubuntu:18.04",
+          "description": "The pop_fail_stack function in the GNU C Library (aka glibc or libc6) allows context-dependent attackers to cause a denial of service (assertion failure and application crash) via vectors related to extended regular expression processing.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2015-8985",
+          "severity": "Low",
+          "fixedby": ""
+      },
+      {
+          "featurename": "glibc",
+          "featureversion": "2.27-3ubuntu1",
+          "vulnerability": "CVE-2019-9169",
+          "namespace": "ubuntu:18.04",
+          "description": "In the GNU C Library (aka glibc or libc6) through 2.29, proceed_next_node in posix/regexec.c has a heap-based buffer over-read via an attempted case-insensitive regular-expression match.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-9169",
+          "severity": "Low",
+          "fixedby": ""
+      },
+      {
+          "featurename": "glibc",
+          "featureversion": "2.27-3ubuntu1",
+          "vulnerability": "CVE-2009-5155",
+          "namespace": "ubuntu:18.04",
+          "description": "In the GNU C Library (aka glibc or libc6) before 2.28, parse_reg_exp in posix/regcomp.c misparses alternatives, which allows attackers to cause a denial of service (assertion failure and application exit) or trigger an incorrect result by attempting a regular-expression match.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2009-5155",
+          "severity": "Low",
+          "fixedby": ""
+      },
+      {
+          "featurename": "shadow",
+          "featureversion": "1:4.5-1ubuntu2",
+          "vulnerability": "CVE-2018-7169",
+          "namespace": "ubuntu:18.04",
+          "description": "An issue was discovered in shadow 4.5. newgidmap (in shadow-utils) is setuid and allows an unprivileged user to be placed in a user namespace where setgroups(2) is permitted. This allows an attacker to remove themselves from a supplementary group, which may allow access to certain filesystem paths if the administrator has used \"group blacklisting\" (e.g., chmod g-rwx) to restrict access to paths. This flaw effectively reverts a security feature in the kernel (in particular, the /proc/self/setgroups knob) to prevent this sort of privilege escalation.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-7169",
+          "severity": "Low",
+          "fixedby": ""
+      },
+      {
+          "featurename": "glibc",
+          "featureversion": "2.27-3ubuntu1",
+          "vulnerability": "CVE-2019-9192",
+          "namespace": "ubuntu:18.04",
+          "description": "** DISPUTED ** In the GNU C Library (aka glibc or libc6) through 2.29, check_dst_limits_calc_pos_1 in posix/regexec.c has Uncontrolled Recursion, as demonstrated by '(|)(\\\\1\\\\1)*' in grep, a different issue than CVE-2018-20796. NOTE: the software maintainer disputes that this is a vulnerability because the behavior occurs only with a crafted pattern.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-9192",
+          "severity": "Negligible",
+          "fixedby": ""
+      },
+      {
+          "featurename": "pcre3",
+          "featureversion": "2:8.39-9",
+          "vulnerability": "CVE-2017-7246",
+          "namespace": "ubuntu:18.04",
+          "description": "Stack-based buffer overflow in the pcre32_copy_substring function in pcre_get.c in libpcre1 in PCRE 8.40 allows remote attackers to cause a denial of service (WRITE of size 268) or possibly have unspecified other impact via a crafted file.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2017-7246",
+          "severity": "Negligible",
+          "fixedby": ""
+      },
+      {
+          "featurename": "pcre3",
+          "featureversion": "2:8.39-9",
+          "vulnerability": "CVE-2017-7245",
+          "namespace": "ubuntu:18.04",
+          "description": "Stack-based buffer overflow in the pcre32_copy_substring function in pcre_get.c in libpcre1 in PCRE 8.40 allows remote attackers to cause a denial of service (WRITE of size 4) or possibly have unspecified other impact via a crafted file.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2017-7245",
+          "severity": "Negligible",
+          "fixedby": ""
+      },
+      {
+          "featurename": "glibc",
+          "featureversion": "2.27-3ubuntu1",
+          "vulnerability": "CVE-2019-7309",
+          "namespace": "ubuntu:18.04",
+          "description": "In the GNU C Library (aka glibc or libc6) through 2.29, the memcmp function for the x32 architecture can incorrectly return zero (indicating that the inputs are equal) because the RDX most significant bit is mishandled.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-7309",
+          "severity": "Negligible",
+          "fixedby": ""
+      },
+      {
+          "featurename": "glibc",
+          "featureversion": "2.27-3ubuntu1",
+          "vulnerability": "CVE-2016-10228",
+          "namespace": "ubuntu:18.04",
+          "description": "The iconv program in the GNU C Library (aka glibc or libc6) 2.25 and earlier, when invoked with the -c option, enters an infinite loop when processing invalid multi-byte input sequences, leading to a denial of service.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2016-10228",
+          "severity": "Negligible",
+          "fixedby": ""
+      },
+      {
+          "featurename": "util-linux",
+          "featureversion": "2.31.1-0.4ubuntu3.4",
+          "vulnerability": "CVE-2018-7738",
+          "namespace": "ubuntu:18.04",
+          "description": "In util-linux before 2.32-rc1, bash-completion/umount allows local users to gain privileges by embedding shell commands in a mountpoint name, which is mishandled during a umount command (within Bash) by a different user, as demonstrated by logging in as root and entering umount followed by a tab character for autocompletion.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-7738",
+          "severity": "Negligible",
+          "fixedby": ""
+      },
+      {
+          "featurename": "ncurses",
+          "featureversion": "6.1-1ubuntu1.18.04",
+          "vulnerability": "CVE-2019-17595",
+          "namespace": "ubuntu:18.04",
+          "description": "There is a heap-based buffer over-read in the fmt_entry function in tinfo/comp_hash.c in the terminfo library in ncurses before 6.1-20191012.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-17595",
+          "severity": "Negligible",
+          "fixedby": ""
+      },
+      {
+          "featurename": "ncurses",
+          "featureversion": "6.1-1ubuntu1.18.04",
+          "vulnerability": "CVE-2019-17594",
+          "namespace": "ubuntu:18.04",
+          "description": "There is a heap-based buffer over-read in the _nc_find_entry function in tinfo/comp_hash.c in the terminfo library in ncurses before 6.1-20191012.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-17594",
+          "severity": "Negligible",
+          "fixedby": ""
+      },
+      {
+          "featurename": "dpkg",
+          "featureversion": "1.19.0.5ubuntu2.2",
+          "vulnerability": "CVE-2017-8283",
+          "namespace": "ubuntu:18.04",
+          "description": "dpkg-source in dpkg 1.3.0 through 1.18.23 is able to use a non-GNU patch program and does not offer a protection mechanism for blank-indented diff hunks, which allows remote attackers to conduct directory traversal attacks via a crafted Debian source package, as demonstrated by use of dpkg-source on NetBSD.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2017-8283",
+          "severity": "Negligible",
+          "fixedby": ""
+      },
+      {
+          "featurename": "libtasn1-6",
+          "featureversion": "4.13-2",
+          "vulnerability": "CVE-2018-1000654",
+          "namespace": "ubuntu:18.04",
+          "description": "GNU Libtasn1-4.13 libtasn1-4.13 version libtasn1-4.13, libtasn1-4.12 contains a DoS, specifically CPU usage will reach 100% when running asn1Paser against the POC due to an issue in _asn1_expand_object_id(p_tree), after a long time, the program will be killed. This attack appears to be exploitable via parsing a crafted file.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-1000654",
+          "severity": "Negligible",
+          "fixedby": ""
+      },
+      {
+          "featurename": "glibc",
+          "featureversion": "2.27-3ubuntu1",
+          "vulnerability": "CVE-2018-20796",
+          "namespace": "ubuntu:18.04",
+          "description": "In the GNU C Library (aka glibc or libc6) through 2.29, check_dst_limits_calc_pos_1 in posix/regexec.c has Uncontrolled Recursion, as demonstrated by '(\\227|)(\\\\1\\\\1|t1|\\\\\\2537)+' in grep.",
+          "link": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-20796",
+          "severity": "Negligible",
+          "fixedby": ""
+      }
+  ]
+}

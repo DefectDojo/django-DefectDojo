@@ -2,6 +2,8 @@ import html2text
 import re
 from defusedxml import ElementTree
 from hyperlink._url import SCHEME_PORT_MAP
+from datetime import datetime
+from django.conf import settings
 
 from dojo.models import Finding, Endpoint
 
@@ -124,6 +126,15 @@ class NexposeParser(object):
                             ] += "\n\n" + self.parse_html_type(desc)
                         else:
                             vuln["pluginOutput"] = self.parse_html_type(desc)
+                    if settings.USE_FIRST_SEEN and (date := test.get("vulnerable-since")):
+                        date = datetime.fromisoformat(date)
+                        # It would be nice to be able to define it per Endpoint_Status but for now, we use the oldest known information
+                        if not vuln.get("vulnerableSince") or (date < vuln["vulnerableSince"]):
+                            vuln["vulnerableSince"] = date
+                        else:
+                            vuln["vulnerableSince"] = None
+                    else:
+                        vuln["vulnerableSince"] = None
                     vulns.append(vuln)
 
         return vulns
@@ -324,12 +335,11 @@ class NexposeParser(object):
                 if vuln.get("resolution")
                 else None,
                 impact=vuln.get("vector") if vuln.get("vector") else None,
-                test=test,
                 false_p=False,
                 duplicate=False,
                 out_of_scope=False,
-                mitigated=None,
                 dynamic_finding=True,
+                date=vuln.get("vulnerableSince"),
             )
             # build references
             refs = ""

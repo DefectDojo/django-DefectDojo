@@ -174,7 +174,7 @@ env = environ.FileAwareEnv(
     DD_AUTH_REMOTEUSER_GROUPS_HEADER=(str, ''),
     DD_AUTH_REMOTEUSER_GROUPS_CLEANUP=(bool, True),
     # Comma separated list of IP ranges with trusted proxies
-    DD_AUTH_REMOTEUSER_TRUSTED_PROXY=(list, ['127.0.0.0/32']),
+    DD_AUTH_REMOTEUSER_TRUSTED_PROXY=(list, ['127.0.0.1/32']),
     # REMOTE_USER will be processed only on login page. Check https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#using-remote-user-on-login-pages-only
     DD_AUTH_REMOTEUSER_LOGIN_ONLY=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
@@ -277,6 +277,8 @@ env = environ.FileAwareEnv(
     # If you run big import you may want to disable this because the way django-auditlog currently works, there's
     # a big performance hit. Especially during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
+    # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
+    DD_USE_FIRST_SEEN=(bool, False),
 )
 
 
@@ -1055,28 +1057,28 @@ if SAML2_ENABLED:
 # ------------------------------------------------------------------------------
 
 AUTH_REMOTEUSER_ENABLED = env('DD_AUTH_REMOTEUSER_ENABLED')
+AUTH_REMOTEUSER_USERNAME_HEADER = env('DD_AUTH_REMOTEUSER_USERNAME_HEADER')
+AUTH_REMOTEUSER_EMAIL_HEADER = env('DD_AUTH_REMOTEUSER_EMAIL_HEADER')
+AUTH_REMOTEUSER_FIRSTNAME_HEADER = env('DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER')
+AUTH_REMOTEUSER_LASTNAME_HEADER = env('DD_AUTH_REMOTEUSER_LASTNAME_HEADER')
+AUTH_REMOTEUSER_GROUPS_HEADER = env('DD_AUTH_REMOTEUSER_GROUPS_HEADER')
+AUTH_REMOTEUSER_GROUPS_CLEANUP = env('DD_AUTH_REMOTEUSER_GROUPS_CLEANUP')
+
+AUTH_REMOTEUSER_TRUSTED_PROXY = IPSet()
+for ip_range in env('DD_AUTH_REMOTEUSER_TRUSTED_PROXY'):
+    AUTH_REMOTEUSER_TRUSTED_PROXY.add(IPNetwork(ip_range))
+
+if env('DD_AUTH_REMOTEUSER_LOGIN_ONLY'):
+    RemoteUserMiddleware = 'dojo.remote_user.PersistentRemoteUserMiddleware'
+else:
+    RemoteUserMiddleware = 'dojo.remote_user.RemoteUserMiddleware'
+# we need to add middleware just behindAuthenticationMiddleware as described in https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#configuration
+for i in range(len(MIDDLEWARE)):
+    if MIDDLEWARE[i] == 'django.contrib.auth.middleware.AuthenticationMiddleware':
+        MIDDLEWARE.insert(i + 1, RemoteUserMiddleware)
+        break
+
 if AUTH_REMOTEUSER_ENABLED:
-    AUTH_REMOTEUSER_USERNAME_HEADER = env('DD_AUTH_REMOTEUSER_USERNAME_HEADER')
-    AUTH_REMOTEUSER_EMAIL_HEADER = env('DD_AUTH_REMOTEUSER_EMAIL_HEADER')
-    AUTH_REMOTEUSER_FIRSTNAME_HEADER = env('DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER')
-    AUTH_REMOTEUSER_LASTNAME_HEADER = env('DD_AUTH_REMOTEUSER_LASTNAME_HEADER')
-    AUTH_REMOTEUSER_GROUPS_HEADER = env('DD_AUTH_REMOTEUSER_GROUPS_HEADER')
-    AUTH_REMOTEUSER_GROUPS_CLEANUP = env('DD_AUTH_REMOTEUSER_GROUPS_CLEANUP')
-
-    AUTH_REMOTEUSER_TRUSTED_PROXY = IPSet()
-    for ip_range in env('DD_AUTH_REMOTEUSER_TRUSTED_PROXY'):
-        AUTH_REMOTEUSER_TRUSTED_PROXY.add(IPNetwork(ip_range))
-
-    if env('DD_AUTH_REMOTEUSER_LOGIN_ONLY'):
-        RemoteUserMiddleware = 'dojo.remote_user.PersistentRemoteUserMiddleware'
-    else:
-        RemoteUserMiddleware = 'dojo.remote_user.RemoteUserMiddleware'
-    # we need to add middleware just behindAuthenticationMiddleware as described in https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#configuration
-    for i in range(len(MIDDLEWARE)):
-        if MIDDLEWARE[i] == 'django.contrib.auth.middleware.AuthenticationMiddleware':
-            MIDDLEWARE.insert(i + 1, RemoteUserMiddleware)
-            break
-
     REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = \
         ('dojo.remote_user.RemoteUserAuthentication',) + \
         REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES']
@@ -1268,6 +1270,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Trufflehog Scan': ['title', 'description', 'line'],
     'Humble Json Importer': ['title'],
     'MSDefender Parser': ['title', 'description'],
+    'HCLAppScan XML': ['title', 'description'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1474,6 +1477,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Threagile risks report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Humble Json Importer': DEDUPE_ALGO_HASH_CODE,
     'MSDefender Parser': DEDUPE_ALGO_HASH_CODE,
+    'HCLAppScan XML': DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1709,3 +1713,4 @@ CREATE_CLOUD_BANNER = env('DD_CREATE_CLOUD_BANNER')
 # ------------------------------------------------------------------------------
 AUDITLOG_FLUSH_RETENTION_PERIOD = env('DD_AUDITLOG_FLUSH_RETENTION_PERIOD')
 ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
+USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')

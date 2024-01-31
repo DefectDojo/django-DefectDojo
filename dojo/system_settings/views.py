@@ -71,7 +71,7 @@ def system_settings(request):
                     'Settings cannot be saved: Retroactive false positive history can not be set without False positive history.',
                     extra_tags='alert-warning')
             else:
-                new_settings = form.save()
+                form.save()
                 messages.add_message(request,
                                     messages.SUCCESS,
                                     'Settings saved.',
