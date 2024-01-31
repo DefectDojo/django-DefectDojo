@@ -2559,7 +2559,7 @@ class LanguageTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Language_Add
         self.permission_update = Permissions.Language_Edit
         self.permission_delete = Permissions.Language_Delete
-        self.deleted_objects = 2
+        self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
