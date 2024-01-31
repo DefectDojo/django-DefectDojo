@@ -81,7 +81,7 @@ class DojoDefaultImporter(object):
             # _and_ given a CVSS vector string such as:
             # cvss_vector_str = 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N',
             # the following severity calculation returns the
-            # string values of, "None" instead of the expected string values 
+            # string values of, "None" instead of the expected string values
             # of "Info":
             # ```
             # cvss_obj = CVSS3(cvss_vector_str)
