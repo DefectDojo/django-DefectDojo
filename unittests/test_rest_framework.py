@@ -2531,7 +2531,7 @@ class LanguageTypeTest(BaseClass.RESTEndpointTest):
         }
         self.update_fields = {'color': 'blue'}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 1
+        self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2559,7 +2559,7 @@ class LanguageTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Language_Add
         self.permission_update = Permissions.Language_Edit
         self.permission_delete = Permissions.Language_Delete
-        self.deleted_objects = 1
+        self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
