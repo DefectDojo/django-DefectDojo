@@ -49,21 +49,22 @@ class NoseyParkerParser(object):
 
                 # Set Finding details
                 for match in line['matches']:
-
-                    title = f"Secret(s) Found in Repository with Commit ID {match['provenance'][0]['commit_provenance']['commit_metadata']['commit_id']}"
-                    filepath = match['provenance'][0]['commit_provenance']['blob_path']
+                    json_path = None
+                    if (len(match['provenance']) == 1):
+                        json_path = match['provenance'][0]
+                    if (len(match['provenance']) == 2):
+                        json_path = match['provenance'][1]
+                    title = f"Secret(s) Found in Repository with Commit ID {json_path['commit_provenance']['commit_metadata']['commit_id']}"
+                    filepath = json_path['commit_provenance']['blob_path']
                     line_num = match['location']['source_span']['start']['line']
                     description = f"Secret found of type:   {rule_name} \n" \
                                   f"SECRET starts with:  '{secret[:3]}' \n" \
-                                  f"Committer Name: {match['provenance'][0]['commit_provenance']['commit_metadata']['committer_name']}  \n" \
-                                  f"Committer Email: {match['provenance'][0]['commit_provenance']['commit_metadata']['committer_email']} \n" \
-                                  f"Commit ID: {match['provenance'][0]['commit_provenance']['commit_metadata']['commit_id']}  \n"
-
-                    reproduce = f"Location: {filepath} \n " \
-                                f"Line #{line_num} \n " \
-                                f"Code Snippet Containing Secret: {match['snippet']['before']}***SECRET***{match['snippet']['after']} \n" \
-
-                    description += reproduce
+                                  f"Committer Name: {json_path['commit_provenance']['commit_metadata']['committer_name']}  \n" \
+                                  f"Committer Email: {json_path['commit_provenance']['commit_metadata']['committer_email']} \n" \
+                                  f"Commit ID: {json_path['commit_provenance']['commit_metadata']['commit_id']}  \n" \
+                                  f"Location: {filepath} line #{line_num} \n " \
+                                  f"Line #{line_num} \n " \
+                                  f"Code Snippet Containing Secret: {match['snippet']['before']}***SECRET***{match['snippet']['after']} \n"
 
                     # Internal de-duplication
                     key = hashlib.md5((filepath + "|" + secret + "|" + str(line_num)).encode("utf-8")).hexdigest()
