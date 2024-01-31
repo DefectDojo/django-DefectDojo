@@ -1454,7 +1454,7 @@ class TestsTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Test_Add
         self.permission_update = Permissions.Test_Edit
         self.permission_delete = Permissions.Test_Delete
-        self.deleted_objects = 5
+        self.deleted_objects = 18
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
