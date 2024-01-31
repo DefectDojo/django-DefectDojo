@@ -50,7 +50,7 @@ def migrate_whitesource_findings_to_mend(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0186_system_settings_non_common_password_required'),
+        ('dojo', '0198_alter_system_settings_enable_deduplication'),
     ]
 
     operations = [
