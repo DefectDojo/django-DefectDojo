@@ -6,6 +6,7 @@ import logging
 import textwrap
 
 from dojo.models import Finding
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +62,7 @@ class TwistlockCSVParser(object):
             ),
             impact=data_severity,
         )
+        finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
         finding.description = finding.description.strip()
         if data_vulnerability_id:
             finding.unsaved_vulnerability_ids = [data_vulnerability_id]
@@ -184,6 +186,7 @@ def get_item(vulnerability, test):
         ),
         impact=severity,
     )
+    finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
     finding.unsaved_vulnerability_ids = [vulnerability["id"]]
     finding.description = finding.description.strip()
 

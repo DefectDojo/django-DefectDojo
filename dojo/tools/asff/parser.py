@@ -14,6 +14,7 @@ SEVERITY_MAPPING = {
     "CRITICAL": "Critical",
 }
 
+from django.conf import settings
 
 class AsffParser(object):
     def get_scan_types(self):
@@ -51,8 +52,7 @@ class AsffParser(object):
             else:
                 mitigation = None
                 references = None
-            result.append(
-                Finding(
+            finding = Finding(
                     title=item.get("Title"),
                     description=self.get_description(item),
                     date=dateutil.parser.parse(item.get("CreatedAt")),
@@ -62,7 +62,8 @@ class AsffParser(object):
                     active=True,  # TODO manage attribute 'RecordState'
                     unique_id_from_tool=item.get("Id"),
                 )
-            )
+            finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("asff")]
+            result.append(finding)
         return result
 
     def get_severity(self, data):

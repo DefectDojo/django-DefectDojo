@@ -567,4 +567,4 @@ class TestSarifParser(DojoTestCase):
         parser = SarifParser()
         findings = parser.get_findings(testfile, Test())
         item = findings[0]
-        self.assertEqual(["Scan"], item.tags)
+        self.assertEqual(["Scan"], item.unsaved_tags)

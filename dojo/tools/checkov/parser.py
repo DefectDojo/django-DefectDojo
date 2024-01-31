@@ -1,7 +1,7 @@
 import json
 
 from dojo.models import Finding
-
+from django.conf import settings
 
 class CheckovParser(object):
     def get_scan_types(self):
@@ -87,7 +87,7 @@ def get_item(vuln, test, check_type):
     mitigation = ""
 
     references = vuln["guideline"] if "guideline" in vuln else ""
-    return Finding(
+    finding =  Finding(
         title=title,
         test=test,
         description=description,
@@ -101,3 +101,6 @@ def get_item(vuln, test, check_type):
         dynamic_finding=False,
         vuln_id_from_tool= vuln['check_id']
     )
+    finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("checkov")]
+    return finding
+
