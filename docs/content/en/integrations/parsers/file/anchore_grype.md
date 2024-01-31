@@ -189,4 +189,4 @@ All properties are expected as strings and are required by the parser.
 ~~~
 
 ### Sample Scan Data
-Sample Grype scans can be found at https://github.com/DefectDojo/sample-scan-files/tree/master/anchore_grype .
+Sample Grype scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/anchore_grype).
