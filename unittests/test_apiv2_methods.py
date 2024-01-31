@@ -17,7 +17,7 @@ class ApiEndpointMethods(DojoTestCase):
         exempt_list = [
             'import-scan', 'reimport-scan', 'notes', 'system_settings', 'roles',
             'import-languages', 'endpoint_meta_import', 'test_types',
-            'configuration_permissions', 'risk_acceptance', 'questionnaire_questions',
+            'configuration_permissions', 'questionnaire_questions',
             'questionnaire_answers', 'questionnaire_answered_questionnaires',
             'questionnaire_engagement_questionnaires', 'questionnaire_general_questionnaires',
             'dojo_group_members', 'product_members', 'product_groups', 'product_type_groups',
