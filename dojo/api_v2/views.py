@@ -10,6 +10,7 @@ from django.utils.decorators import method_decorator
 from drf_yasg.inspectors.base import NotHandled
 from drf_yasg.inspectors.query import CoreAPICompatInspector
 from rest_framework import viewsets, mixins, status
+from rest_framework.throttling import UserRateThrottle
 from rest_framework.response import Response
 from django.db import IntegrityError
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
@@ -3002,7 +3003,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     When `auto_create_context` is set to `True` you can use `deduplication_on_engagement` to restrict deduplication for
     imported Findings to the newly created Engagement.
     """
-
+    throttle_classes = [UserRateThrottle]
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.none()
