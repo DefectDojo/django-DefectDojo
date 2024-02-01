@@ -275,10 +275,10 @@ class System_Settings(models.Model):
         default=False,
         blank=False,
         verbose_name=_('Deduplicate findings'),
-        help_text=_("With this setting turned on, Dojo deduplicates findings by "
+        help_text=_("With this setting turned on, DefectDojo deduplicates findings by "
                   "comparing endpoints, cwe fields, and titles. "
                   "If two findings share a URL and have the same CWE or "
-                  "title, Dojo marks the less recent finding as a duplicate. "
+                  "title, DefectDojo marks the recent finding as a duplicate. "
                   "When deduplication is enabled, a list of "
                   "deduplicated findings is added to the engagement view."))
     delete_duplicates = models.BooleanField(default=False, blank=False, help_text=_("Requires next setting: maximum number of duplicates to retain."))
@@ -1774,7 +1774,6 @@ class Endpoint(models.Model):
             mitigated__isnull=True,
             false_p=False,
             duplicate=False,
-            status_finding__mitigated=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False
@@ -1789,7 +1788,6 @@ class Endpoint(models.Model):
             mitigated__isnull=True,
             false_p=False,
             duplicate=False,
-            status_finding__mitigated=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False
@@ -1844,7 +1842,6 @@ class Endpoint(models.Model):
             mitigated__isnull=True,
             false_p=False,
             duplicate=False,
-            status_finding__mitigated=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False,
@@ -1860,7 +1857,6 @@ class Endpoint(models.Model):
             mitigated__isnull=True,
             false_p=False,
             duplicate=False,
-            status_finding__mitigated=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False,
@@ -2907,7 +2903,8 @@ class Finding(models.Model):
 
     def has_github_issue(self):
         try:
-            issue = self.github_issue
+            # Attempt to access the github issue if it exists. If not, an exception will be caught
+            _ = self.github_issue
             return True
         except GITHUB_Issue.DoesNotExist:
             return False

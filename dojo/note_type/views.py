@@ -111,7 +111,7 @@ def add_note_type(request):
     if request.method == 'POST':
         form = NoteTypeForm(request.POST)
         if form.is_valid():
-            note_type = form.save()
+            form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Note Type added successfully.',
