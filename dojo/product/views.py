@@ -875,8 +875,8 @@ def edit_product(request, pid):
         if form.is_valid():
             initial_sla_config = Product.objects.get(pk=form.instance.id).sla_configuration
             form.save()
-
             msg = 'Product updated successfully.'
+            # check if the SLA config was changed, append additional context to message
             if initial_sla_config != form.instance.sla_configuration:
                 msg += ' All SLA expiration dates for findings within this product will be recalculated asynchronously for the newly assigned SLA configuration.'
             messages.add_message(request,
