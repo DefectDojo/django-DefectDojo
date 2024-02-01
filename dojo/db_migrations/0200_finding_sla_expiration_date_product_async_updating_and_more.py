@@ -78,7 +78,7 @@ def calculate_sla_expiration_dates(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0196_notifications_sla_breach_combined'),
+        ('dojo', '0199_whitesource_to_mend'),
     ]
 
     operations = [
