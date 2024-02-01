@@ -59,8 +59,8 @@ env = environ.Env(
     DD_WHITENOISE=(bool, False),
     DD_TRACK_MIGRATIONS=(bool, True),
     DD_SECURE_PROXY_SSL_HEADER=(bool, False),
-    DD_THROTTLE_ANON=(str, "10/min"),
-    DD_THROTTLE_USER=(str, "1000/min"),
+    DD_THROTTLE_ANON=(str, "0/secod"),
+    DD_THROTTLE_USER=(str, "10/secod"),
     DD_TEST_RUNNER=(str, "django.test.runner.DiscoverRunner"),
     DD_URL_PREFIX=(str, ""),
     DD_ROOT=(str, root("dojo")),
@@ -885,8 +885,8 @@ if env("DD_SECURE_HSTS_INCLUDE_SUBDOMAINS"):
     SECURE_HSTS_SECONDS = env("DD_SECURE_HSTS_SECONDS")
     SECURE_HSTS_INCLUDE_SUBDOMAINS = env("DD_SECURE_HSTS_INCLUDE_SUBDOMAINS")
 
-DD_THROTTLE_ANON = env("DD_THROTTLE_ANON")
-DD_THROTTLE_USER = env("DD_THROTTLE_USER")
+THROTTLE_ANON = env("DD_THROTTLE_ANON")
+THROTTLE_USER = env("DD_THROTTLE_USER")
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = env("DD_SESSION_EXPIRE_AT_BROWSER_CLOSE")
 SESSION_COOKIE_AGE = env("DD_SESSION_COOKIE_AGE")
@@ -950,8 +950,8 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle'
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': DD_THROTTLE_ANON,
-        'user': DD_THROTTLE_USER 
+        'anon': THROTTLE_ANON,
+        'user': THROTTLE_USER 
     }
 }
 
