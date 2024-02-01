@@ -3002,7 +3002,8 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     When `auto_create_context` is set to `True` you can use `deduplication_on_engagement` to restrict deduplication for
     imported Findings to the newly created Engagement.
     """
-
+    from rest_framework.throttling import UserRateThrottle
+    throttle_classes = [UserRateThrottle]
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.none()
