@@ -3,8 +3,12 @@ title: "Veracode"
 toc_hide: true
 ---
 
-Veracode reports can be ingested in either XML or JSON Format
+This parser supports Veracode reports and Veracode SourceClear reports. Veracode reports can be ingested in either XML or JSON Format and Veracode SourceClear reports can be ingested using CSV or JSON. 
 
+### Sample Scan Data
+Sample Veracode scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/veracode).
+
+### More info about Veracode reports
 - Detailed XML Report
 - JSON REST Findings from `/appsec/v2/applications/{application_guid}/findings/`
   - Acceptable scan types include `STATIC`, `DYNAMIC`, and `SCA`
@@ -46,6 +50,3 @@ Veracode reports can be ingested in either XML or JSON Format
             }
         }
         ```
-
-### Sample Scan Data
-Sample Veracode scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/veracode).

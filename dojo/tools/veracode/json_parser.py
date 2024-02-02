@@ -1,4 +1,3 @@
-import json
 import re
 from cvss import CVSS3
 from dateutil import parser
@@ -54,8 +53,7 @@ class VeracodeJSONParser(object):
     def get_findings(self, json_output, test):
         findings = []
         if json_output:
-            json_data = json.load(json_output)
-            findings += self.get_items(json_data, test)
+            findings += self.get_items(json_output, test)
         return findings
 
     def get_items(self, tree, test):
@@ -93,9 +91,7 @@ class VeracodeJSONParser(object):
             finding = self.parse_description(finding, vuln.get("description"), scan_type)
             finding.nb_occurences = vuln.get("count", 1)
             finding.test = test
-
             parsed_findings.append(finding)
-
         return parsed_findings
 
     def create_finding_from_details(self, finding_details, scan_type, policy_violated) -> Finding:
@@ -136,7 +132,6 @@ class VeracodeJSONParser(object):
             return self.add_dynamic_details(finding, finding_details, backup_title=cwe_title)
         elif scan_type == "SCA":
             return self.add_sca_details(finding, finding_details, backup_title=cwe_title)
-
         return None
 
     def add_static_details(self, finding, finding_details, backup_title=None) -> Finding:
@@ -175,7 +170,6 @@ class VeracodeJSONParser(object):
         # Add the module this vuln is located into the description
         if module := finding_details.get("module"):
             finding.description += f"**Module**: {module}\n"
-
         return finding
 
     def add_dynamic_details(self, finding, finding_details, backup_title=None) -> Finding:
@@ -224,7 +218,6 @@ class VeracodeJSONParser(object):
         if discovered_by_vsa := finding_details.get("discovered_by_vsa"):
             if bool(discovered_by_vsa):
                 finding.description += "**Note**: This finding was discovered by Virtual Scan Appliance\n"
-
         return finding
 
     def add_sca_details(self, finding, finding_details, backup_title=None) -> Finding:
@@ -285,7 +278,6 @@ class VeracodeJSONParser(object):
         # check if the CWE title was used. A cwe may not be present when a veracode SRCCLR is present
         if not finding.title:
             finding.title = f"{finding.component_name} - {vuln_id}"
-
         return finding
 
     def parse_description(self, finding, description_body, scan_type) -> Finding:
@@ -303,7 +295,6 @@ class VeracodeJSONParser(object):
             # Make sure there is something to grab from the expected places
             if len(sections) > 0:
                 finding.description += f"### Details\n{sections[0]}"
-
             # Determine there is a mitigation section in the first index
             if len(sections) > 1 and "References:" not in sections[1]:
                 finding.mitigation = sections[1]
@@ -320,7 +311,6 @@ class VeracodeJSONParser(object):
             #  - Description: A detailed explanation of the vulnerability and why it is bad
             #  - Mitigation: What to do about the vulnerability
             #  - References: (No "References:" string ) Any external links to further knowledge related to the vulnerability
-
             # Split the description body into sections based on a "<span>" delimiter
             sections = description_body.split("<span>")
             # Trim out the closing span tags and any trailing spaces in each section
@@ -328,20 +318,17 @@ class VeracodeJSONParser(object):
             # Make sure there is something to grab from the expected places
             if len(sections) > 0:
                 finding.description += f"### Details\n{sections[0]}"
-
             # Determine there is a mitigation section in the first index
             if len(sections) > 1 and "<a href" not in sections[1]:
                 finding.mitigation = sections[1]
             # Determine if the references section is actually in the first index
             elif len(sections) > 1 and "<a href" in sections[1]:
                 finding.references = self.parse_references(sections[1])
-
             # Determine if the references are in the second index
             if len(sections) > 2 and "<a href" in sections[2]:
                 finding.references = self.parse_references(sections[2])
         elif scan_type == "SCA":
             finding.description += f"### Details\n{description_body}"
-
         return finding
 
     def parse_references(self, text) -> str:
@@ -372,5 +359,4 @@ class VeracodeJSONParser(object):
                 reference_string += f"- [{label}]({link})\n"
             elif link and not label:
                 reference_string += f"- {link}\n"
-
         return reference_string
