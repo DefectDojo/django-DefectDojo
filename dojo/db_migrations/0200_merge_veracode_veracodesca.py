@@ -7,11 +7,13 @@ logger = logging.getLogger(__name__)
 
 VERACODESOURCECLEAR_REFERENCES = ['Veracode SourceClear Scan']
 
+
 def update_veracodesourceclear_test(test, veracodesourceclear_test_type) -> None:
     if test.test_type.name in VERACODESOURCECLEAR_REFERENCES or test.scan_type in VERACODESOURCECLEAR_REFERENCES:
         test.test_type = veracodesourceclear_test_type
         test.scan_type = veracodesourceclear_test_type.name
         test.save()
+
 
 # Update the found_by field to remove Veracode SourceClear Scan and add Veracode Scan
 def update_veracodesourceclear_finding(finding, veracode_test_type, veracodesourceclear_test_type) -> None:
