@@ -372,11 +372,10 @@ class MobSFParser(object):
     # Criticality rating
     def getCriticalityRating(self, rating):
         criticality = "Info"
-        if rating == "warning":
+        if rating == "Good":
             criticality = "Info"
         else:
             criticality = rating.capitalize()
-
         return criticality
 
     def suite_data(self, suites):
