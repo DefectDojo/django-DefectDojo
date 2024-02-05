@@ -1192,11 +1192,13 @@ class Product(models.Model):
         from django.urls import reverse
         return reverse('view_product', args=[str(self.id)])
 
+    @property
     def violates_sla(self):
-        findings = Finding.objects.filter(test__engagement__product=self,
-                                          active=True,
-                                          sla_expiration_date__lt=timezone.now().date())
-        return findings.count() > 0
+        findings = Finding.objects.filter(test__engagement__product=self, active=True)
+        for f in findings:
+            if f.violates_sla:
+                return True
+        return False
 
 
 class Product_Member(models.Model):
@@ -2178,7 +2180,6 @@ class Test_Import_Finding_Action(TimeStampedModel):
 
 
 class Finding(models.Model):
-
     title = models.CharField(max_length=511,
                              verbose_name=_('Title'),
                              help_text=_("A short description of the flaw."))
@@ -2886,18 +2887,19 @@ class Finding(models.Model):
                 self.sla_expiration_date = get_current_date() + relativedelta(days=days_remaining)
 
     def sla_days_remaining(self):
-        if self.sla_expiration_date:
-            if self.mitigated:
-                mitigated_date = self.mitigated
-                if isinstance(mitigated_date, datetime):
-                    mitigated_date = self.mitigated.date()
-                return (self.sla_expiration_date - mitigated_date).days
-            else:
-                return (self.sla_expiration_date - get_current_date()).days
-        return None
+        sla_calculation = None
+        sla_period = self.get_sla_period()
+        if sla_period:
+            sla_calculation = sla_period - self.sla_age
+        return sla_calculation
 
     def sla_deadline(self):
-        return self.sla_expiration_date
+        days_remaining = self.sla_days_remaining()
+        if days_remaining:
+            if self.mitigated:
+                return self.mitigated.date() + relativedelta(days=days_remaining)
+            return get_current_date() + relativedelta(days=days_remaining)
+        return None
 
     def github(self):
         try:

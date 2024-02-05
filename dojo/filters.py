@@ -149,12 +149,16 @@ class FindingSLAFilter(ChoiceFilter):
         return qs
 
     def sla_satisfied(self, qs, name):
-        # return findings that have an sla expiration date after today or no sla expiration date
-        return qs.filter(Q(sla_expiration_date__isnull=True) | Q(sla_expiration_date__gt=timezone.now().date()))
+        for finding in qs:
+            if finding.violates_sla:
+                qs = qs.exclude(id=finding.id)
+        return qs
 
     def sla_violated(self, qs, name):
-        # return active findings that have an sla expiration date before today
-        return qs.filter(Q(active=True) & Q(sla_expiration_date__lt=timezone.now().date()))
+        for finding in qs:
+            if not finding.violates_sla:
+                qs = qs.exclude(id=finding.id)
+        return qs
 
     options = {
         None: (_('Any'), any),
@@ -181,13 +185,13 @@ class ProductSLAFilter(ChoiceFilter):
 
     def sla_satisifed(self, qs, name):
         for product in qs:
-            if product.violates_sla():
+            if product.violates_sla:
                 qs = qs.exclude(id=product.id)
         return qs
 
     def sla_violated(self, qs, name):
         for product in qs:
-            if not product.violates_sla():
+            if not product.violates_sla:
                 qs = qs.exclude(id=product.id)
         return qs
 
