@@ -62,3 +62,13 @@ class TestSysdigParser(TestCase):
                 "sysdig report contains errors:" in str(context.exception)
             )
             self.assertTrue("ECONNREFUSED" in str(context.exception))
+
+    def test_sysdig_parser_json_with_many_findings(self):
+        testfile = open("unittests/scans/sysdig_reports/sysdig.json")
+        parser = SysdigReportsParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(207, len(findings))
