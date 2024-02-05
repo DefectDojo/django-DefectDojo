@@ -1039,7 +1039,7 @@ class Product(models.Model):
         verbose_name=_("Disable SLA breach notifications"),
         help_text=_("Disable SLA breach notifications if configured in the global settings"))
     async_updating = models.BooleanField(default=False,
-                                            help_text=_('Findings under this SLA configuration are asynchronously being updated'))
+                                            help_text=_('Findings under this Product or SLA configuration are asynchronously being updated'))
 
     def save(self, *args, **kwargs):
         # get the product's sla config before saving (if this is an existing product)
