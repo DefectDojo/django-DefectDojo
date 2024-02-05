@@ -2821,6 +2821,10 @@ class Finding(models.Model):
         return ", ".join([str(s) for s in status])
 
     def _age(self, start_date):
+        from dateutil.parser import parse
+        if start_date and isinstance(start_date, str):
+            start_date = parse(start_date).date()
+
         from dojo.utils import get_work_days
         if settings.SLA_BUSINESS_DAYS:
             if self.mitigated:
