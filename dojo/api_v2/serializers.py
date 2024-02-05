@@ -86,6 +86,7 @@ from dojo.models import (
     Answered_Survey,
     General_Survey,
     Check_List,
+    Announcement,
 )
 
 from dojo.tools.factory import (
@@ -2003,7 +2004,19 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
         exclude = (
             "tid",
             "updated",
+            "async_updating"
         )
+
+    def validate(self, data):
+        async_updating = getattr(self.instance, 'async_updating', None)
+        if async_updating:
+            new_sla_config = data.get('sla_configuration', None)
+            old_sla_config = getattr(self.instance, 'sla_configuration', None)
+            if new_sla_config and old_sla_config and new_sla_config != old_sla_config:
+                raise serializers.ValidationError(
+                    'Finding SLA expiration dates are currently being recalculated. The SLA configuration for this product cannot be changed until the calculation is complete.'
+                )
+        return data
 
     def get_findings_count(self, obj) -> int:
         return obj.findings_count
@@ -2130,6 +2143,10 @@ class ImportScanSerializer(serializers.Serializer):
     product_type_id = serializers.IntegerField(read_only=True)
 
     statistics = ImportStatisticsSerializer(read_only=True, required=False)
+    apply_tags_to_findings = serializers.BooleanField(
+        help_text="If set to True, the tags will be applied to the findings",
+        required=False,
+    )
 
     def save(self, push_to_jira=False):
         data = self.validated_data
@@ -2148,6 +2165,7 @@ class ImportScanSerializer(serializers.Serializer):
         commit_hash = data.get("commit_hash", None)
         api_scan_configuration = data.get("api_scan_configuration", None)
         service = data.get("service", None)
+        apply_tags_to_findings = data.get("apply_tags_to_findings", False)
         source_code_management_uri = data.get(
             "source_code_management_uri", None
         )
@@ -2240,6 +2258,7 @@ class ImportScanSerializer(serializers.Serializer):
                 service=service,
                 title=test_title,
                 create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
+                apply_tags_to_findings=apply_tags_to_findings,
             )
 
             if test:
@@ -2408,6 +2427,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     product_type_id = serializers.IntegerField(read_only=True)
 
     statistics = ImportStatisticsSerializer(read_only=True, required=False)
+    apply_tags_to_findings = serializers.BooleanField(
+        help_text="If set to True, the tags will be applied to the findings",
+        required=False
+    )
 
     def save(self, push_to_jira=False):
         logger.debug("push_to_jira: %s", push_to_jira)
@@ -2420,6 +2443,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         close_old_findings_product_scope = data.get(
             "close_old_findings_product_scope"
         )
+        apply_tags_to_findings = data.get("apply_tags_to_findings", False)
         do_not_reactivate = data.get("do_not_reactivate", False)
         version = data.get("version", None)
         build_id = data.get("build_id", None)
@@ -2520,6 +2544,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     service=service,
                     do_not_reactivate=do_not_reactivate,
                     create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
+                    apply_tags_to_findings=apply_tags_to_findings,
                 )
 
                 if test_import:
@@ -2957,6 +2982,9 @@ class NotificationsSerializer(serializers.ModelSerializer):
     sla_breach = MultipleChoiceField(
         choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
     )
+    sla_breach_combined = MultipleChoiceField(
+        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
+    )
     risk_acceptance_expiration = MultipleChoiceField(
         choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
     )
@@ -3015,7 +3043,21 @@ class NetworkLocationsSerializer(serializers.ModelSerializer):
 class SLAConfigurationSerializer(serializers.ModelSerializer):
     class Meta:
         model = SLA_Configuration
-        fields = "__all__"
+        exclude = (
+            "async_updating",
+        )
+
+    def validate(self, data):
+        async_updating = getattr(self.instance, 'async_updating', None)
+        if async_updating:
+            for field in ['critical', 'high', 'medium', 'low']:
+                old_days = getattr(self.instance, field, None)
+                new_days = data.get(field, None)
+                if old_days and new_days and (old_days != new_days):
+                    raise serializers.ValidationError(
+                        'Finding SLA expiration dates are currently being calculated. The SLA days for this SLA configuration cannot be changed until the calculation is complete.'
+                    )
+        return data
 
 
 class UserProfileSerializer(serializers.Serializer):
@@ -3147,3 +3189,20 @@ class QuestionnaireGeneralSurveySerializer(serializers.ModelSerializer):
     class Meta:
         model = General_Survey
         fields = "__all__"
+
+
+class AnnouncementSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Announcement
+        fields = "__all__"
+
+    def create(self, validated_data):
+        validated_data["id"] = 1
+        try:
+            return super().create(validated_data)
+        except IntegrityError as e:
+            if 'duplicate key value violates unique constraint "dojo_announcement_pkey"' in str(e):
+                raise serializers.ValidationError("No more than one Announcement is allowed")
+            else:
+                raise

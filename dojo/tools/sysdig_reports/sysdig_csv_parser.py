@@ -14,7 +14,7 @@ class CSVParser:
             return ()
 
         content = filename.read()
-        if type(content) is bytes:
+        if isinstance(content, bytes):
             content = content.decode('utf-8')
         reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"')
 

@@ -213,7 +213,6 @@ def edit_engagement(request, eid):
     jira_project_form = None
     jira_epic_form = None
     jira_project = None
-    jira_error = False
 
     if request.method == 'POST':
         form = EngForm(request.POST, instance=engagement, cicd=is_ci_cd, product=engagement.product, user=request.user)
@@ -430,7 +429,6 @@ def view_engagement(request, eid):
                 form = TypedNoteForm(available_note_types=available_note_types)
             else:
                 form = NoteForm()
-            url = request.build_absolute_uri(reverse("view_engagement", args=(eng.id,)))
             title = "Engagement: %s on %s" % (eng.name, eng.product.name)
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -670,6 +668,7 @@ class ImportScanResultsView(View):
             api_scan_configuration = form.cleaned_data.get('api_scan_configuration', None)
             service = form.cleaned_data.get('service', None)
             close_old_findings = form.cleaned_data.get('close_old_findings', None)
+            apply_tags_to_findings = form.cleaned_data.get('apply_tags_to_findings', False)
             # close_old_findings_prodct_scope is a modifier of close_old_findings.
             # If it is selected, close_old_findings should also be selected.
             close_old_findings_product_scope = form.cleaned_data.get('close_old_findings_product_scope', None)
@@ -736,7 +735,7 @@ class ImportScanResultsView(View):
                             minimum_severity=minimum_severity, endpoints_to_add=list(form.cleaned_data['endpoints']) + added_endpoints, scan_date=scan_date,
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
                             close_old_findings=close_old_findings, close_old_findings_product_scope=close_old_findings_product_scope, group_by=group_by, api_scan_configuration=api_scan_configuration, service=service,
-                            create_finding_groups_for_all_findings=create_finding_groups_for_all_findings)
+                            create_finding_groups_for_all_findings=create_finding_groups_for_all_findings, apply_tags_to_findings=apply_tags_to_findings)
 
                 message = f'{scan_type} processed a total of {finding_count} findings'
 
@@ -1106,7 +1105,8 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
 def expire_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
-    eng = get_object_or_404(Engagement, pk=eid)
+    # Validate the engagement ID exists before moving forward
+    get_object_or_404(Engagement, pk=eid)
 
     ra_helper.expire_now(risk_acceptance)
 
@@ -1230,7 +1230,7 @@ def engagement_ics(request, eid):
 def get_list_index(list, index):
     try:
         element = list[index]
-    except Exception as e:
+    except Exception:
         element = None
     return element
 

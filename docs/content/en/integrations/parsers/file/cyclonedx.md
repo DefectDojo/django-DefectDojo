@@ -26,3 +26,6 @@ cyclonedx-py
     -o <path> - the bom file to create
     -j        - generate JSON instead of XML
 {{< /highlight >}}
+
+### Sample Scan Data
+Sample CycloneDX scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/cyclonedx).

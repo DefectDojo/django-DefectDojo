@@ -28,6 +28,9 @@ class RemoteUserAuthentication(OriginalRemoteUserAuthentication):
 
 class RemoteUserMiddleware(OriginalRemoteUserMiddleware):
     def process_request(self, request):
+        if not settings.AUTH_REMOTEUSER_ENABLED:
+            return
+
         # process only if request is comming from the trusted proxy node
         if IPAddress(request.META['REMOTE_ADDR']) in settings.AUTH_REMOTEUSER_TRUSTED_PROXY:
             self.header = settings.AUTH_REMOTEUSER_USERNAME_HEADER
