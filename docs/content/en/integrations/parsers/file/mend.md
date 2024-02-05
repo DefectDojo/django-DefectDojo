@@ -12,4 +12,4 @@ Unit tests for Mend JSON files can be found at https://github.com/DefectDojo/dja
 ### Link To Tool
 See documentation: https://docs.mend.io/bundle/unified_agent/page/example_of_a_unified_agent_json_report.html
 
-*Formerly known as Whitesource.
+*Formerly known as Whitesource.*
