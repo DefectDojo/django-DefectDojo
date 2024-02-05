@@ -73,8 +73,7 @@
             {% endif %}
             <div class="col-sm-10 {{ classes.value }} {% if field|is_multiple_checkbox %}multiple-checkbox{% endif %}">
                 {{ field|addcss:"class:form-control" }}
-
-
+                <p style="width: 70%; font-style: italic; margin-bottom: 0px;">{{ field.field.widget.attrs.message }}</p>
                 {% for error in field.errors %}
                     <span class="help-block {{ form.error_css_class }}">{{ error }}</span>
                 {% endfor %}

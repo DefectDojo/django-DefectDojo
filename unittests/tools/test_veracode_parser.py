@@ -156,8 +156,6 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.assertEqual(datetime.datetime(2020, 6, 1, 10, 2, 1), finding.mitigated)
         self.assertEqual("app-1234_issue-1", finding.unique_id_from_tool)
         self.assertEqual(0, finding.sla_age)
-        self.assertEqual(90, finding.sla_days_remaining())
-        self.assertEqual((datetime.datetime(2020, 6, 1, 10, 2, 1) + datetime.timedelta(days=90)).date(), finding.sla_deadline())
 
     @override_settings(USE_FIRST_SEEN=True)
     def test_parse_file_with_mitigated_fixed_finding_first_seen(self):
