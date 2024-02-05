@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='product',
             name='async_updating',
-            field=models.BooleanField(default=False, help_text='Findings under this SLA configuration are asynchronously being updated'),
+            field=models.BooleanField(default=False, help_text='Findings under this Product or SLA configuration are asynchronously being updated'),
         ),
         migrations.AddField(
             model_name='sla_configuration',
