@@ -1954,9 +1954,10 @@ if os.getenv("DD_USE_CACHE_REDIS") == "true":
     if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
         secret_redis = get_secret(env("DD_SECRET_REDIS"))
         LOCATION_CACHE = [
-            f"rediss://{secret_redis['username']}:{secret_redis['password']}@{secret_redis['host']}:{secret_redis['port']}",
-            f"rediss://{secret_redis['username']}:{secret_redis['password']}@{secret_redis['hostread']}:{secret_redis['port']}",
+            f"rediss://{secret_redis['host']}:{secret_redis['port']}",
+            f"rediss://{secret_redis['hostread']}:{secret_redis['port']}",
         ]
+        OPTIONS_CACHE.update({"PASSWORD": secret_redis['password']})
 
     CACHES = {
         "default": {

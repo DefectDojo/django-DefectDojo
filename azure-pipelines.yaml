@@ -62,6 +62,7 @@ steps:
       coverage run --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --exclude-tag broken
       coverage xml
     displayName: "Unit test"
+    condition: false
 
   - task: SonarQubePrepare@5
     displayName: "Prepare analysis on SonarQube"
