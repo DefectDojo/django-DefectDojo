@@ -1070,7 +1070,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "watson.middleware.SearchContextMiddleware",
     "auditlog.middleware.AuditlogMiddleware",
     "crum.CurrentRequestUserMiddleware",
-    "dojo.request_cache.middleware.RequestCacheMiddleware",
+    "dojo.request_cache.middleware.RequestCacheMiddleware"
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
@@ -1945,4 +1945,20 @@ LIMIT_OF_TEMPORARILY_ASSUMED_VULNERABILITIES_LIMITED_TO_TOLERANCE = env("DD_LIMI
 PERCENTAGE_OF_VULNERABILITIES_CLOSED = env("DD_PERCENTAGE_OF_VULNERABILITIES_CLOSED")
 TEMPORARILY_ASSUMED_VULNERABILITIES = env("DD_TEMPORARILY_ASSUMED_VULNERABILITIES")
 
+# ------------------------------------------------------------------------------
+# CACHE
+# ------------------------------------------------------------------------------
+LOCATION_CACHE = "redis://127.0.0.1:6379"
+OPTIONS_CACHE =  { "CLIENT_CLASS": "django_redis.client.DefaultClient" }
+if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
+    secret_redis = get_secret(env("DD_SECRET_REDIS"))
+    LOCATION_CACHE = f"redis://{secret_redis['username']}@{secret_redis['host']}:{secret_redis['port']}"
+    OPTIONS_CACHE.update({"PASSWORD": secret_redis['password']})
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": LOCATION_CACHE,
+        "OPTIONS": OPTIONS_CACHE
+    }
+}
