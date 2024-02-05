@@ -8,7 +8,7 @@ from django.urls import reverse
 from dojo.authorization.authorization import user_has_configuration_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.forms import SLAConfigForm
-from dojo.models import SLA_Configuration, System_Settings
+from dojo.models import SLA_Configuration, System_Settings, Product
 from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
@@ -41,13 +41,20 @@ def edit_sla_config(request, slaid):
 
     if request.method == 'POST' and request.POST.get('delete'):
         if sla_config.id != 1:
-            user_has_configuration_permission_or_403(
-                request.user, 'dojo.delete_sla_configuration')
-            sla_config.delete()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'SLA Configuration Deleted.',
-                                 extra_tags='alert-success')
+            if Product.objects.filter(sla_configuration=sla_config).count():
+                msg = f"The \"{sla_config}\" SLA configuration could not be deleted, as it is currently in use by one or more products."
+                messages.add_message(request,
+                                    messages.ERROR,
+                                    msg,
+                                    extra_tags='alert-warning')
+            else:
+                user_has_configuration_permission_or_403(
+                    request.user, 'dojo.delete_sla_configuration')
+                sla_config.delete()
+                messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'SLA Configuration Deleted.',
+                                    extra_tags='alert-success')
             return HttpResponseRedirect(reverse('sla_config', ))
         else:
             messages.add_message(request,
@@ -59,12 +66,12 @@ def edit_sla_config(request, slaid):
     elif request.method == 'POST':
         form = SLAConfigForm(request.POST, instance=sla_config)
         if form.is_valid():
-            form.save()
+            form.save(commit=True)
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'SLA configuration successfully updated.',
+                                 'SLA configuration successfully updated. All SLA expiration dates for findings within this SLA configuration will be recalculated asynchronously.',
                                  extra_tags='alert-success')
-            form.save(commit=True)
+            return HttpResponseRedirect(reverse('sla_config', ))
     else:
         form = SLAConfigForm(instance=sla_config)
 
