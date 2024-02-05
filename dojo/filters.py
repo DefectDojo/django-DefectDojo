@@ -11,7 +11,6 @@ from auditlog.models import LogEntry
 from django.conf import settings
 import six
 from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
     BooleanFilter, NumberFilter, DateFilter
