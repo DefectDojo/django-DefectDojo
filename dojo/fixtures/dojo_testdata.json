@@ -399,7 +399,7 @@
     "pk": 555,
     "model": "dojo.test_type",
     "fields": {
-      "name": "Bandit Scan"
+      "name": "Veracode Scan"
     }
   },
   {
@@ -1063,7 +1063,7 @@
       "lead": null,
       "estimated_time": "00:00:00",
       "test_type": 555,
-      "scan_type": "Bandit Scan",
+      "scan_type": "Veracode Scan",
       "engagement": 5,
       "environment": 1,
       "target_start": "2017-12-01T00:00:00Z",
