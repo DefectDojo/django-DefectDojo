@@ -4091,7 +4091,7 @@
     {
       "category": "sast",
       "message": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-      "cve": "dojo/tools/whitesource/parser.py:52cbbccfd7b77010f6c50b6ece5cc13b2ba7257ab48b8b35bba8757149365b47:B303",
+      "cve": "dojo/tools/mend/parser.py:52cbbccfd7b77010f6c50b6ece5cc13b2ba7257ab48b8b35bba8757149365b47:B303",
       "severity": "Medium",
       "confidence": "High",
       "scanner": {
@@ -4099,7 +4099,7 @@
         "name": "Bandit"
       },
       "location": {
-        "file": "dojo/tools/whitesource/parser.py",
+        "file": "dojo/tools/mend/parser.py",
         "start_line": 85,
         "end_line": 85,
         "dependency": {

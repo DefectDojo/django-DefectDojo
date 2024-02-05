@@ -46,3 +46,6 @@ Veracode reports can be ingested in either XML or JSON Format
             }
         }
         ```
+
+### Sample Scan Data
+Sample Veracode scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/veracode).

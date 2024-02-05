@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. /secret-file-loader.sh
+
 initialize_data()
 {
     # Test types shall be initialized every time by the initializer, to make sure test types are complete

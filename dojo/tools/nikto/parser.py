@@ -43,26 +43,28 @@ class NiktoParser(object):
 
     def process_json(self, file, test):
         data = json.load(file)
-
+        if len(data) == 1 and isinstance(data, list):
+            data = data[0]
         dupes = dict()
         host = data.get("host")
         port = data.get("port")
         if port is not None:
             port = int(port)
         for vulnerability in data.get("vulnerabilities", []):
+            description = "\n".join([
+                f"**id:** `{vulnerability.get('id')}`",
+                f"**msg:** `{vulnerability.get('msg')}`",
+                f"**HTTP Method:** `{vulnerability.get('method')}`",
+            ])
+            if vulnerability.get('OSVDB') is not None:
+                description += "\n" + f"**OSVDB:** `{vulnerability.get('OSVDB')}`"
             finding = Finding(
                 title=vulnerability.get("msg"),
                 severity="Info",  # Nikto doesn't assign severity, default to Info
-                description="\n".join(
-                    [
-                        f"**id:** `{vulnerability.get('id')}`",
-                        f"**msg:** `{vulnerability.get('msg')}`",
-                        f"**HTTP Method:** `{vulnerability.get('method')}`",
-                        f"**OSVDB:** `{vulnerability.get('OSVDB')}`",
-                    ]
-                ),
+                description=description,
                 vuln_id_from_tool=vulnerability.get("id"),
                 nb_occurences=1,
+                references=vulnerability.get("references")
             )
             # manage if we have an ID from OSVDB
             if "OSVDB" in vulnerability and "0" != vulnerability.get("OSVDB"):

@@ -18,7 +18,7 @@ from dojo.jira_link.views import get_custom_field
 from dojo.models import (SEVERITIES, DojoMeta, Endpoint, Endpoint_Status,
                          Engagement, Finding, JIRA_Issue, JIRA_Project, Notes,
                          Product, Product_Type, System_Settings, Test,
-                         Test_Type, User)
+                         SLA_Configuration, Test_Type, User)
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +52,11 @@ class DojoTestUtilsMixin(object):
         product_type = Product_Type(name=name, description=description)
         product_type.save()
         return product_type
+
+    def create_sla_configuration(self, name, *args, description='dummy description', critical=7, high=30, medium=60, low=120, **kwargs):
+        sla_configuration = SLA_Configuration(name=name, description=description, critical=critical, high=high, medium=medium, low=low)
+        sla_configuration.save()
+        return sla_configuration
 
     def create_product(self, name, *args, description='dummy description', prod_type=None, tags=[], **kwargs):
         if not prod_type:

@@ -115,3 +115,14 @@ class TestMicrofocusWebinspectParser(DojoTestCase):
         endpoint = item.unsaved_endpoints[0]
         self.assertEqual("www.microfocus.com", endpoint.host)
         self.assertEqual(443, endpoint.port)
+
+    def test_parse_file_issue7690(self):
+        test = Test()
+        test.engagement = Engagement()
+        test.engagement.product = Product()
+        testfile = open(
+            get_unit_tests_path() + "/scans/microfocus_webinspect/issue_7690.xml"
+        )
+        parser = MicrofocusWebinspectParser()
+        findings = parser.get_findings(testfile, test)
+        self.assertEqual(30, len(findings))

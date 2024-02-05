@@ -55,17 +55,20 @@ class TrivyParser:
         return "Import trivy JSON scan report."
 
     def convert_cvss_score(self, raw_value):
-        val = float(raw_value)
-        if val == 0.0:
+        if raw_value is None:
             return "Info"
-        elif val < 4.0:
-            return "Low"
-        elif val < 7.0:
-            return "Medium"
-        elif val < 9.0:
-            return "High"
         else:
-            return "Critical"
+            val = float(raw_value)
+            if val == 0.0:
+                return "Info"
+            elif val < 4.0:
+                return "Low"
+            elif val < 7.0:
+                return "Medium"
+            elif val < 9.0:
+                return "High"
+            else:
+                return "Critical"
 
     def get_findings(self, scan_file, test):
         scan_data = scan_file.read()
@@ -173,8 +176,13 @@ class TrivyParser:
                     if severity_source is not None and cvss is not None:
                         cvssclass = cvss.get(severity_source, None)
                         if cvssclass is not None:
-                            severity = self.convert_cvss_score(cvssclass.get("V3Score", None))
-                            cvssv3 = dict(cvssclass).get("V3Vector", None)
+                            if cvssclass.get("V3Score") is not None:
+                                severity = self.convert_cvss_score(cvssclass.get("V3Score"))
+                                cvssv3 = dict(cvssclass).get("V3Vector")
+                            elif cvssclass.get("V2Score") is not None:
+                                severity = self.convert_cvss_score(cvssclass.get("V2Score"))
+                            else:
+                                severity = self.convert_cvss_score(None)
                         else:
                             severity = TRIVY_SEVERITIES[vuln["Severity"]]
                     else:

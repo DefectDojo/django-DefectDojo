@@ -16,3 +16,6 @@ A CSV formatted Qualys Scan Report can also be used. Ensure the following values
   * Patches and Workarounds
   * Virtual Patches and Mitigating Controls
 * Results
+
+### Sample Scan Data
+Sample Qualys Scan scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/qualys).
