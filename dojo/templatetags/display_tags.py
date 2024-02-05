@@ -255,7 +255,7 @@ def finding_sla(finding):
     title = ""
     severity = finding.severity
     find_sla = finding.sla_days_remaining()
-    sla_age = getattr(finding.get_sla_periods(), severity.lower(), None)
+    sla_age = finding.get_sla_period()
     if finding.mitigated:
         status = "blue"
         status_text = 'Remediated within SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
@@ -986,9 +986,9 @@ def import_history(finding, autoescape=True):
         return ''
 
     if autoescape:
-        esc = conditional_escape
+        conditional_escape
     else:
-        esc = lambda x: x
+        lambda x: x
 
     # prefetched, so no filtering here
     status_changes = finding.test_import_finding_action_set.all()

@@ -290,8 +290,6 @@ def risk_unaccept(finding, perform_save=True):
     logger.debug('unaccepting finding %i:%s if it is currently risk accepted', finding.id, finding)
     if finding.risk_accepted:
         logger.debug('unaccepting finding %i:%s', finding.id, finding)
-        # keep reference to ra to for posting comments later
-        risk_acceptance = finding.risk_acceptance
         # removing from ManyToMany will not fail for non-existing entries
         remove_from_any_risk_acceptance(finding)
         if not finding.mitigated and not finding.false_p and not finding.out_of_scope:
