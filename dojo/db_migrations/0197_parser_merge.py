@@ -76,7 +76,7 @@ def migrate_clairklar_parsers(apps, schema_editor):
     clair_test_type, _ = test_type_model.objects.get_or_create(name="Clair Scan", active=True)
     clairklar_test_type = test_type_model.objects.filter(name="Clair Klar Scan").first()
     # Get all the findings found by Clair Klar Scan
-    findings = finding_model.objects.filter(test__scan_type__in=OPENVAS_REFERENCES)
+    findings = finding_model.objects.filter(test__scan_type__in=CLAIRKLAR_REFERENCES)
     logger.warning(f'We identified {findings.count()} Clair Klar Scan findings to migrate to Clair Scan findings')
     # Iterate over all findings and change
     for finding in findings:
