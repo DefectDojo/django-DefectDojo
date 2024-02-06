@@ -81,5 +81,5 @@ blackduck==1.1.0
 pycurl==7.45.2  # Required for Celery Broker AWS (SQS) support
 boto3==1.34.35  # Required for Celery Broker AWS (SQS) support
 netaddr==0.10.1
-vulners==2.1.2
+vulners==2.1.5
 fontawesomefree==6.5.1
