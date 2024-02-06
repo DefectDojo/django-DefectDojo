@@ -1,6 +1,6 @@
 from django.db import migrations
 from django.utils import timezone
-from datetime import datetime, timedelta
+from datetime import datetime
 from django.conf import settings
 from dateutil.relativedelta import relativedelta
 import logging
