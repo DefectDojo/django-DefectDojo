@@ -40,7 +40,7 @@ class TestKubeHunterParser(TestCase):
         with self.assertRaises(ValueError) as context:
             testfile = open("unittests/scans/kubehunter/empty.json")
             parser = KubeHunterParser()
-            findings = parser.get_findings(testfile, Test())
+            parser.get_findings(testfile, Test())
             testfile.close()
 
             self.assertTrue(

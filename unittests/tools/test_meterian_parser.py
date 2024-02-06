@@ -9,7 +9,7 @@ class TestMeterianParser(DojoTestCase):
         with self.assertRaises(ValueError):
             testfile = open("unittests/scans/meterian/report_invalid.json")
             parser = MeterianParser()
-            findings = parser.get_findings(testfile, Test())
+            parser.get_findings(testfile, Test())
 
     def test_meterianParser_report_has_no_finding(self):
         testfile = open("unittests/scans/meterian/report_no_vulns.json")

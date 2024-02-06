@@ -487,7 +487,7 @@ class BaseClass():
                     continue
 
                 self.assertTrue(field in obj["prefetch"])
-                values = field_value if type(field_value) is list else [field_value]
+                values = field_value if isinstance(field_value, list) else [field_value]
 
                 for value in values:
                     self.assertTrue(value in obj["prefetch"][field])
@@ -514,10 +514,10 @@ class BaseClass():
                         continue
 
                     self.assertTrue(field in objs["prefetch"])
-                    values = field_value if type(field_value) is list else [field_value]
+                    values = field_value if isinstance(field_value, list) else [field_value]
 
                     for value in values:
-                        if type(value) is not int:
+                        if not isinstance(value, int):
                             value = value['id']
                         self.assertTrue(value in objs["prefetch"][field])
 
@@ -588,7 +588,7 @@ class BaseClass():
 
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
-            response = self.client.delete(relative_url)
+            self.client.delete(relative_url)
 
             if self.endpoint_model == Endpoint_Status:
                 permission_object = Endpoint.objects.get(id=current_objects['results'][0]['endpoint'])
