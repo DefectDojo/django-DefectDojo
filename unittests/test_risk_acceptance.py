@@ -274,13 +274,13 @@ class RiskAcceptanceTestUI(DojoTestCase):
         to_warn = ra_helper.get_almost_expired_risk_acceptances_to_handle(heads_up_days=heads_up_days)
         to_expire = ra_helper.get_expired_risk_acceptances_to_handle()
 
-        self.assertTrue(ra1 in to_warn)
-        self.assertFalse(ra2 in to_warn)
-        self.assertFalse(ra3 in to_warn)
+        self.assertIn(ra1, to_warn)
+        self.assertNotIn(ra2, to_warn)
+        self.assertNotIn(ra3, to_warn)
 
-        self.assertFalse(ra1 in to_expire)
-        self.assertFalse(ra2 in to_expire)
-        self.assertTrue(ra3 in to_expire)
+        self.assertNotIn(ra1, to_expire)
+        self.assertNotIn(ra2, to_expire)
+        self.assertIn(ra3, to_expire)
 
         # run job
         ra_helper.expiration_handler()

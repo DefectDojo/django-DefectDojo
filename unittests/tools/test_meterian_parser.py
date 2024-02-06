@@ -61,13 +61,13 @@ class TestMeterianParser(DojoTestCase):
         self.assertEqual("CVE-2020-26289", finding.unsaved_vulnerability_ids[0])
         self.assertEqual(400, finding.cwe)
         self.assertTrue(finding.mitigation.startswith("## Remediation"))
-        self.assertTrue("Upgrade date-and-time to version 0.14.2 or higher." in finding.mitigation)
-        self.assertTrue("https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-26289" in finding.references, "found " + finding.references)
-        self.assertTrue("https://nvd.nist.gov/vuln/detail/CVE-2020-26289" in finding.references, "found " + finding.references)
-        self.assertTrue("https://www.npmjs.com/package/date-and-time" in finding.references, "found " + finding.references)
-        self.assertTrue("https://github.com/knowledgecode/date-and-time/security/advisories/GHSA-r92x-f52r-x54g" in finding.references, "found " + finding.references)
-        self.assertTrue("https://github.com/knowledgecode/date-and-time/commit/9e4b501eacddccc8b1f559fb414f48472ee17c2a" in finding.references, "found " + finding.references)
-        self.assertTrue("Manifest file", finding.file_path)
+        self.assertIn("Upgrade date-and-time to version 0.14.2 or higher.", finding.mitigation)
+        self.assertIn("https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-26289", finding.references, "found " + finding.references)
+        self.assertIn("https://nvd.nist.gov/vuln/detail/CVE-2020-26289", finding.references, "found " + finding.references)
+        self.assertIn("https://www.npmjs.com/package/date-and-time", finding.references, "found " + finding.references)
+        self.assertIn("https://github.com/knowledgecode/date-and-time/security/advisories/GHSA-r92x-f52r-x54g", finding.references, "found " + finding.references)
+        self.assertIn("https://github.com/knowledgecode/date-and-time/commit/9e4b501eacddccc8b1f559fb414f48472ee17c2a", finding.references, "found " + finding.references)
+        self.assertIn("Manifest file", finding.file_path)
         self.assertEqual(["nodejs"], finding.tags)
 
     def test_meterianParser_finding_has_no_remediation(self):
@@ -79,8 +79,8 @@ class TestMeterianParser(DojoTestCase):
 
         finding = findings[0]
         self.assertTrue(finding.mitigation.startswith("We were not able to provide a safe version for this library."))
-        self.assertTrue("You should consider replacing this component as it could be an " +
-            "issue for the safety of your application." in finding.mitigation)
+        self.assertIn("You should consider replacing this component as it could be an " +
+            "issue for the safety of your application.", finding.mitigation)
 
     def test_meterianParser_dual_language_report_has_two_findins(self):
         testfile = open("unittests/scans/meterian/report_multi_language.json")

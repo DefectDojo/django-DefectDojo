@@ -42,9 +42,9 @@ class TestApiBugcrowdParser(TestCase):
             self.assertEqual(
                 finding.unique_id_from_tool, "a4201d47-62e1-4287-9ff6-30807ae9d36a"
             )
-            self.assertTrue(
-                "/submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a"
-                in finding.references
+            self.assertIn(
+                "/submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a",
+                finding.references
             )
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
