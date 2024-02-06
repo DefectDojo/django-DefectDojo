@@ -3,6 +3,10 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
+    dependencies = [
+        ('dojo', '0199_whitesource_to_mend'),
+    ]
+
     operations = [
         migrations.AddField(
             model_name='finding',
