@@ -37,3 +37,13 @@ class TestWFuzzParser(DojoTestCase):
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
         self.assertEqual(4, len(findings))
+
+    def test_issue_7863(self):
+        testfile = open("unittests/scans/wfuzz/issue_7863.json")
+        parser = WFuzzParser()
+        findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(1, len(findings))
+        self.assertEqual("Medium", findings[0].severity)

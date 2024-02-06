@@ -17,6 +17,7 @@ class WFuzzParser(object):
         "401": "Medium",
         "407": "Medium",
         "403": "Medium",
+        "404": "Medium"
     }
 
     def get_scan_types(self):
