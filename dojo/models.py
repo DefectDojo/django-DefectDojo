@@ -2118,6 +2118,7 @@ class Test_Import_Finding_Action(TimeStampedModel):
         return '%i: %s' % (self.finding.id, self.action)
 
 
+
 class Finding(models.Model):
 
     STATUS_CHOICES = (('Risk Pending', 'Risk Pending'),
@@ -3135,6 +3136,49 @@ class Finding(models.Model):
     def violates_sla(self):
         days_remaining = self.sla_days_remaining()
         return days_remaining < 0 if days_remaining else False
+
+
+class TransferFinding(models.Model):
+    finding_id = models.ManyToManyField(Finding, verbose_name=("Finding ID"))
+    title = models.CharField(max_length=255, verbose_name=("Titile"))
+    product_type_name = models.ForeignKey(Product_Type,
+                                                 editable=True,
+                                                 on_delete=models.RESTRICT,
+                                                 help_text=_("product type name"))
+
+    product_name = models.ForeignKey(Product,
+                                                 editable=True,
+                                                 on_delete=models.RESTRICT,
+                                                 help_text=_("Product name"))
+
+    engagement_name = models.ForeignKey(Engagement,
+                                                 editable=True,
+                                                 on_delete=models.RESTRICT,
+                                                 help_text=_("Engagement name"))
+
+    status = models.BooleanField(verbose_name=_("Status"), default=False)
+
+    accepted_by = models.ForeignKey(Dojo_User,
+                                     editable=True,
+                                     on_delete=models.RESTRICT,
+                                     help_text=_("The user that accepts the tranfer finding, The user must belong to the product whit contact"))
+
+    path = models.FileField(upload_to='transfer_finding/%Y/%m/%d',
+                            editable=True, null=True,
+                            blank=True, verbose_name=('Proof'))
+
+    owner = models.CharField(max_length=200,
+                             default=None,
+                             null=True,
+                             blank=True,
+                             verbose_name=_('Owner'), help_text=_("The person that Owner the Tranfer finding"))
+
+    notes = models.ManyToManyField(Notes, editable=False)
+
+    class Meta:
+
+        def __str__(self):
+            return self.title
 
 
 class FindingAdmin(admin.ModelAdmin):

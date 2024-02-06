@@ -690,6 +690,7 @@ def async_burndown_metrics(request, pid):
     })
 
 
+
 @user_is_authorized(Product, Permissions.Engagement_View, 'pid')
 def view_engagements(request, pid):
     prod = get_object_or_404(Product, id=pid)

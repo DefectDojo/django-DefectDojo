@@ -60,6 +60,7 @@ class Permissions(IntEnum):
     Risk_Acceptance_Expire = 1213
     Risk_Acceptance_Reinstance = 1214
     Risk_Unaccept = 1215
+    Transfer_Finding = 1216
 
     Test_View = 1302
     Test_Add = 1303

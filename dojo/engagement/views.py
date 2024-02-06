@@ -25,7 +25,7 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import EngagementFilter, EngagementDirectFilter, EngagementTestFilter
 from dojo.forms import CheckForm, \
-    UploadThreatForm, RiskAcceptanceForm, RiskPendingForm, NoteForm, DoneForm, \
+    UploadThreatForm, RiskAcceptanceForm, TransferFindingForm, RiskPendingForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
     CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm, \
     EditRiskAcceptanceForm
@@ -1071,6 +1071,67 @@ def add_risk_acceptance(request, eid, fid=None):
     return render(request, 'dojo/add_risk_acceptance.html', {
                   'eng': eng,
                   'product_tab': product_tab,
+                  'form': form
+                  })
+
+@user_is_authorized(Engagement, Permissions.Transfer_Finding, 'eid')
+def add_transfer_finding(request, eid, fid=None):
+    eng = get_object_or_404(Engagement, id=eid)
+    product = eng.product
+    product_type = product.prod_type
+    finding = None
+    if fid:
+        finding = get_object_or_404(Finding, id=fid)
+
+    if request.method == 'POST':
+        form = TransferFindingForm(request.POST, request.FILES)
+        if form.is_valid():
+            # first capture notes param as it cannot be saved directly as m2m
+            notes = None
+            if form.cleaned_data['notes']:
+                notes = Notes(
+                    entry=form.cleaned_data['notes'],
+                    author=request.user,
+                    date=timezone.now())
+                notes.save()
+
+            del form.cleaned_data['notes']
+
+            try:
+                # we sometimes see a weird exception here, but are unable to reproduce.
+                # we add some logging in case it happens
+                transfer_finding = form.save()
+            except Exception as e:
+                logger.debug(vars(request.POST))
+                logger.error(vars(form))
+                logger.exception(e)
+                raise
+
+            # attach note to risk acceptance object now in database
+            if notes:
+                transfer_finding.notes.add(notes)
+
+            # eng.risk_acceptance.add(tranfer_finding) # todo egreagr a la matriz de tranfer fidign
+
+            findings = form.cleaned_data['accepted_findings']
+
+            transfer_finding = ra_helper.add_findings_to_risk_acceptance(tranfer_finding, findings)
+
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Risk acceptance saved.',
+                extra_tags='alert-success')
+
+            return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
+    else:
+        form = TransferFindingForm(initial={"engagement_name":eng,
+                                            "title": f"transfer finding - {finding.title}",
+                                            "finding_id": finding})
+
+    return render(request, 'dojo/add_transfer_finding.html', {
+                  'eng': eng,
+                  'product_tab': "product_tab test",
                   'form': form
                   })
 

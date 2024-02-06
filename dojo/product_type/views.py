@@ -1,5 +1,5 @@
 import logging
-
+from django.http import JsonResponse
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from django.contrib import messages
@@ -11,7 +11,7 @@ from dojo.filters import ProductTypeFilter
 from dojo.forms import Product_TypeForm, Delete_Product_TypeForm, Add_Product_Type_MemberForm, \
     Edit_Product_Type_MemberForm, Delete_Product_Type_MemberForm, Add_Product_Type_GroupForm, \
     Edit_Product_Type_Group_Form, Delete_Product_Type_GroupForm
-from dojo.models import Product_Type, Product_Type_Member, Role, Product_Type_Group
+from dojo.models import Product_Type, Product_Type_Member, Role, Product_Type_Group, Product
 from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs, get_setting, async_delete
 from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
@@ -30,6 +30,16 @@ Jay
 Status: in prod
 Product Type views
 """
+
+
+def get_description_product_type(_request, ptid):
+    products = list(Product.objects.filter(prod_type_id=ptid).values())
+    if len(products) != 0:
+        data = {"message": "Success", "products": products}
+    else:
+        data = {"message": "Not found Products"}
+
+    return JsonResponse(data)
 
 
 def product_type(request):
