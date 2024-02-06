@@ -146,7 +146,7 @@ class JIRAConfigEngagementBase(object):
                     engagement = Engagement.objects.get(id=response.url.split('/')[-2])
                 except:
                     raise ValueError('error parsing id from redirect uri: ' + response.url)
-            self.assertTrue(response.url == (expect_redirect_to % engagement.id))
+            self.assertEqual(response.url, (expect_redirect_to % engagement.id))
         else:
             self.assertEqual(response.status_code, 200)
 

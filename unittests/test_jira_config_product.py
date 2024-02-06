@@ -102,8 +102,8 @@ class JIRAConfigProductTest(DojoTestCase):
 
         self.assertEqual(200, response.status_code)
         content = response.content.decode('utf-8')
-        self.assertTrue('Login failed' in content)
-        self.assertTrue('Unable to authenticate to JIRA' in content)
+        self.assertIn('Login failed', content)
+        self.assertIn('Unable to authenticate to JIRA', content)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_add_jira_project_to_product_without_jira_project(self, jira_mock):

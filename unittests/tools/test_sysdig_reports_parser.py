@@ -44,10 +44,9 @@ class TestSysdigParser(TestCase):
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
-            self.assertTrue(
-                "sysdig report contains errors:" in str(context.exception)
-            )
-            self.assertTrue("ECONNREFUSED" in str(context.exception))
+        self.assertEqual(
+            "Number of fields in row (22) does not match number of headers (21)", str(context.exception)
+        )
 
     def test_sysdig_parser_missing_cve_field_not_starting_with_cve(self):
         with self.assertRaises(ValueError) as context:
@@ -58,10 +57,9 @@ class TestSysdigParser(TestCase):
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
-            self.assertTrue(
-                "sysdig report contains errors:" in str(context.exception)
-            )
-            self.assertTrue("ECONNREFUSED" in str(context.exception))
+        self.assertEqual(
+            "Number of fields in row (22) does not match number of headers (21)", str(context.exception)
+        )
 
     def test_sysdig_parser_json_with_many_findings(self):
         testfile = open("unittests/scans/sysdig_reports/sysdig.json")

@@ -27,7 +27,7 @@ class TestKubeBenchParser(DojoTestCase):
         )
         parser = KubeBenchParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertTrue(len(findings) == 4)
+        self.assertEqual(len(findings), 4)
 
     def test_parse_file_with_controls_tag(self):
 
