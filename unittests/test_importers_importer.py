@@ -208,7 +208,7 @@ class FlexibleImportTestAPI(DojoAPITestCase):
 
     def test_import_by_product_name_exists_engagement_name_not_exists(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, product_types=0, endpoints=0):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
+            self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
     @patch('dojo.jira_link.helper.get_jira_project')
@@ -227,7 +227,7 @@ class FlexibleImportTestAPI(DojoAPITestCase):
 
     def test_import_by_product_name_not_exists_engagement_name(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, product_types=0, endpoints=0):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
+            self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
     @patch('dojo.jira_link.helper.get_jira_project')
@@ -259,11 +259,11 @@ class FlexibleImportTestAPI(DojoAPITestCase):
 
     def test_endpoint_meta_import_by_product_name_exists(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
-            import0 = self.endpoint_meta_import_scan_with_params(ENDPOINT_META_IMPORTER_FILENAME, product=None, product_name=PRODUCT_NAME_DEFAULT, expected_http_status_code=201)
+            self.endpoint_meta_import_scan_with_params(ENDPOINT_META_IMPORTER_FILENAME, product=None, product_name=PRODUCT_NAME_DEFAULT, expected_http_status_code=201)
 
     def test_endpoint_meta_import_by_product_name_not_exists(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
-            import0 = self.endpoint_meta_import_scan_with_params(ENDPOINT_META_IMPORTER_FILENAME, product=None, product_name=PRODUCT_NAME_NEW, expected_http_status_code=400)
+            self.endpoint_meta_import_scan_with_params(ENDPOINT_META_IMPORTER_FILENAME, product=None, product_name=PRODUCT_NAME_NEW, expected_http_status_code=400)
 
     def test_import_with_invalid_parameters(self):
         with self.subTest('scan_date in the future'):
@@ -379,7 +379,7 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
 
     def test_reimport_by_product_name_exists_engagement_name_exists_scan_type_not_exsists_test_title_exists(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, product_types=0, endpoints=0):
-            import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type='Acunetix Scan', product_name=PRODUCT_NAME_DEFAULT,
+            self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type='Acunetix Scan', product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, test_title=TEST_TITLE_DEFAULT, expected_http_status_code=400)
 
     @patch('dojo.jira_link.helper.get_jira_project')
@@ -394,7 +394,7 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
 
     def test_reimport_by_product_name_exists_engagement_name_exists_scan_type_not_exsists_test_title_not_exists(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, product_types=0, endpoints=0):
-            import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type='Acunetix Scan', product_name=PRODUCT_NAME_DEFAULT,
+            self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type='Acunetix Scan', product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, test_title='bogus title', expected_http_status_code=400)
 
     @patch('dojo.jira_link.helper.get_jira_project')
@@ -419,7 +419,7 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
 
     def test_reimport_by_product_name_exists_engagement_name_not_exists(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, product_types=0, endpoints=0):
-            import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
+            self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
     @patch('dojo.jira_link.helper.get_jira_project')
@@ -438,7 +438,7 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
 
     def test_reimport_by_product_name_not_exists_engagement_name(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, product_types=0, endpoints=0):
-            import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
+            self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
     @patch('dojo.jira_link.helper.get_jira_project')

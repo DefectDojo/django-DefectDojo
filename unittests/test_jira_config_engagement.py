@@ -247,21 +247,21 @@ class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
         # TODO: add engagement also via API, but let's focus on JIRA here
         engagement = self.add_engagement_without_jira_project(expected_delta_jira_project_db=0)
-        response = self.edit_jira_project_for_engagement(engagement, expected_delta_jira_project_db=1)
+        self.edit_jira_project_for_engagement(engagement, expected_delta_jira_project_db=1)
         self.assertEqual(jira_mock.call_count, 1)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_add_empty_jira_project_to_engagement_without_jira_project(self, jira_mock):
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
         engagement = self.add_engagement_without_jira_project(expected_delta_jira_project_db=0)
-        response = self.empty_jira_project_for_engagement(engagement, expected_delta_jira_project_db=0)
+        self.empty_jira_project_for_engagement(engagement, expected_delta_jira_project_db=0)
         self.assertEqual(jira_mock.call_count, 0)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_edit_jira_project_to_engagement_with_jira_project(self, jira_mock):
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
         engagement = self.add_engagement_with_jira_project(expected_delta_jira_project_db=1)
-        response = self.edit_jira_project_for_engagement2(engagement, expected_delta_jira_project_db=0)
+        self.edit_jira_project_for_engagement2(engagement, expected_delta_jira_project_db=0)
         self.assertEqual(jira_mock.call_count, 2)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
@@ -274,14 +274,14 @@ class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
         # - so prevent clearing out these values
         # response = self.empty_jira_project_for_engagement(Engagement.objects.get(id=3), -1)
         # expecting ValueError as we can't delete existing JIRA Projects
-        response = self.empty_jira_project_for_engagement(engagement, expected_delta_jira_project_db=0, expect_error=True)
+        self.empty_jira_project_for_engagement(engagement, expected_delta_jira_project_db=0, expect_error=True)
         self.assertEqual(jira_mock.call_count, 1)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_add_jira_project_to_engagement_without_jira_project_invalid_project(self, jira_mock):
         jira_mock.return_value = False  # cannot set return_value in decorated AND have the mock into the method
         # errors means it won't redirect to view_engagement, but returns a 200 and redisplays the edit engagement page
-        response = self.edit_jira_project_for_engagement(Engagement.objects.get(id=3), expected_delta_jira_project_db=0, expect_200=True)
+        self.edit_jira_project_for_engagement(Engagement.objects.get(id=3), expected_delta_jira_project_db=0, expect_200=True)
         self.assertEqual(jira_mock.call_count, 1)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
@@ -290,7 +290,7 @@ class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
         engagement = self.add_engagement_with_jira_project(expected_delta_jira_project_db=1)
         jira_mock.return_value = False
         #  jira key is changed, so jira project will be checked
-        response = self.edit_jira_project_for_engagement2(engagement, expected_delta_jira_project_db=0, expect_200=True)
+        self.edit_jira_project_for_engagement2(engagement, expected_delta_jira_project_db=0, expect_200=True)
         self.assertEqual(jira_mock.call_count, 2)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
@@ -329,8 +329,8 @@ class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
     def test_edit_jira_project_to_engagement_with_jira_project_invalid_project_jira_disabled(self, jira_mock):
         self.system_settings(enable_jira=False)
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
-        response = self.edit_jira_project_for_engagement(Engagement.objects.get(id=3), expected_delta_jira_project_db=0)
-        response = self.edit_jira_project_for_engagement2(Engagement.objects.get(id=3), expected_delta_jira_project_db=0)
+        self.edit_jira_project_for_engagement(Engagement.objects.get(id=3), expected_delta_jira_project_db=0)
+        self.edit_jira_project_for_engagement2(Engagement.objects.get(id=3), expected_delta_jira_project_db=0)
         self.assertEqual(jira_mock.call_count, 0)
 
 

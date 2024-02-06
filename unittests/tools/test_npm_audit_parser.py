@@ -74,7 +74,7 @@ class TestNpmAuditParser(DojoTestCase):
         with self.assertRaises(ValueError) as context:
             testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/empty_with_error.json"))
             parser = NpmAuditParser()
-            findings = parser.get_findings(testfile, Test())
+            parser.get_findings(testfile, Test())
             testfile.close()
             self.assertTrue("npm audit report contains errors:" in str(context.exception))
             self.assertTrue("ENOAUDIT" in str(context.exception))
