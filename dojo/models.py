@@ -2422,6 +2422,15 @@ class Finding(models.Model):
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add."))
     inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))
 
+    epss_score = models.FloatField(null = True,
+                            blank = True,
+                            verbose_name = _('EPSS value'),
+                            help_text = _("EPSS score representing the probability [0-1] of exploitation in the wild in the 30 days following score publication."))
+    epss_percentile = models.FloatField(null = True,
+                            blank = True,
+                            verbose_name = _('EPSS percentile'),
+                            help_text = _("Percentile for the EPSS score: the proportion of all scored vulnerabilities with the same or a lower EPSS score."))
+
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
 
@@ -2458,6 +2467,8 @@ class Finding(models.Model):
             models.Index(fields=['duplicate']),
             models.Index(fields=['is_mitigated']),
             models.Index(fields=['duplicate_finding', 'id']),
+            models.Index(fields=['epss_score']),
+            models.Index(fields=['epss_percentile']),
         ]
 
     def __init__(self, *args, **kwargs):
@@ -3194,6 +3205,16 @@ class Finding(models.Model):
     def violates_sla(self):
         days_remaining = self.sla_days_remaining()
         return days_remaining < 0 if days_remaining else False
+
+    @property
+    def epss_info(self):
+        return self._epss_info()
+
+    def _epss_info(self):
+        """
+        :return: A tuple of (EPSS score, score percentile)
+        """
+        return self.epss_score, self.epss_percentile
 
 
 class FindingAdmin(admin.ModelAdmin):

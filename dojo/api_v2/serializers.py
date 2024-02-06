@@ -1656,6 +1656,8 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     reporter = serializers.PrimaryKeyRelatedField(
         required=False, queryset=User.objects.all()
     )
+    epss_score = serializers.FloatField(required=False, default=None)
+    epss_percentile = serializers.FloatField(required=False, default=None)
 
     class Meta:
         model = Finding
@@ -1815,6 +1817,8 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
     reporter = serializers.PrimaryKeyRelatedField(
         required=False, queryset=User.objects.all()
     )
+    epss_score = serializers.FloatField(required=False, default=None)
+    epss_percentile = serializers.FloatField(required=False, default=None)
 
     class Meta:
         model = Finding
@@ -1841,6 +1845,10 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         else:
             vulnerability_id_set = None
 
+        # Pop these here; we'll set them later (the call to save_vulnerability_ids() blows them away)
+        epss_score = validated_data.pop("epss_score")
+        epss_percentile = validated_data.pop("epss_percentile")
+
         # first save, so we have an instance to get push_all_to_jira from
         new_finding = super(TaggitSerializer, self).create(validated_data)
 
@@ -1850,6 +1858,11 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
                 vulnerability_ids.append(vulnerability_id["vulnerability_id"])
             validated_data["cve"] = vulnerability_ids[0]
             save_vulnerability_ids(new_finding, vulnerability_ids)
+            new_finding.save()
+
+        if epss_score or epss_percentile:
+            new_finding.epss_score = epss_score
+            new_finding.epss_percentile = epss_percentile
             new_finding.save()
 
         # TODO: JIRA can we remove this is_push_all_issues, already checked in

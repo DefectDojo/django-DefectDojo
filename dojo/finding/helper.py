@@ -647,6 +647,9 @@ def save_vulnerability_ids(finding, vulnerability_ids):
     else:
         finding.cve = None
 
+    # Remove stored EPSS info
+    finding.epss_score = finding.epss_percentile = None
+
 
 def save_vulnerability_ids_template(finding_template, vulnerability_ids):
     # Remove duplicates
@@ -664,3 +667,6 @@ def save_vulnerability_ids_template(finding_template, vulnerability_ids):
         finding_template.cve = vulnerability_ids[0]
     else:
         finding_template.cve = None
+
+    # Remove stored EPSS info
+    finding_template.epss_score = finding_template.epss_percentile = None
