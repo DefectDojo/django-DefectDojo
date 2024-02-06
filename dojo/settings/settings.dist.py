@@ -41,6 +41,7 @@ env = environ.FileAwareEnv(
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
     DD_CSRF_COOKIE_SAMESITE=(str, 'Lax'),
     DD_SESSION_COOKIE_SAMESITE=(str, 'Lax'),
+    DD_APPEND_SLASH=(bool, True),
     DD_TIME_ZONE=(str, 'UTC'),
     DD_LANG=(str, 'en-us'),
     DD_TEAM_NAME=(str, 'Security Team'),
@@ -672,6 +673,9 @@ CSRF_COOKIE_HTTPONLY = env('DD_CSRF_COOKIE_HTTPONLY')
 # cookie is only sent with an HTTPS connection.
 SESSION_COOKIE_SECURE = env('DD_SESSION_COOKIE_SECURE')
 SESSION_COOKIE_SAMESITE = env('DD_SESSION_COOKIE_SAMESITE')
+
+# Override default Django behavior for incorrect URLs
+APPEND_SLASH = env('DD_APPEND_SLASH')
 
 # Whether to use a secure cookie for the CSRF cookie.
 CSRF_COOKIE_SECURE = env('DD_CSRF_COOKIE_SECURE')
