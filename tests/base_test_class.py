@@ -90,6 +90,11 @@ class BaseTestCase(unittest.TestCase):
             print(
                 "starting chromedriver with options: ", vars(dd_driver_options), desired
             )
+
+            # TODO - this filter needs to be removed
+            import warnings
+            warnings.filterwarnings("ignore", message="executable_path has been deprecated, please pass in a Service object")
+
             dd_driver = webdriver.Chrome(
                 os.environ["CHROMEDRIVER"],
                 chrome_options=dd_driver_options,
