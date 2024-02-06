@@ -1102,7 +1102,7 @@ class Product(models.Model):
     @cached_property
     def endpoint_host_count(self):
         # active_endpoints is (should be) prefetched
-        endpoints = self.active_endpoints
+        endpoints = getattr(self, 'active_endpoints', None)
 
         hosts = []
         for e in endpoints:
@@ -1116,7 +1116,10 @@ class Product(models.Model):
     @cached_property
     def endpoint_count(self):
         # active_endpoints is (should be) prefetched
-        return len(self.active_endpoints)
+        endpoints = getattr(self, 'active_endpoints', None)
+        if endpoints:
+            return len(self.active_endpoints)
+        return None
 
     def open_findings(self, start_date=None, end_date=None):
         if start_date is None or end_date is None:
@@ -3291,8 +3294,9 @@ class Finding(models.Model):
 
     @property
     def violates_sla(self):
-        days_remaining = self.sla_days_remaining()
-        return days_remaining < 0 if days_remaining else False
+        if self.sla_expiration_date and self.sla_expiration_date > timezone.now():
+            return True
+        return False
 
 
 class FindingAdmin(admin.ModelAdmin):
