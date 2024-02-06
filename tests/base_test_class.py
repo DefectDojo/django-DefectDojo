@@ -96,6 +96,7 @@ class BaseTestCase(unittest.TestCase):
             warnings.filterwarnings("ignore", message="executable_path has been deprecated, please pass in a Service object")
             warnings.filterwarnings("ignore", message="use options instead of chrome_options")
             warnings.filterwarnings("ignore", message="desired_capabilities has been deprecated, please pass in a Service object")
+            warnings.filterwarnings("ignore", message="It is deprecated to return a value that is not None from a test case")
 
             dd_driver = webdriver.Chrome(
                 os.environ["CHROMEDRIVER"],
