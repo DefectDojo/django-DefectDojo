@@ -219,6 +219,8 @@ class DependencyTrackParser(object):
 
         if 'epssScore' in dependency_track_finding['vulnerability']:
             epss_score = dependency_track_finding['vulnerability']['epssScore']
+        else:
+            epss_score = None
 
 
         # Build and return Finding model

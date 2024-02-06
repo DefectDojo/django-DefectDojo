@@ -440,6 +440,29 @@
         </div>
     </div>
 
+    {% if finding.epss_score or finding.epss_percentile %}
+    <div class="panel panel-default">
+        <table id="additional_finding_references" class="table-striped table table-condensed table-hover centered">
+            <tr>
+                {% if finding.epss_score%}
+                    <th>EPSS Score</th>
+                {% endif %}
+                {% if finding.epss_percentile%}
+                    <th>EPSS Percentile</th>
+                {% endif %}
+            </tr>
+            <tr>
+                {% if finding.epss_score%}
+                    <td>{{ finding.epss_score }}</td>
+                {% endif %}
+                {% if finding.epss_percentile%}
+                    <td>{{ finding.epss_percentile }}</td>
+                {% endif %}
+            </tr>
+        </table>
+    </div>
+    {% endif %}
+
     {% with finding|additional_vulnerability_ids as additional_vulnerability_ids %}
     {% if additional_vulnerability_ids %}
     <div class="panel panel-default">
