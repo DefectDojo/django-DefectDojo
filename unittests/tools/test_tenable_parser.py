@@ -70,7 +70,7 @@ class TestTenableParser(DojoTestCase):
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual("Info", finding.severity)
-        self.assertFalse(finding.unsaved_vulnerability_ids)
+        self.assertEqual(0, len(finding.unsaved_vulnerability_ids))
         self.assertEqual(0, finding.cwe)
         self.assertEqual("HTTP Server Type and Version", finding.title)
         finding = findings[25]
@@ -92,7 +92,7 @@ class TestTenableParser(DojoTestCase):
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual("Info", finding.severity)
-        self.assertFalse(finding.unsaved_vulnerability_ids)
+        self.assertEqual(0, len(finding.unsaved_vulnerability_ids))
         self.assertEqual(0, finding.cwe)
         self.assertEqual("HTTP Server Type and Version", finding.title)
         finding = findings[25]
@@ -136,14 +136,14 @@ class TestTenableParser(DojoTestCase):
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual("Info", finding.severity)
-        self.assertFalse(finding.unsaved_vulnerability_ids)
+        self.assertEqual(0, len(finding.unsaved_vulnerability_ids))
         self.assertEqual("Nessus Scan Information", finding.title)
 
         finding = findings[25]
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual("Nessus SYN scanner", finding.title)
         self.assertEqual("Info", finding.severity)
-        self.assertFalse(finding.unsaved_vulnerability_ids)
+        self.assertEqual(0, len(finding.unsaved_vulnerability_ids))
         endpoint = finding.unsaved_endpoints[26]
         self.assertEqual("http", endpoint.protocol)
         endpoint = finding.unsaved_endpoints[37]
@@ -221,7 +221,7 @@ class TestTenableParser(DojoTestCase):
             finding = findings[i]
             self.assertIn(finding.severity, Finding.SEVERITIES)
             self.assertEqual('google.com', finding.unsaved_endpoints[0].host)
-            self.assertFalse(finding.unsaved_vulnerability_ids)
+            self.assertEqual(0, len(finding.unsaved_vulnerability_ids))
         finding = findings[0]
         self.assertEqual('7.1', finding.cvssv3_score)
         self.assertEqual('High', finding.severity)
@@ -238,7 +238,7 @@ class TestTenableParser(DojoTestCase):
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual('google.com', finding.unsaved_endpoints[0].host)
-        self.assertFalse(finding.unsaved_vulnerability_ids)
+        self.assertEqual(0, len(finding.unsaved_vulnerability_ids))
         self.assertEqual('7.1', finding.cvssv3_score)
         self.assertEqual('High', finding.severity)
         self.assertEqual('http', finding.unsaved_endpoints[0].protocol)

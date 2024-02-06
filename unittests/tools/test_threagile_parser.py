@@ -9,8 +9,8 @@ class TestThreAgileParser(DojoTestCase):
             parser = ThreagileParser()
             with self.assertRaises(ValueError) as exc_context:
                 parser.get_findings(testfile, Test())
-            exc = exc_context.exception
-            self.assertEqual("Invalid ThreAgile risks file", str(exc))
+        exc = exc_context.exception
+        self.assertEqual("Invalid ThreAgile risks file", str(exc))
 
     def test_empty_file_returns_no_findings(self):
         with open("unittests/scans/threagile/empty_file_no_risks.json") as testfile:

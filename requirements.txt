@@ -40,7 +40,7 @@ Pillow==10.2.0  # required by django-imagekit
 psycopg2-binary==2.9.9
 cryptography==42.0.2
 python-dateutil==2.8.2
-pytz==2023.4
+pytz==2024.1
 redis==5.0.1
 requests==2.31.0
 sqlalchemy==2.0.25  # Required by Celery broker transport
@@ -62,7 +62,7 @@ packageurl-python==0.13.4
 django-crum==0.7.9
 JSON-log-formatter==0.5.2
 django-split-settings==1.2.0
-django-debug-toolbar==4.2.0
+django-debug-toolbar==4.3.0
 django-debug-toolbar-request-history==0.1.4
 vcrpy==6.0.1
 vcrpy-unittest==0.1.7
@@ -79,7 +79,7 @@ django-ratelimit==4.1.0
 argon2-cffi==23.1.0
 blackduck==1.1.0
 pycurl==7.45.2  # Required for Celery Broker AWS (SQS) support
-boto3==1.34.32  # Required for Celery Broker AWS (SQS) support
+boto3==1.34.35  # Required for Celery Broker AWS (SQS) support
 netaddr==0.10.1
 vulners==2.1.2
 fontawesomefree==6.5.1

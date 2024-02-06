@@ -330,7 +330,6 @@ class TestCheckmarxParser(DojoTestCase):
         self.teardown(my_file_handle)
         # aggregation is on sink filename so all vuln with different source filenames are aggregated
         self.assertEqual(1, len(findings))
-        item = findings[0]
         # nb_occurences counts the number of aggregated vulnerabilities from tool
         self.assertEqual(2, findings[0].nb_occurences)
         mock.assert_called_with(product, 'Java', files=2)

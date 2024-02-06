@@ -30,7 +30,7 @@ class TestOssIndexDevauditParser(DojoTestCase):
         parser = OssIndexDevauditParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
-        self.assertTrue(len(findings) > 1)
+        self.assertGreater(len(findings), 1)
 
     def test_ossindex_devaudit_parser_with_no_cve_returns_info_severity(self):
         testfile = open(
@@ -39,7 +39,7 @@ class TestOssIndexDevauditParser(DojoTestCase):
         parser = OssIndexDevauditParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
-        self.assertTrue(len(findings) == 1)
+        self.assertEqual(len(findings), 1)
 
     def test_ossindex_devaudit_parser_with_reference_shows_reference(self):
         testfile = open(
@@ -51,7 +51,7 @@ class TestOssIndexDevauditParser(DojoTestCase):
 
         if len(findings) > 0:
             for item in findings:
-                self.assertTrue(item.references != "")
+                self.assertNotEqual(item.references, "")
 
     def test_ossindex_devaudit_parser_with_empty_reference_shows_empty_reference(self):
         testfile = open(
@@ -62,7 +62,7 @@ class TestOssIndexDevauditParser(DojoTestCase):
         testfile.close()
         if len(findings) > 0:
             for item in findings:
-                self.assertTrue(item.references == "")
+                self.assertEqual(item.references, "")
 
     def test_ossindex_devaudit_parser_with_missing_reference_shows_empty(self):
         testfile = open(
@@ -73,7 +73,7 @@ class TestOssIndexDevauditParser(DojoTestCase):
         testfile.close()
         if len(findings) > 0:
             for item in findings:
-                self.assertTrue(item.references == "")
+                self.assertEqual(item.references, "")
 
     def test_ossindex_devaudit_parser_with_missing_cwe_shows_1035(self):
         testfile = open(
@@ -84,7 +84,7 @@ class TestOssIndexDevauditParser(DojoTestCase):
         testfile.close()
         if len(findings) > 0:
             for item in findings:
-                self.assertTrue(item.cwe == 1035)
+                self.assertEqual(item.cwe, 1035)
 
     def test_ossindex_devaudit_parser_with_null_cwe_shows_1035(self):
         testfile = open(
@@ -95,7 +95,7 @@ class TestOssIndexDevauditParser(DojoTestCase):
         testfile.close()
         if len(findings) > 0:
             for item in findings:
-                self.assertTrue(item.cwe == 1035)
+                self.assertEqual(item.cwe, 1035)
 
     def test_ossindex_devaudit_parser_with_empty_cwe_shows_1035(self):
         testfile = open(
@@ -106,7 +106,7 @@ class TestOssIndexDevauditParser(DojoTestCase):
         testfile.close()
         if len(findings) > 0:
             for item in findings:
-                self.assertTrue(item.cwe == 1035)
+                self.assertEqual(item.cwe, 1035)
 
     def test_ossindex_devaudit_parser_get_severity_shows_info(self):
         testfile = open(
@@ -117,7 +117,7 @@ class TestOssIndexDevauditParser(DojoTestCase):
         testfile.close()
         if len(findings) > 0:
             for item in findings:
-                self.assertTrue(item.severity == "Info")
+                self.assertEqual(item.severity, "Info")
 
     def test_ossindex_devaudit_parser_get_severity_shows_critical(self):
         testfile = open(
@@ -128,7 +128,7 @@ class TestOssIndexDevauditParser(DojoTestCase):
         testfile.close()
         if len(findings) > 0:
             for item in findings:
-                self.assertTrue(item.severity == "Critical")
+                self.assertEqual(item.severity, "Critical")
 
     def test_ossindex_devaudit_parser_get_severity_shows_high(self):
         testfile = open(
@@ -139,7 +139,7 @@ class TestOssIndexDevauditParser(DojoTestCase):
         testfile.close()
         if len(findings) > 0:
             for item in findings:
-                self.assertTrue(item.severity == "High")
+                self.assertEqual(item.severity, "High")
 
     def test_ossindex_devaudit_parser_get_severity_shows_medium(self):
         testfile = open(
@@ -150,7 +150,7 @@ class TestOssIndexDevauditParser(DojoTestCase):
         testfile.close()
         if len(findings) > 0:
             for item in findings:
-                self.assertTrue(item.severity == "Medium")
+                self.assertEqual(item.severity, "Medium")
 
     def test_ossindex_devaudit_parser_get_severity_shows_low(self):
         testfile = open(
@@ -161,4 +161,4 @@ class TestOssIndexDevauditParser(DojoTestCase):
         testfile.close()
         if len(findings) > 0:
             for item in findings:
-                self.assertTrue(item.severity == "Low")
+                self.assertEqual(item.severity, "Low")

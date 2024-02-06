@@ -69,7 +69,7 @@ class TestYarnAuditParser(DojoTestCase):
         with self.assertRaises(ValueError) as context:
             testfile = open("unittests/scans/yarn_audit/empty_with_error.json")
             parser = YarnAuditParser()
-            findings = parser.get_findings(testfile, self.get_test())
+            parser.get_findings(testfile, self.get_test())
             testfile.close()
             self.assertTrue(
                 "yarn audit report contains errors:" in str(context.exception)
