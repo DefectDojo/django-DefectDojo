@@ -13,11 +13,12 @@ class WFuzzParser(object):
     # table to match HTTP error code and severity
     SEVERITY = {
         "200": "High",
-        "500": "Low",
+        "302": "Low",
         "401": "Medium",
-        "407": "Medium",
         "403": "Medium",
-        "404": "Medium"
+        "404": "Medium",
+        "407": "Medium",
+        "500": "Low"
     }
 
     def get_scan_types(self):
