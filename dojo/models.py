@@ -3206,16 +3206,6 @@ class Finding(models.Model):
         days_remaining = self.sla_days_remaining()
         return days_remaining < 0 if days_remaining else False
 
-    @property
-    def epss_info(self):
-        return self._epss_info()
-
-    def _epss_info(self):
-        """
-        :return: A tuple of (EPSS score, score percentile)
-        """
-        return self.epss_score, self.epss_percentile
-
 
 class FindingAdmin(admin.ModelAdmin):
     # For efficiency with large databases, display many-to-many fields with raw

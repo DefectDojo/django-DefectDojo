@@ -270,7 +270,7 @@
                         {% endif %}
                             <th>CWE</th>
                             <th>Vulnerability Id</th>
-                            <th>EPSS Score</th>
+                            <th>EPSS Score / Percentile</th>
                         <th>Found by</th>
                         {% if finding.vuln_id_from_tool %}
                             <th>Vuln ID from tool</th>
@@ -423,10 +423,19 @@
                         {% endif %}
                         </td>
                         <td>
-                            {% if finding.epss_info %}
-                                {{ finding.epss_info.0|percentage:1.0 }} / {{ finding.epss_info.1|percentage:1.0 }}
-                            {% else %}
+                            {% if epss_score is None and epss_percentile is None %}
                                 n/a
+                            {% else %}
+                                {% if epss_score is not None %}
+                                    {{ epss_score|percentage:1.0 }}
+                                {% else %}
+                                    n/a
+                                {% endif %}
+                                {% if epss_percentile is not None %}
+                                    [{{ epss_percentile|percentage:1.0 }}]
+                                {% else %}
+                                    n/a
+                                {% endif %}
                             {% endif %}
                         </td>
                         <td> 

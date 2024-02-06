@@ -741,6 +741,12 @@ class ViewFinding(View):
     def get_template(self):
         return "dojo/view_finding.html"
 
+    def get_epss_data(self, finding):
+        return {
+            "epss_score": finding.epss_score,
+            "epss_percentile": finding.epss_percentile,
+        }
+
     def get(self, request: HttpRequest, finding_id: int):
         # Get the initial objects
         finding = self.get_finding(finding_id)
@@ -758,6 +764,7 @@ class ViewFinding(View):
         context |= self.get_similar_findings(request, finding)
         context |= self.get_test_import_data(request, finding)
         context |= self.get_jira_data(finding)
+        context |= self.get_epss_data(finding)
         # Render the form
         return render(request, self.get_template(), context)
 
@@ -781,6 +788,7 @@ class ViewFinding(View):
         context |= self.get_similar_findings(request, finding)
         context |= self.get_test_import_data(request, finding)
         context |= self.get_jira_data(finding)
+        context |= self.get_epss_data(finding)
         # Render the form
         return render(request, self.get_template(), context)
 
