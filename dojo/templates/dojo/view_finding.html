@@ -423,19 +423,16 @@
                         {% endif %}
                         </td>
                         <td>
-                            {% if epss_score is None and epss_percentile is None %}
-                                n/a
+                            {% if epss_score is not None %}
+                                {{ epss_score|percentage:1.0 }}
                             {% else %}
-                                {% if epss_score is not None %}
-                                    {{ epss_score|percentage:1.0 }}
-                                {% else %}
-                                    n/a
-                                {% endif %}
-                                {% if epss_percentile is not None %}
-                                    [{{ epss_percentile|percentage:1.0 }}]
-                                {% else %}
-                                    n/a
-                                {% endif %}
+                                n/a
+                            {% endif %}
+                            /
+                            {% if epss_percentile is not None %}
+                                [{{ epss_percentile|percentage:1.0 }}]
+                            {% else %}
+                                n/a
                             {% endif %}
                         </td>
                         <td> 
