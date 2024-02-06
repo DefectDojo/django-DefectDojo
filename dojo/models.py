@@ -2133,8 +2133,11 @@ class Finding(models.Model):
                            verbose_name=_("Vulnerability Id"),
                            help_text=_("An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources."))
     epss_score = models.FloatField(default=0, null=True, blank=True,
-                              verbose_name=_("EPSS"),
+                              verbose_name=_("EPSS Score"),
                               help_text=_("EPSS score for the CVE. Describes how likely it is the vulnerability will be exploited in the next 30 days."))
+    epss_percentile = models.FloatField(default=0, null=True, blank=True,
+                              verbose_name=_("EPSS percentile"),
+                              help_text=_("EPSS percentile for the CVE. Describes how many CVEs are scored at or below this one."))
     
     cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
     cvssv3 = models.TextField(validators=[cvssv3_regex],
@@ -2445,7 +2448,8 @@ class Finding(models.Model):
             models.Index(fields=['test', 'component_name']),
 
             models.Index(fields=['cve']),
-            models.Index(fields=['epss']),
+            models.Index(fields=['epss_score']),
+            models.Index(fields=['epss_percentile']),
             models.Index(fields=['cwe']),
             models.Index(fields=['out_of_scope']),
             models.Index(fields=['false_p']),
