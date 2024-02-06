@@ -29,6 +29,9 @@ export CHROMEDRIVER
 CHROME_PATH=/opt/chrome/chrome
 export CHROME_PATH
 
+# We are strict about Warnings during testing
+export PYTHONWARNINGS=error
+
 # Run available unittests with a simple setup
 # All available Integrationtest Scripts are activated below
 # If successsful, A successs message is printed and the script continues

@@ -7,6 +7,7 @@ import environ
 from netaddr import IPNetwork, IPSet
 import json
 import logging
+import warnings
 
 logger = logging.getLogger(__name__)
 
@@ -1714,3 +1715,12 @@ CREATE_CLOUD_BANNER = env('DD_CREATE_CLOUD_BANNER')
 AUDITLOG_FLUSH_RETENTION_PERIOD = env('DD_AUDITLOG_FLUSH_RETENTION_PERIOD')
 ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
 USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
+
+# TODO - these warnings needs to be removed
+if DEBUG:
+    from django.utils.deprecation import RemovedInDjango50Warning
+    warnings.filterwarnings("ignore", category=RemovedInDjango50Warning)
+    warnings.filterwarnings("ignore", message="invalid escape sequence.*")
+    warnings.filterwarnings("ignore", message="'cgi' is deprecated and slated for removal in Python 3\\.13")
+    warnings.filterwarnings("ignore", message="DateTimeField .+ received a naive datetime .+ while time zone support is active\\.")
+    warnings.filterwarnings("ignore", message="unclosed file .+")
