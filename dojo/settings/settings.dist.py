@@ -922,6 +922,7 @@ INSTALLED_APPS = (
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
 DJANGO_MIDDLEWARE_CLASSES = [
+    'dojo.middleware.HealthCheckMiddleware',
     'django.middleware.common.CommonMiddleware',
     'dojo.middleware.APITrailingSlashMiddleware',
     'dojo.middleware.DojoSytemSettingsMiddleware',
