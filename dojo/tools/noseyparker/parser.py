@@ -49,7 +49,7 @@ class NoseyParkerParser(object):
 
                 # Set Finding details
                 for match in line['matches']:
-                    # The following path is to account for the variability in the JSONlines output
+                    # The following path is to account for the variability in the JSON lines output
                     num_elements = len(match['provenance']) - 1
                     json_path = match['provenance'][num_elements]
 

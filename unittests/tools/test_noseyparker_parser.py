@@ -40,6 +40,7 @@ class TestNoseyParkerParser(TestCase):
             parser = NoseyParkerParser()
             findings = parser.get_findings(testfile, Test())
             testfile.close()
+            self.assertEqual(0, len(findings))
             self.assertTrue(
                 "Invalid Nosey Parker data, make sure to use Nosey Parker v0.16.0" in str(context.exception)
             )
