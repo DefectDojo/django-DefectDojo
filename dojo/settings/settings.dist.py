@@ -1483,7 +1483,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Wazuh Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'MSDefender Parser': DEDUPE_ALGO_HASH_CODE,
     'HCLAppScan XML': DEDUPE_ALGO_HASH_CODE,
-    'Nosey Parker Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE
+    'Nosey Parker Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
