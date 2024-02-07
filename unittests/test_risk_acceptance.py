@@ -12,6 +12,7 @@ import copy
 # from unittest import skip
 import dojo.risk_acceptance.helper as ra_helper
 import logging
+import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -264,9 +265,9 @@ class RiskAcceptanceTestUI(DojoTestCase):
         # ra1: expire in 9 days -> warn:yes, expire:no
         # ra2: expire in 11 days -> warn:no, expire:no
         # ra3: expire 5 days ago -> warn:no, expire:yes (expiration not handled yet, so expire)
-        ra1.expiration_date = timezone.now().date() + relativedelta(days=heads_up_days - 1)
-        ra2.expiration_date = timezone.now().date() + relativedelta(days=heads_up_days + 1)
-        ra3.expiration_date = timezone.now().date() - relativedelta(days=5)
+        ra1.expiration_date = timezone.now(datetime.timezone.utc) + relativedelta(days=heads_up_days - 1)
+        ra2.expiration_date = timezone.now(datetime.timezone.utc) + relativedelta(days=heads_up_days + 1)
+        ra3.expiration_date = timezone.now(datetime.timezone.utc) - relativedelta(days=5)
         ra1.save()
         ra2.save()
         ra3.save()
