@@ -2429,7 +2429,7 @@ def get_password_requirements_string():
     if bool(get_system_setting('number_character_required')):
         s += ', one number (0-9)'
     if bool(get_system_setting('special_character_required')):
-        s += ', one special chacter (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?)'  # noqa W605
+        s += ', one special chacter (()[]{}|\\`~!@#$%^&*_-+=;:\'\",<>./?)'
 
     if s.count(', ') == 1:
         password_requirements_string = s.rsplit(', ', 1)[0] + ' and ' + s.rsplit(', ', 1)[1]
