@@ -40,34 +40,9 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
+<script src="{% static 'dojo/js/product_type/index.js' %}"></script>
 <script type="application/javascript" src="{% static 'easymde/dist/easymde.min.js' %}"></script>
 <script type="text/javascript">
-    let options;
-    $(document).ready(function () {
-        $("html").click(function () {
-            console.log("clik")
-            var id_producto_type = $("#id_product_type_name").val();
-            console.log(id_producto_type)
-            $.ajax({
-                url: "/product/type/description/"+id_producto_type,
-                type: "GET",
-                success: function (response) {
-                    console.log(response)
-
-                },
-                error: function (error) {
-                    console.log(error);
-                }
-            });
-        });
-        });
-        $("#id_product_name").on("change", function(){
-            console.log("a click")
-            data.products.forEach((product) => {
-                options += `<option value='${product.id}'>${product.description}</option>`;
-                id_product_name.innerHTML = options;
-            })
-        })
     // Texarea
     $("#add_risk_acceptance textarea").each(function (index, elem) {
         if (elem.id != 'id_notes') {
