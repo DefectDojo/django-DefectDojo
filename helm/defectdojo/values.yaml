@@ -201,6 +201,8 @@ django:
       # Depending on the size and complexity of your scans, you might want to increase the default ingress timeouts if you see repeated 504 Gateway Timeouts
       # nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
       # nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
+      # specific for AWS deployments Defectdojo has the /health endpoint for ALB healthchecks
+      # alb.ingress.kubernetes.io/healthcheck-path: /health
   nginx:
     tls:
       enabled: false
