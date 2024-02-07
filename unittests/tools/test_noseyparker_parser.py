@@ -18,13 +18,13 @@ class TestNoseyParkerParser(TestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         finding = findings[0]
-        self.assertEqual("./app/schema/config.py", findings[0].file_path)
+        self.assertEqual("app/schema/config.py", finding.file_path)
         self.assertEqual("High", finding.severity)
         self.assertEqual(798, finding.cwe)
         self.assertEqual(1, len(findings))
 
     def test_noseyparker_parser_many_vulns(self):
-        # Testfile contains 4 lines (Middle 2 are duplicates and last line has 2 of the same exact matches)
+        # Testfile contains 5 lines (Middle 2 are duplicates and line #4 has 2 of the same exact matches)
         testfile = open("unittests/scans/noseyparker/noseyparker_many_vul.jsonl")
         parser = NoseyParkerParser()
         findings = parser.get_findings(testfile, Test())
@@ -41,6 +41,6 @@ class TestNoseyParkerParser(TestCase):
             findings = parser.get_findings(testfile, Test())
             testfile.close()
             self.assertTrue(
-                "Invalid Nosey Parker data, make sure to use Nosey Parker v0.15.0" in str(context.exception)
+                "Invalid Nosey Parker data, make sure to use Nosey Parker v0.16.0" in str(context.exception)
             )
             self.assertTrue("ECONNREFUSED" in str(context.exception))

@@ -18,7 +18,7 @@ class NoseyParkerParser(object):
 
     def get_description_for_scan_types(self, scan_type):
         return "Nosey Parker report file can be imported in JSON Lines format (option --jsonl). " \
-               "Supports v0.15.0 of https://github.com/praetorian-inc/noseyparker"
+               "Supports v0.16.0 of https://github.com/praetorian-inc/noseyparker"
 
     def get_findings(self, file, test):
         """
@@ -49,11 +49,10 @@ class NoseyParkerParser(object):
 
                 # Set Finding details
                 for match in line['matches']:
-                    json_path = None
-                    if (len(match['provenance']) == 1):
-                        json_path = match['provenance'][0]
-                    if (len(match['provenance']) == 2):
-                        json_path = match['provenance'][1]
+                    # The following path is to account for the variability in the JSONlines output
+                    num_elements = len(match['provenance']) - 1
+                    json_path = match['provenance'][num_elements]
+
                     title = f"Secret(s) Found in Repository with Commit ID {json_path['commit_provenance']['commit_metadata']['commit_id']}"
                     filepath = json_path['commit_provenance']['blob_path']
                     line_num = match['location']['source_span']['start']['line']
@@ -69,10 +68,9 @@ class NoseyParkerParser(object):
                     # Internal de-duplication
                     key = hashlib.md5((filepath + "|" + secret + "|" + str(line_num)).encode("utf-8")).hexdigest()
 
+                    # If secret already exists with the same filepath/secret/linenum
                     if key in dupes:
                         finding = dupes[key]
-                        if finding.description:
-                            finding.description += "\n \n" + description
                         finding.nb_occurences += 1
                         dupes[key] = finding
                     else:
@@ -84,7 +82,7 @@ class NoseyParkerParser(object):
                             title=title,
                             description=description,
                             severity='High',
-                            mitigation="Reset the account/token. Store secrets/tokens/passwords in secret managers or secure vaults.",
+                            mitigation="Reset the account/token and remove from source code. Store secrets/tokens/passwords in secret managers or secure vaults.",
                             date=datetime.today().strftime("%Y-%m-%d"),
                             verified=False,
                             active=True,
@@ -98,6 +96,6 @@ class NoseyParkerParser(object):
                         )
                         dupes[key] = finding
         else:
-            raise ValueError("JSON lines format not recognized. Make sure to use Nosey Parker v0.15.0")
+            raise ValueError("JSON lines format not recognized. Make sure to use Nosey Parker v0.16.0")
 
         return list(dupes.values())
