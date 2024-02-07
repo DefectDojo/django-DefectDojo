@@ -71,7 +71,6 @@ def delete_engagement_survey(request, eid, sid):
 def answer_questionnaire(request, eid, sid):
     survey = get_object_or_404(Answered_Survey, id=sid)
     engagement = get_object_or_404(Engagement, id=eid)
-    prod = engagement.product
     system_settings = System_Settings.objects.all()[0]
 
     if not system_settings.allow_anonymous_survey_repsonse:
@@ -398,13 +397,11 @@ def edit_questionnaire_questions(request, sid):
 
 @user_is_configuration_authorized('dojo.view_engagement_survey')
 def questionnaire(request):
-    user = request.user
     surveys = Engagement_Survey.objects.all()
     surveys = QuestionnaireFilter(request.GET, queryset=surveys)
     paged_surveys = get_page_items(request, surveys.qs, 25)
     general_surveys = General_Survey.objects.all()
     for survey in general_surveys:
-        survey_exp = survey.expiration
         if survey.expiration < tz.now():
             survey.delete()
 
@@ -503,7 +500,6 @@ def create_question(request):
 
 @user_is_configuration_authorized('dojo.change_question')
 def edit_question(request, qid):
-    error = False
     question = get_object_or_404(Question, id=qid)
     survey = Engagement_Survey.objects.filter(questions__in=[question])
     reverted = False

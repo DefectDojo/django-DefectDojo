@@ -31,6 +31,7 @@ from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
 from dateutil.relativedelta import relativedelta
+from datetime import datetime
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
 import tagulous.admin
@@ -274,10 +275,10 @@ class System_Settings(models.Model):
         default=False,
         blank=False,
         verbose_name=_('Deduplicate findings'),
-        help_text=_("With this setting turned on, Dojo deduplicates findings by "
+        help_text=_("With this setting turned on, DefectDojo deduplicates findings by "
                   "comparing endpoints, cwe fields, and titles. "
                   "If two findings share a URL and have the same CWE or "
-                  "title, Dojo marks the less recent finding as a duplicate. "
+                  "title, DefectDojo marks the recent finding as a duplicate. "
                   "When deduplication is enabled, a list of "
                   "deduplicated findings is added to the engagement view."))
     delete_duplicates = models.BooleanField(default=False, blank=False, help_text=_("Requires next setting: maximum number of duplicates to retain."))
@@ -856,9 +857,7 @@ class DojoMeta(models.Model):
 
 class SLA_Configuration(models.Model):
     name = models.CharField(max_length=128, unique=True, blank=False, verbose_name=_('Custom SLA Name'),
-        help_text=_('A unique name for the set of SLAs.')
-    )
-
+        help_text=_('A unique name for the set of SLAs.'))
     description = models.CharField(max_length=512, null=True, blank=True)
     critical = models.IntegerField(default=7, verbose_name=_('Critical Finding SLA Days'),
                                           help_text=_('number of days to remediate a critical finding.'))
@@ -868,14 +867,55 @@ class SLA_Configuration(models.Model):
                                           help_text=_('number of days to remediate a medium finding.'))
     low = models.IntegerField(default=120, verbose_name=_('Low Finding SLA Days'),
                                           help_text=_('number of days to remediate a low finding.'))
+    async_updating = models.BooleanField(default=False,
+                                            help_text=_('Findings under this SLA configuration are asynchronously being updated'))
 
     def clean(self):
-
         sla_days = [self.critical, self.high, self.medium, self.low]
 
         for sla_day in sla_days:
             if sla_day < 1:
                 raise ValidationError('SLA Days must be at least 1')
+
+    def save(self, *args, **kwargs):
+        # get the initial sla config before saving (if this is an existing sla config)
+        initial_sla_config = None
+        if self.pk is not None:
+            initial_sla_config = SLA_Configuration.objects.get(pk=self.pk)
+            # if initial config exists and async finding update is already running, revert sla config before saving
+            if initial_sla_config and self.async_updating:
+                self.critical = initial_sla_config.critical
+                self.high = initial_sla_config.high
+                self.medium = initial_sla_config.medium
+                self.low = initial_sla_config.low
+
+        super(SLA_Configuration, self).save(*args, **kwargs)
+
+        # if the initial sla config exists and async finding update is not running
+        if initial_sla_config is not None and not self.async_updating:
+            # check which sla days fields changed based on severity
+            severities = []
+            if initial_sla_config.critical != self.critical:
+                severities.append('Critical')
+            if initial_sla_config.high != self.high:
+                severities.append('High')
+            if initial_sla_config.medium != self.medium:
+                severities.append('Medium')
+            if initial_sla_config.low != self.low:
+                severities.append('Low')
+            # if severities have changed, update finding sla expiration dates with those severities
+            if len(severities):
+                # set the async updating flag to true for this sla config
+                self.async_updating = True
+                super(SLA_Configuration, self).save(*args, **kwargs)
+                # set the async updating flag to true for all products using this sla config
+                products = Product.objects.filter(sla_configuration=self)
+                for product in products:
+                    product.async_updating = True
+                    super(Product, product).save()
+                # launch the async task to update all finding sla expiration dates
+                from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async
+                update_sla_expiration_dates_sla_config_async(self, tuple(severities), products)
 
     def __str__(self):
         return self.name
@@ -998,6 +1038,37 @@ class Product(models.Model):
         blank=False,
         verbose_name=_("Disable SLA breach notifications"),
         help_text=_("Disable SLA breach notifications if configured in the global settings"))
+    async_updating = models.BooleanField(default=False,
+                                            help_text=_('Findings under this Product or SLA configuration are asynchronously being updated'))
+
+    def save(self, *args, **kwargs):
+        # get the product's sla config before saving (if this is an existing product)
+        initial_sla_config = None
+        if self.pk is not None:
+            initial_sla_config = getattr(Product.objects.get(pk=self.pk), 'sla_configuration', None)
+            # if initial sla config exists and async finding update is already running, revert sla config before saving
+            if initial_sla_config and self.async_updating:
+                self.sla_configuration = initial_sla_config
+
+        super(Product, self).save(*args, **kwargs)
+
+        # if the initial sla config exists and async finding update is not running
+        if initial_sla_config is not None and not self.async_updating:
+            # get the new sla config from the saved product
+            new_sla_config = getattr(self, 'sla_configuration', None)
+            # if the sla config has changed, update finding sla expiration dates within this product
+            if new_sla_config and (initial_sla_config != new_sla_config):
+                # set the async updating flag to true for this product
+                self.async_updating = True
+                super(Product, self).save(*args, **kwargs)
+                # set the async updating flag to true for the sla config assigned to this product
+                sla_config = getattr(self, 'sla_configuration', None)
+                if sla_config:
+                    sla_config.async_updating = True
+                    super(SLA_Configuration, sla_config).save()
+                # launch the async task to update all finding sla expiration dates
+                from dojo.product.helpers import update_sla_expiration_dates_product_async
+                update_sla_expiration_dates_product_async(self, sla_config)
 
     def __str__(self):
         return self.name
@@ -1123,8 +1194,7 @@ class Product(models.Model):
 
     @property
     def violates_sla(self):
-        findings = Finding.objects.filter(test__engagement__product=self,
-                                        active=True)
+        findings = Finding.objects.filter(test__engagement__product=self, active=True)
         for f in findings:
             if f.violates_sla:
                 return True
@@ -1706,7 +1776,6 @@ class Endpoint(models.Model):
             mitigated__isnull=True,
             false_p=False,
             duplicate=False,
-            status_finding__mitigated=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False
@@ -1721,7 +1790,6 @@ class Endpoint(models.Model):
             mitigated__isnull=True,
             false_p=False,
             duplicate=False,
-            status_finding__mitigated=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False
@@ -1776,7 +1844,6 @@ class Endpoint(models.Model):
             mitigated__isnull=True,
             false_p=False,
             duplicate=False,
-            status_finding__mitigated=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False,
@@ -1792,7 +1859,6 @@ class Endpoint(models.Model):
             mitigated__isnull=True,
             false_p=False,
             duplicate=False,
-            status_finding__mitigated=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False,
@@ -2114,20 +2180,22 @@ class Test_Import_Finding_Action(TimeStampedModel):
 
 
 class Finding(models.Model):
-
     title = models.CharField(max_length=511,
                              verbose_name=_('Title'),
                              help_text=_("A short description of the flaw."))
     date = models.DateField(default=get_current_date,
                             verbose_name=_('Date'),
                             help_text=_("The date the flaw was discovered."))
-
     sla_start_date = models.DateField(
                             blank=True,
                             null=True,
                             verbose_name=_('SLA Start Date'),
                             help_text=_("(readonly)The date used as start date for SLA calculation. Set by expiring risk acceptances. Empty by default, causing a fallback to 'date'."))
-
+    sla_expiration_date = models.DateField(
+                            blank=True,
+                            null=True,
+                            verbose_name=_('SLA Expiration Date'),
+                            help_text=_("(readonly)The date SLA expires for this finding. Empty by default, causing a fallback to 'date'."))
     cwe = models.IntegerField(default=0, null=True, blank=True,
                               verbose_name=_("CWE"),
                               help_text=_("The CWE number associated with this flaw."))
@@ -2754,19 +2822,28 @@ class Finding(models.Model):
         return ", ".join([str(s) for s in status])
 
     def _age(self, start_date):
+        from dateutil.parser import parse
+        if start_date and isinstance(start_date, str):
+            start_date = parse(start_date).date()
+
         from dojo.utils import get_work_days
         if settings.SLA_BUSINESS_DAYS:
             if self.mitigated:
-                days = get_work_days(self.date, self.mitigated.date())
+                mitigated_date = self.mitigated
+                if isinstance(mitigated_date, datetime):
+                    mitigated_date = self.mitigated.date()
+                days = get_work_days(self.date, mitigated_date)
             else:
                 days = get_work_days(self.date, get_current_date())
         else:
-            from datetime import datetime
             if isinstance(start_date, datetime):
                 start_date = start_date.date()
 
             if self.mitigated:
-                diff = self.mitigated.date() - start_date
+                mitigated_date = self.mitigated
+                if isinstance(mitigated_date, datetime):
+                    mitigated_date = self.mitigated.date()
+                diff = mitigated_date - start_date
             else:
                 diff = get_current_date() - start_date
             days = diff.days
@@ -2776,9 +2853,9 @@ class Finding(models.Model):
     def age(self):
         return self._age(self.date)
 
-    def get_sla_periods(self):
-        sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
-        return sla_configuration
+    @property
+    def sla_age(self):
+        return self._age(self.get_sla_start_date())
 
     def get_sla_start_date(self):
         if self.sla_start_date:
@@ -2786,16 +2863,34 @@ class Finding(models.Model):
         else:
             return self.date
 
-    @property
-    def sla_age(self):
-        return self._age(self.get_sla_start_date())
+    def get_sla_period(self):
+        sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
+        return getattr(sla_configuration, self.severity.lower(), None)
+
+    def set_sla_expiration_date(self):
+        system_settings = System_Settings.objects.get()
+        if not system_settings.enable_finding_sla:
+            return None
+
+        days_remaining = None
+        sla_period = self.get_sla_period()
+        if sla_period:
+            days_remaining = sla_period - self.sla_age
+
+        if days_remaining:
+            if self.mitigated:
+                mitigated_date = self.mitigated
+                if isinstance(mitigated_date, datetime):
+                    mitigated_date = self.mitigated.date()
+                self.sla_expiration_date = mitigated_date + relativedelta(days=days_remaining)
+            else:
+                self.sla_expiration_date = get_current_date() + relativedelta(days=days_remaining)
 
     def sla_days_remaining(self):
         sla_calculation = None
-        sla_periods = self.get_sla_periods()
-        sla_age = getattr(sla_periods, self.severity.lower(), None)
-        if sla_age:
-            sla_calculation = sla_age - self.sla_age
+        sla_period = self.get_sla_period()
+        if sla_period:
+            sla_calculation = sla_period - self.sla_age
         return sla_calculation
 
     def sla_deadline(self):
@@ -2814,7 +2909,8 @@ class Finding(models.Model):
 
     def has_github_issue(self):
         try:
-            issue = self.github_issue
+            # Attempt to access the github issue if it exists. If not, an exception will be caught
+            _ = self.github_issue
             return True
         except GITHUB_Issue.DoesNotExist:
             return False
@@ -2925,6 +3021,9 @@ class Finding(models.Model):
                 self.dynamic_finding = False
             elif (self.file_path is not None):
                 self.static_finding = True
+
+        # update the SLA expiration date last, after all other finding fields have been updated
+        self.set_sla_expiration_date()
 
         logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
         super(Finding, self).save(*args, **kwargs)

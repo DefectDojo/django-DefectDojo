@@ -1,9 +1,10 @@
 import json
 import re
 from cvss import CVSS3
+from dateutil import parser
+from django.conf import settings
 
-from dojo.models import Finding
-from dojo.models import Endpoint
+from dojo.models import Finding, Endpoint
 
 
 class VeracodeJSONParser(object):
@@ -43,11 +44,11 @@ class VeracodeJSONParser(object):
 
     # This mapping was found here: https://docs.veracode.com/r/c_integrated_license_agent
     license_mapping = {
+        0: ("Non OSS", "Non-OSS indicates that this file could be subject to commercial license terms. If so, you should refer to your applicable license agreement with such vendor for additional information."),
         1: ("Unrecognized", "Unrecognized indicates that no license was found for the component. However, this does not indicate that there is no risk associated with the license."),
         2: ("Low", "Low-risk licenses are typically permissive licenses that require you to preserve the copyright and license notices, but allow distribution under different terms without disclosing source code."),
         3: ("Medium", "Medium-risk licenses are typically weak copyleft licenses that require you to preserve the copyright and license notices, and require distributors to make the source code of the component and any modifications under the same terms."),
         4: ("High", "High-risk licenses are typically strong copyleft licenses that require you to preserve the copyright and license notices, and require distributors to make the source code of the component and any modifications under the same terms."),
-        5: ("Non OSS", "Non-OSS indicates that this file could be subject to commercial license terms. If so, you should refer to your applicable license agreement with such vendor for additional information."),
     }
 
     def get_findings(self, json_output, test):
@@ -80,6 +81,15 @@ class VeracodeJSONParser(object):
             # not be supported yet
             if not finding:
                 continue
+            # Set the date of the finding from the report if it is present
+            try:
+                if settings.USE_FIRST_SEEN:
+                    finding.date = parser.parse(vuln.get("finding_status", {}).get("first_found_date", ""))
+                else:
+                    finding.date = parser.parse(vuln.get("finding_status", {}).get("last_found_date", ""))
+            except Exception:
+                pass
+            # Generate the description
             finding = self.parse_description(finding, vuln.get("description"), scan_type)
             finding.nb_occurences = vuln.get("count", 1)
             finding.test = test

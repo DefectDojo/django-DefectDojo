@@ -74,19 +74,18 @@ class TestNpmAuditParser(DojoTestCase):
         with self.assertRaises(ValueError) as context:
             testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/empty_with_error.json"))
             parser = NpmAuditParser()
-            findings = parser.get_findings(testfile, Test())
+            parser.get_findings(testfile, Test())
             testfile.close()
-            self.assertTrue("npm audit report contains errors:" in str(context.exception))
-            self.assertTrue("ENOAUDIT" in str(context.exception))
+        self.assertIn("npm audit report contains errors:", str(context.exception))
+        self.assertIn("ENOAUDIT", str(context.exception))
 
     def test_npm_audit_parser_many_vuln_npm7(self):
         with self.assertRaises(ValueError) as context:
             testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/many_vuln_npm7.json"))
             parser = NpmAuditParser()
-            findings = parser.get_findings(testfile, Test())
+            parser.get_findings(testfile, Test())
             testfile.close()
-            self.assertTrue("npm7 with auditReportVersion 2 or higher not yet supported" in str(context.exception))
-            self.assertEqual(findings, None)
+        self.assertIn("npm7 with auditReportVersion 2 or higher not yet supported", str(context.exception))
 
     def test_npm_audit_censored_hash(self):
         path = "77d76e075ae87483063c4c74885422f98300f9fc0ecbd3b8dfb60152a36e5269>axios"
@@ -96,3 +95,10 @@ class TestNpmAuditParser(DojoTestCase):
         path = "7f888b06cc55dd893be344958d300da5ca1d84eebd0928d8bcb138b4029eff9f>c748e76b6a1b63450590f72e14f9b53ad357bc64632ff0bda73d00799c4a0a91>lodash"
         censored_path = censor_path_hashes(path)
         self.assertEqual(censored_path, "censored_by_npm_audit>censored_by_npm_audit>lodash")
+
+    def test_npm_audit_parser_issue_7897(self):
+        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/issue_7897.json"))
+        parser = NpmAuditParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(5, len(findings))
