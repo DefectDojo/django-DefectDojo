@@ -1727,4 +1727,3 @@ if DEBUG:
     warnings.filterwarnings("ignore", message="invalid escape sequence.*")
     warnings.filterwarnings("ignore", message="'cgi' is deprecated and slated for removal in Python 3\\.13")
     warnings.filterwarnings("ignore", message="DateTimeField .+ received a naive datetime .+ while time zone support is active\\.")
-    warnings.filterwarnings("ignore", message="unclosed file .+")
