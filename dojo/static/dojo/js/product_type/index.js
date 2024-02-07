@@ -1,3 +1,13 @@
+window.onload = function(){
+    element = document.getElementById('id_product_type_name');
+    element.selectedIndex = 0;
+    element = document.getElementById('id_product_name');
+    element.selectedIndex = 0;
+    element = document.getElementById('id_engagement_name');
+    element.selectedIndex = 0;
+    element = document.getElementById('id_accepted_by');
+    element.selectedIndex = 0;
+}
 $(document).ready(function() {
     $("#id_product_type_name").on("change", handleProductTypeChange);
 });
@@ -9,12 +19,45 @@ $(document).ready(function() {
 function handleProductChange(){
     let idProduct = $("#id_product_name").val();
     let engagementElement = document.getElementById('id_engagement_name');
+    let contactsElement = document.getElementById('id_accepted_by') 
     
     if (idProduct !== '') {
         getEngagementOptions(idProduct, engagementElement);
+        getContacs(idProduct, contactsElement)
     } else {
         clearSelect(engagementElement);
     }
+}
+
+function getContacs(idProduct, contactsElement){
+    $.ajax({
+        url: "/api/v2/products/"+ idProduct +"/?prefetch=team_manager,technical_contact,product_manager",
+        type: "GET",
+        success: function(response) {
+            clearSelect(contactsElement);
+            addOption(contactsElement, '', 'Select Contact Product...');
+            for(let key in response.prefetch){
+                if(response.prefetch.hasOwnProperty(key)){
+                    console.log("key");
+                    console.log(key);
+                    console.log("value");
+                    console.log(response.prefetch[key]);
+                    console.log("object value");
+                    contactObj = getContact(response.prefetch[key]);
+                    addOption(contactsElement, contactObj.id, contactObj.username)
+                }
+            }
+            refreshSelectPicker();
+        },
+        error: function(error) {
+            console.error(error);
+        }
+    });
+}
+
+function getContact(contact){
+    let contactObj= Object.values(contact);
+    return contactObj[0];
 }
 
 function getEngagementOptions(idProduct, engagementElement){
@@ -22,7 +65,6 @@ function getEngagementOptions(idProduct, engagementElement){
         url: "/api/v2/engagements/?product=" + idProduct,
         type: "GET",
         success: function(response) {
-            console.log(response.results)
             clearSelect(engagementElement);
             addOption(engagementElement, '', 'Select Product Name...');
             response.results.forEach(function(engagement) {
@@ -39,7 +81,7 @@ function getEngagementOptions(idProduct, engagementElement){
 function handleProductTypeChange() {
     let idProductType = $("#id_product_type_name").val();
     let productTypeElement = document.getElementById('id_product_name');
-    
+    clearLabel()
     if (idProductType !== '') {
         getProductOptions(idProductType, productTypeElement);
     } else {
@@ -77,3 +119,15 @@ function addOption(select_element, value, text) {
 function refreshSelectPicker() {
     $('.selectpicker').selectpicker('refresh');
 };
+
+
+function clearLabel(){
+    element = document.getElementById('id_product_name');
+    element.selectedIndex = 0;
+    element = document.getElementById('id_engagement_name');
+    element.selectedIndex = 0;
+    element = document.getElementById('id_accepted_by');
+    element.selectedIndex = 0;
+    refreshSelectPicker();
+
+}

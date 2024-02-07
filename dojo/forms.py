@@ -1166,19 +1166,28 @@ class TransferFindingForm(forms.ModelForm):
     title = forms.CharField(required=True, max_length=255)
 
     product_type_name = forms.ModelChoiceField(
+        label="Product Type",
         queryset=Product_Type.objects.none(),
         empty_label="Not Assigned",
         help_text="Product Type Name, ",
     )
     product_name = forms.ModelChoiceField(
+        label="Product",
         queryset=Product.objects.none(),
         empty_label="Not Assigned",
         help_text="Product Name, ",
     )
     engagement_name = forms.ModelChoiceField(
+        label="Engagement",
         queryset=Engagement.objects.none(),
         empty_label="Not Assigned",
         help_text="Engagement name, ",
+    )
+    accepted_by = forms.ModelChoiceField(
+        label="Acceptd By",
+        queryset=Dojo_User.objects.none(),
+        empty_label="Not Assigned",
+        help_text="Member who will accept the finding, ",
     )
     notes = forms.CharField(
         required=False, max_length=2400, widget=forms.Textarea, label="Notes"

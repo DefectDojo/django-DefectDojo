@@ -1124,6 +1124,8 @@ def add_transfer_finding(request, eid, fid=None):
                 extra_tags='alert-success')
 
             return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
+        else:
+            logger.error(form.errors)
     else:
         form = TransferFindingForm(initial={"engagement_name":eng,
                                             "title": f"transfer finding - {finding.title}",
