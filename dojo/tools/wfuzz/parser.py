@@ -13,6 +13,7 @@ class WFuzzParser(object):
     # table to match HTTP error code and severity
     SEVERITY = {
         "200": "High",
+        "301": "Low",
         "302": "Low",
         "401": "Medium",
         "403": "Medium",
