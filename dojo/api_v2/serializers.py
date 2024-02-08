@@ -1656,8 +1656,9 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     reporter = serializers.PrimaryKeyRelatedField(
         required=False, queryset=User.objects.all()
     )
-    epss_score = serializers.FloatField(required=False, default=None)
-    epss_percentile = serializers.FloatField(required=False, default=None)
+    epss_score = serializers.FloatField(required=False, allow_null=True, min_value=0.0, max_value=1.0, default=None)
+    epss_percentile = serializers.FloatField(required=False, allow_null=True, min_value=0.0, max_value=1.0,
+                                             default=None)
 
     class Meta:
         model = Finding
@@ -1817,8 +1818,9 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
     reporter = serializers.PrimaryKeyRelatedField(
         required=False, queryset=User.objects.all()
     )
-    epss_score = serializers.FloatField(required=False, default=None)
-    epss_percentile = serializers.FloatField(required=False, default=None)
+    epss_score = serializers.FloatField(required=False, allow_null=True, min_value=0.0, max_value=1.0, default=None)
+    epss_percentile = serializers.FloatField(required=False, allow_null=True, min_value=0.0, max_value=1.0,
+                                             default=None)
 
     class Meta:
         model = Finding
