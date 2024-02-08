@@ -13,7 +13,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.db.models.expressions import Case, When
 from django.urls import reverse
-from django.core.validators import RegexValidator, validate_ipv46_address
+from django.core.validators import RegexValidator, validate_ipv46_address, MinValueValidator, MaxValueValidator
 from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
 from django.db import models, connection
@@ -2425,11 +2425,13 @@ class Finding(models.Model):
     epss_score = models.FloatField(null = True,
                             blank = True,
                             verbose_name = _('EPSS value'),
-                            help_text = _("EPSS score representing the probability [0-1] of exploitation in the wild in the 30 days following score publication."))
+                            help_text = _("EPSS score representing the probability [0-1] of exploitation in the wild in the 30 days following score publication."),
+                            validators=[MinValueValidator(0.0), MaxValueValidator(1.0)],)
     epss_percentile = models.FloatField(null = True,
                             blank = True,
                             verbose_name = _('EPSS percentile'),
-                            help_text = _("Percentile for the EPSS score: the proportion of all scored vulnerabilities with the same or a lower EPSS score."))
+                            help_text = _("Percentile for the EPSS score: the proportion of all scored vulnerabilities with the same or a lower EPSS score."),
+                            validators=[MinValueValidator(0.0), MaxValueValidator(1.0)],)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
