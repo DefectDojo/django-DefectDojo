@@ -106,7 +106,7 @@ class DojoDefaultImporter(object):
             # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
             # Finding.mitigated is DateTimeField and it requires timezone
             if item.mitigated and not item.mitigated.tzinfo:
-                item.mitigated.replace(tzinfo=now.tzinfo)
+                item.mitigated = item.mitigated.replace(tzinfo=now.tzinfo)
 
             item.test = test
             item.reporter = user if user else get_current_user

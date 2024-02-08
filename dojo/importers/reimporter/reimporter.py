@@ -92,7 +92,7 @@ class DojoDefaultReImporter(object):
             # Some parsers provide "mitigated" field but do not set timezone (because it is probably not available in the report)
             # Finding.mitigated is DateTimeField and it requires timezone
             if item.mitigated and not item.mitigated.tzinfo:
-                item.mitigated.replace(tzinfo=now.tzinfo)
+                item.mitigated = item.mitigated.replace(tzinfo=now.tzinfo)
 
             if not hasattr(item, "test"):
                 item.test = test
