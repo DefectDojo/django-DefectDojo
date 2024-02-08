@@ -40,7 +40,7 @@ from dojo.models import (
     Test_Type,
     Notes,
     Risk_Acceptance,
-    TransferFinding,
+    Transfer_Finding,
     Development_Environment,
     Dojo_User,
     Endpoint,
@@ -1155,7 +1155,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
         )
 
 
-class TransferFindingForm(forms.ModelForm):
+class Transfer_FindingForm(forms.ModelForm):
     finding_id = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.none(),
         required=True,
@@ -1165,7 +1165,7 @@ class TransferFindingForm(forms.ModelForm):
 
     title = forms.CharField(required=True, max_length=255)
 
-    product_type_name_id = forms.ModelChoiceField(
+    product_type_id = forms.ModelChoiceField(
         queryset=Product_Type.objects.none()
     )
     product_name = forms.CharField(widget=forms.Select())  # Usar widget Select
@@ -1181,11 +1181,11 @@ class TransferFindingForm(forms.ModelForm):
             Permissions.Transfer_Finding
         )
         self.fields["title"].initial = kwags.get("engagement_id")
-        self.fields["product_type_name_id"].queryset = Product_Type.objects.all()
+        self.fields["product_type_id"].queryset = Product_Type.objects.all()
         self.fields["owner"].disabled = True
 
     class Meta:
-        model = TransferFinding
+        model = Transfer_Finding
         exclude = ("status",)
 
 

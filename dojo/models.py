@@ -3138,7 +3138,7 @@ class Finding(models.Model):
         return days_remaining < 0 if days_remaining else False
 
 
-class TransferFinding(models.Model):
+class Transfer_Finding(models.Model):
     finding_id = models.ManyToManyField(Finding, verbose_name=("Finding ID"))
     title = models.CharField(max_length=255, verbose_name=("Titile"))
     product_type_id = models.ForeignKey(Product_Type,

@@ -13,6 +13,12 @@
 {% block add_css %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'easymde/dist/easymde.min.css' %}">
+    <style>
+        .modal-content {
+          width: 200%; /* Ajusta el ancho como desees */
+          margin: 0 -50%; /* Centra el contenido horizontalmente */
+        }
+      </style>
 {% endblock %}
 {% block content %}
     {{ block.super }}
@@ -26,7 +32,7 @@
             Select the findings that apply to this Tranfer finding.
         </p>
         <br/>
-        <form id="add_transfer_finding" enctype="multipart/form-data" class="form-horizontal" method="post">
+        {% comment %} <form id="add_transfer_finding" enctype="multipart/form-data" class="form-horizontal" method="post">
             {% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
             <div class="form-group">
@@ -35,7 +41,41 @@
                 </div>
             </div>
             <br/><br/>
-        </form>
+        </form> {% endcomment %}
+        <!-- Botón para abrir el modal -->
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+    Transfer Finding
+  </button>
+  
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document"> <!-- Cambia modal-lg a modal-sm o modal-xl según necesites -->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="myModalLabel">Transfer Finding</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Formulario -->
+          <form id="add_transfer_finding" enctype="multipart/form-data" class="form-horizontal" method="post">
+            {% csrf_token %}
+            {% include "dojo/form_fields.html" with form=form %}
+            <div class="form-group">
+              <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" type="submit" value="Save"/>
+              </div>
+            </div>
+          </form>
+        </div>
+        <!-- /.modal-body -->
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
+
     </div>
 {% endblock %}
 {% block postscript %}
@@ -43,6 +83,7 @@
 <script src="{% static 'dojo/js/product_type/index.js' %}"></script>
 <script type="application/javascript" src="{% static 'easymde/dist/easymde.min.js' %}"></script>
 <script type="text/javascript">
+   
     // Texarea
     $("#add_risk_acceptance textarea").each(function (index, elem) {
         if (elem.id != 'id_notes') {

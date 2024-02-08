@@ -25,7 +25,7 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import EngagementFilter, EngagementDirectFilter, EngagementTestFilter
 from dojo.forms import CheckForm, \
-    UploadThreatForm, RiskAcceptanceForm, TransferFindingForm, RiskPendingForm, NoteForm, DoneForm, \
+    UploadThreatForm, RiskAcceptanceForm, Transfer_FindingForm, RiskPendingForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
     CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm, \
     EditRiskAcceptanceForm
@@ -34,7 +34,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Import, Notes, \
     Risk_Acceptance, Development_Environment, Endpoint, \
     Cred_Mapping, System_Settings, Note_Type, Product_API_Scan_Configuration, \
-    Product_Type, Dojo_User, Product_Type, TransferFinding
+    Product_Type, Dojo_User, Product_Type, Transfer_Finding
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, async_delete, \
@@ -1090,8 +1090,8 @@ def add_transfer_finding(request, eid, fid=None):
         # engagement_obj = get_object_or_404(Engagement, id=int(request.POST.get('engagement_name')))
         # accepted_by_obj = get_object_or_404(Dojo_User, id=int(request.POST.get('accepted_by')))
 
-        # obj_transfer = TransferFinding.objects.create()
-        form = TransferFindingForm(request.POST, request.FILES)
+        # obj_transfer = Transfer_Finding.objects.create()
+        form = Transfer_FindingForm(request.POST, request.FILES)
         if form.is_valid():
             # first capture notes param as it cannot be saved directly as m2m
             notes = None
@@ -1120,9 +1120,7 @@ def add_transfer_finding(request, eid, fid=None):
 
             # eng.risk_acceptance.add(tranfer_finding) # todo egreagr a la matriz de tranfer fidign
 
-            findings = form.cleaned_data['accepted_findings']
-
-            transfer_finding = ra_helper.add_findings_to_risk_acceptance(tranfer_finding, findings)
+            # transfer_finding = ra_helper.add_findings_to_risk_acceptance(tranfer_finding, findings)
 
             messages.add_message(
                 request,
@@ -1134,7 +1132,7 @@ def add_transfer_finding(request, eid, fid=None):
         else:
             logger.error(form.errors)
     else:
-        form = TransferFindingForm(initial={"engagement_name":eng,
+        form = Transfer_FindingForm(initial={"engagement_name":eng,
                                             "title": f"transfer finding - {finding.title}",
                                             "finding_id": finding})
 
