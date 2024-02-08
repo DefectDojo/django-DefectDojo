@@ -34,7 +34,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Import, Notes, \
     Risk_Acceptance, Development_Environment, Endpoint, \
     Cred_Mapping, System_Settings, Note_Type, Product_API_Scan_Configuration, \
-    Product_Type
+    Product_Type, Dojo_User, Product_Type
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, async_delete, \
@@ -1084,7 +1084,19 @@ def add_transfer_finding(request, eid, fid=None):
         finding = get_object_or_404(Finding, id=fid)
 
     if request.method == 'POST':
-        form = TransferFindingForm(request.POST, request.FILES)
+        product_type_name = get_object_or_404(Product_Type, id=request.POST.get('product_type_name'))
+        product_obj = get_object_or_404(Product, id=int(request.POST.get('product_name')))
+        engagement_obj = get_object_or_404(Engagement, id=int(request.POST.get('engagement_name')))
+        accepted_by_obj = get_object_or_404(Dojo_User, id=int(request.POST.get('accepted_by')))
+
+        object_request = {
+            "fiding_id": finding,
+            "product_type_name": product_type_name,
+            "product_name": product_obj,
+            "engagement_name": engagement_obj,
+            "accepted_by": accepted_by_obj
+        }
+        form = TransferFindingForm(object_request, request.FILES)
         if form.is_valid():
             # first capture notes param as it cannot be saved directly as m2m
             notes = None
