@@ -788,7 +788,6 @@ class ViewFinding(View):
         context |= self.get_similar_findings(request, finding)
         context |= self.get_test_import_data(request, finding)
         context |= self.get_jira_data(finding)
-        context |= self.get_epss_data(finding)
         # Render the form
         return render(request, self.get_template(), context)
 
