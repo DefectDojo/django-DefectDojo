@@ -1532,8 +1532,8 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
             findings = data['accepted_findings']
             for finding in findings:
                 if not user_has_permission(self.context["request"].user, finding, Permissions.Finding_View):
-                    raise serializers.ValidationError(
-                        "You do not have permission to access to any of these findings"
+                    raise PermissionDenied(
+                        "You are not permitted to add one or more selected findings to this risk acceptance"
                     )
         return data
 
