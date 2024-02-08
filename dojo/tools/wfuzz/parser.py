@@ -32,16 +32,17 @@ class WFuzzParser(object):
 
     def get_findings(self, filename, test):
         data = json.load(filename)
-
         dupes = {}
         for item in data:
             url = hyperlink.parse(item["url"])
-            return_code = str(item["code"])
-            severity = self.severity_mapper(input=return_code)
+            return_code = item.get("code", None)
+            if return_code is None:
+                severity = "Low"
+            else:
+                severity = self.severity_mapper(input=return_code)
             description = f"The URL {url.to_text()} must not be exposed\n Please review your configuration\n"
-
             dupe_key = hashlib.sha256(
-                (url.to_text() + return_code).encode("utf-8")
+                (url.to_text() + str(return_code)).encode("utf-8")
             ).hexdigest()
 
             if dupe_key in dupes:
@@ -68,7 +69,7 @@ class WFuzzParser(object):
                     )
                 ]
                 finding.unsaved_req_resp = [
-                    {"req": item["payload"], "resp": str(item["code"])}
+                    {"req": item["payload"], "resp": str(return_code)}
                 ]
                 dupes[dupe_key] = finding
         return list(dupes.values())
