@@ -3141,27 +3141,35 @@ class Finding(models.Model):
 class TransferFinding(models.Model):
     finding_id = models.ManyToManyField(Finding, verbose_name=("Finding ID"))
     title = models.CharField(max_length=255, verbose_name=("Titile"))
-    product_type_name = models.ForeignKey(Product_Type,
+    product_type_id = models.ForeignKey(Product_Type,
                                                  editable=True,
+                                                 blank=True,
+                                                 null=True,
                                                  on_delete=models.RESTRICT,
                                                  help_text=_("product type name"))
 
-    product_name = models.ForeignKey(Product,
-                                                 editable=True,
-                                                 on_delete=models.RESTRICT,
-                                                 help_text=_("Product name"))
+    product_name = models.CharField(
+        max_length=255,
+        editable=True,
+        blank=True,
+        null=True,
+        help_text=_("Product name"))
 
-    engagement_name = models.ForeignKey(Engagement,
-                                                 editable=True,
-                                                 on_delete=models.RESTRICT,
-                                                 help_text=_("Engagement name"))
+    engagement_name = models.CharField(
+        max_length=255,
+        editable=True,
+        blank=True,
+        null=True,
+        help_text=_("Engagement name"))
 
     status = models.BooleanField(verbose_name=_("Status"), default=False)
 
-    accepted_by = models.ForeignKey(Dojo_User,
-                                     editable=True,
-                                     on_delete=models.RESTRICT,
-                                     help_text=_("The user that accepts the tranfer finding, The user must belong to the product whit contact"))
+    accepted_by = models.CharField(
+        max_length=255,
+        editable=True,
+        blank=True,
+        null=True,
+        help_text=_("The user that accepts the tranfer finding, The user must belong to the product whit contact"))
 
     path = models.FileField(upload_to='transfer_finding/%Y/%m/%d',
                             editable=True, null=True,

@@ -1,5 +1,5 @@
 window.onload = function(){
-    element = document.getElementById('id_product_type_name');
+    element = document.getElementById('id_product_type_id');
     element.selectedIndex = 0;
     element = document.getElementById('id_product_name');
     element.selectedIndex = 0;
@@ -9,7 +9,7 @@ window.onload = function(){
     element.selectedIndex = 0;
 }
 $(document).ready(function() {
-    $("#id_product_type_name").on("change", handleProductTypeChange);
+    $("#id_product_type_id").on("change", handleProductTypeChange);
 });
 
 $(document).ready(function() {
@@ -79,7 +79,8 @@ function getEngagementOptions(idProduct, engagementElement){
 }
 
 function handleProductTypeChange() {
-    let idProductType = $("#id_product_type_name").val();
+    console.log("que paso")
+    let idProductType = $("#id_product_type_id").val();
     let productTypeElement = document.getElementById('id_product_name');
     clearLabel()
     if (idProductType !== '') {

@@ -1084,12 +1084,14 @@ def add_transfer_finding(request, eid, fid=None):
         finding = get_object_or_404(Finding, id=fid)
 
     if request.method == 'POST':
-        product_type_name = get_object_or_404(Product_Type, id=request.POST.get('product_type_name'))
-        product_obj = get_object_or_404(Product, id=int(request.POST.get('product_name')))
-        engagement_obj = get_object_or_404(Engagement, id=int(request.POST.get('engagement_name')))
-        accepted_by_obj = get_object_or_404(Dojo_User, id=int(request.POST.get('accepted_by')))
+        # finding = Finding.objects.filter(finding_id=request.POST.get('finding_id'))
+        # product_type_name = get_object_or_404(Product_Type, id=request.POST.get('product_type_name'))
+        # product_obj = get_object_or_404(Product, id=int(request.POST.get('product_name')))
+        # engagement_obj = get_object_or_404(Engagement, id=int(request.POST.get('engagement_name')))
+        # accepted_by_obj = get_object_or_404(Dojo_User, id=int(request.POST.get('accepted_by')))
 
-        obj_transfer = TransferFinding.objects.create()
+        # obj_transfer = TransferFinding.objects.create()
+        form = TransferFindingForm(request.POST, request.FILES)
         if form.is_valid():
             # first capture notes param as it cannot be saved directly as m2m
             notes = None

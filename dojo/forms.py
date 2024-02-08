@@ -1165,30 +1165,12 @@ class TransferFindingForm(forms.ModelForm):
 
     title = forms.CharField(required=True, max_length=255)
 
-    product_type_name = forms.ModelChoiceField(
-        label="Product Type",
-        queryset=Product_Type.objects.none(),
-        empty_label="Not Assigned",
-        help_text="Product Type Name, ",
+    product_type_name_id = forms.ModelChoiceField(
+        queryset=Product_Type.objects.none()
     )
-    product_name = forms.ModelChoiceField(
-        label="Product",
-        queryset=Product.objects.none(),
-        empty_label="Not Assigned",
-        help_text="Product Name, ",
-    )
-    engagement_name = forms.ModelChoiceField(
-        label="Engagement",
-        queryset=Engagement.objects.none(),
-        empty_label="Not Assigned",
-        help_text="Engagement name, ",
-    )
-    accepted_by = forms.ModelChoiceField(
-        label="Acceptd By",
-        queryset=Dojo_User.objects.none(),
-        empty_label="Not Assigned",
-        help_text="Member who will accept the finding, ",
-    )
+    product_name = forms.CharField(widget=forms.Select())  # Usar widget Select
+    engagement_name = forms.CharField(widget=forms.Select())  # Usar widget Select
+    accepted_by = forms.CharField(widget=forms.Select())  # Usar widget Select
     notes = forms.CharField(
         required=False, max_length=2400, widget=forms.Textarea, label="Notes"
     )
@@ -1199,7 +1181,7 @@ class TransferFindingForm(forms.ModelForm):
             Permissions.Transfer_Finding
         )
         self.fields["title"].initial = kwags.get("engagement_id")
-        self.fields["product_type_name"].queryset = Product_Type.objects.all()
+        self.fields["product_type_name_id"].queryset = Product_Type.objects.all()
         self.fields["owner"].disabled = True
 
     class Meta:
