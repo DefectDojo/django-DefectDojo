@@ -36,6 +36,13 @@ class TestParsers(DojoTestCase):
                     self.assertTrue(re.search("toc_hide: true", content),
                                     f"Documentation file '{doc_file}' does not contain toc_hide: true"
                                     )
+                    if category == "file":
+                        self.assertTrue(re.search("### Sample Scan Data", content),
+                                        f"Documentation file '{doc_file}' does not contain ### Sample Scan Data"
+                                        )
+                        self.assertTrue(re.search("https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans", content),
+                                        f"Documentation file '{doc_file}' does not contain https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans"
+                                        )
 
             if parser_dir.name not in [
                 # there is not exception for now

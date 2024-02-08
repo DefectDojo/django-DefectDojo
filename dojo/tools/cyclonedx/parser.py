@@ -425,7 +425,7 @@ class CycloneDXParser(object):
                     test=test,
                     description=description,
                     severity=severity,
-                    mitigation=vulnerability.get("recommendation"),
+                    mitigation=vulnerability.get("recommendation", ""),
                     component_name=component_name,
                     component_version=component_version,
                     references=references,

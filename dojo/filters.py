@@ -147,13 +147,13 @@ class FindingSLAFilter(ChoiceFilter):
     def any(self, qs, name):
         return qs
 
-    def satisfies_sla(self, qs, name):
+    def sla_satisfied(self, qs, name):
         for finding in qs:
             if finding.violates_sla:
                 qs = qs.exclude(id=finding.id)
         return qs
 
-    def violates_sla(self, qs, name):
+    def sla_violated(self, qs, name):
         for finding in qs:
             if not finding.violates_sla:
                 qs = qs.exclude(id=finding.id)
@@ -161,8 +161,8 @@ class FindingSLAFilter(ChoiceFilter):
 
     options = {
         None: (_('Any'), any),
-        0: (_('False'), satisfies_sla),
-        1: (_('True'), violates_sla),
+        0: (_('False'), sla_satisfied),
+        1: (_('True'), sla_violated),
     }
 
     def __init__(self, *args, **kwargs):
@@ -182,13 +182,13 @@ class ProductSLAFilter(ChoiceFilter):
     def any(self, qs, name):
         return qs
 
-    def satisfies_sla(self, qs, name):
+    def sla_satisifed(self, qs, name):
         for product in qs:
             if product.violates_sla:
                 qs = qs.exclude(id=product.id)
         return qs
 
-    def violates_sla(self, qs, name):
+    def sla_violated(self, qs, name):
         for product in qs:
             if not product.violates_sla:
                 qs = qs.exclude(id=product.id)
@@ -196,8 +196,8 @@ class ProductSLAFilter(ChoiceFilter):
 
     options = {
         None: (_('Any'), any),
-        0: (_('False'), satisfies_sla),
-        1: (_('True'), violates_sla),
+        0: (_('False'), sla_satisifed),
+        1: (_('True'), sla_violated),
     }
 
     def __init__(self, *args, **kwargs):
@@ -319,7 +319,6 @@ def get_finding_filterset_fields(metrics=False, similar=False):
                 'is_mitigated',
                 'out_of_scope',
                 'false_p',
-                'risk_accepted',
                 'has_component',
                 'has_notes',
                 'file_path',
@@ -584,7 +583,7 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
         None: (_('Either'), any),
         1: (_('Yes'), accepted),
         2: (_('No'), not_accepted),
-        3: (_('Was'), was_accepted),
+        3: (_('Expired'), was_accepted),
     }
 
     def __init__(self, *args, **kwargs):
@@ -1466,9 +1465,8 @@ class FindingFilter(FindingFilterWithTags):
                    'endpoints', 'references',
                    'thread_id', 'notes', 'scanner_confidence',
                    'numerical_severity', 'line', 'duplicate_finding',
-                   'hash_code',
-                   'reviewers',
-                   'created', 'files', 'sla_start_date', 'cvssv3',
+                   'hash_code', 'reviewers', 'created', 'files',
+                   'sla_start_date', 'sla_expiration_date', 'cvssv3',
                    'severity_justification', 'steps_to_reproduce']
 
     def __init__(self, *args, **kwargs):

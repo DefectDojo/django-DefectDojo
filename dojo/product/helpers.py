@@ -1,11 +1,31 @@
 import contextlib
-from celery.utils.log import get_task_logger
+import logging
 from dojo.celery import app
-from dojo.models import Product, Engagement, Test, Finding, Endpoint
+from dojo.models import SLA_Configuration, Product, Engagement, Test, Finding, Endpoint
 from dojo.decorators import dojo_async_task
 
 
-logger = get_task_logger(__name__)
+logger = logging.getLogger(__name__)
+
+
+@dojo_async_task
+@app.task
+def update_sla_expiration_dates_product_async(product, sla_config, *args, **kwargs):
+    update_sla_expiration_dates_product_sync(product, sla_config)
+
+
+def update_sla_expiration_dates_product_sync(product, sla_config):
+    logger.info(f"Updating finding SLA expiration dates within product {product}")
+    # update each finding that is within the SLA configuration that was saved
+    for f in Finding.objects.filter(test__engagement__product=product):
+        f.save()
+    # reset the async updating flag to false for the sla config assigned to this product
+    if sla_config:
+        sla_config.async_updating = False
+        super(SLA_Configuration, sla_config).save()
+    # set the async updating flag to false for the sla config assigned to this product
+    product.async_updating = False
+    super(Product, product).save()
 
 
 @dojo_async_task

@@ -9,8 +9,10 @@ The return code matching are directly put in Severity as follow(this is hardcode
 HTTP Return Code | Severity
 -----------------|---------
 200              |  High
+302              |  Low
 401              |  Medium
 403              |  Medium
+404              |  Medium
 407              |  Medium
 500              |  Low
 

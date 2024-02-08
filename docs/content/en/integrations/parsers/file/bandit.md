@@ -64,4 +64,4 @@ All properties are expected as strings, except "metrics" properties, which are e
 ~~~
 
 ### Sample Scan Data
-Sample Bandit scans can be found at https://github.com/DefectDojo/sample-scan-files/tree/master/bandit.
+Sample Bandit scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/bandit).

@@ -121,3 +121,18 @@ class TestTrivyOperatorParser(DojoTestCase):
         self.assertEqual("github-pat", finding.references)
         self.assertEqual("root/github_secret.txt", finding.file_path)
         self.assertEqual("Secret detected in root/github_secret.txt - GitHub Personal Access Token", finding.title)
+
+    def test_vulnerabilityreport_extended(self):
+        test_file = open(sample_path("vulnerabilityreport_extended.json"))
+        parser = TrivyOperatorParser()
+        findings = parser.get_findings(test_file, Test())
+        self.assertEqual(len(findings), 5)
+        finding = findings[0]
+        self.assertEqual("Medium", finding.severity)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2024-0553", finding.unsaved_vulnerability_ids[0])
+        self.assertEqual("CVE-2024-0553 libgnutls30 3.6.13-2ubuntu1.9", finding.title)
+        self.assertEqual("3.6.13-2ubuntu1.10", finding.mitigation)
+        self.assertEqual(5.9, finding.cvssv3_score)
+        self.assertEqual("ubuntu:20.04 (ubuntu 20.04)", finding.file_path)
+        self.assertEqual("os-pkgs, ubuntu", str(finding.tags))

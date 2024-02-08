@@ -85,4 +85,4 @@ Parser expects an array of finding.  All properties are strings. Required fields
 ~~~
 
 ### Sample Scan Data
-You can run a sample model and download some sample risk data from [here](https://run.threagile.io/)
+Sample Threagile scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/threagile).
