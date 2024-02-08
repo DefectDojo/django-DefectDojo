@@ -8,6 +8,7 @@ The return code matching are directly put in Severity as follow(this is hardcode
 
 HTTP Return Code | Severity
 -----------------|---------
+missing          |  Low
 200 - 299        |  High
 300 - 399        |  Low
 400 - 499        |  Medium
