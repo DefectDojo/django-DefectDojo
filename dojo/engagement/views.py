@@ -920,6 +920,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
 
     if form.is_valid():
         notes = None
+        id_risk_acceptance = None
         if form.cleaned_data['notes']:
             notes = Notes(
                 entry=form.cleaned_data['notes'],
@@ -931,6 +932,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
 
         try:
             risk_acceptance = form.save()
+            id_risk_acceptance = risk_acceptance.id
         except Exception as e:
             logger.debug(vars(request.POST))
             logger.error(vars(form))
@@ -959,6 +961,8 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
             messages.SUCCESS,
             'Risk acceptance saved.',
             extra_tags='alert-success')
+
+        return redirect_to_return_url_or_else(request, reverse('view_risk_acceptance', args=(eid, id_risk_acceptance)))
 
     return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
 
