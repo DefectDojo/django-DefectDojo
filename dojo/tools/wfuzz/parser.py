@@ -10,17 +10,16 @@ class WFuzzParser(object):
     A class that can be used to parse the WFuzz JSON report files
     """
 
-    # table to match HTTP error code and severity
-    SEVERITY = {
-        "200": "High",
-        "301": "Low",
-        "302": "Low",
-        "401": "Medium",
-        "403": "Medium",
-        "404": "Medium",
-        "407": "Medium",
-        "500": "Low"
-    }
+    # match HTTP error code and severity
+    def severity_mapper(self, input):
+        if 200 <= int(input) <= 299:
+            return "High"
+        elif 300 <= int(input) <= 399:
+            return "Low"
+        elif 400 <= int(input) <= 499:
+            return "Medium"
+        elif 500 <= int(input):
+            return "Low"
 
     def get_scan_types(self):
         return ["WFuzz JSON report"]
@@ -38,7 +37,7 @@ class WFuzzParser(object):
         for item in data:
             url = hyperlink.parse(item["url"])
             return_code = str(item["code"])
-            severity = self.SEVERITY[return_code]
+            severity = self.severity_mapper(input=return_code)
             description = f"The URL {url.to_text()} must not be exposed\n Please review your configuration\n"
 
             dupe_key = hashlib.sha256(
