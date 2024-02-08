@@ -22,7 +22,6 @@ from dojo.models import (
     Finding_Group,
     Product_Type,
     Product,
-    Risk_Acceptance,
     Test,
     Dojo_Group,
     Cred_Mapping,
