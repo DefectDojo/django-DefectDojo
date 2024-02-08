@@ -79,8 +79,8 @@ class ImportReimportMixin(object):
         self.veracode_mitigated_findings = self.scans_path + 'veracode/mitigated_finding.xml'
         self.scan_type_veracode = 'Veracode Scan'
 
-        self.clair_few_findings = self.scans_path + 'clair/few_vuln.json'
-        self.clair_empty = self.scans_path + 'clair/empty.json'
+        self.clair_few_findings = self.scans_path + 'clair/clair_few_vuln.json'
+        self.clair_empty = self.scans_path + 'clair/clair_empty.json'
         self.scan_type_clair = 'Clair Scan'
 
         self.generic_filename_with_file = self.scans_path + "generic/test_with_image.json"
@@ -137,8 +137,6 @@ class ImportReimportMixin(object):
         # no notes expected
         self.assertEqual(notes_count_before, self.db_notes_count())
 
-        return test_id
-
     # import zap scan, testing:
     # - import
     # - active/verifed = False
@@ -179,8 +177,6 @@ class ImportReimportMixin(object):
         # no notes expected
         self.assertEqual(notes_count_before, self.db_notes_count())
 
-        return test_id
-
     # Test Scan_Date logic for Import. Reimport without a test_id cannot work for UI, so those tests are only in the API class below.
 
     # import zap scan without dates
@@ -199,8 +195,6 @@ class ImportReimportMixin(object):
         date = findings['results'][0]['date']
         self.assertEqual(date, str(timezone.localtime(timezone.now()).date()))
 
-        return test_id
-
     # import acunetix scan with dates
     # - import
     # - no scan scan_date does not overrides date set by parser
@@ -216,8 +210,6 @@ class ImportReimportMixin(object):
         # Get the date
         date = findings['results'][0]['date']
         self.assertEqual(date, '2018-09-24')
-
-        return test_id
 
     # import zap scan without dates
     # - import
@@ -235,8 +227,6 @@ class ImportReimportMixin(object):
         date = findings['results'][0]['date']
         self.assertEqual(date, '2006-12-26')
 
-        return test_id
-
     # import acunetix scan with dates
     # - import
     # - set scan_date overrides date set by parser
@@ -252,8 +242,6 @@ class ImportReimportMixin(object):
         # Get the date
         date = findings['results'][0]['date']
         self.assertEqual(date, '2006-12-26')
-
-        return test_id
 
     # Test Scan_Date for reimport in UI. UI can only rupload for existing tests, non UI tests are in API class below
 
@@ -345,8 +333,6 @@ class ImportReimportMixin(object):
         # no notes expected
         self.assertEqual(notes_count_before, self.db_notes_count())
 
-        return test_id
-
     # Test re-import with unique_id_from_tool_or_hash_code algorithm
     # import veracode scan, testing:
     # - import
@@ -367,8 +353,6 @@ class ImportReimportMixin(object):
 
         # no notes expected
         self.assertEqual(notes_count_before, self.db_notes_count())
-
-        return test_id
 
     # import veracode and then reimport veracode again
     # - reimport, findings stay the same, stay active
@@ -730,7 +714,7 @@ class ImportReimportMixin(object):
         test_id = reimport1['test']
         self.assertEqual(test_id, test_id)
 
-        test = self.get_test_api(test_id)
+        self.get_test_api(test_id)
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
@@ -770,7 +754,7 @@ class ImportReimportMixin(object):
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
-        finding_count_before = self.db_finding_count()
+        self.db_finding_count()
         endpoint_count_before = self.db_endpoint_count()
         endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
         endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
@@ -786,12 +770,12 @@ class ImportReimportMixin(object):
         endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
 
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, closed=1, reactivated=1, untouched=3):
-            reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
+            self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
         test_id = reimport1['test']
         self.assertEqual(test_id, test_id)
 
-        test = self.get_test_api(test_id)
+        self.get_test_api(test_id)
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
@@ -944,7 +928,7 @@ class ImportReimportMixin(object):
         test_id = reimport1['test']
         self.assertEqual(test_id, test_id)
 
-        test = self.get_test_api(test_id)
+        self.get_test_api(test_id)
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
         self.assert_finding_count_json(4 + 2, findings)
@@ -1039,7 +1023,7 @@ class ImportReimportMixin(object):
 
         # reimport exact same report
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, untouched=4):
-            reimport0 = self.reimport_scan_with_params(test_id, self.anchore_file_name, scan_type=self.scan_type_anchore)
+            self.reimport_scan_with_params(test_id, self.anchore_file_name, scan_type=self.scan_type_anchore)
 
         active_findings_after = self.get_test_findings_api(test_id, active=True)
         self.log_finding_summary_json_api(active_findings_after)
@@ -1168,7 +1152,7 @@ class ImportReimportMixin(object):
         self.assert_finding_count_json(6, active_findings_before)
 
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, created=0, untouched=6):
-            reimport0 = self.reimport_scan_with_params(test_id,
+            self.reimport_scan_with_params(test_id,
                                                        self.gitlab_dep_scan_components_filename,
                                                        scan_type=self.scan_type_gtlab_dep_scan,
                                                        minimum_severity='Info')
@@ -1451,7 +1435,7 @@ class ImportReimportMixin(object):
         )
         reimport_test.save()
 
-        reimport0 = self.reimport_scan_with_params(reimport_test.id, self.anchore_grype_file_name, scan_type=self.anchore_grype_scan_type)
+        self.reimport_scan_with_params(reimport_test.id, self.anchore_grype_file_name, scan_type=self.anchore_grype_scan_type)
         findings = Finding.objects.filter(test=reimport_test)
         self.assertEqual(4, len(findings))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)
@@ -1680,8 +1664,6 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         date = findings['results'][0]['date']
         self.assertEqual(date, str(timezone.localtime(timezone.now()).date()))
 
-        return test_id
-
     # reimport acunetix scan with dates (non existing test, so import is called inside DD)
     # - reimport
     # - deafult scan_date (today) does not overrides date set by parser
@@ -1698,8 +1680,6 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         # Get the date
         date = findings['results'][0]['date']
         self.assertEqual(date, '2018-09-24')
-
-        return test_id
 
     # reimport zap scan without dates (non existing test, so import is called inside DD)
     # - reimport
@@ -1718,8 +1698,6 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         date = findings['results'][0]['date']
         self.assertEqual(date, '2006-12-26')
 
-        return test_id
-
     # reimport acunetix scan with dates (non existing test, so import is called inside DD)
     # - reimport
     # - set scan_date overrides date set by parser
@@ -1736,8 +1714,6 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         # Get the date
         date = findings['results'][0]['date']
         self.assertEqual(date, '2006-12-26')
-
-        return test_id
 
 
 class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):

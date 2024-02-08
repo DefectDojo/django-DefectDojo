@@ -12,7 +12,7 @@ from dojo.models import Development_Environment, Product, Engagement, Test, Find
     Product_Group, Global_Role, Dojo_Group_Member, Language_Type, Languages, \
     Notifications, UserContactInfo, Cred_Mapping, Cred_User, \
     TextQuestion, ChoiceQuestion, TextAnswer, ChoiceAnswer, Engagement_Survey, \
-    Answered_Survey, General_Survey
+    Answered_Survey, General_Survey, Announcement
 from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
@@ -26,7 +26,8 @@ from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, En
     NotificationsViewSet, UserContactInfoViewSet, ProductAPIScanConfigurationViewSet, \
     ConfigurationPermissionViewSet, CredentialsMappingViewSet, \
     CredentialsViewSet, QuestionnaireQuestionViewSet, QuestionnaireAnswerViewSet, \
-    QuestionnaireGeneralSurveyViewSet, QuestionnaireEngagementSurveyViewSet, QuestionnaireAnsweredSurveyViewSet
+    QuestionnaireGeneralSurveyViewSet, QuestionnaireEngagementSurveyViewSet, QuestionnaireAnsweredSurveyViewSet, \
+    AnnouncementViewSet
 from json import dumps
 from enum import Enum
 from django.urls import reverse
@@ -346,7 +347,7 @@ class BaseClass():
                         self.assertEqual(len(check_for_tags), len(result.get('tags', None)))
                         for tag in check_for_tags:
                             # logger.debug('looking for tag %s in tag list %s', tag, result['tags'])
-                            self.assertTrue(tag in result['tags'])
+                            self.assertIn(tag, result['tags'])
                         tags_found = True
                 self.assertTrue(tags_found)
 
@@ -368,7 +369,7 @@ class BaseClass():
                 self.assertEqual(len(self.payload.get('tags')), len(response.data.get('tags', None)))
                 for tag in self.payload.get('tags'):
                     # logger.debug('looking for tag %s in tag list %s', tag, response.data['tags'])
-                    self.assertTrue(tag in response.data['tags'])
+                    self.assertIn(tag, response.data['tags'])
 
             self.check_schema_response('post', '201', response)
 
@@ -380,9 +381,9 @@ class BaseClass():
             self.assertEqual(200, response.status_code, response.content[:1000])
             # sensitive data must be set to write_only so those are not returned in the response
             # https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-8q8j-7wc4-vjg5
-            self.assertFalse('password' in response.data)
-            self.assertFalse('ssh' in response.data)
-            self.assertFalse('api_key' in response.data)
+            self.assertNotIn('password', response.data)
+            self.assertNotIn('ssh', response.data)
+            self.assertNotIn('api_key', response.data)
 
             self.check_schema_response('get', '200', response, detail=True)
 
@@ -417,16 +418,16 @@ class BaseClass():
                         response_data = response.data[key]
                     self.assertEqual(value, response_data)
 
-            self.assertFalse('push_to_jira' in response.data)
-            self.assertFalse('ssh' in response.data)
-            self.assertFalse('password' in response.data)
-            self.assertFalse('api_key' in response.data)
+            self.assertNotIn('push_to_jira', response.data)
+            self.assertNotIn('ssh', response.data)
+            self.assertNotIn('password', response.data)
+            self.assertNotIn('api_key', response.data)
 
             if hasattr(self.endpoint_model, 'tags') and self.update_fields and self.update_fields.get('tags', None):
                 self.assertEqual(len(self.update_fields.get('tags')), len(response.data.get('tags', None)))
                 for tag in self.update_fields.get('tags'):
                     logger.debug('looking for tag %s in tag list %s', tag, response.data['tags'])
-                    self.assertTrue(tag in response.data['tags'])
+                    self.assertIn(tag, response.data['tags'])
 
             response = self.client.put(
                 relative_url, self.payload)
@@ -447,17 +448,17 @@ class BaseClass():
 
             self.check_schema_response('get', '200', response, detail=True)
 
-            self.assertFalse('push_to_jira' in response.data)
-            self.assertFalse('password' in response.data)
-            self.assertFalse('ssh' in response.data)
-            self.assertFalse('api_key' in response.data)
+            self.assertNotIn('push_to_jira', response.data)
+            self.assertNotIn('password', response.data)
+            self.assertNotIn('ssh', response.data)
+            self.assertNotIn('api_key', response.data)
 
             self.assertIsInstance(response.data['results'], list)
-            self.assertTrue(len(response.data['results']) > 0, "Length: {}".format(len(response.data['results'])))
+            self.assertGreater(len(response.data['results']), 0, "Length: {}".format(len(response.data['results'])))
 
             for obj in response.data['results']:
                 self.assertIsInstance(obj, dict)
-                self.assertTrue(len(obj), 3)
+                self.assertEqual(len(obj), 3)
                 self.assertIsInstance(obj['model'], str)
                 if obj['id']:  # It needs to be None or int
                     self.assertIsInstance(obj['id'], int)
@@ -478,18 +479,18 @@ class BaseClass():
 
             self.assertEqual(200, response.status_code)
             obj = response.data
-            self.assertTrue("prefetch" in obj)
+            self.assertIn("prefetch", obj)
 
             for field in prefetchable_fields:
                 field_value = obj.get(field, None)
                 if field_value is None:
                     continue
 
-                self.assertTrue(field in obj["prefetch"])
-                values = field_value if type(field_value) is list else [field_value]
+                self.assertIn(field, obj["prefetch"])
+                values = field_value if isinstance(field_value, list) else [field_value]
 
                 for value in values:
-                    self.assertTrue(value in obj["prefetch"][field])
+                    self.assertIn(value, obj["prefetch"][field])
 
             # TODO add schema check
 
@@ -503,8 +504,8 @@ class BaseClass():
 
             self.assertEqual(200, response.status_code)
             objs = response.data
-            self.assertTrue("results" in objs)
-            self.assertTrue("prefetch" in objs)
+            self.assertIn("results", objs)
+            self.assertIn("prefetch", objs)
 
             for obj in objs["results"]:
                 for field in prefetchable_fields:
@@ -512,13 +513,13 @@ class BaseClass():
                     if field_value is None:
                         continue
 
-                    self.assertTrue(field in objs["prefetch"])
-                    values = field_value if type(field_value) is list else [field_value]
+                    self.assertIn(field, objs["prefetch"])
+                    values = field_value if isinstance(field_value, list) else [field_value]
 
                     for value in values:
-                        if type(value) is not int:
+                        if not isinstance(value, int):
                             value = value['id']
-                        self.assertTrue(value in objs["prefetch"][field])
+                        self.assertIn(value, objs["prefetch"][field])
 
             # TODO add schema check
 
@@ -587,7 +588,7 @@ class BaseClass():
 
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
-            response = self.client.delete(relative_url)
+            self.client.delete(relative_url)
 
             if self.endpoint_model == Endpoint_Status:
                 permission_object = Endpoint.objects.get(id=current_objects['results'][0]['endpoint'])
@@ -1585,7 +1586,7 @@ class UsersTest(BaseClass.RESTEndpointTest):
         }
         self.update_fields = {"first_name": "test changed", "configuration_permissions": [219, 220]}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 18
+        self.deleted_objects = 19
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_create_user_with_non_configuration_permissions(self):
@@ -2835,3 +2836,25 @@ class AnsweredSurveyTest(BaseClass.RESTEndpointTest):
         self.test_type = TestType.STANDARD
         self.deleted_objects = 5
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class AnnouncementTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Announcement
+        self.endpoint_path = 'announcements'
+        self.viewname = 'announcement'
+        self.viewset = AnnouncementViewSet
+        self.payload = {
+            "message": "Test template",
+            "style": "info",
+            "dismissable": True,
+        }
+        self.update_fields = {'style': 'warning'}
+        self.test_type = TestType.CONFIGURATION_PERMISSIONS
+        self.deleted_objects = 7
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_create(self):
+        self.skipTest('Only one Announcement can exists')

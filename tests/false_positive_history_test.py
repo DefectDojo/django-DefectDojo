@@ -96,7 +96,6 @@ class FalsePositiveHistoryTest(BaseTestCase):
         driver.find_element(By.CSS_SELECTOR, "input[type='submit']").click()
 
     def test_retroactive_edit_finding(self):
-        driver = self.driver
         # Create two equal findings on different engagements
         finding_1 = self.create_finding(
             product_name='QA Test',
@@ -125,7 +124,6 @@ class FalsePositiveHistoryTest(BaseTestCase):
         self.assert_is_active(finding_2)
 
     def test_retroactive_bulk_edit_finding(self):
-        driver = self.driver
         # Create two equal findings on different engagements
         finding_1 = self.create_finding(
             product_name='QA Test',

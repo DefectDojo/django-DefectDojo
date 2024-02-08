@@ -24,7 +24,7 @@ class CloseOldTest(BaseTestCase):
     # --------------------------------------------------------------------------------------------------------
     def setUp(self):
         super().setUp()
-        self.relative_path = dir_path = os.path.dirname(os.path.realpath(__file__))
+        self.relative_path = os.path.dirname(os.path.realpath(__file__))
 
     @on_exception_html_source_logger
     def test_delete_findings(self):

@@ -88,7 +88,7 @@ class MobSFParser(object):
         # Mobile Permissions
         if "permissions" in data:
             # for permission, details in data["permissions"].items():
-            if type(data["permissions"]) is list:
+            if isinstance(data["permissions"], list):
                 for details in data["permissions"]:
                     mobsf_item = {
                         "category": "Mobile Permissions",
@@ -125,9 +125,86 @@ class MobSFParser(object):
                 }
                 mobsf_findings.append(mobsf_item)
 
+        # Certificate Analysis
+        if "certificate_analysis" in data:
+            if data["certificate_analysis"] != {}:
+                certificate_info = data["certificate_analysis"]["certificate_info"]
+                for details in data["certificate_analysis"]["certificate_findings"]:
+                    if len(details) == 3:
+                        mobsf_item = {
+                            "category": "Certificate Analysis",
+                            "title": details[2],
+                            "severity": details[0].replace("warning", "low").title(),
+                            "description": details[1] + "\n\n**Certificate Info:** " + certificate_info,
+                            "file_path": None
+                        }
+                        mobsf_findings.append(mobsf_item)
+                    elif len(details) == 2:
+                        mobsf_item = {
+                            "category": "Certificate Analysis",
+                            "title": details[1],
+                            "severity": details[0].replace("warning", "low").title(),
+                            "description": details[1] + "\n\n**Certificate Info:** " + certificate_info,
+                            "file_path": None
+                        }
+                        mobsf_findings.append(mobsf_item)
+                    else:
+                        pass
+
+        # Manifest Analysis
+        if "manifest_analysis" in data:
+            if data["manifest_analysis"] != {} and isinstance(data["manifest_analysis"], dict):
+                if data["manifest_analysis"]["manifest_findings"]:
+                    for details in data["manifest_analysis"]["manifest_findings"]:
+                        mobsf_item = {
+                            "category": "Manifest Analysis",
+                            "title": details["title"],
+                            "severity": details["severity"].replace("warning", "low").title(),
+                            "description": details["description"] + "\n\n " + details["name"],
+                            "file_path": None
+                        }
+                        mobsf_findings.append(mobsf_item)
+                else:
+                    for details in data["manifest_analysis"]:
+                        mobsf_item = {
+                            "category": "Manifest Analysis",
+                            "title": details["title"],
+                            "severity": details["stat"].replace("warning", "low").title(),
+                            "description": details["desc"] + "\n\n " + details["name"],
+                            "file_path": None
+                        }
+                        mobsf_findings.append(mobsf_item)
+
+        # Code Analysis
+        if "code_analysis" in data:
+            if data["code_analysis"] != {}:
+                if data["code_analysis"].get("findings"):
+                    for details in data["code_analysis"]["findings"]:
+                        metadata = data["code_analysis"]["findings"][details]
+                        mobsf_item = {
+                            "category": "Code Analysis",
+                            "title": details,
+                            "severity": metadata["metadata"]["severity"].replace("warning", "low").title(),
+                            "description": metadata["metadata"]["description"],
+                            "file_path": None
+                        }
+                        mobsf_findings.append(mobsf_item)
+                else:
+                    for details in data["code_analysis"]:
+                        metadata = data["code_analysis"][details]
+                        if metadata.get("metadata"):
+                            mobsf_item = {
+                                "category": "Code Analysis",
+                                "title": details,
+                                "severity": metadata["metadata"]["severity"].replace("warning", "low").title(),
+                                "description": metadata["metadata"]["description"],
+                                "file_path": None
+                            }
+                            mobsf_findings.append(mobsf_item)
+
         # Binary Analysis
         if "binary_analysis" in data:
-            if type(data["binary_analysis"]) is list:
+            if isinstance(data["binary_analysis"], list):
                 for details in data["binary_analysis"]:
                     for binary_analysis_type in details:
                         if "name" != binary_analysis_type:

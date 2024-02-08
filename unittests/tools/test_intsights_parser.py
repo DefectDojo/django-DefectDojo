@@ -62,7 +62,7 @@ class TestIntSightsParser(DojoTestCase):
             testfile = open(
                 "unittests/scans/intsights/intsights_invalid_file.txt")
             parser = IntSightsParser()
-            findings = parser.get_findings(testfile, Test())
+            parser.get_findings(testfile, Test())
 
     def test_intsights_parser_with_no_alerts_json(self):
         testfile = open("unittests/scans/intsights/intsights_zero_vuln.json")

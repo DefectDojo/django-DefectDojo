@@ -103,7 +103,10 @@ def get_item(item_node, test):
             paths += "\n  - ..... (list of paths truncated after 25 paths)"
 
     cwe = get_npm_cwe(item_node)
-
+    try:
+        filepath = censor_path_hashes(item_node["findings"][0]["paths"][0])
+    except IndexError:
+        filepath = ""
     dojo_finding = Finding(
         title=item_node["title"]
         + " - "
@@ -114,7 +117,7 @@ def get_item(item_node, test):
         + ")",
         test=test,
         severity=severity,
-        file_path=censor_path_hashes(item_node["findings"][0]["paths"][0]),
+        file_path=filepath,
         description=item_node["url"]
         + "\n"
         + item_node["overview"]

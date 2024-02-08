@@ -418,12 +418,14 @@ class CycloneDXParser(object):
                 component_name, component_version = self._get_component(
                     components, reference
                 )
+                if not description:
+                    description = "Description was not provided."
                 finding = Finding(
                     title=f"{component_name}:{component_version} | {vulnerability.get('id')}",
                     test=test,
                     description=description,
                     severity=severity,
-                    mitigation=vulnerability.get("recommendation"),
+                    mitigation=vulnerability.get("recommendation", ""),
                     component_name=component_name,
                     component_version=component_version,
                     references=references,

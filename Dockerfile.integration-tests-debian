@@ -1,7 +1,7 @@
 
 # code: language=Dockerfile
 
-FROM openapitools/openapi-generator-cli:v7.1.0@sha256:6e6da58bad0078a5f79f666a8b09e9b512528d92526a0f611dda3963f9672115 as openapitools
+FROM openapitools/openapi-generator-cli:v7.2.0@sha256:9eab779faa2525b1474c4159ec335d913ee3cee00f641552a2305b0a4d7db8f7 as openapitools
 FROM python:3.11.4-slim-bullseye@sha256:40319d0a897896e746edf877783ef39685d44e90e1e6de8d964d0382df0d4952 as build
 WORKDIR /app
 RUN \
@@ -61,6 +61,7 @@ WORKDIR /app
 COPY --from=openapitools /opt/openapi-generator/modules/openapi-generator-cli/target/openapi-generator-cli.jar /usr/local/bin/openapi-generator-cli.jar
 
 COPY docker/wait-for-it.sh \
+  docker/secret-file-loader.sh \
   docker/entrypoint-integration-tests.sh \
   /
 

@@ -7,10 +7,10 @@ from dojo.tools.coverity_api.parser import CoverityApiParser
 
 class TestZapParser(DojoTestCase):
     def test_parse_wrong_file(self):
-        with self.assertRaises(ValueError) as ve:
+        with self.assertRaises(ValueError):
             testfile = open("unittests/scans/coverity_api/wrong.json")
             parser = CoverityApiParser()
-            findings = parser.get_findings(testfile, Test())
+            parser.get_findings(testfile, Test())
 
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/coverity_api/empty.json")
