@@ -3147,9 +3147,9 @@ class TransferFinding(models.Model):
                                                  help_text=_("product type name"))
 
     product_name = models.ForeignKey(Product,
-                                    editable=True,
-                                    on_delete=models.RESTRICT,
-                                    help_text=_("Product name"))
+                                                 editable=True,
+                                                 on_delete=models.RESTRICT,
+                                                 help_text=_("Product name"))
 
     engagement_name = models.ForeignKey(Engagement,
                                                  editable=True,

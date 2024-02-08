@@ -1159,7 +1159,7 @@ class TransferFindingForm(forms.ModelForm):
     finding_id = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.none(),
         required=True,
-        widget=forms.widgets.SelectMultiple(attrs={"size": 1}),
+        widget=forms.widgets.SelectMultiple(attrs={"size": 10}),
         help_text=("Active, verified findings listed, please select to add findings."),
     )
 
