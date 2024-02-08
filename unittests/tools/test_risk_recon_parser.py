@@ -11,13 +11,13 @@ class TestRiskReconAPIParser(DojoTestCase):
         testfile = open("unittests/scans/risk_recon/bad_url.json")
         with self.assertRaises(Exception):
             parser = RiskReconParser()
-            findings = parser.get_findings(testfile, Test())
+            parser.get_findings(testfile, Test())
 
     def test_api_with_bad_key(self):
         testfile = open("unittests/scans/risk_recon/bad_key.json")
         with self.assertRaises(Exception):
             parser = RiskReconParser()
-            findings = parser.get_findings(testfile, Test())
+            parser.get_findings(testfile, Test())
 
     def test_parser_without_api(self):
         testfile = open("unittests/scans/risk_recon/findings.json")

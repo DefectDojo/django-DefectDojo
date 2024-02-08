@@ -22,7 +22,7 @@ class TestSslLabsParser(DojoTestCase):
         self.assertEqual(findings[0].unsaved_endpoints[0].host, "defectdojo.mevitae.com")
         self.assertEqual(findings[0].cwe, 310)
         self.assertEqual(findings[0].severity, "Info")
-        self.assertTrue("TLS" in findings[0].description)
+        self.assertIn("TLS", findings[0].description)
 
     def test_parse_dh1024(self):
         parser = SslLabsParser()
@@ -37,7 +37,7 @@ class TestSslLabsParser(DojoTestCase):
         self.assertEqual(findings[0].unsaved_endpoints[0].host, "dh1024.badssl.com")
         self.assertEqual(findings[0].cwe, 310)
         self.assertEqual(findings[0].severity, "Medium")
-        self.assertTrue("TLS" in findings[0].description)
+        self.assertIn("TLS", findings[0].description)
 
     def test_parse_3des(self):
         parser = SslLabsParser()
@@ -52,7 +52,7 @@ class TestSslLabsParser(DojoTestCase):
         self.assertEqual(findings[0].unsaved_endpoints[0].host, "3des.badssl.com")
         self.assertEqual(findings[0].cwe, 310)
         self.assertEqual(findings[0].severity, "High")
-        self.assertTrue("TLS" in findings[0].description)
+        self.assertIn("TLS", findings[0].description)
 
     def test_parse_revoked(self):
         parser = SslLabsParser()
@@ -67,7 +67,7 @@ class TestSslLabsParser(DojoTestCase):
         self.assertEqual(findings[0].unsaved_endpoints[0].host, "revoked.badssl.com")
         self.assertEqual(findings[0].cwe, 310)
         self.assertEqual(findings[0].severity, "Critical")
-        self.assertTrue("TLS" in findings[0].description)
+        self.assertIn("TLS", findings[0].description)
 
     def test_parse_multiple(self):
         parser = SslLabsParser()
@@ -84,7 +84,7 @@ class TestSslLabsParser(DojoTestCase):
         foundCritical = False
 
         for finding in findings:
-            self.assertTrue("TLS" in finding.description)
+            self.assertIn("TLS", finding.description)
             self.assertEqual(finding.cwe, 310)
             if finding.severity == "Info":
                 self.assertEqual(finding.title, "TLS Grade 'A+' for defectdojo.mevitae.com")

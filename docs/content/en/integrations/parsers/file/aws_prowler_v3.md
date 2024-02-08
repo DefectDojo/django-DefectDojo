@@ -8,7 +8,6 @@ DefectDojo parser accepts a .json file.  Please note: earlier versions of AWS Pr
 
 JSON reports can be created from the [AWS Prowler V3 CLI](https://docs.prowler.cloud/en/latest/tutorials/reporting/#json) using the following command: `prowler <provider> -M json`
 
-
 ### Acceptable JSON Format
 Parser expects an array of assessments.  All properties are strings and are required by the parser.
 

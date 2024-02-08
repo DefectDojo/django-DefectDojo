@@ -27,7 +27,7 @@ class TestCheckovParser(DojoTestCase):
         testfile = open("unittests/scans/checkov/checkov-report-many-vuln.json")
         parser = CheckovParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertTrue(len(findings) > 2)
+        self.assertGreater(len(findings), 2)
 
     def test_parse_file_with_multiple_check_type_has_multiple_check_type(self):
         testfile = open("unittests/scans/checkov/checkov-report-multiple-check_type.json")

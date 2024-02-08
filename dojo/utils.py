@@ -668,7 +668,6 @@ def add_breadcrumb(parent=None,
                    url=None,
                    request=None,
                    clear=False):
-    title_done = False
     if clear:
         request.session['dojo_breadcrumbs'] = None
         return
@@ -685,7 +684,6 @@ def add_breadcrumb(parent=None,
         if parent is not None and getattr(parent, "get_breadcrumbs", None):
             crumbs += parent.get_breadcrumbs()
         else:
-            title_done = True
             crumbs += [{
                 'title': title,
                 'url': request.get_full_path() if url is None else url
@@ -700,7 +698,6 @@ def add_breadcrumb(parent=None,
                     'url': request.get_full_path() if url is None else url
                 }]
         else:
-            title_done = True
             obj_crumbs = [{
                 'title': title,
                 'url': request.get_full_path() if url is None else url
@@ -906,7 +903,7 @@ def get_period_counts_legacy(findings,
         else:
             risks_a = None
 
-        crit_count, high_count, med_count, low_count, closed_count = [
+        crit_count, high_count, med_count, low_count, _ = [
             0, 0, 0, 0, 0
         ]
         for finding in findings:
@@ -926,7 +923,7 @@ def get_period_counts_legacy(findings,
             [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
              crit_count, high_count, med_count, low_count, total,
              closed_in_range_count])
-        crit_count, high_count, med_count, low_count, closed_count = [
+        crit_count, high_count, med_count, low_count, _ = [
             0, 0, 0, 0, 0
         ]
         if risks_a is not None:
@@ -1003,13 +1000,13 @@ def get_period_counts(findings,
         else:
             risks_a = None
 
-        f_crit_count, f_high_count, f_med_count, f_low_count, f_closed_count = [
+        f_crit_count, f_high_count, f_med_count, f_low_count, _ = [
             0, 0, 0, 0, 0
         ]
-        ra_crit_count, ra_high_count, ra_med_count, ra_low_count, ra_closed_count = [
+        ra_crit_count, ra_high_count, ra_med_count, ra_low_count, _ = [
             0, 0, 0, 0, 0
         ]
-        active_crit_count, active_high_count, active_med_count, active_low_count, active_closed_count = [
+        active_crit_count, active_high_count, active_med_count, active_low_count, _ = [
             0, 0, 0, 0, 0
         ]
 
@@ -1493,8 +1490,6 @@ def prepare_for_view(encrypted_value):
         encrypted_values = encrypted_value.split(":")
 
         if len(encrypted_values) > 1:
-            type = encrypted_values[0]
-
             iv = binascii.a2b_hex(encrypted_values[1])
             value = encrypted_values[2]
 
@@ -1555,7 +1550,7 @@ def calculate_grade(product, *args, **kwargs):
         grade_product = "grade_product(%s, %s, %s, %s)" % (
             critical, high, medium, low)
         product.prod_numeric_grade = aeval(grade_product)
-        product.save()
+        super(Product, product).save()
 
 
 def get_celery_worker_status():
@@ -1750,7 +1745,7 @@ def user_post_save(sender, instance, created, **kwargs):
             notifications.template = False
             notifications.user = instance
             logger.info('creating default set (from template) of notifications for: ' + str(instance))
-        except Exception as err:
+        except Exception:
             notifications = Notifications(user=instance)
             logger.info('creating default set of notifications for: ' + str(instance))
 

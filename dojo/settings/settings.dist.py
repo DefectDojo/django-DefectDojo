@@ -7,6 +7,7 @@ import environ
 from netaddr import IPNetwork, IPSet
 import json
 import logging
+import warnings
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 root = environ.Path(__file__) - 3  # Three folders back
 
 # reference: https://pypi.org/project/django-environ/
-env = environ.Env(
+env = environ.FileAwareEnv(
     # Set casting and default values
     DD_SITE_URL=(str, 'http://localhost:8080'),
     DD_DEBUG=(bool, False),
@@ -40,6 +41,7 @@ env = environ.Env(
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
     DD_CSRF_COOKIE_SAMESITE=(str, 'Lax'),
     DD_SESSION_COOKIE_SAMESITE=(str, 'Lax'),
+    DD_APPEND_SLASH=(bool, True),
     DD_TIME_ZONE=(str, 'UTC'),
     DD_LANG=(str, 'en-us'),
     DD_TEAM_NAME=(str, 'Security Team'),
@@ -174,7 +176,7 @@ env = environ.Env(
     DD_AUTH_REMOTEUSER_GROUPS_HEADER=(str, ''),
     DD_AUTH_REMOTEUSER_GROUPS_CLEANUP=(bool, True),
     # Comma separated list of IP ranges with trusted proxies
-    DD_AUTH_REMOTEUSER_TRUSTED_PROXY=(list, ['127.0.0.0/32']),
+    DD_AUTH_REMOTEUSER_TRUSTED_PROXY=(list, ['127.0.0.1/32']),
     # REMOTE_USER will be processed only on login page. Check https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#using-remote-user-on-login-pages-only
     DD_AUTH_REMOTEUSER_LOGIN_ONLY=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
@@ -277,6 +279,8 @@ env = environ.Env(
     # If you run big import you may want to disable this because the way django-auditlog currently works, there's
     # a big performance hit. Especially during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
+    # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
+    DD_USE_FIRST_SEEN=(bool, False),
 )
 
 
@@ -670,6 +674,9 @@ CSRF_COOKIE_HTTPONLY = env('DD_CSRF_COOKIE_HTTPONLY')
 SESSION_COOKIE_SECURE = env('DD_SESSION_COOKIE_SECURE')
 SESSION_COOKIE_SAMESITE = env('DD_SESSION_COOKIE_SAMESITE')
 
+# Override default Django behavior for incorrect URLs
+APPEND_SLASH = env('DD_APPEND_SLASH')
+
 # Whether to use a secure cookie for the CSRF cookie.
 CSRF_COOKIE_SECURE = env('DD_CSRF_COOKIE_SECURE')
 CSRF_COOKIE_SAMESITE = env('DD_CSRF_COOKIE_SAMESITE')
@@ -1055,28 +1062,28 @@ if SAML2_ENABLED:
 # ------------------------------------------------------------------------------
 
 AUTH_REMOTEUSER_ENABLED = env('DD_AUTH_REMOTEUSER_ENABLED')
+AUTH_REMOTEUSER_USERNAME_HEADER = env('DD_AUTH_REMOTEUSER_USERNAME_HEADER')
+AUTH_REMOTEUSER_EMAIL_HEADER = env('DD_AUTH_REMOTEUSER_EMAIL_HEADER')
+AUTH_REMOTEUSER_FIRSTNAME_HEADER = env('DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER')
+AUTH_REMOTEUSER_LASTNAME_HEADER = env('DD_AUTH_REMOTEUSER_LASTNAME_HEADER')
+AUTH_REMOTEUSER_GROUPS_HEADER = env('DD_AUTH_REMOTEUSER_GROUPS_HEADER')
+AUTH_REMOTEUSER_GROUPS_CLEANUP = env('DD_AUTH_REMOTEUSER_GROUPS_CLEANUP')
+
+AUTH_REMOTEUSER_TRUSTED_PROXY = IPSet()
+for ip_range in env('DD_AUTH_REMOTEUSER_TRUSTED_PROXY'):
+    AUTH_REMOTEUSER_TRUSTED_PROXY.add(IPNetwork(ip_range))
+
+if env('DD_AUTH_REMOTEUSER_LOGIN_ONLY'):
+    RemoteUserMiddleware = 'dojo.remote_user.PersistentRemoteUserMiddleware'
+else:
+    RemoteUserMiddleware = 'dojo.remote_user.RemoteUserMiddleware'
+# we need to add middleware just behindAuthenticationMiddleware as described in https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#configuration
+for i in range(len(MIDDLEWARE)):
+    if MIDDLEWARE[i] == 'django.contrib.auth.middleware.AuthenticationMiddleware':
+        MIDDLEWARE.insert(i + 1, RemoteUserMiddleware)
+        break
+
 if AUTH_REMOTEUSER_ENABLED:
-    AUTH_REMOTEUSER_USERNAME_HEADER = env('DD_AUTH_REMOTEUSER_USERNAME_HEADER')
-    AUTH_REMOTEUSER_EMAIL_HEADER = env('DD_AUTH_REMOTEUSER_EMAIL_HEADER')
-    AUTH_REMOTEUSER_FIRSTNAME_HEADER = env('DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER')
-    AUTH_REMOTEUSER_LASTNAME_HEADER = env('DD_AUTH_REMOTEUSER_LASTNAME_HEADER')
-    AUTH_REMOTEUSER_GROUPS_HEADER = env('DD_AUTH_REMOTEUSER_GROUPS_HEADER')
-    AUTH_REMOTEUSER_GROUPS_CLEANUP = env('DD_AUTH_REMOTEUSER_GROUPS_CLEANUP')
-
-    AUTH_REMOTEUSER_TRUSTED_PROXY = IPSet()
-    for ip_range in env('DD_AUTH_REMOTEUSER_TRUSTED_PROXY'):
-        AUTH_REMOTEUSER_TRUSTED_PROXY.add(IPNetwork(ip_range))
-
-    if env('DD_AUTH_REMOTEUSER_LOGIN_ONLY'):
-        RemoteUserMiddleware = 'dojo.remote_user.PersistentRemoteUserMiddleware'
-    else:
-        RemoteUserMiddleware = 'dojo.remote_user.RemoteUserMiddleware'
-    # we need to add middleware just behindAuthenticationMiddleware as described in https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#configuration
-    for i in range(len(MIDDLEWARE)):
-        if MIDDLEWARE[i] == 'django.contrib.auth.middleware.AuthenticationMiddleware':
-            MIDDLEWARE.insert(i + 1, RemoteUserMiddleware)
-            break
-
     REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = \
         ('dojo.remote_user.RemoteUserAuthentication',) + \
         REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES']
@@ -1207,7 +1214,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'SonarQube API Import': ['title', 'file_path', 'line'],
     'Dependency Check Scan': ['title', 'cwe', 'file_path'],
     'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
-    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'vulnerability_ids', 'severity'],
+    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'vulnerability_ids'],
     'Mobsfscan Scan': ['title', 'severity', 'cwe'],
     'Tenable Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     'Nexpose Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
@@ -1216,7 +1223,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'Yarn Audit Scan': ['title', 'severity', 'file_path', 'vulnerability_ids', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on vulnerability_ids + file_path + severity
-    'Whitesource Scan': ['title', 'severity', 'description'],
+    'Mend Scan': ['title', 'severity', 'description'],
     'ZAP Scan': ['title', 'cwe', 'severity'],
     'Qualys Scan': ['title', 'severity', 'endpoints'],
     # 'Qualys Webapp Scan': ['title', 'unique_id_from_tool'],
@@ -1260,7 +1267,6 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'NeuVector (compliance)': ['title', 'vuln_id_from_tool', 'description'],
     'Wpscan': ['title', 'description', 'severity'],
     'Popeye Scan': ['title', 'description'],
-    'Wazuh Scan': ['title'],
     'Nuclei Scan': ['title', 'cwe', 'severity'],
     'KubeHunter Scan': ['title', 'description'],
     'kube-bench Scan': ['title', 'vuln_id_from_tool', 'description'],
@@ -1268,6 +1274,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Trufflehog Scan': ['title', 'description', 'line'],
     'Humble Json Importer': ['title'],
     'MSDefender Parser': ['title', 'description'],
+    'HCLAppScan XML': ['title', 'description'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1303,7 +1310,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Nexpose Scan': True,
     'NPM Audit Scan': True,
     'Yarn Audit Scan': True,
-    'Whitesource Scan': True,
+    'Mend Scan': True,
     'ZAP Scan': False,
     'Qualys Scan': True,
     'DSOP Scan': True,
@@ -1399,7 +1406,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Nexpose Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
-    'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
+    'Mend Scan': DEDUPE_ALGO_HASH_CODE,
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
     'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
     'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
@@ -1473,7 +1480,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'kube-bench Scan': DEDUPE_ALGO_HASH_CODE,
     'Threagile risks report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Humble Json Importer': DEDUPE_ALGO_HASH_CODE,
+    'Wazuh Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'MSDefender Parser': DEDUPE_ALGO_HASH_CODE,
+    'HCLAppScan XML': DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1709,3 +1718,13 @@ CREATE_CLOUD_BANNER = env('DD_CREATE_CLOUD_BANNER')
 # ------------------------------------------------------------------------------
 AUDITLOG_FLUSH_RETENTION_PERIOD = env('DD_AUDITLOG_FLUSH_RETENTION_PERIOD')
 ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
+USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
+
+# TODO - these warnings needs to be removed
+if DEBUG:
+    from django.utils.deprecation import RemovedInDjango50Warning
+    warnings.filterwarnings("ignore", category=RemovedInDjango50Warning)
+    warnings.filterwarnings("ignore", message="invalid escape sequence.*")
+    warnings.filterwarnings("ignore", message="'cgi' is deprecated and slated for removal in Python 3\\.13")
+    warnings.filterwarnings("ignore", message="DateTimeField .+ received a naive datetime .+ while time zone support is active\\.")
+    warnings.filterwarnings("ignore", message="unclosed file .+")

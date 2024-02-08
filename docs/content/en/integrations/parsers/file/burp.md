@@ -41,4 +41,4 @@ All XML elements are required and will be parsed as strings.
 ~~~
 
 ### Sample Scan Data
-Sample Burp scans can be found at https://github.com/DefectDojo/sample-scan-files/tree/master/burp.
+Sample Burp scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/burp).

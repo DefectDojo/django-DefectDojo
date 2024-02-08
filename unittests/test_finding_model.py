@@ -1,5 +1,7 @@
 from .dojo_test_case import DojoTestCase
-from dojo.models import Finding, Test, Engagement, DojoMeta
+from dojo.models import User, Finding, Test, Engagement, DojoMeta
+from datetime import datetime, timedelta
+from crum import impersonate
 
 
 class TestFindingModel(DojoTestCase):
@@ -262,3 +264,147 @@ class TestFindingModel(DojoTestCase):
         finding = Finding()
         finding.references = 'URL: [https://www.example.com](https://www.example.com)'
         self.assertEqual('URL: [https://www.example.com](https://www.example.com)', finding.get_references_with_links())
+
+
+class TestFindingSLAExpiration(DojoTestCase):
+    fixtures = ['dojo_testdata.json']
+
+    def run(self, result=None):
+        testuser = User.objects.get(username='admin')
+        testuser.usercontactinfo.block_execution = True
+        testuser.save()
+
+        # unit tests are running without any user, which will result in actions like dedupe happening in the celery process
+        # this doesn't work in unittests as unittests are using an in memory sqlite database and celery can't see the data
+        # so we're running the test under the admin user context and set block_execution to True
+        with impersonate(testuser):
+            super().run(result)
+
+    def test_sla_expiration_date(self):
+        """
+            tests if the SLA expiration date and SLA days remaining are calculated correctly
+            after a finding's severity is updated
+        """
+        user, _ = User.objects.get_or_create(username='admin')
+        product_type = self.create_product_type('test_product_type')
+        sla_config = self.create_sla_configuration(name='test_sla_config')
+        product = self.create_product(name='test_product', prod_type=product_type)
+        product.sla_configuration = sla_config
+        product.save()
+        engagement = self.create_engagement('test_eng', product)
+        test = self.create_test(engagement=engagement, scan_type='ZAP Scan', title='test_test')
+        finding = Finding.objects.create(
+            test=test,
+            reporter=user,
+            title='test_finding',
+            severity='Critical',
+            date=datetime.now().date())
+        finding.set_sla_expiration_date()
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+    def test_sla_expiration_date_after_finding_severity_updated(self):
+        """
+            tests if the SLA expiration date and SLA days remaining are calculated correctly
+            after a finding's severity is updated
+        """
+        user, _ = User.objects.get_or_create(username='admin')
+        product_type = self.create_product_type('test_product_type')
+        sla_config = self.create_sla_configuration(name='test_sla_config')
+        product = self.create_product(name='test_product', prod_type=product_type)
+        product.sla_configuration = sla_config
+        product.save()
+        engagement = self.create_engagement('test_eng', product)
+        test = self.create_test(engagement=engagement, scan_type='ZAP Scan', title='test_test')
+        finding = Finding.objects.create(
+            test=test,
+            reporter=user,
+            title='test_finding',
+            severity='Critical',
+            date=datetime.now().date())
+        finding.set_sla_expiration_date()
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+        finding.severity = 'Medium'
+        finding.set_sla_expiration_date()
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+    def test_sla_expiration_date_after_product_updated(self):
+        """
+            tests if the SLA expiration date and SLA days remaining are calculated correctly
+            after a product changed from one SLA configuration to another
+        """
+        user, _ = User.objects.get_or_create(username='admin')
+        product_type = self.create_product_type('test_product_type')
+        sla_config_1 = self.create_sla_configuration(name='test_sla_config_1')
+        sla_config_2 = self.create_sla_configuration(
+            name='test_sla_config_2',
+            critical=1,
+            high=2,
+            medium=3,
+            low=4)
+        product = self.create_product(name='test_product', prod_type=product_type)
+        product.sla_configuration = sla_config_1
+        product.save()
+        engagement = self.create_engagement('test_eng', product)
+        test = self.create_test(engagement=engagement, scan_type='ZAP Scan', title='test_test')
+        finding = Finding.objects.create(
+            test=test,
+            reporter=user,
+            title='test_finding',
+            severity='Critical',
+            date=datetime.now().date())
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+        product.sla_configuration = sla_config_2
+        product.save()
+
+        finding.set_sla_expiration_date()
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+    def test_sla_expiration_date_after_sla_configuration_updated(self):
+        """
+            tests if the SLA expiration date and SLA days remaining are calculated correctly
+            after the SLA configuration on a product was updated to a different number of SLA days
+        """
+        user, _ = User.objects.get_or_create(username='admin')
+        product_type = self.create_product_type('test_product_type')
+        sla_config = self.create_sla_configuration(name='test_sla_config')
+        product = self.create_product(name='test_product', prod_type=product_type)
+        product.sla_configuration = sla_config
+        product.save()
+        engagement = self.create_engagement('test_eng', product)
+        test = self.create_test(engagement=engagement, scan_type='ZAP Scan', title='test_test')
+        finding = Finding.objects.create(
+            test=test,
+            reporter=user,
+            title='test_finding',
+            severity='Critical',
+            date=datetime.now().date())
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+        sla_config.critical = 10
+        sla_config.save()
+
+        finding.set_sla_expiration_date()
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)

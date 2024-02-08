@@ -399,7 +399,7 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         content = """Date,Title,Url,Severity,Description,References,Active,Verified"""
         file = TestFile("findings.csv", content)
         parser = GenericParser()
-        findings = parser.get_findings(file, self.test)
+        parser.get_findings(file, self.test)
 
     def test_column_order_is_flexible(self):
         content1 = """\
@@ -640,11 +640,11 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         parser = GenericParser()
         with self.assertRaisesMessage(ValueError,
                 "Required fields are missing: ['description', 'severity', 'title']"):
-            findings = parser.get_findings(file, Test())
+            parser.get_findings(file, Test())
 
     def test_parse_json_invalid_finding(self):
         file = open("unittests/scans/generic/generic_invalid.json")
         parser = GenericParser()
         with self.assertRaisesMessage(ValueError,
                 "Not allowed fields are present: ['invalid_field', 'last_status_update']"):
-            findings = parser.get_findings(file, Test())
+            parser.get_findings(file, Test())

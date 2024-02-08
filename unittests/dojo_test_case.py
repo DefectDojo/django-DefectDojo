@@ -18,7 +18,7 @@ from dojo.jira_link.views import get_custom_field
 from dojo.models import (SEVERITIES, DojoMeta, Endpoint, Endpoint_Status,
                          Engagement, Finding, JIRA_Issue, JIRA_Project, Notes,
                          Product, Product_Type, System_Settings, Test,
-                         Test_Type, User)
+                         SLA_Configuration, Test_Type, User)
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +52,11 @@ class DojoTestUtilsMixin(object):
         product_type = Product_Type(name=name, description=description)
         product_type.save()
         return product_type
+
+    def create_sla_configuration(self, name, *args, description='dummy description', critical=7, high=30, medium=60, low=120, **kwargs):
+        sla_configuration = SLA_Configuration(name=name, description=description, critical=critical, high=high, medium=medium, low=low)
+        sla_configuration.save()
+        return sla_configuration
 
     def create_product(self, name, *args, description='dummy description', prod_type=None, tags=[], **kwargs):
         if not prod_type:
@@ -248,7 +253,7 @@ class DojoTestUtilsMixin(object):
                     product = Product.objects.get(id=response.url.split('/')[-2])
                 except:
                     raise ValueError('error parsing id from redirect uri: ' + response.url)
-            self.assertTrue(response.url == (expect_redirect_to % product.id))
+            self.assertEqual(response.url, (expect_redirect_to % product.id))
         else:
             self.assertEqual(response.status_code, 200)
 
@@ -396,12 +401,12 @@ class DojoTestUtilsMixin(object):
         response = jira._session.get(url).json().get('fields', {})
         epic_link = response.get(epic_link_field, None)
         if epic_id is None and epic_link is None or issue_in_epic:
-            self.assertTrue(epic_id == epic_link)
+            self.assertEqual(epic_id, epic_link)
         else:
-            self.assertTrue(epic_id != epic_link)
+            self.assertNotEqual(epic_id, epic_link)
 
     def assert_jira_updated_change(self, old, new):
-        self.assertTrue(old != new)
+        self.assertNotEqual(old, new)
 
     def get_latest_model(self, model):
         return model.objects.order_by('id').last()

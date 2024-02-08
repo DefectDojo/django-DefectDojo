@@ -2,6 +2,13 @@ name: Fetch OpenAPI Specifications
 
 on:
   workflow_call:
+    inputs:
+      version:
+        type: string
+        description: |
+          The version to be associated with the GitHub release that's created or updated.
+          This will override any version calculated by the release-drafter.
+        required: true
 
 jobs:
   oas_fetch:
@@ -13,22 +20,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      # load docker images from build jobs
-      - name: Load images from artifacts
-        uses: actions/download-artifact@v3
+        with:
+          ref: ${{ github.event.inputs.version }}
 
       - name: Load docker images
         run: |-
-             docker load -i nginx/nginx-alpine_img
-             docker load -i django/django-alpine_img
+             docker pull defectdojo/defectdojo-django:${{ github.event.inputs.version }}-alpine
+             docker pull defectdojo/defectdojo-nginx:${{ github.event.inputs.version }}-alpine
              docker images
 
       - name: Start Dojo
         run: docker-compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env up --no-deps -d postgres nginx uwsgi
         env:
-          DJANGO_VERSION: alpine
-          NGINX_VERSION: alpine
+          DJANGO_VERSION: ${{ github.event.inputs.version }}-alpine
+          NGINX_VERSION: ${{ github.event.inputs.version }}-alpine
 
       - name: Download OpenAPI Specifications
         run: |-
