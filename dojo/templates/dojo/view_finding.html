@@ -423,14 +423,14 @@
                         {% endif %}
                         </td>
                         <td>
-                            {% if epss_score is not None %}
-                                {{ epss_score|percentage:1.0 }}
+                            {% if finding.epss_score is not None %}
+                                {{ finding.epss_score|percentage:1.0 }}
                             {% else %}
                                 N/A
                             {% endif %}
                             /
-                            {% if epss_percentile is not None %}
-                                {{ epss_percentile|percentage:1.0 }}
+                            {% if finding.epss_percentile is not None %}
+                                {{ finding.epss_percentile|percentage:1.0 }}
                             {% else %}
                                 N/A
                             {% endif %}
