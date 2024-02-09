@@ -14,108 +14,112 @@ def calculate_sla_expiration_dates(apps, schema_editor):
     System_Settings = apps.get_model('dojo', 'System_Settings')
 
     ss, _ = System_Settings.objects.get_or_create()
-    if ss.enable_finding_sla:
-        logger.info('Calculating SLA expiration dates for all findings')
+    if not ss.enable_finding_sla:
+        return
 
-        SLA_Configuration = apps.get_model('dojo', 'SLA_Configuration')
-        Finding = apps.get_model('dojo', 'Finding')
+    logger.info('Calculating SLA expiration dates for all findings')
 
-        findings = Finding.objects.filter(sla_expiration_date__isnull=True).order_by('id').only('id', 'sla_start_date', 'date', 'severity', 'test', 'mitigated')
+    SLA_Configuration = apps.get_model('dojo', 'SLA_Configuration')
+    Finding = apps.get_model('dojo', 'Finding')
 
-        page_size = 1000
-        total_count = Finding.objects.filter(id__gt=0).count()
-        logger.info('Found %d findings to be updated', total_count)
+    findings = Finding.objects.filter(sla_expiration_date__isnull=True).order_by('id').only('id', 'sla_start_date', 'date', 'severity', 'test', 'mitigated')
 
-        i = 0
-        batch = []
-        last_id = 0
-        total_pages = (total_count // page_size) + 2
-        for p in range(1, total_pages):
-            page = findings.filter(id__gt=last_id)[:page_size]
-            for find in page:
-                i += 1
-                last_id = find.id
+    page_size = 1000
+    total_count = Finding.objects.filter(id__gt=0).count()
+    logger.info('Found %d findings to be updated', total_count)
 
-                start_date = find.sla_start_date if find.sla_start_date else find.date
+    i = 0
+    batch = []
+    last_id = 0
+    total_pages = (total_count // page_size) + 2
+    for p in range(1, total_pages):
+        page = findings.filter(id__gt=last_id)[:page_size]
+        for find in page:
+            i += 1
+            last_id = find.id
 
-                sla_config = SLA_Configuration.objects.filter(id=find.test.engagement.product.sla_configuration_id).first()
-                sla_period = getattr(sla_config, find.severity.lower(), None)
+            start_date = find.sla_start_date if find.sla_start_date else find.date
 
-                days = None
-                if settings.SLA_BUSINESS_DAYS:
-                    if find.mitigated:
-                        days = get_work_days(find.date, find.mitigated.date())
-                    else:
-                        days = get_work_days(find.date, timezone.now().date())
+            sla_config = SLA_Configuration.objects.filter(id=find.test.engagement.product.sla_configuration_id).first()
+            sla_period = getattr(sla_config, find.severity.lower(), None)
+
+            days = None
+            if settings.SLA_BUSINESS_DAYS:
+                if find.mitigated:
+                    days = get_work_days(find.date, find.mitigated.date())
                 else:
-                    if isinstance(start_date, datetime):
-                        start_date = start_date.date()
+                    days = get_work_days(find.date, timezone.now().date())
+            else:
+                if isinstance(start_date, datetime):
+                    start_date = start_date.date()
 
-                    if find.mitigated:
-                        days = (find.mitigated.date() - start_date).days
-                    else:
-                        days = (timezone.now().date() - start_date).days
+                if find.mitigated:
+                    days = (find.mitigated.date() - start_date).days
+                else:
+                    days = (timezone.now().date() - start_date).days
 
-                days = days if days > 0 else 0
+            days = days if days > 0 else 0
 
-                days_remaining = None
-                if sla_period:
-                    days_remaining = sla_period - days
+            days_remaining = None
+            if sla_period:
+                days_remaining = sla_period - days
 
-                if days_remaining:
-                    if find.mitigated:
-                        find.sla_expiration_date = find.mitigated.date() + relativedelta(days=days_remaining)
-                    else:
-                        find.sla_expiration_date = timezone.now().date() + relativedelta(days=days_remaining)
+            if days_remaining:
+                if find.mitigated:
+                    find.sla_expiration_date = find.mitigated.date() + relativedelta(days=days_remaining)
+                else:
+                    find.sla_expiration_date = timezone.now().date() + relativedelta(days=days_remaining)
 
-                batch.append(find)
+            batch.append(find)
 
-                if (i > 0 and i % page_size == 0):
-                    Finding.objects.bulk_update(batch, ['sla_expiration_date'])
-                    batch = []
-                    logger.info('%s out of %s findings processed...', i, total_count)
+            if (i > 0 and i % page_size == 0):
+                Finding.objects.bulk_update(batch, ['sla_expiration_date'])
+                batch = []
+                logger.info('%s out of %s findings processed...', i, total_count)
 
-        Finding.objects.bulk_update(batch, ['sla_expiration_date'])
-        batch = []
-        logger.info('%s out of %s findings processed...', i, total_count)
+    Finding.objects.bulk_update(batch, ['sla_expiration_date'])
+    batch = []
+    logger.info('%s out of %s findings processed...', i, total_count)
 
 
 def reset_sla_expiration_dates(apps, schema_editor):
     System_Settings = apps.get_model('dojo', 'System_Settings')
 
     ss, _ = System_Settings.objects.get_or_create()
-    if ss.enable_finding_sla:
-        logger.info('Resetting SLA expiration dates for all findings')
+    if not ss.enable_finding_sla:
+        return
 
-        Finding = apps.get_model('dojo', 'Finding')
+    logger.info('Resetting SLA expiration dates for all findings')
 
-        findings = Finding.objects.filter(sla_expiration_date__isnull=False).order_by('id').only('id')
+    Finding = apps.get_model('dojo', 'Finding')
 
-        page_size = 1000
-        total_count = Finding.objects.filter(id__gt=0).count()
-        logger.info('Found %d findings to be reset', total_count)
+    findings = Finding.objects.filter(sla_expiration_date__isnull=False).order_by('id').only('id')
 
-        i = 0
-        batch = []
-        last_id = 0
-        total_pages = (total_count // page_size) + 2
-        for p in range(1, total_pages):
-            page = findings.filter(id__gt=last_id)[:page_size]
-            for find in page:
-                i += 1
-                last_id = find.id
+    page_size = 1000
+    total_count = Finding.objects.filter(id__gt=0).count()
+    logger.info('Found %d findings to be reset', total_count)
 
-                find.sla_expiration_date = None
-                batch.append(find)
+    i = 0
+    batch = []
+    last_id = 0
+    total_pages = (total_count // page_size) + 2
+    for p in range(1, total_pages):
+        page = findings.filter(id__gt=last_id)[:page_size]
+        for find in page:
+            i += 1
+            last_id = find.id
 
-                if (i > 0 and i % page_size == 0):
-                    Finding.objects.bulk_update(batch, ['sla_expiration_date'])
-                    batch = []
-                    logger.info('%s out of %s findings processed...', i, total_count)
+            find.sla_expiration_date = None
+            batch.append(find)
 
-        Finding.objects.bulk_update(batch, ['sla_expiration_date'])
-        batch = []
-        logger.info('%s out of %s findings processed...', i, total_count)
+            if (i > 0 and i % page_size == 0):
+                Finding.objects.bulk_update(batch, ['sla_expiration_date'])
+                batch = []
+                logger.info('%s out of %s findings processed...', i, total_count)
+
+    Finding.objects.bulk_update(batch, ['sla_expiration_date'])
+    batch = []
+    logger.info('%s out of %s findings processed...', i, total_count)
 
 
 class Migration(migrations.Migration):
