@@ -22,6 +22,7 @@ from dojo.models import (
     Finding_Group,
     Product_Type,
     Product,
+    Risk_Acceptance,
     Test,
     Dojo_Group,
     Cred_Mapping,
@@ -343,7 +344,7 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
             request.path
         ):
             return check_post_permission(
-                request, Product, "product", Permissions.Risk_Acceptance
+                request, Risk_Acceptance, "name", Permissions.Risk_Acceptance
             )
         else:
             # related object only need object permission
