@@ -2138,7 +2138,6 @@ class Finding(models.Model):
     epss_percentile = models.FloatField(default=0, null=True, blank=True,
                               verbose_name=_("EPSS percentile"),
                               help_text=_("EPSS percentile for the CVE. Describes how many CVEs are scored at or below this one."))
-    
     cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
     cvssv3 = models.TextField(validators=[cvssv3_regex],
                               max_length=117,

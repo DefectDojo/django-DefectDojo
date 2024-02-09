@@ -222,7 +222,6 @@ class DependencyTrackParser(object):
         else:
             epss_score = None
 
-
         # Build and return Finding model
         finding = Finding(
             title=title,
@@ -247,10 +246,9 @@ class DependencyTrackParser(object):
 
         if cvss_score:
             finding.cvssv3_score = cvss_score
-        
+
         if epss_score:
             finding.epss_score = epss_score
-        
         if epss_percentile:
             finding.epss_percentile = epss_percentile
 
