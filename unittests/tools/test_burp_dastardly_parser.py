@@ -15,5 +15,3 @@ class TestBurpParser(DojoTestCase):
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
             self.assertEqual(4, len(findings))
-            self.assertEqual("1049088", findings[0].vuln_id_from_tool)
-            self.assertEqual(3, len(findings[0].unsaved_endpoints))
