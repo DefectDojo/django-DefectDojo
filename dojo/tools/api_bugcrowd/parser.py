@@ -151,7 +151,6 @@ class ApiBugcrowdParser(object):
                 finding.active = False
                 finding.severity = "Info"
 
-
             if bug_endpoint:
                 try:
                     bug_endpoint.clean()
@@ -245,12 +244,13 @@ class ApiBugcrowdParser(object):
     # Open
     # New: A submission that has not been reviewed or assigned a status.
     # Triaged: A submission that has been confirmed valid and unique by the Bugcrowd ASE team and is ready for the customer to accept.
-    
+
     # Accepted
     # Unresolved: A valid submission that needs to be fixed. Typically, you should reward a submission at this point in the process.
     # Resolved: A valid submission that has been fixed.
-    # Informational: A submission that is reproducible but will not be fixed. Use this if the submission is a best practice issue but will not be fixed, a minor priority issue, or if you already have a mitigation.
-    
+    # Informational: A submission that is reproducible but will not be fixed. Use this if the submission is a best practice issue but 
+    # will not be fixed, a minor priority issue, or if you already have a mitigation.
+
     # Rejected
     # Out of Scope: A submission you reject because it is not in scope with the criteria outlined in the bounty program.
     # Not Reproducible: A submission you reject because you cannot reproduce it based on the information you have.
