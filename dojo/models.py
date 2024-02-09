@@ -2433,7 +2433,7 @@ class Finding(models.Model):
                   'High': 1, 'Critical': 0}
 
     class Meta:
-        ordering = ('numerical_severity', '-date', 'title')
+        ordering = ('numerical_severity', '-date', 'title', 'epss_score', 'epss_percentile')
         indexes = [
             models.Index(fields=['test', 'active', 'verified']),
 

@@ -322,6 +322,12 @@
                                     <th>
                                         {% trans "Vulnerability Id" %}
                                     </th>
+                                    <th>
+                                        {% trans "EPSS Score" %}
+                                    </th>
+                                    <th>
+                                        {% trans "EPSS Percentile" %}
+                                    </th>
                                     <th class="nowrap">
                                         {% if filter_name == 'Closed' %}
                                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
@@ -592,6 +598,20 @@
                                                     {% endif %}
                                                 {% endif %}
                                             {% endwith %}
+                                        </td>
+                                        <td class="nowrap">
+                                            {% if finding.epss_score %}
+                                                {{ finding.epss_score }}
+                                            {% else %}
+                                                N.A.
+                                            {% endif %}
+                                        </td>
+                                        <td class="nowrap">
+                                            {% if finding.epss_percentile %}
+                                                {{ finding.epss_percentile }}
+                                            {% else %}
+                                                N.A.
+                                            {% endif %}
                                         </td>
                                         <td class="nowrap">
                                             {% if filter_name == 'Closed' %}
