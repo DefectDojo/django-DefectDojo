@@ -10,15 +10,19 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterModelOptions(
+            name='finding',
+            options={'ordering': ('numerical_severity', '-date', 'title', 'epss_score', 'epss_percentile')},
+        ),
         migrations.AddField(
             model_name='finding',
             name='epss_percentile',
-            field=models.FloatField(blank=True, default=0, help_text='EPSS percentile for the CVE. Describes how many CVEs are scored at or below this one.', null=True, verbose_name='EPSS percentile'),
+            field=models.FloatField(blank=True, default=None, help_text='EPSS percentile for the CVE. Describes how many CVEs are scored at or below this one.', null=True, verbose_name='EPSS percentile'),
         ),
         migrations.AddField(
             model_name='finding',
             name='epss_score',
-            field=models.FloatField(blank=True, default=0, help_text='EPSS score for the CVE. Describes how likely it is the vulnerability will be exploited in the next 30 days.', null=True, verbose_name='EPSS Score'),
+            field=models.FloatField(blank=True, default=None, help_text='EPSS score for the CVE. Describes how likely it is the vulnerability will be exploited in the next 30 days.', null=True, verbose_name='EPSS Score'),
         ),
         migrations.AddIndex(
             model_name='finding',
