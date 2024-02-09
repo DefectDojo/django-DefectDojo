@@ -213,7 +213,7 @@
                         <td> <span style="color: green;">{{ finding.accepted_by}} </span></td>
                         <td>
                             {% if engagement|has_object_permission:"Risk_Acceptance" and engagement|has_risk_acceptance_permission:finding%}
-                                <form method="post">
+                                <form method="post" id="form_risk_pending_id">
                                     {% csrf_token %}
 
                                     <input type="hidden" name="risk_accept_finding_id"
@@ -246,7 +246,7 @@
                                             </div>
                                             <div class="modal-footer">
                                             <input type="button" class="btn btn-secondary" data-dismiss="modal" value="Cancel">
-                                            <input id="confirmed_action_risk_pending" type="submit" class="btn btn-info" data-dismiss="modal" name="#" value="Confirmed">
+                                            <input id="confirmed_action_risk_pending" type="submit" class="btn btn-info" name="#" value="Confirmed">
                                             </div>
                                         </div>
                                         </div>
