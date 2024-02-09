@@ -248,7 +248,7 @@ class ApiBugcrowdParser(object):
     # Accepted
     # Unresolved: A valid submission that needs to be fixed. Typically, you should reward a submission at this point in the process.
     # Resolved: A valid submission that has been fixed.
-    # Informational: A submission that is reproducible but will not be fixed. Use this if the submission is a best practice issue but 
+    # Informational: A submission that is reproducible but will not be fixed. Use this if the submission is a best practice issue but
     # will not be fixed, a minor priority issue, or if you already have a mitigation.
 
     # Rejected
