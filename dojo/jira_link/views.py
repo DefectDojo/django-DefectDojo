@@ -106,10 +106,12 @@ def webhook(request, secret=None):
                     for finding in findings:
                         jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jissue)
                 # Check for any comment that could have come along with the resolution
-                check_for_and_create_comment(parsed)
+                if (error_response := check_for_and_create_comment(parsed)) is not None:
+                    return error_response
 
             if parsed.get('webhookEvent') == 'comment_created':
-                check_for_and_create_comment(parsed)
+                if (error_response := check_for_and_create_comment(parsed)) is not None:
+                    return error_response
 
             if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
                 logger.info(f"Unrecognized JIRA webhook event received: {parsed.get('webhookEvent')}")
