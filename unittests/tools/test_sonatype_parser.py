@@ -85,4 +85,3 @@ class TestSonatypeParser(DojoTestCase):
         self.assertEqual(False, findings[4].out_of_scope)
         self.assertEqual(True, findings[5].verified)
         self.assertEqual(True, findings[5].out_of_scope)
-
