@@ -181,64 +181,64 @@ def check_for_and_create_comment(parsed_json):
     comment = parsed_json.get("comment", None)
     if comment is None:
         return
-    ....
-        comment_text = comment.get('body')
-        commenter = ''
-        if 'name' in comment.get('updateAuthor'):
-            commenter = comment.get('updateAuthor', {}).get('name')
-        elif 'emailAddress' in comment.get('updateAuthor'):
-            commenter = comment.get('updateAuthor', {}).get('emailAddress')
-        else:
-            logger.debug('Could not find the author of this jira comment!')
-        commenter_display_name = comment.get('updateAuthor', {}).get('displayName')
-        # example: body['comment']['self'] = "http://www.testjira.com/jira_under_a_path/rest/api/2/issue/666/comment/456843"
-        jid = comment.get('self', '').split('/')[-3]
-        jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
-        logging.info(f"Received issue comment for {jissue.jira_key}")
-        logger.debug('jissue: %s', vars(jissue))
 
-        jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
-        for jira_user_id in jira_usernames:
-            # logger.debug('incoming username: %s jira config username: %s', commenter.lower(), jira_user_id.lower())
-            if jira_user_id.lower() == commenter.lower():
-                logger.debug('skipping incoming JIRA comment as the user id of the comment in JIRA (%s) matches the JIRA username in DefectDojo (%s)', commenter.lower(), jira_user_id.lower())
-                return HttpResponse('')
+    comment_text = comment.get('body')
+    commenter = ''
+    if 'name' in comment.get('updateAuthor'):
+        commenter = comment.get('updateAuthor', {}).get('name')
+    elif 'emailAddress' in comment.get('updateAuthor'):
+        commenter = comment.get('updateAuthor', {}).get('emailAddress')
+    else:
+        logger.debug('Could not find the author of this jira comment!')
+    commenter_display_name = comment.get('updateAuthor', {}).get('displayName')
+    # example: body['comment']['self'] = "http://www.testjira.com/jira_under_a_path/rest/api/2/issue/666/comment/456843"
+    jid = comment.get('self', '').split('/')[-3]
+    jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
+    logging.info(f"Received issue comment for {jissue.jira_key}")
+    logger.debug('jissue: %s', vars(jissue))
 
-        findings = None
-        if jissue.finding:
-            findings = [jissue.finding]
-            create_notification(event='other', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding", args=(jissue.finding.id,)), icon='check')
+    jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
+    for jira_user_id in jira_usernames:
+        # logger.debug('incoming username: %s jira config username: %s', commenter.lower(), jira_user_id.lower())
+        if jira_user_id.lower() == commenter.lower():
+            logger.debug('skipping incoming JIRA comment as the user id of the comment in JIRA (%s) matches the JIRA username in DefectDojo (%s)', commenter.lower(), jira_user_id.lower())
+            return HttpResponse('')
 
-        elif jissue.finding_group:
-            findings = [jissue.finding_group.findings.all()]
-            create_notification(event='other', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding_group", args=(jissue.finding_group.id,)), icon='check')
+    findings = None
+    if jissue.finding:
+        findings = [jissue.finding]
+        create_notification(event='other', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding", args=(jissue.finding.id,)), icon='check')
 
-        elif jissue.engagement:
-            return HttpResponse('Comment for engagement ignored')
-        else:
-            raise Http404(f'No finding or engagement found for JIRA issue {jissue.jira_key}')
+    elif jissue.finding_group:
+        findings = [jissue.finding_group.findings.all()]
+        create_notification(event='other', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding_group", args=(jissue.finding_group.id,)), icon='check')
 
-        # Set the fields for the notes
-        author, _ = User.objects.get_or_create(username='JIRA')
-        entry = f'({commenter_display_name} ({commenter})): {comment_text}'
-        # Iterate (potentially) over each of the findings the note should be added to
-        for finding in findings:
-            # Determine if this exact note was created within the last 30 seconds to avoid duplicate notes
-            existing_notes = finding.notes.filter(
-                entry=entry,
-                author=author,
-                date__gte=(timezone.now() - datetime.timedelta(seconds=30)),
-            )
-            # Check the query for any hits
-            if existing_notes.count() == 0:
-                new_note = Notes()
-                new_note.entry = entry
-                new_note.author = author
-                new_note.save()
-                finding.notes.add(new_note)
-                finding.jira_issue.jira_change = timezone.now()
-                finding.jira_issue.save()
-                finding.save()
+    elif jissue.engagement:
+        return HttpResponse('Comment for engagement ignored')
+    else:
+        raise Http404(f'No finding or engagement found for JIRA issue {jissue.jira_key}')
+
+    # Set the fields for the notes
+    author, _ = User.objects.get_or_create(username='JIRA')
+    entry = f'({commenter_display_name} ({commenter})): {comment_text}'
+    # Iterate (potentially) over each of the findings the note should be added to
+    for finding in findings:
+        # Determine if this exact note was created within the last 30 seconds to avoid duplicate notes
+        existing_notes = finding.notes.filter(
+            entry=entry,
+            author=author,
+            date__gte=(timezone.now() - datetime.timedelta(seconds=30)),
+        )
+        # Check the query for any hits
+        if existing_notes.count() == 0:
+            new_note = Notes()
+            new_note.entry = entry
+            new_note.author = author
+            new_note.save()
+            finding.notes.add(new_note)
+            finding.jira_issue.jira_change = timezone.now()
+            finding.jira_issue.save()
+            finding.save()
 
 
 def get_custom_field(jira, label):
