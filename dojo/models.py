@@ -1102,7 +1102,7 @@ class Product(models.Model):
     @cached_property
     def endpoint_host_count(self):
         # active_endpoints is (should be) prefetched
-        endpoints = self.active_endpoints
+        endpoints = getattr(self, 'active_endpoints', None)
 
         hosts = []
         for e in endpoints:
@@ -1116,7 +1116,10 @@ class Product(models.Model):
     @cached_property
     def endpoint_count(self):
         # active_endpoints is (should be) prefetched
-        return len(self.active_endpoints)
+        endpoints = getattr(self, 'active_endpoints', None)
+        if endpoints:
+            return len(self.active_endpoints)
+        return None
 
     def open_findings(self, start_date=None, end_date=None):
         if start_date is None or end_date is None:
@@ -1192,13 +1195,11 @@ class Product(models.Model):
         from django.urls import reverse
         return reverse('view_product', args=[str(self.id)])
 
-    @property
     def violates_sla(self):
-        findings = Finding.objects.filter(test__engagement__product=self, active=True)
-        for f in findings:
-            if f.violates_sla:
-                return True
-        return False
+        findings = Finding.objects.filter(test__engagement__product=self,
+                                          active=True,
+                                          sla_expiration_date__lt=timezone.now().date())
+        return findings.count() > 0
 
 
 class Product_Member(models.Model):
@@ -2887,19 +2888,18 @@ class Finding(models.Model):
                 self.sla_expiration_date = get_current_date() + relativedelta(days=days_remaining)
 
     def sla_days_remaining(self):
-        sla_calculation = None
-        sla_period = self.get_sla_period()
-        if sla_period:
-            sla_calculation = sla_period - self.sla_age
-        return sla_calculation
+        if self.sla_expiration_date:
+            if self.mitigated:
+                mitigated_date = self.mitigated
+                if isinstance(mitigated_date, datetime):
+                    mitigated_date = self.mitigated.date()
+                return (self.sla_expiration_date - mitigated_date).days
+            else:
+                return (self.sla_expiration_date - get_current_date()).days
+        return None
 
     def sla_deadline(self):
-        days_remaining = self.sla_days_remaining()
-        if days_remaining:
-            if self.mitigated:
-                return self.mitigated.date() + relativedelta(days=days_remaining)
-            return get_current_date() + relativedelta(days=days_remaining)
-        return None
+        return self.sla_expiration_date
 
     def github(self):
         try:
@@ -3294,8 +3294,7 @@ class Finding(models.Model):
 
     @property
     def violates_sla(self):
-        days_remaining = self.sla_days_remaining()
-        return days_remaining < 0 if days_remaining else False
+        return (self.sla_expiration_date and self.sla_expiration_date < timezone.now())
 
 
 class FindingAdmin(admin.ModelAdmin):
