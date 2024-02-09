@@ -178,7 +178,10 @@ def check_for_and_create_comment(parsed_json):
         }
         }
     """
-    if (comment := parsed_json.get("comment", None)) is not None:
+    comment = parsed_json.get("comment", None)
+    if comment is None:
+        return
+    ....
         comment_text = comment.get('body')
         commenter = ''
         if 'name' in comment.get('updateAuthor'):
