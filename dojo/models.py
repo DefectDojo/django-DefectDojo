@@ -13,7 +13,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.db.models.expressions import Case, When
 from django.urls import reverse
-from django.core.validators import RegexValidator, validate_ipv46_address
+from django.core.validators import RegexValidator, validate_ipv46_address, MinValueValidator, MaxValueValidator
 from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
 from django.db import models, connection
@@ -2132,12 +2132,14 @@ class Finding(models.Model):
                            blank=False,
                            verbose_name=_("Vulnerability Id"),
                            help_text=_("An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources."))
-    epss_score = models.FloatField(default=0, null=True, blank=True,
+    epss_score = models.FloatField(default=None, null=True, blank=True,
                               verbose_name=_("EPSS Score"),
-                              help_text=_("EPSS score for the CVE. Describes how likely it is the vulnerability will be exploited in the next 30 days."))
-    epss_percentile = models.FloatField(default=0, null=True, blank=True,
+                              help_text=_("EPSS score for the CVE. Describes how likely it is the vulnerability will be exploited in the next 30 days."),
+                              validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
+    epss_percentile = models.FloatField(default=None, null=True, blank=True,
                               verbose_name=_("EPSS percentile"),
-                              help_text=_("EPSS percentile for the CVE. Describes how many CVEs are scored at or below this one."))
+                              help_text=_("EPSS percentile for the CVE. Describes how many CVEs are scored at or below this one."),
+                              validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
     cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
     cvssv3 = models.TextField(validators=[cvssv3_regex],
                               max_length=117,
