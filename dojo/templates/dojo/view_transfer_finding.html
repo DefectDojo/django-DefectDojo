@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load display_tags %}
+{% load authorization_tags %}
+{% load humanize %}
+{% load static %}
+
+{% block add_styles %}
+    {{ block.super }}
+    .chosen-container {
+    width: 70% !important;
+    }
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+    width: 70% !important;
+    }
+{% endblock %}
+{% block add_css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'easymde/dist/easymde.min.css' %}">
+{% endblock %}
+{% block content %}
+    {{ block.super }}
+    <div id="risk_acceptance" class="panel panel-default table-responsive">
+        <div class="panel-heading">
+            <h3>Findings Accepted</h3>
+        </div>
+            <table id="open_findings" class="table table-condensed table-striped">
+                <thead>
+                    <tr>
+                        <th>Severity</th>
+                        <th>Title</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Accepted by</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {%for finding in transfer_findings%}
+                        <tr>
+                            <td>{{finding.severity}}</td>
+                            <td>{{finding.title}}</td>
+                            <td>{{finding.date}}</td>
+                            <td>user</td>
+                            <td>actions</td>
+                        </tr>
+                    {% endfor%}
+                </tbody>
+            </table>
+            <div class="panel-body">
+                {% include "dojo/paging_snippet.html" with page=accepted_findings %}
+            </div>
+            <div class="panel-body">
+                <p><b>No findings associated with this Risk Acceptance.</b></p>
+            </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3>Notes</h3>
+        </div>
+            <p class="text-center">No notes saved.</p>
+        <hr/>
+        <form class="form-horizontal" method="post">{% csrf_token %}
+            {% include "dojo/form_fields.html" with form=note_form %}
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input class="btn" type="submit" value="Add Note"/>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block postscript %}
+    {{ block.super }}
+{% if not edit_mode %}
+    <script type="text/javascript">
+    </script>
+{% endif %}
+
+<script type="text/javascript">
+     {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
+</script>
+{% endblock %}

@@ -3139,30 +3139,61 @@ class Finding(models.Model):
 
 
 class Transfer_Finding(models.Model):
+
+    STATUS_TRANSFER_FINDING_CHOICES = (
+        ('Transfer Pending', 'Transfer Pending'),
+        ('Transfer Rejected', 'Transfer Rejected'),
+        ('Transfer Accepted', 'Transfer Accepted'),)
+
     finding_id = models.ManyToManyField(Finding, verbose_name=("Finding ID"))
     title = models.CharField(max_length=255, verbose_name=("Titile"))
-    product_type_id = models.ForeignKey(Product_Type,
+    destination_product_type = models.ForeignKey(Product_Type,
                                                  editable=True,
                                                  blank=True,
                                                  null=True,
-                                                 on_delete=models.RESTRICT,
+                                                 on_delete=models.CASCADE,
                                                  help_text=_("product type name"))
-
-    product_name = models.CharField(
+    destination_product = models.CharField(
         max_length=255,
         editable=True,
         blank=True,
         null=True,
         help_text=_("Product name"))
 
-    engagement_name = models.CharField(
+    destination_engagement = models.CharField(
         max_length=255,
         editable=True,
         blank=True,
         null=True,
         help_text=_("Engagement name"))
 
-    status = models.BooleanField(verbose_name=_("Status"), default=False)
+    status = models.CharField(verbose_name=_("Status"),
+                              default='Transfer Pending',
+                              choices=STATUS_TRANSFER_FINDING_CHOICES,
+                              max_length=100,
+                              null=False,
+                              blank=False)
+    origin_product_type = models.CharField(
+        max_length=255,
+        editable=True,
+        blank=True,
+        null=True,
+        help_text=_("origin product type"))
+
+    origin_product = models.CharField(
+        max_length=255,
+        editable=True,
+        blank=True,
+        null=True,
+        help_text=_(" Origin Product"))
+
+    origin_engagement = models.CharField(
+        max_length=255,
+        editable=True,
+        blank=True,
+        null=True,
+        help_text=_("Origin Engagement"))
+
 
     accepted_by = models.CharField(
         max_length=255,
@@ -3176,9 +3207,8 @@ class Transfer_Finding(models.Model):
                             blank=True, verbose_name=('Proof'))
 
     owner = models.CharField(max_length=200,
-                             default=None,
-                             null=True,
-                             blank=True,
+                             null=False,
+                             blank=False,
                              verbose_name=_('Owner'), help_text=_("The person that Owner the Tranfer finding"))
 
     notes = models.ManyToManyField(Notes, editable=False)

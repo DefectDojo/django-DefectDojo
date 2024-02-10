@@ -1,15 +1,15 @@
 window.onload = function(){
-    element = document.getElementById('id_product_type_id');
+    element = document.getElementById('id_destination_product_type');
     element.selectedIndex = 0;
-    element = document.getElementById('id_product_name');
+    element = document.getElementById('id_destination_product');
     element.selectedIndex = 0;
-    element = document.getElementById('id_engagement_name');
+    element = document.getElementById('id_destination_engagement');
     element.selectedIndex = 0;
     element = document.getElementById('id_accepted_by');
     element.selectedIndex = 0;
 }
 $(document).ready(function() {
-    $("#id_product_type_id").on("change", handleProductTypeChange);
+    $("#id_destination_product_type").on("change", handleProductTypeChange);
 });
 
 $(document).ready(function() {
@@ -17,12 +17,12 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-    $("#id_product_name").on("change", handleProductChange);
+    $("#id_destination_product").on("change", handleProductChange);
 });
 
 function handleProductChange(){
-    let idProduct = $("#id_product_name").val();
-    let engagementElement = document.getElementById('id_engagement_name');
+    let idProduct = $("#id_destination_product").val();
+    let engagementElement = document.getElementById('id_destination_engagement');
     let contactsElement = document.getElementById('id_accepted_by') 
     
     if (idProduct !== '') {
@@ -84,8 +84,8 @@ function getEngagementOptions(idProduct, engagementElement){
 
 function handleProductTypeChange() {
     console.log("que paso")
-    let idProductType = $("#id_product_type_id").val();
-    let productTypeElement = document.getElementById('id_product_name');
+    let idProductType = $("#id_destination_product_type").val();
+    let productTypeElement = document.getElementById('id_destination_product');
     clearLabel()
     if (idProductType !== '') {
         getProductOptions(idProductType, productTypeElement);
@@ -127,9 +127,9 @@ function refreshSelectPicker() {
 
 
 function clearLabel(){
-    element = document.getElementById('id_product_name');
+    element = document.getElementById('id_destination_product');
     element.selectedIndex = 0;
-    element = document.getElementById('id_engagement_name');
+    element = document.getElementById('id_destination_engagement');
     element.selectedIndex = 0;
     element = document.getElementById('id_accepted_by');
     element.selectedIndex = 0;

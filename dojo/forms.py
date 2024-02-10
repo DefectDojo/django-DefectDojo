@@ -1165,15 +1165,20 @@ class Transfer_FindingForm(forms.ModelForm):
 
     title = forms.CharField(required=True, max_length=255)
 
-    product_type_id = forms.ModelChoiceField(
+    destination_product_type = forms.ModelChoiceField(
         queryset=Product_Type.objects.none()
     )
-    product_name = forms.CharField(widget=forms.Select())  # Usar widget Select
-    engagement_name = forms.CharField(widget=forms.Select())  # Usar widget Select
+    destination_product = forms.CharField(widget=forms.Select())  # Usar widget Select
+    destination_engagement = forms.CharField(widget=forms.Select())  # Usar widget Select
     accepted_by = forms.CharField(widget=forms.Select())  # Usar widget Select
     notes = forms.CharField(
         required=False, max_length=2400, widget=forms.Textarea, label="Notes"
     )
+    owner = forms.CharField(widget=forms.HiddenInput(), required=False)
+    status = forms.CharField(widget=forms.HiddenInput(), required=False)
+    origin_product_type = forms.CharField(widget=forms.HiddenInput(), required=True)
+    origin_product = forms.CharField(widget=forms.HiddenInput(), required=True)
+    origin_engagement = forms.CharField(widget=forms.HiddenInput(), required=True)
 
     def __init__(self, *args, **kwags):
         super().__init__(*args, **kwags)
@@ -1181,13 +1186,11 @@ class Transfer_FindingForm(forms.ModelForm):
             Permissions.Transfer_Finding
         )
         self.fields["title"].initial = kwags.get("engagement_id")
-        self.fields["product_type_id"].queryset = Product_Type.objects.all()
-        self.fields["owner"].disabled = True
-
+        self.fields["destination_product_type"].queryset = Product_Type.objects.all()
+    
     class Meta:
         model = Transfer_Finding
-        exclude = ("status",)
-
+        fields = "__all__"
 
 class BaseManageFileFormSet(forms.BaseModelFormSet):
     def clean(self):

@@ -1074,6 +1074,12 @@ def add_risk_acceptance(request, eid, fid=None):
                   'form': form
                   })
 
+# @user_is_authorized(Engagement, Permissions.Transfer_Finding, 'eid')
+def view_transfer_finding(request, eid):
+    transfer_findings =  list(Transfer_Finding.objects.all().values())
+    return render(request, 'dojo/view_transfer_finding.html', {"transfer_findings": transfer_findings})
+
+
 @user_is_authorized(Engagement, Permissions.Transfer_Finding, 'eid')
 def add_transfer_finding(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
@@ -1084,63 +1090,45 @@ def add_transfer_finding(request, eid, fid=None):
         finding = get_object_or_404(Finding, id=fid)
 
     if request.method == 'POST':
-        # finding = Finding.objects.filter(finding_id=request.POST.get('finding_id'))
-        # product_type_name = get_object_or_404(Product_Type, id=request.POST.get('product_type_name'))
-        # product_obj = get_object_or_404(Product, id=int(request.POST.get('product_name')))
-        # engagement_obj = get_object_or_404(Engagement, id=int(request.POST.get('engagement_name')))
-        # accepted_by_obj = get_object_or_404(Dojo_User, id=int(request.POST.get('accepted_by')))
+        request.POST._mutable = True
+        data = request.POST
+        product_type = eng.product.prod_type
+        data["origin_product_type"] = str(product_type.name)
+        data["origin_product"] = str(eng.product.name)
+        data["origin_engagement"] = str(eng.name)
 
-        # obj_transfer = Transfer_Finding.objects.create()
         form = Transfer_FindingForm(request.POST, request.FILES)
         if form.is_valid():
-            # first capture notes param as it cannot be saved directly as m2m
-            notes = None
-            if form.cleaned_data['notes']:
-                notes = Notes(
-                    entry=form.cleaned_data['notes'],
-                    author=request.user,
-                    date=timezone.now())
-                notes.save()
-
-            del form.cleaned_data['notes']
-
             try:
-                # we sometimes see a weird exception here, but are unable to reproduce.
-                # we add some logging in case it happens
-                transfer_finding = form.save()
+                transfer_findings = form.save()
             except Exception as e:
                 logger.debug(vars(request.POST))
                 logger.error(vars(form))
                 logger.exception(e)
                 raise
-
-            # attach note to risk acceptance object now in database
-            if notes:
-                transfer_finding.notes.add(notes)
-
-            # eng.risk_acceptance.add(tranfer_finding) # todo egreagr a la matriz de tranfer fidign
-
-            # transfer_finding = ra_helper.add_findings_to_risk_acceptance(tranfer_finding, findings)
-
             messages.add_message(
                 request,
                 messages.SUCCESS,
                 'Risk acceptance saved.',
                 extra_tags='alert-success')
 
-            return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
+            # return redirect_to_return_url_or_else(request, reverse('view_transfer_finding'), args=(eid, ))
+            return HttpResponseRedirect(reverse('view_transfer_finding', args=(eid,)))
         else:
             logger.error(form.errors)
     else:
         form = Transfer_FindingForm(initial={"engagement_name":eng,
                                             "title": f"transfer finding - {finding.title}",
-                                            "finding_id": finding})
+                                            "finding_id": finding,
+                                            "owner": request.user.username,
+                                            "status": "Transfer Pending"})
 
     return render(request, 'dojo/add_transfer_finding.html', {
                   'eng': eng,
                   'product_tab': "product_tab test",
                   'form': form
                   })
+
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
 def view_risk_acceptance(request, eid, raid):
