@@ -71,16 +71,6 @@ def get_finding(security_issue, component, test):
         vulnerability_id = security_issue.get("reference")
         finding.unsaved_vulnerability_ids = [vulnerability_id]
 
-    if status == "Open":
-        pass
-    elif status == "Acknowledged":
-        finding.verified = True
-    elif status == "Not Applicable":
-        finding.verified = True
-        finding.out_of_scope = True
-    elif status == "Confirmed":
-        finding.verified = True
-
     return finding
 
 

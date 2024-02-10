@@ -75,13 +75,3 @@ class TestSonatypeParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual("WEB-INF/lib/okhttp-2.6.0.jar", findings[5].file_path)
-
-    def test_status_parsed_correctly(self):
-        testfile = open("unittests/scans/sonatype/many_vulns.json")
-        parser = SonatypeParser()
-        findings = parser.get_findings(testfile, Test())
-        testfile.close()
-        self.assertEqual(False, findings[4].verified)
-        self.assertEqual(False, findings[4].out_of_scope)
-        self.assertEqual(True, findings[5].verified)
-        self.assertEqual(True, findings[5].out_of_scope)
