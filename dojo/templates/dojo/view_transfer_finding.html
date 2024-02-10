@@ -35,7 +35,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {%for finding in transfer_findings%}
+                    {%for finding in page_obj%}
                         <tr>
                             <td>{{finding.severity}}</td>
                             <td>{{finding.title}}</td>
@@ -46,6 +46,23 @@
                     {% endfor%}
                 </tbody>
             </table>
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1">&laquo; first</a>
+                        <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                    {% endif %}
+            
+                    <span class="current">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+            
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
             <div class="panel-body">
                 {% include "dojo/paging_snippet.html" with page=accepted_findings %}
             </div>

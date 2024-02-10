@@ -58,9 +58,12 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 import dojo.notifications.helper as notifications_helper
 from dojo.endpoint.utils import save_endpoints_to_add
-
+from django.views.generic import ListView
+from django.core.paginator import Paginator
+from django.views import View
 
 logger = logging.getLogger(__name__)
+
 
 
 @cache_page(60 * 5)  # cache for 5 minutes
@@ -1074,10 +1077,14 @@ def add_risk_acceptance(request, eid, fid=None):
                   'form': form
                   })
 
+
 # @user_is_authorized(Engagement, Permissions.Transfer_Finding, 'eid')
-def view_transfer_finding(request, eid):
-    transfer_findings =  list(Transfer_Finding.objects.all().values())
-    return render(request, 'dojo/view_transfer_finding.html', {"transfer_findings": transfer_findings})
+def view_transfer_finding(request):
+    transfer_finding = Transfer_Finding.objects.all()
+    paginator = Paginator(transfer_finding, 25)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'dojo/view_transfer_finding.html', {'page_obj': page_obj})
 
 
 @user_is_authorized(Engagement, Permissions.Transfer_Finding, 'eid')
@@ -1113,7 +1120,7 @@ def add_transfer_finding(request, eid, fid=None):
                 extra_tags='alert-success')
 
             # return redirect_to_return_url_or_else(request, reverse('view_transfer_finding'), args=(eid, ))
-            return HttpResponseRedirect(reverse('view_transfer_finding', args=(eid,)))
+            return HttpResponseRedirect(reverse('view_transfer_finding'))
         else:
             logger.error(form.errors)
     else:
