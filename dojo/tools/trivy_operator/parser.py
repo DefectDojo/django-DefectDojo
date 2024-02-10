@@ -78,6 +78,36 @@ class TrivyOperatorParser:
                 package_name = vulnerability.get("resource")
                 package_version = vulnerability.get("installedVersion")
                 cvssv3_score = vulnerability.get("score")
+
+                finding_tags = list()
+                target_target = None
+                target_class = None
+                package_path = None
+
+                if vulnerability.get("packageType"):
+                    package_type = vulnerability.get("packageType")
+                    finding_tags.append(package_type)
+
+                if vulnerability.get("class"):
+                    target_class = vulnerability.get("class")
+                    finding_tags.append(target_class)
+
+                if vulnerability.get("packagePath"):
+                    package_path = vulnerability.get("packagePath")
+
+                if vulnerability.get("target"):
+                    target_target = vulnerability.get("target")
+
+                if target_class == "os-pkgs" or target_class == "lang-pkgs":
+                    if package_path:
+                        file_path = package_path
+                    elif target_target:
+                        file_path = target_target
+                    else:
+                        file_path = None
+                else:
+                    file_path = None
+
                 description = DESCRIPTION_TEMPLATE.format(
                     title=vulnerability.get("title"), fixed_version=mitigation
                 )
@@ -101,6 +131,8 @@ class TrivyOperatorParser:
                     static_finding=True,
                     dynamic_finding=False,
                     service=service,
+                    file_path=file_path,
+                    tags=finding_tags,
                 )
                 if vuln_id:
                     finding.unsaved_vulnerability_ids = [vuln_id]

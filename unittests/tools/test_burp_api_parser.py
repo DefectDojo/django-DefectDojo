@@ -49,7 +49,6 @@ class TestParser(DojoTestCase):
             self.assertEqual("Info", convert_severity({}))
 
     def test_convert_confidence(self):
-        confidence = None
         with self.subTest(confidence="certain"):
             self.assertGreater(3, convert_confidence({"confidence": "certain"}))
         with self.subTest(confidence="firm"):

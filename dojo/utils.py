@@ -1547,7 +1547,7 @@ def calculate_grade(product, *args, **kwargs):
         grade_product = "grade_product(%s, %s, %s, %s)" % (
             critical, high, medium, low)
         product.prod_numeric_grade = aeval(grade_product)
-        product.save()
+        super(Product, product).save()
 
 
 def get_celery_worker_status():
