@@ -1,7 +1,8 @@
 import hashlib
 import logging
-
+import json
 import dateutil
+from dateutil import parser
 import html2text
 import hyperlink
 from cvss import parser as cvss_parser
@@ -23,144 +24,216 @@ class AcunetixParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "XML format"
 
-    def get_findings(self, xml_output, test):
-        root = parse(xml_output).getroot()
-
-        dupes = dict()
-        for scan in root.findall("Scan"):
-            start_url = scan.findtext("StartURL")
-            if ":" not in start_url:
-                start_url = "//" + start_url
-            # get report date
-            if scan.findtext("StartTime") and "" != scan.findtext("StartTime"):
-                report_date = dateutil.parser.parse(
-                    scan.findtext("StartTime")
-                ).date()
-
-            for item in scan.findall("ReportItems/ReportItem"):
-                finding = Finding(
-                    test=test,
-                    title=item.findtext("Name"),
-                    severity=self.get_severity(item.findtext("Severity")),
-                    description=html2text.html2text(
-                        item.findtext("Description")
-                    ).strip(),
-                    false_p=self.get_false_positive(
-                        item.findtext("IsFalsePositive")
-                    ),
-                    static_finding=True,
-                    dynamic_finding=False,
-                    nb_occurences=1,
-                )
-
-                if item.findtext("Impact") and "" != item.findtext("Impact"):
-                    finding.impact = item.findtext("Impact")
-
-                if item.findtext("Recommendation") and "" != item.findtext(
-                    "Recommendation"
-                ):
-                    finding.mitigation = item.findtext("Recommendation")
-
-                if report_date:
-                    finding.date = report_date
-
-                if item.findtext("CWEList/CWE"):
-                    finding.cwe = self.get_cwe_number(
-                        item.findtext("CWEList/CWE")
+    def get_findings(self, filename, test):
+        if str(filename.name).endswith('.xml'):
+            root = parse(filename).getroot()
+            dupes = dict()
+            for scan in root.findall("Scan"):
+                start_url = scan.findtext("StartURL")
+                if ":" not in start_url:
+                    start_url = "//" + start_url
+                # get report date
+                if scan.findtext("StartTime") and "" != scan.findtext("StartTime"):
+                    report_date = dateutil.parser.parse(
+                        scan.findtext("StartTime")
+                    ).date()
+                for item in scan.findall("ReportItems/ReportItem"):
+                    finding = Finding(
+                        test=test,
+                        title=item.findtext("Name"),
+                        severity=self.get_severity(item.findtext("Severity")),
+                        description=html2text.html2text(
+                            item.findtext("Description")
+                        ).strip(),
+                        false_p=self.get_false_positive(
+                            item.findtext("IsFalsePositive")
+                        ),
+                        static_finding=True,
+                        dynamic_finding=False,
+                        nb_occurences=1,
                     )
-
-                references = []
-                for reference in item.findall("References/Reference"):
-                    url = reference.findtext("URL")
-                    db = reference.findtext("Database") or url
-                    references.append(" * [{}]({})".format(db, url))
-                if len(references) > 0:
-                    finding.references = "\n".join(references)
-
-                if item.findtext("CVSS3/Descriptor"):
-                    cvss_objects = cvss_parser.parse_cvss_from_text(
-                        item.findtext("CVSS3/Descriptor")
-                    )
-                    if len(cvss_objects) > 0:
-                        finding.cvssv3 = cvss_objects[0].clean_vector()
-
-                # more description are in "Details"
-                if (
-                    item.findtext("Details")
-                    and len(item.findtext("Details").strip()) > 0
-                ):
-                    finding.description += "\n\n**Details:**\n{}".format(
-                        html2text.html2text(item.findtext("Details"))
-                    )
-                if (
-                    item.findtext("TechnicalDetails")
-                    and len(item.findtext("TechnicalDetails").strip()) > 0
-                ):
-                    finding.description += (
-                        "\n\n**TechnicalDetails:**\n\n{}".format(
-                            item.findtext("TechnicalDetails")
+                    if item.findtext("Impact") and "" != item.findtext("Impact"):
+                        finding.impact = item.findtext("Impact")
+                    if item.findtext("Recommendation") and "" != item.findtext(
+                        "Recommendation"
+                    ):
+                        finding.mitigation = item.findtext("Recommendation")
+                    if report_date:
+                        finding.date = report_date
+                    if item.findtext("CWEList/CWE"):
+                        finding.cwe = self.get_cwe_number(
+                            item.findtext("CWEList/CWE")
                         )
-                    )
-
-                # add requests
-                finding.unsaved_req_resp = list()
-                if len(item.findall("TechnicalDetails/Request")):
-                    finding.dynamic_finding = (
-                        True  # if there is some requests it's dynamic
-                    )
-                    finding.static_finding = (
-                        False  # if there is some requests it's dynamic
-                    )
-                    for request in item.findall("TechnicalDetails/Request"):
-                        finding.unsaved_req_resp.append(
-                            {"req": (request.text or ""), "resp": ""}
+                    references = []
+                    for reference in item.findall("References/Reference"):
+                        url = reference.findtext("URL")
+                        db = reference.findtext("Database") or url
+                        references.append(" * [{}]({})".format(db, url))
+                    if len(references) > 0:
+                        finding.references = "\n".join(references)
+                    if item.findtext("CVSS3/Descriptor"):
+                        cvss_objects = cvss_parser.parse_cvss_from_text(
+                            item.findtext("CVSS3/Descriptor")
                         )
-
-                # manage the endpoint
-                url = hyperlink.parse(start_url)
-                endpoint = Endpoint(
-                    host=url.host,
-                    port=url.port,
-                    path=item.findtext("Affects"),
-                )
-                if url.scheme is not None and "" != url.scheme:
-                    endpoint.protocol = url.scheme
-                finding.unsaved_endpoints = [endpoint]
-
-                dupe_key = hashlib.sha256(
-                    "|".join(
-                        [
-                            finding.title,
-                            str(finding.impact),
-                            str(finding.mitigation),
-                        ]
-                    ).encode("utf-8")
-                ).hexdigest()
-
-                if dupe_key in dupes:
-                    find = dupes[dupe_key]
-                    # add details for the duplicate finding
+                        if len(cvss_objects) > 0:
+                            finding.cvssv3 = cvss_objects[0].clean_vector()
+                    # more description are in "Details"
                     if (
                         item.findtext("Details")
                         and len(item.findtext("Details").strip()) > 0
                     ):
-                        find.description += (
-                            "\n-----\n\n**Details:**\n{}".format(
-                                html2text.html2text(item.findtext("Details"))
+                        finding.description += "\n\n**Details:**\n{}".format(
+                            html2text.html2text(item.findtext("Details"))
+                        )
+                    if (
+                        item.findtext("TechnicalDetails")
+                        and len(item.findtext("TechnicalDetails").strip()) > 0
+                    ):
+                        finding.description += (
+                            "\n\n**TechnicalDetails:**\n\n{}".format(
+                                item.findtext("TechnicalDetails")
                             )
                         )
-                    find.unsaved_endpoints.extend(finding.unsaved_endpoints)
-                    find.unsaved_req_resp.extend(finding.unsaved_req_resp)
-                    find.nb_occurences += finding.nb_occurences
-                    logger.debug(
-                        "Duplicate finding : {defectdojo_title}".format(
-                            defectdojo_title=finding.title
+                    # add requests
+                    finding.unsaved_req_resp = list()
+                    if len(item.findall("TechnicalDetails/Request")):
+                        finding.dynamic_finding = (
+                            True  # if there is some requests it's dynamic
                         )
+                        finding.static_finding = (
+                            False  # if there is some requests it's dynamic
+                        )
+                        for request in item.findall("TechnicalDetails/Request"):
+                            finding.unsaved_req_resp.append(
+                                {"req": (request.text or ""), "resp": ""}
+                            )
+                    # manage the endpoint
+                    url = hyperlink.parse(start_url)
+                    endpoint = Endpoint(
+                        host=url.host,
+                        port=url.port,
+                        path=item.findtext("Affects"),
                     )
+                    if url.scheme is not None and "" != url.scheme:
+                        endpoint.protocol = url.scheme
+                    finding.unsaved_endpoints = [endpoint]
+                    dupe_key = hashlib.sha256(
+                        "|".join(
+                            [
+                                finding.title,
+                                str(finding.impact),
+                                str(finding.mitigation),
+                            ]
+                        ).encode("utf-8")
+                    ).hexdigest()
+                    if dupe_key in dupes:
+                        find = dupes[dupe_key]
+                        # add details for the duplicate finding
+                        if (
+                            item.findtext("Details")
+                            and len(item.findtext("Details").strip()) > 0
+                        ):
+                            find.description += (
+                                "\n-----\n\n**Details:**\n{}".format(
+                                    html2text.html2text(item.findtext("Details"))
+                                )
+                            )
+                        find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                        find.unsaved_req_resp.extend(finding.unsaved_req_resp)
+                        find.nb_occurences += finding.nb_occurences
+                        logger.debug(
+                            "Duplicate finding : {defectdojo_title}".format(
+                                defectdojo_title=finding.title
+                            )
+                        )
+                    else:
+                        dupes[dupe_key] = finding
+        elif str(filename.name).endswith('.json'):
+            data = json.load(filename)
+            dupes = dict()
+            scan_date = parser.parse(data["Generated"])
+            text_maker = html2text.HTML2Text()
+            text_maker.body_width = 0
+
+            for item in data["Vulnerabilities"]:
+                title = item["Name"]
+                findingdetail = text_maker.handle(item.get("Description", ""))
+                if "Cwe" in item["Classification"]:
+                    try:
+                        cwe = int(item["Classification"]["Cwe"].split(",")[0])
+                    except BaseException:
+                        cwe = None
+                else:
+                    cwe = None
+                sev = item["Severity"]
+                if sev not in ["Info", "Low", "Medium", "High", "Critical"]:
+                    sev = "Info"
+                mitigation = text_maker.handle(item.get("RemedialProcedure", ""))
+                references = text_maker.handle(item.get("RemedyReferences", ""))
+                if "LookupId" in item:
+                    lookupId = item["LookupId"]
+                    references = (
+                        f"https://online.acunetix360.com/issues/detail/{lookupId}\n"
+                        + references
+                    )
+                url = item["Url"]
+                impact = text_maker.handle(item.get("Impact", ""))
+                dupe_key = title
+                request = item["HttpRequest"]["Content"]
+                if request is None or len(request) <= 0:
+                    request = "Request Not Found"
+                response = item["HttpResponse"]["Content"]
+                if response is None or len(response) <= 0:
+                    response = "Response Not Found"
+
+                finding = Finding(
+                    title=title,
+                    test=test,
+                    description=findingdetail,
+                    severity=sev.title(),
+                    mitigation=mitigation,
+                    impact=impact,
+                    date=scan_date,
+                    references=references,
+                    cwe=cwe,
+                    static_finding=True,
+                )
+
+                if (
+                    (item["Classification"] is not None)
+                    and (item["Classification"]["Cvss"] is not None)
+                    and (item["Classification"]["Cvss"]["Vector"] is not None)
+                ):
+                    cvss_objects = cvss_parser.parse_cvss_from_text(
+                        item["Classification"]["Cvss"]["Vector"]
+                    )
+                    if len(cvss_objects) > 0:
+                        finding.cvssv3 = cvss_objects[0].clean_vector()
+
+                if item["State"] is not None:
+                    state = [x.strip() for x in item["State"].split(",")]
+                    if "AcceptedRisk" in state:
+                        finding.risk_accepted = True
+                        finding.active = False
+                    elif "FalsePositive" in state:
+                        finding.false_p = True
+                        finding.active = False
+
+                finding.unsaved_req_resp = [{"req": request, "resp": response}]
+                finding.unsaved_endpoints = [Endpoint.from_uri(url)]
+
+                if item.get("FirstSeenDate"):
+                    parseddate = parser.parse(item["FirstSeenDate"])
+                    finding.date = parseddate
+
+                if dupe_key in dupes:
+                    find = dupes[dupe_key]
+                    find.unsaved_req_resp.extend(finding.unsaved_req_resp)
+                    find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                 else:
                     dupes[dupe_key] = finding
-
         return list(dupes.values())
+
 
     def get_cwe_number(self, cwe):
         """
