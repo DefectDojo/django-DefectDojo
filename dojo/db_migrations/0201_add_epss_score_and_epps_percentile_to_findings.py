@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0199_whitesource_to_mend'),
+        ('dojo', '0200_finding_sla_expiration_date_product_async_updating_and_more'),
     ]
 
     operations = [
