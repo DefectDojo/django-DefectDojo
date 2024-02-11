@@ -374,6 +374,8 @@ class MobSFParser(object):
         criticality = "Info"
         if rating == "Good":
             criticality = "Info"
+        if rating == "Warning":
+            criticality = "Low"
         else:
             criticality = rating.capitalize()
         return criticality
