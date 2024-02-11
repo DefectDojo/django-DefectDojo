@@ -2,6 +2,7 @@
 {% load display_tags %}
 {% load authorization_tags %}
 {% load get_endpoint_status %}
+{% load multiply %}
 {% load static %}
 {% load i18n %}
 {% block findings_list %}
@@ -323,10 +324,7 @@
                                         {% trans "Vulnerability Id" %}
                                     </th>
                                     <th>
-                                        {% trans "EPSS Score" %}
-                                    </th>
-                                    <th>
-                                        {% trans "EPSS Percentile" %}
+                                        {% trans "EPSS Score" %} / {% trans "Percentile" %}
                                     </th>
                                     <th class="nowrap">
                                         {% if filter_name == 'Closed' %}
@@ -600,15 +598,14 @@
                                             {% endwith %}
                                         </td>
                                         <td class="nowrap">
-                                            {% if finding.epss_score %}
-                                                {{ finding.epss_score }}
+                                            {% if finding.epss_score is not None %}
+                                                {{ finding.epss_score|multiply:100|floatformat:"2" }}%
                                             {% else %}
                                                 N.A.
                                             {% endif %}
-                                        </td>
-                                        <td class="nowrap">
-                                            {% if finding.epss_percentile %}
-                                                {{ finding.epss_percentile }}
+                                            /
+                                            {% if finding.epss_percentile is not None %}
+                                                {{ finding.epss_percentile|multiply:100|floatformat:"2" }}%
                                             {% else %}
                                                 N.A.
                                             {% endif %}
@@ -741,6 +738,7 @@
                     }},
                     { "data": "cwe" },
                     { "data": "cve" },
+                    { "data": "epss"},
                     { "data": "found_date" },
                     { "data": "finding_age" },
                 {% if system_settings.enable_finding_sla %}
