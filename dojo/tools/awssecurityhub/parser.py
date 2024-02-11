@@ -122,6 +122,9 @@ def get_item(finding: dict, test):
         references.append(remediation_rec_url)
     false_p = False
 
+    if finding.get("Vulnerabilities", []).get("EpssScore") is not None:
+        epss_score = float(finding.get("Vulnerabilities", []).get("EpssScore"))
+
     result = Finding(
         title=f"{title}{title_suffix}",
         test=test,
@@ -140,6 +143,10 @@ def get_item(finding: dict, test):
         dynamic_finding=False,
         component_name=component_name,
     )
+
+    if epss_score:
+        result.epss_score = epss_score
+
     # Add the unsaved vulnerability ids
     result.unsaved_vulnerability_ids = unsaved_vulnerability_ids
 
