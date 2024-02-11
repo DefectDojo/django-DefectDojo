@@ -1,8 +1,8 @@
 import datetime
-
 from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.acunetix.parser import AcunetixParser
+from datetime import datetime as date
 
 
 class TestAcunetixParser(DojoTestCase):
@@ -220,7 +220,7 @@ class TestAcunetixParser(DojoTestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual(str(endpoint), "http://php.testsparker.com/auth/login.php")
-            self.assertEqual(finding.date, datetime(2021, 6, 16, 12, 30))
+            self.assertEqual(finding.date, date(2021, 6, 16, 12, 30))
             self.assertIn("https://online.acunetix360.com/issues/detail/735f4503-e9eb-4b4c-4306-ad49020a4c4b", finding.references)
 
     def test_parse_file_with_one_finding_false_positive(self):
