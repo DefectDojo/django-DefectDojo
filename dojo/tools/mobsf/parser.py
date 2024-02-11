@@ -134,7 +134,7 @@ class MobSFParser(object):
                         mobsf_item = {
                             "category": "Certificate Analysis",
                             "title": details[2],
-                            "severity": details[0].replace("warning", "low").title(),
+                            "severity": details[0].title(),
                             "description": details[1] + "\n\n**Certificate Info:** " + certificate_info,
                             "file_path": None
                         }
@@ -143,7 +143,7 @@ class MobSFParser(object):
                         mobsf_item = {
                             "category": "Certificate Analysis",
                             "title": details[1],
-                            "severity": details[0].replace("warning", "low").title(),
+                            "severity": details[0].title(),
                             "description": details[1] + "\n\n**Certificate Info:** " + certificate_info,
                             "file_path": None
                         }
@@ -159,7 +159,7 @@ class MobSFParser(object):
                         mobsf_item = {
                             "category": "Manifest Analysis",
                             "title": details["title"],
-                            "severity": details["severity"].replace("warning", "low").title(),
+                            "severity": details["severity"].title(),
                             "description": details["description"] + "\n\n " + details["name"],
                             "file_path": None
                         }
@@ -169,7 +169,7 @@ class MobSFParser(object):
                         mobsf_item = {
                             "category": "Manifest Analysis",
                             "title": details["title"],
-                            "severity": details["stat"].replace("warning", "low").title(),
+                            "severity": details["stat"].title(),
                             "description": details["desc"] + "\n\n " + details["name"],
                             "file_path": None
                         }
@@ -184,7 +184,7 @@ class MobSFParser(object):
                         mobsf_item = {
                             "category": "Code Analysis",
                             "title": details,
-                            "severity": metadata["metadata"]["severity"].replace("warning", "low").title(),
+                            "severity": metadata["metadata"]["severity"].title(),
                             "description": metadata["metadata"]["description"],
                             "file_path": None
                         }
@@ -196,7 +196,7 @@ class MobSFParser(object):
                             mobsf_item = {
                                 "category": "Code Analysis",
                                 "title": details,
-                                "severity": metadata["metadata"]["severity"].replace("warning", "low").title(),
+                                "severity": metadata["metadata"]["severity"].title(),
                                 "description": metadata["metadata"]["description"],
                                 "file_path": None
                             }
@@ -211,7 +211,7 @@ class MobSFParser(object):
                             mobsf_item = {
                                 "category": "Binary Analysis",
                                 "title": details[binary_analysis_type]["description"].split(".")[0],
-                                "severity": details[binary_analysis_type]["severity"].replace("warning", "low").title(),
+                                "severity": details[binary_analysis_type]["severity"].title(),
                                 "description": details[binary_analysis_type]["description"],
                                 "file_path": details["name"]
                             }
@@ -280,7 +280,7 @@ class MobSFParser(object):
                 mobsf_item = {
                     "category": "Android API",
                     "title": details["metadata"]["description"],
-                    "severity": details["metadata"]["severity"].replace("warning", "low").title(),
+                    "severity": details["metadata"]["severity"].title(),
                     "description": "**API:** " + api + "\n\n**Description:** " + details["metadata"]["description"],
                     "file_path": None
                 }
