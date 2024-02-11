@@ -25,9 +25,9 @@ class AcunetixParser(object):
         return "Acunetix Scanner in XML format or Acunetix 360 Scanner in JSON format"
 
     def get_findings(self, filename, test):
-        if str(filename.name).endswith('.xml'):
+        dupes = dict()
+        if '.xml' in str(filename):
             root = parse(filename).getroot()
-            dupes = dict()
             for scan in root.findall("Scan"):
                 start_url = scan.findtext("StartURL")
                 if ":" not in start_url:
@@ -148,7 +148,8 @@ class AcunetixParser(object):
                         )
                     else:
                         dupes[dupe_key] = finding
-        elif str(filename.name).endswith('.json'):
+            return list(dupes.values())
+        elif '.json' in str(filename):
             data = json.load(filename)
             dupes = dict()
             scan_date = parser.parse(data["Generated"])
@@ -232,7 +233,7 @@ class AcunetixParser(object):
                     find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                 else:
                     dupes[dupe_key] = finding
-        return list(dupes.values())
+            return list(dupes.values())
 
     def get_cwe_number(self, cwe):
         """
