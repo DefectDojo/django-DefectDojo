@@ -230,7 +230,7 @@ class MobSFParser(object):
                     mobsf_item = {
                         "category": "Binary Analysis",
                         "title": details["detailed_desc"],
-                        "severity": details["severity"].replace("good", "info").title(),
+                        "severity": details["severity"].title(),
                         "description": details["detailed_desc"],
                         "file_path": None
                     }
@@ -248,7 +248,7 @@ class MobSFParser(object):
                     mobsf_item = {
                         "category": "Binary Analysis",
                         "title": details["detailed_desc"],
-                        "severity": details["severity"].replace("good", "info").title(),
+                        "severity": details["severity"].title(),
                         "description": details["detailed_desc"],
                         "file_path": None
                     }
