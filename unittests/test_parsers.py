@@ -93,3 +93,8 @@ class TestParsers(DojoTestCase):
                         if ".read()" in str(line):
                             read_true = True
                             i = 0
+
+    def test_parser_existence(self):
+        for docs in os.scandir(os.path.join(basedir, 'docs', 'content', 'en', 'integrations', 'parsers', 'file')):
+            print(docs)
+         
