@@ -202,7 +202,7 @@ class TestAcunetixParser(DojoTestCase):
             self.assertIsNotNone(req_resp['resp'])
             self.assertIsInstance(req_resp['resp'], str)
 
-    def test_parse_file_with_one_finding(self):
+    def test_parse_file_with_one_finding_acunetix360(self):
         testfile = open("unittests/scans/acunetix/acunetix360_one_finding.json")
         parser = AcunetixParser()
         findings = parser.get_findings(testfile, Test())
@@ -263,7 +263,7 @@ class TestAcunetixParser(DojoTestCase):
             self.assertEqual(str(endpoint), "http://php.testsparker.com/auth/login.php")
             self.assertTrue(finding.risk_accepted)
 
-    def test_parse_file_with_multiple_finding(self):
+    def test_parse_file_with_multiple_finding_acunetix360(self):
         testfile = open("unittests/scans/acunetix/acunetix360_many_findings.json")
         parser = AcunetixParser()
         findings = parser.get_findings(testfile, Test())
