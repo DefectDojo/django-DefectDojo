@@ -273,7 +273,7 @@
                         <th>Vulnerability Id</th>
                         {% if finding.epss_score != None or finding.epss_percentile != None %}
                             {% if finding.epss_score != None and finding.epss_percentile != None %}
-                                <th>EPSS Score / EPSS Percentile</th>
+                                <th>EPSS Score / Percentile</th>
                             {% elif finding.epss_score != None and finding.epss_percentile == None %}
                                 <th>EPSS Score</th>
                             {% elif finding.epss_score == None and finding.epss_percentile != None %}
