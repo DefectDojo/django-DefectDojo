@@ -77,7 +77,10 @@ class SarifParser(object):
 
 def get_rules(run):
     rules = {}
-    for item in run["tool"]["driver"].get("rules", []):
+    rules_array = run["tool"]["driver"].get("rules", [])
+    if len(rules_array) == 0 and run["tool"].get("extensions") is not None:
+        rules_array = run["tool"]["extensions"][0].get("rules", [])
+    for item in rules_array:
         rules[item["id"]] = item
     return rules
 

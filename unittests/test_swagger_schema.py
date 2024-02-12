@@ -785,6 +785,9 @@ class ToolTypeTest(BaseClass.SchemaTest):
         self.viewset = ToolTypesViewSet
         self.model = Tool_Type
         self.serializer = ToolTypeSerializer
+        self.field_transformers = {
+            "name": lambda v: v + "_new"
+        }
 
 
 class UserTest(BaseClass.SchemaTest):
