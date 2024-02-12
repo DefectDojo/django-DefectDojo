@@ -67,7 +67,7 @@ def get_item(finding: dict, test):
             if vendor := vulnerability.get("Vendor"):
                 if vendor_url := vendor.get("Url"):
                     references.append(vendor_url)
-            if vulnerability.get("EpssScore") != None:
+            if vulnerability.get("EpssScore") is not None:
                 epss_score = vulnerability.get("EpssScore")
 
         if finding.get("ProductFields", {}).get("aws/inspector/FindingStatus", "ACTIVE") == "ACTIVE":
@@ -144,7 +144,7 @@ def get_item(finding: dict, test):
         component_name=component_name,
     )
 
-    if epss_score != None:
+    if epss_score is not None:
         result.epss_score = epss_score
 
     # Add the unsaved vulnerability ids
