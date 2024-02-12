@@ -2395,7 +2395,7 @@ class ToolTypeForm(forms.ModelForm):
         if Tool_Type.objects.filter(name=name).count() > 0:
             raise forms.ValidationError('A Tool Type with the name already exists')
 
-        return form_data 
+        return form_data
 
 
 class RegulationForm(forms.ModelForm):
