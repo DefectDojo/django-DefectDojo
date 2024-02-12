@@ -81,11 +81,18 @@ def get_item(finding: dict, test):
                     mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
             else:
                 mitigated = datetime.utcnow()
-
+    elif aws_scanner_type == "GuardDuty":
+        mitigations = finding.get("FindingProviderFields", {}).get("Types")
+        for mitigate in mitigations:
+            mitigation += mitigate + "\n"
+        active = True #TODO
+        is_Mitigated = False #TODO
+        mitigated = None #TODO
+        mitigation +=  "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html"
+        description = f"This is a GuardDuty Finding\n{finding.get('Description', '')}"
     else:
         mitigation = finding.get("Remediation", {}).get("Recommendation", {}).get("Text", "")
         description = "This is a Security Hub Finding \n" + finding.get("Description", "")
-
         if finding.get("Compliance", {}).get("Status", "PASSED") == "PASSED":
             is_Mitigated = True
             active = False
