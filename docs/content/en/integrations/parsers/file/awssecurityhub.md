@@ -11,8 +11,8 @@ AWS Security Hub integrates with multiple AWS Tools. Thus, you can retrieve find
 - AWS Security Hub GuardDuty
 
 ### Example Commands to retrieve JSON output
-- AWS Security Hub Compliance Checks: `aws securityhub get-findings --filters ComplianceStatus="[{Comparison=EQUALS,Value=FAILED}]" | jq "." > output.json`
-- AWS Security Hub GuardDuty: `aws securityhub get-findings --filters ProductName="[{Value=GuardDuty,Comparison=EQUALS}]" | jq "." > output.json`
+- AWS Security Hub Compliance Checks: <br>`aws securityhub get-findings --filters ComplianceStatus="[{Comparison=EQUALS,Value=FAILED}]" | jq "." > output.json`
+- AWS Security Hub GuardDuty: <br>`aws securityhub get-findings --filters ProductName="[{Value=GuardDuty,Comparison=EQUALS}]" | jq "." > output.json`
 
 ### Sample Scan Data
 Sample scan data for testing purposes can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/awssecurityhub).
