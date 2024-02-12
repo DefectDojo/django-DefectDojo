@@ -85,11 +85,24 @@ def get_item(finding: dict, test):
         mitigations = finding.get("FindingProviderFields", {}).get("Types")
         for mitigate in mitigations:
             mitigation += mitigate + "\n"
-        active = True #TODO
-        is_Mitigated = False #TODO
-        mitigated = None #TODO
         mitigation +=  "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html"
+        active = True
+        if finding.get("RecordState") == "ACTIVE":
+            is_Mitigated = False
+        else:
+            is_Mitigated = True
+        if finding.get("LastObservedAt", None):
+            try:
+                mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
+            except Exception:
+                mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
+        else:
+            mitigated = datetime.utcnow()
         description = f"This is a GuardDuty Finding\n{finding.get('Description', '')}"
+        description += f"SourceURL: {finding.get('SourceUrl', '')}\n"
+        description += f"AwsAccountId: {finding.get('AwsAccountId', '')}\n"
+        description += f"Region: {finding.get('Region', '')}\n"
+        description += f"Id: {finding.get('Id', '')}\n"
     else:
         mitigation = finding.get("Remediation", {}).get("Recommendation", {}).get("Text", "")
         description = "This is a Security Hub Finding \n" + finding.get("Description", "")
