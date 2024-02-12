@@ -1164,13 +1164,12 @@ class Transfer_FindingForm(forms.ModelForm):
     )
 
     title = forms.CharField(required=True, max_length=255)
-
+    severity = forms.CharField(widget=forms.HiddenInput(), required=True)
     destination_product_type = forms.ModelChoiceField(
         queryset=Product_Type.objects.none()
     )
-    destination_product = forms.CharField(widget=forms.Select())  # Usar widget Select
+    destination_product = forms.CharField(widget=forms.Select())
     destination_engagement = forms.CharField(widget=forms.Select())  # Usar widget Select
-    accepted_by = forms.CharField(widget=forms.Select())  # Usar widget Select
     notes = forms.CharField(
         required=False, max_length=2400, widget=forms.Textarea, label="Notes"
     )
@@ -1179,6 +1178,10 @@ class Transfer_FindingForm(forms.ModelForm):
     origin_product_type = forms.CharField(widget=forms.HiddenInput(), required=True)
     origin_product = forms.CharField(widget=forms.HiddenInput(), required=True)
     origin_engagement = forms.CharField(widget=forms.HiddenInput(), required=True)
+    destination_product_name = forms.CharField(widget=forms.HiddenInput(), required=False)
+    destination_engagement_name = forms.CharField(widget=forms.HiddenInput(), required=False)
+    accepted_by = forms.CharField(widget=forms.Select())  # Usar widget Select
+    accepted_by_username = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     def __init__(self, *args, **kwags):
         super().__init__(*args, **kwags)

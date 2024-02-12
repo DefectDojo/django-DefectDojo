@@ -3147,13 +3147,31 @@ class Transfer_Finding(models.Model):
 
     finding_id = models.ManyToManyField(Finding, verbose_name=("Finding ID"))
     title = models.CharField(max_length=255, verbose_name=("Titile"))
-    destination_product_type = models.ForeignKey(Product_Type,
-                                                 editable=True,
-                                                 blank=True,
-                                                 null=True,
-                                                 on_delete=models.CASCADE,
-                                                 help_text=_("product type name"))
+    date = models.DateField(auto_now_add=True, verbose_name=("Date"))
+    destination_product_type = models.ForeignKey(
+        Product_Type,
+        editable=True,
+        related_name="product",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text=_("product type name"))  
+    
+    severity= models.CharField(
+        max_length=50,
+        editable=True,
+        blank=True,
+        null=True,
+        help_text=_("Product id"))
+
     destination_product = models.CharField(
+        max_length=255,
+        editable=True,
+        blank=True,
+        null=True,
+        help_text=_("Product id"))
+
+    destination_product_name = models.CharField(
         max_length=255,
         editable=True,
         blank=True,
@@ -3161,6 +3179,13 @@ class Transfer_Finding(models.Model):
         help_text=_("Product name"))
 
     destination_engagement = models.CharField(
+        max_length=255,
+        editable=True,
+        blank=True,
+        null=True,
+        help_text=_("Engagement id"))
+
+    destination_engagement_name = models.CharField(
         max_length=255,
         editable=True,
         blank=True,
@@ -3196,6 +3221,13 @@ class Transfer_Finding(models.Model):
 
 
     accepted_by = models.CharField(
+        max_length=255,
+        editable=True,
+        blank=True,
+        null=True,
+        help_text=_("The user that accepts the tranfer finding, The user must belong to the product whit contact"))
+
+    accepted_by_username = models.CharField(
         max_length=255,
         editable=True,
         blank=True,

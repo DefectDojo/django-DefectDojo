@@ -26,10 +26,11 @@
             <table id="open_findings" class="table table-condensed table-striped">
                 <thead>
                     <tr>
-                        <th>Severity</th>
                         <th>Title</th>
+                        <th>Severity</th>
                         <th>Date</th>
                         <th>Status</th>
+                        <th>Destination ProductType</th>
                         <th>Accepted by</th>
                         <th>Actions</th>
                     </tr>
@@ -37,11 +38,17 @@
                 <tbody>
                     {%for finding in page_obj%}
                         <tr>
-                            <td>{{finding.severity}}</td>
                             <td>{{finding.title}}</td>
+                            <td>{{finding.severity}}</td>
                             <td>{{finding.date}}</td>
-                            <td>user</td>
-                            <td>actions</td>
+                            <td>{{finding.status}}</td>
+                            <td>{{finding.destination_product_type}}</td>
+                            <td>{{finding.accepted_by_username}}</td>
+                            <td>
+                                <button type="button" class="btn btn-success">Accept</button>
+                                <button type="button" class="btn btn-warning">Reject</button>
+                                <button type="button" class="btn btn-danger">Remove</button>
+                            </td>
                         </tr>
                     {% endfor%}
                 </tbody>

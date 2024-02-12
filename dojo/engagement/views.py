@@ -1100,9 +1100,12 @@ def add_transfer_finding(request, eid, fid=None):
         request.POST._mutable = True
         data = request.POST
         product_type = eng.product.prod_type
-        data["origin_product_type"] = str(product_type.name)
-        data["origin_product"] = str(eng.product.name)
-        data["origin_engagement"] = str(eng.name)
+        data["origin_product_type"] = product_type.name
+        data["origin_product"] = eng.product.name
+        data["origin_engagement"] = eng.name
+        data["destination_product_name"] = Product.objects.get(id=data.get("destination_product")).name
+        data["destination_engagement_name"] = Engagement.objects.get(id=data.get("destination_engagement")).name
+        data["accepted_by_username"] = Dojo_User.objects.get(id=data.get("accepted_by")).username
 
         form = Transfer_FindingForm(request.POST, request.FILES)
         if form.is_valid():
@@ -1128,7 +1131,8 @@ def add_transfer_finding(request, eid, fid=None):
                                             "title": f"transfer finding - {finding.title}",
                                             "finding_id": finding,
                                             "owner": request.user.username,
-                                            "status": "Transfer Pending"})
+                                            "status": "Transfer Pending",
+                                            "severity": finding.severity})
 
     return render(request, 'dojo/add_transfer_finding.html', {
                   'eng': eng,
