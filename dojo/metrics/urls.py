@@ -18,6 +18,8 @@ urlpatterns = [
         views.metrics, name='product_type_metrics'),
     re_path(r'^metrics/product/type/counts$',
         views.product_type_counts, name='product_type_counts'),
+    re_path(r'^metrics/product/tag/counts$',
+        views.product_tag_counts, name='product_tag_counts'),
     re_path(r'^metrics/engineer$', views.engineer_metrics,
         name='engineer_metrics'),
     re_path(r'^metrics/engineer/(?P<eid>\d+)$', views.view_engineer,
