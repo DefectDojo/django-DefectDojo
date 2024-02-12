@@ -1,7 +1,7 @@
 # Standard library imports
 import json
 import logging
-
+import datetime
 # Third party imports
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
@@ -105,97 +105,13 @@ def webhook(request, secret=None):
                 if findings:
                     for finding in findings:
                         jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jissue)
+                # Check for any comment that could have come along with the resolution
+                if (error_response := check_for_and_create_comment(parsed)) is not None:
+                    return error_response
 
             if parsed.get('webhookEvent') == 'comment_created':
-                """
-                    example incoming requests from JIRA Server 8.14.0
-                    {
-                    "timestamp":1610269967824,
-                    "webhookEvent":"comment_created",
-                    "comment":{
-                        "self":"https://jira.host.com/rest/api/2/issue/115254/comment/466578",
-                        "id":"466578",
-                        "author":{
-                            "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
-                            "name":"defect.dojo",
-                            "key":"defect.dojo", # seems to be only present on JIRA Server, not on Cloud
-                            "avatarUrls":{
-                                "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
-                                "24x24":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
-                                "16x16":"https://www.gravatar.com/avatar9637bfb970eff6176357df615f548f1c?d=mm&s=16",
-                                "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
-                            },
-                            "displayName":"Defect Dojo",
-                            "active":true,
-                            "timeZone":"Europe/Amsterdam"
-                        },
-                        "body":"(Valentijn Scholten):test4",
-                        "updateAuthor":{
-                            "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
-                            "name":"defect.dojo",
-                            "key":"defect.dojo",
-                            "avatarUrls":{
-                                "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
-                                "24x24""https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
-                                "16x16":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=16",
-                                "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
-                            },
-                            "displayName":"Defect Dojo",
-                            "active":true,
-                            "timeZone":"Europe/Amsterdam"
-                        },
-                        "created":"2021-01-10T10:12:47.824+0100",
-                        "updated":"2021-01-10T10:12:47.824+0100"
-                    }
-                    }
-                """
-
-                comment_text = parsed['comment']['body']
-                commentor = ''
-                if 'name' in parsed['comment']['updateAuthor']:
-                    commentor = parsed['comment']['updateAuthor']['name']
-                elif 'emailAddress' in parsed['comment']['updateAuthor']:
-                    commentor = parsed['comment']['updateAuthor']['emailAddress']
-                else:
-                    logger.debug('Could not find the author of this jira comment!')
-                commentor_display_name = parsed['comment']['updateAuthor']['displayName']
-                # example: body['comment']['self'] = "http://www.testjira.com/jira_under_a_path/rest/api/2/issue/666/comment/456843"
-                jid = parsed['comment']['self'].split('/')[-3]
-                jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
-                logging.info(f"Received issue comment for {jissue.jira_key}")
-                logger.debug('jissue: %s', vars(jissue))
-
-                jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
-                for jira_userid in jira_usernames:
-                    # logger.debug('incoming username: %s jira config username: %s', commentor.lower(), jira_userid.lower())
-                    if jira_userid.lower() == commentor.lower():
-                        logger.debug('skipping incoming JIRA comment as the user id of the comment in JIRA (%s) matches the JIRA username in DefectDojo (%s)', commentor.lower(), jira_userid.lower())
-                        return HttpResponse('')
-
-                findings = None
-                if jissue.finding:
-                    findings = [jissue.finding]
-                    create_notification(event='other', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding", args=(jissue.finding.id,)), icon='check')
-
-                elif jissue.finding_group:
-                    findings = [jissue.finding_group.findings.all()]
-                    create_notification(event='other', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding_group", args=(jissue.finding_group.id,)), icon='check')
-
-                elif jissue.engagement:
-                    return HttpResponse('Comment for engagement ignored')
-                else:
-                    raise Http404(f'No finding or engagement found for JIRA issue {jissue.jira_key}')
-
-                for finding in findings:
-                    # logger.debug('finding: %s', vars(jissue.finding))
-                    new_note = Notes()
-                    new_note.entry = f'({commentor_display_name} ({commentor})): {comment_text}'
-                    new_note.author, created = User.objects.get_or_create(username='JIRA')
-                    new_note.save()
-                    finding.notes.add(new_note)
-                    finding.jira_issue.jira_change = timezone.now()
-                    finding.jira_issue.save()
-                    finding.save()
+                if (error_response := check_for_and_create_comment(parsed)) is not None:
+                    return error_response
 
             if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
                 logger.info(f"Unrecognized JIRA webhook event received: {parsed.get('webhookEvent')}")
@@ -203,6 +119,7 @@ def webhook(request, secret=None):
         except Exception as e:
             if isinstance(e, Http404):
                 logger.warning('404 error processing JIRA webhook')
+                logger.warning(str(e))
             else:
                 logger.exception(e)
 
@@ -216,6 +133,112 @@ def webhook(request, secret=None):
             # reraise to make sure we don't silently swallow things
             raise
     return HttpResponse('')
+
+
+def check_for_and_create_comment(parsed_json):
+    """
+        example incoming requests from JIRA Server 8.14.0
+        {
+        "timestamp":1610269967824,
+        "webhookEvent":"comment_created",
+        "comment":{
+            "self":"https://jira.host.com/rest/api/2/issue/115254/comment/466578",
+            "id":"466578",
+            "author":{
+                "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
+                "name":"defect.dojo",
+                "key":"defect.dojo", # seems to be only present on JIRA Server, not on Cloud
+                "avatarUrls":{
+                    "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
+                    "24x24":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
+                    "16x16":"https://www.gravatar.com/avatar9637bfb970eff6176357df615f548f1c?d=mm&s=16",
+                    "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
+                },
+                "displayName":"Defect Dojo",
+                "active":true,
+                "timeZone":"Europe/Amsterdam"
+            },
+            "body":"(Valentijn Scholten):test4",
+            "updateAuthor":{
+                "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
+                "name":"defect.dojo",
+                "key":"defect.dojo",
+                "avatarUrls":{
+                    "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
+                    "24x24""https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
+                    "16x16":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=16",
+                    "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
+                },
+                "displayName":"Defect Dojo",
+                "active":true,
+                "timeZone":"Europe/Amsterdam"
+            },
+            "created":"2021-01-10T10:12:47.824+0100",
+            "updated":"2021-01-10T10:12:47.824+0100"
+        }
+        }
+    """
+    comment = parsed_json.get("comment", None)
+    if comment is None:
+        return
+
+    comment_text = comment.get('body')
+    commenter = ''
+    if 'name' in comment.get('updateAuthor'):
+        commenter = comment.get('updateAuthor', {}).get('name')
+    elif 'emailAddress' in comment.get('updateAuthor'):
+        commenter = comment.get('updateAuthor', {}).get('emailAddress')
+    else:
+        logger.debug('Could not find the author of this jira comment!')
+    commenter_display_name = comment.get('updateAuthor', {}).get('displayName')
+    # example: body['comment']['self'] = "http://www.testjira.com/jira_under_a_path/rest/api/2/issue/666/comment/456843"
+    jid = comment.get('self', '').split('/')[-3]
+    jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
+    logging.info(f"Received issue comment for {jissue.jira_key}")
+    logger.debug('jissue: %s', vars(jissue))
+
+    jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
+    for jira_user_id in jira_usernames:
+        # logger.debug('incoming username: %s jira config username: %s', commenter.lower(), jira_user_id.lower())
+        if jira_user_id.lower() == commenter.lower():
+            logger.debug('skipping incoming JIRA comment as the user id of the comment in JIRA (%s) matches the JIRA username in DefectDojo (%s)', commenter.lower(), jira_user_id.lower())
+            return HttpResponse('')
+
+    findings = None
+    if jissue.finding:
+        findings = [jissue.finding]
+        create_notification(event='other', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding", args=(jissue.finding.id,)), icon='check')
+
+    elif jissue.finding_group:
+        findings = [jissue.finding_group.findings.all()]
+        create_notification(event='other', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding_group", args=(jissue.finding_group.id,)), icon='check')
+
+    elif jissue.engagement:
+        return HttpResponse('Comment for engagement ignored')
+    else:
+        raise Http404(f'No finding or engagement found for JIRA issue {jissue.jira_key}')
+
+    # Set the fields for the notes
+    author, _ = User.objects.get_or_create(username='JIRA')
+    entry = f'({commenter_display_name} ({commenter})): {comment_text}'
+    # Iterate (potentially) over each of the findings the note should be added to
+    for finding in findings:
+        # Determine if this exact note was created within the last 30 seconds to avoid duplicate notes
+        existing_notes = finding.notes.filter(
+            entry=entry,
+            author=author,
+            date__gte=(timezone.now() - datetime.timedelta(seconds=30)),
+        )
+        # Check the query for any hits
+        if existing_notes.count() == 0:
+            new_note = Notes()
+            new_note.entry = entry
+            new_note.author = author
+            new_note.save()
+            finding.notes.add(new_note)
+            finding.jira_issue.jira_change = timezone.now()
+            finding.jira_issue.save()
+            finding.save()
 
 
 def get_custom_field(jira, label):
