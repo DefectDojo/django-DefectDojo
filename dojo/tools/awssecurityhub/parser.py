@@ -85,7 +85,7 @@ def get_item(finding: dict, test):
         mitigations = finding.get("FindingProviderFields", {}).get("Types")
         for mitigate in mitigations:
             mitigation += mitigate + "\n"
-        mitigation +=  "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html"
+        mitigation += "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html"
         active = True
         if finding.get("RecordState") == "ACTIVE":
             is_Mitigated = False
