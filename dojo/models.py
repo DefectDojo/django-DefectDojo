@@ -246,14 +246,16 @@ class UserContactInfo(models.Model):
 
 class Dojo_Group(models.Model):
     AZURE = 'AzureAD'
+    REMOTE = 'Remote'
     SOCIAL_CHOICES = (
         (AZURE, _('AzureAD')),
+        (REMOTE, _('Remote')),
     )
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True, blank=True)
     users = models.ManyToManyField(Dojo_User, through='Dojo_Group_Member', related_name='users', blank=True)
     auth_group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
-    social_provider = models.CharField(max_length=10, choices=SOCIAL_CHOICES, blank=True, null=True, help_text='Group imported from a social provider.', verbose_name='Social Authentication Provider')
+    social_provider = models.CharField(max_length=10, choices=SOCIAL_CHOICES, blank=True, null=True, help_text=_('Group imported from a social provider.'), verbose_name=_('Social Authentication Provider'))
 
     def __str__(self):
         return self.name
