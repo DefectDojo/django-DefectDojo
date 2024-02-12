@@ -1535,6 +1535,16 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
             engagement
         )
 
+    def validate(self, data):
+        if self.context["request"].method == "POST":
+            findings = data['accepted_findings']
+            for finding in findings:
+                if not user_has_permission(self.context["request"].user, finding, Permissions.Finding_View):
+                    raise PermissionDenied(
+                        "You are not permitted to add one or more selected findings to this risk acceptance"
+                    )
+        return data
+
     class Meta:
         model = Risk_Acceptance
         fields = "__all__"
