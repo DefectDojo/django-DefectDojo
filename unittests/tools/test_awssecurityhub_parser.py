@@ -101,3 +101,15 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertEqual("CVE-2023-2650 - openssl - Image: repo-os/sha256:af965ef68c78374a5f987fce98c0ddfa45801df2395bf012c50b863e65978d74", finding.title)
             self.assertIn("repo-os/sha256:af965ef68c78374a5f987fce98c0ddfa45801df2395bf012c50b863e65978d74", finding.impact)
             self.assertIn("Repository: repo-os", finding.impact)
+
+    def test_guardduty(self):
+        with open(get_unit_tests_path() + sample_path("guardduty.json")) as test_file:
+            parser = AwsSecurityHubParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(4, len(findings))
+            finding = findings[0]
+            self.assertEqual("Medium", finding.severity)
+            self.assertTrue(finding.active)
+            finding = findings[3]
+            self.assertEqual("Low", finding.severity)
+            self.assertTrue(finding.active)
