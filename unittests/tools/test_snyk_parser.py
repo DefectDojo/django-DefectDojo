@@ -184,7 +184,7 @@ class TestSnykParser(DojoTestCase):
             self.assertEqual(39, len(findings))
 
     def test_snykcode_issue_9270_epss(self):
-        with open("unittests/scans/snyk/snykcode_issue_epss.json") as testfile:
+        with open("unittests/scans/snyk/snykcontainer_issue_epss.json") as testfile:
             parser = SnykParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
