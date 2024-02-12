@@ -102,7 +102,6 @@ def get_item(finding: dict, test):
         description += f"SourceURL: {finding.get('SourceUrl', '')}\n"
         description += f"AwsAccountId: {finding.get('AwsAccountId', '')}\n"
         description += f"Region: {finding.get('Region', '')}\n"
-        description += f"Id: {finding.get('Id', '')}\n"
     else:
         mitigation = finding.get("Remediation", {}).get("Recommendation", {}).get("Text", "")
         description = "This is a Security Hub Finding \n" + finding.get("Description", "")
