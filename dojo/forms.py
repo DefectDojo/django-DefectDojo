@@ -2388,6 +2388,15 @@ class ToolTypeForm(forms.ModelForm):
         model = Tool_Type
         exclude = ['product']
 
+    def clean(self):
+        form_data = self.cleaned_data
+        name = form_data.get("name")
+        # Make sure this will not create a duplicate test type
+        if Tool_Type.objects.filter(name=name).count() > 0:
+            raise forms.ValidationError('A Tool Type with the name already exists')
+
+        return form_data 
+
 
 class RegulationForm(forms.ModelForm):
     class Meta:
