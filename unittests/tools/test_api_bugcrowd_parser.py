@@ -42,9 +42,9 @@ class TestApiBugcrowdParser(TestCase):
             self.assertEqual(
                 finding.unique_id_from_tool, "a4201d47-62e1-4287-9ff6-30807ae9d36a"
             )
-            self.assertTrue(
-                "/submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a"
-                in finding.references
+            self.assertIn(
+                "/submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a",
+                finding.references
             )
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -89,7 +89,7 @@ class TestApiBugcrowdParser(TestCase):
                 endpoint.clean()
             self.assertEqual(finding_1.severity, "Info")
             self.assertEqual(finding_2.severity, "Critical")
-            self.assertEqual(finding_3.severity, "Medium")
+            self.assertEqual(finding_3.severity, "Info")
 
             self.assertEqual(finding_1.mitigation, "Do things properly1")
             self.assertEqual(finding_2.mitigation, "Do things properly2")
@@ -102,7 +102,7 @@ class TestApiBugcrowdParser(TestCase):
             self.assertEqual(finding_1.is_mitigated, True)
             self.assertEqual(finding_2.is_mitigated, False)
             self.assertEqual(finding_3.is_mitigated, False)
-            self.assertEqual(finding_3.risk_accepted, True)
+            self.assertEqual(finding_3.risk_accepted, False)
 
             self.assertEqual(
                 finding_1.unique_id_from_tool, "3b0e6b2a-c21e-493e-bd19-de40f525016e"
@@ -140,6 +140,7 @@ class TestApiBugcrowdParser(TestCase):
             # self.assertEqual(finding.description, description)
             self.assertEqual(finding.mitigation, "Properly do JWT")
             self.assertEqual(finding.active, False)
+            self.assertEqual(finding.false_p, True)
             self.assertEqual(
                 finding.unique_id_from_tool, "a4201d47-62e1-4287-9ff6-30807ae9d36a"
             )
