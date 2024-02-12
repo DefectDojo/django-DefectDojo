@@ -185,6 +185,7 @@ def get_item(vulnerability, test):
             vector, cvss, riskFactors
         ),
         impact=severity,
+        vuln_id_from_tool= vulnerability['id']
     )
     finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
     finding.unsaved_vulnerability_ids = [vulnerability["id"]]
