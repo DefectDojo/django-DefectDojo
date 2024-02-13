@@ -1103,9 +1103,15 @@ def add_transfer_finding(request, eid, fid=None):
         data["origin_product_type"] = product_type.name
         data["origin_product"] = eng.product.name
         data["origin_engagement"] = eng.name
-        data["destination_product_name"] = Product.objects.get(id=data.get("destination_product")).name
-        data["destination_engagement_name"] = Engagement.objects.get(id=data.get("destination_engagement")).name
-        data["accepted_by_username"] = Dojo_User.objects.get(id=data.get("accepted_by")).username
+        id_destination_product = data.get("destination_product")
+        id_destination_engagement = data.get("destination_engagement")
+        id_accepted_by_username = data.get("accepted_by")
+        query_destination_product = Product.objects.get(id=id_destination_product).name if id_destination_product else None
+        query_destination_engagement = Engagement.objects.get(id=id_destination_engagement).name if id_destination_engagement else None
+        query_accepted_by = Dojo_User.objects.get(id=id_accepted_by_username).username if id_accepted_by_username else None
+        data["destination_product_name"] = query_destination_product
+        data["destination_engagement_name"] = query_destination_engagement
+        data["accepted_by_username"] = query_accepted_by
 
         form = Transfer_FindingForm(request.POST, request.FILES)
         if form.is_valid():

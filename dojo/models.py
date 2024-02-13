@@ -3155,9 +3155,9 @@ class Transfer_Finding(models.Model):
         blank=True,
         null=True,
         on_delete=models.CASCADE,
-        help_text=_("product type name"))  
+        help_text=_("product type name")) 
     
-    severity= models.CharField(
+    severity = models.CharField(
         max_length=50,
         editable=True,
         blank=True,

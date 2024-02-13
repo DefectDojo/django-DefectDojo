@@ -82,13 +82,13 @@ function handleProductTypeChange() {
     let productTypeElement = document.getElementById('id_destination_product');
     clearLabel()
     if (idProductType !== '') {
-        getProductOptions(idProductType, productTypeElement);
+        getTransferFindings(idProductType, productTypeElement);
     } else {
         clearSelect(productTypeElement);
     }
 }
 
-function getProductOptions(product_type_id, productTypeElement) {
+function getTransferFindings(product_type_id, productTypeElement) {
     $.ajax({
         url: "/api/v2/products/?prod_type=" + product_type_id,
         type: "GET",
@@ -130,28 +130,3 @@ function clearLabel(){
     refreshSelectPicker();
 
 }
-
-$(document).on("submit", "form", function(event){
-    console.log("init submint")
-    try{
-        let inputElement_product = document.getElementById('id_destination_product_name');
-        let selectElement_product = document.getElementById('id_destination_product');
-        let selectOption_product = selectElement_product.options[selectElement_product.selectedIndex];
-        inputElement_product.value = selectOption_product.text
-
-        let inputElement_accepted_by = document.getElementById('id_destination_accepted_by_name');
-        let selectElement_accepted_by = document.getElementById('id_accepted_by');
-        let selectOption_accpted_by = selectElement_accepted_by.options[selectElement_accepted_by.selectedIndex];
-        inputElement_accepted_by.value = "este es toro nombre"
-
-        let inputElement_engagement = document.getElementById('id_destination_engagement_name');
-        let selectElement_engagement = document.getElementById('id_destination_engagement');
-        let selectOption_engagement = selectElement_engagement.options[selectElement_engagement.selectedIndex];
-        inputElement_engagement.value = "este es otro nombre"
-
-        refreshSelectPicker();
-    }catch(e){
-        console.error(e.error)
-    }
-
-});

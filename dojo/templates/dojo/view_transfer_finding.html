@@ -5,13 +5,18 @@
 {% load static %}
 
 {% block add_styles %}
+<style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    .limitar-texto {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .modal fade {
+        max-width: 200%;
+    }
+</style>
     {{ block.super }}
-    .chosen-container {
-    width: 70% !important;
-    }
-    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
-    width: 70% !important;
-    }
 {% endblock %}
 {% block add_css %}
     {{ block.super }}
@@ -19,15 +24,55 @@
 {% endblock %}
 {% block content %}
     {{ block.super }}
+    <!-- Tu modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title" id="exampleModalLabel">Transfer Finding</h3>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <table class="table">
+            <thead class="thead-dark">
+              <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Name</th>
+                <th scope="col">Severity</th>
+                <th scope="col">Vulnerability Id</th>
+                <th scope="col">Status</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="id_data_transfer_finding">
+              <tr>
+                <td>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal"><i class="fa-solid fa-circle-xmark"></i> Close</button>
+          <button type="button" class="btn btn-primary btn-sm" id="send-message-btn"><i class="fa-solid fa-floppy-disk"></i> Save</i> </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+    {% comment %} <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Transfer Finding</button> {% endcomment %}
     <div id="risk_acceptance" class="panel panel-default table-responsive">
         <div class="panel-heading">
-            <h3>Findings Accepted</h3>
+            <h3>Transfer Finding</h3>
         </div>
             <table id="open_findings" class="table table-condensed table-striped">
                 <thead>
                     <tr>
+                        <th>Id</th>
                         <th>Title</th>
-                        <th>Severity</th>
                         <th>Date</th>
                         <th>Status</th>
                         <th>Destination ProductType</th>
@@ -36,18 +81,26 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {%for finding in page_obj%}
+                    {%for transfer_findings in page_obj%}
                         <tr>
-                            <td>{{finding.title}}</td>
-                            <td>{{finding.severity}}</td>
-                            <td>{{finding.date}}</td>
-                            <td>{{finding.status}}</td>
-                            <td>{{finding.destination_product_type}}</td>
-                            <td>{{finding.accepted_by_username}}</td>
+                            <td>{{transfer_findings.id}}</td>
+                            <td><a href="#" class="table-link" type="button" data-toggle="modal" data-target="#exampleModal" data-transfer-id={{transfer_findings.id}}> {{transfer_findings.title}}   </a></td>
+                            <td>{{transfer_findings.date}}</td>
+                            <td class="cls-transfer-finding-status">{{transfer_findings.status}}</td>
+                            <td>{{transfer_findings.destination_product_type}}</td>
+                            <td>{{transfer_findings.accepted_by_username}}</td>
                             <td>
-                                <button type="button" class="btn btn-success">Accept</button>
-                                <button type="button" class="btn btn-warning">Reject</button>
-                                <button type="button" class="btn btn-danger">Remove</button>
+                                <td>
+                                    <button type="button" class="btn btn-success btn-sm">
+                                    <i class="fas fa-check"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-times"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </i></td>
                             </td>
                         </tr>
                     {% endfor%}
@@ -73,33 +126,14 @@
             <div class="panel-body">
                 {% include "dojo/paging_snippet.html" with page=accepted_findings %}
             </div>
-            <div class="panel-body">
-                <p><b>No findings associated with this Risk Acceptance.</b></p>
-            </div>
     </div>
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3>Notes</h3>
-        </div>
-            <p class="text-center">No notes saved.</p>
-        <hr/>
-        <form class="form-horizontal" method="post">{% csrf_token %}
-            {% include "dojo/form_fields.html" with form=note_form %}
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <input class="btn" type="submit" value="Add Note"/>
-                </div>
-            </div>
-        </form>
-    </div>
 {% endblock %}
 
 {% block postscript %}
     {{ block.super }}
 {% if not edit_mode %}
-    <script type="text/javascript">
-    </script>
+    <script src="{% static 'dojo/js/transfer_finding/index.js' %}"</script>
 {% endif %}
 
 <script type="text/javascript">

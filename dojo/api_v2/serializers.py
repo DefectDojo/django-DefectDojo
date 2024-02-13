@@ -87,6 +87,7 @@ from dojo.models import (
     Answered_Survey,
     General_Survey,
     Check_List,
+    Transfer_Finding,
 )
 
 from dojo.tools.factory import (
@@ -3160,4 +3161,18 @@ class QuestionnaireGeneralSurveySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = General_Survey
+        fields = "__all__"
+
+
+class TransferFindinFindingsSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Finding
+        fields = "__all__"
+
+
+
+class TransferFindingSerializer(serializers.ModelSerializer):
+    finding_id = TransferFindinFindingsSerializers(many=True, read_only=True)
+    class Meta:
+        model = Transfer_Finding
         fields = "__all__"

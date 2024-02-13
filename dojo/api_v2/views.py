@@ -82,6 +82,7 @@ from dojo.models import (
     Answered_Survey,
     General_Survey,
     Check_List,
+    Transfer_Finding,
 )
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import (
@@ -417,8 +418,6 @@ class EndpointStatusViewSet(
             Permissions.Endpoint_View
         ).distinct()
 
-
-# Authorization: object-based
 class EngagementViewSet(
     PrefetchDojoModelViewSet,
     ra_api.AcceptedRisksMixin,
@@ -3774,6 +3773,30 @@ class QuestionnaireAnsweredSurveyViewSet(
         [
             "questionnaire_answered_questionnaires_list",
             "questionnaire_answered_questionnaires_read",
+        ],
+        serializers.QuestionnaireAnsweredSurveySerializer,
+    ).to_schema()
+
+
+class TransferFindingViewSet(prefetch.PrefetchListMixin,
+                             prefetch.PrefetchRetrieveMixin,
+                             DojoModelViewSet):
+    queryset = Transfer_Finding.objects.all()
+    serializer_class = serializers.TransferFindingSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ["id",
+                        "severity",
+                        "destination_product_name",
+                        "destination_engagement_name",
+                        "status", "origin_product_type",
+                        "origin_product",
+                        "origin_engagement",
+                        "accepted_by_username",
+                        "owner"]
+    swagger_schema = prefetch.get_prefetch_schema(
+        [
+            "Transfer_finding_list",
+            "Transfer_findings_read",
         ],
         serializers.QuestionnaireAnsweredSurveySerializer,
     ).to_schema()
