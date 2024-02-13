@@ -10,6 +10,7 @@ from dojo.celery import app
 from dojo.models import System_Settings, Risk_Acceptance, Finding
 import logging
 import crum
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -354,3 +355,17 @@ def update_endpoint_statuses(finding: Finding, accept_risk: bool) -> None:
             status.risk_accepted = False
         status.last_modified = timezone.now()
         status.save()
+
+def risk_accept_provider(
+        finding: Finding,
+        provider: str,
+        acceptance_days: int,
+        url: str,
+        header: str,
+        token: str,
+    ):
+    formatted_url = url + f'{provider}?vulnerabilityId={finding.vuln_id_from_tool}&acceptanceDays={acceptance_days}'
+    headers = {}
+    headers[header] = token
+    response = requests.post(url=formatted_url, headers=headers, verify=False)
+    logger.debug(response)
