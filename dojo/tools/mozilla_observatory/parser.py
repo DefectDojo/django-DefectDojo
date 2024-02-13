@@ -34,28 +34,32 @@ class MozillaObservatoryParser(object):
         for key in nodes:
             node = nodes[key]
 
-            description = "\n".join([
-                "**Score Description** : `" + node['score_description'] + "`",
-                "**Result** : `" + node['result'] + "`"
-                "**expectation** : " + str(node.get('expectation')) + "`",
-            ])
+            description = "\n".join(
+                [
+                    "**Score Description** : `"
+                    + node["score_description"]
+                    + "`",
+                    "**Result** : `" + node["result"] + "`"
+                    "**expectation** : " + str(node.get("expectation")) + "`",
+                ]
+            )
 
             finding = Finding(
-                title=node['score_description'],
+                title=node["score_description"],
                 test=test,
-                active=not node['pass'],
+                active=not node["pass"],
                 description=description,
-                severity=self.get_severity(int(node['score_modifier'])),
+                severity=self.get_severity(int(node["score_modifier"])),
                 static_finding=False,
                 dynamic_finding=True,
-                vuln_id_from_tool=node['name']
+                vuln_id_from_tool=node.get("name", key),
             )
 
             findings.append(finding)
         return findings
 
     def get_severity(self, num_severity):
-        if num_severity >= -10:
+        if 0 > num_severity >= -10:
             return "Low"
         elif -11 >= num_severity > -26:
             return "Medium"

@@ -14,7 +14,7 @@ class ProductTypeTest(BaseTestCase):
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Add Product Type").click()
         driver.find_element(By.ID, "id_name").clear()
-        driver.find_element(By.ID, "id_name").send_keys("product test type")
+        driver.find_element(By.ID, "id_name").send_keys("Product test type")
         driver.find_element(By.ID, "id_critical_product").click()
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
@@ -53,7 +53,7 @@ class ProductTypeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "View").click()
         product_type_text = driver.find_element(By.ID, "id_heading").text
 
-        self.assertEqual('Product Type product test type', product_type_text)
+        self.assertEqual('Product Type Product test type', product_type_text)
 
     def test_edit_product_type(self):
         print("\n\nDebug Print Log: testing 'edit product type' \n")

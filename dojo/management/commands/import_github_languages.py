@@ -33,7 +33,7 @@ class Command(BaseCommand):
                 try:
                     language_type, created = Language_Type.objects.get_or_create(language=name)
                 except Language_Type.MultipleObjectsReturned:
-                    logger.warn('Language_Type {} exists multiple times'.format(name))
+                    logger.warning('Language_Type {} exists multiple times'.format(name))
                     continue
 
                 if created:

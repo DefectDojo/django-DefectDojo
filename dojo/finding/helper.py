@@ -3,13 +3,15 @@ from django.db.models.signals import post_delete, pre_delete
 from django.dispatch.dispatcher import receiver
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
+import dojo.jira_link.helper as jira_helper
 import logging
 from time import strftime
 from django.utils import timezone
 from django.conf import settings
 from fieldsignals import pre_save_changed
 from dojo.utils import get_current_user, mass_model_updater, to_str_typed
-from dojo.models import Engagement, Finding, Finding_Group, System_Settings, Test, Endpoint, Endpoint_Status
+from dojo.models import Engagement, Finding, Finding_Group, System_Settings, Test, Endpoint, Endpoint_Status, \
+    Vulnerability_Id, Vulnerability_Id_Template
 from dojo.endpoint.utils import save_endpoints_to_add
 
 
@@ -25,6 +27,7 @@ ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=True)
 NOT_ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=False)
 WAS_ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False) & Q(risk_acceptance__expiration_date_handled__isnull=False)
 CLOSED_FINDINGS_QUERY = Q(is_mitigated=True)
+UNDER_REVIEW_QUERY = Q(under_review=True)
 
 
 # this signal is triggered just before a finding is getting saved
@@ -49,9 +52,21 @@ def pre_save_finding_status_change(sender, instance, changed_fields=None, **kwar
 
 
 # also get signal when id is set/changed so we can process new findings
-pre_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['id', 'active', 'verfied', 'false_p', 'is_mitigated', 'mitigated', 'mitigated_by', 'out_of_scope', 'risk_accepted'])
-# pre_save_changed.connect(pre_save_finding_status_change, sender=Finding)
-# post_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['active', 'verfied', 'false_p', 'is_mitigated', 'mitigated', 'mitigated_by', 'out_of_scope'])
+pre_save_changed.connect(
+    pre_save_finding_status_change,
+    sender=Finding,
+    fields=[
+        "id",
+        "active",
+        "verified",
+        "false_p",
+        "is_mitigated",
+        "mitigated",
+        "mitigated_by",
+        "out_of_scope",
+        "risk_accepted",
+    ],
+)
 
 
 def update_finding_status(new_state_finding, user, changed_fields=None):
@@ -164,6 +179,11 @@ def add_to_finding_group(finding_group, finds):
     available_findings = [find for find in finds if not find.finding_group_set.all()]
     finding_group.findings.add(*available_findings)
 
+    # Now update the JIRA to add the finding to the finding group
+    if finding_group.has_jira_issue and jira_helper.get_jira_instance(finding_group).finding_jira_sync:
+        logger.debug('pushing to jira from finding.finding_bulk_update_all()')
+        jira_helper.push_to_jira(finding_group)
+
     added = len(available_findings)
     skipped = len(finds) - added
     return finding_group, added, skipped
@@ -185,6 +205,12 @@ def remove_from_finding_group(finds):
 
         removed += 1
 
+    # Now update the JIRA to remove the finding from the finding group
+    for group in affected_groups:
+        if group.has_jira_issue and jira_helper.get_jira_instance(group).finding_jira_sync:
+            logger.debug('pushing to jira from finding.finding_bulk_update_all()')
+            jira_helper.push_to_jira(group)
+
     return affected_groups, removed, skipped
 
 
@@ -204,17 +230,26 @@ def update_finding_group(finding, finding_group):
 
 
 def get_group_by_group_name(finding, finding_group_by_option):
+    group_name = None
+
     if finding_group_by_option == 'component_name':
-        group_name = finding.component_name if finding.component_name else 'None'
+        group_name = finding.component_name
     elif finding_group_by_option == 'component_name+component_version':
-        group_name = '%s:%s' % ((finding.component_name if finding.component_name else 'None'),
-        (finding.component_version if finding.component_version else 'None'))
+        if finding.component_name or finding.component_version:
+            group_name = '%s:%s' % ((finding.component_name if finding.component_name else 'None'),
+                (finding.component_version if finding.component_version else 'None'))
     elif finding_group_by_option == 'file_path':
-        group_name = 'Filepath %s' % (finding.file_path if finding.file_path else 'None')
+        if finding.file_path:
+            group_name = 'Filepath %s' % (finding.file_path)
+    elif finding_group_by_option == 'finding_title':
+        group_name = finding.title
     else:
         raise ValueError("Invalid group_by option %s" % finding_group_by_option)
 
-    return 'Findings in: %s' % group_name
+    if group_name:
+        return 'Findings in: %s' % group_name
+
+    return group_name
 
 
 def group_findings_by(finds, finding_group_by_option):
@@ -229,7 +264,11 @@ def group_findings_by(finds, finding_group_by_option):
             continue
 
         group_name = get_group_by_group_name(find, finding_group_by_option)
-        finding_group = Finding_Group.objects.filter(name=group_name).first()
+        if group_name is None:
+            skipped += 1
+            continue
+
+        finding_group = Finding_Group.objects.filter(test=find.test, name=group_name).first()
         if not finding_group:
             finding_group, added, skipped = create_finding_group([find], group_name)
             groups_created += 1
@@ -242,23 +281,61 @@ def group_findings_by(finds, finding_group_by_option):
 
         affected_groups.add(finding_group)
 
+    # Now update the JIRA to add the finding to the finding group
+    for group in affected_groups:
+        if group.has_jira_issue and jira_helper.get_jira_instance(group).finding_jira_sync:
+            logger.debug('pushing to jira from finding.finding_bulk_update_all()')
+            jira_helper.push_to_jira(group)
+
     return affected_groups, grouped, skipped, groups_created
 
 
-def add_finding_to_auto_group(finding, group_by):
-    test = finding.test
-    name = get_group_by_group_name(finding, group_by)
-    finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=get_current_user(), name=name)
-    if created:
-        logger.debug('Created Finding Group %d:%s for test %d:%s', finding_group.id, finding_group, test.id, test)
-    finding_group.findings.add(finding)
+def add_findings_to_auto_group(name, findings, group_by, create_finding_groups_for_all_findings=True, **kwargs):
+    if name is not None and findings is not None and len(findings) > 0:
+        creator = get_current_user()
+        if not creator:
+            creator = kwargs.get('async_user', None)
+        test = findings[0].test
+
+        if create_finding_groups_for_all_findings or len(findings) > 1:
+            # Only create a finding group if we have more than one finding for a given finding group, unless configured otherwise
+            finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name)
+            if created:
+                logger.debug('Created Finding Group %d:%s for test %d:%s', finding_group.id, finding_group, test.id, test)
+                # See if we have old findings in the same test that were created without a finding group
+                # that should be added to this new group
+                old_findings = Finding.objects.filter(test=test)
+                for f in old_findings:
+                    f_group_name = get_group_by_group_name(f, group_by)
+                    if f_group_name == name and f not in findings:
+                        finding_group.findings.add(f)
+
+            finding_group.findings.add(*findings)
+        else:
+            # Otherwise add to an existing finding group if it exists only
+            try:
+                finding_group = Finding_Group.objects.get(test=test, name=name)
+                if finding_group:
+                    finding_group.findings.add(*findings)
+            except:
+                # See if we have old findings in the same test that were created without a finding group
+                # that match this new finding - then we can create a finding group
+                old_findings = Finding.objects.filter(test=test)
+                created = False
+                for f in old_findings:
+                    f_group_name = get_group_by_group_name(f, group_by)
+                    if f_group_name == name and f not in findings:
+                        finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=creator, name=name)
+                        finding_group.findings.add(f)
+                if created:
+                    finding_group.findings.add(*findings)
 
 
 @dojo_model_to_id
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def post_process_finding_save(finding, dedupe_option=True, false_history=False, rules_option=True, product_grading_option=True,
+def post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True,
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
 
     system_settings = System_Settings.objects.get()
@@ -274,12 +351,13 @@ def post_process_finding_save(finding, dedupe_option=True, false_history=False, 
         else:
             deduplicationLogger.warning("skipping dedupe because hash_code is None")
 
-    if false_history:
-        if system_settings.false_positive_history:
+    if system_settings.false_positive_history:
+        # Only perform false positive history if deduplication is disabled
+        if system_settings.enable_deduplication:
+            deduplicationLogger.warning("skipping false positive history because deduplication is also enabled")
+        else:
             from dojo.utils import do_false_positive_history
             do_false_positive_history(finding, *args, **kwargs)
-        else:
-            deduplicationLogger.debug("skipping false positive history because it's disabled in system settings")
 
     # STEP 2 run all non-status changing tasks as celery tasks in the background
     if issue_updater_option:
@@ -314,7 +392,6 @@ def finding_pre_delete(sender, instance, **kwargs):
     # https://code.djangoproject.com/ticket/154
 
     instance.found_by.clear()
-    instance.status_finding.clear()
 
 
 def finding_delete(instance, **kwargs):
@@ -345,7 +422,6 @@ def finding_delete(instance, **kwargs):
     # https://code.djangoproject.com/ticket/154
     logger.debug('finding delete: clearing found by')
     instance.found_by.clear()
-    instance.status_finding.clear()
 
 
 @receiver(post_delete, sender=Finding)
@@ -388,7 +464,8 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
 
             new_original.duplicate = False
             new_original.duplicate_finding = None
-            new_original.active = True
+            new_original.active = original.active
+            new_original.is_mitigated = original.is_mitigated
             new_original.save_no_options()
             new_original.found_by.set(original.found_by.all())
 
@@ -405,7 +482,7 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
 def prepare_duplicates_for_delete(test=None, engagement=None):
     logger.debug('prepare duplicates for delete, test: %s, engagement: %s', test.id if test else None, engagement.id if engagement else None)
     if test is None and engagement is None:
-        logger.warn('nothing to prepare as test and engagement are None')
+        logger.warning('nothing to prepare as test and engagement are None')
 
     fix_loop_duplicates()
 
@@ -550,6 +627,40 @@ def add_endpoints(new_finding, form):
     for endpoint in new_finding.endpoints.all():
         eps, created = Endpoint_Status.objects.get_or_create(
             finding=new_finding,
-            endpoint=endpoint)
-        endpoint.endpoint_status.add(eps)
-        new_finding.endpoint_status.add(eps)
+            endpoint=endpoint, defaults={'date': form.cleaned_data['date'] or timezone.now()})
+
+
+def save_vulnerability_ids(finding, vulnerability_ids):
+    # Remove duplicates
+    vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
+
+    # Remove old vulnerability ids
+    Vulnerability_Id.objects.filter(finding=finding).delete()
+
+    # Save new vulnerability ids
+    for vulnerability_id in vulnerability_ids:
+        Vulnerability_Id(finding=finding, vulnerability_id=vulnerability_id).save()
+
+    # Set CVE
+    if vulnerability_ids:
+        finding.cve = vulnerability_ids[0]
+    else:
+        finding.cve = None
+
+
+def save_vulnerability_ids_template(finding_template, vulnerability_ids):
+    # Remove duplicates
+    vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
+
+    # Remove old vulnerability ids
+    Vulnerability_Id_Template.objects.filter(finding_template=finding_template).delete()
+
+    # Save new vulnerability ids
+    for vulnerability_id in vulnerability_ids:
+        Vulnerability_Id_Template(finding_template=finding_template, vulnerability_id=vulnerability_id).save()
+
+    # Set CVE
+    if vulnerability_ids:
+        finding_template.cve = vulnerability_ids[0]
+    else:
+        finding_template.cve = None

@@ -26,7 +26,7 @@ class NotificationTest(BaseTestCase):
 
     def disable_notification(self):
         driver = self.driver
-        # Navigate to the System Settimgs
+        # Navigate to the System Settings
         driver.get(self.base_url + "system_settings")
         mail_control = driver.find_element(By.ID, "id_enable_{}_notifications".format(self.type))
         if mail_control.is_selected():
@@ -91,6 +91,37 @@ class NotificationTest(BaseTestCase):
         except NoSuchElementException:
             assert False
 
+    def test_disable_template_notification(self):
+        # Login to the site. Password will have to be modified
+        # to match an admin password in your own container
+
+        driver = self.driver
+
+        self.disable_notification()
+        driver.get(self.base_url + "notifications/template")
+        try:
+            driver.find_element(By.XPATH, "//input[@name='product_added' and @value='{}']".format(self.type))
+            assert False
+        except NoSuchElementException:
+            assert True
+
+    def test_enable_template_notification(self):
+        # Login to the site. Password will have to be modified
+        # to match an admin password in your own container
+        driver = self.driver
+
+        self.enable_notification()
+        driver.get(self.base_url + "notifications/template")
+        try:
+            driver.find_element(By.XPATH, "//input[@name='product_added' and @value='{}']".format(self.type))
+            assert True
+        except NoSuchElementException:
+            if self.type == 'msteams':
+                # msteam should be not in personal notifications
+                assert True
+            else:
+                assert False
+
     def test_user_mail_notifications_change(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
@@ -141,7 +172,11 @@ def suite():
     suite.addTest(NotificationTest('test_enable_system_notification', 'slack'))
     suite.addTest(NotificationTest('test_enable_system_notification', 'msteams'))
     # not really for the user we created, but still related to user settings
-#    suite.addTest(NotificationTest('test_user_mail_notifications_change'))
+    suite.addTest(NotificationTest('test_user_mail_notifications_change', 'mail'))
+    # now do short test for the template
+    suite.addTest(NotificationTest('test_enable_template_notification', 'mail'))
+    suite.addTest(NotificationTest('test_enable_template_notification', 'slack'))
+    suite.addTest(NotificationTest('test_enable_template_notification', 'msteams'))
 
     return suite
 

@@ -3,6 +3,7 @@ from django.contrib.auth.models import Group
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from dojo.models import Dojo_Group, Dojo_Group_Member, Role
+from django.conf import settings
 
 
 def get_auth_group_name(group, attempt=0):
@@ -14,7 +15,8 @@ def get_auth_group_name(group, attempt=0):
         auth_group_name = group.name + '_' + str(attempt)
 
     try:
-        auth_group = Group.objects.get(name=auth_group_name)
+        # Attempt to fetch an existing group before moving forward with the real operation
+        _ = Group.objects.get(name=auth_group_name)
         return get_auth_group_name(group, attempt + 1)
     except Group.DoesNotExist:
         return auth_group_name
@@ -31,7 +33,7 @@ def group_post_save_handler(sender, **kwargs):
         group.auth_group = auth_group
         group.save()
         user = get_current_user()
-        if user:
+        if user and not settings.AZUREAD_TENANT_OAUTH2_GET_GROUPS:
             # Add the current user as the owner of the group
             member = Dojo_Group_Member()
             member.user = user

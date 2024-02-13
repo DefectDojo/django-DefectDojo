@@ -3,9 +3,9 @@ from dojo.models import Finding, Dojo_User
 from django.db import models
 from django.conf import settings
 
-from ratelimit.exceptions import Ratelimited
-from ratelimit.core import is_ratelimited
-from ratelimit import ALL
+from django_ratelimit.exceptions import Ratelimited
+from django_ratelimit.core import is_ratelimited
+from django_ratelimit import UNSAFE
 
 import logging
 
@@ -22,7 +22,7 @@ def we_want_async(*args, func=None, **kwargs):
         logger.debug('dojo_async_task %s: running task in the foreground as sync=True has been found as kwarg', func)
         return False
 
-    user = get_current_user()
+    user = kwargs.get('async_user', get_current_user())
     logger.debug('user: %s', user)
 
     if Dojo_User.wants_block_execution(user):
@@ -38,8 +38,12 @@ def we_want_async(*args, func=None, **kwargs):
 def dojo_async_task(func):
     @wraps(func)
     def __wrapper__(*args, **kwargs):
+        from dojo.utils import get_current_user
+        user = get_current_user()
+        kwargs['async_user'] = user
+        countdown = kwargs.pop("countdown", 0)
         if we_want_async(*args, func=func, **kwargs):
-            return func.delay(*args, **kwargs)
+            return func.apply_async(args=args, kwargs=kwargs, countdown=countdown)
         else:
             return func(*args, **kwargs)
 
@@ -155,12 +159,12 @@ def on_exception_log_kwarg(func):
             f = open("/tmp/selenium_page_source.html", "w", encoding='utf-8')
             f.writelines(self.driver.page_source)
             # time.sleep(30)
-            raise(e)
+            raise e
 
     return wrapper
 
 
-def dojo_ratelimit(key='ip', rate=None, method=ALL, block=False):
+def dojo_ratelimit(key='ip', rate=None, method=UNSAFE, block=False):
     def decorator(fn):
         @wraps(fn)
         def _wrapped(request, *args, **kw):
@@ -178,7 +182,7 @@ def dojo_ratelimit(key='ip', rate=None, method=ALL, block=False):
                     if username:
                         dojo_user = Dojo_User.objects.filter(username=username).first()
                         if dojo_user:
-                            Dojo_User.enable_force_password_rest(dojo_user)
+                            Dojo_User.enable_force_password_reset(dojo_user)
                 raise Ratelimited()
             return fn(request, *args, **kw)
         return _wrapped

@@ -1,9 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
     {{ block.super }}
-    <h1>403</h1>
+    <div class="error-page-box">
+        <i class="fa-solid fa-5x fa-road-barrier"></i>
+    </div>
+    <div class="error-page-box">
+        <h1>
+            Oops...
+        </h1>
+        <h2>
+            ...looks like you don't have permission to do that.
+        </h2>
+    </div>
     <hr/>
-    <h2>
-        You don't have permission to do that. Contact your administrator for additional access.
-    </h2>
-    {% endblock %}
+    <p class="lightgrey">403 Forbidden</p>
+{% endblock %}

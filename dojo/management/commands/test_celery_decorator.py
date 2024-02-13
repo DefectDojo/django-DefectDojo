@@ -86,7 +86,7 @@ def my_test_task(new_finding, *args, **kwargs):
 @app.task
 @dojo_model_from_id(model=Notes, parameter=1)
 @dojo_model_from_id
-def test_valentijn_task(new_finding, note):
+def test_valentijn_task(new_finding, note, **kwargs):
     logger.debug('test_valentijn:')
     logger.debug(new_finding)
     logger.debug(note)

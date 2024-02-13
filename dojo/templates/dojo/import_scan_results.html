@@ -10,6 +10,9 @@
 {% block content %}
     {{ block.super }}
     <h3> Add Tests</h3>
+	<p>
+		<a href="https://defectdojo.github.io/django-DefectDojo/integrations/importing/">Documentation</a>
+	</p>
     <form class="form-horizontal" action="" enctype="multipart/form-data" method="post">
 	{% csrf_token %}
 	{% include "dojo/form_fields.html" with form=form %}
@@ -19,7 +22,7 @@
         <hr>
 		<div class="form-group">
 			<label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
-				<i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
+				<i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="JIRA URL connected to this product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
 				</i>
 			</label>
 			<div class="col-sm-10 form-control-static">

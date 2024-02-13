@@ -12,4 +12,6 @@ class Command(BaseCommand):
             Test_Type.objects.get_or_create(name=scan_type)
             parser = PARSERS[scan_type]
             if hasattr(parser, 'requires_tool_type'):
-                Tool_Type.objects.get_or_create(name=parser.requires_tool_type(scan_type))
+                tool_type = parser.requires_tool_type(scan_type)
+                if tool_type:
+                    Tool_Type.objects.get_or_create(name=tool_type)

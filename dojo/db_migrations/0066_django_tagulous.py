@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                             prod_type_lost_and_found, created = Product_Type_Model.objects.get_or_create(name='_tag migration lost and found')
                             obj.prod_type = prod_type_lost_and_found
                             obj.save()
-                            logger.warning('product type succesfully changed to %i', prod_type_lost_and_found.id)
+                            logger.warning('product type successfully changed to %i', prod_type_lost_and_found.id)
 
                         obj.save()
                     except Exception as e:

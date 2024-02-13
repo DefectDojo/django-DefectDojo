@@ -1,0 +1,24 @@
+{{- $fullName := include "django.pvc_name" $ -}}
+{{ with .Values.django.mediaPersistentVolume }}
+{{- if and .enabled (eq .type "pvc") .persistentVolumeClaim.create   }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    defectdojo.org/component: django
+    app.kubernetes.io/name: {{ include "defectdojo.name" $ }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" $ }}
+  name: {{ $fullName }}
+spec:
+  accessModes: 
+  {{- toYaml .persistentVolumeClaim.accessModes |nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .persistentVolumeClaim.size }}
+  {{- if .persistentVolumeClaim.storageClassName }}
+  storageClassName: {{ .persistentVolumeClaim.storageClassName }}
+  {{- end }}
+{{- end }}
+{{- end }}

@@ -1,11 +1,13 @@
 import logging
-from datetime import timedelta
+from auditlog.models import LogEntry
+from datetime import timedelta, date
+from dateutil.relativedelta import relativedelta
 from django.db.models import Count, Prefetch
 from django.conf import settings
 from django.urls import reverse
 from dojo.celery import app
 from celery.utils.log import get_task_logger
-from dojo.models import Alerts, Product, Finding, Engagement, System_Settings, User
+from dojo.models import Alerts, Product, Engagement, Finding, System_Settings, User
 from django.utils import timezone
 from dojo.utils import calculate_grade
 from dojo.utils import sla_compute_and_notify
@@ -87,6 +89,26 @@ def cleanup_alerts(*args, **kwargs):
 
 
 @app.task(bind=True)
+def flush_auditlog(*args, **kwargs):
+    retention_period = settings.AUDITLOG_FLUSH_RETENTION_PERIOD
+
+    if retention_period < 0:
+        logger.info("Flushing auditlog is disabled")
+        return
+
+    logger.info("Running Cleanup Task for Logentries with %d Months retention", retention_period)
+    retention_date = date.today() - relativedelta(months=retention_period)
+    subset = LogEntry.objects.filter(timestamp__date__lt=retention_date)
+    event_count = subset.count()
+    logger.debug("Initially received %d Logentries", event_count)
+    if event_count > 0:
+        subset._raw_delete(subset.db)
+        logger.debug('Total number of audit log entries deleted: %s', event_count)
+    else:
+        logger.debug('No outdated Logentries found')
+
+
+@app.task(bind=True)
 def async_dupe_delete(*args, **kwargs):
     try:
         system_settings = System_Settings.objects.get()
@@ -154,6 +176,7 @@ def async_sla_compute_and_notify_task(*args, **kwargs):
         if system_settings.enable_finding_sla:
             sla_compute_and_notify(*args, **kwargs)
     except Exception as e:
+        logger.exception(e)
         logger.error("An unexpected error was thrown calling the SLA code: {}".format(e))
 
 

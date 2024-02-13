@@ -38,6 +38,7 @@ pip-delete-this-directory.txt
 .tox/
 .coverage
 .cache
+.ruff_cache
 nosetests.xml
 coverage.xml
 
@@ -82,6 +83,7 @@ dojo/uploads/threat/*
 *.db
 celerybeat.pid
 *.env*
+!docker/environments/*.env
 
 weekly.txt
 Monthly.txt

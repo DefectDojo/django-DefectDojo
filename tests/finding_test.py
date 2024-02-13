@@ -8,6 +8,7 @@ import sys
 import os
 from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 from product_test import ProductTest, WaitForPageLoad
+from user_test import UserTest
 from pathlib import Path
 import time
 
@@ -80,6 +81,8 @@ class FindingTest(BaseTestCase):
         driver.find_element(By.ID, "downloadMenu").click()
         driver.find_element(By.ID, "csv_export").click()
 
+        time.sleep(5)
+
         self.check_file(f'{self.export_path}/findings.csv')
 
     def test_excel_export(self):
@@ -88,6 +91,8 @@ class FindingTest(BaseTestCase):
 
         driver.find_element(By.ID, "downloadMenu").click()
         driver.find_element(By.ID, "excel_export").click()
+
+        time.sleep(5)
 
         self.check_file(f'{self.export_path}/findings.xlsx')
 
@@ -110,12 +115,19 @@ class FindingTest(BaseTestCase):
         Select(driver.find_element(By.ID, "id_severity")).select_by_visible_text("Critical")
         # cvssv3
         driver.find_element(By.ID, "id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
+        # finding Vulnerability Ids
+        driver.find_element(By.ID, "id_vulnerability_ids").send_keys("\nREF-3\nREF-4\n")
         # "Click" the Done button to Edit the finding
         driver.find_element(By.XPATH, "//input[@name='_Finished']").click()
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='Finding saved successfully'))
+        self.assertTrue(self.is_text_present_on_page(text='REF-1'))
+        self.assertTrue(self.is_text_present_on_page(text='REF-2'))
+        self.assertTrue(self.is_text_present_on_page(text='REF-3'))
+        self.assertTrue(self.is_text_present_on_page(text='REF-4'))
+        self.assertTrue(self.is_text_present_on_page(text='Additional Vulnerability Ids'))
 
     def test_add_image(self):
         # print("\n\nDebug Print Log: testing 'add image' \n")
@@ -178,7 +190,6 @@ class FindingTest(BaseTestCase):
         # select Reviewer
         # Let's make the first user in the list a reviewer
         # set select element style from 'none' to 'inline'
-
         try:
             WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_reviewers')))
         except TimeoutException:
@@ -191,8 +202,8 @@ class FindingTest(BaseTestCase):
         Select(element).select_by_value(reviewer_option.get_attribute("value"))
         # Add Review notes
         driver.find_element(By.ID, "id_entry").clear()
-        driver.find_element(By.ID, "id_entry").send_keys("This is to be reveiwed critically. Make sure it is well handled.")
-        # Click 'Mark for reveiw'
+        driver.find_element(By.ID, "id_entry").send_keys("This is to be reviewed critically. Make sure it is well handled.")
+        # Click 'Mark for review'
         driver.find_element(By.NAME, "submit").click()
         # Query the site to determine if the finding has been added
 
@@ -301,7 +312,7 @@ class FindingTest(BaseTestCase):
         # Select and click on the particular finding to edit
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
         # Get the status of the current endpoint
-        pre_status = driver.find_element(By.XPATH, '//*[@id="vuln_endpoints"]/tbody/tr/td[3]').text
+        driver.find_element(By.XPATH, '//*[@id="vuln_endpoints"]/tbody/tr/td[3]').text
         # Click on the 'dropdownMenu1 button'
         driver.find_element(By.ID, "dropdownMenu1").click()
         # Click on `Close Finding`
@@ -325,7 +336,7 @@ class FindingTest(BaseTestCase):
         # Select and click on the particular finding to edit
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
         # Get the status of the current endpoint
-        pre_status = driver.find_element(By.XPATH, '//*[@id="vuln_endpoints"]/tbody/tr/td[3]').text
+        driver.find_element(By.XPATH, '//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
         # Click on the 'dropdownMenu1 button'
         driver.find_element(By.ID, "dropdownMenu1").click()
         # Click on `Close Finding`
@@ -470,6 +481,7 @@ class FindingTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='ZAP Scan processed a total of 4 findings'))
 
+    @on_exception_html_source_logger
     def test_delete_finding(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
         # Test To Add Finding To product
@@ -490,7 +502,8 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='Finding deleted successfully'))
+        # self.assertTrue(self.is_success_message_present(text='Finding deleted successfully')) # there's no alert when deleting this way
+        self.assertTrue(self.is_text_present_on_page(text='Finding deleted successfully'))
         # check that user was redirect back to url where it came from based on return_url
 
     def test_list_components(self):
@@ -508,12 +521,12 @@ def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=
     suite.addTest(BaseTestCase('delete_finding_template_if_exists'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ProductTest('test_add_product_finding'))
+    suite.addTest(UserTest('test_create_user_with_writer_global_role'))
     suite.addTest(FindingTest('test_list_findings_all'))
     suite.addTest(FindingTest('test_list_findings_open'))
     suite.addTest(FindingTest('test_quick_report'))
-    # Export tests are not stable and therefore disabled
-    # suite.addTest(FindingTest('test_csv_export'))
-    # suite.addTest(FindingTest('test_excel_export'))
+    suite.addTest(FindingTest('test_csv_export'))
+    suite.addTest(FindingTest('test_excel_export'))
     suite.addTest(FindingTest('test_list_components'))
     suite.addTest(FindingTest('test_edit_finding'))
     suite.addTest(FindingTest('test_add_note_to_finding'))
@@ -536,6 +549,7 @@ def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=
     suite.addTest(FindingTest('test_delete_finding'))
     suite.addTest(FindingTest('test_delete_finding_template'))
     suite.addTest(ProductTest('test_delete_product'))
+    suite.addTest(UserTest('test_user_with_writer_role_delete'))
     return suite
 
 

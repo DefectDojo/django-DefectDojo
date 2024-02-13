@@ -1,0 +1,66 @@
+{
+  "service": "StackHawk",
+  "scanCompleted": {
+    "scan": {
+      "id": "e2ff5651-7eef-47e9-b743-0c2f7d861e27",
+      "hawkscanVersion": "2.1.1",
+      "env": "Development",
+      "status": "COMPLETED",
+      "application": "Secured Application",
+      "startedTimestamp": "2022-02-16T23:07:19.575Z",
+      "scanURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27"
+    },
+    "scanDuration": "30",
+    "spiderDuration": "48",
+    "completedScanStats": {
+      "urlsCount": "31",
+      "duration": "78",
+      "scanResultsStats": {
+        "totalCount": "3",
+        "lowCount": "3",
+        "mediumCount": "0",
+        "highCount": "0",
+        "lowTriagedCount": "3",
+        "mediumTriagedCount": "0",
+        "highTriagedCount": "0"
+      }
+    },
+    "findings": [
+      {
+        "pluginId": "90027",
+        "pluginName": "Cookie Slack Detector",
+        "severity": "Low",
+        "host": "https://localhost:9000",
+        "paths": [
+          {
+            "path": "/payload/3101",
+            "method": "GET",
+            "status": "RISK_ACCEPTED",
+            "pathURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/90027/path/107364/message/2020"
+          },
+          {
+            "path": "/jwt-auth",
+            "method": "GET",
+            "status": "RISK_ACCEPTED",
+            "pathURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/90027/path/107362/message/2001"
+          },
+          {
+            "path": "/payload/3099",
+            "method": "GET",
+            "status": "RISK_ACCEPTED",
+            "pathURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/90027/path/107367/message/2007"
+          }
+        ],
+        "pathStats": [
+          {
+            "status": "RISK_ACCEPTED",
+            "count": 3
+          }
+        ],
+        "totalCount": "3",
+        "category": "Information Leakage",
+        "findingURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/90027"
+      }
+    ]
+  }
+}

@@ -21,6 +21,9 @@ class TestOpenscapParser(DojoTestCase):
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
         self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2005-1038", finding.unsaved_vulnerability_ids[0])
 
     def test_openscap_parser_with_many_vuln_has_many_findings(self):
         testfile = open("unittests/scans/openscap/many_vuln_rhsa.xml")
@@ -34,7 +37,8 @@ class TestOpenscapParser(DojoTestCase):
         finding = findings[0]
         self.assertEqual("RHSA-2017:3315: kernel security and bug fix update (Moderate)", finding.title)
         self.assertEqual("Medium", finding.severity)
-        self.assertEqual("CVE-2017-1000380", finding.cve)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2017-1000380", finding.unsaved_vulnerability_ids[0])
         self.assertEqual("oval-com.redhat.rhsa-def-20173315", finding.unique_id_from_tool)
         # endpoints
         self.assertEqual(7, len(finding.unsaved_endpoints))
@@ -58,7 +62,7 @@ class TestOpenscapParser(DojoTestCase):
         finding = findings[0]
         self.assertEqual("IOS 12 - no IP finger service", finding.title)
         self.assertEqual("Medium", finding.severity)
-        self.assertIsNone(finding.cve)
+        self.assertIsNone(finding.unsaved_vulnerability_ids)
         self.assertEqual("ios12-no-finger-service", finding.unique_id_from_tool)
         # endpoints
         self.assertEqual(3, len(finding.unsaved_endpoints))

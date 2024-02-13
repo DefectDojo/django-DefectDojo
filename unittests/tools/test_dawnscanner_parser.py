@@ -21,7 +21,8 @@ class TestDawnScannerParser(DojoTestCase):
                 finding = findings[0]
                 self.assertEqual("CVE-2016-6316", finding.title)
                 self.assertEqual("Medium", finding.severity)
-                self.assertEqual("CVE-2016-6316", finding.cve)
+                self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+                self.assertEqual("CVE-2016-6316", finding.unsaved_vulnerability_ids[0])
                 self.assertEqual(
                     'Text declared as "HTML safe" when passed as an attribute value to a tag helper will not have quotes escaped which can lead to an XSS attack.',
                     finding.description,
@@ -35,7 +36,7 @@ class TestDawnScannerParser(DojoTestCase):
                 finding = findings[3]
                 self.assertEqual("Owasp Ror CheatSheet: Security Related Headers", finding.title)
                 self.assertEqual("Info", finding.severity)
-                self.assertIsNone(finding.cve)
+                self.assertIsNone(finding.unsaved_vulnerability_ids)
                 self.assertEqual(
                     'To set a header value, simply access the response.headers object as a hash inside your controller (often in a before/after_filter). Rails 4 provides the "default_headers" functionality that will automatically apply the values supplied. This works for most headers in almost all cases.',
                     finding.description,

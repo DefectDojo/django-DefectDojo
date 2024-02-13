@@ -26,7 +26,7 @@ class GitlabAPIFuzzingParser(object):
         for vulnerability in vulnerabilities:
             title = vulnerability["name"]
             severity = self.normalise_severity(vulnerability["severity"])
-            description = vulnerability["category"]
+            description = vulnerability.get("category", "")
             try:
                 location = vulnerability["location"]
                 description += "\n" + location["crash_type"]

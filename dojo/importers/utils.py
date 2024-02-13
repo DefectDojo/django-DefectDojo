@@ -1,13 +1,15 @@
 from django.core.exceptions import ValidationError
 from django.core.exceptions import MultipleObjectsReturned
 from django.conf import settings
+from django.utils.timezone import make_aware
 from dojo.decorators import dojo_async_task
 from dojo.celery import app
 from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.utils import max_safe
+from django.urls import reverse
 from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, \
     IMPORT_REACTIVATED_FINDING, IMPORT_UNTOUCHED_FINDING, Test_Import, Test_Import_Finding_Action, \
-    Endpoint_Status
+    Endpoint_Status, Vulnerability_Id
 import logging
 
 
@@ -18,28 +20,35 @@ def update_timestamps(test, version, branch_tag, build_id, commit_hash, now, sca
     if not scan_date:
         scan_date = now
 
-    test.engagement.updated = now
     if test.engagement.engagement_type == 'CI/CD':
         test.engagement.target_end = max_safe([scan_date.date(), test.engagement.target_end])
 
-    test.updated = now
-    test.target_end = max_safe([scan_date, test.target_end])
+    max_test_start_date = max_safe([scan_date, test.target_end])
+    if not max_test_start_date.tzinfo:
+        max_test_start_date = make_aware(max_test_start_date)
+    test.target_end = max_test_start_date
 
     if version:
         test.version = version
 
     if branch_tag:
         test.branch_tag = branch_tag
-        test.engagement.version = version
 
     if build_id:
         test.build_id = build_id
 
-    if branch_tag:
+    if commit_hash:
         test.commit_hash = commit_hash
 
     test.save()
     test.engagement.save()
+
+
+def update_tags(test, tags):
+    if tags:
+        test.tags = tags
+
+    test.save()
 
 
 def update_import_history(type, active, verified, tags, minimum_severity, endpoints_to_add, version, branch_tag,
@@ -55,7 +64,6 @@ def update_import_history(type, active, verified, tags, minimum_severity, endpoi
     import_settings['push_to_jira'] = push_to_jira
     import_settings['tags'] = tags
 
-    # tags=tags TODO no tags field in api for reimport it seems
     if endpoints_to_add:
         import_settings['endpoints'] = [str(endpoint) for endpoint in endpoints_to_add]
 
@@ -110,14 +118,17 @@ def chunk_list(list):
 
 
 def chunk_endpoints_and_disperse(finding, test, endpoints, **kwargs):
-    chunked_list = chunk_list(endpoints)
-    # If there is only one chunk, then do not bother with async
-    if len(chunked_list) < 2:
+    if settings.ASYNC_FINDING_IMPORT:
+        chunked_list = chunk_list(endpoints)
+        # If there is only one chunk, then do not bother with async
+        if len(chunked_list) < 2:
+            add_endpoints_to_unsaved_finding(finding, test, endpoints, sync=True)
+            return []
+        # First kick off all the workers
+        for endpoints_list in chunked_list:
+            add_endpoints_to_unsaved_finding(finding, test, endpoints_list, sync=False)
+    else:
         add_endpoints_to_unsaved_finding(finding, test, endpoints, sync=True)
-        return []
-    # First kick off all the workers
-    for endpoints_list in chunked_list:
-        add_endpoints_to_unsaved_finding(finding, test, endpoints_list, sync=False)
 
 
 # Since adding a model to a ManyToMany relationship does not require an additional
@@ -144,21 +155,14 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
                 fragment=endpoint.fragment,
                 product=test.engagement.product)
         except (MultipleObjectsReturned):
-            pass
+            raise Exception("Endpoints in your database are broken. Please access {} and migrate them to new format or "
+                            "remove them.".format(reverse('endpoint_migrate')))
 
-        eps = None
-        try:
-            eps, created = Endpoint_Status.objects.get_or_create(
-                finding=finding,
-                endpoint=ep,
-                date=finding.date)
-        except (MultipleObjectsReturned):
-            pass
+        eps, created = Endpoint_Status.objects.get_or_create(
+            finding=finding,
+            endpoint=ep,
+            defaults={'date': finding.date})
 
-        if ep and eps:
-            ep.endpoint_status.add(eps)
-            finding.endpoint_status.add(eps)
-            finding.endpoints.add(ep)
     logger.debug('IMPORT_SCAN: ' + str(len(endpoints)) + ' imported')
 
 
@@ -166,6 +170,32 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
 # and after endpoint task, so this should only run after all the other ones are done
 @dojo_async_task
 @app.task()
-def update_test_progress(test):
+def update_test_progress(test, **kwargs):
     test.percent_complete = 100
     test.save()
+
+
+def handle_vulnerability_ids(finding):
+    # Synchronize the cve field with the unsaved_vulnerability_ids
+    # We do this to be as flexible as possible to handle the fields until
+    # the cve field is not needed anymore and can be removed.
+    if finding.unsaved_vulnerability_ids and finding.cve:
+        # Make sure the first entry of the list is the value of the cve field
+        finding.unsaved_vulnerability_ids.insert(0, finding.cve)
+    elif finding.unsaved_vulnerability_ids and not finding.cve:
+        # If the cve field is not set, use the first entry of the list to set it
+        finding.cve = finding.unsaved_vulnerability_ids[0]
+    elif not finding.unsaved_vulnerability_ids and finding.cve:
+        # If there is no list, make one with the value of the cve field
+        finding.unsaved_vulnerability_ids = [finding.cve]
+
+    if finding.unsaved_vulnerability_ids:
+        # Remove duplicates
+        finding.unsaved_vulnerability_ids = list(dict.fromkeys(finding.unsaved_vulnerability_ids))
+
+        # Add all vulnerability ids to the database
+        for vulnerability_id in finding.unsaved_vulnerability_ids:
+            Vulnerability_Id(
+                vulnerability_id=vulnerability_id,
+                finding=finding,
+            ).save()

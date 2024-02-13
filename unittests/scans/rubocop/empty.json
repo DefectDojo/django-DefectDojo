@@ -1,0 +1,15 @@
+{
+    "metadata": {
+        "rubocop_version": "1.13.0",
+        "ruby_engine": "ruby",
+        "ruby_version": "3.0.3",
+        "ruby_patchlevel": "157",
+        "ruby_platform": "x86_64-linux"
+    },
+    "files": [],
+    "summary": {
+        "offense_count": 0,
+        "target_file_count": 0,
+        "inspected_file_count": 0
+    }
+}

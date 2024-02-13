@@ -1,6 +1,7 @@
 import logging
 import csv
 import re
+from django.views import View
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from tempfile import NamedTemporaryFile
@@ -11,7 +12,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError, PermissionDenied
-from django.urls import reverse
+from django.urls import reverse, Resolver404
 from django.db.models import Q, Count
 from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponse, FileResponse, QueryDict
 from django.shortcuts import render, get_object_or_404
@@ -32,11 +33,11 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Import, Notes, \
     Risk_Acceptance, Development_Environment, Endpoint, \
-    Cred_Mapping, Dojo_User, System_Settings, Note_Type, Product_API_Scan_Configuration
+    Cred_Mapping, System_Settings, Note_Type, Product_API_Scan_Configuration
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, \
-    get_system_setting, redirect_to_return_url_or_else, get_return_url
+    FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, async_delete, \
+    get_system_setting, get_setting, redirect_to_return_url_or_else, get_return_url, calculate_grade
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
@@ -50,6 +51,7 @@ from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.product.queries import get_authorized_products
 from dojo.engagement.queries import get_authorized_engagements
+from dojo.user.queries import get_authorized_users
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 import dojo.notifications.helper as notifications_helper
@@ -62,6 +64,10 @@ logger = logging.getLogger(__name__)
 @cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
 def engagement_calendar(request):
+
+    if not get_system_setting('enable_calendar'):
+        raise Resolver404()
+
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
         engagements = get_authorized_engagements(Permissions.Engagement_View)
     else:
@@ -83,7 +89,7 @@ def engagement_calendar(request):
             'caltype': 'engagements',
             'leads': request.GET.getlist('lead', ''),
             'engagements': engagements,
-            'users': Dojo_User.objects.all()
+            'users': get_authorized_users(Permissions.Engagement_View)
         })
 
 
@@ -207,7 +213,6 @@ def edit_engagement(request, eid):
     jira_project_form = None
     jira_epic_form = None
     jira_project = None
-    jira_error = False
 
     if request.method == 'POST':
         form = EngForm(request.POST, instance=engagement, cicd=is_ci_cd, product=engagement.product, user=request.user)
@@ -216,6 +221,7 @@ def edit_engagement(request, eid):
         if form.is_valid():
             # first save engagement details
             new_status = form.cleaned_data.get('status')
+            engagement.product = form.cleaned_data.get('product')
             engagement = form.save(commit=False)
             if (new_status == "Cancelled" or new_status == "Completed"):
                 engagement.active = False
@@ -265,7 +271,7 @@ def edit_engagement(request, eid):
     else:
         title = 'Edit Interactive Engagement'
 
-    product_tab = Product_Tab(engagement.product.id, title=title, tab="engagements")
+    product_tab = Product_Tab(engagement.product, title=title, tab="engagements")
     product_tab.setEngagement(engagement)
     return render(request, 'dojo/new_eng.html', {
         'product_tab': product_tab,
@@ -289,11 +295,17 @@ def delete_engagement(request, eid):
             form = DeleteEngagementForm(request.POST, instance=engagement)
             if form.is_valid():
                 product = engagement.product
-                engagement.delete()
+                if get_setting("ASYNC_OBJECT_DELETE"):
+                    async_del = async_delete()
+                    async_del.delete(engagement)
+                    message = 'Engagement and relationships will be removed in the background.'
+                else:
+                    message = 'Engagement and relationships removed.'
+                    engagement.delete()
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    'Engagement and relationships removed.',
+                    message,
                     extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Deletion of %s' % engagement.name,
@@ -305,17 +317,61 @@ def delete_engagement(request, eid):
 
                 return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([engagement])
-    rels = collector.nested()
+    rels = ['Previewing the relationships has been disabled.', '']
+    display_preview = get_setting('DELETE_PREVIEW')
+    if display_preview:
+        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+        collector.collect([engagement])
+        rels = collector.nested()
 
-    product_tab = Product_Tab(product.id, title="Delete Engagement", tab="engagements")
+    product_tab = Product_Tab(product, title="Delete Engagement", tab="engagements")
     product_tab.setEngagement(engagement)
     return render(request, 'dojo/delete_engagement.html', {
         'product_tab': product_tab,
         'engagement': engagement,
         'form': form,
         'rels': rels,
+    })
+
+
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
+def copy_engagement(request, eid):
+    engagement = get_object_or_404(Engagement, id=eid)
+    product = engagement.product
+    form = DoneForm()
+
+    if request.method == 'POST':
+        form = DoneForm(request.POST)
+        if form.is_valid():
+            engagement_copy = engagement.copy()
+            calculate_grade(product)
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Engagement Copied successfully.',
+                extra_tags='alert-success')
+            create_notification(event='other',
+                                title='Copying of %s' % engagement.name,
+                                description='The engagement "%s" was copied by %s' % (engagement.name, request.user),
+                                product=product,
+                                url=request.build_absolute_uri(reverse('view_engagement', args=(engagement_copy.id, ))),
+                                recipients=[engagement.lead],
+                                icon="exclamation-triangle")
+            return redirect_to_return_url_or_else(request, reverse("view_engagements", args=(product.id, )))
+        else:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'Unable to copy engagement, please try again.',
+                extra_tags='alert-danger')
+
+    product_tab = Product_Tab(product, title="Copy Engagement", tab="engagements")
+    return render(request, 'dojo/copy_object.html', {
+        'source': engagement,
+        'source_label': 'Engagement',
+        'destination_label': 'Product',
+        'product_tab': product_tab,
+        'form': form,
     })
 
 
@@ -373,7 +429,6 @@ def view_engagement(request, eid):
                 form = TypedNoteForm(available_note_types=available_note_types)
             else:
                 form = NoteForm()
-            url = request.build_absolute_uri(reverse("view_engagement", args=(eng.id,)))
             title = "Engagement: %s on %s" % (eng.name, eng.product.name)
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -395,7 +450,7 @@ def view_engagement(request, eid):
     title = ""
     if eng.engagement_type == "CI/CD":
         title = " CI/CD"
-    product_tab = Product_Tab(prod.id, title="View" + title + " Engagement", tab="engagements")
+    product_tab = Product_Tab(prod, title="View" + title + " Engagement", tab="engagements")
     product_tab.setEngagement(eng)
     return render(
         request, 'dojo/view_eng.html', {
@@ -434,7 +489,7 @@ def prefetch_for_view_tests(tests):
         prefetched = prefetched.annotate(total_reimport_count=Count('test_import__id', filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
 
     else:
-        logger.warn('unable to prefetch because query was already executed')
+        logger.warning('unable to prefetch because query was already executed')
 
     return prefetched
 
@@ -506,7 +561,7 @@ def add_tests(request, eid):
         form.initial['lead'] = request.user
     add_breadcrumb(
         parent=eng, title="Add Tests", top_level=False, request=request)
-    product_tab = Product_Tab(eng.product.id, title="Add Tests", tab="engagements")
+    product_tab = Product_Tab(eng.product, title="Add Tests", tab="engagements")
     product_tab.setEngagement(eng)
     return render(request, 'dojo/add_tests.html', {
         'product_tab': product_tab,
@@ -517,30 +572,77 @@ def add_tests(request, eid):
     })
 
 
-# Cant use the easy decorator because of the potential for either eid/pid being used
-def import_scan_results(request, eid=None, pid=None):
-    engagement = None
-    form = ImportScanForm()
-    cred_form = CredMappingForm()
-    finding_count = 0
-    jform = None
-    user = request.user
+class ImportScanResultsView(View):
+    def get(self, request, eid=None, pid=None):
+        environment = Development_Environment.objects.filter(name='Development').first()
+        engagement = None
+        form = ImportScanForm(initial={'environment': environment})
+        cred_form = CredMappingForm()
+        jform = None
+        user = request.user
 
-    if eid:
-        engagement = get_object_or_404(Engagement, id=eid)
-        engagement_or_product = engagement
-        cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
-    elif pid:
-        product = get_object_or_404(Product, id=pid)
-        engagement_or_product = product
-    elif not user.is_staff:
-        raise PermissionDenied
+        if eid:
+            engagement = get_object_or_404(Engagement, id=eid)
+            engagement_or_product = engagement
+            cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
+        elif pid:
+            product = get_object_or_404(Product, id=pid)
+            engagement_or_product = product
+        else:
+            raise Exception('Either Engagement or Product has to be provided')
 
-    user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
+        user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
 
-    push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
+        push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
+        custom_breadcrumb = None
+        title = "Import Scan Results"
+        if engagement:
+            product_tab = Product_Tab(engagement.product, title=title, tab="engagements")
+            product_tab.setEngagement(engagement)
+        else:
+            custom_breadcrumb = {"", ""}
+            product_tab = Product_Tab(product, title=title, tab="findings")
 
-    if request.method == "POST":
+        if jira_helper.get_jira_project(engagement_or_product):
+            jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
+
+        form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
+        form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id)
+
+        return render(request,
+        'dojo/import_scan_results.html',
+        {'form': form,
+         'product_tab': product_tab,
+         'engagement_or_product': engagement_or_product,
+         'custom_breadcrumb': custom_breadcrumb,
+         'title': title,
+         'cred_form': cred_form,
+         'jform': jform,
+         'scan_types': get_scan_types_sorted(),
+         })
+
+    def post(self, request, eid=None, pid=None):
+        environment = Development_Environment.objects.filter(name='Development').first()  # If 'Development' was removed, None is used
+        engagement = None
+        form = ImportScanForm(initial={'environment': environment})
+        cred_form = CredMappingForm()
+        finding_count = 0
+        jform = None
+        user = request.user
+
+        if eid:
+            engagement = get_object_or_404(Engagement, id=eid)
+            engagement_or_product = engagement
+            cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
+        elif pid:
+            product = get_object_or_404(Product, id=pid)
+            engagement_or_product = product
+        else:
+            raise Exception('Either Engagement or Product has to be provided')
+
+        user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
+
+        push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
         form = ImportScanForm(request.POST, request.FILES)
         cred_form = CredMappingForm(request.POST)
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
@@ -555,8 +657,8 @@ def import_scan_results(request, eid=None, pid=None):
             scan = request.FILES.get('file', None)
             scan_date = form.cleaned_data['scan_date']
             minimum_severity = form.cleaned_data['minimum_severity']
-            active = form.cleaned_data['active']
-            verified = form.cleaned_data['verified']
+            activeChoice = form.cleaned_data.get('active', None)
+            verifiedChoice = form.cleaned_data.get('verified', None)
             scan_type = request.POST['scan_type']
             tags = form.cleaned_data['tags']
             version = form.cleaned_data['version']
@@ -566,11 +668,18 @@ def import_scan_results(request, eid=None, pid=None):
             api_scan_configuration = form.cleaned_data.get('api_scan_configuration', None)
             service = form.cleaned_data.get('service', None)
             close_old_findings = form.cleaned_data.get('close_old_findings', None)
+            apply_tags_to_findings = form.cleaned_data.get('apply_tags_to_findings', False)
+            # close_old_findings_prodct_scope is a modifier of close_old_findings.
+            # If it is selected, close_old_findings should also be selected.
+            close_old_findings_product_scope = form.cleaned_data.get('close_old_findings_product_scope', None)
+            if close_old_findings_product_scope:
+                close_old_findings = True
             # Will save in the provided environment or in the `Development` one if absent
             environment_id = request.POST.get('environment', 'Development')
             environment = Development_Environment.objects.get(id=environment_id)
 
             group_by = form.cleaned_data.get('group_by', None)
+            create_finding_groups_for_all_findings = form.cleaned_data['create_finding_groups_for_all_findings']
 
             # TODO move to form validation?
             if scan and is_scan_file_too_large(scan):
@@ -607,12 +716,26 @@ def import_scan_results(request, eid=None, pid=None):
             # Save newly added endpoints
             added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, engagement.product)
 
+            active = None
+            if activeChoice:
+                if activeChoice == 'force_to_true':
+                    active = True
+                elif activeChoice == 'force_to_false':
+                    active = False
+            verified = None
+            if verifiedChoice:
+                if verifiedChoice == 'force_to_true':
+                    verified = True
+                elif verifiedChoice == 'force_to_false':
+                    verified = False
+
             try:
                 importer = Importer()
                 test, finding_count, closed_finding_count, _ = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
                             minimum_severity=minimum_severity, endpoints_to_add=list(form.cleaned_data['endpoints']) + added_endpoints, scan_date=scan_date,
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
-                            close_old_findings=close_old_findings, group_by=group_by, api_scan_configuration=api_scan_configuration, service=service)
+                            close_old_findings=close_old_findings, close_old_findings_product_scope=close_old_findings_product_scope, group_by=group_by, api_scan_configuration=api_scan_configuration, service=service,
+                            create_finding_groups_for_all_findings=create_finding_groups_for_all_findings, apply_tags_to_findings=apply_tags_to_findings)
 
                 message = f'{scan_type} processed a total of {finding_count} findings'
 
@@ -645,34 +768,7 @@ def import_scan_results(request, eid=None, pid=None):
                 return HttpResponseRedirect(
                     reverse('view_test', args=(test.id, )))
 
-    prod_id = None
-    custom_breadcrumb = None
-    title = "Import Scan Results"
-    if engagement:
-        prod_id = engagement.product.id
-        product_tab = Product_Tab(prod_id, title=title, tab="engagements")
-        product_tab.setEngagement(engagement)
-    else:
-        prod_id = pid
-        custom_breadcrumb = {"", ""}
-        product_tab = Product_Tab(prod_id, title=title, tab="findings")
-
-    if jira_helper.get_jira_project(engagement_or_product):
-        jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
-
-    form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
-    form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id)
-    return render(request,
-        'dojo/import_scan_results.html',
-        {'form': form,
-         'product_tab': product_tab,
-         'engagement_or_product': engagement_or_product,
-         'custom_breadcrumb': custom_breadcrumb,
-         'title': title,
-         'cred_form': cred_form,
-         'jform': jform,
-         'scan_types': get_scan_types_sorted(),
-         })
+        return HttpResponseRedirect(reverse('view_test', args=(test.id, )))
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
@@ -757,7 +853,7 @@ def complete_checklist(request, eid):
         findings = Finding.objects.filter(test__in=tests).all()
         form = CheckForm(instance=checklist, findings=findings)
 
-    product_tab = Product_Tab(eng.product.id, title="Checklist", tab="engagements")
+    product_tab = Product_Tab(eng.product, title="Checklist", tab="engagements")
     product_tab.setEngagement(eng)
     return render(request, 'dojo/checklist.html', {
         'form': form,
@@ -827,7 +923,7 @@ def add_risk_acceptance(request, eid, fid=None):
     form.fields['accepted_findings'].queryset = finding_choices
     if fid:
         form.fields['accepted_findings'].initial = {fid}
-    product_tab = Product_Tab(eng.product.id, title="Risk Acceptance", tab="engagements")
+    product_tab = Product_Tab(eng.product, title="Risk Acceptance", tab="engagements")
     product_tab.setEngagement(eng)
 
     return render(request, 'dojo/add_risk_acceptance.html', {
@@ -977,14 +1073,14 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     accepted_findings = risk_acceptance.accepted_findings.order_by('numerical_severity')
     fpage = get_page_items(request, accepted_findings, 15)
 
-    unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all()) \
+    unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False) \
         .exclude(id__in=accepted_findings).order_by("title")
     add_fpage = get_page_items(request, unaccepted_findings, 10, 'apage')
     # on this page we need to add unaccepted findings as possible findings to add as accepted
     add_findings_form.fields[
         "accepted_findings"].queryset = add_fpage.object_list
 
-    product_tab = Product_Tab(eng.product.id, title="Risk Acceptance", tab="engagements")
+    product_tab = Product_Tab(eng.product, title="Risk Acceptance", tab="engagements")
     product_tab.setEngagement(eng)
     return render(
         request, 'dojo/view_risk_acceptance.html', {
@@ -1009,7 +1105,8 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
 def expire_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
-    eng = get_object_or_404(Engagement, pk=eid)
+    # Validate the engagement ID exists before moving forward
+    get_object_or_404(Engagement, pk=eid)
 
     ra_helper.expire_now(risk_acceptance)
 
@@ -1095,7 +1192,7 @@ def upload_threatmodel(request, eid):
                 reverse('view_engagement', args=(eid, )))
     else:
         form = UploadThreatForm()
-    product_tab = Product_Tab(eng.product.id, title="Upload Threat Model", tab="engagements")
+    product_tab = Product_Tab(eng.product, title="Upload Threat Model", tab="engagements")
     return render(request, 'dojo/up_threat.html', {
         'form': form,
         'product_tab': product_tab,
@@ -1133,7 +1230,7 @@ def engagement_ics(request, eid):
 def get_list_index(list, index):
     try:
         element = list[index]
-    except Exception as e:
+    except Exception:
         element = None
     return element
 
@@ -1146,7 +1243,7 @@ def get_engagements(request):
         if url.startswith('url='):
             url = url[4:]
 
-    path_items = list(filter(None, re.split('/|\?', url))) # noqa W605
+    path_items = list(filter(None, re.split(r'/|\?', url)))
 
     if not path_items or path_items[0] != 'engagement':
         raise ValidationError('URL is not an engagement view')

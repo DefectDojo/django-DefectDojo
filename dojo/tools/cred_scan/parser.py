@@ -24,36 +24,44 @@ class CredScanParser(object):
 
     def get_findings(self, filename, test):
         content = filename.read()
-        if type(content) is bytes:
-            content = content.decode('utf-8-sig')
-        reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"')
+        if isinstance(content, bytes):
+            content = content.decode("utf-8-sig")
+        reader = csv.DictReader(
+            io.StringIO(content), delimiter=",", quotechar='"'
+        )
 
         dupes = dict()
         for row in reader:
             # Create the description
-            description = row.get('Description', 'Description not provided')
+            description = row.get("Description", "Description not provided")
             # Add contextual details to the description
-            if 'IsSuppressed' in row:
-                description += '\n Is Supressed: ' + str(row['IsSuppressed'])
-            if 'SuppressJustification' in row:
-                description += '\n Supress Justifcation: ' + str(row['SuppressJustification'])
-            if 'MatchingScore' in row:
-                description += '\n Matching Score: ' + str(row['MatchingScore'])
+            if "IsSuppressed" in row:
+                description += "\n Is Supressed: " + str(row["IsSuppressed"])
+            if "SuppressJustification" in row:
+                description += "\n Supress Justifcation: " + str(
+                    row["SuppressJustification"]
+                )
+            if "MatchingScore" in row:
+                description += "\n Matching Score: " + str(
+                    row["MatchingScore"]
+                )
 
             finding = Finding(
-                    title=row['Searcher'],
-                    description=description,
-                    severity='Info',
-                    nb_occurences=1,
-                    file_path=row['Source'],
-                    line=row['Line'],
+                title=row["Searcher"],
+                description=description,
+                severity="Info",
+                nb_occurences=1,
+                file_path=row["Source"],
+                line=row["Line"],
             )
             # Update the finding date if it specified
-            if 'TimeofDiscovery' in row:
-                finding.date = parser.parse(row['TimeofDiscovery'].replace('Z', ''))
+            if "TimeofDiscovery" in row:
+                finding.date = parser.parse(
+                    row["TimeofDiscovery"].replace("Z", "")
+                )
 
             # internal de-duplication
-            dupe_key = row['Searcher'] + row['Source'] + str(row['Line'])
+            dupe_key = row["Searcher"] + row["Source"] + str(row["Line"])
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]

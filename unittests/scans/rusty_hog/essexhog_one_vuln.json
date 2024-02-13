@@ -1,0 +1,10 @@
+[
+    {
+      "stringsFound": [
+        "-----BEGIN RSA PRIVATE KEY-----"
+      ],
+      "page_id": "998772",
+      "reason": "RSA private key",
+      "url": "https://confluence.com/pages/viewpage.action?pageId=998772"
+    }
+]

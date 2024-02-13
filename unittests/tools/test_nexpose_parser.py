@@ -1,3 +1,6 @@
+import datetime
+from django.test import override_settings
+
 from ..dojo_test_case import DojoTestCase
 from dojo.tools.nexpose.parser import NexposeParser
 from dojo.models import Test, Engagement, Product
@@ -40,18 +43,19 @@ class TestNexposeParser(DojoTestCase):
         finding = findings[0]
         self.assertEqual("Medium", finding.severity)
         self.assertEqual("TCP Sequence Number Approximation Vulnerability", finding.title)
-        self.assertEqual("CVE-2004-0230", finding.cve)
         self.assertEqual(3, len(finding.unsaved_endpoints))
         self.assertIn("https://www.securityfocus.com/bid/10183", finding.references)  # BID: 10183
         self.assertIn("https://www.kb.cert.org/vuls/id/415294.html", finding.references)  # CERT-VN: 415294
         self.assertIn("https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2004-0230", finding.references)  # CVE: CVE-2004-0230
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2004-0230", finding.unsaved_vulnerability_ids[0])
 
         # vuln 2
         finding = findings[2]
         self.assertEqual("Low", finding.severity)
         self.assertEqual("TCP timestamp response", finding.title)
-        self.assertIsNone(finding.cve)
         self.assertEqual(5, len(finding.unsaved_endpoints))
+        self.assertIsNone(finding.unsaved_vulnerability_ids)
 
         # vuln 2 - endpoint
         endpoint = finding.unsaved_endpoints[0]
@@ -145,22 +149,22 @@ class TestNexposeParser(DojoTestCase):
         finding = findings[0]
         self.assertEqual("High", finding.severity)
         self.assertEqual("ICMP redirection enabled", finding.title)
-        self.assertIsNone(finding.cve)
         self.assertEqual(4, len(finding.unsaved_endpoints))
+        self.assertIsNone(finding.unsaved_vulnerability_ids)
 
         # vuln 1
         finding = findings[1]
         self.assertEqual("Medium", finding.severity)
         self.assertEqual("No password for Grub", finding.title)
-        self.assertIsNone(finding.cve)
         self.assertEqual(4, len(finding.unsaved_endpoints))
+        self.assertIsNone(finding.unsaved_vulnerability_ids)
 
         # vuln 2
         finding = findings[2]
         self.assertEqual("Low", finding.severity)
         self.assertEqual("User home directory mode unsafe", finding.title)
-        self.assertIsNone(finding.cve)
         self.assertEqual(16, len(finding.unsaved_endpoints))
+        self.assertIsNone(finding.unsaved_vulnerability_ids)
 
     def test_nexpose_parser_dns(self):
         testfile = open("unittests/scans/nexpose/dns.xml")
@@ -201,3 +205,19 @@ class TestNexposeParser(DojoTestCase):
         self.assertEqual('dns', str(finding.unsaved_endpoints[0].protocol))
         self.assertEqual('udp', str(finding.unsaved_endpoints[0].fragment))
         self.assertEqual('dns://192.168.1.1#udp', str(finding.unsaved_endpoints[0]))
+
+    @override_settings(USE_FIRST_SEEN=True)
+    def test_nexpose_parser_use_first_seen(self):
+        testfile = open("unittests/scans/nexpose/dns.xml")
+        parser = NexposeParser()
+        findings = parser.get_findings(testfile, Test())
+
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+
+        self.assertEqual(6, len(findings))
+        finding = findings[2]
+        self.assertEqual(datetime.datetime(2021, 2, 11, 16, 45, 6, 81000), finding.date, finding.title)
+        finding = findings[4]
+        self.assertEqual(datetime.datetime(2021, 2, 11, 16, 45, 6, 81000), finding.date, finding.title)

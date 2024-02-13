@@ -1,5 +1,4 @@
 from crum import get_current_user
-from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
 from dojo.models import JIRA_Issue, JIRA_Project, Product_Member, Product_Type_Member, \
     Product_Group, Product_Type_Group
@@ -17,9 +16,6 @@ def get_authorized_jira_projects(permission, user=None):
     jira_projects = JIRA_Project.objects.all()
 
     if user.is_superuser:
-        return jira_projects
-
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return jira_projects
 
     if user_has_global_permission(user, permission):
@@ -89,9 +85,6 @@ def get_authorized_jira_issues(permission):
     jira_issues = JIRA_Issue.objects.all()
 
     if user.is_superuser:
-        return jira_issues
-
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return jira_issues
 
     if user_has_global_permission(user, permission):

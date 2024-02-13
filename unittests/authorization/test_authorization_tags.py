@@ -46,7 +46,7 @@ class TestAuthorizationTags(DojoTestCase):
     def test_has_object_permission_wrong_permission(self):
 
         with self.assertRaises(KeyError):
-            result = has_object_permission(self.product_type, 'Test')
+            has_object_permission(self.product_type, 'Test')
 
     @patch('dojo.templatetags.authorization_tags.configuration_permission')
     @patch('crum.get_current_user')
@@ -54,10 +54,10 @@ class TestAuthorizationTags(DojoTestCase):
         mock_configuration_permission.return_value = True
         mock_current_user.return_value = self.user
 
-        result = has_configuration_permission('test', 'testLegacy')
+        result = has_configuration_permission('test', None)
 
         self.assertTrue(result)
-        mock_configuration_permission.assert_called_with(self.user, 'test', 'testLegacy')
+        mock_configuration_permission.assert_called_with(self.user, 'test')
         mock_current_user.assert_called_once()
 
     @patch('django.contrib.auth.models.User.user_permissions')

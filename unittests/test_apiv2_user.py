@@ -18,7 +18,7 @@ class UserTest(APITestCase):
         r = self.client.get(reverse('user-list'))
         self.assertEqual(r.status_code, 200, r.content[:1000])
         user_list = r.json()['results']
-        self.assertTrue(len(user_list) >= 1, r.content[:1000])
+        self.assertGreaterEqual(len(user_list), 1, r.content[:1000])
         for user in user_list:
             for item in ['username', 'first_name', 'last_name', 'email']:
                 self.assertIn(item, user, r.content[:1000])
@@ -53,7 +53,7 @@ class UserTest(APITestCase):
             "password": "weakPassword"
         }, format='json')
         self.assertEqual(r.status_code, 400, r.content[:1000])
-        self.assertIn('The password must contain at least 1 digit, 0-9.', r.content.decode("utf-8"))
+        self.assertIn('Password must contain at least 1 digit, 0-9.', r.content.decode("utf-8"))
 
     def test_user_change_password(self):
         # some user

@@ -11,11 +11,14 @@ class TestOutpost24Parser(DojoTestCase):
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
-            self.assertEquals(item_count, len(findings))
+            self.assertEqual(item_count, len(findings))
             if item_count > 0:
                 for item in findings:
                     endpoint_count = len(item.unsaved_endpoints)
                     self.assertGreater(endpoint_count, 0)
+            if item_count == 1:
+                self.assertEqual(1, len(findings[0].unsaved_vulnerability_ids))
+                self.assertEqual("CVE-2019-9315", findings[0].unsaved_vulnerability_ids[0])
 
     def test_parser_no_items(self):
         self.assert_file_has_n_items(get_unit_tests_path() + "/scans/outpost24/none.xml", 0)

@@ -1,56 +1,14 @@
 import datetime
-import logging
+from unittest import skip
 
 from django_test_migrations.contrib.unittest_case import MigratorTestCase
-from django_test_migrations.migrator import Migrator
-from django.test import TransactionTestCase
 from django.utils import timezone
 
-logger = logging.getLogger(__name__)
 
-
-class TestEndpointMigrationBroken(TransactionTestCase):
-    migrate_from = ('dojo', '0104_endpoint_userinfo_creation')
-    migrate_to = ('dojo', '0105_endpoint_host_migration')
-
-    def setUp(self):
-        super().setUp()
-        self.migrator = Migrator()
-
-        self.old_state = self.migrator.apply_initial_migration(self.migrate_from)
-
-        Endpoint = self.old_state.apps.get_model('dojo', 'Endpoint')
-        self.endpoints = {
-            'empty': Endpoint.objects.create().pk,
-            'empty_host': Endpoint.objects.create(host='').pk,
-            'invalid_host': Endpoint.objects.create(host='foo bar').pk,
-            'invalid_ip': Endpoint.objects.create(host='127.0.1').pk,
-            'invalid_port_high': Endpoint.objects.create(host='127.0.0.1:66666').pk,
-            'invalid_port_low': Endpoint.objects.create(host='127.0.0.1:-1').pk,
-            'invalid_port_word': Endpoint.objects.create(host='127.0.0.1:port').pk,
-            'protocol_mismatch': Endpoint.objects.create(protocol='http', host='https://foo.bar').pk,
-            'port_mismatch': Endpoint.objects.create(host='https://foo.bar', port=80).pk,
-            'path_mismatch': Endpoint.objects.create(host='https://foo.bar/path1', path='/path1').pk,
-            'query_mismatch': Endpoint.objects.create(host='https://foo.bar/?key1=value&key2', query='?key1=value&'
-                                                                                                     'key2=None').pk,
-            'fragment_mismatch': Endpoint.objects.create(host='https://foo.bar/#fragment', fragment='#fragment').pk,
-            'missing_host': Endpoint.objects.create(host='file:///etc/passwd').pk,
-        }
-
-    def tearDown(self):
-        self.migrator.reset()
-        super().tearDown()
-
-    def test_migration_endpoint_broken(self):
-        with self.assertLogs('dojo.endpoint.utils', 'ERROR') as cm:
-            self.migrator.apply_tested_migration(self.migrate_to)
-        self.assertIn('ERROR:dojo.endpoint.utils:It is not possible to migrate database because there is/are {} broken '
-                      'endpoint(s). Please check logs.'.format(len(self.endpoints)), cm.output)
-
-
-class TestEndpointMigration(MigratorTestCase):
-    migrate_from = ('dojo', '0104_endpoint_userinfo_creation')
-    migrate_to = ('dojo', '0105_endpoint_host_migration')
+@skip("Outdated - this class was testing some version of migration; it is not needed anymore")
+class TestOptiEndpointStatus(MigratorTestCase):
+    migrate_from = ('dojo', '0171_jira_labels_per_product_and_engagement')
+    migrate_to = ('dojo', '0172_optimize_usage_of_endpoint_status')
 
     def prepare(self):
         Product_Type = self.old_state.apps.get_model('dojo', 'Product_Type')
@@ -60,22 +18,11 @@ class TestEndpointMigration(MigratorTestCase):
         Finding = self.old_state.apps.get_model('dojo', 'Finding')
         Endpoint = self.old_state.apps.get_model('dojo', 'Endpoint')
         Endpoint_Status = self.old_state.apps.get_model('dojo', 'Endpoint_Status')
-        self.endpoints = {
-            'valid_host': Endpoint.objects.create(host='foo.bar').pk,
-            'valid_ip': Endpoint.objects.create(host='127.0.0.1').pk,
-            'host_port': Endpoint.objects.create(host='foo.bar:22').pk,
-            'ip_port': Endpoint.objects.create(host='127.0.0.1:22').pk,
-            'url': Endpoint.objects.create(host='http://foo.bar/').pk,
-            'url_existing_port': Endpoint.objects.create(host='https://foo.bar:4433/', port=4433).pk,
-            'full_url': Endpoint.objects.create(host='https://alice@foo.bar:4433/path1/path2/?key1=value1&no_value_key'
-                                                     '#fragmentX').pk,
-            'path_with_slash': Endpoint.objects.create(host='bar.foo', path='/test').pk,
-        }
 
         self.prod_type = Product_Type.objects.create()
         self.product = Product.objects.create(prod_type=self.prod_type)
         self.engagement = Engagement.objects.create(
-            product=self.product,
+            product_id=self.product.pk,
             target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
             target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc)
         )
@@ -86,76 +33,131 @@ class TestEndpointMigration(MigratorTestCase):
             test_type_id=1
         )
         from django.contrib.auth import get_user_model
-        User = get_user_model()
-        self.finding = Finding.objects.create(test=self.test, reporter_id=User.objects.create().pk).pk
-        self.endpoints_eps = {
-            'short': Endpoint.objects.create(protocol='http', host='foo.bar.eps', product=self.product).pk,
-            'long': Endpoint.objects.create(protocol='http', host='foo.bar.eps', port=80, product=self.product).pk,
-        }
-        self.endpoint_status = {
-            'old': Endpoint_Status.objects.create(
-                last_modified=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
-                mitigated=True,
-                finding_id=self.finding,
-                endpoint_id=self.endpoints_eps['short']
-            ).pk,
-            'new': Endpoint_Status.objects.create(
-                last_modified=datetime.datetime(2021, 1, 1, tzinfo=timezone.utc),
-                mitigated=False,
-                finding_id=self.finding,
-                endpoint_id=self.endpoints_eps['long']
-            ).pk,
-        }
+        user = get_user_model().objects.create().pk
 
-    def test_migration_endpoint(self):
+        self.finding = Finding.objects.create(test_id=self.test.pk, reporter_id=user).pk
+        self.endpoint = Endpoint.objects.create(host='foo.bar', product_id=self.product.pk).pk
+        self.endpoint_status = Endpoint_Status.objects.create(
+                finding_id=self.finding,
+                endpoint_id=self.endpoint
+        ).pk
+        Endpoint.objects.get(id=self.endpoint).endpoint_status.add(
+            Endpoint_Status.objects.get(id=self.endpoint_status)
+        )
+        Finding.objects.get(id=self.finding).endpoint_status.add(
+            Endpoint_Status.objects.get(id=self.endpoint_status)
+        )
+        Finding.objects.get(id=self.finding).endpoints.add(
+            Endpoint.objects.get(id=self.endpoint).pk
+        )
+
+        self.presudotest_before_migration()
+
+    def case_add_status_endpoint(self, endpoint, status):
+        endpoint.endpoint_status.add(status)
+
+    def case_add_status_finding(self, finding, status):
+        finding.endpoint_status.add(status)
+
+    def case_from_finding_get_endpoints(self, finding):
+        return finding.endpoints.all()
+
+    def case_add_endpoint_finding(self, finding, endpoint):
+        finding.endpoints.add(endpoint)
+
+    def case_list_with_status_finding(self, finding):
+        return finding.status_finding
+
+    def case_list_with_status_endpoint(self, endpoint):
+        return endpoint.status_endpoint
+
+    def presudotest_before_migration(self):
+        Finding = self.old_state.apps.get_model('dojo', 'Finding')
+        Endpoint = self.old_state.apps.get_model('dojo', 'Endpoint')
+        Endpoint_Status = self.old_state.apps.get_model('dojo', 'Endpoint_Status')
+
+        with self.subTest('Old: Add existing EPS to endpoint'):
+            self.case_add_status_endpoint(
+                Endpoint.objects.get(id=self.endpoint),
+                Endpoint_Status.objects.get(id=self.endpoint_status),
+            )
+
+        with self.subTest('Old: Add existing EPS to finding'):
+            self.case_add_status_finding(
+                Finding.objects.get(id=self.finding),
+                Endpoint_Status.objects.get(id=self.endpoint_status),
+            )
+
+        with self.subTest('Old: From finding get endpoints'):
+            ep = self.case_from_finding_get_endpoints(
+                Finding.objects.get(id=self.finding),
+            ).all()
+            self.assertEqual(ep.all().count(), 1, ep)
+
+        with self.subTest('Old: Add existing endpoint to finding'):
+            self.case_add_endpoint_finding(
+                Finding.objects.get(id=self.finding),
+                Endpoint.objects.get(id=self.endpoint).pk,
+            )
+
+        with self.subTest('Old: List EPS from finding'):
+            eps = self.case_list_with_status_finding(
+                Finding.objects.get(id=self.finding),
+            )
+            self.assertEqual(eps.all().count(), 1, ep)
+            self.assertIsInstance(eps.all().first(), Endpoint_Status)
+
+        with self.subTest('Old: List EPS from endpoint'):
+            with self.assertRaises(AttributeError) as exc:
+                eps = self.case_list_with_status_endpoint(
+                    Endpoint.objects.get(id=self.endpoint),
+                )
+            self.assertEqual(str(exc.exception), "'Endpoint' object has no attribute 'status_endpoint'")
+
+    def test_after_migration(self):
+        Finding = self.new_state.apps.get_model('dojo', 'Finding')
         Endpoint = self.new_state.apps.get_model('dojo', 'Endpoint')
         Endpoint_Status = self.new_state.apps.get_model('dojo', 'Endpoint_Status')
 
-        endpoint = Endpoint.objects.get(pk=self.endpoints['valid_host'])
-        self.assertEqual(endpoint.host, 'foo.bar')
+        with self.subTest('New: Add existing EPS to endpoint'):
+            with self.assertRaises(AttributeError) as exc:
+                self.case_add_status_endpoint(
+                    Endpoint.objects.get(id=self.endpoint),
+                    Endpoint_Status.objects.get(id=self.endpoint_status),
+                )
+            self.assertEqual(str(exc.exception), "'Endpoint' object has no attribute 'endpoint_status'")
 
-        endpoint = Endpoint.objects.get(pk=self.endpoints['valid_ip'])
-        self.assertEqual(endpoint.host, '127.0.0.1')
+        with self.subTest('New: Add existing EPS to finding'):
+            with self.assertRaises(AttributeError) as exc:
+                self.case_add_status_endpoint(
+                    Finding.objects.get(id=self.finding),
+                    Endpoint_Status.objects.get(id=self.endpoint_status),
+                )
+            self.assertEqual(str(exc.exception), "'Finding' object has no attribute 'endpoint_status'")
 
-        endpoint = Endpoint.objects.get(pk=self.endpoints['host_port'])
-        self.assertEqual(endpoint.host, 'foo.bar')
-        self.assertEqual(endpoint.port, 22)
+        with self.subTest('New: From finding get endpoints'):
+            ep = self.case_from_finding_get_endpoints(
+                Finding.objects.get(id=self.finding),
+            ).all()
+            self.assertEqual(ep.all().count(), 1, ep)
 
-        endpoint = Endpoint.objects.get(pk=self.endpoints['ip_port'])
-        self.assertEqual(endpoint.host, '127.0.0.1')
-        self.assertEqual(endpoint.port, 22)
+        with self.subTest('New: Add existing endpoint to finding'):
+            # Yes, this method is still available. It could create Endpoint_Status with default values
+            self.case_add_endpoint_finding(
+                Finding.objects.get(id=self.finding),
+                Endpoint.objects.get(id=self.endpoint),
+            )
 
-        endpoint = Endpoint.objects.get(pk=self.endpoints['url'])
-        self.assertEqual(endpoint.protocol, 'http')
-        self.assertEqual(endpoint.host, 'foo.bar')
-        self.assertEqual(endpoint.port, 80)
-        self.assertIsNone(endpoint.path)
+        with self.subTest('New: List EPS from finding'):
+            eps = self.case_list_with_status_finding(
+                Finding.objects.get(id=self.finding),
+            )
+            self.assertEqual(eps.all().count(), 1, ep)
+            self.assertIsInstance(eps.all().first(), Endpoint_Status)
 
-        endpoint = Endpoint.objects.get(pk=self.endpoints['url_existing_port'])
-        self.assertEqual(endpoint.port, 4433)
-
-        endpoint = Endpoint.objects.get(pk=self.endpoints['full_url'])
-        self.assertEqual(endpoint.protocol, 'https')
-        self.assertEqual(endpoint.userinfo, 'alice')
-        self.assertEqual(endpoint.host, 'foo.bar')
-        self.assertEqual(endpoint.port, 4433)
-        self.assertEqual(endpoint.path, 'path1/path2/')
-        self.assertEqual(endpoint.query, 'key1=value1&no_value_key')
-        self.assertEqual(endpoint.fragment, 'fragmentX')
-
-        endpoint = Endpoint.objects.get(pk=self.endpoints['path_with_slash'])
-        self.assertEqual(endpoint.path, 'test')
-
-        low_id = Endpoint.objects.filter(id=min(self.endpoints_eps.values()))
-        logger.debug("Low id: {}".format(list(low_id)))
-        self.assertEqual(low_id.count(), 1)
-        high_id = Endpoint.objects.filter(id=max(self.endpoints_eps.values()))
-        logger.debug("High id: {}".format(list(high_id)))
-        self.assertEqual(high_id.count(), 0)
-
-        eps = Endpoint_Status.objects.filter(
-            finding_id=self.finding,
-            endpoint_id__in=self.endpoints_eps.values()
-        )
-        self.assertEqual(eps.count(), 1)
-        self.assertFalse(eps[0].mitigated)
+        with self.subTest('New: List EPS from endpoint'):
+            eps = self.case_list_with_status_endpoint(
+                Endpoint.objects.get(id=self.endpoint),
+            )
+            self.assertEqual(eps.all().count(), 1, ep)
+            self.assertIsInstance(eps.all().first(), Endpoint_Status)

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
     {{ block.super }}
-    <h3> Delete Endpoint {{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</h3>
+    <h3> Delete Endpoint {{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</h3>
     <p>
         Deleting this Endpoint will disassociate it with any findings and products and other relationships associated
         with it. These relationships are listed below:

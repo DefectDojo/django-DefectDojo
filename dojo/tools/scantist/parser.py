@@ -37,19 +37,20 @@ class ScantistParser(object):
         test:
         : purpose: parses input rawto extract dojo
         """
+
         def get_findings(vuln, test):
             """
             vuln : input vulnerable node
             test :
             """
-            cve = vuln.get("Public ID")
+            vulnerability_id = vuln.get("Public ID")
             # default use OWASP a9 until the Scantist output report includes
             cwe = 1035
 
             component_name = vuln.get("Library")
             component_version = vuln.get("Library Version")
 
-            title = cve + '|' + component_name
+            title = vulnerability_id + "|" + component_name
             description = vuln.get("Description")
 
             file_path = vuln.get("File Path", "")
@@ -63,17 +64,17 @@ class ScantistParser(object):
                 test=test,
                 description=description,
                 severity=severity,
-                cve=cve,
                 cwe=cwe,
                 mitigation=mitigation,
-                references=vuln.get('references'),
+                references=vuln.get("references"),
                 file_path=file_path,
                 component_name=component_name,
                 component_version=component_version,
-                severity_justification=vuln.get('severity_justification'),
-                dynamic_finding=True
+                severity_justification=vuln.get("severity_justification"),
+                dynamic_finding=True,
             )
-
+            if vulnerability_id:
+                finding.unsaved_vulnerability_ids = [vulnerability_id]
             return finding
 
         items = dict()
@@ -82,7 +83,9 @@ class ScantistParser(object):
 
             if item:
                 hash_key = hashlib.md5(
-                    node.get('Public ID').encode('utf-8') + node.get('Library').encode('utf-8')).hexdigest()
+                    node.get("Public ID").encode("utf-8")
+                    + node.get("Library").encode("utf-8")
+                ).hexdigest()
 
                 items[hash_key] = get_findings(node, test)
 

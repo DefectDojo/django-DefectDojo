@@ -1,5 +1,8 @@
 [flake8]
 # Documentation for flake8 http://flake8.pycqa.org/en/3.1.1/user/index.html
+
+# we should not ignore these mistakes !!!!!!!!
+
 ignore =
     # Suppress - line too long (> 79 characters)
     E501
@@ -25,6 +28,8 @@ ignore =
     E128
     # line break after binary operator
     W504
+    # Line break occurred before a binary operator (conflicting with black)
+    W503
     # undefined file name excpetion
     F821
 

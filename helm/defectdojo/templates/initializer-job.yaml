@@ -1,4 +1,4 @@
-{{- if .Values.initializer.run  }}
+{{- if .Values.initializer.run }}
 {{- $fullName := include "defectdojo.fullname" . -}}
 apiVersion: batch/v1
 kind: Job
@@ -10,14 +10,21 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
+  annotations:
+    {{- with .Values.initializer.jobAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
-  ttlSecondsAfterFinished: {{ .Values.initializerKeepSeconds }}
+  ttlSecondsAfterFinished: {{ .Values.initializer.keepSeconds }}
   template:
     metadata:
       labels:
         defectdojo.org/component: initializer
         app.kubernetes.io/name: {{ include "defectdojo.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- if .Values.initializer.labels }}
+        {{- toYaml .Values.initializer.labels | nindent 8 }}
+        {{- end }}
       annotations:
       {{- with .Values.initializer.annotations }}
         {{- toYaml . | nindent 8 }}
@@ -27,6 +34,19 @@ spec:
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
       - name: {{ .Values.imagePullSecrets }}
+      {{- end }}
+      volumes:
+      {{- range .Values.initializer.extraVolumes }}
+      - name: userconfig-{{ .name }}
+        {{ .type }}:
+          {{- if (eq .type "configMap") }}
+          name: {{ .name }}
+          {{- else if (eq .type "secret") }}
+          secretName: {{ .name }}
+          {{- else if (eq .type "hostPath") }}
+          type: {{ .pathType | default "Directory" }}
+          path: {{ .hostPath }}
+          {{- end }}
       {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
@@ -39,9 +59,9 @@ spec:
         args:
         - "-verbose={{ .Values.cloudsql.verbose }}"
         {{- if eq .Values.database "postgresql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.service.port }}"
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
         {{- else if eq .Values.database "mysql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.master.service.port }}"
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.primary.service.ports.mysql }}"
         {{- end }}
         {{- if .Values.cloudsql.enable_iam_login }}
         - "-enable_iam_login"
@@ -56,7 +76,14 @@ spec:
         {{- if .Values.securityContext.enabled }}
         securityContext:
           {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
-        {{- end }}          
+        {{- end }}
+        volumeMounts:
+        {{- range .Values.initializer.extraVolumes }}
+        - name: userconfig-{{ .name }}
+          readOnly: true
+          mountPath: {{ .path }}
+          subPath: {{ .subPath }}
+        {{- end }}
         command:
           - /entrypoint-initializer.sh
         envFrom:
@@ -69,12 +96,18 @@ spec:
           valueFrom:
             secretKeyRef:
               {{- if eq .Values.database "postgresql" }}
-              name: {{ .Values.postgresql.existingSecret }}
-              key: {{ .Values.postgresql.secretKey }}
+              name: {{ .Values.postgresql.auth.existingSecret }}
+              key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey }}
+              {{- else if eq .Values.database "postgresqlha" }}
+              name: {{ .Values.postgresqlha.postgresql.existingSecret }}
+              key: postgresql-postgres-password
               {{- else if eq .Values.database "mysql" }}
               name: {{ .Values.mysql.auth.existingSecret }}
               key: {{ .Values.mysql.auth.secretKey }}
               {{- end }}
+        {{- if .Values.extraEnv }}
+        {{- toYaml .Values.extraEnv | nindent 8 }}
+        {{- end }}
         resources:
           {{- toYaml .Values.initializer.resources | nindent 10 }}
       restartPolicy: Never

@@ -1,0 +1,615 @@
+{
+   "meta": {
+      "application": "Dependency-Track",
+      "version": "4.7.0",
+      "timestamp": "2023-02-08T13:43:13Z"
+   },
+   "findings": [
+      {
+         "component": {
+            "latestVersion": "2.14.2",
+            "name": "jackson-databind",
+            "project": "fba4704e-7b21-4637-b441-8390af5d0710",
+            "purl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.13.3?type=jar",
+            "uuid": "911e562b-150b-447e-abd7-796204527bf7",
+            "version": "2.13.3",
+            "group": "com.fasterxml.jackson.core"
+         },
+         "attribution": {
+            "analyzerIdentity": "INTERNAL_ANALYZER",
+            "attributedOn": "2023-02-07 21:51:37.814"
+         },
+         "vulnerability": {
+            "severity": "HIGH",
+            "severityRank": 1,
+            "cweName": "Uncontrolled Resource Consumption",
+            "vulnId": "GHSA-rgv9-q543-rqg4",
+            "aliases": [
+               {
+                  "allBySource": {
+                     "NVD": "CVE-2022-42004",
+                     "OSV": "DSA-5283-1",
+                     "GITHUB": "GHSA-rgv9-q543-rqg4"
+                  },
+                  "cveId": "CVE-2022-42004",
+                  "ghsaId": "GHSA-rgv9-q543-rqg4",
+                  "id": 8089,
+                  "osvId": "DSA-5283-1"
+               }
+            ],
+            "cweId": 400,
+            "description": "In FasterXML jackson-databind before 2.12.7.1 and in 2.13.x before 2.13.4, resource exhaustion can occur because of a lack of a check in BeanDeserializer._deserializeFromArray to prevent use of deeply nested arrays. An application is vulnerable only with certain customized choices for deserialization.",
+            "source": "GITHUB",
+            "title": "Uncontrolled Resource Consumption in FasterXML jackson-databind",
+            "cwes": [
+               {
+                  "cweId": 400,
+                  "name": "Uncontrolled Resource Consumption",
+                  "id": 0
+               },
+               {
+                  "cweId": 502,
+                  "name": "Deserialization of Untrusted Data",
+                  "id": 0
+               }
+            ],
+            "uuid": "8af37107-7e63-49d1-99fa-18226135f4f6"
+         },
+         "analysis": {
+            "isSuppressed": false
+         },
+         "matrix": "fba4704e-7b21-4637-b441-8390af5d0710:911e562b-150b-447e-abd7-796204527bf7:8af37107-7e63-49d1-99fa-18226135f4f6"
+      },
+      {
+         "component": {
+            "latestVersion": "2.14.2",
+            "name": "jackson-databind",
+            "project": "fba4704e-7b21-4637-b441-8390af5d0710",
+            "purl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.13.3?type=jar",
+            "uuid": "911e562b-150b-447e-abd7-796204527bf7",
+            "version": "2.13.3",
+            "group": "com.fasterxml.jackson.core"
+         },
+         "attribution": {
+            "analyzerIdentity": "INTERNAL_ANALYZER",
+            "attributedOn": "2023-02-07 21:51:37.85"
+         },
+         "vulnerability": {
+            "severity": "HIGH",
+            "severityRank": 1,
+            "cweName": "Uncontrolled Resource Consumption",
+            "vulnId": "GHSA-jjjh-jjxp-wpff",
+            "aliases": [
+               {
+                  "allBySource": {
+                     "NVD": "CVE-2022-42003",
+                     "OSV": "DSA-5283-1",
+                     "GITHUB": "GHSA-jjjh-jjxp-wpff"
+                  },
+                  "cveId": "CVE-2022-42003",
+                  "ghsaId": "GHSA-jjjh-jjxp-wpff",
+                  "id": 8088,
+                  "osvId": "DSA-5283-1"
+               }
+            ],
+            "cweId": 400,
+            "description": "In FasterXML jackson-databind before 2.12.7.1 and in 2.13.x before 2.13.4.1 resource exhaustion can occur because of a lack of a check in primitive value deserializers to avoid deep wrapper array nesting, when the UNWRAP_SINGLE_VALUE_ARRAYS feature is enabled. This was patched in 2.12.7.1, 2.13.4.1, and 2.14.0.",
+            "source": "GITHUB",
+            "title": "Uncontrolled Resource Consumption in Jackson-databind",
+            "cwes": [
+               {
+                  "cweId": 400,
+                  "name": "Uncontrolled Resource Consumption",
+                  "id": 0
+               },
+               {
+                  "cweId": 502,
+                  "name": "Deserialization of Untrusted Data",
+                  "id": 0
+               }
+            ],
+            "uuid": "f2060109-fbd1-41b7-89f6-3261b9716670"
+         },
+         "analysis": {
+            "isSuppressed": false
+         },
+         "matrix": "fba4704e-7b21-4637-b441-8390af5d0710:911e562b-150b-447e-abd7-796204527bf7:f2060109-fbd1-41b7-89f6-3261b9716670"
+      },
+      {
+         "component": {
+            "latestVersion": "1.33",
+            "name": "snakeyaml",
+            "project": "fba4704e-7b21-4637-b441-8390af5d0710",
+            "purl": "pkg:maven/org.yaml/snakeyaml@1.30?type=jar",
+            "uuid": "f97c2704-ae2f-4229-8f71-d884d25bccda",
+            "version": "1.30",
+            "group": "org.yaml"
+         },
+         "attribution": {
+            "analyzerIdentity": "INTERNAL_ANALYZER",
+            "attributedOn": "2023-02-07 21:51:38.004"
+         },
+         "vulnerability": {
+            "severity": "MEDIUM",
+            "severityRank": 2,
+            "cweName": "Out-of-bounds Write",
+            "vulnId": "GHSA-9w3m-gqgf-c4p9",
+            "aliases": [
+               {
+                  "allBySource": {
+                     "NVD": "CVE-2022-38752",
+                     "GITHUB": "GHSA-9w3m-gqgf-c4p9"
+                  },
+                  "cveId": "CVE-2022-38752",
+                  "ghsaId": "GHSA-9w3m-gqgf-c4p9",
+                  "id": 7158
+               }
+            ],
+            "cweId": 787,
+            "description": "Using snakeYAML to parse untrusted YAML files may be vulnerable to Denial of Service attacks (DoS). If the parser is running on user supplied input, an attacker may supply content that causes the parser to crash by stack-overflow.",
+            "source": "GITHUB",
+            "title": "snakeYAML before 1.32 vulnerable to Denial of Service due to Out-of-bounds Write",
+            "cwes": [
+               {
+                  "cweId": 787,
+                  "name": "Out-of-bounds Write",
+                  "id": 0
+               }
+            ],
+            "uuid": "61b80aee-51bf-4d82-ac76-8c98f3c93da5"
+         },
+         "analysis": {
+            "isSuppressed": false
+         },
+         "matrix": "fba4704e-7b21-4637-b441-8390af5d0710:f97c2704-ae2f-4229-8f71-d884d25bccda:61b80aee-51bf-4d82-ac76-8c98f3c93da5"
+      },
+      {
+         "component": {
+            "latestVersion": "1.33",
+            "name": "snakeyaml",
+            "project": "fba4704e-7b21-4637-b441-8390af5d0710",
+            "purl": "pkg:maven/org.yaml/snakeyaml@1.30?type=jar",
+            "uuid": "f97c2704-ae2f-4229-8f71-d884d25bccda",
+            "version": "1.30",
+            "group": "org.yaml"
+         },
+         "attribution": {
+            "analyzerIdentity": "INTERNAL_ANALYZER",
+            "attributedOn": "2023-02-07 21:51:38.04"
+         },
+         "vulnerability": {
+            "severity": "MEDIUM",
+            "severityRank": 2,
+            "cweName": "Stack-based Buffer Overflow",
+            "vulnId": "GHSA-w37g-rhq8-7m4j",
+            "aliases": [
+               {
+                  "allBySource": {
+                     "NVD": "CVE-2022-41854",
+                     "GITHUB": "GHSA-w37g-rhq8-7m4j"
+                  },
+                  "cveId": "CVE-2022-41854",
+                  "ghsaId": "GHSA-w37g-rhq8-7m4j",
+                  "id": 37892
+               }
+            ],
+            "cweId": 121,
+            "description": "Those using Snakeyaml to parse untrusted YAML files may be vulnerable to Denial of Service attacks (DOS). If the parser is running on user supplied input, an attacker may supply content that causes the parser to crash by stack overflow. This effect may support a denial of service attack.",
+            "source": "GITHUB",
+            "title": "Snakeyaml vulnerable to Stack overflow leading to denial of service",
+            "cwes": [
+               {
+                  "cweId": 121,
+                  "name": "Stack-based Buffer Overflow",
+                  "id": 0
+               },
+               {
+                  "cweId": 787,
+                  "name": "Out-of-bounds Write",
+                  "id": 0
+               }
+            ],
+            "uuid": "81bb04f7-4e73-4b1e-9369-755aed57d903"
+         },
+         "analysis": {
+            "isSuppressed": false
+         },
+         "matrix": "fba4704e-7b21-4637-b441-8390af5d0710:f97c2704-ae2f-4229-8f71-d884d25bccda:81bb04f7-4e73-4b1e-9369-755aed57d903"
+      },
+      {
+         "component": {
+            "latestVersion": "1.33",
+            "name": "snakeyaml",
+            "project": "fba4704e-7b21-4637-b441-8390af5d0710",
+            "purl": "pkg:maven/org.yaml/snakeyaml@1.30?type=jar",
+            "uuid": "f97c2704-ae2f-4229-8f71-d884d25bccda",
+            "version": "1.30",
+            "group": "org.yaml"
+         },
+         "attribution": {
+            "analyzerIdentity": "INTERNAL_ANALYZER",
+            "attributedOn": "2023-02-07 21:51:38.081"
+         },
+         "vulnerability": {
+            "severity": "MEDIUM",
+            "severityRank": 2,
+            "cweName": "Stack-based Buffer Overflow",
+            "vulnId": "GHSA-c4r9-r8fh-9vj2",
+            "aliases": [
+               {
+                  "allBySource": {
+                     "NVD": "CVE-2022-38749",
+                     "OSV": "DLA-3132-1",
+                     "GITHUB": "GHSA-c4r9-r8fh-9vj2"
+                  },
+                  "cveId": "CVE-2022-38749",
+                  "ghsaId": "GHSA-c4r9-r8fh-9vj2",
+                  "id": 7675,
+                  "osvId": "DLA-3132-1"
+               }
+            ],
+            "cweId": 121,
+            "description": "Using snakeYAML to parse untrusted YAML files may be vulnerable to Denial of Service attacks (DOS). If the parser is running on user supplied input, an attacker may supply content that causes the parser to crash by stackoverflow.",
+            "source": "GITHUB",
+            "title": "snakeYAML before 1.31 vulnerable to Denial of Service due to Out-of-bounds Write",
+            "cwes": [
+               {
+                  "cweId": 121,
+                  "name": "Stack-based Buffer Overflow",
+                  "id": 0
+               },
+               {
+                  "cweId": 787,
+                  "name": "Out-of-bounds Write",
+                  "id": 0
+               }
+            ],
+            "uuid": "703ec00f-8bbe-42b4-959e-0562e226ecfa"
+         },
+         "analysis": {
+            "isSuppressed": false
+         },
+         "matrix": "fba4704e-7b21-4637-b441-8390af5d0710:f97c2704-ae2f-4229-8f71-d884d25bccda:703ec00f-8bbe-42b4-959e-0562e226ecfa"
+      },
+      {
+         "component": {
+            "latestVersion": "1.33",
+            "name": "snakeyaml",
+            "project": "fba4704e-7b21-4637-b441-8390af5d0710",
+            "purl": "pkg:maven/org.yaml/snakeyaml@1.30?type=jar",
+            "uuid": "f97c2704-ae2f-4229-8f71-d884d25bccda",
+            "version": "1.30",
+            "group": "org.yaml"
+         },
+         "attribution": {
+            "analyzerIdentity": "INTERNAL_ANALYZER",
+            "attributedOn": "2023-02-07 21:51:38.113"
+         },
+         "vulnerability": {
+            "severity": "MEDIUM",
+            "severityRank": 2,
+            "cweName": "Out-of-bounds Write",
+            "vulnId": "GHSA-98wm-3w3q-mw94",
+            "aliases": [
+               {
+                  "allBySource": {
+                     "NVD": "CVE-2022-38751",
+                     "OSV": "DLA-3132-1",
+                     "GITHUB": "GHSA-98wm-3w3q-mw94"
+                  },
+                  "cveId": "CVE-2022-38751",
+                  "ghsaId": "GHSA-98wm-3w3q-mw94",
+                  "id": 7676,
+                  "osvId": "DLA-3132-1"
+               }
+            ],
+            "cweId": 787,
+            "description": "Using snakeYAML to parse untrusted YAML files may be vulnerable to Denial of Service attacks (DOS). If the parser is running on user supplied input, an attacker may supply content that causes the parser to crash by stackoverflow.",
+            "source": "GITHUB",
+            "title": "snakeYAML before 1.31 vulnerable to Denial of Service due to Out-of-bounds Write",
+            "cwes": [
+               {
+                  "cweId": 787,
+                  "name": "Out-of-bounds Write",
+                  "id": 0
+               }
+            ],
+            "uuid": "e85c0f1d-1d69-4fc7-b947-a12438ddb4e9"
+         },
+         "analysis": {
+            "isSuppressed": false
+         },
+         "matrix": "fba4704e-7b21-4637-b441-8390af5d0710:f97c2704-ae2f-4229-8f71-d884d25bccda:e85c0f1d-1d69-4fc7-b947-a12438ddb4e9"
+      },
+      {
+         "component": {
+            "latestVersion": "1.33",
+            "name": "snakeyaml",
+            "project": "fba4704e-7b21-4637-b441-8390af5d0710",
+            "purl": "pkg:maven/org.yaml/snakeyaml@1.30?type=jar",
+            "uuid": "f97c2704-ae2f-4229-8f71-d884d25bccda",
+            "version": "1.30",
+            "group": "org.yaml"
+         },
+         "attribution": {
+            "analyzerIdentity": "INTERNAL_ANALYZER",
+            "attributedOn": "2023-02-07 21:51:38.143"
+         },
+         "vulnerability": {
+            "severity": "MEDIUM",
+            "severityRank": 2,
+            "cweName": "Out-of-bounds Write",
+            "vulnId": "GHSA-hhhw-99gj-p3c3",
+            "aliases": [
+               {
+                  "allBySource": {
+                     "NVD": "CVE-2022-38750",
+                     "OSV": "DLA-3132-1",
+                     "GITHUB": "GHSA-hhhw-99gj-p3c3"
+                  },
+                  "cveId": "CVE-2022-38750",
+                  "ghsaId": "GHSA-hhhw-99gj-p3c3",
+                  "id": 7677,
+                  "osvId": "DLA-3132-1"
+               }
+            ],
+            "cweId": 787,
+            "description": "Using snakeYAML to parse untrusted YAML files may be vulnerable to Denial of Service attacks (DOS). If the parser is running on user supplied input, an attacker may supply content that causes the parser to crash by stackoverflow.",
+            "source": "GITHUB",
+            "title": "snakeYAML before 1.31 vulnerable to Denial of Service due to Out-of-bounds Write",
+            "cwes": [
+               {
+                  "cweId": 787,
+                  "name": "Out-of-bounds Write",
+                  "id": 0
+               }
+            ],
+            "uuid": "7a13ba24-7abd-4967-b6a4-5745c27a8c61"
+         },
+         "analysis": {
+            "isSuppressed": false
+         },
+         "matrix": "fba4704e-7b21-4637-b441-8390af5d0710:f97c2704-ae2f-4229-8f71-d884d25bccda:7a13ba24-7abd-4967-b6a4-5745c27a8c61"
+      },
+      {
+         "component": {
+            "latestVersion": "1.33",
+            "name": "snakeyaml",
+            "project": "fba4704e-7b21-4637-b441-8390af5d0710",
+            "purl": "pkg:maven/org.yaml/snakeyaml@1.30?type=jar",
+            "uuid": "f97c2704-ae2f-4229-8f71-d884d25bccda",
+            "version": "1.30",
+            "group": "org.yaml"
+         },
+         "attribution": {
+            "analyzerIdentity": "INTERNAL_ANALYZER",
+            "attributedOn": "2023-02-07 21:51:38.19"
+         },
+         "vulnerability": {
+            "severity": "HIGH",
+            "severityRank": 1,
+            "cweName": "Uncontrolled Resource Consumption",
+            "vulnId": "GHSA-3mc7-4q67-w48m",
+            "aliases": [
+               {
+                  "allBySource": {
+                     "NVD": "CVE-2022-25857",
+                     "OSV": "DLA-3132-1",
+                     "GITHUB": "GHSA-3mc7-4q67-w48m"
+                  },
+                  "cveId": "CVE-2022-25857",
+                  "ghsaId": "GHSA-3mc7-4q67-w48m",
+                  "id": 7678,
+                  "osvId": "DLA-3132-1"
+               }
+            ],
+            "cweId": 400,
+            "description": "The package org.yaml:snakeyaml from 0 and before 1.31 are vulnerable to Denial of Service (DoS) due missing to nested depth limitation for collections.",
+            "source": "GITHUB",
+            "title": "Uncontrolled Resource Consumption in snakeyaml",
+            "cwes": [
+               {
+                  "cweId": 400,
+                  "name": "Uncontrolled Resource Consumption",
+                  "id": 0
+               }
+            ],
+            "uuid": "852e59cc-3a12-4ce9-a7fd-eea4f1abd003"
+         },
+         "analysis": {
+            "isSuppressed": false
+         },
+         "matrix": "fba4704e-7b21-4637-b441-8390af5d0710:f97c2704-ae2f-4229-8f71-d884d25bccda:852e59cc-3a12-4ce9-a7fd-eea4f1abd003"
+      },
+      {
+         "component": {
+            "latestVersion": "1.33",
+            "name": "snakeyaml",
+            "project": "fba4704e-7b21-4637-b441-8390af5d0710",
+            "purl": "pkg:maven/org.yaml/snakeyaml@1.30?type=jar",
+            "uuid": "f97c2704-ae2f-4229-8f71-d884d25bccda",
+            "version": "1.30",
+            "group": "org.yaml"
+         },
+         "attribution": {
+            "analyzerIdentity": "INTERNAL_ANALYZER",
+            "attributedOn": "2023-02-07 21:51:38.237"
+         },
+         "vulnerability": {
+            "severity": "HIGH",
+            "severityRank": 1,
+            "cweName": "Deserialization of Untrusted Data",
+            "vulnId": "GHSA-mjmj-j48q-9wg2",
+            "aliases": [
+               {
+                  "allBySource": {
+                     "NVD": "CVE-2022-1471",
+                     "GITHUB": "GHSA-mjmj-j48q-9wg2"
+                  },
+                  "cveId": "CVE-2022-1471",
+                  "ghsaId": "GHSA-mjmj-j48q-9wg2",
+                  "id": 38484
+               }
+            ],
+            "cweId": 502,
+            "description": "### Summary\nSnakeYaml's `Constructor` class, which inherits from `SafeConstructor`, allows any type be deserialized given the following line:\n\nnew Yaml(new Constructor(TestDataClass.class)).load(yamlContent);\n\nTypes do not have to match the types of properties in the target class. A `ConstructorException` is thrown, but only after a malicious payload is deserialized.\n\n### Severity\nHigh, lack of type checks during deserialization allows remote code execution.\n\n### Proof of Concept\nExecute `bash run.sh`. The PoC uses Constructor to deserialize a payload\nfor RCE. RCE is demonstrated by using a payload which performs a http request to\nhttp://127.0.0.1:8000.\n\nExample output of successful run of proof of concept:\n\n```\n$ bash run.sh\n\n[+] Downloading snakeyaml if needed\n[+] Starting mock HTTP server on 127.0.0.1:8000 to demonstrate RCE\nnc: no process found\n[+] Compiling and running Proof of Concept, which a payload that sends a HTTP request to mock web server.\n[+] An exception is expected.\nException:\nCannot create property=payload for JavaBean=Main$TestDataClass@3cbbc1e0\n in 'string', line 1, column 1:\n    payload: !!javax.script.ScriptEn ... \n    ^\nCan not set java.lang.String field Main$TestDataClass.payload to javax.script.ScriptEngineManager\n in 'string', line 1, column 10:\n    payload: !!javax.script.ScriptEngineManag ... \n             ^\n\n\tat org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:291)\n\tat org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:172)\n\tat org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:332)\n\tat org.yaml.snakeyaml.constructor.BaseConstructor.constructObjectNoCheck(BaseConstructor.java:230)\n\tat org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:220)\n\tat org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:174)\n\tat org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:158)\n\tat org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:491)\n\tat org.yaml.snakeyaml.Yaml.load(Yaml.java:416)\n\tat Main.main(Main.java:37)\nCaused by: java.lang.IllegalArgumentException: Can not set java.lang.String field Main$TestDataClass.payload to javax.script.ScriptEngineManager\n\tat java.base/jdk.internal.reflect.UnsafeFieldAccessorImpl.throwSetIllegalArgumentException(UnsafeFieldAccessorImpl.java:167)\n\tat java.base/jdk.internal.reflect.UnsafeFieldAccessorImpl.throwSetIllegalArgumentException(UnsafeFieldAccessorImpl.java:171)\n\tat java.base/jdk.internal.reflect.UnsafeObjectFieldAccessorImpl.set(UnsafeObjectFieldAccessorImpl.java:81)\n\tat java.base/java.lang.reflect.Field.set(Field.java:780)\n\tat org.yaml.snakeyaml.introspector.FieldProperty.set(FieldProperty.java:44)\n\tat org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:286)\n\t... 9 more\n[+] Dumping Received HTTP Request. Will not be empty if PoC worked\nGET /proof-of-concept HTTP/1.1\nUser-Agent: Java/11.0.14\nHost: localhost:8000\nAccept: text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2\nConnection: keep-alive\n```\n\n### Further Analysis\nPotential mitigations include, leveraging SnakeYaml's SafeConstructor while parsing untrusted content.\n\nSee https://bitbucket.org/snakeyaml/snakeyaml/issues/561/cve-2022-1471-vulnerability-in#comment-64581479 for discussion on the subject.\n\nA proposed fix is planned for version 1.34. See https://bitbucket.org/snakeyaml/snakeyaml/issues/561/cve-2022-1471-vulnerability-in#comment-64634374 for more information.\n\n### Timeline\n**Date reported**: 4/11/2022\n**Date fixed**: \n**Date disclosed**: 10/13/2022",
+            "source": "GITHUB",
+            "title": "SnakeYaml Constructor Deserialization Remote Code Execution",
+            "cwes": [
+               {
+                  "cweId": 502,
+                  "name": "Deserialization of Untrusted Data",
+                  "id": 0
+               }
+            ],
+            "uuid": "dc37054d-7573-4b46-93a5-c065b952284b"
+         },
+         "analysis": {
+            "isSuppressed": false
+         },
+         "matrix": "fba4704e-7b21-4637-b441-8390af5d0710:f97c2704-ae2f-4229-8f71-d884d25bccda:dc37054d-7573-4b46-93a5-c065b952284b"
+      },
+      {
+         "component": {
+            "latestVersion": "5.0.0.Alpha2",
+            "name": "netty-codec-haproxy",
+            "project": "fba4704e-7b21-4637-b441-8390af5d0710",
+            "purl": "pkg:maven/io.netty/netty-codec-haproxy@4.1.78.Final?type=jar",
+            "uuid": "c5e1399d-25ed-4ce8-9646-e508b6c5d3f3",
+            "version": "4.1.78.Final",
+            "group": "io.netty"
+         },
+         "attribution": {
+            "analyzerIdentity": "INTERNAL_ANALYZER",
+            "attributedOn": "2023-02-07 21:51:38.388"
+         },
+         "vulnerability": {
+            "severity": "MEDIUM",
+            "severityRank": 2,
+            "cweName": "Uncontrolled Recursion",
+            "vulnId": "GHSA-fx2c-96vj-985v",
+            "aliases": [
+               {
+                  "allBySource": {
+                     "NVD": "CVE-2022-41881",
+                     "OSV": "DLA-3268-1",
+                     "GITHUB": "GHSA-fx2c-96vj-985v"
+                  },
+                  "cveId": "CVE-2022-41881",
+                  "ghsaId": "GHSA-fx2c-96vj-985v",
+                  "id": 38485,
+                  "osvId": "DLA-3268-1"
+               }
+            ],
+            "cweId": 674,
+            "description": "### Impact\nA StackOverflowError can be raised when parsing a malformed crafted message due to an infinite recursion.\n\n### Patches\nUsers should upgrade to 4.1.86.Final.\n\n### Workarounds\nThere is no workaround, except using a custom HaProxyMessageDecoder.\n\n### References\nWhen parsing a TLV with type = PP2_TYPE_SSL, the value can be again a TLV with type = PP2_TYPE_SSL and so on.\nThe only limitation of the recursion is that the TLV length cannot be bigger than 0xffff because it is encoded in an unsigned short type.\nProviding a TLV with a nesting level that is large enough will lead to raising of a StackOverflowError.\nThe StackOverflowError will be caught if HAProxyMessageDecoder is used as part of Netty’s ChannelPipeline, but using it directly without the ChannelPipeline will lead to a thrown exception / crash.\n\n\n### For more information\nIf you have any questions or comments about this advisory:\n* Open an issue in [netty](https://github.com/netty/netty)\n",
+            "source": "GITHUB",
+            "title": "HAProxyMessageDecoder Stack Exhaustion DoS",
+            "cwes": [
+               {
+                  "cweId": 674,
+                  "name": "Uncontrolled Recursion",
+                  "id": 0
+               }
+            ],
+            "uuid": "29b575bb-4e58-4fba-82e4-242159996903"
+         },
+         "analysis": {
+            "isSuppressed": false
+         },
+         "matrix": "fba4704e-7b21-4637-b441-8390af5d0710:c5e1399d-25ed-4ce8-9646-e508b6c5d3f3:29b575bb-4e58-4fba-82e4-242159996903"
+      },
+      {
+         "component": {
+            "latestVersion": "6.0.4",
+            "name": "spring-web",
+            "project": "fba4704e-7b21-4637-b441-8390af5d0710",
+            "purl": "pkg:maven/org.springframework/spring-web@5.3.21?type=jar",
+            "uuid": "7548389b-8231-428f-9879-3918a4a393bd",
+            "version": "5.3.21",
+            "group": "org.springframework"
+         },
+         "attribution": {
+            "analyzerIdentity": "INTERNAL_ANALYZER",
+            "attributedOn": "2023-02-07 21:51:38.74"
+         },
+         "vulnerability": {
+            "severity": "MEDIUM",
+            "severityRank": 2,
+            "cweName": "Deserialization of Untrusted Data",
+            "vulnId": "GHSA-4wrc-f8pq-fpqp",
+            "aliases": [
+               {
+                  "allBySource": {
+                     "NVD": "CVE-2016-1000027",
+                     "GITHUB": "GHSA-4wrc-f8pq-fpqp"
+                  },
+                  "cveId": "CVE-2016-1000027",
+                  "ghsaId": "GHSA-4wrc-f8pq-fpqp",
+                  "id": 37708
+               }
+            ],
+            "cweId": 502,
+            "description": "Pivotal Spring Framework before 6.0.0 suffers from a potential remote code execution (RCE) issue if used for Java deserialization of untrusted data. Depending on how the library is implemented within a product, this issue may or not occur, and authentication may be required.\n\nMaintainers recommend investigating alternative components or a potential mitigating control. Version 4.2.6 and 3.2.17 contain [enhanced documentation](https://github.com/spring-projects/spring-framework/commit/5cbe90b2cd91b866a5a9586e460f311860e11cfa) advising users to take precautions against unsafe Java deserialization, and version 6.0.0 and above [deprecate the impacted classes](https://github.com/spring-projects/spring-framework/commit/2b051b8b321768a4cfef83077db65c6328ffd60f). ",
+            "source": "GITHUB",
+            "title": "Pivotal Spring Framework contains unsafe Java deserialization methods",
+            "cwes": [
+               {
+                  "cweId": 502,
+                  "name": "Deserialization of Untrusted Data",
+                  "id": 0
+               }
+            ],
+            "uuid": "e9b74c34-0c1c-4101-85cc-dd61f8038068"
+         },
+         "analysis": {
+            "isSuppressed": false
+         },
+         "matrix": "fba4704e-7b21-4637-b441-8390af5d0710:7548389b-8231-428f-9879-3918a4a393bd:e9b74c34-0c1c-4101-85cc-dd61f8038068"
+      },
+      {
+         "component": {
+            "latestVersion": "2.3.3.Final",
+            "name": "undertow-core",
+            "project": "fba4704e-7b21-4637-b441-8390af5d0710",
+            "purl": "pkg:maven/io.undertow/undertow-core@2.2.18.Final?type=jar",
+            "uuid": "df54982d-d929-4764-bfdc-ecc39994a116",
+            "version": "2.2.18.Final",
+            "group": "io.undertow"
+         },
+         "attribution": {
+            "analyzerIdentity": "INTERNAL_ANALYZER",
+            "attributedOn": "2023-02-07 21:51:38.805"
+         },
+         "vulnerability": {
+            "severity": "HIGH",
+            "severityRank": 1,
+            "cweName": "Uncontrolled Resource Consumption",
+            "vulnId": "CVE-2022-2053",
+            "aliases": [],
+            "cweId": 400,
+            "description": "When a POST request comes through AJP and the request exceeds the max-post-size limit (maxEntitySize), Undertow's AjpServerRequestConduit implementation closes a connection without sending any response to the client/proxy. This behavior results in that a front-end proxy marking the backend worker (application server) as an error state and not forward requests to the worker for a while. In mod_cluster, this continues until the next STATUS request (10 seconds intervals) from the application server updates the server state. So, in the worst case, it can result in \"All workers are in error state\" and mod_cluster responds \"503 Service Unavailable\" for a while (up to 10 seconds). In mod_proxy_balancer, it does not forward requests to the worker until the \"retry\" timeout passes. However, luckily, mod_proxy_balancer has \"forcerecovery\" setting (On by default; this parameter can force the immediate recovery of all workers without considering the retry parameter of the workers if all workers of a balancer are in error state.). So, unlike mod_cluster, mod_proxy_balancer does not result in responding \"503 Service Unavailable\". An attacker could use this behavior to send a malicious request and trigger server errors, resulting in DoS (denial of service). This flaw was fixed in Undertow 2.2.19.Final, Undertow 2.3.0.Alpha2.",
+            "source": "NVD",
+            "title": "Undertow vulnerable to Dos via Large AJP request",
+            "cwes": [
+               {
+                  "cweId": 400,
+                  "name": "Uncontrolled Resource Consumption",
+                  "id": 0
+               }
+            ],
+            "uuid": "79cfe5aa-b44c-4823-a3d0-e23685616b93"
+         },
+         "analysis": {
+            "isSuppressed": false
+         },
+         "matrix": "fba4704e-7b21-4637-b441-8390af5d0710:df54982d-d929-4764-bfdc-ecc39994a116:79cfe5aa-b44c-4823-a3d0-e23685616b93"
+      }
+   ],
+   "project": {
+      "name": "project",
+      "uuid": "fba4704e-7b21-4637-b441-8390af5d0710",
+      "version": "develop-snapshot"
+   },
+   "version": "1.1"
+}

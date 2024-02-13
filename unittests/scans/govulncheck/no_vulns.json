@@ -1,0 +1,167 @@
+{
+	"Calls": {
+		"Functions": {},
+		"Entries": null
+	},
+	"Imports": {
+		"Packages": {
+			"1": {
+				"ID": 1,
+				"Name": "syscall",
+				"Path": "syscall",
+				"Module": 1,
+				"ImportedBy": [
+					2,
+					3,
+					5,
+					6,
+					7
+				]
+			},
+			"10": {
+				"ID": 10,
+				"Name": "log",
+				"Path": "log",
+				"Module": 1,
+				"ImportedBy": [
+					11
+				]
+			},
+			"11": {
+				"ID": 11,
+				"Name": "main",
+				"Path": "my_project",
+				"Module": 1,
+				"ImportedBy": null
+			},
+			"2": {
+				"ID": 2,
+				"Name": "execenv",
+				"Path": "internal/syscall/execenv",
+				"Module": 1,
+				"ImportedBy": [
+					7
+				]
+			},
+			"3": {
+				"ID": 3,
+				"Name": "time",
+				"Path": "time",
+				"Module": 1,
+				"ImportedBy": [
+					4,
+					6,
+					7,
+					10
+				]
+			},
+			"4": {
+				"ID": 4,
+				"Name": "fs",
+				"Path": "io/fs",
+				"Module": 1,
+				"ImportedBy": [
+					7
+				]
+			},
+			"5": {
+				"ID": 5,
+				"Name": "unix",
+				"Path": "internal/syscall/unix",
+				"Module": 1,
+				"ImportedBy": [
+					6,
+					7
+				]
+			},
+			"6": {
+				"ID": 6,
+				"Name": "poll",
+				"Path": "internal/poll",
+				"Module": 1,
+				"ImportedBy": [
+					7
+				]
+			},
+			"7": {
+				"ID": 7,
+				"Name": "os",
+				"Path": "os",
+				"Module": 1,
+				"ImportedBy": [
+					8,
+					10
+				]
+			},
+			"8": {
+				"ID": 8,
+				"Name": "fmt",
+				"Path": "fmt",
+				"Module": 1,
+				"ImportedBy": [
+					9,
+					10,
+					11
+				]
+			},
+			"9": {
+				"ID": 9,
+				"Name": "gocvss31",
+				"Path": "github.com/pandatix/go-cvss/31",
+				"Module": 2,
+				"ImportedBy": [
+					11
+				]
+			}
+		},
+		"Entries": [
+			11
+		]
+	},
+	"Requires": {
+		"Modules": {
+			"1": {
+				"ID": 1,
+				"Path": "stdlib",
+				"Version": "v1.19.0",
+				"Replace": 0,
+				"RequiredBy": [
+					2
+				]
+			},
+			"2": {
+				"ID": 2,
+				"Path": "github.com/pandatix/go-cvss",
+				"Version": "v0.3.0",
+				"Replace": 0,
+				"RequiredBy": [
+					1
+				]
+			}
+		},
+		"Entries": [
+			1
+		]
+	},
+	"Vulns": null,
+	"Modules": [
+		{
+			"Path": "github.com/pandatix/go-cvss",
+			"Version": "v0.3.0",
+			"Dir": "",
+			"Replace": null
+		},
+		{
+			"Path": "my_project",
+			"Version": "",
+			"Dir": "",
+			"Replace": null
+		},
+		{
+			"Path": "stdlib",
+			"Version": "v1.19.0",
+			"Dir": "",
+			"Replace": null
+		}
+	]
+}

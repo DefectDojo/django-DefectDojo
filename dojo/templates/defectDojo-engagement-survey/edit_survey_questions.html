@@ -1,13 +1,10 @@
 {% extends "base.html" %}
-{% block add_css %}
-    {{ block.super }}
-    <link rel="stylesheet" href="{{ STATIC_URL }}chosen-bootstrap/chosen.bootstrap.min.css">
-{% endblock %}
 {% block content %}
     {{ block.super }}
     <h3>Edit Questionnaire Questions ({{ survey.name }})</h3>
 
     <form class="form-horizontal" method="post">{% csrf_token %}
+    </br>
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
@@ -16,15 +13,18 @@
             </div>
         </div>
     </form>
-{% endblock %}
+{% endblock content %}
 {% block postscript %}
     {{ block.super }}
     <script type="application/javascript">
+        $(document).ready(function() {
+            $(".filter-option-inner-inner").text('Select as many Questions as applicable')
+        });
+
         $(function () {
-            $("#id_questions").bind("DOMSubtreeModified", function() {
-                $("#id_questions").trigger("chosen:updated");
+            $("#id_questions").change(function() {
+                $(".filter-option-inner-inner").text('Select as many Questions as applicable')
             });
         });
     </script>
-    <script type="application/javascript" src="{{ STATIC_URL }}admin/js/admin/RelatedObjectLookups.js"></script>
-{% endblock %}
+{% endblock postscript %}

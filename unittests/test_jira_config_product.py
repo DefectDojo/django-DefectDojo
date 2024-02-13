@@ -81,11 +81,12 @@ class JIRAConfigProductTest(DojoTestCase):
 
         self.assertEqual(200, response.status_code)
         content = response.content.decode('utf-8')
-        self.assertTrue('Name or service not known' in content)
+        # debian throws 'Name or service not known' error and alpine 'Name does not resolve'
+        self.assertTrue(('Name or service not known' in content) or ('Name does not resolve' in content))
 
         # test raw connection error
         with self.assertRaises(requests.exceptions.RequestException):
-            jira = jira_helper.get_jira_connection_raw(data['url'], data['username'], data['password'])
+            jira_helper.get_jira_connection_raw(data['url'], data['username'], data['password'])
 
     @patch('dojo.jira_link.views.jira_helper.get_jira_connection_raw')
     def test_add_jira_instance_invalid_credentials(self, jira_mock):
@@ -101,29 +102,29 @@ class JIRAConfigProductTest(DojoTestCase):
 
         self.assertEqual(200, response.status_code)
         content = response.content.decode('utf-8')
-        self.assertTrue('Login failed' in content)
-        self.assertTrue('Unable to authenticate to JIRA' in content)
+        self.assertIn('Login failed', content)
+        self.assertIn('Unable to authenticate to JIRA', content)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_add_jira_project_to_product_without_jira_project(self, jira_mock):
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
         # TODO: add product also via API, but let's focus on JIRA here
         product = self.add_product_without_jira_project(expected_delta_jira_project_db=0)
-        response = self.edit_jira_project_for_product(product, expected_delta_jira_project_db=1)
+        self.edit_jira_project_for_product(product, expected_delta_jira_project_db=1)
         self.assertEqual(jira_mock.call_count, 1)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_add_empty_jira_project_to_product_without_jira_project(self, jira_mock):
         jira_mock.return_value = True  # cannot set return_value in decorater AND have the mock into the method
         product = self.add_product_without_jira_project(expected_delta_jira_project_db=0)
-        response = self.empty_jira_project_for_product(product, expected_delta_jira_project_db=0)
+        self.empty_jira_project_for_product(product, expected_delta_jira_project_db=0)
         self.assertEqual(jira_mock.call_count, 0)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_edit_jira_project_to_product_with_jira_project(self, jira_mock):
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
         product = self.add_product_with_jira_project(expected_delta_jira_project_db=1)
-        response = self.edit_jira_project_for_product2(product, expected_delta_jira_project_db=0)
+        self.edit_jira_project_for_product2(product, expected_delta_jira_project_db=0)
         self.assertEqual(jira_mock.call_count, 2)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
@@ -136,14 +137,14 @@ class JIRAConfigProductTest(DojoTestCase):
         # - so prevent clearing out these values
         # response = self.empty_jira_project_for_product(Product.objects.get(id=3), -1)
         # errors means it won't redirect to view_product, but returns a 200 and redisplays the edit product page
-        response = self.empty_jira_project_for_product(product, expected_delta_jira_project_db=0, expect_200=True)
+        self.empty_jira_project_for_product(product, expected_delta_jira_project_db=0, expect_200=True)
         self.assertEqual(jira_mock.call_count, 1)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_add_jira_project_to_product_without_jira_project_invalid_project(self, jira_mock):
         jira_mock.return_value = False  # cannot set return_value in decorated AND have the mock into the method
         # errors means it won't redirect to view_product, but returns a 200 and redisplays the edit product page
-        response = self.edit_jira_project_for_product(Product.objects.get(id=3), expected_delta_jira_project_db=0, expect_200=True)
+        self.edit_jira_project_for_product(Product.objects.get(id=3), expected_delta_jira_project_db=0, expect_200=True)
         self.assertEqual(jira_mock.call_count, 1)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
@@ -152,7 +153,7 @@ class JIRAConfigProductTest(DojoTestCase):
         product = self.add_product_with_jira_project(expected_delta_jira_project_db=1)
         jira_mock.return_value = False
         #  jira key is changed, so jira project will be checked
-        response = self.edit_jira_project_for_product2(product, expected_delta_jira_project_db=0, expect_200=True)
+        self.edit_jira_project_for_product2(product, expected_delta_jira_project_db=0, expect_200=True)
         self.assertEqual(jira_mock.call_count, 2)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
@@ -191,8 +192,8 @@ class JIRAConfigProductTest(DojoTestCase):
     def test_edit_jira_project_to_product_with_jira_project_invalid_project_jira_disabled(self, jira_mock):
         self.system_settings(enable_jira=False)
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
-        response = self.edit_jira_project_for_product(Product.objects.get(id=3), expected_delta_jira_project_db=0)
-        response = self.edit_jira_project_for_product2(Product.objects.get(id=3), expected_delta_jira_project_db=0)
+        self.edit_jira_project_for_product(Product.objects.get(id=3), expected_delta_jira_project_db=0)
+        self.edit_jira_project_for_product2(Product.objects.get(id=3), expected_delta_jira_project_db=0)
         self.assertEqual(jira_mock.call_count, 0)
 
 

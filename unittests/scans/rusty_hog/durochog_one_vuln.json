@@ -1,0 +1,11 @@
+[
+    {
+       "stringsFound":[
+          "password = retrievePassword()"
+       ],
+       "path":"/scan_folder/unittests/scans/sonarqube/sonar-no-finding.html",
+       "reason":"password (Password)",
+       "linenum":68622,
+       "diff":"val password = retrievePassword()"
+    }
+]

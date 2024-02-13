@@ -1,8 +1,19 @@
-from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
-from dojo.tools.cobalt_api.api_client import CobaltAPI
+from dojo.tools.api_bugcrowd.api_client import BugcrowdAPI
+from dojo.tools.api_blackduck.api_client import BlackduckAPI
+from dojo.tools.api_cobalt.api_client import CobaltAPI
+from dojo.tools.api_edgescan.api_client import EdgescanAPI
+from dojo.tools.api_sonarqube.api_client import SonarQubeAPI
+from dojo.tools.api_vulners.api_client import VulnersAPI
 
-SCAN_APIS = {'SonarQube': SonarQubeAPI,
-             'Cobalt.io': CobaltAPI}
+
+SCAN_APIS = {
+                'Bugcrowd API': BugcrowdAPI,
+                'BlackDuck API': BlackduckAPI,
+                'Cobalt.io': CobaltAPI,
+                'Edgescan': EdgescanAPI,
+                'SonarQube': SonarQubeAPI,
+                'Vulners': VulnersAPI,
+             }
 
 
 def create_API(tool_configuration):

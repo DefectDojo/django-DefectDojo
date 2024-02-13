@@ -4,7 +4,7 @@ from dojo.tools.arachni.parser import ArachniParser
 from dojo.models import Test
 
 
-class TestAquaParser(DojoTestCase):
+class TestArachniParser(DojoTestCase):
 
     def test_parser_has_one_finding(self):
         with open("unittests/scans/arachni/arachni.afr.json") as testfile:

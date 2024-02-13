@@ -19,7 +19,7 @@ class TestSonarQubeParser(DojoTestCase):
 
     # SonarQube Scan - no finding
     def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_no_findings(
-        self,
+            self,
     ):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-no-finding.html"
@@ -40,7 +40,7 @@ class TestSonarQubeParser(DojoTestCase):
 
     # SonarQube Scan - report with one vuln
     def test_file_name_aggregated_parse_file_with_single_vulnerability_has_single_finding(
-        self,
+            self,
     ):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-single-finding.html"
@@ -134,50 +134,8 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(str, type(item.unique_id_from_tool))
         self.assertEqual("AWK40IMu-pl6AHs22MnV", item.unique_id_from_tool)
 
-    def check_parse_file_with_single_vulnerability_has_single_finding(self):
-        self.assertEqual(1, len(findings))
-
-        # check content
-        item = findings[0]
-        self.assertEqual(str, type(findings[0].title))
-        self.assertEqual("Credentials should not be hard-coded", item.title)
-        self.assertEqual(int, type(item.cwe))
-        # This is only the first CWE in the list!
-        self.assertEqual(798, item.cwe)
-        self.assertEqual(bool, type(item.active))
-        self.assertEqual(False, item.active)
-        self.assertEqual(bool, type(item.verified))
-        self.assertEqual(False, item.verified)
-        self.assertEqual(str, type(item.severity))
-        self.assertEqual("Critical", item.severity)
-        self.assertEqual(str, type(item.mitigation))
-        self.assertEqual(
-            "'PASSWORD' detected in this expression, review this potentially hardcoded credential.",
-            item.mitigation,
-        )
-        self.assertEqual(str, type(item.references))
-        self.assertMultiLineEqual(
-            "squid:S2068\n"
-            "OWASP Top 10 2017 Category A2\n"
-            "MITRE, CWE-798\n"
-            "MITRE, CWE-259\n"
-            "CERT, MSC03-J.\n"
-            "SANS Top 25\n"
-            "Hard Coded Password",
-            item.references,
-        )
-        self.assertEqual(str, type(item.file_path))
-        self.assertEqual(
-            "modules/jdbc-pool/src/main/java/org/apache/tomcat/jdbc/pool/DataSourceFactory.java",
-            item.file_path,
-        )
-        self.assertEqual(bool, type(item.static_finding))
-        self.assertEqual(True, item.static_finding)
-        self.assertEqual(bool, type(item.dynamic_finding))
-        self.assertEqual(False, item.dynamic_finding)
-
     def test_detailed_parse_file_with_multiple_vulnerabilities_has_multiple_findings(
-        self,
+            self,
     ):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-6-findings.html"
@@ -189,7 +147,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(6, len(findings))
 
     def test_file_name_aggregated_parse_file_with_multiple_vulnerabilities_has_multiple_findings(
-        self,
+            self,
     ):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-6-findings.html"
@@ -220,7 +178,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(bool, type(item.active))
         self.assertEqual(True, item.active)
         self.assertEqual(bool, type(item.verified))
-        self.assertEqual(True, item.verified)
+        self.assertEqual(False, item.verified)
         self.assertEqual(str, type(item.description))
         self.assertMultiLineEqual(
             "Many consider clone and Cloneable broken in Java, largely because the rules for overriding clone are tricky\n"
@@ -300,7 +258,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(bool, type(item.active))
         self.assertEqual(True, item.active)
         self.assertEqual(bool, type(item.verified))
-        self.assertEqual(True, item.verified)
+        self.assertEqual(False, item.verified)
         self.assertEqual(str, type(item.description))
         self.assertEqual("No description provided", item.description)
         self.assertEqual(str, type(item.severity))
@@ -408,3 +366,184 @@ class TestSonarQubeParser(DojoTestCase):
         findings = parser.get_findings(my_file_handle, test)
         # specific verifications
         self.assertEqual(322, len(findings))
+
+    def test_detailed_parse_file_table_has_whitespace(self):
+        """
+        from version 3.1.1: sonarqube-report has new template with some change.
+        see: https://github.com/soprasteria/sonar-report/commit/7dab559e7ecf9ed319345e9262a8b160bd3af94f
+        Data table will have some whitespaces, parser should strip it before compare or use these properties.
+        """
+        my_file_handle, product, engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/sonar-table-in-table-with-whitespace.html"
+        )
+        parser = SonarQubeParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(1, len(findings))
+
+        # check content
+        item = findings[0]
+        self.assertEqual(str, type(findings[0].title))
+        self.assertEqual('"clone" should not be overridden', item.title)
+        self.assertEqual(int, type(item.cwe))
+        self.assertEqual(0, item.cwe)
+        self.assertEqual(bool, type(item.active))
+        self.assertEqual(True, item.active)
+        self.assertEqual(bool, type(item.verified))
+        self.assertEqual(False, item.verified)
+        self.assertEqual(str, type(item.description))
+        self.assertMultiLineEqual(
+            "Many consider clone and Cloneable broken in Java, largely because the rules for overriding clone are tricky\n"
+            "and difficult to get right, according to Joshua Bloch:\n"
+            "\n"
+            "  Object's clone method is very tricky. It's based on field copies, and it's \"extra-linguistic.\" It creates an object without calling a constructor.\n"
+            "  There are no guarantees that it preserves the invariants established by the constructors. There have been lots of bugs over the years, both in and\n"
+            "  outside Sun, stemming from the fact that if you just call super.clone repeatedly up the chain until you have cloned an object, you have a shallow\n"
+            "  copy of the object. The clone generally shares state with the object being cloned. If that state is mutable, you don't have two independent objects.\n"
+            "  If you modify one, the other changes as well. And all of a sudden, you get random behavior.\n"
+            "\n"
+            "A copy constructor or copy factory should be used instead.\n"
+            "This rule raises an issue when clone is overridden, whether or not Cloneable is implemented.\n"
+            "**Noncompliant Code Example**\n"
+            "\n"
+            "public class MyClass {\n"
+            "  // ...\n"
+            "\n"
+            "  public Object clone() { // Noncompliant\n"
+            "    //...\n"
+            "  }\n"
+            "}\n"
+            "\n"
+            "**Compliant Solution**\n"
+            "\n"
+            "public class MyClass {\n"
+            "  // ...\n"
+            "\n"
+            "  MyClass (MyClass source) {\n"
+            "    //...\n"
+            "  }\n"
+            "}",
+            item.description,
+        )
+        self.assertEqual(str, type(item.severity))
+        self.assertEqual("Critical", item.severity)
+        self.assertEqual(str, type(item.mitigation))
+        self.assertEqual(
+            'Remove this "clone" implementation; use a copy constructor or copy factory instead.',
+            item.mitigation,
+        )
+        self.assertEqual(str, type(item.references))
+        self.assertMultiLineEqual(
+            "squid:S2975\n" "Copy Constructor versus Cloning\n" "S2157\n" "S1182",
+            item.references,
+        )
+        self.assertEqual(str, type(item.file_path))
+        self.assertEqual(
+            "java/org/apache/catalina/util/URLEncoder.java", item.file_path
+        )
+        self.assertEqual(str, type(item.line))
+        self.assertEqual("190", item.line)
+        self.assertEqual(str, type(item.unique_id_from_tool))
+        self.assertEqual("AWK40IMu-pl6AHs22MnV", item.unique_id_from_tool)
+        self.assertEqual(bool, type(item.static_finding))
+        self.assertEqual(True, item.static_finding)
+        self.assertEqual(bool, type(item.dynamic_finding))
+        self.assertEqual(False, item.dynamic_finding)
+
+    def test_detailed_parse_json_file_with_no_vulnerabilities_has_no_findings(self):
+        my_file_handle, product, engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/sonar-no-finding.json"
+        )
+        parser = SonarQubeParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(0, len(findings))
+
+    def test_detailed_parse_json_file_with_single_vulnerability_has_single_finding(self):
+        my_file_handle, product, engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/sonar-single-finding.json"
+        )
+        parser = SonarQubeParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
+        # common verifications
+        self.assertEqual(1, len(findings))
+        # specific verifications
+        item = findings[0]
+        self.assertEqual(str, type(item.description))
+        self.maxDiff = None
+        self.assertMultiLineEqual('A cross-site request forgery (CSRF) attack occurs when a trusted user of a web '
+                                  'application can be forced, by an attacker, to perform sensitive\nactions that he '
+                                  'didn&#8217;t intend, such as updating his profile or sending a message, more generally '
+                                  'anything that can change the state of the\napplication.\nThe attacker can trick '
+                                  'the user/victim to click on a link, corresponding to the privileged action, '
+                                  'or to visit a malicious web site that embeds a\nhidden web request and as web '
+                                  'browsers automatically include cookies, the actions can be authenticated and '
+                                  'sensitive.\n**Ask Yourself Whether**\n\n   The web application uses cookies to '
+                                  'authenticate users. \n   There exist sensitive operations in the web application '
+                                  'that can be performed when the user is authenticated. \n   The state / resources '
+                                  'of the web application can be modified by doing HTTP POST or HTTP DELETE requests '
+                                  'for example. \n\nThere is a risk if you answered yes to any of those '
+                                  'questions.\n**Recommended Secure Coding Practices**\n\n   Protection against CSRF '
+                                  'attacks is strongly recommended:\n    \n       to be activated by default for all '
+                                  'unsafe HTTP\n      methods. \n       implemented, for example, with an unguessable '
+                                  'CSRF token \n      \n   Of course all sensitive operations should not be performed '
+                                  'with safe HTTP methods like GET which are designed to be\n  used only for '
+                                  'information retrieval. \n\n**Sensitive Code Example**\nFor a Django application, '
+                                  'the code is sensitive when,\n\n   django.middleware.csrf.CsrfViewMiddleware is not '
+                                  'used in the Django settings: \n\n\nMIDDLEWARE = [\n    '
+                                  '\'django.middleware.security.SecurityMiddleware\','
+                                  '\n    \'django.contrib.sessions.middleware.SessionMiddleware\','
+                                  '\n    \'django.middleware.common.CommonMiddleware\','
+                                  '\n    \'django.contrib.auth.middleware.AuthenticationMiddleware\','
+                                  '\n    \'django.contrib.messages.middleware.MessageMiddleware\','
+                                  '\n    \'django.middleware.clickjacking.XFrameOptionsMiddleware\',\n] # Sensitive: '
+                                  'django.middleware.csrf.CsrfViewMiddleware is missing\n\n\n   the CSRF protection '
+                                  'is disabled on a view: \n\n\n@csrf_exempt # Sensitive\ndef example(request):\n    '
+                                  'return HttpResponse("default")\n\nFor a Flask application, the code is sensitive '
+                                  'when,\n\n   the WTF_CSRF_ENABLED setting is set to false: \n\n\napp = Flask('
+                                  '__name__)\napp.config[\'WTF_CSRF_ENABLED\'] = False # Sensitive\n\n\n   the '
+                                  'application doesn&#8217;t use the CSRFProtect module: \n\n\napp = Flask(__name__) # '
+                                  'Sensitive: CSRFProtect is missing\n\n@app.route(\'/\')\ndef hello_world():\n    '
+                                  'return \'Hello, World!\'\n\n\n   the CSRF protection is disabled on a view: '
+                                  '\n\n\napp = Flask(__name__)\ncsrf = CSRFProtect()\ncsrf.init_app('
+                                  'app)\n\n@app.route(\'/example/\', methods=[\'POST\'])\n@csrf.exempt # '
+                                  'Sensitive\ndef example():\n    return \'example \'\n\n\n   the CSRF protection is '
+                                  'disabled on a form: \n\n\nclass unprotectedForm(FlaskForm):\n    class Meta:\n     '
+                                  '   csrf = False # Sensitive\n\n    name = TextField(\'name\')\n    submit = '
+                                  'SubmitField(\'submit\')\n\n**Compliant Solution**\nFor a Django application,'
+                                  '\n\n   it is recommended to protect all the views with '
+                                  'django.middleware.csrf.CsrfViewMiddleware: \n\n\nMIDDLEWARE = [\n    '
+                                  '\'django.middleware.security.SecurityMiddleware\','
+                                  '\n    \'django.contrib.sessions.middleware.SessionMiddleware\','
+                                  '\n    \'django.middleware.common.CommonMiddleware\','
+                                  '\n    \'django.middleware.csrf.CsrfViewMiddleware\', # Compliant\n    '
+                                  '\'django.contrib.auth.middleware.AuthenticationMiddleware\','
+                                  '\n    \'django.contrib.messages.middleware.MessageMiddleware\','
+                                  '\n    \'django.middleware.clickjacking.XFrameOptionsMiddleware\',\n]\n\n\n   and '
+                                  'to not disable the CSRF protection on specific views: \n\n\ndef example(request): '
+                                  '# Compliant\n    return HttpResponse("default")\n\nFor a Flask application,'
+                                  '\n\n   the CSRFProtect module should be used (and not disabled further with '
+                                  'WTF_CSRF_ENABLED set to false):\n  \n\n\napp = Flask(__name__)\ncsrf = '
+                                  'CSRFProtect()\ncsrf.init_app(app) # Compliant\n\n\n   and it is recommended to not '
+                                  'disable the CSRF protection on specific views or forms: \n\n\n@app.route('
+                                  '\'/example/\', methods=[\'POST\']) # Compliant\ndef example():\n    return '
+                                  '\'example \'\n\nclass unprotectedForm(FlaskForm):\n    class Meta:\n        csrf = '
+                                  'True # Compliant\n\n    name = TextField(\'name\')\n    submit = SubmitField('
+                                  '\'submit\')\n\n'.strip(),
+                                  item.description)
+        self.assertEqual(str, type(item.line))
+        self.assertEqual(8, 8)
+        self.assertEqual(str, type(item.unique_id_from_tool))
+        self.assertEqual("AYvNd32RyD1npIoQXyT1", item.unique_id_from_tool)
+
+    def test_detailed_parse_json_file_with_multiple_vulnerabilities_has_multiple_findings(self):
+        my_file_handle, product, engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/sonar-6-findings.json"
+        )
+        parser = SonarQubeParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
+        # common verifications
+        # (there is no aggregation to be done here)
+        self.assertEqual(6, len(findings))

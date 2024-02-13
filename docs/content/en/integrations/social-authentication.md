@@ -92,8 +92,7 @@ to be created. Closely follow the steps below to guarantee success.
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = ['<email@example.com>']
     {{< /highlight >}}
 
-OKTA
-----
+## OKTA
 
 In a similar fashion to that of Google, using OKTA as a OAuth2 provider
 carries the same attributes and a similar procedure. Follow along below.
@@ -137,7 +136,7 @@ carries the same attributes and a similar procedure. Follow along below.
     DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=True,
     DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY=(str, '**YOUR_CLIENT_ID_FROM_STEP_ABOVE**'),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET=(str, '**YOUR_CLIENT_SECRET_FROM_STEP_ABOVE**'),
-    DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://{your-org-url}/oauth2/default'),
+    DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://{your-org-url}/oauth2'),
     {{< /highlight >}}
 
 If during the login process you get the following error: *The
@@ -148,7 +147,7 @@ GET parameter starts with `http://` instead of
 `SOCIAL_AUTH_REDIRECT_IS_HTTPS = True` in the settings.
 
 ## Azure Active Directory
-
+### Azure AD Configuration
 You can now use your corporate Azure Active Directory to authenticate
 users to Defect Dojo. Users will be using your corporate Azure AD
 account (A.K.A. Office 365 identity) to authenticate via OAuth, and all
@@ -158,7 +157,7 @@ in, it will try to match the UPN of the user to an existing e-mail from
 a user in Defect Dojo, and if no match is found, a new user will be
 created in Defect Dojo, associated with the unique id/value of the user
 provided by your Azure AD tenant. Then, you can assign roles to this
-user, such as 'staff' or 'superuser'
+user, such as 'superuser'.
 
 1.  Navigate to the following address and follow instructions to create
     a new app registration
@@ -191,26 +190,61 @@ user, such as 'staff' or 'superuser'
 5.  Restart your Dojo, and you should now see a **Login with Azure AD**
     button on the login page which should *magically* work
 
+### Automatic Import of User-Groups
+To import groups from Azure AD users, the following environment variable needs to be set:  
+
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS=True
+    {{< /highlight >}}
+
+This will ensure the user is added to all the groups found in the Azure AD Token. Any missing groups will be created in DefectDojo (unless filtered). This group synchronization allows for product access via groups to limit the products a user can interact with.
+
+The Azure AD token returned by Azure will also need to be configured to include group IDs. Without this step, the
+token will not contain any notion of a group, and the mapping process will report that the current user is not a member of any 
+groups. To update the the format of the token, add a group claim that applies to whatever group type you are using.
+If unsure of what type that is, select `All Groups`. Do not activate `Emit groups as role claims` within the Azure AD 
+"Token configuration" page.
+
+Application API permissions need to be updated with the `Group.Read.All` permission so that groups can be read on behalf
+of the user that has successfully signed in.
+
+To limit the amount of groups imported from Azure AD, a regular expression can be used as the following:
+    
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER='^team-.*' # or 'teamA|teamB|groupC'
+    {{< /highlight >}}
+
+### Automatic Cleanup of User-Groups
+
+To prevent authorization creep, old Azure AD groups a user is not having anymore can be deleted with the following environment parameter:
+
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS=True
+    {{< /highlight >}}
+
+When a user is removed from a given group in Azure AD, they will also be removed from the corresponding group in DefectDojo.
+If there is a group in DefectDojo, that no longer has any members, it will be left as is for record purposes.
+
 ## Gitlab
 
 In a similar fashion to that of Google and OKTA, using Gitlab as a
 OAuth2 provider carries the same attributes and a similar procedure.
 Follow along below.
 
-1.  Navigate to your Gitlab settings page and got to the Applications
+1. Navigate to your Gitlab settings page and got to the Applications
     section
 
     -   <https://gitlab.com/profile/applications>
     -   **OR**
     -   [https://the_hostname_you_have_gitlab_deployed:your_gitlab_port/profile/applications](https://the_hostname_you_have_gitlab_deployed:your_gitlab_port/profile/applications)
 
-2.  Choose a name for your application
-3.  For the Redirect URI, enter the DefectDojo URL with the following
+2. Choose a name for your application
+3. For the Redirect URI, enter the DefectDojo URL with the following
     format
 
     -   [https://the_hostname_you_have_dojo_deployed:your_server_port/complete/gitlab/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/gitlab/)
 
-4.  Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
+4. Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
     information:
 
     {{< highlight python >}}
@@ -227,14 +261,93 @@ Follow along below.
     DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT = True
     {{< /highlight >}}
 
-5.  Restart DefectDojo, and you should now see a **Login with Gitlab**
+    **Important:** if you enable this setting on already working instance with gitlab integrations, it will require new grant "read_repository" by user
+ 
+5. Restart DefectDojo, and you should now see a **Login with Gitlab**
     button on the login page.
+
+## Keycloak
+There is also an option to use Keycloak as OAuth2 provider in order to authenticate users to Defect Dojo, also by using
+the social-auth plugin.
+
+Here are suggestion on how to configure Keycloak and DefectDojo: 
+
+### Configure Keycloak
+(assuming you already have an existing realm, otherwise create one)
+1. Navigate to your keycloak realm and add a new client of type openid-connect. Choose a name for the client id and use this value below for DD_SOCIAL_AUTH_KEYCLOAK_KEY).
+2. In the client settings:
+   * Set `access type` to `confidential`
+   * Under `valid Redirect URIs`, add the URI to your defect dojo installation, e.g. 'https://<YOUR_DD_HOST>/*'
+   * Under `web origins`, add the same (or '+')
+   * Under `Fine grained openID connect configuration` -> `user info signed response algorithm`: set to `RS256`
+   * Under `Fine grained openID connect configuration` -> `request object signature algorithm`: set to `RS256`
+   * -> save these settings in keycloak (hit save button)
+3. Under `Scope` -> `Full Scope Allowed` set to `off`
+4. Under `mappers` -> add a custom mapper here: 
+   * Name: `aud`
+   * Mapper type: `audience`
+   * Included audience: select your client/client-id here
+   * Add ID to token: `off`
+   * Add access to token: `on`
+5. Under `credentials`: copy the secret (and use as DD_SOCIAL_AUTH_KEYCLOAK_SECRET below)
+6. In your realm settings -> keys: copy the "Public key" (signing key) (use for DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY below)
+7. In your realm settings -> general -> endpoints: look into openId endpoint configuration
+   and look up your authorization and token endpoint (use them below)
+
+### Configure Defect Dojo
+Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
+   information:
+
+   {{< highlight python >}}
+   DD_SESSION_COOKIE_SECURE=True,
+   DD_CSRF_COOKIE_SECURE=True,
+   DD_SECURE_SSL_REDIRECT=True,
+   DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED=True,
+   DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY=(str, '<your realm public key>'),
+   DD_SOCIAL_AUTH_KEYCLOAK_KEY=(str, '<your client id>'), 
+   DD_SOCIAL_AUTH_KEYCLOAK_SECRET=(str, '<your keycloak client credentials secret>'), 
+   DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL=(str, '<your authorization endpoint>'),
+   DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL=(str, '<your token endpoint>')         
+   {{< /highlight >}}
+ 
+or, alternatively, for helm configuration, add this to the `extraConfig` section: 
+
+```
+DD_SESSION_COOKIE_SECURE: 'True'
+DD_CSRF_COOKIE_SECURE: 'True'
+DD_SECURE_SSL_REDIRECT: 'True'
+DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED: 'True'
+DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY: '<your realm public key>'
+DD_SOCIAL_AUTH_KEYCLOAK_KEY: '<your client id>'
+DD_SOCIAL_AUTH_KEYCLOAK_SECRET: '<your keycloak client credentials secret>'
+DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL: '<your authorization endpoint>'
+DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL: '<your token endpoint>'
+```
+
+Optionally, you *can* set `DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT` in order to customize the login button's text caption. 
+
+## GitHub Enterprise
+1.  Navigate to your GitHub Enterprise Server and follow instructions to create a new OAuth App [https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app](https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app)
+2. Choose a name for your application
+3. For the Redirect URI, enter the DefectDojo URL with the following
+    format
+    -   [https://the_hostname_you_have_dojo_deployed:your_server_port/complete/github-enterprise/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/github-enterprise/)
+4. Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
+    information:
+    {{< highlight python >}}  
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, 'GitHub Enterprise OAuth App Client ID'),  
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, 'GitHub Enterprise OAuth App Client Secret'),  
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_URL=(str, 'https://github.<your_company>.com/'),  
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL=(str, 'https://github.<your_company>.com/api/v3/'),  
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_OAUTH2_ENABLED = True,  
+    {{< /highlight >}}
+5. Restart DefectDojo, and you should now see a **Login with GitHub Enterprise**
+    button on the login page.  
 
 ## SAML 2.0
 In a similar direction to OAuth, this SAML addition provides a more secure
 perogative to SSO. For definitions of terms used and more information,
-see the plugin [plugin
-homepage](https://github.com/IdentityPython/djangosaml2). 
+see the plugin [plugin homepage](https://github.com/IdentityPython/djangosaml2). 
 
 1.  Navigate to your SAML IdP and find your metadata
 2.  Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
@@ -261,6 +374,8 @@ homepage](https://github.com/IdentityPython/djangosaml2).
     {{< /highlight >}}
 
 NOTE: *DD_SAML2_ATTRIBUTES_MAP* in k8s can be referenced as extraConfig (e.g. `DD_SAML2_ATTRIBUTES_MAP: 'Email'='email', 'Username'='username'...`)
+
+NOTE: *DD_SITE_URL* might also need to be set depending on the choices you make with the metadata.xml provider. (File versus URL).
 
 4.  Checkout the SAML section in dojo/`dojo/settings/settings.dist.py` and verfiy if it fits your requirement. If you need help, take a look at the [plugin
 documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configuration).
@@ -299,6 +414,26 @@ Up to relase 1.15.0 the SAML integration was based on [https://github.com/fangli
 * DD_SAML2_ATTRIBUTES_MAP: Syntax has changed
 * DD_SAML2_CREATE_USER: Default value changed to False, to avoid security breaches
 
+## RemoteUser
+
+This implementation is suitable if the DefectDojo instance is placed behind HTTP Authentication Proxy.
+Dojo expects that the proxy will perform authentication and pass HTTP requests to the Dojo instance with filled HTTP headers.
+The proxy should check if an attacker is not trying to add a malicious HTTP header and bypass authentication.
+
+Values which need to be set:
+
+* `DD_AUTH_REMOTEUSER_ENABLED` - Needs to be set to `True`
+* `DD_AUTH_REMOTEUSER_USERNAME_HEADER` - Name of the header which contains the username
+* `DD_AUTH_REMOTEUSER_EMAIL_HEADER`(optional) - Name of the header which contains the email
+* `DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER`(optional) - Name of the header which contains the first name
+* `DD_AUTH_REMOTEUSER_LASTNAME_HEADER`(optional) - Name of the header which contains the last name
+* `DD_AUTH_REMOTEUSER_GROUPS_HEADER`(optional) - Name of the header which contains the comma-separated list of groups; user will be assigned to these groups (missing groups will be created)
+* `DD_AUTH_REMOTEUSER_GROUPS_CLEANUP`(optional) - Same as [#automatic-import-of-user-groups](AzureAD implementation)
+* `DD_AUTH_REMOTEUSER_TRUSTED_PROXY` - Comma separated list of proxies; Simple IP and CIDR formats are supported
+* `DD_AUTH_REMOTEUSER_LOGIN_ONLY`(optional) - Check [Django documentation](https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#using-remote-user-on-login-pages-only)
+
+*WARNING:* There is possible spoofing of headers (for all `DD_AUTH_REMOTEUSER_xxx_HEADER` values). Read Warning in [Django documentation](https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#configuration)
+
 ## User Permissions
 
 When a new user is created via the social-auth, only the default permissions are active. This means that the newly created user does not have access to add, edit, nor delete anything within DefectDojo. There are two parameters in the System Settings to influence the permissions for newly created users:
@@ -307,28 +442,27 @@ When a new user is created via the social-auth, only the default permissions are
 
 When both the parameters `Default group` and `Default group role` are set, the new user will be a member of the given group with the given role, which will give him the respective permissions.
 
-### Staff user ###
+### Groups from Identity Providers
 
-Newly created users are neither staff nor superuser by default. The `is_staff` flag of a new user will be set to `True`, if the user's email address matches the regular expression in the parameter `Email pattern for staff users`. 
+Some Identity Providers are able to send list of groups to which should user belongs. This functionality is implemented only for Identity Providers mentioned below. For all others, we will be more than happy for contribution (hint: functions `assign_user_to_groups` and `cleanup_old_groups_for_user` from [`dojo/pipeline.py`](https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/pipeline.py) might be useful).
 
-**Example:**
-
-`.*@example.com` will make `alice@example.com` a staff user, while `bob@partner.example.com` or `chris@example.org` will be non-staff users.
-
+- [Azure](#automatic-import-of-user-groups): Check `DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS` and `DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS`
+- [RemoteUser](#remoteuser): Check `DD_AUTH_REMOTEUSER_GROUPS_HEADER` and `DD_AUTH_REMOTEUSER_GROUPS_CLEANUP`
 
 ## Login speed-up
 
-If you are using only one Social authentication and you are not using the standard login mechanism (`SHOW_LOGIN_FORM` is
-set to `False`), showing login page could be useless because every time user clicks on the only existing button on the
-page like "Login with SAML" (or another similar button). If you set `SOCIAL_LOGIN_AUTO_REDIRECT` to `True`, the login
-page is skipped and the user is automatically redirected to the identity provider's page.
+You can bypass the login form if you are only using SSO/Social authentication for login in by enabling these two environment variables:
+
+```
+DD_SOCIAL_LOGIN_AUTO_REDIRECT: "true"
+DD_SOCIAL_AUTH_SHOW_LOGIN_FORM: "false"
+```
 
 ### Login form fallback
 
 If you are using "login speed-up", it can be useful to be able to login by the standard way, for example when an admin
-user needs to log in because of a change of some settings or permissions. Accessing
-[`<DD_HOST>/login?force_login_form`](https://<DD_HOST>/login?force_login_form) shows login form even "login speed-up" is
-enabled.
+user needs to log in because of a change of some settings or permissions. This feature is accessible by a visiting the URL
+`<DD_HOST>/login?force_login_form`.
 
 
 ## Other Providers

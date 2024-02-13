@@ -1,5 +1,4 @@
 from crum import get_current_user
-from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
 from dojo.models import Tool_Product_Settings, Product_Member, Product_Type_Member, \
     Product_Group, Product_Type_Group
@@ -13,9 +12,6 @@ def get_authorized_tool_product_settings(permission):
         return Tool_Product_Settings.objects.none()
 
     if user.is_superuser:
-        return Tool_Product_Settings.objects.all()
-
-    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return Tool_Product_Settings.objects.all()
 
     if user_has_global_permission(user, permission):

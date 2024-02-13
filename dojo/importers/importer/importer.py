@@ -3,7 +3,7 @@ import base64
 from django.db.models.query_utils import Q
 from dojo.importers import utils as importer_utils
 from dojo.decorators import dojo_async_task
-from dojo.utils import get_current_user
+from dojo.utils import get_current_user, is_finding_groups_enabled
 from dojo.celery import app
 from django.core.exceptions import ValidationError
 from django.core import serializers
@@ -35,14 +35,20 @@ class DojoDefaultImporter(object):
         if created:
             logger.info('Created new Test_Type with name %s because a report is being imported', test_type.name)
 
+        if scan_date and not scan_date.tzinfo:
+            scan_date = timezone.make_aware(scan_date)
+
+        if now and not now.tzinfo:
+            now = timezone.make_aware(now)
+
         test = Test(
             title=title,
             engagement=engagement,
             lead=lead,
             test_type=test_type,
             scan_type=scan_type,
-            target_start=scan_date if scan_date else now.date(),
-            target_end=scan_date if scan_date else now.date(),
+            target_start=scan_date or now,
+            target_end=scan_date or now,
             environment=environment,
             percent_complete=100,
             version=version,
@@ -50,28 +56,44 @@ class DojoDefaultImporter(object):
             build_id=build_id,
             commit_hash=commit_hash,
             api_scan_configuration=api_scan_configuration,
-            tags=tags)
-        try:
-            # TODO What is going on here?
-            test.full_clean()
-        except ValidationError:
-            pass
+            tags=tags,
+        )
 
+        test.full_clean()
         test.save()
         return test
 
     @dojo_async_task
     @app.task(ignore_result=False)
-    def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
-                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, scan_date=None, **kwargs):
+    def process_parsed_findings(self, test, parsed_findings, scan_type, user, active=None, verified=None, minimum_severity=None,
+                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None, scan_date=None,
+                                create_finding_groups_for_all_findings=True, **kwargs):
         logger.debug('endpoints_to_add: %s', endpoints_to_add)
         new_findings = []
         items = parsed_findings
         logger.debug('starting import of %i items.', len(items) if items else 0)
-        i = 0
+        group_names_to_findings_dict = {}
+
         for item in items:
             # FIXME hack to remove when all parsers have unit tests for this attribute
-            if item.severity.lower().startswith('info') and item.severity != 'Info':
+            # Importing the cvss module via:
+            # `from cvss import CVSS3`
+            # _and_ given a CVSS vector string such as:
+            # cvss_vector_str = 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N',
+            # the following severity calculation returns the
+            # string values of, "None" instead of the expected string values
+            # of "Info":
+            # ```
+            # cvss_obj = CVSS3(cvss_vector_str)
+            # severities = cvss_obj.severities()
+            # print(severities)
+            # ('None', 'None', 'None')
+            # print(severities[0])
+            # 'None'
+            # print(type(severities[0]))
+            # <class 'str'>
+            # ```
+            if (item.severity.lower().startswith('info') or item.severity.lower() == 'none') and item.severity != 'Info':
                 item.severity = 'Info'
 
             item.numerical_severity = Finding.get_numerical_severity(item.severity)
@@ -87,31 +109,31 @@ class DojoDefaultImporter(object):
             item.last_reviewed_by = user if user else get_current_user
 
             logger.debug('process_parsed_findings: active from report: %s, verified from report: %s', item.active, item.verified)
-            # active, verified parameters = parameters from the gui or api call.
-            # item.active, item.verified = values from the report / the parser
-            # if either value of active (from the parser or from the api/gui) is false, final status is inactive
-            #   else final status is active
-            # if either value of verified (from the parser or from the api/gui) is false, final status is not verified
-            #   else final status is verified
-            # Note that:
-            #   - the API (active/verified parameters) values default to True if not specified
-            #   - the parser values default to true if not set by the parser (as per the default value in models.py)
-            #   - there is no "not specified" in the GUI (not ticked means not active/not verified)
-            if item.active:
+            if active is not None:
+                # indicates an override. Otherwise, do not change the value of item.active
                 item.active = active
-            if item.verified:
+
+            if verified is not None:
+                # indicates an override. Otherwise, do not change the value of verified
                 item.verified = verified
 
             # if scan_date was provided, override value from parser
             if scan_date:
                 item.date = scan_date.date()
 
-            item.service = service
+            if service:
+                item.service = service
 
             item.save(dedupe_option=False)
 
-            if settings.FEATURE_FINDING_GROUPS and group_by:
-                finding_helper.add_finding_to_auto_group(item, group_by)
+            if is_finding_groups_enabled() and group_by:
+                # If finding groups are enabled, group all findings by group name
+                name = finding_helper.get_group_by_group_name(item, group_by)
+                if name is not None:
+                    if name in group_names_to_findings_dict:
+                        group_names_to_findings_dict[name].append(item)
+                    else:
+                        group_names_to_findings_dict[name] = [item]
 
             if (hasattr(item, 'unsaved_req_resp') and
                     len(item.unsaved_req_resp) > 0):
@@ -132,16 +154,9 @@ class DojoDefaultImporter(object):
                 burp_rr.clean()
                 burp_rr.save()
 
-            if settings.ASYNC_FINDING_IMPORT:
-                importer_utils.chunk_endpoints_and_disperse(item, test, item.unsaved_endpoints)
-            else:
-                importer_utils.add_endpoints_to_unsaved_finding(item, test, item.unsaved_endpoints, sync=True)
-
+            importer_utils.chunk_endpoints_and_disperse(item, test, item.unsaved_endpoints)
             if endpoints_to_add:
-                if settings.ASYNC_FINDING_IMPORT:
-                    importer_utils.chunk_endpoints_and_disperse(item, test, endpoints_to_add)
-                else:
-                    importer_utils.add_endpoints_to_unsaved_finding(item, test, endpoints_to_add, sync=True)
+                importer_utils.chunk_endpoints_and_disperse(item, test, endpoints_to_add)
 
             if item.unsaved_tags:
                 item.tags = item.unsaved_tags
@@ -157,40 +172,53 @@ class DojoDefaultImporter(object):
                     file_upload.save()
                     item.files.add(file_upload)
 
+            importer_utils.handle_vulnerability_ids(item)
+
             new_findings.append(item)
             # to avoid pushing a finding group multiple times, we push those outside of the loop
-            if settings.FEATURE_FINDING_GROUPS and item.finding_group:
+            if is_finding_groups_enabled() and group_by:
                 item.save()
             else:
                 item.save(push_to_jira=push_to_jira)
 
-        if settings.FEATURE_FINDING_GROUPS and push_to_jira:
-            for finding_group in set([finding.finding_group for finding in new_findings if finding.finding_group is not None]):
-                jira_helper.push_to_jira(finding_group)
+        for (group_name, findings) in group_names_to_findings_dict.items():
+            finding_helper.add_findings_to_auto_group(group_name, findings, group_by, create_finding_groups_for_all_findings, **kwargs)
+            if push_to_jira:
+                if findings[0].finding_group is not None:
+                    jira_helper.push_to_jira(findings[0].finding_group)
+                else:
+                    jira_helper.push_to_jira(findings[0])
+
         sync = kwargs.get('sync', False)
         if not sync:
             return [serializers.serialize('json', [finding, ]) for finding in new_findings]
         return new_findings
 
-    def close_old_findings(self, test, scan_date_time, user, push_to_jira=None, service=None):
-        old_findings = []
+    def close_old_findings(self, test, scan_date_time, user, push_to_jira=None, service=None, close_old_findings_product_scope=False):
         # Close old active findings that are not reported by this scan.
-        new_hash_codes = test.finding_set.values('hash_code')
-
-        # TODO I don't think these criteria are 100% correct, why are findings with the same hash_code excluded?
-        # Would it make more sense to exclude duplicates? But the deduplication process can be unfinished because it's
-        # run in a celery async task...
-        if test.engagement.deduplication_on_engagement:
+        # Refactoring this to only call test.finding_set.values() once.
+        findings = test.finding_set.values()
+        mitigated_hash_codes = []
+        new_hash_codes = []
+        for finding in findings:
+            new_hash_codes.append(finding["hash_code"])
+            if finding["is_mitigated"]:
+                mitigated_hash_codes.append(finding["hash_code"])
+                for hash_code in new_hash_codes:
+                    if hash_code == finding["hash_code"]:
+                        new_hash_codes.remove(hash_code)
+        if close_old_findings_product_scope:
+            # Close old findings of the same test type in the same product
             old_findings = Finding.objects.exclude(test=test) \
-                                            .exclude(hash_code__in=new_hash_codes) \
-                                            .filter(test__engagement=test.engagement,
-                                                test__test_type=test.test_type,
-                                                active=True)
+                .exclude(hash_code__in=new_hash_codes) \
+                .filter(test__engagement__product=test.engagement.product,
+                        test__test_type=test.test_type,
+                        active=True)
         else:
-            # TODO BUG? this will violate the deduplication_on_engagement setting for other engagements
+            # Close old findings of the same test type in the same engagement
             old_findings = Finding.objects.exclude(test=test) \
-                                            .exclude(hash_code__in=new_hash_codes) \
-                                            .filter(test__engagement__product=test.engagement.product,
+                                        .exclude(hash_code__in=new_hash_codes) \
+                                        .filter(test__engagement=test.engagement,
                                                 test__test_type=test.test_type,
                                                 active=True)
 
@@ -206,7 +234,7 @@ class DojoDefaultImporter(object):
             old_finding.notes.create(author=user,
                                         entry="This finding has been automatically closed"
                                         " as it is not present anymore in recent scans.")
-            endpoint_status = old_finding.endpoint_status.all()
+            endpoint_status = old_finding.status_finding.all()
             for status in endpoint_status:
                 status.mitigated_by = user
                 status.mitigated_time = timezone.now()
@@ -217,22 +245,22 @@ class DojoDefaultImporter(object):
             old_finding.tags.add('stale')
 
             # to avoid pushing a finding group multiple times, we push those outside of the loop
-            if settings.FEATURE_FINDING_GROUPS and old_finding.finding_group:
+            if is_finding_groups_enabled() and old_finding.finding_group:
                 # don't try to dedupe findings that we are closing
                 old_finding.save(dedupe_option=False)
             else:
                 old_finding.save(dedupe_option=False, push_to_jira=push_to_jira)
 
-        if settings.FEATURE_FINDING_GROUPS and push_to_jira:
+        if is_finding_groups_enabled() and push_to_jira:
             for finding_group in set([finding.finding_group for finding in old_findings if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
 
         return old_findings
 
-    def import_scan(self, scan, scan_type, engagement, lead, environment, active, verified, tags=None, minimum_severity=None,
+    def import_scan(self, scan, scan_type, engagement, lead, environment, active=None, verified=None, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None,
-                    service=None, title=None):
+                    commit_hash=None, push_to_jira=None, close_old_findings=False, close_old_findings_product_scope=False,
+                    group_by=None, api_scan_configuration=None, service=None, title=None, create_finding_groups_for_all_findings=True, apply_tags_to_findings=False):
 
         logger.debug(f'IMPORT_SCAN: parameters: {locals()}')
 
@@ -250,7 +278,11 @@ class DojoDefaultImporter(object):
         parser = get_parser(scan_type)
         if hasattr(parser, 'get_tests'):
             logger.debug('IMPORT_SCAN parser v2: Create Test and parse findings')
-            tests = parser.get_tests(scan_type, scan)
+            try:
+                tests = parser.get_tests(scan_type, scan)
+            except ValueError as e:
+                logger.warning(e)
+                raise ValidationError(e)
             # for now we only consider the first test in the list and artificially aggregate all findings of all tests
             # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
             # when there is more than 1 test
@@ -295,7 +327,11 @@ class DojoDefaultImporter(object):
 
             logger.debug('IMPORT_SCAN: Parse findings')
             parser = get_parser(scan_type)
-            parsed_findings = parser.get_findings(scan, test)
+            try:
+                parsed_findings = parser.get_findings(scan, test)
+            except ValueError as e:
+                logger.warning(e)
+                raise ValidationError(e)
 
         logger.debug('IMPORT_SCAN: Processing findings')
         new_findings = []
@@ -304,10 +340,11 @@ class DojoDefaultImporter(object):
             results_list = []
             # First kick off all the workers
             for findings_list in chunk_list:
-                result = self.process_parsed_findings(test, findings_list, scan_type, user, active,
-                                                            verified, minimum_severity=minimum_severity,
+                result = self.process_parsed_findings(test, findings_list, scan_type, user, active=active,
+                                                            verified=verified, minimum_severity=minimum_severity,
                                                             endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
-                                                            group_by=group_by, now=now, service=service, scan_date=scan_date, sync=False)
+                                                            group_by=group_by, now=now, service=service, scan_date=scan_date, sync=False,
+                                                            create_finding_groups_for_all_findings=create_finding_groups_for_all_findings)
                 # Since I dont want to wait until the task is done right now, save the id
                 # So I can check on the task later
                 results_list += [result]
@@ -320,17 +357,18 @@ class DojoDefaultImporter(object):
             # Indicate that the test is not complete yet as endpoints will still be rolling in.
             test.percent_complete = 50
             test.save()
-            importer_utils.update_test_progress(test)
         else:
-            new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
-                                                            verified, minimum_severity=minimum_severity,
+            new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active=active,
+                                                            verified=verified, minimum_severity=minimum_severity,
                                                             endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
-                                                            group_by=group_by, now=now, service=service, scan_date=scan_date, sync=True)
+                                                            group_by=group_by, now=now, service=service, scan_date=scan_date, sync=True,
+                                                            create_finding_groups_for_all_findings=create_finding_groups_for_all_findings)
 
         closed_findings = []
         if close_old_findings:
             logger.debug('IMPORT_SCAN: Closing findings no longer present in scan report')
-            closed_findings = self.close_old_findings(test, scan_date, user=user, push_to_jira=push_to_jira, service=service)
+            closed_findings = self.close_old_findings(test, scan_date, user=user, push_to_jira=push_to_jira, service=service,
+                                                      close_old_findings_product_scope=close_old_findings_product_scope)
 
         logger.debug('IMPORT_SCAN: Updating test/engagement timestamps')
         importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date)
@@ -341,12 +379,18 @@ class DojoDefaultImporter(object):
             test_import = importer_utils.update_import_history(Test_Import.IMPORT_TYPE, active, verified, tags, minimum_severity,
                                                                 endpoints_to_add, version, branch_tag, build_id, commit_hash,
                                                                 push_to_jira, close_old_findings, test, new_findings, closed_findings)
+            if apply_tags_to_findings and tags:
+                for finding in test_import.findings_affected.all():
+                    for tag in tags:
+                        finding.tags.add(tag)
 
         logger.debug('IMPORT_SCAN: Generating notifications')
         notifications_helper.notify_test_created(test)
         updated_count = len(new_findings) + len(closed_findings)
-        if updated_count > 0:
-            notifications_helper.notify_scan_added(test, updated_count, new_findings=new_findings, findings_mitigated=closed_findings)
+        notifications_helper.notify_scan_added(test, updated_count, new_findings=new_findings, findings_mitigated=closed_findings)
+
+        logger.debug('IMPORT_SCAN: Updating Test progress')
+        importer_utils.update_test_progress(test)
 
         logger.debug('IMPORT_SCAN: Done')
 

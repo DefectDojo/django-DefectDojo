@@ -48,7 +48,7 @@ class TestNiktoParser(DojoTestCase):
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        self.assertTrue(len(findings) == 10)
+        self.assertEqual(len(findings), 10)
 
     def test_parse_file_json_with_multiple_vuln_has_multiple_findings(self):
         testfile = open("unittests/scans/nikto/juice-shop.json")
@@ -176,3 +176,12 @@ class TestNiktoParser(DojoTestCase):
             self.assertEqual(443, endpoint.port)
             self.assertEqual("64.220.43.153", endpoint.host)
             self.assertIsNone(endpoint.path)
+
+    def test_parse_file_issue_9274(self):
+        testfile = open("unittests/scans/nikto/issue_9274.json")
+        parser = NiktoParser()
+        findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(8, len(findings))

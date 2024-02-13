@@ -1,0 +1,63 @@
+{
+  "date": "Thursday, Jan 18, 2024",
+  "projectName": "vulnerable-flask-app",
+  "inNewCodePeriod": false,
+  "allBugs": false,
+  "fixMissingRule": false,
+  "noSecurityHotspot": false,
+  "noRulesInReport": false,
+  "onlyDetectedRules": true,
+  "vulnerabilityPhrase": "Vulnerability",
+  "noCoverage": true,
+  "vulnerabilityPluralPhrase": "Vulnerabilities",
+  "sonarBaseURL": "https://sonar.192-168-38-31.nip.io",
+  "sonarComponent": "vulnerable-flask-app",
+  "rules": {
+  },
+  "issues": [
+  ],
+  "hotspotKeys": [
+  ],
+  "deltaAnalysis": "No",
+  "qualityGateStatusPeriodDate": "2023-11-15",
+  "qualityGateStatus": {
+    "projectStatus": {
+      "status": "OK",
+      "conditions": [
+        {
+          "status": "OK",
+          "metricKey": "new reliability rating",
+          "comparator": "GT",
+          "errorThreshold": "A",
+          "actualValue": "A"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new security rating",
+          "comparator": "GT",
+          "errorThreshold": "A",
+          "actualValue": "A"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new maintainability rating",
+          "comparator": "GT",
+          "errorThreshold": "A",
+          "actualValue": "A"
+        }
+      ],
+      "ignoredConditions": false,
+      "period": {
+        "mode": "PREVIOUS_VERSION",
+        "date": "2023-11-15T07:40:39+0000"
+      },
+      "caycStatus": "compliant"
+    }
+  },
+  "summary": {
+    "blocker": 0,
+    "critical": 1,
+    "major": 0,
+    "minor": 5
+  }
+}

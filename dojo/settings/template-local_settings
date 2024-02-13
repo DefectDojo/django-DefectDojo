@@ -3,7 +3,8 @@
 
 # this example configures the django debug toolbar and sets some loglevels to DEBUG
 
-from django.conf.urls import include, url
+from django.urls import re_path
+from django.conf.urls import include
 
 # UPDATE: Adding debug_toolbar to to INSTALLED_APPS here prevents the nginx container from generating the correct static files
 #         So add debug_toolbar to INSTALLED_APPS in settings.dist.py and rebuild to get started with the debug_toolbar.
@@ -57,4 +58,4 @@ DEBUG_TOOLBAR_PANELS = [
 ]
 
 import debug_toolbar
-EXTRA_URL_PATTERNS = [url(r"^__debug__/", include(debug_toolbar.urls))]
+EXTRA_URL_PATTERNS = [re_path(r"^__debug__/", include(debug_toolbar.urls))]

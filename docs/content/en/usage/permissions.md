@@ -7,8 +7,8 @@ draft: false
 
 ## System-wide permissions
 
-* Administrators (aka super users) have no limitations in the system. They can change all settings, manage users  and have read and write access to all data.
-* Staff users can add Product Types, and have access to data according to their role in a Product or Product Type. There is the parameter `AUTHORIZATION_STAFF_OVERRIDE` in the settings to give all staff users full access to all Products and Product Types.
+* Administrators (aka superusers) have no limitations in the system. They can change all settings, manage users  and have read / write access to all data.
+* Staff users can add Product Types, and have access to data according to their role in a Product or Product Type.
 * Regular users have limited functionality available. They cannot add Product Types but have access to data according to their role in a Product or Product Type
 
 ## Product and Product Type permissions
@@ -36,14 +36,14 @@ Users can be assigned as members to Products and Product Types, giving them one 
 | Delete Product              |        |        |            | x     |              |
 |                             |        |        |            |       |              |
 | View Engagement             | x      | x      | x          | x     |  x           |
-| Add Engagement              |        | x      | x          | x     |              |
-| Edit Engagement             |        | x      | x          | x     |              |
+| Add Engagement              |        | x      | x          | x     |  x           |
+| Edit Engagement             |        | x      | x          | x     |  x           |
 | Risk Acceptance             |        | x      | x          | x     |              |
 | Delete Engagement           |        |        | x          | x     |              |
 |                             |        |        |            |       |              |
 | View Test                   | x      | x      | x          | x     | x            |
 | Add Test                    |        | x      | x          | x     |              |
-| Edit Test                   |        | x      | x          | x     |              |
+| Edit Test                   |        | x      | x          | x     | x            |
 | Delete Test                 |        |        | x          | x     |              |
 |                             |        |        |            |       |              |
 | View Finding                | x      | x      | x          | x     | x            |
@@ -73,7 +73,7 @@ Users can be assigned as members to Products and Product Types, giving them one 
 | Delete Note                 | (x) <sup>2)</sub> | (x) <sup>2)</sub> | x          | x     |              |
 
 
-<sup>1)</sup> Every staff user and administrator can add Product Types. Regular users are not allowed to add Product Types, unless they are Global Owner or Maintainer.
+<sup>1)</sup> Every superuser can add Product Types. Regular users are not allowed to add Product Types, unless they are a Global Owner or Maintainer.
 
 <sup>2)</sup> Every user is allowed to edit and delete his own notes.
 
@@ -105,8 +105,23 @@ The membership of a group itself has a role that determines what permissions the
 | Add Group member as Owner   |        |            | x     |
 | Delete Group                |        |            | x     |
 
-<sup>1)</sup> Every staff user and administrator can add groups. Regular users are not allowed to add groups.
+<sup>1)</sup> Every superuser can add groups. Regular users are not allowed to add groups.
 
 The permissions to manage the roles of Products and Product types for a group is defined by the role of the user in the respective Product or Product Type.
 
 Groups can have a global role too. This global role gives all members of the group access to all Product Types and Products, including the underlying data, with permissions according to the respective role.
+
+## Configuration permissions
+
+Many configuration dialogues and API endpoints can be enabled for users or groups of users, regardless of their **superuser** status:
+
+![Configuration permissions](../../images/configuration_permissions.png)
+
+3 configurations can still only be changed by superusers:
+* System settings
+* Notifications on system level
+* Configuration permissions for users and groups
+
+{{% alert title="Warning" color="warning" %}}
+These configuration settings are a powerful tool and should be used with great care.
+{{% /alert %}}

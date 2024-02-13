@@ -30,7 +30,7 @@ def new_object(request, pid):
             return HttpResponseRedirect(reverse('view_objects', args=(pid,)))
     else:
         tform = ObjectSettingsForm()
-        product_tab = Product_Tab(pid, title="Add Tracked Files to a Product", tab="settings")
+        product_tab = Product_Tab(prod, title="Add Tracked Files to a Product", tab="settings")
 
         return render(request, 'dojo/new_object.html',
                       {'tform': tform,
@@ -43,7 +43,7 @@ def view_objects(request, pid):
     product = get_object_or_404(Product, id=pid)
     object_queryset = Objects_Product.objects.filter(product=pid).order_by('path', 'folder', 'artifact')
 
-    product_tab = Product_Tab(pid, title="Tracked Product Files, Paths and Artifacts", tab="settings")
+    product_tab = Product_Tab(product, title="Tracked Product Files, Paths and Artifacts", tab="settings")
     return render(request,
                   'dojo/view_objects.html',
                   {
@@ -73,7 +73,7 @@ def edit_object(request, pid, ttid):
     else:
         tform = ObjectSettingsForm(instance=object)
 
-    product_tab = Product_Tab(pid, title="Edit Tracked Files", tab="settings")
+    product_tab = Product_Tab(product, title="Edit Tracked Files", tab="settings")
     return render(request,
                   'dojo/edit_object.html',
                   {
@@ -100,7 +100,7 @@ def delete_object(request, pid, ttid):
     else:
         tform = DeleteObjectsSettingsForm(instance=object)
 
-    product_tab = Product_Tab(pid, title="Delete Product Tool Configuration", tab="settings")
+    product_tab = Product_Tab(product, title="Delete Product Tool Configuration", tab="settings")
     return render(request,
                   'dojo/delete_object.html',
                   {

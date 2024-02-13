@@ -1,0 +1,35 @@
+{
+    "artifacts": [{
+            "general": {
+                "name": "artifact1:1.0",
+                "component_id": "artifact1:1.0",
+                "pkg_type": "Docker",
+                "path": "artifact_path/artifact1/1.0/",
+                "sha256": "eaab06c0a28618bfb65481bf31bce7d6dd3a15dac528297690111c202a1cd468"
+            },
+            "issues": [{
+					"issue_id": "XRAY-124116",
+                    "summary": "OpenSSL crypto/rc5/rc5_skey.c RC5_32_set_key() Function Key Initialization Stack Buffer Overflow",
+                    "description": "OpenSSL contains an overflow condition in the RC5_32_set_key() function in crypto/rc5/rc5_skey.c that is triggered as certain input is not properly validated when initializing encryption or decryption keys. This may allow a context-dependent attacker to cause a stack-based buffer overflow, resulting in a denial of service or potentially allowing the execution of arbitrary code.",
+                    "issue_type": "security",
+                    "severity": "Critical",
+                    "provider": "JFrog",
+                    "cves": [{
+                            "cvss_v2": "9.3/AV:N/AC:M/Au:N/C:C/I:C/A:C",
+                            "cvss_v3": "9.8/CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+                        }
+                    ],
+                    "created": "2020-09-09T00:00:00.937Z",
+                    "impact_path": ["artifact_path/artifact1/1.0/sha256__cbc330c4d62cdcdac9408f3fc679b06fc8a22b08638c8f25720f3cd621f52fb6.tar.gz/3.12:openssl:1.1.1k-r0"]
+                }
+            ],
+            "licenses": [{
+                    "name": "OpenSSL",
+                    "full_name": "OpenSSL LICENSE",
+                    "more_info_url": ["https://spdx.org/licenses/OpenSSL.html", "http://www.openssl.org/source/license.html", "https://www.openssl.org/source/license.html", "https://spdx.org/licenses/OpenSSL"],
+                    "components": ["alpine://3.12:libcrypto1.1:1.1.1k-r0", "alpine://3.12:libssl1.1:1.1.1k-r0", "alpine://3.12:openssl:1.1.1k-r0"]
+                } 
+            ]
+        }
+    ]
+}

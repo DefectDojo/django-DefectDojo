@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from django.test.utils import override_settings
 from ..dojo_test_case import DojoTestCase
 from unittest.mock import patch, Mock
 from dojo.models import Product_Type
@@ -51,17 +50,6 @@ class TestAuthorizationDecorators(DojoTestCase):
         mock_shortcuts_get.assert_called_once()
 
     @patch('dojo.authorization.authorization_decorators.get_object_or_404')
-    @override_settings(AUTHORIZATION_STAFF_OVERRIDE=True)
-    def test_authorization_staff_override(self, mock_shortcuts_get):
-        mock_shortcuts_get.return_value = self.product_type
-
-        self.user.is_staff = True
-
-        self.decorated_func(self.request, 1)
-
-        mock_shortcuts_get.assert_called_once()
-
-    @patch('dojo.authorization.authorization_decorators.get_object_or_404')
     @patch('dojo.authorization.authorization_decorators.user_has_permission_or_403')
     def test_authorization_user_has_permission(self, mock_user_has_permission, mock_shortcuts_get):
         mock_shortcuts_get.return_value = self.product_type
@@ -80,7 +68,7 @@ class TestConfigurationAuthorizationDecorators(DojoTestCase):
         self.request = RequestFactory().get('/dummy')
         self.user = User()
         self.request.user = self.user
-        self.decorated_func = user_is_configuration_authorized('test', 'testLegacy', Mock())
+        self.decorated_func = user_is_configuration_authorized('test', Mock())
 
     @patch('dojo.authorization.authorization_decorators.user_has_configuration_permission')
     def test_authorization_user_has_configuration_permission_ok(self, mock):
@@ -88,7 +76,7 @@ class TestConfigurationAuthorizationDecorators(DojoTestCase):
 
         self.decorated_func(self.request)
 
-        mock.assert_called_with(self.user, 'test', 'testLegacy')
+        mock.assert_called_with(self.user, 'test')
 
     @patch('dojo.authorization.authorization_decorators.user_has_configuration_permission')
     def test_authorization_user_has_configuration_permission_denied(self, mock):
@@ -97,4 +85,4 @@ class TestConfigurationAuthorizationDecorators(DojoTestCase):
         with self.assertRaises(PermissionDenied):
             self.decorated_func(self.request)
 
-        mock.assert_called_with(self.user, 'test', 'testLegacy')
+        mock.assert_called_with(self.user, 'test')

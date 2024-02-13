@@ -47,7 +47,7 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     severity_count_by_month = get_severities_by_month(findings, today)
     punchcard, ticks = get_punchcard_data(findings, today - relativedelta(weeks=26), 26)
 
-    if user_has_configuration_permission(request.user, 'dojo.view_engagement_survey', 'staff'):
+    if user_has_configuration_permission(request.user, 'dojo.view_engagement_survey'):
         unassigned_surveys = Answered_Survey.objects.filter(assignee_id__isnull=True, completed__gt=0, ) \
             .filter(Q(engagement__isnull=True) | Q(engagement__in=engagements))
     else:
@@ -69,6 +69,11 @@ def dashboard(request: HttpRequest) -> HttpResponse:
         'ticks': ticks,
         'surveys': unassigned_surveys,
     })
+
+
+def support(request: HttpRequest) -> HttpResponse:
+    add_breadcrumb(title="Support", top_level=not len(request.GET), request=request)
+    return render(request, 'dojo/support.html', {})
 
 
 def get_severities_all(findings) -> Dict[str, int]:
