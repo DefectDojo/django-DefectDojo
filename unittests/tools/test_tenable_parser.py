@@ -268,3 +268,13 @@ class TestTenableParser(DojoTestCase):
         self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
         for vulnerability_id in finding.unsaved_vulnerability_ids:
             self.assertEqual('CVE-2023-32233', vulnerability_id)
+
+    def test_parse_issue_6992(self):
+        testfile = open("unittests/scans/tenable/nessus/issue_6992.nessus")
+        parser = TenableParser()
+        findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(1, len(findings))
+        self.assertEqual("High", findings[0].severity)
