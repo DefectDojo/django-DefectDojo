@@ -405,6 +405,15 @@ def jira_get_resolution_id(jira, issue, status):
     return resolution_id
 
 
+def jira_get_transition_id(jira, issue, transition_name):
+    transitions = jira.transitions(issue)
+    for t in transitions:
+        if t['name'] == transition_name:
+            return t['id']
+
+    return None
+
+
 def jira_transition(jira, issue, transition_id):
     try:
         if issue and transition_id:
@@ -985,7 +994,12 @@ def push_status_to_jira(obj, jira_instance, jira, issue, save=False):
     if any(item in status_list for item in RESOLVED_STATUS):
         if issue_from_jira_is_active(issue):
             logger.debug('Transitioning Jira issue to Resolved')
-            updated = jira_transition(jira, issue, jira_instance.close_status_key)
+            if hasattr(settings, 'JIRA_CLOSE_TRANSITION_NAME_CONFIG'):
+                close_transition_id = jira_get_transition_id(jira, issue, settings.JIRA_CLOSE_TRANSITION_NAME_CONFIG)
+                if not close_transition_id == "None":
+                    updated = jira_transition(jira, issue, close_transition_id)
+            else:
+                updated = jira_transition(jira, issue, jira_instance.close_status_key)
         else:
             logger.debug('Jira issue already Resolved')
             updated = False
