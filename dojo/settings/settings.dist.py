@@ -1210,6 +1210,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'Checkmarx OSA': ['vulnerability_ids', 'component_name'],
     'Cloudsploit Scan': ['title', 'description'],
+    'KICS Scan': ['file_path', 'line', 'severity', 'description', 'title'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube API Import': ['title', 'file_path', 'line'],
     'Dependency Check Scan': ['title', 'cwe', 'file_path'],
