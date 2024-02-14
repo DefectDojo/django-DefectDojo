@@ -281,6 +281,8 @@ env = environ.FileAwareEnv(
     DD_ENABLE_AUDITLOG=(bool, True),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
+    # Define Jira Transition Name to Close tickets, which will be used to lookup transition id each time a ticket has to be closed
+    DD_JIRA_CLOSE_TRANSITION_NAME_CONFIG=(str, ''),
 )
 
 
@@ -1719,6 +1721,8 @@ CREATE_CLOUD_BANNER = env('DD_CREATE_CLOUD_BANNER')
 AUDITLOG_FLUSH_RETENTION_PERIOD = env('DD_AUDITLOG_FLUSH_RETENTION_PERIOD')
 ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
 USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
+# global jira transition name to close; if this is present, Jira close transition ID will be ignored and will be looked up automatically from this name
+JIRA_CLOSE_TRANSITION_NAME_CONFIG = env("DD_JIRA_CLOSE_TRANSITION_NAME_CONFIG")
 
 # TODO - these warnings needs to be removed
 if DEBUG:
