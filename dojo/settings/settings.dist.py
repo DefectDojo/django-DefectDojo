@@ -1210,7 +1210,6 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'Checkmarx OSA': ['vulnerability_ids', 'component_name'],
     'Cloudsploit Scan': ['title', 'description'],
-    'KICS Scan': ['file_path', 'line', 'severity', 'description', 'title'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube API Import': ['title', 'file_path', 'line'],
     'Dependency Check Scan': ['title', 'cwe', 'file_path'],
@@ -1276,6 +1275,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Humble Json Importer': ['title'],
     'MSDefender Parser': ['title', 'description'],
     'HCLAppScan XML': ['title', 'description'],
+    'KICS Scan': ['file_path', 'line', 'severity', 'description', 'title'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1441,7 +1441,6 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Meterian Scan': DEDUPE_ALGO_HASH_CODE,
     'Github Vulnerability Scan': DEDUPE_ALGO_HASH_CODE,
     'Cloudsploit Scan': DEDUPE_ALGO_HASH_CODE,
-    'KICS Scan': DEDUPE_ALGO_HASH_CODE,
     'SARIF': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Azure Security Center Recommendations Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Hadolint Dockerfile check': DEDUPE_ALGO_HASH_CODE,
@@ -1484,6 +1483,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Wazuh Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'MSDefender Parser': DEDUPE_ALGO_HASH_CODE,
     'HCLAppScan XML': DEDUPE_ALGO_HASH_CODE,
+    'KICS Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
