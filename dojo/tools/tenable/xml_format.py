@@ -219,8 +219,7 @@ class TenableXMLParser(object):
                         cvssv3_score = cvssv3_score_element_text
 
                     cvss = self.safely_get_element_text(item.find("cvss3_base_score"))
-                    if cvss != None:
-                        print(cvss)
+                    if cvss is not None:
                         severity = self.get_cvss_severity(cvss)
 
                     # Determine the current entry has already been parsed in

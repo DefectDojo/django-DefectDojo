@@ -53,7 +53,6 @@ class TestTenableParser(DojoTestCase):
         self.assertEqual("CVE-2004-2761", finding.unsaved_vulnerability_ids[0])
         # this vuln have 'CVE-2013-2566,CVE-2015-2808' as CVE
         finding = findings[3]
-        print(f"finding.unsaved_vulnerability_ids: {finding.unsaved_vulnerability_ids} - {type(finding.unsaved_vulnerability_ids)} - {type(finding.unsaved_vulnerability_ids[0])}")
         self.assertEqual(2, len(finding.unsaved_vulnerability_ids))
         self.assertEqual("CVE-2013-2566", finding.unsaved_vulnerability_ids[0])
         self.assertEqual("CVE-2015-2808", finding.unsaved_vulnerability_ids[1])
