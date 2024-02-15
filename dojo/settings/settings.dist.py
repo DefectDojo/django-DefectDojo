@@ -1690,4 +1690,3 @@ if DEBUG:
     warnings.filterwarnings("ignore", category=RemovedInDjango50Warning)
     warnings.filterwarnings("ignore", message="invalid escape sequence.*")
     warnings.filterwarnings("ignore", message="DateTimeField .+ received a naive datetime .+ while time zone support is active\\.")
-    warnings.filterwarnings("ignore", message="unclosed file .+")
