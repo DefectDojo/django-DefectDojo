@@ -1133,6 +1133,14 @@ class ToolTypeSerializer(serializers.ModelSerializer):
         model = Tool_Type
         fields = "__all__"
 
+    def validate(self, data):
+        if self.context["request"].method == "POST":
+            name = data.get("name")
+            # Make sure this will not create a duplicate test type
+            if Tool_Type.objects.filter(name=name).count() > 0:
+                raise serializers.ValidationError('A Tool Type with the name already exists')
+        return data
+
 
 class RegulationSerializer(serializers.ModelSerializer):
     class Meta:
