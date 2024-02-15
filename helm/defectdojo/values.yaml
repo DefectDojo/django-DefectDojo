@@ -104,7 +104,7 @@ monitoring:
   # Add the nginx prometheus exporter sidecar
   prometheus:
     enabled: false
-    image: nginx/nginx-prometheus-exporter:1.0.0
+    image: nginx/nginx-prometheus-exporter:1.1.0
     imagePullPolicy: IfNotPresent
 
 annotations: {}
@@ -304,6 +304,7 @@ initializer:
     helm.sh/hook: "post-install,post-upgrade"
   }
   annotations: {}
+  labels: {}
   keepSeconds: 60
   affinity: {}
   nodeSelector: {}
@@ -456,7 +457,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.33.15
+    tag: 1.33.16
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""

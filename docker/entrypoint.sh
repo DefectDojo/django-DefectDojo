@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /secret-file-loader.sh
+
 # Waits for the database to come up.
 ./docker/wait-for-it.sh "$DD_DATABASE_HOST":"$DD_DATABASE_PORT"
 

@@ -9,7 +9,6 @@ DefectDojo parser accepts a .json file.
 To export a .json file from Bandit, you will need to install and run the .json report formatter from your Bandit instance.  
 See Bandit documentation: https://bandit.readthedocs.io/en/latest/formatters/index.html
 
-
 ### Acceptable JSON Format
 All properties are expected as strings, except "metrics" properties, which are expected as numbers.  All properties are required by the parser.
 
@@ -65,4 +64,4 @@ All properties are expected as strings, except "metrics" properties, which are e
 ~~~
 
 ### Sample Scan Data
-Sample Bandit scans can be found at https://github.com/DefectDojo/sample-scan-files/tree/master/bandit.
+Sample Bandit scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/bandit).

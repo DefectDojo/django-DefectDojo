@@ -37,4 +37,4 @@ All properties are strings and are required by the parser.
 ~~~
 
 ### Sample Scan Data
-Sample Anchore-Engine scans can be found at https://github.com/DefectDojo/sample-scan-files/tree/master/anchore_engine .
+Sample Anchore-Engine scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/anchore_engine).

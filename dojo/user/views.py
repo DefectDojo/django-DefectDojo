@@ -181,12 +181,12 @@ def delete_alerts(request):
     alerts = Alerts.objects.filter(user_id=request.user)
 
     if request.method == 'POST':
-        removed_alerts = request.POST.getlist('alert_select')
         alerts.filter().delete()
-        messages.add_message(request,
-                                        messages.SUCCESS,
-                                        _('Alerts removed.'),
-                                        extra_tags='alert-success')
+        messages.add_message(
+            request,
+            messages.SUCCESS,
+            _('Alerts removed.'),
+            extra_tags='alert-success')
         return HttpResponseRedirect('alerts')
 
     return render(request,
@@ -270,9 +270,7 @@ def change_password(request):
     if request.method == 'POST':
         form = ChangePasswordForm(request.POST, user=user)
         if form.is_valid():
-            current_password = form.cleaned_data['current_password']
             new_password = form.cleaned_data['new_password']
-            confirm_password = form.cleaned_data['confirm_password']
 
             user.set_password(new_password)
             Dojo_User.disable_force_password_reset(user)

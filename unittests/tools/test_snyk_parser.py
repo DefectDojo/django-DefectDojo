@@ -163,13 +163,22 @@ class TestSnykParser(DojoTestCase):
         with open("unittests/scans/snyk/single_project_upgrade_libs.json") as testfile:
             parser = SnykParser()
             findings = parser.get_findings(testfile, Test())
-            for index in range(len(findings)):
-                print(index, findings[index], findings[index].unsaved_tags)
             self.assertEqual(254, len(findings))
             # acme-review@1.0.0: Remote Code Execution (RCE)
             finding = findings[227]
-            print(finding, finding.severity, finding.unsaved_tags)
             self.assertEqual("High", finding.severity)
             self.assertIn('target_file:package-lock.json', finding.unsaved_tags)
             self.assertIn('upgrade_to:react-scripts@5.0.0', finding.unsaved_tags)
             self.assertIn('shell-quote@1.7.2', finding.mitigation)
+
+    def test_snykcontainer_issue_9270(self):
+        with open("unittests/scans/snyk/snykcontainer_issue_9270.json") as testfile:
+            parser = SnykParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(25, len(findings))
+
+    def test_snykcode_issue_9270(self):
+        with open("unittests/scans/snyk/snykcode_issue_9270.json") as testfile:
+            parser = SnykParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(39, len(findings))
