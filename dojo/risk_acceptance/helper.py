@@ -357,14 +357,14 @@ def update_endpoint_statuses(finding: Finding, accept_risk: bool) -> None:
         status.save()
 
 def risk_accept_provider(
-        finding: Finding,
+        finding_id: str,
         provider: str,
         acceptance_days: int,
         url: str,
         header: str,
         token: str,
     ):
-    formatted_url = url + f'{provider}?vulnerabilityId={finding.vuln_id_from_tool}&acceptanceDays={acceptance_days}'
+    formatted_url = url + f'{provider}?vulnerabilityId={finding_id}&acceptanceDays={acceptance_days}'
     headers = {}
     headers[header] = token
     response = requests.post(url=formatted_url, headers=headers, verify=False)

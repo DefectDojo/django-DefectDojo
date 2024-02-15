@@ -66,28 +66,18 @@ def update_expiration_risk_accepted(finding: Finding):
     return expiration_delta_days.get(finding.severity.lower()), expiration_date, created_date
 
 def handle_from_provider_risk(finding, acceptance_days):
-    if finding.tags == settings.ENGINE_BACKEND_FLUID:
+    if finding.tags in [settings.PROVIDER1, settings.PROVIDER2, settings.PROVIDER3]:
+        if finding.tags == settings.PROVIDER3:
+            finding_id = finding.unique_id_from_tool
+        else:
+            finding_id = finding.vuln_id_from_tool
         ra_helper.risk_accept_provider(
-            finding=finding,
-            provider=settings.ENGINE_BACKEND_FLUID,
+            finding_id==finding_id,
+            provider=finding.tags,
             acceptance_days=acceptance_days,
-            url=settings.ENGINE_BACKEND,
-            header=settings.ENGINE_BACKEND_HEADER,
-            token=settings.ENGINE_BACKEND_TOKEN)
-    elif finding.tags == settings.ENGINE_BACKEND_7WAY:
-        ra_helper.risk_accept_provider(
-            settings.ENGINE_BACKEND_7WAY,
-            acceptance_days,
-            settings.ENGINE_BACKEND,
-            settings.ENGINE_BACKEND_HEADER,
-            settings.ENGINE_BACKEND_TOKEN)
-    elif finding.tags == settings.ENGINE_BACKEND_SONAR:
-        ra_helper.risk_accept_provider(
-            settings.ENGINE_BACKEND_SONAR,
-            acceptance_days,
-            settings.ENGINE_BACKEND,
-            settings.ENGINE_BACKEND_HEADER,
-            settings.ENGINE_BACKEND_TOKEN)
+            url=settings.PROVIDER_URL,
+            header=settings.PROVIDER_HEADER,
+            token=settings.PROVIDER_TOKEN)
 
 def risk_accepted_succesfully(
     user,
