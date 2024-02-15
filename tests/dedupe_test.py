@@ -95,12 +95,11 @@ class DedupeTest(BaseTestCase):
         # check that user was redirect back to url where it came from based on return_url
         self.assertTrue(driver.current_url.endswith('page=1'))
 
-
 # --------------------------------------------------------------------------------------------------------
 # Same scanner deduplication - Deduplication on engagement
 #   Test deduplication for Bandit SAST scanner
 # --------------------------------------------------------------------------------------------------------
-    @on_exception_html_source_logger  # noqa: E301
+    @on_exception_html_source_logger
     def test_add_path_test_suite(self):
         logger.debug("Same scanner deduplication - Deduplication on engagement - static. Creating tests...")
         # Create engagement
