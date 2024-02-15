@@ -674,3 +674,12 @@ feedback.internal.google.com (endpoint) -> [ team:human resources, public_facing
 Endpoint Meta Importer can be found in the Endpoint tab when viewing a Product
 
 **Note:** The field "hostname" is required as it is used to query/create endpoints.
+
+## Findings Image Upload
+
+You can add images (.png) to your findings. In order to achieve this, you have to click on "Manage Files" within the finding:
+![Manage Files](../../images/findings_manage_files.png)
+There, you can upload a png file to attach it to a finding:
+![Upload PNG File](../../images/file_upload.png)
+The following picture shows the result:
+![Result PNG File in finding](../../images/uploaded_png_to_finding.png)
