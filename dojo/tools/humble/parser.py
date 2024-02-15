@@ -18,7 +18,7 @@ class HumbleParser(object):
         items = []
         try:
             data = json.load(filename)
-        except ValueError as err:
+        except ValueError:
             data = {}
         if data != {}:
             url = data['[0. Info]']['URL']

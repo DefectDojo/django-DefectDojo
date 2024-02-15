@@ -64,3 +64,5 @@ To match it to DefectDojo severity formula, Secerity 0 (Ok) findings from Popeye
 - Severity 2 (Warning) Popeye findings will be created as Severity "Low" findings in DefectDojo.
 - Severity 3 (Errors) Popeye findings will be created as Severity "High" findingsi in DefectDojo.
 
+### Sample Scan Data
+Sample Popeye scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/popeye).

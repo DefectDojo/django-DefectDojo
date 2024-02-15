@@ -82,6 +82,7 @@ COPY \
   docker/wait-for-it.sh \
   docker/celery_readiness.py \
   docker/celery_worker_liveness.py \
+  docker/secret-file-loader.sh \
   docker/certs/* \
   /
 COPY wsgi.py manage.py docker/unit-tests.sh ./

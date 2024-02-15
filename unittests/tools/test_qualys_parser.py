@@ -130,4 +130,49 @@ class TestQualysParser(DojoTestCase):
                 self.assertEqual(
                     finding.severity, "Critical"
                 )
+
         return findings[0]
+
+    def test_parse_file_monthly_pci_issue6932(self):
+        testfile = open(
+            get_unit_tests_path() + "/scans/qualys/monthly_pci_issue6932.csv"
+        )
+        parser = QualysParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+
+    def test_parse_file_with_cvss_values_and_scores(self):
+        testfile = open(
+            get_unit_tests_path() + "/scans/qualys/Qualys_Sample_Report.xml"
+        )
+        parser = QualysParser()
+        findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            if finding.unsaved_endpoints[0].host == "demo14.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
+                finding_cvssv3_score = finding
+            if finding.unsaved_endpoints[0].host == "demo13.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
+                finding_no_cvssv3_at_detection = finding
+            if finding.unsaved_endpoints[0].host == "demo14.s02.sjc01.qualys.com" and finding.title == "QID-121695 | NTP \"monlist\"  Feature Denial of Service Vulnerability":
+                finding_no_cvssv3 = finding
+        # The CVSS Vector is not used from the Knowledgebase
+        self.assertEqual(
+            # CVSS_FINAL is defined without a cvssv3 vector
+            finding_cvssv3_score.cvssv3, None
+        )
+        # Nevertheless the CVSSv3 Score should be set
+        self.assertEqual(
+            finding_cvssv3_score.cvssv3_score, 8.2
+        )
+        # If no cvss information is present in detection and not in knowledgebase values should be empty
+        self.assertEqual(
+            finding_no_cvssv3.cvssv3, None
+        )
+        self.assertEqual(
+            finding_no_cvssv3.cvssv3_score, None
+        )
+        # No CVSS Values available in detection and it uses the knowledgebase then
+        self.assertEqual(finding_no_cvssv3_at_detection.cvssv3,
+                         "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H")
+        self.assertEqual(
+            finding_no_cvssv3_at_detection.cvssv3_score, 9.0
+        )

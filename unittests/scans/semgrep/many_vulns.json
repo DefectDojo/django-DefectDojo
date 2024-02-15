@@ -936,7 +936,7 @@
     },
     {
       "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
-      "path": "tools/whitesource/parser.py",
+      "path": "tools/mend/parser.py",
       "start": {
         "line": 104,
         "col": 24

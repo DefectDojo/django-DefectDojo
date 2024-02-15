@@ -8,3 +8,6 @@ AWS Security Hub consumes, aggregates, organizes, and prioritizes findings from 
 Reference: https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-findings-format.html
 
 Prowler tool can generate this format with option `-M json-asff`.
+
+### Sample Scan Data
+Sample AWS Security Finding Format (ASFF) scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/asff).
