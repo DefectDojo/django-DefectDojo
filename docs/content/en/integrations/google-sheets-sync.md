@@ -5,6 +5,7 @@ draft: false
 weight: 7
 ---
 
+**Please note - the Google Sheets feature has been deprecated as of DefectDojo version 2.21.0 - these documents are for reference only.**
 
 With the Google Sheets sync feature, DefectDojo allow the users to
 export all the finding details of each test into a separate Google
