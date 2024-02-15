@@ -1601,6 +1601,13 @@ class Endpoint(models.Model):
             models.Index(fields=['product']),
         ]
 
+    def save(self, *args, **kwargs):
+        # clean() is not called when an object is saved, so we should do it here to prevent
+        # the endpoint from getting into an inrecoverable state
+        # https://docs.djangoproject.com/en/5.0/ref/models/instances/#django.db.models.Model.clean
+        self.clean()
+        super(Endpoint, self).save(*args, **kwargs)
+
     def clean(self):
         errors = []
         null_char_list = ["0x00", "\x00"]
@@ -1907,7 +1914,7 @@ class Endpoint(models.Model):
         query = query_string[:1000] if query_string is not None and query_string != '' else None
         fragment = url.fragment[:500] if url.fragment is not None and url.fragment != '' else None
 
-        return Endpoint(
+        endpoint = Endpoint(
             protocol=protocol,
             userinfo=userinfo,
             host=host,
@@ -1916,6 +1923,11 @@ class Endpoint(models.Model):
             query=query,
             fragment=fragment,
         )
+        # Ensure the parsed endpoint is actually clean. In the event of a validation error, it will be caught
+        # here rather than when findings have already been saved
+        endpoint.clean()
+
+        return endpoint
 
     def get_absolute_url(self):
         from django.urls import reverse
