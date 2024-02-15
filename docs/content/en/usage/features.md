@@ -677,7 +677,7 @@ Endpoint Meta Importer can be found in the Endpoint tab when viewing a Product
 
 ## Findings Image Upload
 
-You can add images (.png) to your findings. In order to achieve this, you have to click on "Manage Files" within the finding:
+You can add images (.png, .jpeg, .gif) to your findings. In order to achieve this, you have to click on "Manage Files" within the finding:
 ![Manage Files](../../images/findings_manage_files.png)
 There, you can upload a png file to attach it to a finding:
 ![Upload PNG File](../../images/file_upload.png)
