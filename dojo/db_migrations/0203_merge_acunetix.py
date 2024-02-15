@@ -47,7 +47,7 @@ def merge_parser(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0200_finding_sla_expiration_date_product_async_updating_and_more'),
+        ('dojo', '0202_alter_dojo_group_social_provider'),
     ]
 
     operations = [
