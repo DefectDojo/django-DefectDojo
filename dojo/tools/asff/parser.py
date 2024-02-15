@@ -62,8 +62,7 @@ class AsffParser(object):
                 unique_id_from_tool=item.get("Id"),
             )
             finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("asff")]
-            result.append(finding)
-
+            
             if "Resources" in item:
                 endpoints = []
                 for resource in item["Resources"]:
