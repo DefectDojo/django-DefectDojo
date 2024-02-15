@@ -55,7 +55,6 @@ env = environ.FileAwareEnv(
     DD_LANGUAGE_CODE=(str, 'en-us'),
     DD_SITE_ID=(int, 1),
     DD_USE_I18N=(bool, True),
-    DD_USE_L10N=(bool, True),
     DD_USE_TZ=(bool, True),
     DD_MEDIA_URL=(str, '/media/'),
     DD_MEDIA_ROOT=(str, root('media')),
@@ -344,10 +343,6 @@ SITE_ID = env('DD_SITE_ID')
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
 USE_I18N = env('DD_USE_I18N')
-
-# If you set this to False, Django will not format dates, numbers and
-# calendars according to the current locale.
-USE_L10N = env('DD_USE_L10N')
 
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = env('DD_USE_TZ')
@@ -1664,8 +1659,6 @@ TAGULOUS_AUTOCOMPLETE_JS = (
 TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
 
 EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
-
-USE_L10N = True
 
 # FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
 FEATURE_FINDING_GROUPS = env('DD_FEATURE_FINDING_GROUPS')
