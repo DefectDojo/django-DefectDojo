@@ -320,7 +320,16 @@ class MobSFParser(object):
                 }
 
                 mobsf_findings.append(mobsf_item)
-
+        if type(data) == list:
+            for finding in data:
+                mobsf_item = {
+                    "category": finding["category"],
+                    "title": finding["name"],
+                    "severity": finding["severity"],
+                    "description": finding["description"] + "\n" + "**apk_exploit_dict:** " + str(finding["apk_exploit_dict"]) + "\n" + "**line_number:** " + str(finding["line_number"]),
+                    "file_path": finding["file_object"]
+                }
+                mobsf_findings.append(mobsf_item)
         for mobsf_finding in mobsf_findings:
             title = mobsf_finding["title"]
             sev = self.getCriticalityRating(mobsf_finding["severity"])
@@ -372,12 +381,14 @@ class MobSFParser(object):
     # Criticality rating
     def getCriticalityRating(self, rating):
         criticality = "Info"
-        if rating == "Good":
+        if rating.lower() == "good":
             criticality = "Info"
-        if rating == "Warning":
+        elif rating.lower() == "warning":
             criticality = "Low"
+        elif rating.lower() == "vulnerability":
+            criticality = "Medium"
         else:
-            criticality = rating.capitalize()
+            criticality = rating.lower().capitalize()
         return criticality
 
     def suite_data(self, suites):
