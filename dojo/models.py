@@ -4029,26 +4029,23 @@ class Notifications(models.Model):
                 result = notifications
                 # result.pk = None # detach from db
             else:
-                # TODO This concat looks  better, but requires Python 3.6+
-                # result.scan_added = [*result.scan_added, *notifications.scan_added]
-                from dojo.utils import merge_sets_safe
-                result.product_type_added = merge_sets_safe(result.product_type_added, notifications.product_type_added)
-                result.product_added = merge_sets_safe(result.product_added, notifications.product_added)
-                result.engagement_added = merge_sets_safe(result.engagement_added, notifications.engagement_added)
-                result.test_added = merge_sets_safe(result.test_added, notifications.test_added)
-                result.scan_added = merge_sets_safe(result.scan_added, notifications.scan_added)
-                result.jira_update = merge_sets_safe(result.jira_update, notifications.jira_update)
-                result.upcoming_engagement = merge_sets_safe(result.upcoming_engagement, notifications.upcoming_engagement)
-                result.stale_engagement = merge_sets_safe(result.stale_engagement, notifications.stale_engagement)
-                result.auto_close_engagement = merge_sets_safe(result.auto_close_engagement, notifications.auto_close_engagement)
-                result.close_engagement = merge_sets_safe(result.close_engagement, notifications.close_engagement)
-                result.user_mentioned = merge_sets_safe(result.user_mentioned, notifications.user_mentioned)
-                result.code_review = merge_sets_safe(result.code_review, notifications.code_review)
-                result.review_requested = merge_sets_safe(result.review_requested, notifications.review_requested)
-                result.other = merge_sets_safe(result.other, notifications.other)
-                result.sla_breach = merge_sets_safe(result.sla_breach, notifications.sla_breach)
-                result.sla_breach_combined = merge_sets_safe(result.sla_breach_combined, notifications.sla_breach_combined)
-                result.risk_acceptance_expiration = merge_sets_safe(result.risk_acceptance_expiration, notifications.risk_acceptance_expiration)
+                result.product_type_added = [*result.product_type_added, *notifications.product_type_added]
+                result.product_added = [*result.product_added, *notifications.product_added]
+                result.engagement_added = [*result.engagement_added, *notifications.engagement_added]
+                result.test_added = [*result.test_added, *notifications.test_added]
+                result.scan_added = [*result.scan_added, *notifications.scan_added]
+                result.jira_update = [*result.jira_update, *notifications.jira_update]
+                result.upcoming_engagement = [*result.upcoming_engagement, *notifications.upcoming_engagement]
+                result.stale_engagement = [*result.stale_engagement, *notifications.stale_engagement]
+                result.auto_close_engagement = [*result.auto_close_engagement, *notifications.auto_close_engagement]
+                result.close_engagement = [*result.close_engagement, *notifications.close_engagement]
+                result.user_mentioned = [*result.user_mentioned, *notifications.user_mentioned]
+                result.code_review = [*result.code_review, *notifications.code_review]
+                result.review_requested = [*result.review_requested, *notifications.review_requested]
+                result.other = [*result.other, *notifications.other]
+                result.sla_breach = [*result.sla_breach, *notifications.sla_breach]
+                result.sla_breach_combined = [*result.sla_breach_combined, *notifications.sla_breach_combined]
+                result.risk_acceptance_expiration = [*result.risk_acceptance_expiration, *notifications.risk_acceptance_expiration]
 
         return result
 
