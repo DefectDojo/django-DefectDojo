@@ -89,15 +89,16 @@ def get_item(finding: dict, test):
         active = True
         if finding.get("RecordState") == "ACTIVE":
             is_Mitigated = False
+            mitigated = None
         else:
             is_Mitigated = True
-        if finding.get("LastObservedAt", None):
-            try:
-                mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
-            except Exception:
-                mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
-        else:
-            mitigated = datetime.utcnow()
+            if finding.get("LastObservedAt", None):
+                try:
+                    mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
+                except Exception:
+                    mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
+            else:
+                mitigated = datetime.utcnow()
         description = f"This is a GuardDuty Finding\n{finding.get('Description', '')}"
         description += f"SourceURL: {finding.get('SourceUrl', '')}\n"
         description += f"AwsAccountId: {finding.get('AwsAccountId', '')}\n"
