@@ -320,7 +320,7 @@ class MobSFParser(object):
                 }
 
                 mobsf_findings.append(mobsf_item)
-        if type(data) == list:
+        if type(data) is list:
             for finding in data:
                 mobsf_item = {
                     "category": finding["category"],
