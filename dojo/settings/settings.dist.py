@@ -55,7 +55,6 @@ env = environ.FileAwareEnv(
     DD_LANGUAGE_CODE=(str, 'en-us'),
     DD_SITE_ID=(int, 1),
     DD_USE_I18N=(bool, True),
-    DD_USE_L10N=(bool, True),
     DD_USE_TZ=(bool, True),
     DD_MEDIA_URL=(str, '/media/'),
     DD_MEDIA_ROOT=(str, root('media')),
@@ -344,10 +343,6 @@ SITE_ID = env('DD_SITE_ID')
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
 USE_I18N = env('DD_USE_I18N')
-
-# If you set this to False, Django will not format dates, numbers and
-# calendars according to the current locale.
-USE_L10N = env('DD_USE_L10N')
 
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = env('DD_USE_TZ')
@@ -758,29 +753,6 @@ REST_FRAMEWORK = {
 if API_TOKENS_ENABLED:
     REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += ('rest_framework.authentication.TokenAuthentication',)
 
-SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'basicAuth': {
-            'type': 'basic'
-        },
-        'cookieAuth': {
-            'type': 'apiKey',
-            'in': 'cookie',
-            'name': 'sessionid'
-        },
-    },
-    'DOC_EXPANSION': "none",
-    'JSON_EDITOR': True,
-    'SHOW_REQUEST_HEADERS': True,
-}
-
-if API_TOKENS_ENABLED:
-    SWAGGER_SETTINGS['SECURITY_DEFINITIONS']['tokenAuth'] = {
-        'type': 'apiKey',
-        'in': 'header',
-        'name': 'Authorization'
-    }
-
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Defect Dojo API v2',
     'DESCRIPTION': 'Defect Dojo - Open Source vulnerability Management made easy. Prefetch related parameters/responses not yet in the schema.',
@@ -854,7 +826,6 @@ INSTALLED_APPS = (
     'dbbackup',
     'django_celery_results',
     'social_django',
-    'drf_yasg',
     'drf_spectacular',
     'drf_spectacular_sidecar',  # required for Django collectstatic discovery
     'tagulous',
@@ -1088,11 +1059,6 @@ if AUTH_REMOTEUSER_ENABLED:
         ('dojo.remote_user.RemoteUserAuthentication',) + \
         REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES']
 
-    SWAGGER_SETTINGS['SECURITY_DEFINITIONS']['remoteUserAuth'] = {
-        'type': 'apiKey',
-        'in': 'header',
-        'name': AUTH_REMOTEUSER_USERNAME_HEADER[5:].replace('_', '-')
-    }
 # ------------------------------------------------------------------------------
 # CELERY
 # ------------------------------------------------------------------------------
@@ -1275,6 +1241,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Humble Json Importer': ['title'],
     'MSDefender Parser': ['title', 'description'],
     'HCLAppScan XML': ['title', 'description'],
+    'MobSF Scan': ['title', 'description', 'severity'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1483,6 +1450,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Wazuh Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'MSDefender Parser': DEDUPE_ALGO_HASH_CODE,
     'HCLAppScan XML': DEDUPE_ALGO_HASH_CODE,
+    'MobSF Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1665,8 +1633,6 @@ TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separat
 
 EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 
-USE_L10N = True
-
 # FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
 FEATURE_FINDING_GROUPS = env('DD_FEATURE_FINDING_GROUPS')
 JIRA_TEMPLATE_ROOT = env('DD_JIRA_TEMPLATE_ROOT')
@@ -1724,6 +1690,5 @@ USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
 if DEBUG:
     from django.utils.deprecation import RemovedInDjango50Warning
     warnings.filterwarnings("ignore", category=RemovedInDjango50Warning)
-    warnings.filterwarnings("ignore", message="invalid escape sequence.*")
     warnings.filterwarnings("ignore", message="'cgi' is deprecated and slated for removal in Python 3\\.13")
     warnings.filterwarnings("ignore", message="unclosed file .+")

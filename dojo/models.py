@@ -246,14 +246,16 @@ class UserContactInfo(models.Model):
 
 class Dojo_Group(models.Model):
     AZURE = 'AzureAD'
+    REMOTE = 'Remote'
     SOCIAL_CHOICES = (
         (AZURE, _('AzureAD')),
+        (REMOTE, _('Remote')),
     )
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True, blank=True)
     users = models.ManyToManyField(Dojo_User, through='Dojo_Group_Member', related_name='users', blank=True)
     auth_group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
-    social_provider = models.CharField(max_length=10, choices=SOCIAL_CHOICES, blank=True, null=True, help_text='Group imported from a social provider.', verbose_name='Social Authentication Provider')
+    social_provider = models.CharField(max_length=10, choices=SOCIAL_CHOICES, blank=True, null=True, help_text=_('Group imported from a social provider.'), verbose_name=_('Social Authentication Provider'))
 
     def __str__(self):
         return self.name
@@ -545,7 +547,7 @@ class System_Settings(models.Model):
         default=True,
         blank=False,
         verbose_name=_("Password must contain one special character"),
-        help_text=_("Requires user passwords to contain at least one special character (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?)."))  # noqa W605
+        help_text=_("Requires user passwords to contain at least one special character (()[]{}|\\`~!@#$%^&*_-+=;:\'\",<>./?)."))
     lowercase_character_required = models.BooleanField(
         default=True,
         blank=False,
@@ -1102,7 +1104,7 @@ class Product(models.Model):
     @cached_property
     def endpoint_host_count(self):
         # active_endpoints is (should be) prefetched
-        endpoints = self.active_endpoints
+        endpoints = getattr(self, 'active_endpoints', None)
 
         hosts = []
         for e in endpoints:
@@ -1116,7 +1118,10 @@ class Product(models.Model):
     @cached_property
     def endpoint_count(self):
         # active_endpoints is (should be) prefetched
-        return len(self.active_endpoints)
+        endpoints = getattr(self, 'active_endpoints', None)
+        if endpoints:
+            return len(self.active_endpoints)
+        return None
 
     def open_findings(self, start_date=None, end_date=None):
         if start_date is None or end_date is None:
@@ -1192,13 +1197,11 @@ class Product(models.Model):
         from django.urls import reverse
         return reverse('view_product', args=[str(self.id)])
 
-    @property
     def violates_sla(self):
-        findings = Finding.objects.filter(test__engagement__product=self, active=True)
-        for f in findings:
-            if f.violates_sla:
-                return True
-        return False
+        findings = Finding.objects.filter(test__engagement__product=self,
+                                          active=True,
+                                          sla_expiration_date__lt=timezone.now().date())
+        return findings.count() > 0
 
 
 class Product_Member(models.Model):
@@ -2887,19 +2890,18 @@ class Finding(models.Model):
                 self.sla_expiration_date = get_current_date() + relativedelta(days=days_remaining)
 
     def sla_days_remaining(self):
-        sla_calculation = None
-        sla_period = self.get_sla_period()
-        if sla_period:
-            sla_calculation = sla_period - self.sla_age
-        return sla_calculation
+        if self.sla_expiration_date:
+            if self.mitigated:
+                mitigated_date = self.mitigated
+                if isinstance(mitigated_date, datetime):
+                    mitigated_date = self.mitigated.date()
+                return (self.sla_expiration_date - mitigated_date).days
+            else:
+                return (self.sla_expiration_date - get_current_date()).days
+        return None
 
     def sla_deadline(self):
-        days_remaining = self.sla_days_remaining()
-        if days_remaining:
-            if self.mitigated:
-                return self.mitigated.date() + relativedelta(days=days_remaining)
-            return get_current_date() + relativedelta(days=days_remaining)
-        return None
+        return self.sla_expiration_date
 
     def github(self):
         try:
@@ -3294,8 +3296,7 @@ class Finding(models.Model):
 
     @property
     def violates_sla(self):
-        days_remaining = self.sla_days_remaining()
-        return days_remaining < 0 if days_remaining else False
+        return (self.sla_expiration_date and self.sla_expiration_date < timezone.now())
 
 
 class FindingAdmin(admin.ModelAdmin):

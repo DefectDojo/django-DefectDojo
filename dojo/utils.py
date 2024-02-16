@@ -1082,7 +1082,7 @@ def get_period_counts(findings,
     }
 
 
-def opened_in_period(start_date, end_date, pt):
+def opened_in_period(start_date, end_date, **kwargs):
     start_date = datetime(
         start_date.year,
         start_date.month,
@@ -1095,7 +1095,7 @@ def opened_in_period(start_date, end_date, pt):
         tzinfo=timezone.get_current_timezone())
     opened_in_period = Finding.objects.filter(
         date__range=[start_date, end_date],
-        test__engagement__product__prod_type=pt,
+        **kwargs,
         verified=True,
         false_p=False,
         duplicate=False,
@@ -1107,7 +1107,7 @@ def opened_in_period(start_date, end_date, pt):
                 Count('numerical_severity')).order_by('numerical_severity')
     total_opened_in_period = Finding.objects.filter(
         date__range=[start_date, end_date],
-        test__engagement__product__prod_type=pt,
+        **kwargs,
         verified=True,
         false_p=False,
         duplicate=False,
@@ -1139,7 +1139,7 @@ def opened_in_period(start_date, end_date, pt):
         'closed':
         Finding.objects.filter(
             mitigated__date__range=[start_date, end_date],
-            test__engagement__product__prod_type=pt,
+            **kwargs,
             severity__in=('Critical', 'High', 'Medium', 'Low')).aggregate(
                 total=Sum(
                     Case(
@@ -1155,7 +1155,7 @@ def opened_in_period(start_date, end_date, pt):
             duplicate=False,
             out_of_scope=False,
             mitigated__isnull=True,
-            test__engagement__product__prod_type=pt,
+            **kwargs,
             severity__in=('Critical', 'High', 'Medium', 'Low')).count()
     }
 
@@ -2429,7 +2429,7 @@ def get_password_requirements_string():
     if bool(get_system_setting('number_character_required')):
         s += ', one number (0-9)'
     if bool(get_system_setting('special_character_required')):
-        s += ', one special chacter (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?)'  # noqa W605
+        s += ', one special character (()[]{}|\\`~!@#$%^&*_-+=;:\'\",<>./?)'
 
     if s.count(', ') == 1:
         password_requirements_string = s.rsplit(', ', 1)[0] + ' and ' + s.rsplit(', ', 1)[1]
