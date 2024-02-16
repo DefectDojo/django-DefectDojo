@@ -31,5 +31,6 @@ exec uwsgi \
   --wsgi dojo.wsgi:application \
   --buffer-size="${DD_UWSGI_BUFFER_SIZE:-8192}" \
   --http 0.0.0.0:8081 --http-to "${DD_UWSGI_ENDPOINT}" \
-  --logformat "${DD_UWSGI_LOGFORMAT:-$DD_UWSGI_LOGFORMAT_DEFAULT}"
+  --logformat "${DD_UWSGI_LOGFORMAT:-$DD_UWSGI_LOGFORMAT_DEFAULT}" \
+  --max-fd "${DD_UWSGI_MAX_FD:-1048576}
   # HTTP endpoint is enabled for Kubernetes liveness checks. It should not be exposed as a service.
