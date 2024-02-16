@@ -3177,7 +3177,7 @@ class TransferFindingSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         # representation['actions'] = helper.get_permissions_tranfer_finding(Permissions.Transfer_Finding_View)
-        representation['actions'] = ["delete", "edit", "list"]
+        representation['actions'] = []
         return representation
 
     class Meta:

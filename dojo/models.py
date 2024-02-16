@@ -3165,7 +3165,7 @@ class Transfer_Finding(models.Model):
         help_text=_("Product id"))
 
     destination_product = models.CharField(
-        max_length=255,
+        max_length=50,
         editable=True,
         blank=True,
         null=True,
@@ -3218,7 +3218,6 @@ class Transfer_Finding(models.Model):
         blank=True,
         null=True,
         help_text=_("Origin Engagement"))
-
 
     accepted_by = models.CharField(
         max_length=255,

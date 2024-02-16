@@ -3801,7 +3801,7 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
         serializers.TransferFindingSerializer,
     ).to_schema()
 
-    # def list(self, request, *args, **kwargs):
-    #     print("Request method:", request.method)
-    #     print("Request user:", request.user)
-    #     return super().list(request, *args, **kwargs)
+    def list(self, request, *args, **kwargs):
+        print("Request method:", request.method)
+        print("Request user:", request.user)
+        return super().list(request, *args, **kwargs)

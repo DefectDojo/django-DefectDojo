@@ -4,7 +4,9 @@ var findingAcceptance = []
 $(document).on('click', '.table-link', function(event) {
     event.preventDefault();
     let transferId = $(this).data('transfer-id');
-    getTransferFindings(transferId)
+    let productId = $(this).data('product-id');
+    let productTypeId = $(this).data('product-type-id');
+    getTransferFindings(transferId, productId, productTypeId)
 });
 
 
@@ -55,24 +57,30 @@ function innerData(data){
             <td>${finding.severity}</td>
             <td>${finding.cve}</td>
             <td class="cls-finding-status">${finding.risk_status}</td>
-            <td><button type="button" class="btn btn-success btn-sm" data-btn-success=${finding.id}>
-            <i class="fas fa-check"></i>
-            </button>
-            <button type="button" class="btn btn-warning btn-sm" data-btn-warning=${finding.id}>
-            <i class="fas fa-times"></i>
-            </button>
-            <button type="button" class="btn btn-danger btn-sm" data-btn-danger=${finding.id}>
-            <i class="fas fa-trash-alt"></i>
-            </button></td>`; 
+            <td>
+                ${transfer_finding_item.actions.includes('edit') ? 
+                    `<button type="button" class="btn btn-success btn-sm" data-btn-success=${finding.id}>
+                        <i class="fas fa-check"></i>
+                     </button>
+                     <button type="button" class="btn btn-warning btn-sm" data-btn-warning=${finding.id}>
+                        <i class="fas fa-times"></i>
+                     </button>`
+                     :'-'}
+                ${transfer_finding_item.actions.includes('delete') ? 
+                    `<button type="button" class="btn btn-danger btn-sm" data-btn-danger=${finding.id}>
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                     `: '-'}
+            </td>`; 
             tableBody.appendChild(row);
         });
     });
 }
 
 
-function getTransferFindings(transfer_findin_id){
+function getTransferFindings(transfer_findin_id, productId, productTypeId){
     $.ajax({
-        url: "/api/v2/transfer_finding?id=" + transfer_findin_id,
+        url: "/api/v2/transfer_finding?id=" + transfer_findin_id+'&'+"product="+productId+'&'+"product_type="+productTypeId,
         type: "GET",
         success: function(response) {
             innerData(response)
