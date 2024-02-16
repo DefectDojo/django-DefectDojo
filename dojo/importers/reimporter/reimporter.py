@@ -89,6 +89,11 @@ class DojoDefaultReImporter(object):
                 item.component_version if hasattr(item, "component_version") else None
             )
 
+            # Some parsers provide "mitigated" field but do not set timezone (because it is probably not available in the report)
+            # Finding.mitigated is DateTimeField and it requires timezone
+            if item.mitigated and not item.mitigated.tzinfo:
+                item.mitigated = item.mitigated.replace(tzinfo=now.tzinfo)
+
             if not hasattr(item, "test"):
                 item.test = test
 

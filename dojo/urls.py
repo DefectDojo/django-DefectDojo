@@ -4,9 +4,6 @@ from django.conf.urls import include
 from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views as tokenviews
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
 from django.http import HttpResponse
 from dojo import views
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
@@ -183,20 +180,6 @@ if hasattr(settings, 'API_TOKENS_ENABLED'):
             )
         ]
 
-schema_view = get_schema_view(
-    openapi.Info(
-        title="Defect Dojo API",
-        default_version='v2',
-        description="To use the API you need be authorized.\n\n## Deprecated - Removal in v2.30.0\n#### Please use the [OpenAPI3 version](/api/v2/oa3/swagger-ui/)",
-    ),
-    # if public=False, includes only endpoints the current user has access to
-    public=True,
-    # The API of a OpenSource project should be public accessible
-    permission_classes=[permissions.AllowAny],
-    # url pattersns specific to the API
-    patterns=api_v2_urls,
-)
-
 urlpatterns = []
 
 # sometimes urlpatterns needed be added from local_settings.py before other URLs of core dojo
@@ -207,9 +190,6 @@ urlpatterns += [
     # action history
     re_path(r'^%shistory/(?P<cid>\d+)/(?P<oid>\d+)$' % get_system_setting('url_prefix'), views.action_history, name='action_history'),
     re_path(r'^%s' % get_system_setting('url_prefix'), include(ur)),
-
-    # drf-yasg = OpenAPI2
-    re_path(r'^%sapi/v2/doc/' % get_system_setting('url_prefix'), schema_view.with_ui('swagger', cache_timeout=0), name='api_v2_schema'),
 
     # drf-spectacular = OpenAPI3
     re_path(r'^%sapi/v2/oa3/schema/' % get_system_setting('url_prefix'), SpectacularAPIView.as_view(), name='schema_oa3'),
