@@ -14,7 +14,7 @@ class TestMobSFParser(DojoTestCase):
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
-        self.assertEqual(22, len(findings))
+        self.assertEqual(68, len(findings))
         item = findings[0]
         self.assertEqual('android.permission.WRITE_EXTERNAL_STORAGE', item.title)
         self.assertEqual('High', item.severity)
@@ -25,10 +25,10 @@ class TestMobSFParser(DojoTestCase):
         self.assertEqual('This shared object does not have RELRO enabled', item.title)
         self.assertEqual('High', item.severity)
         self.assertEqual('lib/armeabi-v7a/libdivajni.so', item.file_path)
-        self.assertEqual(7, item.nb_occurences)
+        self.assertEqual(1, item.nb_occurences)
         item = findings[17]
-        self.assertEqual('Local File I/O Operations', item.title)
-        self.assertEqual('Info', item.severity)
+        self.assertEqual('This shared object does not have a stack canary value added to the stack', item.title)
+        self.assertEqual('High', item.severity)
         self.assertEqual(1, item.nb_occurences)
 
     def test_parse_file2(self):
@@ -40,8 +40,7 @@ class TestMobSFParser(DojoTestCase):
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
-        self.assertEqual(0, len(findings))
-        # TODO add more checks dedicated to this file
+        self.assertEqual(1022, len(findings))
 
     def test_parse_file_3_1_9_android(self):
         test = Test()
@@ -102,7 +101,7 @@ class TestMobSFParser(DojoTestCase):
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
-        self.assertEqual(55, len(findings))
+        self.assertEqual(93, len(findings))
 
     def test_parse_damnvulnrablebank(self):
         test = Test()
@@ -113,4 +112,4 @@ class TestMobSFParser(DojoTestCase):
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
-        self.assertEqual(39, len(findings))
+        self.assertEqual(80, len(findings))
