@@ -352,8 +352,11 @@ class MobSFParser(object):
             )
             if mobsf_finding["file_path"]:
                 finding.file_path = mobsf_finding["file_path"]
-
-            dupe_key = sev + title
+                dupe_key = sev + title + description + mobsf_finding["file_path"]
+            else:
+                dupe_key = sev + title + description
+            if mobsf_finding["category"]:
+                dupe_key += mobsf_finding["category"]
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 if description is not None:
