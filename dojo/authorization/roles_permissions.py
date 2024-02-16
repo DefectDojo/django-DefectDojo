@@ -60,7 +60,11 @@ class Permissions(IntEnum):
     Risk_Acceptance_Expire = 1213
     Risk_Acceptance_Reinstance = 1214
     Risk_Unaccept = 1215
-    Transfer_Finding = 1216
+
+    Transfer_Finding_View = 1216
+    Transfer_Finding_Edit = 1217
+    Transfer_Finding_Delete = 1218
+    Transfer_Finding_Add = 1219
 
     Test_View = 1302
     Test_Add = 1303
@@ -164,6 +168,7 @@ class Permissions(IntEnum):
             Permissions.Note_Delete,
             Permissions.Note_Edit,
             Permissions.Note_View_History,
+
         }.union(cls.get_test_permissions())
 
     @classmethod
@@ -193,7 +198,17 @@ class Permissions(IntEnum):
             Permissions.Note_Delete,
             Permissions.Note_Edit,
             Permissions.Note_View_History,
+            Permissions.Transfer_Finding_Add,
         }.union(cls.get_finding_group_permissions())
+    
+    @classmethod
+    def get_transfer_finding_permissions(cls):
+        return {
+            Permissions.Transfer_Finding_View,
+            Permissions.Transfer_Finding_Edit,
+            Permissions.Transfer_Finding_Delete,
+            Permissions.Transfer_Finding_Add,
+        }
 
     @classmethod
     def get_finding_group_permissions(cls):
@@ -528,7 +543,9 @@ def get_roles_with_permissions():
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
-            Permissions.Risk_Acceptance
+            Permissions.Risk_Acceptance,
+            Permissions.Transfer_Finding_Add,
+            Permissions.Transfer_Finding_View
         },
         Roles.Leader: {
             Permissions.Product_Type_View,

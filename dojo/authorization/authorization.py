@@ -25,6 +25,7 @@ from dojo.models import (
     Stub_Finding,
     Product_API_Scan_Configuration,
     Cred_Mapping,
+    Transfer_Finding,
 )
 
 
@@ -101,6 +102,11 @@ def user_has_permission(user, obj, permission):
     ) and permission in Permissions.get_finding_permissions():
         return user_has_permission(
             user, obj.test.engagement.product, permission
+        )
+    elif (isinstance(obj, Transfer_Finding)
+          and permission in Permissions.get_transfer_finding_permissions()):
+        return user_has_permission(
+              user, Product_Type.objects.get(name=obj.origin_product_type), permission
         )
     elif (
         isinstance(obj, Finding_Group)

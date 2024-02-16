@@ -90,7 +90,7 @@
                             <td>{{transfer_findings.destination_product_type}}</td>
                             <td>{{transfer_findings.accepted_by_username}}</td>
                             <td>
-                                <td>
+                            {% if transfer_findings|has_object_permission:"Transfer_Finding_Edit" %}
                                     <button type="button" class="btn btn-success btn-sm">
                                     <i class="fas fa-check"></i>
                                     </button>
@@ -99,8 +99,10 @@
                                     </button>
                                     <button type="button" class="btn btn-danger btn-sm">
                                     <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </i></td>
+                                    </button></i>
+                            {% else%}
+                                    --
+                            {%endif%}
                             </td>
                         </tr>
                     {% endfor%}

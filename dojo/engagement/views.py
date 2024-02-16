@@ -1079,7 +1079,8 @@ def add_risk_acceptance(request, eid, fid=None):
 
 
 # @user_is_authorized(Engagement, Permissions.Transfer_Finding, 'eid')
-def view_transfer_finding(request):
+def view_transfer_finding(request, eid=None):
+    eng = get_object_or_404(Engagement, id=eid)
     transfer_finding = Transfer_Finding.objects.all()
     paginator = Paginator(transfer_finding, 25)
     page_number = request.GET.get('page')
@@ -1087,7 +1088,7 @@ def view_transfer_finding(request):
     return render(request, 'dojo/view_transfer_finding.html', {'page_obj': page_obj})
 
 
-@user_is_authorized(Engagement, Permissions.Transfer_Finding, 'eid')
+@user_is_authorized(Engagement, Permissions.Transfer_Finding_Add, 'eid')
 def add_transfer_finding(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
     product = eng.product
@@ -1128,8 +1129,7 @@ def add_transfer_finding(request, eid, fid=None):
                 'Risk acceptance saved.',
                 extra_tags='alert-success')
 
-            # return redirect_to_return_url_or_else(request, reverse('view_transfer_finding'), args=(eid, ))
-            return HttpResponseRedirect(reverse('view_transfer_finding'))
+            return redirect_to_return_url_or_else(request, reverse('view_transfer_finding', args=(eid, )))
         else:
             logger.error(form.errors)
     else:

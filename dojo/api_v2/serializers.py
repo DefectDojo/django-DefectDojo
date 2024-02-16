@@ -15,6 +15,7 @@ from dojo.importers.reimporter.utils import (
     get_target_product_if_exists,
     get_target_test_if_exists,
 )
+from dojo.transfer_findings import helper
 from dojo.models import (
     IMPORT_ACTIONS,
     SEVERITIES,
@@ -3170,9 +3171,15 @@ class TransferFindinFindingsSerializers(serializers.ModelSerializer):
         fields = "__all__"
 
 
-
 class TransferFindingSerializer(serializers.ModelSerializer):
     finding_id = TransferFindinFindingsSerializers(many=True, read_only=True)
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # representation['actions'] = helper.get_permissions_tranfer_finding(Permissions.Transfer_Finding_View)
+        representation['actions'] = ["delete", "edit", "list"]
+        return representation
+
     class Meta:
         model = Transfer_Finding
         fields = "__all__"

@@ -1186,7 +1186,7 @@ class Transfer_FindingForm(forms.ModelForm):
     def __init__(self, *args, **kwags):
         super().__init__(*args, **kwags)
         self.fields["finding_id"].queryset = get_authorized_findings(
-            Permissions.Transfer_Finding
+            Permissions.Transfer_Finding_Add
         )
         self.fields["title"].initial = kwags.get("engagement_id")
         self.fields["destination_product_type"].queryset = Product_Type.objects.all()

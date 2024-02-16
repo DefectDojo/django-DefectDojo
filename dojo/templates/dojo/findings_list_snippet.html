@@ -501,7 +501,7 @@
                                                                 {% endif %}
                                                             {% endif %}
                                                         {% endif %}
-                                                        {% if finding|has_object_permission:"Transfer_Finding" %}
+                                                        {% if finding|has_object_permission:"Transfer_Finding_Add" %}
                                                             <li role="presentation">
                                                                 <a rel="noopener noreferrer" href="{% url 'add_transfer_finding' finding.test.engagement.id finding.id %}">
                                                                     <i class="fa-solid fa-circle-exclamation"></i> {% trans "Transfer Finding..." %}

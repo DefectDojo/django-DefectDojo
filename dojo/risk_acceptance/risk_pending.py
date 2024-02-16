@@ -115,7 +115,7 @@ def get_role_members(user, product: Product, product_type: Product_Type):
     if not user_members:
         raise ValueError("The user does not have any product_type or product associated with it")
     for user_member in user_members.all():
-        if hasattr(user_member,"product_type_id"):
+        if hasattr(user_member, "product_type_id"):
             if user_member.product_type_id == product_type.id:
                 return user_member.role.name
         elif hasattr(user_member, "product_id"):
