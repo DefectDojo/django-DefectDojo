@@ -33,7 +33,20 @@ Product Type views
 
 
 def get_description_product_type(_request, ptid):
-    products = list(Product.objects.filter(prod_type_id=ptid).values())
+    products = Product.objects.filter(prod_type_id=ptid).prefetch_related("product_manager","technical_contact", "team_manager")
+    product_list = []
+    for product in products:
+        item = {
+            "id": product.id,
+            "name":product.name,
+            "contacts": {
+                "product_manager": product.product_manager.username,
+                "technical_contact": product.technical_contact.username,
+                "team_manager": product.team_manager.username
+            }
+        }
+        product_list.append(item)
+    products = list(product_list)
     if len(products) != 0:
         data = {"message": "Success", "products": products}
     else:

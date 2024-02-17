@@ -1168,18 +1168,21 @@ class Transfer_FindingForm(forms.ModelForm):
     destination_product_type = forms.ModelChoiceField(
         queryset=Product_Type.objects.none()
     )
-    destination_product = forms.CharField(widget=forms.Select(), required=True)
-    destination_engagement = forms.CharField(widget=forms.Select(), required=True)  # Usar widget Select
+    destination_product_id = forms.CharField(widget=forms.Select(), required=True)
+    destination_product_name = forms.CharField(widget=forms.HiddenInput(), required=True)
+    destination_engagement_id = forms.CharField(widget=forms.Select(), required=True)  # Usar widget Select
+    destination_engagement_name = forms.CharField(widget=forms.HiddenInput(), required=True)
     notes = forms.CharField(
         required=False, max_length=2400, widget=forms.Textarea, label="Notes"
     )
     owner = forms.CharField(widget=forms.HiddenInput(), required=True)
     status = forms.CharField(widget=forms.HiddenInput(), required=True)
-    origin_product_type = forms.CharField(widget=forms.HiddenInput(), required=True)
-    origin_product = forms.CharField(widget=forms.HiddenInput(), required=True)
-    origin_engagement = forms.CharField(widget=forms.HiddenInput(), required=True)
-    destination_product_name = forms.CharField(widget=forms.HiddenInput(), required=True)
-    destination_engagement_name = forms.CharField(widget=forms.HiddenInput(), required=True)
+    origin_product_type_id = forms.CharField(widget=forms.HiddenInput(), required=True)
+    origin_product_type_name = forms.CharField(widget=forms.HiddenInput(), required=True)
+    origin_product_id = forms.CharField(widget=forms.HiddenInput(), required=True)
+    origin_product_name = forms.CharField(widget=forms.HiddenInput(), required=True)
+    origin_engagement_id = forms.CharField(widget=forms.HiddenInput(), required=True)
+    origin_engagement_name = forms.CharField(widget=forms.HiddenInput(), required=True)
     accepted_by = forms.CharField(widget=forms.Select(), required=True)  # Usar widget Select
     accepted_by_username = forms.CharField(widget=forms.HiddenInput(), required=True)
 

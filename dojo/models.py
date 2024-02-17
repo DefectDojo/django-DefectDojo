@@ -3155,69 +3155,83 @@ class Transfer_Finding(models.Model):
         blank=True,
         null=True,
         on_delete=models.CASCADE,
-        help_text=_("product type name")) 
+        help_text=_("Destination Product Type Name"))
     
     severity = models.CharField(
         max_length=50,
         editable=True,
         blank=True,
         null=True,
-        help_text=_("Product id"))
+        help_text=_("Severity"))
 
-    destination_product = models.CharField(
-        max_length=50,
+    destination_product_id = models.CharField(
+        max_length=255,
         editable=True,
         blank=True,
         null=True,
-        help_text=_("Product id"))
+        help_text=_("Destination Product"))
 
     destination_product_name = models.CharField(
         max_length=255,
         editable=True,
         blank=True,
         null=True,
-        help_text=_("Product name"))
+        help_text=_("Destination Product name"))
 
-    destination_engagement = models.CharField(
+    destination_engagement_id = models.CharField(
         max_length=255,
         editable=True,
         blank=True,
         null=True,
-        help_text=_("Engagement id"))
+        help_text=_("Destination Engagement Id"))
 
     destination_engagement_name = models.CharField(
         max_length=255,
         editable=True,
         blank=True,
         null=True,
-        help_text=_("Engagement name"))
+        help_text=_("Destination Engagement name"))
 
-    status = models.CharField(verbose_name=_("Status"),
-                              default='Transfer Pending',
-                              choices=STATUS_TRANSFER_FINDING_CHOICES,
-                              max_length=100,
-                              null=False,
-                              blank=False)
-    origin_product_type = models.CharField(
+    origin_product_type_name = models.CharField(
         max_length=255,
         editable=True,
         blank=True,
         null=True,
-        help_text=_("origin product type"))
+        help_text=_("Origin Product Type"))
 
-    origin_product = models.CharField(
+    origin_product_type_id = models.CharField(
         max_length=255,
         editable=True,
         blank=True,
         null=True,
-        help_text=_(" Origin Product"))
+        help_text=_("Origin Product Type Id"))
 
-    origin_engagement = models.CharField(
+    origin_product_name = models.CharField(
         max_length=255,
         editable=True,
         blank=True,
         null=True,
-        help_text=_("Origin Engagement"))
+        help_text=_(" Origin Product name"))
+
+    origin_product_id = models.IntegerField(
+        editable=True,
+        blank=True,
+        null=True,
+        help_text=_("Origin Product Id"))
+
+    origin_engagement_name = models.CharField(
+        max_length=255,
+        editable=True,
+        blank=True,
+        null=True,
+        help_text=_("Origin Engagement Name"))
+
+    origin_engagement_id = models.CharField(
+        max_length=255,
+        editable=True,
+        blank=True,
+        null=True,
+        help_text=_("Origin Engagement Id"))
 
     accepted_by = models.CharField(
         max_length=255,
@@ -3232,6 +3246,14 @@ class Transfer_Finding(models.Model):
         blank=True,
         null=True,
         help_text=_("The user that accepts the tranfer finding, The user must belong to the product whit contact"))
+
+    status = models.CharField(verbose_name=_("Status"),
+                              default='Transfer Pending',
+                              choices=STATUS_TRANSFER_FINDING_CHOICES,
+                              max_length=100,
+                              null=False,
+                              blank=False)
+
 
     path = models.FileField(upload_to='transfer_finding/%Y/%m/%d',
                             editable=True, null=True,

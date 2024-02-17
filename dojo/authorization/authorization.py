@@ -106,7 +106,7 @@ def user_has_permission(user, obj, permission):
     elif (isinstance(obj, Transfer_Finding)
           and permission in Permissions.get_transfer_finding_permissions()):
         return user_has_permission(
-              user, Product_Type.objects.get(name=obj.origin_product_type), permission
+              user, Product_Type.objects.get(id=obj.origin_product_type_id), permission
         )
     elif (
         isinstance(obj, Finding_Group)

@@ -1,9 +1,9 @@
 window.onload = function(){
     element = document.getElementById('id_destination_product_type');
     element.selectedIndex = 0;
-    element = document.getElementById('id_destination_product');
+    element = document.getElementById('id_destination_product_id');
     element.selectedIndex = 0;
-    element = document.getElementById('id_destination_engagement');
+    element = document.getElementById('id_destination_engagement_id');
     element.selectedIndex = 0;
     element = document.getElementById('id_accepted_by');
     element.selectedIndex = 0;
@@ -17,12 +17,12 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-    $("#id_destination_product").on("change", handleProductChange);
+    $("#id_destination_product_id").on("change", handleProductChange);
 });
 
 function handleProductChange(){
-    let idProduct = $("#id_destination_product").val();
-    let engagementElement = document.getElementById('id_destination_engagement');
+    let idProduct = $("#id_destination_product_id").val();
+    let engagementElement = document.getElementById('id_destination_engagement_id');
     let contactsElement = document.getElementById('id_accepted_by') 
     
     if (idProduct !== '') {
@@ -35,17 +35,14 @@ function handleProductChange(){
 
 function getContacs(idProduct, contactsElement){
     $.ajax({
-        url: "/api/v2/products/"+ idProduct +"/?prefetch=team_manager,technical_contact,product_manager",
+        url: "/product/type/description/44",
         type: "GET",
         success: function(response) {
+            console.log(response)
             clearSelect(contactsElement);
             addOption(contactsElement, '', 'Select Contact Product...');
-            for(let key in response.prefetch){
-                if(response.prefetch.hasOwnProperty(key)){
-                    contactObj = getContact(response.prefetch[key]);
-                    addOption(contactsElement, contactObj.id, contactObj.username)
-                }
-            }
+            let contactObj = getContact(response.contacts);
+            addOption(contactsElement, contactObj.id, contactObj.username)
             refreshSelectPicker();
         },
         error: function(error) {
@@ -79,7 +76,7 @@ function getEngagementOptions(idProduct, engagementElement){
 
 function handleProductTypeChange() {
     let idProductType = $("#id_destination_product_type").val();
-    let productTypeElement = document.getElementById('id_destination_product');
+    let productTypeElement = document.getElementById('id_destination_product_id');
     clearLabel()
     if (idProductType !== '') {
         getTransferFindings(idProductType, productTypeElement);
@@ -90,12 +87,12 @@ function handleProductTypeChange() {
 
 function getTransferFindings(product_type_id, productTypeElement) {
     $.ajax({
-        url: "/api/v2/products/?prod_type=" + product_type_id,
+        url: "/product/type/description/" + product_type_id,
         type: "GET",
         success: function(response) {
             clearSelect(productTypeElement);
             addOption(productTypeElement, '', 'Select Product Type Name...');
-            response.results.forEach(function(product) {
+            response.products.forEach(function(product) {
                 addOption(productTypeElement, product.id, product.name);
             });
             refreshSelectPicker();
@@ -121,12 +118,20 @@ function refreshSelectPicker() {
 
 
 function clearLabel(){
-    element = document.getElementById('id_destination_product');
-    element.selectedIndex = 0;
-    element = document.getElementById('id_destination_engagement');
-    element.selectedIndex = 0;
-    element = document.getElementById('id_accepted_by');
-    element.selectedIndex = 0;
-    refreshSelectPicker();
+    try
+    {
+        element = document.getElementById('id_destination_product_id');
+        element.selectedIndex = 0;
+        element = document.getElementById('id_destination_engagement_id');
+        element.selectedIndex = 0;
+        element = document.getElementById('id_accepted_by');
+        element.selectedIndex = 0;
+        refreshSelectPicker();
+
+    }
+    catch(err) {
+        console.error(err);
+    }
+
 
 }

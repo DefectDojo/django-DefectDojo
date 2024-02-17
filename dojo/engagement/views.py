@@ -1101,11 +1101,14 @@ def add_transfer_finding(request, eid, fid=None):
         request.POST._mutable = True
         data = request.POST
         product_type = eng.product.prod_type
-        data["origin_product_type"] = product_type.name
-        data["origin_product"] = eng.product.name
-        data["origin_engagement"] = eng.name
-        id_destination_product = data.get("destination_product")
-        id_destination_engagement = data.get("destination_engagement")
+        data["origin_product_type_name"] = product_type.name
+        data["origin_product_name"] = eng.product.name
+        data["origin_engagement_name"] = eng.name
+        data["origin_product_type_id"] = str(product_type.id)
+        data["origin_product_id"] = str(eng.product.id)
+        data["origin_engagement_id"] = str(eng.id)
+        id_destination_product = data.get("destination_product_id")
+        id_destination_engagement = data.get("destination_engagement_id")
         id_accepted_by_username = data.get("accepted_by")
         query_destination_product = Product.objects.get(id=id_destination_product).name if id_destination_product else None
         query_destination_engagement = Engagement.objects.get(id=id_destination_engagement).name if id_destination_engagement else None

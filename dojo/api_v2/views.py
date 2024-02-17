@@ -3787,10 +3787,10 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
     filterset_fields = ["id",
                         "severity",
                         "destination_product_name",
-                        "destination_engagement_name",
-                        "status", "origin_product_type",
-                        "origin_product",
-                        "origin_engagement",
+                        "destination_engagement_id",
+                        "status", "origin_product_type_id",
+                        "origin_product_type_id",
+                        "origin_engagement_id",
                         "accepted_by_username",
                         "owner"]
     swagger_schema = prefetch.get_prefetch_schema(
@@ -3805,3 +3805,10 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
         print("Request method:", request.method)
         print("Request user:", request.user)
         return super().list(request, *args, **kwargs)
+
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+@api_view(['GET'])
+def transfer_findings_products(request):
+    return Response({"message": "¡Hola desde mi nueva vista!"})
