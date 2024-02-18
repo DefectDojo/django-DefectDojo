@@ -58,8 +58,6 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 import dojo.notifications.helper as notifications_helper
 from dojo.endpoint.utils import save_endpoints_to_add
-from django.views.generic import ListView
-from django.core.paginator import Paginator
 from django.views import View
 
 logger = logging.getLogger(__name__)
@@ -1077,22 +1075,11 @@ def add_risk_acceptance(request, eid, fid=None):
                   'form': form
                   })
 
-
-# @user_is_authorized(Engagement, Permissions.Transfer_Finding, 'eid')
-def view_transfer_finding(request, eid=None):
-    eng = get_object_or_404(Engagement, id=eid)
-    transfer_finding = Transfer_Finding.objects.all()
-    paginator = Paginator(transfer_finding, 25)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return render(request, 'dojo/view_transfer_finding.html', {'page_obj': page_obj})
-
-
 @user_is_authorized(Engagement, Permissions.Transfer_Finding_Add, 'eid')
 def add_transfer_finding(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
     product = eng.product
-    product_type = product.prod_type
+    origin_product_type = product.prod_type
     finding = None
     if fid:
         finding = get_object_or_404(Finding, id=fid)
@@ -1100,27 +1087,35 @@ def add_transfer_finding(request, eid, fid=None):
     if request.method == 'POST':
         request.POST._mutable = True
         data = request.POST
-        product_type = eng.product.prod_type
-        data["origin_product_type_name"] = product_type.name
-        data["origin_product_name"] = eng.product.name
+        # Origin Transfer Finding
+        origin_product_type = eng.product.prod_type
+        data["origin_product_type_name"] = origin_product_type.name
+        data["origin_product_type_id"] = str(origin_product_type.id)
         data["origin_engagement_name"] = eng.name
-        data["origin_product_type_id"] = str(product_type.id)
-        data["origin_product_id"] = str(eng.product.id)
         data["origin_engagement_id"] = str(eng.id)
-        id_destination_product = data.get("destination_product_id")
+        data["origin_product_name"] = eng.product.name
+        data["origin_product_id"] = str(eng.product.id)
+        # Destination Transfer Finding
+        id_destination_product = data.get("destination_product")
+        destination_product_obj = Product.objects.get(id=id_destination_product) if id_destination_product else None
+        data["destination_product_type_id"] = destination_product_obj.id
+        data["destination_product_type_name"] = destination_product_obj.name
         id_destination_engagement = data.get("destination_engagement_id")
+        destination_engagement_name = Engagement.objects.get(id=id_destination_engagement).name if id_destination_engagement else None
+        data["destination_engagement_name"] = destination_engagement_name
         id_accepted_by_username = data.get("accepted_by")
-        query_destination_product = Product.objects.get(id=id_destination_product).name if id_destination_product else None
-        query_destination_engagement = Engagement.objects.get(id=id_destination_engagement).name if id_destination_engagement else None
-        query_accepted_by = Dojo_User.objects.get(id=id_accepted_by_username).username if id_accepted_by_username else None
-        data["destination_product_name"] = query_destination_product
-        data["destination_engagement_name"] = query_destination_engagement
-        data["accepted_by_username"] = query_accepted_by
+        accepted_by_username = Dojo_User.objects.get(id=id_accepted_by_username).username if id_accepted_by_username else None
+        data["accepted_by_username"] = accepted_by_username
 
         form = Transfer_FindingForm(request.POST, request.FILES)
         if form.is_valid():
             try:
                 transfer_findings = form.save()
+                for finding in transfer_findings.finding_id.prefetch_related('transfer_findings'):
+                    finding.risk_status = "Transfer Pending"
+                    finding.save()
+                
+
             except Exception as e:
                 logger.debug(vars(request.POST))
                 logger.error(vars(form))
@@ -1132,7 +1127,7 @@ def add_transfer_finding(request, eid, fid=None):
                 'Risk acceptance saved.',
                 extra_tags='alert-success')
 
-            return redirect_to_return_url_or_else(request, reverse('view_transfer_finding', args=(eid, )))
+            return redirect_to_return_url_or_else(request, reverse('view_transfer_finding', args=(product.id, )))
         else:
             logger.error(form.errors)
     else:

@@ -712,12 +712,24 @@ def finding_display_status(finding):
     # add urls for some statuses
     # outputs html, so make sure to escape user provided fields
     display_status = finding.status()
+    if 'Transfer Rejected' in display_status:
+        url = reverse('view_transfer_finding', args=(finding.test.engagement.product.id, ))
+        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Rejected"><span style="color: red;">Transfer Rejected</span></a>'
+        display_status = display_status.replace('Transfer Rejected', link)
+    if 'Transfer Pending' in display_status:
+        url = reverse('view_transfer_finding', args=(finding.test.engagement.product.id, ))
+        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Pending"><span style="color: blue;">Transfer Pending</span></a>'
+        display_status = display_status.replace('Transfer Pending', link)
+    if 'Transfer Accepted' in display_status:
+        url = reverse('view_transfer_finding', args=(finding.test.engagement.product.id, ))
+        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Accepted"><span style="color: red;">Transfer Accepted</span></a>'
+        display_status = display_status.replace('Transfer Accepted', link)
     if 'Risk Rejected' in display_status:
         ra = finding.risk_acceptance
         if ra:
             url = reverse('view_risk_acceptance', args=(finding.test.engagement.id, ra.id, ))
             info = ra.name_and_expiration_info
-            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Rejected"><span style="color: red;">Risk Rejected</span></a>'
+            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Rejected">Risk Rejected</a>'
             display_status = display_status.replace('Risk Rejected', link)
 
     if 'Risk pending' in display_status:
@@ -902,10 +914,13 @@ def class_name(value):
 @register.filter
 def status_style_color(status: str):
     dict_style_color = {
+        "Risk Active": f'<span style="color:gray">{status}</span>',
         "Risk Pending": f'<span style="color:blue">{status}</span>',
         "Risk Accepted": f'<span style="color:green">{status}</span>',
         "Risk Rejected": f'<span style="color:red">{status}</span>',
-        "Risk Active": f'<span style="color:gray">{status}</span>',
+        "Transfer Pending": f'<span style="color:blue">{status}</span>',
+        "Transfer Accepted": f'<span style="color:green">{status}</span>',
+        "Transfer Rejected": f'<span style="color:red">{status}</span>',
     }
     return mark_safe(dict_style_color.get(status, f'<span>{status}</span>'))
 

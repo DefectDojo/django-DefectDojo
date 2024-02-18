@@ -2124,7 +2124,10 @@ class Finding(models.Model):
     STATUS_CHOICES = (('Risk Pending', 'Risk Pending'),
                       ('Risk Rejected', 'Risk Rejected'),
                       ('Risk Accepted', 'Risk Accepted'),
-                      ('Risk Active', 'Risk Active'))
+                      ('Risk Active', 'Risk Active'),
+                      ('Transfer Pending', 'Transfer Pending'),
+                      ('Transfer Rejected', 'Transfer Rejected'),
+                      ('Transfer Accepted', 'Transfer Accepted'))
 
     title = models.CharField(max_length=511,
                              verbose_name=_('Title'),
@@ -2773,6 +2776,12 @@ class Finding(models.Model):
             status += ['Out Of Scope']
         if self.duplicate:
             status += ['Duplicate']
+        if self.risk_status == "Transfer Accepted":
+            status += ['Transfer Accepted']
+        if self.risk_status == "Transfer Pending":
+            status += ['Transfer Pending']
+        if self.risk_status == "Transfer Rejected":
+            status += ['Transfer Rejected']
         if self.risk_status == "Risk Pending":
             status += ['Risk pending']
         if self.risk_status == "Risk Rejected":
@@ -3145,17 +3154,22 @@ class Transfer_Finding(models.Model):
         ('Transfer Rejected', 'Transfer Rejected'),
         ('Transfer Accepted', 'Transfer Accepted'),)
 
-    finding_id = models.ManyToManyField(Finding, verbose_name=("Finding ID"))
+    finding_id = models.ManyToManyField(Finding, verbose_name=("Finding ID"), related_name="transfer_findings")
     title = models.CharField(max_length=255, verbose_name=("Titile"))
     date = models.DateField(auto_now_add=True, verbose_name=("Date"))
-    destination_product_type = models.ForeignKey(
-        Product_Type,
+    destination_product_type_name = models.CharField(
+        max_length=255,
         editable=True,
-        related_name="product",
         blank=True,
         null=True,
-        on_delete=models.CASCADE,
         help_text=_("Destination Product Type Name"))
+
+    destination_product_type_id = models.CharField(
+        max_length=255,
+        editable=True,
+        blank=True,
+        null=True,
+        help_text=_("Destination Product Type Id"))
     
     severity = models.CharField(
         max_length=50,
@@ -3164,14 +3178,9 @@ class Transfer_Finding(models.Model):
         null=True,
         help_text=_("Severity"))
 
-    destination_product_id = models.CharField(
-        max_length=255,
-        editable=True,
-        blank=True,
-        null=True,
-        help_text=_("Destination Product"))
-
-    destination_product_name = models.CharField(
+    destination_product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
         max_length=255,
         editable=True,
         blank=True,

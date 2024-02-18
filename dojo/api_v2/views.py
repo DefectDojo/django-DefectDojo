@@ -3786,7 +3786,6 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id",
                         "severity",
-                        "destination_product_name",
                         "destination_engagement_id",
                         "status", "origin_product_type_id",
                         "origin_product_type_id",

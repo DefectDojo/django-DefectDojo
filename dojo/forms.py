@@ -1165,13 +1165,11 @@ class Transfer_FindingForm(forms.ModelForm):
 
     title = forms.CharField(required=True, max_length=255)
     severity = forms.CharField(widget=forms.HiddenInput(), required=True)
-    destination_product_type = forms.ModelChoiceField(
-        queryset=Product_Type.objects.none()
-    )
-    destination_product_id = forms.CharField(widget=forms.Select(), required=True)
-    destination_product_name = forms.CharField(widget=forms.HiddenInput(), required=True)
-    destination_engagement_id = forms.CharField(widget=forms.Select(), required=True)  # Usar widget Select
-    destination_engagement_name = forms.CharField(widget=forms.HiddenInput(), required=True)
+    destination_product_type_name = forms.CharField(widget=forms.HiddenInput(), required=True)
+    destination_product_type_id = forms.CharField(widget=forms.HiddenInput(), required=True)
+    destination_product = forms.ModelChoiceField(queryset=Product.objects.all(), required=True)
+    destination_engagement_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    destination_engagement_name = forms.CharField(widget=forms.HiddenInput(), required=False)
     notes = forms.CharField(
         required=False, max_length=2400, widget=forms.Textarea, label="Notes"
     )
@@ -1192,7 +1190,6 @@ class Transfer_FindingForm(forms.ModelForm):
             Permissions.Transfer_Finding_Add
         )
         self.fields["title"].initial = kwags.get("engagement_id")
-        self.fields["destination_product_type"].queryset = Product_Type.objects.all()
     
     class Meta:
         model = Transfer_Finding

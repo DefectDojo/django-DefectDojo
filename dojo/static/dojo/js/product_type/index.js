@@ -1,9 +1,5 @@
 window.onload = function(){
-    element = document.getElementById('id_destination_product_type');
-    element.selectedIndex = 0;
-    element = document.getElementById('id_destination_product_id');
-    element.selectedIndex = 0;
-    element = document.getElementById('id_destination_engagement_id');
+    element = document.getElementById('id_destination_product');
     element.selectedIndex = 0;
     element = document.getElementById('id_accepted_by');
     element.selectedIndex = 0;
@@ -17,16 +13,13 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-    $("#id_destination_product_id").on("change", handleProductChange);
+    $("#id_destination_product").on("change", handleProductChange);
 });
 
 function handleProductChange(){
-    let idProduct = $("#id_destination_product_id").val();
-    let engagementElement = document.getElementById('id_destination_engagement_id');
+    let idProduct = $("#id_destination_product").val();
     let contactsElement = document.getElementById('id_accepted_by') 
-    
     if (idProduct !== '') {
-        getEngagementOptions(idProduct, engagementElement);
         getContacs(idProduct, contactsElement)
     } else {
         clearSelect(engagementElement);
@@ -35,14 +28,16 @@ function handleProductChange(){
 
 function getContacs(idProduct, contactsElement){
     $.ajax({
-        url: "/product/type/description/44",
+        url: "/product/type/description/" + idProduct,
         type: "GET",
         success: function(response) {
-            console.log(response)
             clearSelect(contactsElement);
             addOption(contactsElement, '', 'Select Contact Product...');
-            let contactObj = getContact(response.contacts);
-            addOption(contactsElement, contactObj.id, contactObj.username)
+            response.products.forEach(function(product){
+                contactsElement.innerHTML += `<option value='1'>${product.contacts.product_manager}</option>`;
+                contactsElement.innerHTML += `<option value='2'>${product.contacts.technical_contact}</option>`;
+                contactsElement.innerHTML += `<option value='3'>${product.contacts.team_manager}</option>`;
+            });
             refreshSelectPicker();
         },
         error: function(error) {
@@ -76,7 +71,7 @@ function getEngagementOptions(idProduct, engagementElement){
 
 function handleProductTypeChange() {
     let idProductType = $("#id_destination_product_type").val();
-    let productTypeElement = document.getElementById('id_destination_product_id');
+    let productTypeElement = document.getElementById('id_destination_product');
     clearLabel()
     if (idProductType !== '') {
         getTransferFindings(idProductType, productTypeElement);
@@ -120,7 +115,7 @@ function refreshSelectPicker() {
 function clearLabel(){
     try
     {
-        element = document.getElementById('id_destination_product_id');
+        element = document.getElementById('id_destination_product');
         element.selectedIndex = 0;
         element = document.getElementById('id_destination_engagement_id');
         element.selectedIndex = 0;
