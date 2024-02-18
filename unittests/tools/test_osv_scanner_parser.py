@@ -10,7 +10,7 @@ class TestOSVScannerParser(DojoTestCase):
             parser = OSVScannerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
-    
+
     def test_some_findings(self):
         with open(path.join(path.dirname(__file__), "../scans/osv_scanner/some_findings.json")) as testfile:
             parser = OSVScannerParser()
