@@ -15,7 +15,6 @@ from math import pi, sqrt
 import vobject
 from dateutil.relativedelta import relativedelta, MO, SU
 from django.conf import settings
-from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse, get_script_prefix
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
