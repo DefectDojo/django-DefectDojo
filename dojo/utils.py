@@ -1373,22 +1373,6 @@ def process_notifications(request, note, parent_url, parent_title):
         recipients=users_to_notify)
 
 
-def send_atmention_email(user, users, parent_url, parent_title, new_note):
-    recipients = [u.email for u in users]
-    msg = "\nGreetings, \n\n"
-    msg += "User {0} mentioned you in a note on {1}".format(
-        str(user), parent_title)
-    msg += "\n\n" + new_note.entry
-    msg += "\n\nIt can be reviewed at " + parent_url
-    msg += "\n\nThanks\n"
-    send_mail(
-        'DefectDojo - {0} @mentioned you in a note'.format(str(user)),
-        msg,
-        user.email,
-        recipients,
-        fail_silently=False)
-
-
 def encrypt(key, iv, plaintext):
     text = ""
     if plaintext and plaintext is not None:
