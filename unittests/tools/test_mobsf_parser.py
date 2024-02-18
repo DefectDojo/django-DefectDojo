@@ -75,7 +75,16 @@ class TestMobSFParser(DojoTestCase):
         findings = parser.get_findings(testfile, test)
         testfile.close()
         self.assertEqual(11, len(findings))
-        # TODO add more checks dedicated to this file
+        item = findings[2]
+        self.assertEqual('NSLocationAlwaysUsageDescription', item.title)
+        self.assertEqual('High', item.severity)
+        item = findings[3]
+        self.assertEqual('NSLocationWhenInUseUsageDescription', item.title)
+        self.assertEqual('High', item.severity)
+        item = findings[10]
+        self.assertEqual('App is compiled with Automatic Reference Counting (ARC) flag. ARC is a compiler feature that provides automatic memory management of Objective-C objects and is an exploit mitigation mechanism against memory corruption vulnerabilities.', item.title)
+        self.assertEqual('Info', item.severity)
+        self.assertEqual(1, item.nb_occurences)
 
     def test_parse_file_mobsf_3_7_9(self):
         test = Test()
