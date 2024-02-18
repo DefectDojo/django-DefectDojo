@@ -51,8 +51,19 @@ class TestMobSFParser(DojoTestCase):
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
-        self.assertEqual(77, len(findings))
-        # TODO add more checks dedicated to this file
+        item = findings[1]
+        self.assertEqual('android.permission.ACCESS_GPS', item.title)
+        self.assertEqual('High', item.severity)
+        item = findings[4]
+        self.assertEqual('android.permission.ACCESS_LOCATION', item.title)
+        self.assertEqual('High', item.severity)
+        item = findings[7]
+        self.assertEqual('android.permission.READ_PHONE_STATE', item.title)
+        self.assertEqual('High', item.severity)
+        item = findings[70]
+        self.assertEqual('HTTPS Connection', item.title)
+        self.assertEqual('Info', item.severity)
+        self.assertEqual(1, item.nb_occurences)
 
     def test_parse_file_3_1_9_ios(self):
         test = Test()
