@@ -3273,7 +3273,7 @@ class Transfer_Finding(models.Model):
                              blank=False,
                              verbose_name=_('Owner'), help_text=_("The person that Owner the Tranfer finding"))
 
-    notes = models.CharField(max_length=2500, editable=True, blank=True)
+    notes = models.CharField(max_length=2500, editable=True, blank=True, null=True)
 
     class Meta:
 
