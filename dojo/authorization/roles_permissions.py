@@ -574,6 +574,8 @@ def get_roles_with_permissions():
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
+            Permissions.Transfer_Finding_Edit,
+            Permissions.Transfer_Finding_View,
         },
         Roles.Cibersecurity: {
             Permissions.Product_Type_View,

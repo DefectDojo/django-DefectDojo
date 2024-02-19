@@ -3173,11 +3173,18 @@ class TransferFindinFindingsSerializers(serializers.ModelSerializer):
 
 class TransferFindingSerializer(serializers.ModelSerializer):
     finding_id = TransferFindinFindingsSerializers(many=True, read_only=True)
-    
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        # representation['actions'] = helper.get_permissions_tranfer_finding(Permissions.Transfer_Finding_View)
         representation['actions'] = []
+        transfer_finding_obj = Transfer_Finding.objects.get(id=representation.get("id"))
+        for permission in [Permissions.Transfer_Finding_View, Permissions.Transfer_Finding_Edit]:
+            if user_has_permission(
+                    self.context["request"].user,
+                    transfer_finding_obj,
+                    permission):
+                representation['actions'].append(permission)
+
         return representation
 
     class Meta:
