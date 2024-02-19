@@ -199,6 +199,14 @@ def convert_severity(severity):
         return "High"
     elif severity.lower() == "moderate":
         return "Medium"
+    elif severity.lower() == "unimportant":
+        return "Low"
+    elif severity.lower() == "unassigned":
+        return "Low"
+    elif severity.lower() == "negligible":
+        return "Low"
+    elif severity.lower() == "not yet assigned":
+        return "Low"
     elif severity.lower() == "information":
         return "Info"
     elif severity.lower() == "informational":
