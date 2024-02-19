@@ -15,7 +15,17 @@ class OSVScannerParser(object):
 
     def get_findings(self, file, test):
         data = json.load(file)
-        findings = list
+
+        for result in data["results"]:
+            source_path = result["source"]["path"]
+            source_type = result["source"]["type"]
+            for package in result["packages"]:
+                package_name = package["package"]["name"]
+                package_version = package["package"]["version"]
+                package_ecosystem = package["package"]["ecosystem"]
+                for vulnerability in package["vulnerabilities"]:
+                    print(len(vulnerability))
+        findings = list()
         finding = Finding(
             title="title",
             test=test,
@@ -25,4 +35,4 @@ class OSVScannerParser(object):
             dynamic_finding=True,
         )
         findings.append(finding)
-        return finding
+        return findings
