@@ -260,7 +260,7 @@ class DojoDefaultImporter(object):
     def import_scan(self, scan, scan_type, engagement, lead, environment, active=None, verified=None, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, close_old_findings_product_scope=False,
-                    group_by=None, api_scan_configuration=None, service=None, title=None, create_finding_groups_for_all_findings=True, apply_tags_to_findings=False):
+                    group_by=None, api_scan_configuration=None, service=None, title=None, create_finding_groups_for_all_findings=True, apply_tags_to_findings=False, test_object=None):
 
         logger.debug(f'IMPORT_SCAN: parameters: {locals()}')
 
@@ -275,57 +275,69 @@ class DojoDefaultImporter(object):
         # if yes, we parse the data first
         # after that we customize the Test_Type to reflect the data
         # This allow us to support some meta-formats like SARIF or the generic format
-        parser = get_parser(scan_type)
-        if hasattr(parser, 'get_tests'):
-            logger.debug('IMPORT_SCAN parser v2: Create Test and parse findings')
-            try:
-                tests = parser.get_tests(scan_type, scan)
-            except ValueError as e:
-                logger.warning(e)
-                raise ValidationError(e)
-            # for now we only consider the first test in the list and artificially aggregate all findings of all tests
-            # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
-            # when there is more than 1 test
-            #
-            # we also aggregate the label of the Test_type to show the user the original scan_type
-            # only if they are different. This is to support meta format like SARIF
-            # so a report that have the label 'CodeScanner' will be changed to 'CodeScanner Scan (SARIF)'
-            test_type_name = scan_type
-            if len(tests) > 0:
-                if tests[0].type:
-                    test_type_name = tests[0].type + " Scan"
-                    if test_type_name != scan_type:
-                        test_type_name = f"{test_type_name} ({scan_type})"
+        if not test_object:
+            parser = get_parser(scan_type)
+            if hasattr(parser, 'get_tests'):
+                logger.debug('IMPORT_SCAN parser v2: Create Test and parse findings')
+                try:
+                    tests = parser.get_tests(scan_type, scan)
+                except ValueError as e:
+                    logger.warning(e)
+                    raise ValidationError(e)
+                # for now we only consider the first test in the list and artificially aggregate all findings of all tests
+                # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
+                # when there is more than 1 test
+                #
+                # we also aggregate the label of the Test_type to show the user the original scan_type
+                # only if they are different. This is to support meta format like SARIF
+                # so a report that have the label 'CodeScanner' will be changed to 'CodeScanner Scan (SARIF)'
+                test_type_name = scan_type
+                if len(tests) > 0:
+                    if tests[0].type:
+                        test_type_name = tests[0].type + " Scan"
+                        if test_type_name != scan_type:
+                            test_type_name = f"{test_type_name} ({scan_type})"
 
-                test = self.create_test(scan_type, test_type_name, engagement, lead, environment, scan_date=scan_date, tags=tags,
+                    test = self.create_test(scan_type, test_type_name, engagement, lead, environment, scan_date=scan_date, tags=tags,
+                                        version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, now=now,
+                                        api_scan_configuration=api_scan_configuration, title=title)
+                    self.test = test
+                    # This part change the name of the Test
+                    # we get it from the data of the parser
+                    test_raw = tests[0]
+                    if test_raw.name:
+                        test.name = test_raw.name
+                    if test_raw.description:
+                        test.description = test_raw.description
+                    test.save()
+
+                    logger.debug('IMPORT_SCAN parser v2: Parse findings (aggregate)')
+                    # currently we only support import one Test
+                    # so for parser that support multiple tests (like SARIF)
+                    # we aggregate all the findings into one uniq test
+                    parsed_findings = []
+                    for test_raw in tests:
+                        parsed_findings.extend(test_raw.findings)
+                else:
+                    logger.info(f'No tests found in import for {scan_type}')
+            else:
+                logger.debug('IMPORT_SCAN: Create Test')
+                # by default test_type == scan_type
+                test = self.create_test(scan_type, scan_type, engagement, lead, environment, scan_date=scan_date, tags=tags,
                                     version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, now=now,
                                     api_scan_configuration=api_scan_configuration, title=title)
-                # This part change the name of the Test
-                # we get it from the data of the parser
-                test_raw = tests[0]
-                if test_raw.name:
-                    test.name = test_raw.name
-                if test_raw.description:
-                    test.description = test_raw.description
-                test.save()
+                self.test = test
 
-                logger.debug('IMPORT_SCAN parser v2: Parse findings (aggregate)')
-                # currently we only support import one Test
-                # so for parser that support multiple tests (like SARIF)
-                # we aggregate all the findings into one uniq test
-                parsed_findings = []
-                for test_raw in tests:
-                    parsed_findings.extend(test_raw.findings)
-            else:
-                logger.info(f'No tests found in import for {scan_type}')
+                logger.debug('IMPORT_SCAN: Parse findings')
+                parser = get_parser(scan_type)
+                try:
+                    parsed_findings = parser.get_findings(scan, test)
+                except ValueError as e:
+                    logger.warning(e)
+                    raise ValidationError(e)
         else:
-            logger.debug('IMPORT_SCAN: Create Test')
-            # by default test_type == scan_type
-            test = self.create_test(scan_type, scan_type, engagement, lead, environment, scan_date=scan_date, tags=tags,
-                                version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, now=now,
-                                api_scan_configuration=api_scan_configuration, title=title)
-
-            logger.debug('IMPORT_SCAN: Parse findings')
+            self.test = test_object
+            test = test_object
             parser = get_parser(scan_type)
             try:
                 parsed_findings = parser.get_findings(scan, test)
@@ -364,7 +376,6 @@ class DojoDefaultImporter(object):
                                                             group_by=group_by, now=now, service=service, scan_date=scan_date, sync=True,
                                                             create_finding_groups_for_all_findings=create_finding_groups_for_all_findings)
         self.findings = parsed_findings
-        self.test = test
         # Start post processing
         self.post_processing_findings()
 

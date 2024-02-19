@@ -722,8 +722,6 @@ def add_tests(request, eid):
 
 
 class ImportScanResultsView(View):
-    def get_importer(self):
-        return Importer()
 
     def get(self, request, eid=None, pid=None):
         environment = Development_Environment.objects.filter(name='Development').first()
@@ -882,12 +880,18 @@ class ImportScanResultsView(View):
                     verified = False
 
             try:
-                importer = self.get_importer()
+                if self.importer:
+                    importer = self.importer
+                    test = self.test
+                else:
+                    importer = Importer()
+                    test = None
+
                 test, finding_count, closed_finding_count, _ = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags, user=user,
                             minimum_severity=minimum_severity, endpoints_to_add=list(form.cleaned_data['endpoints']) + added_endpoints, scan_date=scan_date,
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
                             close_old_findings=close_old_findings, close_old_findings_product_scope=close_old_findings_product_scope, group_by=group_by, api_scan_configuration=api_scan_configuration, service=service,
-                            create_finding_groups_for_all_findings=create_finding_groups_for_all_findings, apply_tags_to_findings=apply_tags_to_findings)
+                            create_finding_groups_for_all_findings=create_finding_groups_for_all_findings, apply_tags_to_findings=apply_tags_to_findings, test_object=test)
 
                 message = f'{scan_type} processed a total of {finding_count} findings'
 
