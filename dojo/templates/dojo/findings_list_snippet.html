@@ -2,6 +2,7 @@
 {% load display_tags %}
 {% load authorization_tags %}
 {% load get_endpoint_status %}
+{% load multiply %}
 {% load static %}
 {% load i18n %}
 {% block findings_list %}
@@ -322,6 +323,9 @@
                                     <th>
                                         {% trans "Vulnerability Id" %}
                                     </th>
+                                    <th>
+                                        {% trans "EPSS Score" %} / {% trans "Percentile" %}
+                                    </th>
                                     <th class="nowrap">
                                         {% if filter_name == 'Closed' %}
                                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
@@ -594,6 +598,19 @@
                                             {% endwith %}
                                         </td>
                                         <td class="nowrap">
+                                            {% if finding.epss_score is not None %}
+                                                {{ finding.epss_score|multiply:100|floatformat:"2" }}%
+                                            {% else %}
+                                                N.A.
+                                            {% endif %}
+                                            /
+                                            {% if finding.epss_percentile is not None %}
+                                                {{ finding.epss_percentile|multiply:100|floatformat:"2" }}%
+                                            {% else %}
+                                                N.A.
+                                            {% endif %}
+                                        </td>
+                                        <td class="nowrap">
                                             {% if filter_name == 'Closed' %}
                                                 {{ finding.mitigated|date }}
                                             {% else %}
@@ -721,6 +738,7 @@
                     }},
                     { "data": "cwe" },
                     { "data": "cve" },
+                    { "data": "epss"},
                     { "data": "found_date" },
                     { "data": "finding_age" },
                 {% if system_settings.enable_finding_sla %}
