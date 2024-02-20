@@ -3,6 +3,7 @@
 {% load humanize %}
 {% load display_tags %}
 {% load authorization_tags %}
+{% load multiply %}
 {% load static %}
 {% block add_styles %}
     {{ block.super }}
@@ -259,6 +260,7 @@
                 <tr>
                     <th>Title</th>
                     <th class="text-center">Severity</th>
+                    <th class="text-center">EPSS Score / Percentile</th>
                     <th class="text-center">Date</th>
                     <th class="text-center">Age</th>
                     <th>Found by</th>
@@ -274,6 +276,19 @@
                             <span class="label severity severity-{{ finding.severity }}">
                             {{ finding.severity }}
                             </span>
+                        </td>
+                        <td class="text-center">
+                            {% if finding.epss_score != None %}
+                                {{ finding.epss_score|multiply:100|floatformat:"2" }}%
+                            {% else %}
+                                N.A.
+                            {% endif %}
+                            /
+                            {% if finding.epss_percentile != None %}
+                                {{ finding.epss_percentile|multiply:100|floatformat:"2" }}%
+                            {% else %}
+                                N.A.
+                            {% endif %}
                         </td>
                         <td class="text-center">
                             {{ finding.date }}
