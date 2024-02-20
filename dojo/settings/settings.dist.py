@@ -1696,7 +1696,7 @@ USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
 # These warnings are produce by polymorphic beacuser of weirdness around cascade deletes. We had to do
 # some pretty out of pocket things to correct this behaviors to correct this weirdness, and therefore
 # some warnings are produced trying to steer us in the right direction. Ignore those
-# Reference issue: https://github.com/jazzband/django-polymorphic/issues/229 
+# Reference issue: https://github.com/jazzband/django-polymorphic/issues/229
 warnings.filterwarnings("ignore", message="polymorphic.base.ManagerInheritanceWarning.*")
 warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager.*")
 
