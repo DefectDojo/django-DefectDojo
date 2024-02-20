@@ -18,3 +18,6 @@ Black Duck Binary Analysis can also detect if sensitive information like email a
 #### **How** ####
 * Initiate Black Duck Binary Analysis scans using the UI, REST API, or drivers such as [pwn_bdba_scan](https://github.com/0dayinc/pwn/blob/master/bin/pwn_bdba_scan) found within the security automation framework, [PWN](https://github.com/0dayinc/pwn)
 * Import a single BDBA vulnerabilty csv results file into DefectDojo leveraging the UI, REST API, or drivers such as [pwn_defectdojo_importscan](https://github.com/0dayInc/pwn/blob/master/bin/pwn_defectdojo_importscan) or [pwn_defectdojo_reimportscan](https://github.com/0dayInc/pwn/blob/master/bin/pwn_defectdojo_reimportscan).
+
+### Sample Scan Data
+Sample Blackduck Binary Analysis scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/blackduck_binary_analysis).

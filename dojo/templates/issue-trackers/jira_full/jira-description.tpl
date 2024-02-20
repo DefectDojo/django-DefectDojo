@@ -25,7 +25,7 @@
 {% endif %}
 
 {% if finding.cvssv3_score %}
-*CVSSv3 Score:* {{ finding.cvssv3_score }}
+*CVSSv3 Score:* {{ finding.cvssv3_score }} {% if finding.cvssv3 %}({{ finding.cvssv3 }}){% endif %}
 {% endif %}
 
 *Product/Engagement/Test:* [{{ finding.test.engagement.product.name }}|{{ product_url|full_url }}] / [{{ finding.test.engagement.name }}|{{ engagement_url|full_url }}] / [{{ finding.test }}|{{ test_url|full_url }}]

@@ -209,3 +209,19 @@ Number  Content
         finding = findings[0]
         self.assertEqual("Low", finding.severity)
         self.assertEqual("KSV116 - Runs with a root primary or supplementary GID", finding.title)
+
+    def test_issue_9263(self):
+        test_file = open(sample_path("issue_9263.json"))
+        parser = TrivyParser()
+        findings = parser.get_findings(test_file, Test())
+        self.assertEqual(len(findings), 1)
+        finding = findings[0]
+        self.assertEqual("High", finding.severity)
+
+    def test_issue_9333(self):
+        test_file = open(sample_path("issue_9333.json"))
+        parser = TrivyParser()
+        findings = parser.get_findings(test_file, Test())
+        self.assertEqual(len(findings), 13)
+        finding = findings[0]
+        self.assertEqual("Low", finding.severity)

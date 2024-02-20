@@ -171,6 +171,54 @@
     }
   },
   {
+    "model": "auditlog.logentry",
+    "pk": 803,
+    "fields": {
+      "content_type": 28,
+      "object_pk": "1",
+      "object_id": 1,
+      "object_repr": "BodgeIt",
+      "action": 0,
+      "changes": "{\"product\": [\"None\", \"dojo.Cred_Mapping.None\"], \"product_meta\": [\"None\", \"dojo.DojoMeta.None\"], \"name\": [\"None\", \"BodgeIt\"], \"description\": [\"None\", \"[Features](https://github.com/psiinon/bodgeit) and characteristics:\\r\\n\\r\\n* Easy to install - just requires java and a servlet engine, e.g. Tomcat\\r\\n* Self contained (no additional dependencies other than to 2 in the above line)\\r\\n* Easy to change on the fly - all the functionality is implemented in JSPs, so no IDE required\\r\\n* Cross platform\\r\\n* Open source\\r\\n* No separate db to install and configure - it uses an 'in memory' db that is automatically (re)initialized on start up\"], \"product_manager\": [\"None\", \"(admin)\"], \"technical_contact\": [\"None\", \"(user2)\"], \"team_manager\": [\"None\", \"(product_manager)\"], \"prod_type\": [\"None\", \"Commerce\"], \"id\": [\"None\", \"1\"], \"tid\": [\"None\", \"0\"], \"prod_numeric_grade\": [\"None\", \"5\"], \"business_criticality\": [\"None\", \"high\"], \"platform\": [\"None\", \"web\"], \"lifecycle\": [\"None\", \"production\"], \"origin\": [\"None\", \"internal\"], \"user_records\": [\"None\", \"1000000000\"], \"revenue\": [\"None\", \"1000.00\"], \"external_audience\": [\"None\", \"True\"], \"internet_accessible\": [\"None\", \"True\"], \"enable_simple_risk_acceptance\": [\"None\", \"False\"], \"enable_full_risk_acceptance\": [\"None\", \"True\"]}",
+      "actor": null,
+      "remote_addr": null,
+      "timestamp": "2021-10-22T01:24:54.921Z",
+      "additional_data": null
+      }
+    },
+    {
+      "model": "auditlog.logentry",
+      "pk": 804,
+      "fields": {
+        "content_type": 28,
+        "object_pk": "2",
+        "object_id": 2,
+        "object_repr": "Internal CRM App",
+        "action": 0,
+        "changes": "{\"product\": [\"None\", \"dojo.Cred_Mapping.None\"], \"product_meta\": [\"None\", \"dojo.DojoMeta.None\"], \"name\": [\"None\", \"Internal CRM App\"], \"description\": [\"None\", \"* New product in development that attempts to follow all best practices\"], \"product_manager\": [\"None\", \"(product_manager)\"], \"technical_contact\": [\"None\", \"(product_manager)\"], \"team_manager\": [\"None\", \"(user2)\"], \"prod_type\": [\"None\", \"Commerce\"], \"id\": [\"None\", \"2\"], \"tid\": [\"None\", \"0\"], \"business_criticality\": [\"None\", \"medium\"], \"platform\": [\"None\", \"web\"], \"lifecycle\": [\"None\", \"construction\"], \"origin\": [\"None\", \"internal\"], \"external_audience\": [\"None\", \"False\"], \"internet_accessible\": [\"None\", \"False\"], \"enable_simple_risk_acceptance\": [\"None\", \"False\"], \"enable_full_risk_acceptance\": [\"None\", \"True\"]}",
+        "actor": null,
+        "remote_addr": null,
+        "timestamp": "2021-10-22T01:24:55.044Z",
+        "additional_data": null
+      }
+    },
+    {
+      "model": "auditlog.logentry",
+      "pk": 805,
+      "fields": {
+        "content_type": 28,
+        "object_pk": "3",
+        "object_id": 3,
+        "object_repr": "Apple Accounting Software",
+        "action": 0,
+        "changes": "{\"product\": [\"None\", \"dojo.Cred_Mapping.None\"], \"product_meta\": [\"None\", \"dojo.DojoMeta.None\"], \"name\": [\"None\", \"Apple Accounting Software\"], \"description\": [\"None\", \"Accounting software is typically composed of various modules, different sections dealing with particular areas of accounting. Among the most common are:\\r\\n\\r\\n**Core modules**\\r\\n\\r\\n* Accounts receivable\\u2014where the company enters money received\\r\\n* Accounts payable\\u2014where the company enters its bills and pays money it owes\\r\\n* General ledger\\u2014the company's \\\"books\\\"\\r\\n* Billing\\u2014where the company produces invoices to clients/customers\"], \"product_manager\": [\"None\", \"(admin)\"], \"technical_contact\": [\"None\", \"(user2)\"], \"team_manager\": [\"None\", \"(user2)\"], \"prod_type\": [\"None\", \"Billing\"], \"id\": [\"None\", \"3\"], \"tid\": [\"None\", \"0\"], \"business_criticality\": [\"None\", \"high\"], \"platform\": [\"None\", \"web\"], \"lifecycle\": [\"None\", \"production\"], \"origin\": [\"None\", \"purchased\"], \"user_records\": [\"None\", \"5000\"], \"external_audience\": [\"None\", \"True\"], \"internet_accessible\": [\"None\", \"False\"], \"enable_simple_risk_acceptance\": [\"None\", \"False\"], \"enable_full_risk_acceptance\": [\"None\", \"True\"]}",
+        "actor": null,
+        "remote_addr": null,
+        "timestamp": "2021-10-22T01:24:55.071Z",
+        "additional_data": null
+      }
+    },
+  {
     "pk": 1,
     "model": "dojo.system_settings",
     "fields": {
@@ -2987,6 +3035,15 @@
       "test": null,
       "is_authn_provider": false,
       "url": "https://google.com"
+    }
+  },
+  {
+    "model": "dojo.announcement",
+    "pk": 1,
+    "fields": {
+      "message": "test message",
+      "dismissable": true,
+      "style": "danger"
     }
   }
 ]

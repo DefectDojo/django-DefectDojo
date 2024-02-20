@@ -17,7 +17,7 @@ from dateutil.relativedelta import relativedelta, MO, SU
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.paginator import Paginator
-from django.urls import get_resolver, reverse
+from django.urls import get_resolver, reverse, get_script_prefix
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -742,8 +742,12 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
         a_stuff.append(a_counts)
 
 
-def add_breadcrumb(parent=None, title=None, top_level=True, url=None, request=None, clear=False):
-    title_done = False
+def add_breadcrumb(parent=None,
+                   title=None,
+                   top_level=True,
+                   url=None,
+                   request=None,
+                   clear=False):
     if clear:
         request.session["dojo_breadcrumbs"] = None
         return
@@ -757,8 +761,10 @@ def add_breadcrumb(parent=None, title=None, top_level=True, url=None, request=No
         if parent is not None and getattr(parent, "get_breadcrumbs", None):
             crumbs += parent.get_breadcrumbs()
         else:
-            title_done = True
-            crumbs += [{"title": title, "url": request.get_full_path() if url is None else url}]
+            crumbs += [{
+                'title': title,
+                'url': request.get_full_path() if url is None else url
+            }]
     else:
         resolver = get_resolver(None).resolve
         if parent is not None and getattr(parent, "get_breadcrumbs", None):
@@ -766,8 +772,10 @@ def add_breadcrumb(parent=None, title=None, top_level=True, url=None, request=No
             if title is not None:
                 obj_crumbs += [{"title": title, "url": request.get_full_path() if url is None else url}]
         else:
-            title_done = True
-            obj_crumbs = [{"title": title, "url": request.get_full_path() if url is None else url}]
+            obj_crumbs = [{
+                'title': title,
+                'url': request.get_full_path() if url is None else url
+            }]
 
         for crumb in crumbs:
             crumb_to_resolve = crumb["url"] if "?" not in crumb["url"] else crumb["url"][: crumb["url"].index("?")]
@@ -964,7 +972,9 @@ def get_period_counts_legacy(
         else:
             risks_a = None
 
-        crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
+        crit_count, high_count, med_count, low_count, _ = [
+            0, 0, 0, 0, 0
+        ]
         for finding in findings:
             if (
                 new_date
@@ -982,18 +992,12 @@ def get_period_counts_legacy(
 
         total = crit_count + high_count + med_count + low_count
         opened_in_period.append(
-            [
-                (tcalendar.timegm(new_date.timetuple()) * 1000),
-                new_date,
-                crit_count,
-                high_count,
-                med_count,
-                low_count,
-                total,
-                closed_in_range_count,
-            ]
-        )
-        crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
+            [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
+             crit_count, high_count, med_count, low_count, total,
+             closed_in_range_count])
+        crit_count, high_count, med_count, low_count, _ = [
+            0, 0, 0, 0, 0
+        ]
         if risks_a is not None:
             for finding in risks_a:
                 if finding.severity == "Critical":
@@ -1062,9 +1066,15 @@ def get_period_counts(
         else:
             risks_a = None
 
-        f_crit_count, f_high_count, f_med_count, f_low_count, f_closed_count = [0, 0, 0, 0, 0]
-        ra_crit_count, ra_high_count, ra_med_count, ra_low_count, ra_closed_count = [0, 0, 0, 0, 0]
-        active_crit_count, active_high_count, active_med_count, active_low_count, active_closed_count = [0, 0, 0, 0, 0]
+        f_crit_count, f_high_count, f_med_count, f_low_count, _ = [
+            0, 0, 0, 0, 0
+        ]
+        ra_crit_count, ra_high_count, ra_med_count, ra_low_count, _ = [
+            0, 0, 0, 0, 0
+        ]
+        active_crit_count, active_high_count, active_med_count, active_low_count, _ = [
+            0, 0, 0, 0, 0
+        ]
 
         for finding in findings:
             try:
@@ -1559,8 +1569,6 @@ def prepare_for_view(encrypted_value):
         encrypted_values = encrypted_value.split(":")
 
         if len(encrypted_values) > 1:
-            type = encrypted_values[0]
-
             iv = binascii.a2b_hex(encrypted_values[1])
             value = encrypted_values[2]
 
@@ -1625,7 +1633,7 @@ def calculate_grade(product, *args, **kwargs):
         aeval(system_settings.product_grade)
         grade_product = "grade_product(%s, %s, %s, %s)" % (critical, high, medium, low)
         product.prod_numeric_grade = aeval(grade_product)
-        product.save()
+        super(Product, product).save()
 
 
 def get_celery_worker_status():
@@ -1823,8 +1831,8 @@ def user_post_save(sender, instance, created, **kwargs):
             notifications.pk = None
             notifications.template = False
             notifications.user = instance
-            logger.info("creating default set (from template) of notifications for: " + str(instance))
-        except Exception as err:
+            logger.info('creating default set (from template) of notifications for: ' + str(instance))
+        except Exception:
             notifications = Notifications(user=instance)
             logger.info("creating default set of notifications for: " + str(instance))
 
@@ -1949,19 +1957,89 @@ def sla_compute_and_notify(*args, **kwargs):
     """
     import dojo.jira_link.helper as jira_helper
 
-    def _notify(finding, title):
-        if not finding.test.engagement.product.disable_sla_breach_notifications:
-            create_notification(
-                event="sla_breach",
-                title=title,
-                finding=finding,
-                url=reverse("view_finding", args=(finding.id,)),
-                sla_age=sla_age,
-            )
+    class NotificationEntry:
+        def __init__(self, finding=None, jira_issue=None, do_jira_sla_comment=False):
+            self.finding = finding
+            self.jira_issue = jira_issue
+            self.do_jira_sla_comment = do_jira_sla_comment
 
-            if do_jira_sla_comment:
-                logger.info("Creating JIRA comment to notify of SLA breach information.")
-                jira_helper.add_simple_jira_comment(jira_instance, jira_issue, title)
+    def _add_notification(finding, kind):
+        # jira_issue, do_jira_sla_comment are taken from the context
+        # kind can be one of: breached, prebreach, breaching
+        if finding.test.engagement.product.disable_sla_breach_notifications:
+            return
+
+        notification = NotificationEntry(finding=finding,
+                                         jira_issue=jira_issue,
+                                         do_jira_sla_comment=do_jira_sla_comment)
+
+        pt = finding.test.engagement.product.prod_type.name
+        p = finding.test.engagement.product.name
+
+        if pt in combined_notifications:
+            if p in combined_notifications[pt]:
+                if kind in combined_notifications[pt][p]:
+                    combined_notifications[pt][p][kind].append(notification)
+                else:
+                    combined_notifications[pt][p][kind] = [notification]
+            else:
+                combined_notifications[pt][p] = {kind: [notification]}
+        else:
+            combined_notifications[pt] = {p: {kind: [notification]}}
+
+    def _notification_title_for_finding(finding, kind, sla_age):
+        title = "Finding %s - " % (finding.id)
+        if kind == 'breached':
+            abs_sla_age = abs(sla_age)
+            period = "day"
+            if abs_sla_age > 1:
+                period = "days"
+            title += "SLA breached by %d %s! Overdue notice" % (abs_sla_age, period)
+        elif kind == 'prebreach':
+            title += "SLA pre-breach warning - %d day(s) left" % (sla_age)
+        elif kind == 'breaching':
+            title += "SLA is breaching today"
+
+        return title
+
+    def _create_notifications():
+        for pt in combined_notifications:
+            for p in combined_notifications[pt]:
+                for kind in combined_notifications[pt][p]:
+                    # creating notifications on per-finding basis
+
+                    # we need this list for combined notification feature as we
+                    # can not supply references to local objects as
+                    # create_notification() arguments
+                    findings_list = []
+
+                    for n in combined_notifications[pt][p][kind]:
+                        title = _notification_title_for_finding(n.finding, kind, n.finding.sla_days_remaining())
+
+                        create_notification(
+                            event='sla_breach',
+                            title=title,
+                            finding=n.finding,
+                            url=reverse('view_finding', args=(n.finding.id,)),
+                        )
+
+                        if n.do_jira_sla_comment:
+                            logger.info("Creating JIRA comment to notify of SLA breach information.")
+                            jira_helper.add_simple_jira_comment(jira_instance, n.jira_issue, title)
+
+                        findings_list.append(n.finding)
+
+                    # producing a "combined" SLA breach notification
+                    title_combined = "SLA alert (%s): product type '%s', product '%s'" % (kind, pt, p)
+                    product = combined_notifications[pt][p][kind][0].finding.test.engagement.product
+                    create_notification(
+                        event='sla_breach_combined',
+                        title=title_combined,
+                        product=product,
+                        findings=findings_list,
+                        breach_kind=kind,
+                        base_url=get_script_prefix(),
+                    )
 
     # exit early on flags
     system_settings = System_Settings.objects.get()
@@ -1971,6 +2049,8 @@ def sla_compute_and_notify(*args, **kwargs):
 
     jira_issue = None
     jira_instance = None
+    # notifications list per product per product type
+    combined_notifications = {}
     try:
         if system_settings.enable_finding_sla:
             logger.info("About to process findings for SLA notifications.")
@@ -2064,20 +2144,8 @@ def sla_compute_and_notify(*args, **kwargs):
                     post_breach_count += 1
                     logger.info("Finding {} has breached by {} days.".format(finding.id, abs(sla_age)))
                     abs_sla_age = abs(sla_age)
-                    if (
-                        not system_settings.enable_notify_sla_exponential_backoff
-                        or abs_sla_age == 1
-                        or (abs_sla_age & (abs_sla_age - 1) == 0)
-                    ):
-                        period = "day"
-                        if abs_sla_age > 1:
-                            period = "days"
-                        _notify(
-                            finding,
-                            "Finding {} - SLA breached by {} {}! Overdue notice".format(
-                                finding.id, abs_sla_age, period
-                            ),
-                        )
+                    if not system_settings.enable_notify_sla_exponential_backoff or abs_sla_age == 1 or (abs_sla_age & (abs_sla_age - 1) == 0):
+                        _add_notification(finding, 'breached')
                     else:
                         logger.info(
                             "Skipping notification as exponential backoff is enabled and the SLA is not a power of two"
@@ -2085,30 +2153,23 @@ def sla_compute_and_notify(*args, **kwargs):
                 # The finding is within the pre-breach period
                 elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
                     pre_breach_count += 1
-                    logger.info(
-                        "Security SLA pre-breach warning for finding ID {}. Days remaining: {}".format(
-                            finding.id, sla_age
-                        )
-                    )
-                    _notify(finding, "Finding {} - SLA pre-breach warning - {} day(s) left".format(finding.id, sla_age))
+                    logger.info("Security SLA pre-breach warning for finding ID {}. Days remaining: {}".format(finding.id, sla_age))
+                    _add_notification(finding, 'prebreach')
                 # The finding breaches the SLA today
                 elif sla_age == 0:
                     at_breach_count += 1
-                    logger.info(
-                        "Security SLA breach warning. Finding ID {} breaching today ({})".format(finding.id, sla_age)
-                    )
-                    _notify(finding, "Finding {} - SLA is breaching today".format(finding.id))
+                    logger.info("Security SLA breach warning. Finding ID {} breaching today ({})".format(finding.id, sla_age))
+                    _add_notification(finding, 'breaching')
 
-            logger.info(
-                "SLA run results: Pre-breach: {}, at-breach: {}, post-breach: {}, post-breach-no-notify: {}, with-jira: {}, TOTAL: {}".format(
-                    pre_breach_count,
-                    at_breach_count,
-                    post_breach_count,
-                    post_breach_no_notify_count,
-                    jira_count,
-                    total_count,
-                )
-            )
+            _create_notifications()
+            logger.info("SLA run results: Pre-breach: {}, at-breach: {}, post-breach: {}, post-breach-no-notify: {}, with-jira: {}, TOTAL: {}".format(
+                pre_breach_count,
+                at_breach_count,
+                post_breach_count,
+                post_breach_no_notify_count,
+                jira_count,
+                total_count
+            ))
 
     except System_Settings.DoesNotExist:
         logger.info("Findings SLA is not enabled.")

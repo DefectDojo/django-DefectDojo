@@ -96,8 +96,7 @@ class DojoDefaultImporter(object):
         logger.debug("endpoints_to_add: %s", endpoints_to_add)
         new_findings = []
         items = parsed_findings
-        logger.debug("starting import of %i items.", len(items) if items else 0)
-        i = 0
+        logger.debug('starting import of %i items.', len(items) if items else 0)
         group_names_to_findings_dict = {}
 
         for item in items:
@@ -282,34 +281,12 @@ class DojoDefaultImporter(object):
 
         return old_findings
 
-    def import_scan(
-        self,
-        scan,
-        scan_type,
-        engagement,
-        lead,
-        environment,
-        active=None,
-        verified=None,
-        tags=None,
-        minimum_severity=None,
-        user=None,
-        endpoints_to_add=None,
-        scan_date=None,
-        version=None,
-        branch_tag=None,
-        build_id=None,
-        commit_hash=None,
-        push_to_jira=None,
-        close_old_findings=False,
-        close_old_findings_product_scope=False,
-        group_by=None,
-        api_scan_configuration=None,
-        service=None,
-        title=None,
-        create_finding_groups_for_all_findings=True,
-    ):
-        logger.debug(f"IMPORT_SCAN: parameters: {locals()}")
+    def import_scan(self, scan, scan_type, engagement, lead, environment, active=None, verified=None, tags=None, minimum_severity=None,
+                    user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
+                    commit_hash=None, push_to_jira=None, close_old_findings=False, close_old_findings_product_scope=False,
+                    group_by=None, api_scan_configuration=None, service=None, title=None, create_finding_groups_for_all_findings=True, apply_tags_to_findings=False):
+
+        logger.debug(f'IMPORT_SCAN: parameters: {locals()}')
 
         user = user or get_current_user()
 
@@ -481,24 +458,14 @@ class DojoDefaultImporter(object):
 
         test_import = None
         if settings.TRACK_IMPORT_HISTORY:
-            logger.debug("IMPORT_SCAN: Updating Import History")
-            test_import = importer_utils.update_import_history(
-                Test_Import.IMPORT_TYPE,
-                active,
-                verified,
-                tags,
-                minimum_severity,
-                endpoints_to_add,
-                version,
-                branch_tag,
-                build_id,
-                commit_hash,
-                push_to_jira,
-                close_old_findings,
-                test,
-                new_findings,
-                closed_findings,
-            )
+            logger.debug('IMPORT_SCAN: Updating Import History')
+            test_import = importer_utils.update_import_history(Test_Import.IMPORT_TYPE, active, verified, tags, minimum_severity,
+                                                                endpoints_to_add, version, branch_tag, build_id, commit_hash,
+                                                                push_to_jira, close_old_findings, test, new_findings, closed_findings)
+            if apply_tags_to_findings and tags:
+                for finding in test_import.findings_affected.all():
+                    for tag in tags:
+                        finding.tags.add(tag)
 
         logger.debug("IMPORT_SCAN: Generating notifications")
         notifications_helper.notify_test_created(test)

@@ -22,3 +22,16 @@ def add_announcement_to_new_user(sender, instance, **kwargs):
                 UserAnnouncement.objects.get_or_create(
                     user=dojo_user, announcement=announcement
                 )
+
+
+@receiver(post_save, sender=Announcement)
+def announcement_post_save(sender, instance, created, **kwargs):
+    if created:
+        UserAnnouncement.objects.bulk_create(
+            [
+                UserAnnouncement(
+                    user=user_id, announcement=instance
+                )
+                for user_id in Dojo_User.objects.all()
+            ]
+        )

@@ -61,6 +61,7 @@ WORKDIR /app
 COPY --from=openapitools /opt/openapi-generator/modules/openapi-generator-cli/target/openapi-generator-cli.jar /usr/local/bin/openapi-generator-cli.jar
 
 COPY docker/wait-for-it.sh \
+  docker/secret-file-loader.sh \
   docker/entrypoint-integration-tests.sh \
   /
 
