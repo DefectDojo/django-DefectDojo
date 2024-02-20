@@ -141,7 +141,7 @@
                                     {% endif %}
                                     <td> {{ e.status }} </td>
                                     <td> {{ e.target_start }} - {{ e.target_end }}
-                                        {% if e.is_overdue and e.active %}
+                                        {% if e.is_overdue and e.active and e.status != 'Completed' %}
                                         <sup><div class="tag-label warning-color">{{ e.target_end|overdue }} overdue</div></sup>
                                         {% endif %}
                                     </td>

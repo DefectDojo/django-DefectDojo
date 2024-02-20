@@ -92,7 +92,7 @@ def get_endpoint_ids(endpoints):
     hosts = []
     ids = []
     for e in endpoints:
-        key = e.host + '-' + str(e.product.id)
+        key = f"{e.host}-{e.product.id}"
         if key in hosts:
             continue
         else:
