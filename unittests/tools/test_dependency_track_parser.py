@@ -84,7 +84,7 @@ class TestDependencyTrackParser(DojoTestCase):
         self.assertEqual(12, len(findings))
         self.assertTrue(all(item.file_path is not None for item in findings))
         self.assertTrue(all(item.vuln_id_from_tool is not None for item in findings))
-        self.assertTrue('CVE-2022-42004' in findings[0].unsaved_vulnerability_ids)
+        self.assertIn('CVE-2022-42004', findings[0].unsaved_vulnerability_ids)
 
     def test_dependency_track_parser_findings_with_empty_alias(self):
         testfile = open(
@@ -95,7 +95,7 @@ class TestDependencyTrackParser(DojoTestCase):
         testfile.close()
 
         self.assertEqual(12, len(findings))
-        self.assertTrue('CVE-2022-2053' in findings[11].unsaved_vulnerability_ids)
+        self.assertIn('CVE-2022-2053', findings[11].unsaved_vulnerability_ids)
 
     def test_dependency_track_parser_findings_with_cvssV3_score(self):
         with open(f"{get_unit_tests_path()}/scans/dependency_track/many_findings_with_cvssV3_score.json") as testfile:
@@ -104,5 +104,15 @@ class TestDependencyTrackParser(DojoTestCase):
         self.assertEqual(12, len(findings))
         self.assertTrue(all(item.file_path is not None for item in findings))
         self.assertTrue(all(item.vuln_id_from_tool is not None for item in findings))
-        self.assertTrue('CVE-2022-42004' in findings[0].unsaved_vulnerability_ids)
+        self.assertIn('CVE-2022-42004', findings[0].unsaved_vulnerability_ids)
         self.assertEqual(8.3, findings[0].cvssv3_score)
+
+    def test_dependency_track_parser_findings_with_epss_score(self):
+        with open(f"{get_unit_tests_path()}/scans/dependency_track/dependency_track_4.10_2024_02_11.json") as testfile:
+            parser = DependencyTrackParser()
+            findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        self.assertEqual(0.00043, findings[0].epss_score)
+        self.assertEqual(0.07756, findings[0].epss_percentile)
+        self.assertEqual(4.2, findings[0].cvssv3_score)
+        self.assertIn('CVE-2023-45803', findings[0].unsaved_vulnerability_ids)

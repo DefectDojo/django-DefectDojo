@@ -101,3 +101,4 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertEqual("CVE-2023-2650 - openssl - Image: repo-os/sha256:af965ef68c78374a5f987fce98c0ddfa45801df2395bf012c50b863e65978d74", finding.title)
             self.assertIn("repo-os/sha256:af965ef68c78374a5f987fce98c0ddfa45801df2395bf012c50b863e65978d74", finding.impact)
             self.assertIn("Repository: repo-os", finding.impact)
+            self.assertEqual(0.0014, finding.epss_score)

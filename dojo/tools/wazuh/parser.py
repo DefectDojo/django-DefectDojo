@@ -1,10 +1,10 @@
+import hashlib
 import json
-from dojo.models import Finding
+from dojo.models import Finding, Endpoint
 
 
 class WazuhParser(object):
     """
-    Use Wazuh Vulnerability API to retrieve the findings
     The vulnerabilities with condition "Package unfixed" are skipped because there is no fix out yet.
     https://github.com/wazuh/wazuh/issues/14560
     """
@@ -18,54 +18,49 @@ class WazuhParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Wazuh"
 
-    def get_findings(self, filename, test):
-        data = json.load(filename)
+    def get_findings(self, file, test):
+        data = json.load(file)
+
+        if not data:
+            return []
+
         # Detect duplications
         dupes = dict()
 
-        try:
-            vulnerability = data[next(iter(data.keys()))]["affected_items"]
-        except (KeyError, StopIteration):
-            return list()
-
-        if vulnerability is None:
-            return list()
-
-        for item in vulnerability:
+        # Loop through each element in the list
+        vulnerabilities = data.get("data", {}).get("affected_items", [])
+        for item in vulnerabilities:
             if (
                 item["condition"] != "Package unfixed"
                 and item["severity"] != "Untriaged"
             ):
-                id = item.get("cve")
+                cve = item.get("cve")
                 package_name = item.get("name")
                 package_version = item.get("version")
                 description = item.get("condition")
-                if item.get("severity") == "Untriaged":
-                    severity = "Info"
-                else:
-                    severity = item.get("severity")
-                if item.get("status") == "VALID":
-                    active = True
-                else:
-                    active = False
+                severity = item.get("severity").capitalize()
+                agent_ip = item.get("agent_ip")
                 links = item.get("external_references")
-                title = (
-                    item.get("title") + " (version: " + package_version + ")"
-                )
-                severity = item.get("severity", "info").capitalize()
+                cvssv3_score = item.get("cvss3_score")
+                publish_date = item.get("published")
+                agent_name = item.get("agent_name")
+                agent_ip = item.get("agent_ip")
+                detection_time = item.get("detection_time")
+
                 if links:
-                    references = ""
-                    for link in links:
-                        references += f"{link}\n"
+                    references = "\n".join(links)
                 else:
                     references = None
 
-                if id and id.startswith("CVE"):
-                    vulnerability_id = id
-                else:
-                    vulnerability_id = None
+                title = (
+                    item.get("title") + " (version: " + package_version + ")"
+                )
 
-                dupe_key = title
+                if agent_name:
+                    dupe_key = title + cve + agent_name + package_name + package_version
+                else:
+                    dupe_key = title + cve + package_name + package_version
+                dupe_key = hashlib.sha256(dupe_key.encode('utf-8')).hexdigest()
 
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
@@ -77,14 +72,25 @@ class WazuhParser(object):
                         test=test,
                         description=description,
                         severity=severity,
-                        active=active,
-                        mitigation="mitigation",
                         references=references,
                         static_finding=True,
                         component_name=package_name,
                         component_version=package_version,
+                        cvssv3_score=cvssv3_score,
+                        publish_date=publish_date,
+                        unique_id_from_tool=dupe_key,
+                        date=detection_time,
                     )
-                    if vulnerability_id:
-                        find.unsaved_vulnerability_ids = [vulnerability_id]
+
+                    # in some cases the agent_ip is not the perfect way on how to identify a host. Thus prefer the agent_name, if existant.
+                    if agent_name:
+                        find.unsaved_endpoints = [Endpoint(host=agent_name)]
+                    elif agent_ip:
+                        find.unsaved_endpoints = [Endpoint(host=agent_ip)]
+
+                    if id:
+                        find.unsaved_vulnerability_ids = cve
+
                     dupes[dupe_key] = find
+
         return list(dupes.values())
