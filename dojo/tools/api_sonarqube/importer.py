@@ -199,6 +199,7 @@ class SonarQubeApiImporter(object):
                     unique_id_from_tool=issue.get("key"),
                     vuln_id_from_tool=rule_id,
                 )
+                find.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("sonarqube")]
                 items.append(find)
 
         except Exception as e:
@@ -322,6 +323,7 @@ class SonarQubeApiImporter(object):
                     unique_id_from_tool=f"hotspot:{hotspot.get('key')}",
                     vuln_id_from_tool=rule_id,
                 )
+                find.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("sonarqube")]
                 items.append(find)
 
             return items
