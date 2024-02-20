@@ -6,7 +6,6 @@ from lxml import etree
 import json
 
 from dojo.models import Finding
-from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -226,7 +225,6 @@ class SonarQubeParser(object):
             dynamic_finding=False,
             unique_id_from_tool=vuln_key,
         )
-        find.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("sonarqube")]
         dupes[aggregateKeys] = find
 
     # Process one vuln from the report for "SonarQube Scan"
@@ -274,7 +272,6 @@ class SonarQubeParser(object):
                 dynamic_finding=False,
                 nb_occurences=1,
             )
-            find.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("sonarqube")]
             dupes[aggregateKeys] = find
         else:
             # We have already created a finding for this aggregate: updates the

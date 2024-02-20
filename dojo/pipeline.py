@@ -319,7 +319,7 @@ def get_remote_json_config(connection: Connection):
         file_content = git_client.get_item_text(
             repository_id=settings.AZURE_DEVOPS_REPOSITORY_ID,
             path=settings.AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH,
-            project=settings.AZURE_DEVOPS_PROJECT_NAME
+            project=settings.AZURE_DEVOPS_OFFICES_LOCATION.split(",")[0]
         )
         data = json.loads(b"".join(file_content).decode("utf-8"))
         return data
