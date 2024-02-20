@@ -47,6 +47,7 @@ def get_item(finding: dict, test):
     impact = []
     references = []
     unsaved_vulnerability_ids = []
+    epss_score = None
     if aws_scanner_type == "Inspector":
         description = f"This is an Inspector Finding\n{finding.get('Description', '')}"
         vulnerabilities = finding.get("Vulnerabilities", [])
@@ -66,6 +67,8 @@ def get_item(finding: dict, test):
             if vendor := vulnerability.get("Vendor"):
                 if vendor_url := vendor.get("Url"):
                     references.append(vendor_url)
+            if vulnerability.get("EpssScore") is not None:
+                epss_score = vulnerability.get("EpssScore")
 
         if finding.get("ProductFields", {}).get("aws/inspector/FindingStatus", "ACTIVE") == "ACTIVE":
             mitigated = None
@@ -140,6 +143,10 @@ def get_item(finding: dict, test):
         dynamic_finding=False,
         component_name=component_name,
     )
+
+    if epss_score is not None:
+        result.epss_score = epss_score
+
     # Add the unsaved vulnerability ids
     result.unsaved_vulnerability_ids = unsaved_vulnerability_ids
 
