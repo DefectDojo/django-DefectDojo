@@ -2,7 +2,6 @@
 {% load display_tags %}
 {% load authorization_tags %}
 {% load get_endpoint_status %}
-{% load multiply %}
 {% load static %}
 {% load i18n %}
 {% block findings_list %}
@@ -601,18 +600,10 @@
                                             {% endwith %}
                                         </td>
                                         <td class="nowrap">
-                                            {% if finding.epss_score is not None %}
-                                                {{ finding.epss_score|multiply:100|floatformat:"2" }}%
-                                            {% else %}
-                                                N.A.
-                                            {% endif %}
+                                            {{ finding.epss_score|format_epss }}%
                                         </td>
                                         <td class="nowrap">
-                                            {% if finding.epss_percentile is not None %}
-                                                {{ finding.epss_percentile|multiply:100|floatformat:"2" }}%
-                                            {% else %}
-                                                N.A.
-                                            {% endif %}
+                                            {{ finding.epss_percentile|format_epss }}%
                                         </td>
                                         <td class="nowrap">
                                             {% if filter_name == 'Closed' %}

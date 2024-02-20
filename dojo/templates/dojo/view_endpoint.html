@@ -278,17 +278,9 @@
                             </span>
                         </td>
                         <td class="text-center">
-                            {% if finding.epss_score != None %}
-                                {{ finding.epss_score|multiply:100|floatformat:"2" }}%
-                            {% else %}
-                                N.A.
-                            {% endif %}
+                            {{ finding.epss_score|format_epss }}
                             /
-                            {% if finding.epss_percentile != None %}
-                                {{ finding.epss_percentile|multiply:100|floatformat:"2" }}%
-                            {% else %}
-                                N.A.
-                            {% endif %}
+                            {{ finding.epss_percentile|format_epss }}
                         </td>
                         <td class="text-center">
                             {{ finding.date }}

@@ -3,7 +3,6 @@
 {% load authorization_tags %}
 {% load get_endpoint_status %}
 {% load static %}
-{% load multiply %}
 {% load i18n %}
 {% load humanize %}
 {% block add_styles %}
@@ -1194,18 +1193,10 @@
                                         {% endwith %}
                                     </td>
                                     <td class="nowrap">
-                                        {% if finding.epss_score is not None %}
-                                            {{ finding.epss_score|multiply:100|floatformat:"2" }}%
-                                        {% else %}
-                                            N.A.
-                                        {% endif %}
+                                        {{ finding.epss_score|format_epss }}%
                                     </td>
                                     <td class="nowrap">
-                                        {% if finding.epss_percentile is not None %}
-                                            {{ finding.epss_percentile|multiply:100|floatformat:"2" }}%
-                                        {% else %}
-                                            N.A.
-                                        {% endif %}
+                                        {{ finding.epss_percentile|format_epss }}%
                                     </td>
                                     <td class="nowrap">
                                         {{ finding.date }}
