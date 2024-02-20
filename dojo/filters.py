@@ -322,6 +322,8 @@ def get_finding_filterset_fields(metrics=False, similar=False):
                 'unique_id_from_tool',
                 'vuln_id_from_tool',
                 'service',
+                'epss_score',
+                'epss_percentile'
     ])
 
     if similar:
@@ -1443,6 +1445,8 @@ class FindingFilter(FindingFilterWithTags):
             ('test__engagement__product__name',
              'test__engagement__product__name'),
             ('service', 'service'),
+            ('epss_score', 'epss_score'),
+            ('epss_percentile', 'epss_percentile'),
         ),
         field_labels={
             'numerical_severity': 'Severity',
@@ -1451,6 +1455,8 @@ class FindingFilter(FindingFilterWithTags):
             'mitigated': 'Mitigated Date',
             'title': 'Finding Name',
             'test__engagement__product__name': 'Product Name',
+            'epss_score': 'EPSS Score',
+            'epss_percentile': 'EPSS Percentile',
         }
     )
 
@@ -1464,7 +1470,8 @@ class FindingFilter(FindingFilterWithTags):
                    'numerical_severity', 'line', 'duplicate_finding',
                    'hash_code', 'reviewers', 'created', 'files',
                    'sla_start_date', 'sla_expiration_date', 'cvssv3',
-                   'severity_justification', 'steps_to_reproduce']
+                   'severity_justification', 'steps_to_reproduce',
+                   'epss_score', 'epss_percentile']
 
     def __init__(self, *args, **kwargs):
         self.user = None
