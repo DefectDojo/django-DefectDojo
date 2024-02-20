@@ -53,7 +53,6 @@ class TestTenableParser(DojoTestCase):
         self.assertEqual("CVE-2004-2761", finding.unsaved_vulnerability_ids[0])
         # this vuln have 'CVE-2013-2566,CVE-2015-2808' as CVE
         finding = findings[3]
-        print(f"finding.unsaved_vulnerability_ids: {finding.unsaved_vulnerability_ids} - {type(finding.unsaved_vulnerability_ids)} - {type(finding.unsaved_vulnerability_ids[0])}")
         self.assertEqual(2, len(finding.unsaved_vulnerability_ids))
         self.assertEqual("CVE-2013-2566", finding.unsaved_vulnerability_ids[0])
         self.assertEqual("CVE-2015-2808", finding.unsaved_vulnerability_ids[1])
@@ -268,3 +267,13 @@ class TestTenableParser(DojoTestCase):
         self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
         for vulnerability_id in finding.unsaved_vulnerability_ids:
             self.assertEqual('CVE-2023-32233', vulnerability_id)
+
+    def test_parse_issue_6992(self):
+        testfile = open("unittests/scans/tenable/nessus/issue_6992.nessus")
+        parser = TenableParser()
+        findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(1, len(findings))
+        self.assertEqual("High", findings[0].severity)
