@@ -156,7 +156,7 @@ class TruffleHog3Parser(object):
                 title=title,
                 test=test,
                 cwe=798,
-                description=description,
+                description=description.replace("\x00", "\uFFFD"),
                 severity=severity,
                 mitigation="Secrets and passwords should be stored in a secure vault or secure storage.",
                 impact="This weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code.",

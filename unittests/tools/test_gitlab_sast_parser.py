@@ -33,7 +33,7 @@ class TestGitlabSastParser(DojoTestCase):
         with open(f"{get_unit_tests_path()}/scans/gitlab_sast/gl-sast-report-many-vuln_v14.json") as testfile:
             parser = GitlabSastParser()
             findings = parser.get_findings(testfile, Test())
-        self.assertTrue(3, len(findings))
+        self.assertEqual(219, len(findings))
         finding = findings[0]
         self.assertEqual("Password in URL", finding.title)
         self.assertEqual("Critical", finding.severity)
@@ -48,7 +48,7 @@ class TestGitlabSastParser(DojoTestCase):
         with open(f"{get_unit_tests_path()}/scans/gitlab_sast/gl-sast-report-many-vuln_v15.json") as testfile:
             parser = GitlabSastParser()
             findings = parser.get_findings(testfile, Test())
-        self.assertTrue(3, len(findings))
+        self.assertEqual(219, len(findings))
         finding = findings[0]
         self.assertEqual("Password in URL", finding.title)
         self.assertEqual("Critical", finding.severity)
@@ -63,9 +63,10 @@ class TestGitlabSastParser(DojoTestCase):
         with open(f"{get_unit_tests_path()}/scans/gitlab_sast/gl-sast-report-confidence_v14.json") as testfile:
             parser = GitlabSastParser()
             findings = parser.get_findings(testfile, Test())
-        self.assertTrue(len(findings) == 8)
+        self.assertEqual(len(findings), 8)
         for item in findings:
-            self.assertTrue(item.cwe is None or isinstance(item.cwe, int))
+            if item.cwe:
+                self.assertIsInstance(item.cwe, int)
         finding = findings[3]
         self.assertEqual("Tentative", finding.get_scanner_confidence_text())
         finding = findings[4]
@@ -81,9 +82,10 @@ class TestGitlabSastParser(DojoTestCase):
         with open(f"{get_unit_tests_path()}/scans/gitlab_sast/gl-sast-report-confidence_v15.json") as testfile:
             parser = GitlabSastParser()
             findings = parser.get_findings(testfile, Test())
-        self.assertTrue(len(findings) == 8)
+        self.assertEqual(len(findings), 8)
         for item in findings:
-            self.assertTrue(item.cwe is None or isinstance(item.cwe, int))
+            if item.cwe:
+                self.assertIsInstance(item.cwe, int)
         finding = findings[3]
         self.assertEqual("", finding.get_scanner_confidence_text())
         finding = findings[4]
@@ -99,7 +101,7 @@ class TestGitlabSastParser(DojoTestCase):
         with open("unittests/scans/gitlab_sast/gl-sast-report-cwe_v14.json") as testfile:
             parser = GitlabSastParser()
             findings = parser.get_findings(testfile, Test())
-        self.assertTrue(len(findings) == 3)
+        self.assertEqual(len(findings), 3)
         self.assertEqual(79, findings[0].cwe)
         self.assertEqual(89, findings[1].cwe)
         self.assertEqual(None, findings[2].cwe)
@@ -108,7 +110,7 @@ class TestGitlabSastParser(DojoTestCase):
         with open("unittests/scans/gitlab_sast/gl-sast-report-cwe_v15.json") as testfile:
             parser = GitlabSastParser()
             findings = parser.get_findings(testfile, Test())
-        self.assertTrue(len(findings) == 3)
+        self.assertEqual(len(findings), 3)
         self.assertEqual(79, findings[0].cwe)
         self.assertEqual(89, findings[1].cwe)
         self.assertEqual(None, findings[2].cwe)

@@ -557,6 +557,9 @@ Product Type Counts
 
     ![Product Type Counts](../../images/met_2.png)
 
+Product Tag Counts
+:   Same as above, but for a group of products sharing a tag.
+
 Simple Metrics
 :   Provides tabular data for all Product Types. The data displayed in
     this view is the total number of S0, S1, S2, S3, S4, Opened This
@@ -671,3 +674,12 @@ feedback.internal.google.com (endpoint) -> [ team:human resources, public_facing
 Endpoint Meta Importer can be found in the Endpoint tab when viewing a Product
 
 **Note:** The field "hostname" is required as it is used to query/create endpoints.
+
+## Findings Image Upload
+
+You can add images (.png, .jpeg, .gif) to your findings. In order to achieve this, you have to click on "Manage Files" within the finding:
+![Manage Files](../../images/findings_manage_files.png)
+There, you can upload a png file to attach it to a finding:
+![Upload PNG File](../../images/file_upload.png)
+The following picture shows the result:
+![Result PNG File in finding](../../images/uploaded_png_to_finding.png)

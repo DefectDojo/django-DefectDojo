@@ -99,3 +99,9 @@ class TestTruffleHog3Parser(DojoTestCase):
         self.assertEqual('env-file.txt', finding.file_path)
         self.assertEqual(10, finding.line)
         self.assertEqual(1, finding.nb_occurences)
+
+    def test_issue_6999(self):
+        test_file = open(sample_path("issue_6999.json"))
+        parser = TruffleHog3Parser()
+        findings = parser.get_findings(test_file, Test())
+        self.assertEqual(len(findings), 1)

@@ -76,7 +76,24 @@ class DojoDefaultImporter(object):
 
         for item in items:
             # FIXME hack to remove when all parsers have unit tests for this attribute
-            if item.severity.lower().startswith('info') and item.severity != 'Info':
+            # Importing the cvss module via:
+            # `from cvss import CVSS3`
+            # _and_ given a CVSS vector string such as:
+            # cvss_vector_str = 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N',
+            # the following severity calculation returns the
+            # string values of, "None" instead of the expected string values
+            # of "Info":
+            # ```
+            # cvss_obj = CVSS3(cvss_vector_str)
+            # severities = cvss_obj.severities()
+            # print(severities)
+            # ('None', 'None', 'None')
+            # print(severities[0])
+            # 'None'
+            # print(type(severities[0]))
+            # <class 'str'>
+            # ```
+            if (item.severity.lower().startswith('info') or item.severity.lower() == 'none') and item.severity != 'Info':
                 item.severity = 'Info'
 
             item.numerical_severity = Finding.get_numerical_severity(item.severity)
@@ -85,6 +102,11 @@ class DojoDefaultImporter(object):
                     Finding.SEVERITIES[minimum_severity]):
                 # finding's severity is below the configured threshold : ignoring the finding
                 continue
+
+            # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
+            # Finding.mitigated is DateTimeField and it requires timezone
+            if item.mitigated and not item.mitigated.tzinfo:
+                item.mitigated = item.mitigated.replace(tzinfo=now.tzinfo)
 
             item.test = test
             item.reporter = user if user else get_current_user
