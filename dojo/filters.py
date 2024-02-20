@@ -1,4 +1,5 @@
 import collections
+import warnings
 from drf_spectacular.types import OpenApiTypes
 
 from drf_spectacular.utils import extend_schema_field
@@ -28,6 +29,7 @@ from dojo.models import Dojo_User, Finding_Group, Product_API_Scan_Configuration
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 import tagulous
+from polymorphic.base import ManagerInheritanceWarning
 # from tagulous.forms import TagWidget
 # import tagulous
 from dojo.authorization.roles_permissions import Permissions
@@ -2411,12 +2413,13 @@ class QuestionTypeFilter(ChoiceFilter):
         return self.options[value][1](self, qs, self.options[value][0])
 
 
-class QuestionFilter(FilterSet):
-    text = CharFilter(lookup_expr='icontains')
-    type = QuestionTypeFilter()
+with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
+    class QuestionFilter(FilterSet):
+        text = CharFilter(lookup_expr='icontains')
+        type = QuestionTypeFilter()
 
-    class Meta:
-        model = Question
-        exclude = ['polymorphic_ctype', 'created', 'modified', 'order']
+        class Meta:
+            model = Question
+            exclude = ['polymorphic_ctype', 'created', 'modified', 'order']
 
-    question_set = FilterSet
+        question_set = FilterSet
