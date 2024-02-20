@@ -106,3 +106,13 @@ class TestDependencyTrackParser(DojoTestCase):
         self.assertTrue(all(item.vuln_id_from_tool is not None for item in findings))
         self.assertIn('CVE-2022-42004', findings[0].unsaved_vulnerability_ids)
         self.assertEqual(8.3, findings[0].cvssv3_score)
+
+    def test_dependency_track_parser_findings_with_epss_score(self):
+        with open(f"{get_unit_tests_path()}/scans/dependency_track/dependency_track_4.10_2024_02_11.json") as testfile:
+            parser = DependencyTrackParser()
+            findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        self.assertEqual(0.00043, findings[0].epss_score)
+        self.assertEqual(0.07756, findings[0].epss_percentile)
+        self.assertEqual(4.2, findings[0].cvssv3_score)
+        self.assertIn('CVE-2023-45803', findings[0].unsaved_vulnerability_ids)
