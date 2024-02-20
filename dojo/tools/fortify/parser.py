@@ -1,7 +1,6 @@
 import logging
-
+import zipfile
 from defusedxml import ElementTree
-
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
@@ -18,6 +17,12 @@ class FortifyParser(object):
         return "Import Findings from XML file format."
 
     def get_findings(self, filename, test):
+        if str(filename.name).endswith('.xml'):
+            self.parse_xml(filename, test)
+        elif str(filename.name).endswith('.fpr'):
+            self.parse_fpr(filename, test)
+
+    def parse_xml(self, filename, test):
         fortify_scan = ElementTree.parse(filename)
         root = fortify_scan.getroot()
 
@@ -112,6 +117,18 @@ class FortifyParser(object):
                     )
                 )
                 dupes.add(title)
+        return items
+
+    def parse_fpr(self, filename, test):
+        if str(filename.__class__) == "<class '_io.TextIOWrapper'>":
+            input_zip = zipfile.ZipFile(filename.name, 'r')
+        else:
+            input_zip = zipfile.ZipFile(filename, 'r')
+        fortify_scan = ElementTree.parse(input_zip.read("audit.fvdl"))
+        root = fortify_scan.getroot()
+        print(root) #TODO
+
+        items = []
         return items
 
     def format_title(self, category, filename, line_no):
