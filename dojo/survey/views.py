@@ -500,7 +500,7 @@ def create_question(request):
 
 @user_is_configuration_authorized('dojo.change_question')
 def edit_question(request, qid):
-    try: 
+    try:
         question = Question.polymorphic.get(id=qid)
     except Question.DoesNotExist:
         return Http404()
