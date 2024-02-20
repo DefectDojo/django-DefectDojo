@@ -295,7 +295,7 @@ def assign_product_type_product_to_leaders(user, job_title, office_location, rol
             (key_pt, key_user)
             for key_pt, value in get_remote_json_config(connection).items()
             for key_user, val in value.items()
-            if val == user_login.lower()
+            if val.lower() == user_login.lower()
         ]
         for pt_key, user_key in keys:
             pt = Product_Type.objects.filter(name=pt_key)
