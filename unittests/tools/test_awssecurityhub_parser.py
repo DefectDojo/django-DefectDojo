@@ -115,3 +115,4 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertTrue(finding.active)
             self.assertEqual("User AssumedRole : 123123123 is anomalously invoking APIs commonly used in Discovery tactics. - Resource: 123123123", finding.title)
             self.assertEqual("TTPs/Discovery/IAMUser-AnomalousBehavior\nhttps://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html", finding.mitigation)
+            self.assertEqual(0.0014, finding.epss_score)
