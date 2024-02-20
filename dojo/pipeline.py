@@ -2,7 +2,7 @@ import gitlab
 import re
 import logging
 import requests
-
+import json
 
 import social_core.pipeline.user
 from django.conf import settings
@@ -218,22 +218,19 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
 
             graph_client = connection.clients.get_graph_client()
             result_query_subjects = graph_client.query_subjects({"query": user_login, "subjectKind": ["User"]})
+            
+            # Get user's current product types names
+            user_product_types_names = [
+                prod.product_type.name
+                for prod in Product_Type_Member.objects.select_related("user").filter(user=user)
+            ]
 
             role_assigned = {"role": Role.objects.get(id=Roles.Developer)}
-            if (
-                job_title in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[0]
-                or job_title in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[1]
-            ):
+            if any(job_title in part for part in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[:2]):
                 role_assigned = {"role": Role.objects.get(id=Roles.Leader)}
-                assign_product_type_product_to_leaders(user, job_title, office_location, role_assigned)
+                assign_product_type_product_to_leaders(user, job_title, office_location, role_assigned, connection, user_login, user_product_types_names)
 
-            if result_query_subjects is not None:
-                # Get user's current product types names
-                user_product_types_names = [
-                    prod.product_type.name
-                    for prod in Product_Type_Member.objects.select_related("user").filter(user=user)
-                ]
-
+            if result_query_subjects is not None and len(result_query_subjects) > 0:
                 # Get user's product type for become member
                 result_memberships = graph_client.get_membership(result_query_subjects[0].descriptor, None)
 
@@ -282,35 +279,56 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
                                     "Deleting membership of user %s from product type %s", user, product_type_name
                                 )
                     else:
-                        clean_project_type_user(user_product_types_names, user, user_login, job_title)
+                        clean_project_type_user(user_product_types_names, user, user_login)
                 else:
-                    clean_project_type_user(user_product_types_names, user, user_login, job_title)
+                    clean_project_type_user(user_product_types_names, user, user_login)
 
 
-def assign_product_type_product_to_leaders(user, job_title, office_location, role_assigned):
+def assign_product_type_product_to_leaders(user, job_title, office_location, role_assigned, connection, user_login, user_product_types_names):
     conf_jobs = settings.AZURE_DEVOPS_JOBS_TITLE.split(",")
     if job_title in conf_jobs[0]:
         Product.objects.filter(
             description__contains=re.sub(conf_jobs[2], "", office_location).replace(" ", "-")
         ).update(team_manager=user)
-    elif job_title in conf_jobs[1].split("-")[0] or job_title in conf_jobs[1].split("-")[1]:
-        pts = Product_Type.objects.filter(description__contains=office_location)
-        pts.update(product_type_technical_contact=user)
-        if len(pts) > 0:
-            Product_Type_Member.objects.get_or_create(product_type=pts[0], user=user, defaults=role_assigned)
-            logger.debug(
-                "User %s become member of product type %s with the role %s",
-                user,
-                pts[0],
-                role_assigned["role"],
-            )
+    elif job_title in conf_jobs[1]:
+        keys = [
+            (key_pt, key_user)
+            for key_pt, value in get_remote_json_config(connection).items()
+            for key_user, val in value.items()
+            if val == user_login.lower()
+        ]
+        for pt_key, user_key in keys:
+            pt = Product_Type.objects.filter(name=pt_key)
+            if pt.exists():
+                pt.update(**{json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[2])[user_key]: user})
+                if pt_key not in user_product_types_names:
+                    Product_Type_Member.objects.get_or_create(product_type=pt[0], user=user, defaults=role_assigned)
+                    logger.debug(
+                        "User %s become member of product type %s with the role %s",
+                        user,
+                        pt,
+                        role_assigned["role"],
+                    )
+            if pt_key in user_product_types_names:
+                user_product_types_names.remove(pt_key)
+        clean_project_type_user(user_product_types_names, user, user_login)
+
+def get_remote_json_config(connection: Connection):
+    try:
+        git_client = connection.clients.get_git_client()
+        file_content = git_client.get_item_text(
+            repository_id=settings.AZURE_DEVOPS_REPOSITORY_ID,
+            path=settings.AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH,
+            project=settings.AZURE_DEVOPS_PROJECT_NAME
+        )
+        data = json.loads(b"".join(file_content).decode("utf-8"))
+        return data
+    except Exception as e:
+        logger.error("Error getting remote configuration file: " + str(e))
 
 
-def clean_project_type_user(user_product_types_names, user, user_login, job_title):
-    if (
-        job_title not in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[1]
-        and user_login.split("@")[0] not in settings.AZURE_DEVOPS_USERS_EXCLUDED_TPM
-    ):
+def clean_project_type_user(user_product_types_names, user, user_login):
+    if (user_login.split("@")[0] not in settings.AZURE_DEVOPS_USERS_EXCLUDED_TPM):
         for product_type_name in user_product_types_names:
             product_type = Product_Type.objects.get(name=product_type_name)
             Product_Type_Member.objects.filter(product_type=product_type, user=user).delete()

@@ -99,8 +99,11 @@ def get_item(vuln, test, check_type):
         component_name=resource,
         static_finding=True,
         dynamic_finding=False,
-        vuln_id_from_tool= vuln['check_id']
+        vuln_id_from_tool= vuln['check_id'],
+
     )
     finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("checkov")]
+    if "custom_vuln_id" in vuln:
+        finding.unsaved_vulnerability_ids = [vuln['custom_vuln_id']]
     return finding
 
