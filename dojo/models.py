@@ -27,6 +27,7 @@ from django.utils import timezone
 from django.utils.html import escape
 from pytz import all_timezones
 from polymorphic.models import PolymorphicModel
+from polymorphic.managers import PolymorphicManager
 from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
@@ -4355,6 +4356,8 @@ class Question(PolymorphicModel, TimeStampedModel):
         help_text=_("If selected, user doesn't have to answer this question"))
 
     text = models.TextField(blank=False, help_text=_('The question text'), default='')
+    objects = models.Manager()
+    polymorphic = PolymorphicManager()
 
     def __str__(self):
         return self.text
@@ -4364,6 +4367,7 @@ class TextQuestion(Question):
     '''
     Question with a text answer
     '''
+    objects = PolymorphicManager()
 
     def get_form(self):
         '''
@@ -4397,8 +4401,8 @@ class ChoiceQuestion(Question):
 
     multichoice = models.BooleanField(default=False,
                                       help_text=_("Select one or more"))
-
     choices = models.ManyToManyField(Choice)
+    objects = PolymorphicManager()
 
     def get_form(self):
         '''
@@ -4476,6 +4480,8 @@ class Answer(PolymorphicModel, TimeStampedModel):
                                         null=False,
                                         blank=False,
                                         on_delete=models.CASCADE)
+    objects = models.Manager()
+    polymorphic = PolymorphicManager()
 
 
 class TextAnswer(Answer):
@@ -4483,6 +4489,7 @@ class TextAnswer(Answer):
         blank=False,
         help_text=_('The answer text'),
         default='')
+    objects = PolymorphicManager()
 
     def __str__(self):
         return self.answer
@@ -4492,6 +4499,7 @@ class ChoiceAnswer(Answer):
     answer = models.ManyToManyField(
         Choice,
         help_text=_('The selected choices as the answer'))
+    objects = PolymorphicManager()
 
     def __str__(self):
         if len(self.answer.all()):
