@@ -863,9 +863,10 @@ def update_jira_issue(obj, *args, **kwargs):
             summary=jira_summary(obj),
             description=jira_description(obj),
             component_name=jira_project.component if not issue.fields.components else None,
-            labels=labels,
+            labels=labels + issue.fields.labels,
             environment=jira_environment(obj),
-            priority_name=jira_priority(obj),
+            # Do not update the priority in jira after creation as this could have changed in jira, but should not change in dojo
+            # priority_name=jira_priority(obj),
             issuetype_fields=issuetype_fields)
 
         logger.debug('sending fields to JIRA: %s', fields)
@@ -873,7 +874,8 @@ def update_jira_issue(obj, *args, **kwargs):
         issue.update(
             summary=fields['summary'],
             description=fields['description'],
-            priority=fields['priority'],
+            # Do not update the priority in jira after creation as this could have changed in jira, but should not change in dojo
+            # priority=fields['priority'],
             fields=fields)
 
         push_status_to_jira(obj, jira_instance, jira, issue)
