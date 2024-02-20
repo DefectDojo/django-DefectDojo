@@ -768,7 +768,7 @@ class ImportScanResultsView(View):
                 return HttpResponseRedirect(
                     reverse('view_test', args=(test.id, )))
 
-        return HttpResponseRedirect(reverse('view_test', args=(test.id, )))
+        return HttpResponseRedirect(reverse('import_scan_results', args=(engagement.id, )))
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
