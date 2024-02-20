@@ -1244,7 +1244,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     replace_form = ReplaceRiskAcceptanceProofForm(instance=risk_acceptance)
     add_findings_form = AddFindingsRiskAcceptanceForm(instance=risk_acceptance)
 
-    accepted_findings = risk_acceptance.accepted_findings.order_by('numerical_severity')
+    accepted_findings = risk_acceptance.accepted_findings.order_by('id')
     fpage = get_page_items(request, accepted_findings, 15)
     if settings.RISK_PENDING:
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False, severity=risk_acceptance.severity, duplicate=False) \
