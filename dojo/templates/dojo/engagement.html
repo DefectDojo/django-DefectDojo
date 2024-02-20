@@ -151,7 +151,7 @@
                                     </div>
                                 </td>
                                 <td> {{ e.target_start }} - {{ e.target_end }}
-                                     {% if e.is_overdue %}
+                                     {% if e.is_overdue and e.status != 'Completed' %}
                                         <span class="tag-label warning-color">
                                              {{ e.target_end|overdue }} overdue
                                          </span>

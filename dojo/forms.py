@@ -2,6 +2,7 @@ import os
 import re
 from datetime import datetime, date
 import pickle
+import warnings
 from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
@@ -18,6 +19,7 @@ from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from polymorphic.base import ManagerInheritanceWarning
 import tagulous
 
 from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
@@ -3267,16 +3269,17 @@ class CreateQuestionnaireForm(forms.ModelForm):
         exclude = ['questions']
 
 
-class EditQuestionnaireQuestionsForm(forms.ModelForm):
-    questions = forms.ModelMultipleChoiceField(
-        Question.objects.all(),
-        required=True,
-        help_text="Select questions to include on this questionnaire.  Field can be used to search available questions.",
-        widget=MultipleSelectWithPop(attrs={'size': '11'}))
+with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
+    class EditQuestionnaireQuestionsForm(forms.ModelForm):
+        questions = forms.ModelMultipleChoiceField(
+            Question.polymorphic.all(),
+            required=True,
+            help_text="Select questions to include on this questionnaire.  Field can be used to search available questions.",
+            widget=MultipleSelectWithPop(attrs={'size': '11'}))
 
-    class Meta:
-        model = Engagement_Survey
-        exclude = ['name', 'description', 'active']
+        class Meta:
+            model = Engagement_Survey
+            exclude = ['name', 'description', 'active']
 
 
 class CreateQuestionForm(forms.Form):
