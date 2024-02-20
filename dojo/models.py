@@ -4358,21 +4358,21 @@ with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning
         '''
             Represents a question.
         '''
-    
+
         class Meta:
             ordering = ['order']
-    
+
         order = models.PositiveIntegerField(default=1,
                                             help_text=_('The render order'))
-    
+
         optional = models.BooleanField(
             default=False,
             help_text=_("If selected, user doesn't have to answer this question"))
-    
+
         text = models.TextField(blank=False, help_text=_('The question text'), default='')
         objects = models.Manager()
         polymorphic = PolymorphicManager()
-    
+
         def __str__(self):
             return self.text
 
@@ -4484,12 +4484,13 @@ class General_Survey(models.Model):
     def __str__(self):
         return self.survey.name
 
+
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
     class Answer(PolymorphicModel, TimeStampedModel):
         ''' Base Answer model
         '''
         question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    
+
         answered_survey = models.ForeignKey(Answered_Survey,
                                             null=False,
                                             blank=False,
