@@ -75,3 +75,16 @@ class TestFortifyParser(DojoTestCase):
             self.assertEqual("src/adrui/MyContextListener.java", finding.file_path)
             self.assertEqual(28, finding.line)
             self.assertEqual('B5B15F27E10F4D7799BD0ED1E6D34C5D', finding.unique_id_from_tool)
+
+    def test_fortify_many_fdr_findings(self):
+        testfile = get_unit_tests_path() + "/scans/fortify/many_findings.fdr"
+        parser = FortifyParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(2, len(findings)) #TODO finish the right values
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("Privilege Management: Unnecessary Permission - AndroidManifest.xml: 11", finding.title)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual("app/build/intermediates/bundle_manifest/developDebug/processDevelopDebugManifest/bundle-manifest/AndroidManifest.xml", finding.file_path)
+            self.assertEqual(11, finding.line)
+            self.assertEqual('53C25D2FC6950554F16D3CEF9E41EF6F', finding.unique_id_from_tool)
