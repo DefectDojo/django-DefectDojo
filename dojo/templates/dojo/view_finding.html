@@ -433,11 +433,11 @@
                         </td>
                         {% if finding.epss_score != None or finding.epss_percentile != None %}
                                 {% if finding.epss_score != None and finding.epss_percentile != None %}
-                                    <td>{{ finding.epss_score|multiply:100|floatformat:"3" }}% / {{ finding.epss_percentile|multiply:100|floatformat:"3" }}%</td>
+                                    <td>{{ finding.epss_score|multiply:100|floatformat:"2" }}% / {{ finding.epss_percentile|multiply:100|floatformat:"2" }}%</td>
                                 {% elif finding.epss_score != None and finding.epss_percentile == None %}
-                                    <td>{{ finding.epss_score|multiply:100|floatformat:"3" }}%</td>
+                                    <td>{{ finding.epss_score|multiply:100|floatformat:"2" }}%</td>
                                 {% elif finding.epss_score == None and finding.epss_percentile != None %}
-                                    <td>{{ finding.epss_percentile|multiply:100|floatformat:"3" }}%</td>
+                                    <td>{{ finding.epss_percentile|multiply:100|floatformat:"2" }}%</td>
                                 {% endif %}
                         {% endif %}
                         <td>
