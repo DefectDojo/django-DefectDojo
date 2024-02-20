@@ -62,6 +62,7 @@ class KICSParser(object):
                         + category
                         + issue_type
                         + file_name
+                        + expected_value
                         + str(line_number)
                     ).encode("utf-8")
                 ).hexdigest()

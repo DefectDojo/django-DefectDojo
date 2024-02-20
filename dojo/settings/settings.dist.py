@@ -1242,6 +1242,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Humble Json Importer': ['title'],
     'MSDefender Parser': ['title', 'description'],
     'HCLAppScan XML': ['title', 'description'],
+    'KICS Scan': ['file_path', 'line', 'severity', 'description', 'title'],
     'MobSF Scan': ['title', 'description', 'severity'],
 }
 
@@ -1409,7 +1410,6 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Meterian Scan': DEDUPE_ALGO_HASH_CODE,
     'Github Vulnerability Scan': DEDUPE_ALGO_HASH_CODE,
     'Cloudsploit Scan': DEDUPE_ALGO_HASH_CODE,
-    'KICS Scan': DEDUPE_ALGO_HASH_CODE,
     'SARIF': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Azure Security Center Recommendations Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Hadolint Dockerfile check': DEDUPE_ALGO_HASH_CODE,
@@ -1452,6 +1452,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Wazuh Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'MSDefender Parser': DEDUPE_ALGO_HASH_CODE,
     'HCLAppScan XML': DEDUPE_ALGO_HASH_CODE,
+    'KICS Scan': DEDUPE_ALGO_HASH_CODE,
     'MobSF Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
