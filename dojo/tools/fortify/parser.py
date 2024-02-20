@@ -18,9 +18,9 @@ class FortifyParser(object):
 
     def get_findings(self, filename, test):
         if str(filename.name).endswith('.xml'):
-            self.parse_xml(filename, test)
+            return self.parse_xml(filename, test)
         elif str(filename.name).endswith('.fpr'):
-            self.parse_fpr(filename, test)
+            return self.parse_fpr(filename, test)
 
     def parse_xml(self, filename, test):
         fortify_scan = ElementTree.parse(filename)
