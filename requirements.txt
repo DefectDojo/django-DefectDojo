@@ -56,7 +56,6 @@ Python-jose==3.3.0
 gitpython==3.1.41
 debugpy==1.8.0
 python-gitlab==4.4.0
-drf_yasg==1.21.5
 cpe==1.2.1
 packageurl-python==0.13.4
 django-crum==0.7.9

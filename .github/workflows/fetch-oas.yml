@@ -10,6 +10,9 @@ on:
           This will override any version calculated by the release-drafter.
         required: true
 
+env:
+  release_version: ${{ github.event.inputs.version || github.event.inputs.release_number }}
+
 jobs:
   oas_fetch:
     name: Fetch OpenAPI Specifications
@@ -21,19 +24,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.version }}
+          ref: release/${{ env.release_version }}
 
       - name: Load docker images
         run: |-
-             docker pull defectdojo/defectdojo-django:${{ github.event.inputs.version }}-alpine
-             docker pull defectdojo/defectdojo-nginx:${{ github.event.inputs.version }}-alpine
+             docker pull defectdojo/defectdojo-django:${{ env.release_version }}-alpine
+             docker pull defectdojo/defectdojo-nginx:${{ env.release_version }}-alpine
              docker images
 
       - name: Start Dojo
         run: docker-compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env up --no-deps -d postgres nginx uwsgi
         env:
-          DJANGO_VERSION: ${{ github.event.inputs.version }}-alpine
-          NGINX_VERSION: ${{ github.event.inputs.version }}-alpine
+          DJANGO_VERSION: ${{ env.release_version }}-alpine
+          NGINX_VERSION: ${{ env.release_version }}-alpine
 
       - name: Download OpenAPI Specifications
         run: |-

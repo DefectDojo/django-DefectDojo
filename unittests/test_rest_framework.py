@@ -967,6 +967,12 @@ class RiskAcceptanceTest(BaseClass.RESTEndpointTest):
         self.deleted_objects = 3
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_create_object_not_authorized(self):
+        self.setUp_not_authorized()
+
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
 
 class FindingRequestResponseTest(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
