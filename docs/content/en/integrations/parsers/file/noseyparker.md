@@ -17,7 +17,6 @@ Things to note about the Nosey Parker Parser:
      - The scan will pick up secrets committed in the past that have since been removed
      - If a secret is removed from source code, it will still show up in the next scan
      - When importing findings via the Dojo API, make sure to use the parameter `do_not_reactivate`  which will keep existing findings closed, without reactivating them
-     - 
     - **For targeted branch scans:**
       - Keep in mind there may be active secrets that are either in the git history or not in the current branch
 
