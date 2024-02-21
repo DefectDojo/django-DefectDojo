@@ -399,9 +399,6 @@ class BaseClass():
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.patch(relative_url, self.update_fields)
-            # print('patch response.data')
-            # print(response.data)
-
             self.assertEqual(200, response.status_code, response.content[:1000])
 
             self.check_schema_response('patch', '200', response, detail=True)
@@ -432,8 +429,6 @@ class BaseClass():
             response = self.client.put(
                 relative_url, self.payload)
             self.assertEqual(200, response.status_code, response.content[:1000])
-            # print('put response.data')
-            # print(response.data)
 
             self.check_schema_response('put', '200', response, detail=True)
 
@@ -937,7 +932,7 @@ class RiskAcceptanceTest(BaseClass.RESTEndpointTest):
         self.viewname = 'risk_acceptance'
         self.viewset = RiskAcceptanceViewSet
         self.payload = {
-            "id": 1,
+            "id": 2,
             "recommendation": "Fix (The risk is eradicated)",
             "decision": "Accept (The risk is acknowledged, yet remains)",
             "path": "No proof has been supplied",
@@ -954,7 +949,7 @@ class RiskAcceptanceTest(BaseClass.RESTEndpointTest):
             "updated": "2023-09-15T17:17:39.462854Z",
             "owner": 1,
             "accepted_findings": [
-                4
+                226
             ],
             "notes": []
         }
@@ -969,7 +964,6 @@ class RiskAcceptanceTest(BaseClass.RESTEndpointTest):
 
     def test_create_object_not_authorized(self):
         self.setUp_not_authorized()
-
         response = self.client.post(self.url, self.payload)
         self.assertEqual(403, response.status_code, response.content[:1000])
 

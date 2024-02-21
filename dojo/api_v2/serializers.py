@@ -1532,7 +1532,7 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        findings = data['accepted_findings']
+        findings = data.get('accepted_findings', [])
         findings_ids = list(map(lambda x: x.id, findings))
         finding_objects = Finding.objects.filter(id__in=findings_ids)
         authed_findings = get_authorized_findings(Permissions.Finding_View).filter(id__in=findings_ids)
@@ -1544,14 +1544,14 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
             engagements = finding_objects.values_list('test__engagement__id', flat=True).distinct().count()
             if engagements > 1:
                 raise PermissionDenied(
-                    "You are not permitted to add findings to more than a single engagement"
+                    "You are not permitted to add findings to a distinct engagement"
                 )
         elif self.context['request'].method in ['PATCH', 'PUT']:
             engagement = Engagement.objects.filter(risk_acceptance=self.instance.id).first()
             findings = finding_objects.exclude(test__engagement__id=engagement.id)
             if len(findings) > 0:
                 raise PermissionDenied(
-                    "You are not permitted to add findings to more than a single engagement"
+                    "You are not permitted to add findings to a distinct engagement"
                 )
         return data
 
