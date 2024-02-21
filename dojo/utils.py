@@ -484,14 +484,19 @@ def deduplicate_uid_or_hash_code(new_finding):
 
 
 def set_duplicate(new_finding, existing_finding):
+    deduplicationLogger.debug(f"new_finding.status(): {new_finding.id} {new_finding.status()}")
+    deduplicationLogger.debug(f"existing_finding.status(): {existing_finding.id} {existing_finding.status()}")
     if existing_finding.duplicate:
-        logger.debug('existing finding: %s:%s:duplicate=%s;duplicate_finding=%s', existing_finding.id, existing_finding.title, existing_finding.duplicate, existing_finding.duplicate_finding.id if existing_finding.duplicate_finding else 'None')
+        deduplicationLogger.debug('existing finding: %s:%s:duplicate=%s;duplicate_finding=%s', existing_finding.id, existing_finding.title, existing_finding.duplicate, existing_finding.duplicate_finding.id if existing_finding.duplicate_finding else 'None')
         raise Exception("Existing finding is a duplicate")
     if existing_finding.id == new_finding.id:
         raise Exception("Can not add duplicate to itself")
-    deduplicationLogger.debug('Setting new finding ' + str(new_finding.id) + ' as a duplicate of existing finding ' + str(existing_finding.id))
     if is_duplicate_reopen(new_finding, existing_finding):
-        set_duplicate_reopen(new_finding, existing_finding)
+        raise Exception("Found a regression. Ignore this so that a new duplicate chain can be made")
+    if new_finding.duplicate and finding_mitigated(existing_finding):
+        raise Exception("Skip this finding as we do not want to attach a new duplicate to a mitigated finding")
+
+    deduplicationLogger.debug('Setting new finding ' + str(new_finding.id) + ' as a duplicate of existing finding ' + str(existing_finding.id))
     new_finding.duplicate = True
     new_finding.active = False
     new_finding.verified = False
@@ -511,11 +516,16 @@ def set_duplicate(new_finding, existing_finding):
     super(Finding, existing_finding).save()
 
 
-def is_duplicate_reopen(new_finding, existing_finding):
-    if (existing_finding.is_mitigated or existing_finding.mitigated) and not existing_finding.out_of_scope and not existing_finding.false_p and new_finding.active and not new_finding.is_mitigated:
-        return True
-    else:
-        return False
+def is_duplicate_reopen(new_finding, existing_finding) -> bool:
+    return finding_mitigated(existing_finding) and finding_not_human_set_status(existing_finding) and not finding_mitigated(new_finding)
+
+
+def finding_mitigated(finding: Finding) -> bool:
+    return finding.active is False and (finding.is_mitigated is True or finding.mitigated is not None)
+
+
+def finding_not_human_set_status(finding: Finding) -> bool:
+    return finding.out_of_scope is False and finding.false_p is False
 
 
 def set_duplicate_reopen(new_finding, existing_finding):
@@ -1085,7 +1095,7 @@ def get_period_counts(findings,
     }
 
 
-def opened_in_period(start_date, end_date, pt):
+def opened_in_period(start_date, end_date, **kwargs):
     start_date = datetime(
         start_date.year,
         start_date.month,
@@ -1098,7 +1108,7 @@ def opened_in_period(start_date, end_date, pt):
         tzinfo=timezone.get_current_timezone())
     opened_in_period = Finding.objects.filter(
         date__range=[start_date, end_date],
-        test__engagement__product__prod_type=pt,
+        **kwargs,
         verified=True,
         false_p=False,
         duplicate=False,
@@ -1110,7 +1120,7 @@ def opened_in_period(start_date, end_date, pt):
                 Count('numerical_severity')).order_by('numerical_severity')
     total_opened_in_period = Finding.objects.filter(
         date__range=[start_date, end_date],
-        test__engagement__product__prod_type=pt,
+        **kwargs,
         verified=True,
         false_p=False,
         duplicate=False,
@@ -1142,7 +1152,7 @@ def opened_in_period(start_date, end_date, pt):
         'closed':
         Finding.objects.filter(
             mitigated__date__range=[start_date, end_date],
-            test__engagement__product__prod_type=pt,
+            **kwargs,
             severity__in=('Critical', 'High', 'Medium', 'Low')).aggregate(
                 total=Sum(
                     Case(
@@ -1158,7 +1168,7 @@ def opened_in_period(start_date, end_date, pt):
             duplicate=False,
             out_of_scope=False,
             mitigated__isnull=True,
-            test__engagement__product__prod_type=pt,
+            **kwargs,
             severity__in=('Critical', 'High', 'Medium', 'Low')).count()
     }
 
@@ -2432,7 +2442,7 @@ def get_password_requirements_string():
     if bool(get_system_setting('number_character_required')):
         s += ', one number (0-9)'
     if bool(get_system_setting('special_character_required')):
-        s += ', one special chacter (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?)'  # noqa W605
+        s += ', one special character (()[]{}|\\`~!@#$%^&*_-+=;:\'\",<>./?)'
 
     if s.count(', ') == 1:
         password_requirements_string = s.rsplit(', ', 1)[0] + ' and ' + s.rsplit(', ', 1)[1]

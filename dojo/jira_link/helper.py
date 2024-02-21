@@ -863,9 +863,10 @@ def update_jira_issue(obj, *args, **kwargs):
             summary=jira_summary(obj),
             description=jira_description(obj),
             component_name=jira_project.component if not issue.fields.components else None,
-            labels=labels,
+            labels=labels + issue.fields.labels,
             environment=jira_environment(obj),
-            priority_name=jira_priority(obj),
+            # Do not update the priority in jira after creation as this could have changed in jira, but should not change in dojo
+            # priority_name=jira_priority(obj),
             issuetype_fields=issuetype_fields)
 
         logger.debug('sending fields to JIRA: %s', fields)
@@ -873,7 +874,8 @@ def update_jira_issue(obj, *args, **kwargs):
         issue.update(
             summary=fields['summary'],
             description=fields['description'],
-            priority=fields['priority'],
+            # Do not update the priority in jira after creation as this could have changed in jira, but should not change in dojo
+            # priority=fields['priority'],
             fields=fields)
 
         push_status_to_jira(obj, jira_instance, jira, issue)
@@ -1036,28 +1038,28 @@ def get_issuetype_fields(
 
         else:
             try:
-                issuetypes = jira.createmeta_issuetypes(project_key)
+                issuetypes = jira.project_issue_types(project_key)
             except JIRAError as e:
                 e.text = f"Jira API call 'createmeta/issuetypes' failed with status: {e.status_code} and message: {e.text}. Project misconfigured or no permissions in Jira ?"
                 raise e
 
             issuetype_id = None
-            for it in issuetypes['values']:
-                if it['name'] == issuetype_name:
-                    issuetype_id = it['id']
+            for it in issuetypes:
+                if it.name == issuetype_name:
+                    issuetype_id = it.id
                     break
 
             if not issuetype_id:
                 raise JIRAError("Issue type ID can not be matched. Misconfigured default issue type ?")
 
             try:
-                issuetype_fields = jira.createmeta_fieldtypes(project_key, issuetype_id)
+                issuetype_fields = jira.project_issue_fields(project_key, issuetype_id)
             except JIRAError as e:
                 e.text = f"Jira API call 'createmeta/fieldtypes' failed with status: {e.status_code} and message: {e.text}. Misconfigured project or default issue type ?"
                 raise e
 
             try:
-                issuetype_fields = [f['fieldId'] for f in issuetype_fields['values']]
+                issuetype_fields = [f.fieldId for f in issuetype_fields]
             except Exception:
                 raise JIRAError("Misconfigured default issue type ?")
 

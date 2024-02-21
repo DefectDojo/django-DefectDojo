@@ -4,6 +4,7 @@ import logging
 import os
 import re
 import copy
+import warnings
 from typing import Dict, Set, Optional
 from uuid import uuid4
 from django.conf import settings
@@ -13,7 +14,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.db.models.expressions import Case, When
 from django.urls import reverse
-from django.core.validators import RegexValidator, validate_ipv46_address
+from django.core.validators import RegexValidator, validate_ipv46_address, MinValueValidator, MaxValueValidator
 from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
 from django.db import models, connection
@@ -27,6 +28,8 @@ from django.utils import timezone
 from django.utils.html import escape
 from pytz import all_timezones
 from polymorphic.models import PolymorphicModel
+from polymorphic.managers import PolymorphicManager
+from polymorphic.base import ManagerInheritanceWarning
 from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
@@ -246,14 +249,16 @@ class UserContactInfo(models.Model):
 
 class Dojo_Group(models.Model):
     AZURE = 'AzureAD'
+    REMOTE = 'Remote'
     SOCIAL_CHOICES = (
         (AZURE, _('AzureAD')),
+        (REMOTE, _('Remote')),
     )
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True, blank=True)
     users = models.ManyToManyField(Dojo_User, through='Dojo_Group_Member', related_name='users', blank=True)
     auth_group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
-    social_provider = models.CharField(max_length=10, choices=SOCIAL_CHOICES, blank=True, null=True, help_text='Group imported from a social provider.', verbose_name='Social Authentication Provider')
+    social_provider = models.CharField(max_length=10, choices=SOCIAL_CHOICES, blank=True, null=True, help_text=_('Group imported from a social provider.'), verbose_name=_('Social Authentication Provider'))
 
     def __str__(self):
         return self.name
@@ -545,7 +550,7 @@ class System_Settings(models.Model):
         default=True,
         blank=False,
         verbose_name=_("Password must contain one special character"),
-        help_text=_("Requires user passwords to contain at least one special character (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?)."))  # noqa W605
+        help_text=_("Requires user passwords to contain at least one special character (()[]{}|\\`~!@#$%^&*_-+=;:\'\",<>./?)."))
     lowercase_character_required = models.BooleanField(
         default=True,
         blank=False,
@@ -1102,7 +1107,7 @@ class Product(models.Model):
     @cached_property
     def endpoint_host_count(self):
         # active_endpoints is (should be) prefetched
-        endpoints = self.active_endpoints
+        endpoints = getattr(self, 'active_endpoints', None)
 
         hosts = []
         for e in endpoints:
@@ -1116,7 +1121,10 @@ class Product(models.Model):
     @cached_property
     def endpoint_count(self):
         # active_endpoints is (should be) prefetched
-        return len(self.active_endpoints)
+        endpoints = getattr(self, 'active_endpoints', None)
+        if endpoints:
+            return len(self.active_endpoints)
+        return None
 
     def open_findings(self, start_date=None, end_date=None):
         if start_date is None or end_date is None:
@@ -1192,13 +1200,11 @@ class Product(models.Model):
         from django.urls import reverse
         return reverse('view_product', args=[str(self.id)])
 
-    @property
     def violates_sla(self):
-        findings = Finding.objects.filter(test__engagement__product=self, active=True)
-        for f in findings:
-            if f.violates_sla:
-                return True
-        return False
+        findings = Finding.objects.filter(test__engagement__product=self,
+                                          active=True,
+                                          sla_expiration_date__lt=timezone.now().date())
+        return findings.count() > 0
 
 
 class Product_Member(models.Model):
@@ -2204,6 +2210,14 @@ class Finding(models.Model):
                            blank=False,
                            verbose_name=_("Vulnerability Id"),
                            help_text=_("An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources."))
+    epss_score = models.FloatField(default=None, null=True, blank=True,
+                              verbose_name=_("EPSS Score"),
+                              help_text=_("EPSS score for the CVE. Describes how likely it is the vulnerability will be exploited in the next 30 days."),
+                              validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
+    epss_percentile = models.FloatField(default=None, null=True, blank=True,
+                              verbose_name=_("EPSS percentile"),
+                              help_text=_("EPSS percentile for the CVE. Describes how many CVEs are scored at or below this one."),
+                              validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
     cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
     cvssv3 = models.TextField(validators=[cvssv3_regex],
                               max_length=117,
@@ -2503,7 +2517,7 @@ class Finding(models.Model):
                   'High': 1, 'Critical': 0}
 
     class Meta:
-        ordering = ('numerical_severity', '-date', 'title')
+        ordering = ('numerical_severity', '-date', 'title', 'epss_score', 'epss_percentile')
         indexes = [
             models.Index(fields=['test', 'active', 'verified']),
 
@@ -2518,6 +2532,8 @@ class Finding(models.Model):
             models.Index(fields=['test', 'component_name']),
 
             models.Index(fields=['cve']),
+            models.Index(fields=['epss_score']),
+            models.Index(fields=['epss_percentile']),
             models.Index(fields=['cwe']),
             models.Index(fields=['out_of_scope']),
             models.Index(fields=['false_p']),
@@ -2893,19 +2909,18 @@ class Finding(models.Model):
                 self.sla_expiration_date = get_current_date() + relativedelta(days=days_remaining)
 
     def sla_days_remaining(self):
-        sla_calculation = None
-        sla_period = self.get_sla_period()
-        if sla_period:
-            sla_calculation = sla_period - self.sla_age
-        return sla_calculation
+        if self.sla_expiration_date:
+            if self.mitigated:
+                mitigated_date = self.mitigated
+                if isinstance(mitigated_date, datetime):
+                    mitigated_date = self.mitigated.date()
+                return (self.sla_expiration_date - mitigated_date).days
+            else:
+                return (self.sla_expiration_date - get_current_date()).days
+        return None
 
     def sla_deadline(self):
-        days_remaining = self.sla_days_remaining()
-        if days_remaining:
-            if self.mitigated:
-                return self.mitigated.date() + relativedelta(days=days_remaining)
-            return get_current_date() + relativedelta(days=days_remaining)
-        return None
+        return self.sla_expiration_date
 
     def github(self):
         try:
@@ -3331,8 +3346,7 @@ class Finding(models.Model):
 
     @property
     def violates_sla(self):
-        days_remaining = self.sla_days_remaining()
-        return days_remaining < 0 if days_remaining else False
+        return (self.sla_expiration_date and self.sla_expiration_date < timezone.now())
 
 
 class FindingAdmin(admin.ModelAdmin):
@@ -4376,32 +4390,35 @@ class Benchmark_Product_Summary(models.Model):
 # ==========================
 # Defect Dojo Engaegment Surveys
 # ==============================
+with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
+    class Question(PolymorphicModel, TimeStampedModel):
+        '''
+            Represents a question.
+        '''
 
-class Question(PolymorphicModel, TimeStampedModel):
-    '''
-        Represents a question.
-    '''
+        class Meta:
+            ordering = ['order']
 
-    class Meta:
-        ordering = ['order']
+        order = models.PositiveIntegerField(default=1,
+                                            help_text=_('The render order'))
 
-    order = models.PositiveIntegerField(default=1,
-                                        help_text=_('The render order'))
+        optional = models.BooleanField(
+            default=False,
+            help_text=_("If selected, user doesn't have to answer this question"))
 
-    optional = models.BooleanField(
-        default=False,
-        help_text=_("If selected, user doesn't have to answer this question"))
+        text = models.TextField(blank=False, help_text=_('The question text'), default='')
+        objects = models.Manager()
+        polymorphic = PolymorphicManager()
 
-    text = models.TextField(blank=False, help_text=_('The question text'), default='')
-
-    def __str__(self):
-        return self.text
+        def __str__(self):
+            return self.text
 
 
 class TextQuestion(Question):
     '''
     Question with a text answer
     '''
+    objects = PolymorphicManager()
 
     def get_form(self):
         '''
@@ -4435,8 +4452,8 @@ class ChoiceQuestion(Question):
 
     multichoice = models.BooleanField(default=False,
                                       help_text=_("Select one or more"))
-
     choices = models.ManyToManyField(Choice)
+    objects = PolymorphicManager()
 
     def get_form(self):
         '''
@@ -4505,15 +4522,18 @@ class General_Survey(models.Model):
         return self.survey.name
 
 
-class Answer(PolymorphicModel, TimeStampedModel):
-    ''' Base Answer model
-    '''
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
+    class Answer(PolymorphicModel, TimeStampedModel):
+        ''' Base Answer model
+        '''
+        question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
-    answered_survey = models.ForeignKey(Answered_Survey,
-                                        null=False,
-                                        blank=False,
-                                        on_delete=models.CASCADE)
+        answered_survey = models.ForeignKey(Answered_Survey,
+                                            null=False,
+                                            blank=False,
+                                            on_delete=models.CASCADE)
+        objects = models.Manager()
+        polymorphic = PolymorphicManager()
 
 
 class TextAnswer(Answer):
@@ -4521,6 +4541,7 @@ class TextAnswer(Answer):
         blank=False,
         help_text=_('The answer text'),
         default='')
+    objects = PolymorphicManager()
 
     def __str__(self):
         return self.answer
@@ -4530,6 +4551,7 @@ class ChoiceAnswer(Answer):
     answer = models.ManyToManyField(
         Choice,
         help_text=_('The selected choices as the answer'))
+    objects = PolymorphicManager()
 
     def __str__(self):
         if len(self.answer.all()):

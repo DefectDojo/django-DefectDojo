@@ -1,4 +1,5 @@
 import collections
+import warnings
 from drf_spectacular.types import OpenApiTypes
 
 from drf_spectacular.utils import extend_schema_field
@@ -11,6 +12,7 @@ from auditlog.models import LogEntry
 from django.conf import settings
 import six
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
     BooleanFilter, NumberFilter, DateFilter
@@ -27,6 +29,7 @@ from dojo.models import Dojo_User, Finding_Group, Product_API_Scan_Configuration
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 import tagulous
+from polymorphic.base import ManagerInheritanceWarning
 # from tagulous.forms import TagWidget
 # import tagulous
 from dojo.authorization.roles_permissions import Permissions
@@ -148,16 +151,12 @@ class FindingSLAFilter(ChoiceFilter):
         return qs
 
     def sla_satisfied(self, qs, name):
-        for finding in qs:
-            if finding.violates_sla:
-                qs = qs.exclude(id=finding.id)
-        return qs
+        # return findings that have an sla expiration date after today or no sla expiration date
+        return qs.filter(Q(sla_expiration_date__isnull=True) | Q(sla_expiration_date__gt=timezone.now().date()))
 
     def sla_violated(self, qs, name):
-        for finding in qs:
-            if not finding.violates_sla:
-                qs = qs.exclude(id=finding.id)
-        return qs
+        # return active findings that have an sla expiration date before today
+        return qs.filter(Q(active=True) & Q(sla_expiration_date__lt=timezone.now().date()))
 
     options = {
         None: (_('Any'), any),
@@ -184,13 +183,13 @@ class ProductSLAFilter(ChoiceFilter):
 
     def sla_satisifed(self, qs, name):
         for product in qs:
-            if product.violates_sla:
+            if product.violates_sla():
                 qs = qs.exclude(id=product.id)
         return qs
 
     def sla_violated(self, qs, name):
         for product in qs:
-            if not product.violates_sla:
+            if not product.violates_sla():
                 qs = qs.exclude(id=product.id)
         return qs
 
@@ -326,6 +325,8 @@ def get_finding_filterset_fields(metrics=False, similar=False):
                 'unique_id_from_tool',
                 'vuln_id_from_tool',
                 'service',
+                'epss_score',
+                'epss_percentile'
     ])
 
     if similar:
@@ -1451,6 +1452,8 @@ class FindingFilter(FindingFilterWithTags):
             ('test__engagement__product__name',
              'test__engagement__product__name'),
             ('service', 'service'),
+            ('epss_score', 'epss_score'),
+            ('epss_percentile', 'epss_percentile'),
         ),
         field_labels={
             'numerical_severity': 'Severity',
@@ -1460,6 +1463,8 @@ class FindingFilter(FindingFilterWithTags):
             'verified_date': 'Verified Date',
             'title': 'Finding Name',
             'test__engagement__product__name': 'Product Name',
+            'epss_score': 'EPSS Score',
+            'epss_percentile': 'EPSS Percentile',
         }
     )
 
@@ -1473,7 +1478,8 @@ class FindingFilter(FindingFilterWithTags):
                    'numerical_severity', 'line', 'duplicate_finding',
                    'hash_code', 'reviewers', 'created', 'files',
                    'sla_start_date', 'sla_expiration_date', 'cvssv3',
-                   'severity_justification', 'steps_to_reproduce']
+                   'severity_justification', 'steps_to_reproduce',
+                   'epss_score', 'epss_percentile']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -2414,12 +2420,13 @@ class QuestionTypeFilter(ChoiceFilter):
         return self.options[value][1](self, qs, self.options[value][0])
 
 
-class QuestionFilter(FilterSet):
-    text = CharFilter(lookup_expr='icontains')
-    type = QuestionTypeFilter()
+with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
+    class QuestionFilter(FilterSet):
+        text = CharFilter(lookup_expr='icontains')
+        type = QuestionTypeFilter()
 
-    class Meta:
-        model = Question
-        exclude = ['polymorphic_ctype', 'created', 'modified', 'order']
+        class Meta:
+            model = Question
+            exclude = ['polymorphic_ctype', 'created', 'modified', 'order']
 
-    question_set = FilterSet
+        question_set = FilterSet

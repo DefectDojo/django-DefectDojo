@@ -55,7 +55,6 @@ env = environ.FileAwareEnv(
     DD_LANGUAGE_CODE=(str, 'en-us'),
     DD_SITE_ID=(int, 1),
     DD_USE_I18N=(bool, True),
-    DD_USE_L10N=(bool, True),
     DD_USE_TZ=(bool, True),
     DD_MEDIA_URL=(str, '/media/'),
     DD_MEDIA_ROOT=(str, root('media')),
@@ -344,10 +343,6 @@ SITE_ID = env('DD_SITE_ID')
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
 USE_I18N = env('DD_USE_I18N')
-
-# If you set this to False, Django will not format dates, numbers and
-# calendars according to the current locale.
-USE_L10N = env('DD_USE_L10N')
 
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = env('DD_USE_TZ')
@@ -758,29 +753,6 @@ REST_FRAMEWORK = {
 if API_TOKENS_ENABLED:
     REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += ('rest_framework.authentication.TokenAuthentication',)
 
-SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'basicAuth': {
-            'type': 'basic'
-        },
-        'cookieAuth': {
-            'type': 'apiKey',
-            'in': 'cookie',
-            'name': 'sessionid'
-        },
-    },
-    'DOC_EXPANSION': "none",
-    'JSON_EDITOR': True,
-    'SHOW_REQUEST_HEADERS': True,
-}
-
-if API_TOKENS_ENABLED:
-    SWAGGER_SETTINGS['SECURITY_DEFINITIONS']['tokenAuth'] = {
-        'type': 'apiKey',
-        'in': 'header',
-        'name': 'Authorization'
-    }
-
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Defect Dojo API v2',
     'DESCRIPTION': 'Defect Dojo - Open Source vulnerability Management made easy. Prefetch related parameters/responses not yet in the schema.',
@@ -854,7 +826,6 @@ INSTALLED_APPS = (
     'dbbackup',
     'django_celery_results',
     'social_django',
-    'drf_yasg',
     'drf_spectacular',
     'drf_spectacular_sidecar',  # required for Django collectstatic discovery
     'tagulous',
@@ -1088,11 +1059,6 @@ if AUTH_REMOTEUSER_ENABLED:
         ('dojo.remote_user.RemoteUserAuthentication',) + \
         REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES']
 
-    SWAGGER_SETTINGS['SECURITY_DEFINITIONS']['remoteUserAuth'] = {
-        'type': 'apiKey',
-        'in': 'header',
-        'name': AUTH_REMOTEUSER_USERNAME_HEADER[5:].replace('_', '-')
-    }
 # ------------------------------------------------------------------------------
 # CELERY
 # ------------------------------------------------------------------------------
@@ -1212,6 +1178,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Cloudsploit Scan': ['title', 'description'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube API Import': ['title', 'file_path', 'line'],
+    'Sonatype Application Scan': ['title', 'cwe', 'file_path', 'component_name', 'component_version', 'vulnerability_ids'],
     'Dependency Check Scan': ['title', 'cwe', 'file_path'],
     'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'vulnerability_ids'],
@@ -1275,6 +1242,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Humble Json Importer': ['title'],
     'MSDefender Parser': ['title', 'description'],
     'HCLAppScan XML': ['title', 'description'],
+    'KICS Scan': ['file_path', 'line', 'severity', 'description', 'title'],
+    'MobSF Scan': ['title', 'description', 'severity'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1400,6 +1369,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
     'SonarQube API Import': DEDUPE_ALGO_HASH_CODE,
+    'Sonatype Application Scan': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
     'Dockle Scan': DEDUPE_ALGO_HASH_CODE,
     'Tenable Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1440,7 +1410,6 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Meterian Scan': DEDUPE_ALGO_HASH_CODE,
     'Github Vulnerability Scan': DEDUPE_ALGO_HASH_CODE,
     'Cloudsploit Scan': DEDUPE_ALGO_HASH_CODE,
-    'KICS Scan': DEDUPE_ALGO_HASH_CODE,
     'SARIF': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Azure Security Center Recommendations Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Hadolint Dockerfile check': DEDUPE_ALGO_HASH_CODE,
@@ -1483,6 +1452,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Wazuh Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'MSDefender Parser': DEDUPE_ALGO_HASH_CODE,
     'HCLAppScan XML': DEDUPE_ALGO_HASH_CODE,
+    'KICS Scan': DEDUPE_ALGO_HASH_CODE,
+    'MobSF Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1665,8 +1636,6 @@ TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separat
 
 EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 
-USE_L10N = True
-
 # FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
 FEATURE_FINDING_GROUPS = env('DD_FEATURE_FINDING_GROUPS')
 JIRA_TEMPLATE_ROOT = env('DD_JIRA_TEMPLATE_ROOT')
@@ -1720,11 +1689,21 @@ AUDITLOG_FLUSH_RETENTION_PERIOD = env('DD_AUDITLOG_FLUSH_RETENTION_PERIOD')
 ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
 USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
 
-# TODO - these warnings needs to be removed
+
+# ------------------------------------------------------------------------------
+# Ignored Warnings
+# ------------------------------------------------------------------------------
+# These warnings are produce by polymorphic beacuser of weirdness around cascade deletes. We had to do
+# some pretty out of pocket things to correct this behaviors to correct this weirdness, and therefore
+# some warnings are produced trying to steer us in the right direction. Ignore those
+# Reference issue: https://github.com/jazzband/django-polymorphic/issues/229
+warnings.filterwarnings("ignore", message="polymorphic.base.ManagerInheritanceWarning.*")
+warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager.*")
+
+
+# TODO - these warnings needs to be removed after all warnings have been removed
 if DEBUG:
     from django.utils.deprecation import RemovedInDjango50Warning
     warnings.filterwarnings("ignore", category=RemovedInDjango50Warning)
-    warnings.filterwarnings("ignore", message="invalid escape sequence.*")
     warnings.filterwarnings("ignore", message="'cgi' is deprecated and slated for removal in Python 3\\.13")
-    warnings.filterwarnings("ignore", message="DateTimeField .+ received a naive datetime .+ while time zone support is active\\.")
     warnings.filterwarnings("ignore", message="unclosed file .+")
