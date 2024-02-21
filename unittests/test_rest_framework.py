@@ -967,6 +967,34 @@ class RiskAcceptanceTest(BaseClass.RESTEndpointTest):
         response = self.client.post(self.url, self.payload)
         self.assertEqual(403, response.status_code, response.content[:1000])
 
+    def test_update_forbidden_engagement(self):
+        self.payload = {
+            "id": 1,
+            "recommendation": "Fix (The risk is eradicated)",
+            "decision": "Accept (The risk is acknowledged, yet remains)",
+            "path": "No proof has been supplied",
+            "name": "string",
+            "recommendation_details": "string",
+            "decision_details": "string",
+            "accepted_by": "string",
+            "expiration_date": "2023-09-15T17:16:52.989000Z",
+            "expiration_date_warned": "2023-09-15T17:16:52.989000Z",
+            "expiration_date_handled": "2023-09-15T17:16:52.989000Z",
+            "reactivate_expired": True,
+            "restart_sla_expired": True,
+            "created": "2020-11-09T23:13:08.520000Z",
+            "updated": "2023-09-15T17:17:39.462854Z",
+            "owner": 1,
+            "accepted_findings": [
+                4
+            ],
+            "notes": []
+        }
+        current_objects = self.client.get(self.url, format='json').data
+        relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+        response = self.client.put(relative_url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
 
 class FindingRequestResponseTest(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
