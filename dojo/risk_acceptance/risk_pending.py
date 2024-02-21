@@ -125,10 +125,11 @@ def get_role_members(user, product: Product, product_type: Product_Type):
 
 
 def role_has_exclusive_permissions(user):
-    if user.global_role.role:
-        if user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
-            return True
-        return False
+    if hasattr(user, "global_role"):
+        if user.global_role.role:
+            if user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
+                return True
+    return False
 
 
 def risk_acceptante_pending(
