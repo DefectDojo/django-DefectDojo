@@ -102,3 +102,6 @@ If the first line is expanded, it looks like this:
     ]
 }
 ~~~
+
+### Sample Scan Data
+Sample scan data for testing purposes can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/noseyparker).
