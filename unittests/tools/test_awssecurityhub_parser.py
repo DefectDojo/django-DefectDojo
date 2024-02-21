@@ -101,6 +101,7 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertEqual("CVE-2023-2650 - openssl - Image: repo-os/sha256:af965ef68c78374a5f987fce98c0ddfa45801df2395bf012c50b863e65978d74", finding.title)
             self.assertIn("repo-os/sha256:af965ef68c78374a5f987fce98c0ddfa45801df2395bf012c50b863e65978d74", finding.impact)
             self.assertIn("Repository: repo-os", finding.impact)
+            self.assertEqual(0.0014, finding.epss_score)
 
     def test_guardduty(self):
         with open(get_unit_tests_path() + sample_path("guardduty.json")) as test_file:
@@ -115,4 +116,3 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertTrue(finding.active)
             self.assertEqual("User AssumedRole : 123123123 is anomalously invoking APIs commonly used in Discovery tactics. - Resource: 123123123", finding.title)
             self.assertEqual("TTPs/Discovery/IAMUser-AnomalousBehavior\nhttps://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html", finding.mitigation)
-            self.assertEqual(0.0014, finding.epss_score)
