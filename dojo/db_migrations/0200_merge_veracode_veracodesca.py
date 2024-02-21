@@ -31,7 +31,7 @@ def migrate_veracode_parsers(apps, schema_editor):
     finding_model = apps.get_model('dojo', 'Finding')
     test_type_model = apps.get_model('dojo', 'Test_Type')
     # Get or create Veracode Scan Test Type and fetch the Veracode SourceClear Scan test types
-    veracode_test_type, _ = test_type_model.objects.get_or_create(name="Veracode Scan", active=True)
+    veracode_test_type, _ = test_type_model.objects.get_or_create(name="Veracode Scan", defaults={active=True})
     veracodesourceclear_test_type = test_type_model.objects.filter(name="Veracode SourceClear Scan").first()
     # Get all the findings found by Veracode SourceClear Scan
     findings = finding_model.objects.filter(test__scan_type__in=VERACODESOURCECLEAR_REFERENCES)
