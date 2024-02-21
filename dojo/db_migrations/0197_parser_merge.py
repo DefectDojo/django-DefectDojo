@@ -73,7 +73,7 @@ def migrate_clairklar_parsers(apps, schema_editor):
     finding_model = apps.get_model('dojo', 'Finding')
     test_type_model = apps.get_model('dojo', 'Test_Type')
     # Get or create Clair Scan Test Type and fetch the Clair Klar Scan test types
-    clair_test_type, _ = test_type_model.objects.get_or_create(name="Clair Scan", , defaults={active=True})
+    clair_test_type, _ = test_type_model.objects.get_or_create(name="Clair Scan", defaults={active=True})
     clairklar_test_type = test_type_model.objects.filter(name="Clair Klar Scan").first()
     # Get all the findings found by Clair Klar Scan
     findings = finding_model.objects.filter(test__scan_type__in=CLAIRKLAR_REFERENCES)
