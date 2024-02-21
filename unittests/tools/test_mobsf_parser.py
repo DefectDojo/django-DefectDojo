@@ -41,6 +41,9 @@ class TestMobSFParser(DojoTestCase):
         findings = parser.get_findings(testfile, test)
         testfile.close()
         self.assertEqual(1022, len(findings))
+        item = findings[1]
+        self.assertEqual('Potential API Key found', item.title)
+        self.assertEqual('Info', item.severity)
 
     def test_parse_file_3_1_9_android(self):
         test = Test()
