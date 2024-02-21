@@ -102,3 +102,17 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertIn("repo-os/sha256:af965ef68c78374a5f987fce98c0ddfa45801df2395bf012c50b863e65978d74", finding.impact)
             self.assertIn("Repository: repo-os", finding.impact)
             self.assertEqual(0.0014, finding.epss_score)
+
+    def test_guardduty(self):
+        with open(get_unit_tests_path() + sample_path("guardduty.json")) as test_file:
+            parser = AwsSecurityHubParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(4, len(findings))
+            finding = findings[0]
+            self.assertEqual("Medium", finding.severity)
+            self.assertTrue(finding.active)
+            finding = findings[3]
+            self.assertEqual("Low", finding.severity)
+            self.assertTrue(finding.active)
+            self.assertEqual("User AssumedRole : 123123123 is anomalously invoking APIs commonly used in Discovery tactics. - Resource: 123123123", finding.title)
+            self.assertEqual("TTPs/Discovery/IAMUser-AnomalousBehavior\nhttps://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html", finding.mitigation)
