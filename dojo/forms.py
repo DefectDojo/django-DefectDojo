@@ -1174,7 +1174,6 @@ class Transfer_FindingForm(forms.ModelForm):
         required=False, max_length=2400, widget=forms.Textarea, label="Notes"
     )
     owner = forms.CharField(widget=forms.HiddenInput(), required=True)
-    status = forms.CharField(widget=forms.HiddenInput(), required=True)
     origin_product_type_id = forms.CharField(widget=forms.HiddenInput(), required=True)
     origin_product_type_name = forms.CharField(widget=forms.HiddenInput(), required=True)
     origin_product_id = forms.CharField(widget=forms.HiddenInput(), required=True)

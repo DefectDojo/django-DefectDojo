@@ -24,7 +24,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     ProductAPIScanConfigurationViewSet, UserProfileView, EndpointMetaImporterView, \
     ConfigurationPermissionViewSet, QuestionnaireQuestionViewSet, QuestionnaireAnswerViewSet, \
     QuestionnaireGeneralSurveyViewSet, QuestionnaireEngagementSurveyViewSet, QuestionnaireAnsweredSurveyViewSet, \
-    TransferFindingViewSet, transfer_findings_products
+    TransferFindingViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -171,7 +171,6 @@ api_v2_urls = [
     #  Django Rest Framework API v2
     re_path(r'^%sapi/v2/' % get_system_setting('url_prefix'), include(v2_api.urls)),
     re_path(r'^%sapi/v2/user_profile/' % get_system_setting('url_prefix'), UserProfileView.as_view(), name='user_profile'),
-    re_path(r'^api/v2/transfer_finding/products/', transfer_findings_products, name='transfer_finding_products'),
 ]
 
 if hasattr(settings, 'API_TOKENS_ENABLED'):

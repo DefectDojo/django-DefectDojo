@@ -3782,12 +3782,12 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
                              prefetch.PrefetchRetrieveMixin,
                              DojoModelViewSet):
     queryset = Transfer_Finding.objects.all()
-    serializer_class = serializers.TransferFindingSerializer
+    # serializer_class = serializers.TransferFindingSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id",
                         "severity",
                         "destination_engagement_id",
-                        "status", "origin_product_type_id",
+                        "origin_product_type_id",
                         "origin_product_type_id",
                         "origin_engagement_id",
                         "accepted_by_username",
@@ -3800,14 +3800,29 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
         serializers.TransferFindingSerializer,
     ).to_schema()
 
-    def list(self, request, *args, **kwargs):
-        print("Request method:", request.method)
-        print("Request user:", request.user)
-        return super().list(request, *args, **kwargs)
+    def get_serializer_class(self):
+        if self.action == 'update':
+            return serializers.TransferFindingSerializer
+        else:
+            return serializers.TransferFindingSerializer
 
+    def get_permissions(self):
+        if self.action == 'update':
+            permission_classes = [IsAuthenticated()]
+        else:
+            permission_classes = ()
+        return permission_classes
 
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-@api_view(['GET'])
-def transfer_findings_products(request):
-    return Response({"message": "¡Hola desde mi nueva vista!"})
+    def update(self, request, pk=None):
+        serializer = serializers.TransferFindingSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def partial_update(self, request, pk=None):
+        serializer = serializers.TransferFindingUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

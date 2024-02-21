@@ -3149,11 +3149,6 @@ class Finding(models.Model):
 
 class Transfer_Finding(models.Model):
 
-    STATUS_TRANSFER_FINDING_CHOICES = (
-        ('Transfer Pending', 'Transfer Pending'),
-        ('Transfer Rejected', 'Transfer Rejected'),
-        ('Transfer Accepted', 'Transfer Accepted'),)
-
     finding_id = models.ManyToManyField(Finding, verbose_name=("Finding ID"), related_name="transfer_findings")
     title = models.CharField(max_length=255, verbose_name=("Titile"))
     date = models.DateField(auto_now_add=True, verbose_name=("Date"))
@@ -3255,13 +3250,6 @@ class Transfer_Finding(models.Model):
         blank=True,
         null=True,
         help_text=_("The user that accepts the tranfer finding, The user must belong to the product whit contact"))
-
-    status = models.CharField(verbose_name=_("Status"),
-                              default='Transfer Pending',
-                              choices=STATUS_TRANSFER_FINDING_CHOICES,
-                              max_length=100,
-                              null=False,
-                              blank=False)
 
 
     path = models.FileField(upload_to='transfer_finding/%Y/%m/%d',

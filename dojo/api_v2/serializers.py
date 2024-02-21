@@ -1798,7 +1798,10 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         )
         return serialized_burps.data
 
-
+class FindingUpdateSerializer(serializers.ModelUpdateSerializer):
+    class Meta:
+        model = Finding
+        exclude = ('')#todo terminar el seializer para serializer para actulzar cada uno de los findings dentro del trnasferfinding
 class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
     notes = serializers.PrimaryKeyRelatedField(
         read_only=True, allow_null=True, required=False, many=True
@@ -3178,7 +3181,10 @@ class TransferFindingSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['actions'] = []
         transfer_finding_obj = Transfer_Finding.objects.get(id=representation.get("id"))
-        for permission in [Permissions.Transfer_Finding_View, Permissions.Transfer_Finding_Edit]:
+        for permission in [Permissions.Transfer_Finding_View,
+                           Permissions.Transfer_Finding_Edit,
+                           Permissions.Transfer_Finding_Delete,
+                           Permissions.Transfer_Finding_Add]:
             if user_has_permission(
                     self.context["request"].user,
                     transfer_finding_obj,
@@ -3190,3 +3196,10 @@ class TransferFindingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transfer_Finding
         fields = "__all__"
+
+
+class TransferFindingUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Transfer_Finding
+        exclude = ("finding_id", )
