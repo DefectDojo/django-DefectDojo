@@ -47,7 +47,7 @@ def migrate_veracode_parsers(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0199_whitesource_to_mend'),
+        ('dojo', '0203_alter_finding_options_finding_epss_percentile_and_more'),
     ]
 
     operations = [
