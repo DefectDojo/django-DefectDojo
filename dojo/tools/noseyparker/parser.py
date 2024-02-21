@@ -96,6 +96,6 @@ class NoseyParkerParser(object):
                         )
                         dupes[key] = finding
         else:
-            raise ValueError("JSON lines format not recognized. Make sure to use Nosey Parker v0.16.0")
+            raise ValueError("JSON lines format not recognized (.jsonl file extension). Make sure to use Nosey Parker v0.16.0")
 
         return list(dupes.values())
