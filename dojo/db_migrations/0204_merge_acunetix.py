@@ -47,7 +47,7 @@ def merge_parser(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0202_alter_dojo_group_social_provider'),
+        ('dojo', '0203_alter_finding_options_finding_epss_percentile_and_more'),
     ]
 
     operations = [
