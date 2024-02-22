@@ -9,6 +9,7 @@ import json
 import logging
 import warnings
 
+
 logger = logging.getLogger(__name__)
 
 # See https://documentation.defectdojo.com/getting_started/configuration/ for options
