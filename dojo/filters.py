@@ -156,7 +156,17 @@ class FindingSLAFilter(ChoiceFilter):
 
     def sla_violated(self, qs, name):
         # return active findings that have an sla expiration date before today
-        return qs.filter(Q(active=True) & Q(sla_expiration_date__lt=timezone.now().date()))
+        return qs.filter(
+            Q(
+                active=True,
+                false_p=False,
+                duplicate=False,
+                out_of_scope=False,
+                risk_accepted=False,
+                is_mitigated=False,
+                mitigated=None,
+            ) & Q(sla_expiration_date__lt=timezone.now().date())
+        )
 
     options = {
         None: (_('Any'), any),
