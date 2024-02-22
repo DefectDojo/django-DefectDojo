@@ -1,10 +1,30 @@
-var dictActionFindings= {}
+var ObjFindings= {};
+var transferId = 0;
+var productId = 0;
+var productTypeId = 0;
+
+// Obtener el valor de la cookie 'csrftoken'
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 
 $(document).on('click', '.table-link', function(event) {
     event.preventDefault();
-    let transferId = $(this).data('transfer-id');
-    let productId = $(this).data('product-id');
-    let productTypeId = $(this).data('product-type-id');
+    transferId = $(this).data('transfer-id');
+    productId = $(this).data('product-id');
+    productTypeId = $(this).data('product-type-id');
     getTransferFindings(transferId, productId, productTypeId)
 });
 
@@ -26,13 +46,16 @@ $(document).ready(function() {
             let findingId = $(this).attr('data-btn-danger');
             RemoveFinding(findingId)
         }
-        logger(dictActionFindings)
     });
 
-    $('#exampleModal').on('hidden.bs.modal', function () {
+$('#exampleModal').on('hidden.bs.modal', function () {
         // Limpiar las variables aquí
         variable1 = null;
         variable2 = null;
+    });
+
+    $('#send-message-btn').on("click", function(){
+        updateFindings({ObjFindings})
     });
 });
 
@@ -57,14 +80,14 @@ $(document).ready(function() {
 });
 
 function AcceptanceFinding(findingId){
-    dictActionFindings[findingId] = "Accepted"
+    ObjFindings[findingId] = {"risk_status": "Transfer Accepted"}
 }
 function RemoveFinding(findingId){
-    dictActionFindings[findingId] = "Removed"
+    ObjFindings[findingId] = {"risk_status": "Transfer Removed"}
 }
 
 function RejectFinding(findingId){
-    dictActionFindings[findingId] = "Rejected"
+    ObjFindings[findingId] = {"risk_status": "Transfer Reject"}
 }
 
 Array.prototype.add = function(value){
@@ -84,7 +107,7 @@ function innerData(data){
     let tableBody = document.getElementById("id_data_transfer_finding")
     tableBody.innerHTML = ""
     data.results.forEach(function(transfer_finding_item){
-        transfer_finding_item.finding_id.forEach(function(finding){
+        transfer_finding_item.findings.forEach(function(finding){
             let row = document.createElement("tr") 
             row.innerHTML = `
             <td>${finding.id}</td>
@@ -119,8 +142,6 @@ function getTransferFindings(transfer_findin_id, productId, productTypeId){
         type: "GET",
         success: function(response) {
             innerData(response)
-            // response.results.forEach(function(transfer_finding_obj) {
-            //     console.log(transfer_finding_obj);
         },
         error: function(error) {
             console.error(error);
@@ -128,11 +149,23 @@ function getTransferFindings(transfer_findin_id, productId, productTypeId){
     });
 }
 
-function transfer_finding_acceptance(finding_id){
+function updateFindings(data){
+    csrftoken = getCookie('csrftoken');
+    console.log(data)
+    $.ajax({
+        url: "/api/v2/transfer_finding/" + transferId + "/",
+        type: "PATCH",
+        headers: { "X-CSRFToken": csrftoken },
+        data: data,
+        success: function(response){
+            console.log(response)
+        },
+        error: function(error){
+            console.log(error)
+        }
 
+    })
 }
-
-
 // utils
 
 function logger(mensaje) {

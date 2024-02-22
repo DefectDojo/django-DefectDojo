@@ -138,8 +138,12 @@
 {% if not edit_mode %}
     <script src="{% static 'dojo/js/transfer_finding/index.js' %}"</script>
 {% endif %}
-
+{% csrf_token %}
 <script type="text/javascript">
      {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
+     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    <script src="{% static 'dojo/js/transfer_finding/index.js' %}"</script>
+
+     console.log(csrftoken)
 </script>
 {% endblock %}

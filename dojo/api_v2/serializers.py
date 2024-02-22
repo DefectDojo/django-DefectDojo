@@ -1798,10 +1798,12 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         )
         return serialized_burps.data
 
-class FindingUpdateSerializer(serializers.ModelUpdateSerializer):
+
+class FindingUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Finding
-        exclude = ('')#todo terminar el seializer para serializer para actulzar cada uno de los findings dentro del trnasferfinding
+        fields = ('risk_status',)
+
 class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
     notes = serializers.PrimaryKeyRelatedField(
         read_only=True, allow_null=True, required=False, many=True
@@ -3175,7 +3177,7 @@ class TransferFindinFindingsSerializers(serializers.ModelSerializer):
 
 
 class TransferFindingSerializer(serializers.ModelSerializer):
-    finding_id = TransferFindinFindingsSerializers(many=True, read_only=True)
+    findings = TransferFindinFindingsSerializers(many=True, read_only=True)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -3199,7 +3201,8 @@ class TransferFindingSerializer(serializers.ModelSerializer):
 
 
 class TransferFindingUpdateSerializer(serializers.ModelSerializer):
-
+    findings = TransferFindinFindingsSerializers(many=True, read_only=True)
+    
     class Meta:
         model = Transfer_Finding
-        exclude = ("finding_id", )
+        fields = ("findings",)

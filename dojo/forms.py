@@ -1156,7 +1156,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
 
 
 class Transfer_FindingForm(forms.ModelForm):
-    finding_id = forms.ModelMultipleChoiceField(
+    findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.none(),
         required=True,
         widget=forms.widgets.SelectMultiple(attrs={"size": 10}),

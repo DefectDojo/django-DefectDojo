@@ -3803,11 +3803,13 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
     def get_serializer_class(self):
         if self.action == 'update':
             return serializers.TransferFindingSerializer
+        elif self.action == 'partial_update':
+            return serializers.TransferFindingUpdateSerializer
         else:
             return serializers.TransferFindingSerializer
 
     def get_permissions(self):
-        if self.action == 'update':
+        if self.action in ["update", "partial_update"]:
             permission_classes = [IsAuthenticated()]
         else:
             permission_classes = ()
@@ -3822,7 +3824,15 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
     
     def partial_update(self, request, pk=None):
         serializer = serializers.TransferFindingUpdateSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        obj_transfer_finding = Transfer_Finding.objects.get(id=pk)
+        request_findings = request.data["findings"]
+        for finding in obj_transfer_finding.findings.all():
+            finding_id = str(finding.id)
+            if finding_id in request_findings:
+                dict_findings = request_findings[finding_id]
+                finding.risk_status = dict_findings["risk_status"]
+                finding.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -3149,7 +3149,7 @@ class Finding(models.Model):
 
 class Transfer_Finding(models.Model):
 
-    finding_id = models.ManyToManyField(Finding, verbose_name=("Finding ID"), related_name="transfer_findings")
+    findings = models.ManyToManyField(Finding, verbose_name=("Finding ID"), related_name="transfer_findings")
     title = models.CharField(max_length=255, verbose_name=("Titile"))
     date = models.DateField(auto_now_add=True, verbose_name=("Date"))
     destination_product_type_name = models.CharField(
