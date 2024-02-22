@@ -1533,9 +1533,9 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         findings = data.get('accepted_findings', [])
-        findings_ids = list(map(lambda x: x.id, findings))
+        findings_ids = [x.id for x in findings]
         finding_objects = Finding.objects.filter(id__in=findings_ids)
-        authed_findings = get_authorized_findings(Permissions.Finding_View).filter(id__in=findings_ids)
+        authed_findings = get_authorized_findings(Permissions.Finding_Edit).filter(id__in=findings_ids)
         if len(findings) != len(authed_findings):
             raise PermissionDenied(
                 "You are not permitted to add one or more selected findings to this risk acceptance"
