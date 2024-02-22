@@ -9,10 +9,10 @@ class TestGovulncheckParser(DojoTestCase):
         with self.assertRaises(ValueError) as exp:
             testfile = open("unittests/scans/govulncheck/empty.json")
             parser = GovulncheckParser()
-            findings = parser.get_findings(testfile, Test())
-            self.assertTrue(
-                "Invalid JSON format" in str(exp.exception)
-            )
+            parser.get_findings(testfile, Test())
+        self.assertIn(
+            "Invalid JSON format", str(exp.exception)
+        )
 
     def test_parse_no_findings(self):
         testfile = open("unittests/scans/govulncheck/no_vulns.json")

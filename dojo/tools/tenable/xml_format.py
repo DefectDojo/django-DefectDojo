@@ -27,6 +27,21 @@ class TenableXMLParser(object):
             severity = "Info"
         return severity
 
+    def get_cvss_severity(self, cvss_score):
+        """Convert data of the report into severity"""
+        severity = "Info"
+        if float(cvss_score) >= 9.0:
+            severity = "Critical"
+        elif float(cvss_score) >= 7.0:
+            severity = "High"
+        elif float(cvss_score) >= 5.0:
+            severity = "Medium"
+        elif float(cvss_score) > 0.0:
+            severity = "Low"
+        else:
+            severity = "Info"
+        return severity
+
     def safely_get_element_text(self, element):
         if element is None:
             return None
@@ -202,6 +217,10 @@ class TenableXMLParser(object):
                     )
                     if cvssv3_score_element_text is not None:
                         cvssv3_score = cvssv3_score_element_text
+
+                    cvss = self.safely_get_element_text(item.find("cvss3_base_score"))
+                    if cvss is not None:
+                        severity = self.get_cvss_severity(cvss)
 
                     # Determine the current entry has already been parsed in
                     # this report

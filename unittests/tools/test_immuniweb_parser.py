@@ -27,4 +27,4 @@ class TestImmuniwebParser(DojoTestCase):
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        self.assertTrue(len(findings) > 2)
+        self.assertGreater(len(findings), 2)

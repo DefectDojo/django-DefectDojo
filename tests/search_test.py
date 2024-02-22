@@ -6,9 +6,6 @@ from selenium.webdriver.common.by import By
 
 class SearchTests(BaseTestCase):
 
-    def test_login(self):
-        driver = self.driver
-
     def test_search(self):
         # very basic search test to see if it doesn't 500
         driver = self.goto_some_page()

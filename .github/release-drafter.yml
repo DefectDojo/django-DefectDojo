@@ -42,16 +42,17 @@ categories:
   - title: '🗣 Updates in localization'
     label: 'localization'
   - title: '🧰 Maintenance'
+    collapse-after: 3
     labels:
       - 'dependencies'
       - 'maintenance'
 exclude-labels:
-  - 'skip-changelog'    
-  
+  - 'skip-changelog'
+
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
   Please consult the [Upgrade notes in the documentation ](https://documentation.defectdojo.com/getting_started/upgrading/) for specific instructions for this release, and general upgrade instructions. Below is an automatically generated list of all PRs merged since the previous release.
-  
+
   ## Changes since $PREVIOUS_TAG
   $CHANGES
 

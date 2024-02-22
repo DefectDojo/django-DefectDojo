@@ -37,14 +37,14 @@ class TestCodeCheckerParser(DojoTestCase):
         )
         parser = CodeCheckerParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertTrue(94 == len(findings), str(len(findings)))
+        self.assertEqual(94, len(findings), str(len(findings)))
 
-        self.assertTrue(sum(1 for f in findings if f.duplicate) == 0)
-        self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'HIGH') == 20)
-        self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'INFO') == 6)
-        self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'CRITICAL') == 0)
-        self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'LOW') == 5)
-        self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'MEDIUM') == 63)
+        self.assertEqual(sum(1 for f in findings if f.duplicate), 0)
+        self.assertEqual(sum(1 for f in findings if f.severity.upper() == 'HIGH'), 20)
+        self.assertEqual(sum(1 for f in findings if f.severity.upper() == 'INFO'), 6)
+        self.assertEqual(sum(1 for f in findings if f.severity.upper() == 'CRITICAL'), 0)
+        self.assertEqual(sum(1 for f in findings if f.severity.upper() == 'LOW'), 5)
+        self.assertEqual(sum(1 for f in findings if f.severity.upper() == 'MEDIUM'), 63)
 
         finding = findings[0]
         self.assertEqual("clang-diagnostic-sign-compare", finding.title)
@@ -64,7 +64,7 @@ class TestCodeCheckerParser(DojoTestCase):
         )
         parser = CodeCheckerParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertTrue(len(findings) == 4)
+        self.assertEqual(len(findings), 4)
 
         finding = findings[0]
         self.assertTrue(finding.active)
