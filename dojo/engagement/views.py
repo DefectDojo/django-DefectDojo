@@ -377,6 +377,13 @@ def copy_engagement(request, eid):
 
 class ViewEngagement(View):
 
+    def get_template(self):
+        return 'dojo/view_eng.html'
+
+    def get_risks_accepted(self, eng):
+        risks_accepted = eng.risk_acceptance.all().select_related('owner').annotate(accepted_findings_count=Count('accepted_findings__id'))
+        return risks_accepted
+
     def get(self, request, eid, *args, **kwargs):
         eng = get_object_or_404(Engagement, id=eid)
         tests = eng.test_set.all().order_by('test_type__name', '-updated')
@@ -385,7 +392,7 @@ class ViewEngagement(View):
         paged_tests = get_page_items(request, tests_filter.qs, default_page_num)
         paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)
         prod = eng.product
-        risks_accepted = eng.risk_acceptance.all().select_related('owner').annotate(accepted_findings_count=Count('accepted_findings__id'))
+        risks_accepted = self.get_risks_accepted(eng)
         preset_test_type = None
         network = None
         if eng.preset:
@@ -425,7 +432,7 @@ class ViewEngagement(View):
         product_tab = Product_Tab(prod, title="View" + title + " Engagement", tab="engagements")
         product_tab.setEngagement(eng)
         return render(
-            request, 'dojo/view_eng.html', {
+            request, self.get_template(), {
                 'eng': eng,
                 'product_tab': product_tab,
                 'system_settings': system_settings,
@@ -457,7 +464,7 @@ class ViewEngagement(View):
         paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)
 
         prod = eng.product
-        risks_accepted = eng.risk_acceptance.all().select_related('owner').annotate(accepted_findings_count=Count('accepted_findings__id'))
+        risks_accepted = self.get_risks_accepted(eng)
         preset_test_type = None
         network = None
         if eng.preset:
@@ -515,7 +522,7 @@ class ViewEngagement(View):
         product_tab = Product_Tab(prod, title="View" + title + " Engagement", tab="engagements")
         product_tab.setEngagement(eng)
         return render(
-            request, 'dojo/view_eng.html', {
+            request, self.get_template(), {
                 'eng': eng,
                 'product_tab': product_tab,
                 'system_settings': system_settings,
