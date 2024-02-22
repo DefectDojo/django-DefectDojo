@@ -3297,7 +3297,7 @@ class Finding(models.Model):
 
     @property
     def violates_sla(self):
-        return (self.sla_expiration_date and self.sla_expiration_date < timezone.now())
+        return (self.sla_expiration_date and self.sla_expiration_date < timezone.now().date())
 
 
 class FindingAdmin(admin.ModelAdmin):
