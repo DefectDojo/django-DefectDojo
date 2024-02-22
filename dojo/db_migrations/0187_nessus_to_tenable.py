@@ -34,7 +34,7 @@ def migrate_nessus_findings_to_tenable(apps, schema_editor):
     finding_model = apps.get_model('dojo', 'Finding')
     test_type_model = apps.get_model('dojo', 'Test_Type')
     # Get or create Tenable Test Type and fetch the nessus and nessus WAS test types
-    tenable_test_type, _ = test_type_model.objects.get_or_create(name="Tenable Scan", active=True)
+    tenable_test_type, _ = test_type_model.objects.get_or_create(name="Tenable Scan", defaults={"active": True})
     nessus_test_type = test_type_model.objects.filter(name="Nessus Scan").first()
     nessus_was_test_type = test_type_model.objects.filter(name="Nessus WAS Scan").first()
     # Get all the findings found by Nessus and Nessus WAS
