@@ -535,6 +535,7 @@ class ViewEngagement(View):
                 'preset_test_type': preset_test_type
             })
 
+
 def prefetch_for_view_tests(tests):
     prefetched = tests
     if isinstance(tests,
