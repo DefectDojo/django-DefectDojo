@@ -6,6 +6,7 @@ from rest_framework.authentication import RemoteUserAuthentication as OriginalRe
 from netaddr import IPAddress
 from django.conf import settings
 from dojo.pipeline import assign_user_to_groups, cleanup_old_groups_for_user
+from dojo.models import Dojo_Group
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +78,7 @@ class RemoteUserBackend(OriginalRemoteUserBackend):
 
         if settings.AUTH_REMOTEUSER_GROUPS_HEADER and \
           settings.AUTH_REMOTEUSER_GROUPS_HEADER in request.META:
-            assign_user_to_groups(user, request.META[settings.AUTH_REMOTEUSER_GROUPS_HEADER].split(','), 'Remote')
+            assign_user_to_groups(user, request.META[settings.AUTH_REMOTEUSER_GROUPS_HEADER].split(','), Dojo_Group.REMOTE)
 
         if settings.AUTH_REMOTEUSER_GROUPS_CLEANUP and \
           settings.AUTH_REMOTEUSER_GROUPS_HEADER and \

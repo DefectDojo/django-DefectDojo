@@ -35,11 +35,11 @@ class TestDockerBenchParser(DojoTestCase):
         )
         parser = DockerBenchParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertTrue(len(findings) == 50)
-        self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'CRITICAL') == 0)
-        self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'HIGH') == 32)
-        self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'LOW') == 16)
-        self.assertTrue(sum(1 for f in findings if f.severity.upper() == 'INFO') == 2)
+        self.assertEqual(len(findings), 50)
+        self.assertEqual(sum(1 for f in findings if f.severity.upper() == 'CRITICAL'), 0)
+        self.assertEqual(sum(1 for f in findings if f.severity.upper() == 'HIGH'), 32)
+        self.assertEqual(sum(1 for f in findings if f.severity.upper() == 'LOW'), 16)
+        self.assertEqual(sum(1 for f in findings if f.severity.upper() == 'INFO'), 2)
 
         finding = findings[3]
         self.assertEqual("High", finding.severity)
