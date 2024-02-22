@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load humanize %}
+{% load display_tags %}
 {% block content %}
     {{ block.super }}
     <div class="row">
@@ -70,6 +71,7 @@
                             <th>Status</th>
                             <th>Mitigated</th>
                             <th>Severity</th>
+                            <th>EPSS Score / Percentile</th>
                             <th>Product</th>
                         </tr>
                         </thead>
@@ -86,6 +88,11 @@
                                 <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
                                     <p class="text-error">
                                 {% else %}<p>{% endif %}{{ finding.severity }}</p></td>
+                                <td>
+                                    {{ finding.epss_score|format_epss }}
+                                    /
+                                    {{ finding.epss_percentile|format_epss }}
+                                </td>
                                 <td>{{ finding.test.engagement.product }}</td>
                             </tr>
                         {% endfor %}
