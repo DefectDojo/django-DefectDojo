@@ -124,10 +124,22 @@ class FortifyParser(object):
             input_zip = zipfile.ZipFile(filename.name, 'r')
         else:
             input_zip = zipfile.ZipFile(filename, 'r')
-        fortify_scan = ElementTree.parse(input_zip.read("audit.fvdl"))
-        root = fortify_scan.getroot()
-        print(root) #TODO
-
+        zipdata = {name: input_zip.read(name) for name in input_zip.namelist()}
+        root = ElementTree.fromstring(zipdata["audit.fvdl"].decode('utf-8'))
+        import re
+        regex = r"{.*}"
+        matches = re.match(regex, root.tag)
+        try:
+            namespace = matches.group(0)
+        except BaseException:
+            namespace = ""
+        for child in root:
+            if "Vulnerabilities" in child.tag:
+                for vuln in child:
+                    severity=vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}InstanceSeverity").text
+                    confidence=vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}Confidence").text
+                    print(severity)
+                    print(confidence)
         items = []
         return items
 
