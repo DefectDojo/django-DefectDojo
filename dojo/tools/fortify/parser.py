@@ -146,16 +146,16 @@ class FortifyParser(object):
                     InstanceSeverity=vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}InstanceSeverity").text
                     Confidence=vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}Confidence").text
                     description=Type +"\n"
-                    description += "**ClassID:** " + ClassID
-                    description += "**Kingdom:** " + Kingdom
-                    description += "**AnalyzerName:** " + AnalyzerName
-                    description += "**DefaultSeverity:** " + DefaultSeverity
-                    description += "**InstanceID:** " + InstanceID
-                    description += "**InstanceSeverity:** " + InstanceSeverity
-                    description += "**Confidence:** " + Confidence
+                    description += "**ClassID:** " + ClassID + "\n"
+                    description += "**Kingdom:** " + Kingdom + "\n"
+                    description += "**AnalyzerName:** " + AnalyzerName + "\n"
+                    description += "**DefaultSeverity:** " + DefaultSeverity + "\n"
+                    description += "**InstanceID:** " + InstanceID + "\n"
+                    description += "**InstanceSeverity:** " + InstanceSeverity + "\n"
+                    description += "**Confidence:** " + Confidence + "\n"
                     items.append(
                     Finding(
-                        title=Type,
+                        title=Type + " " + ClassID,
                         severity="High",
                         static_finding=True,
                         test=test,
