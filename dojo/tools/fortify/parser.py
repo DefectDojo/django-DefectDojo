@@ -1,3 +1,4 @@
+import re
 import logging
 import zipfile
 from defusedxml import ElementTree
@@ -126,21 +127,42 @@ class FortifyParser(object):
             input_zip = zipfile.ZipFile(filename, 'r')
         zipdata = {name: input_zip.read(name) for name in input_zip.namelist()}
         root = ElementTree.fromstring(zipdata["audit.fvdl"].decode('utf-8'))
-        import re
         regex = r"{.*}"
         matches = re.match(regex, root.tag)
         try:
             namespace = matches.group(0)
         except BaseException:
             namespace = ""
+        items=list()
         for child in root:
             if "Vulnerabilities" in child.tag:
                 for vuln in child:
-                    severity=vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}InstanceSeverity").text
-                    confidence=vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}Confidence").text
-                    print(severity)
-                    print(confidence)
-        items = []
+                    ClassID=vuln.find(f"{namespace}ClassInfo").find(f"{namespace}ClassID").text
+                    Kingdom=vuln.find(f"{namespace}ClassInfo").find(f"{namespace}Kingdom").text
+                    Type=vuln.find(f"{namespace}ClassInfo").find(f"{namespace}Type").text
+                    AnalyzerName=vuln.find(f"{namespace}ClassInfo").find(f"{namespace}AnalyzerName").text
+                    DefaultSeverity=vuln.find(f"{namespace}ClassInfo").find(f"{namespace}DefaultSeverity").text
+                    InstanceID=vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}InstanceID").text
+                    InstanceSeverity=vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}InstanceSeverity").text
+                    Confidence=vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}Confidence").text
+                    description=Type +"\n"
+                    description += "**ClassID:** " + ClassID
+                    description += "**Kingdom:** " + Kingdom
+                    description += "**AnalyzerName:** " + AnalyzerName
+                    description += "**DefaultSeverity:** " + DefaultSeverity
+                    description += "**InstanceID:** " + InstanceID
+                    description += "**InstanceSeverity:** " + InstanceSeverity
+                    description += "**Confidence:** " + Confidence
+                    items.append(
+                    Finding(
+                        title=Type,
+                        severity="High",
+                        static_finding=True,
+                        test=test,
+                        description=description,
+                        unique_id_from_tool=ClassID,
+                    )
+                )
         return items
 
     def format_title(self, category, filename, line_no):
