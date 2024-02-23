@@ -272,7 +272,7 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual(['python'], finding.tags)
         self.assertEqual(2, finding.nb_occurences)
 
-def test_grype_issue_9618(self):
+    def test_grype_issue_9618(self):
         testfile = open("unittests/scans/anchore_grype/issue_9618.json")
         parser = AnchoreGrypeParser()
         findings = parser.get_findings(testfile, Test())
