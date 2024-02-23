@@ -437,6 +437,10 @@
 {{ find.severity }} ({{ find.numerical_severity }})
 </span>
                 </p>
+                <p><b>==== EPSS Score / Percentile: ====</b>
+                    <br>
+                    {{ find.epss_score|format_epss }} / {{ find.epss_percentile|format_epss }}
+                </p>
                 <p><b>==== Description / Exploit: ====</b>
                     <br>
                     {{ find.description|linebreaksbr }}
