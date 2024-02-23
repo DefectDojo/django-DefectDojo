@@ -133,19 +133,19 @@ class FortifyParser(object):
             namespace = matches.group(0)
         except BaseException:
             namespace = ""
-        items=list()
+        items = list()
         for child in root:
             if "Vulnerabilities" in child.tag:
                 for vuln in child:
-                    ClassID=vuln.find(f"{namespace}ClassInfo").find(f"{namespace}ClassID").text
-                    Kingdom=vuln.find(f"{namespace}ClassInfo").find(f"{namespace}Kingdom").text
-                    Type=vuln.find(f"{namespace}ClassInfo").find(f"{namespace}Type").text
-                    AnalyzerName=vuln.find(f"{namespace}ClassInfo").find(f"{namespace}AnalyzerName").text
-                    DefaultSeverity=vuln.find(f"{namespace}ClassInfo").find(f"{namespace}DefaultSeverity").text
-                    InstanceID=vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}InstanceID").text
-                    InstanceSeverity=vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}InstanceSeverity").text
-                    Confidence=vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}Confidence").text
-                    description=Type +"\n"
+                    ClassID = vuln.find(f"{namespace}ClassInfo").find(f"{namespace}ClassID").text
+                    Kingdom = vuln.find(f"{namespace}ClassInfo").find(f"{namespace}Kingdom").text
+                    Type = vuln.find(f"{namespace}ClassInfo").find(f"{namespace}Type").text
+                    AnalyzerName = vuln.find(f"{namespace}ClassInfo").find(f"{namespace}AnalyzerName").text
+                    DefaultSeverity = vuln.find(f"{namespace}ClassInfo").find(f"{namespace}DefaultSeverity").text
+                    InstanceID = vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}InstanceID").text
+                    InstanceSeverity = vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}InstanceSeverity").text
+                    Confidence = vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}Confidence").text
+                    description = Type + "\n"
                     description += "**ClassID:** " + ClassID + "\n"
                     description += "**Kingdom:** " + Kingdom + "\n"
                     description += "**AnalyzerName:** " + AnalyzerName + "\n"
@@ -154,15 +154,15 @@ class FortifyParser(object):
                     description += "**InstanceSeverity:** " + InstanceSeverity + "\n"
                     description += "**Confidence:** " + Confidence + "\n"
                     items.append(
-                    Finding(
-                        title=Type + " " + ClassID,
-                        severity="High",
-                        static_finding=True,
-                        test=test,
-                        description=description,
-                        unique_id_from_tool=ClassID,
+                        Finding(
+                            title=Type + " " + ClassID,
+                            severity="High",
+                            static_finding=True,
+                            test=test,
+                            description=description,
+                            unique_id_from_tool=ClassID,
+                        )
                     )
-                )
         return items
 
     def format_title(self, category, filename, line_no):
