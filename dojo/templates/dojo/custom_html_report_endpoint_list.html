@@ -77,11 +77,9 @@
                             </span>
                             </td>
                             <td>
-                                <td>
-                                    {{ finding.epss_score|format_epss }}
-                                    /
-                                    {{ finding.epss_percentile|format_epss }}
-                                </td>
+                                {{ finding.epss_score|format_epss }}
+                                /
+                                {{ finding.epss_percentile|format_epss }}
                             </td>
                             <td>{{ finding.status }}</td>
                             {% if finding.risk_acceptance_set.all %}
