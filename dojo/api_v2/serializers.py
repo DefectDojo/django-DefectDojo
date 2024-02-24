@@ -3176,6 +3176,16 @@ class TransferFindinFindingsSerializers(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class FindingDeleteSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Finding
+        fields = ['id']
+
+
+class TransferFindingDeleteSerializer(serializers.Serializer):
+    findings = FindingDeleteSerializers(required=False)
+
+
 class TransferFindingSerializer(serializers.ModelSerializer):
     findings = TransferFindinFindingsSerializers(many=True, read_only=True)
 

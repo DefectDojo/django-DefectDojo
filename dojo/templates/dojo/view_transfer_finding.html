@@ -15,6 +15,18 @@
     .modal fade {
         max-width: 200%;
     }
+    {% comment %} .modal-dialog{
+      max-width: 50%;
+      width: 50%;
+      margin: 0 auto; /* Centro horizontalmente */
+
+    }
+    .modal-content{
+      max-width: 90%;
+      width: 90%;
+      margin: 0 auto; /* Centro horizontalmente */
+  } {% endcomment %}
+    
 </style>
     {{ block.super }}
 {% endblock %}
@@ -135,15 +147,63 @@
 
 {% block postscript %}
     {{ block.super }}
-{% if not edit_mode %}
-    <script src="{% static 'dojo/js/transfer_finding/index.js' %}"</script>
-{% endif %}
 {% csrf_token %}
+<script src="{% static 'dojo/js/transfer_finding/index.js' %}"></script>
 <script type="text/javascript">
      {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
+    // cookies token
      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    <script src="{% static 'dojo/js/transfer_finding/index.js' %}"</script>
+    // Event update
+    $(document).ready(function() {
+      $('#send-message-btn').on("click", function(){
+        let tranferAcceptedFinding = filterForStatus(["Transfer Accepted", "Transfer Reject"])
+        if (typeof tranferAcceptedFinding === 'object' && Object.keys(tranferAcceptedFinding).length > 0){
+          updateFindings(tranferAcceptedFinding)
+        }
+        let removedFinding = filterForStatus(["Transfer Removed"]);
+        if (typeof removedFinding === 'object' && Object.keys(removedFinding).length > 0){
+          removeFindings(removedFinding)
+        }
+        $("#exampleModal").modal("hide")
+      
+      });
 
-     console.log(csrftoken)
+    });
+
+    function updateFindings(findingChangeStatus){
+    transfer_findings= {"findings" : findingChangeStatus}
+    $.ajax({
+        url: "/api/v2/transfer_finding/" + transferId + "/",
+        type: "PATCH",
+        headers: { "X-CSRFToken": csrftoken,
+        "Content-Type": "application/json"},
+        data: JSON.stringify(transfer_findings),
+        success: function(response){
+            console.log("OK" +  response)
+        },
+        error: function(error){
+            console.log(error)
+        }
+    })
+  }
+
+  function removeFindings(findingRemoved){
+    console.log(findingRemoved)
+    transfer_findings= {"findings" : findingRemoved}
+    $.ajax({
+        url: "/api/v2/transfer_finding/" + transferId + "/",
+        type: "DELETE",
+        headers: { "X-CSRFToken": csrftoken,
+        "Content-Type": "application/json"},
+        data: JSON.stringify(transfer_findings),
+        success: function(response){
+            console.log("OK" +  response)
+        },
+        error: function(error){
+            console.log(error)
+        }
+    })
+  }
+
 </script>
 {% endblock %}

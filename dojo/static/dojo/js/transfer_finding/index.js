@@ -4,22 +4,6 @@ var productId = 0;
 var productTypeId = 0;
 
 // Obtener el valor de la cookie 'csrftoken'
-function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-
 $(document).on('click', '.table-link', function(event) {
     event.preventDefault();
     transferId = $(this).data('transfer-id');
@@ -54,9 +38,7 @@ $('#exampleModal').on('hidden.bs.modal', function () {
         variable2 = null;
     });
 
-    $('#send-message-btn').on("click", function(){
-        updateFindings({ObjFindings})
-    });
+   
 });
 
 $(document).ready(function() {
@@ -109,13 +91,22 @@ function innerData(data){
     data.results.forEach(function(transfer_finding_item){
         transfer_finding_item.findings.forEach(function(finding){
             let row = document.createElement("tr") 
+            let cell_status = document.createElement("td")
+            cell_status.className = "cls-finding-status"
             row.innerHTML = `
             <td>${finding.id}</td>
             <td>${finding.title}</td>
             <td>${finding.severity}</td>
-            <td>${finding.cve}</td>
-            <td class="cls-finding-status">${finding.risk_status}</td>
-            <td>
+            <td>${finding.cve}</td>`
+            if(finding.risk_status.includes("Transfer Accepted")){
+                cell_status.innerHTML= `<span style="color:green">Transfer Accepted</span>`
+            }else if(finding.risk_status.includes("Transfer Reject")){
+                cell_status.innerHTML = `<span style="color:#e7a100">Transfer Rejected</span>`
+            }else{
+                cell_status.innerHTML = `${finding.risk_status}`
+            }
+            row.appendChild(cell_status)
+            row.innerHTML += `<td>
                 ${transfer_finding_item.actions.includes(1216) && transfer_finding_item.actions.includes(1217)? 
                     `<button type="button" class="btn btn-success btn-sm" data-btn-success=${finding.id}>
                         <i class="fas fa-check"></i>
@@ -130,6 +121,7 @@ function innerData(data){
                     </button>
                      `: ''}
             </td>`; 
+            
             tableBody.appendChild(row);
         });
     });
@@ -149,25 +141,17 @@ function getTransferFindings(transfer_findin_id, productId, productTypeId){
     });
 }
 
-function updateFindings(data){
-    csrftoken = getCookie('csrftoken');
-    console.log(data)
-    $.ajax({
-        url: "/api/v2/transfer_finding/" + transferId + "/",
-        type: "PATCH",
-        headers: { "X-CSRFToken": csrftoken },
-        data: data,
-        success: function(response){
-            console.log(response)
-        },
-        error: function(error){
-            console.log(error)
+
+function filterForStatus(status){
+    let ObjFindingsCopy = deepCopy(ObjFindings)
+    for(let findingId in ObjFindingsCopy){
+        if(!status.includes(ObjFindingsCopy[findingId].risk_status)){
+            delete ObjFindingsCopy[findingId] 
         }
-
-    })
+    }
+    return ObjFindingsCopy
 }
-// utils
 
-function logger(mensaje) {
-    console.log("[LOG]", mensaje);
+function deepCopy(objeto) {
+    return JSON.parse(JSON.stringify(objeto));
 }

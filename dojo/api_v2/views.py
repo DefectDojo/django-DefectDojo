@@ -3814,9 +3814,24 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
         else:
             permission_classes = ()
         return permission_classes
+    
+    def destroy(self, request, pk=None):
+        serializer = serializers.TransferFindingDeleteSerializer(data=request.data)
+        if serializer.is_valid():
+            if request.data.get('findings'):
+                obj_transfer_finding = Transfer_Finding.objects.get(id=pk)
+                request_findings = request.data["findings"]
+                for finding_id_request in request_findings:
+                    obj_transfer_finding.findings.remove(finding_id_request)
+                return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+            else:
+                super().destroy(request, pk)
+                return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk=None):
-        serializer = serializers.TransferFindingSerializer(data=request.data)
+        serializer = serializers.TransferFinding(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -3825,14 +3840,16 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
     def partial_update(self, request, pk=None):
         serializer = serializers.TransferFindingUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        obj_transfer_finding = Transfer_Finding.objects.get(id=pk)
-        request_findings = request.data["findings"]
-        for finding in obj_transfer_finding.findings.all():
-            finding_id = str(finding.id)
-            if finding_id in request_findings:
-                dict_findings = request_findings[finding_id]
-                finding.risk_status = dict_findings["risk_status"]
-                finding.save()
+        if serializer.is_valid():
+            serializer.save()
+            obj_transfer_finding = Transfer_Finding.objects.get(id=pk)
+            request_findings = request.data["findings"]
+            for finding in obj_transfer_finding.findings.all():
+                finding_id = str(finding.id)
+                if finding_id in request_findings:
+                    dict_findings = request_findings[finding_id]
+                    finding.risk_status = dict_findings["risk_status"]
+                    finding.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
