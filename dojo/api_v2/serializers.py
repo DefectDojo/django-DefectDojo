@@ -234,6 +234,7 @@ class TagListSerializerField(serializers.ListField):
             " form must be valid json."
         ),
         "not_a_str": _("All list items must be of string type."),
+        "spaces_in_tag": _("Spaces are prohibited within a given tag: {value}"),
     }
     order_by = None
 
@@ -266,6 +267,9 @@ class TagListSerializerField(serializers.ListField):
         for s in data:
             if not isinstance(s, six.string_types):
                 self.fail("not_a_str")
+
+            if " " in s:
+                self.fail("spaces_in_tag", value=s)
 
             self.child.run_validation(s)
 
