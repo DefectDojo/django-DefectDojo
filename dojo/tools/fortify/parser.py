@@ -120,6 +120,19 @@ class FortifyParser(object):
                 dupes.add(title)
         return items
 
+    def fpr_severity(self, Confidence, InstanceSeverity):
+        if Confidence >= 2.5 and InstanceSeverity >= 2.5:
+            severity = "Critical"
+        elif Confidence >= 2.5 and InstanceSeverity < 2.5:
+            severity = "High"
+        elif Confidence < 2.5 and InstanceSeverity >= 2.5:
+            severity = "Medium"
+        elif Confidence < 2.5 and InstanceSeverity < 2.5:
+            severity = "Low"
+        else:
+            severity = "Info"
+        return severity
+
     def parse_fpr(self, filename, test):
         if str(filename.__class__) == "<class '_io.TextIOWrapper'>":
             input_zip = zipfile.ZipFile(filename.name, 'r')
@@ -146,6 +159,7 @@ class FortifyParser(object):
                     InstanceSeverity = vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}InstanceSeverity").text
                     Confidence = vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}Confidence").text
                     description = Type + "\n"
+                    severity = self.fpr_severity(Confidence, InstanceSeverity)                    
                     description += "**ClassID:** " + ClassID + "\n"
                     description += "**Kingdom:** " + Kingdom + "\n"
                     description += "**AnalyzerName:** " + AnalyzerName + "\n"
@@ -156,7 +170,7 @@ class FortifyParser(object):
                     items.append(
                         Finding(
                             title=Type + " " + ClassID,
-                            severity="High",
+                            severity=severity,
                             static_finding=True,
                             test=test,
                             description=description,
