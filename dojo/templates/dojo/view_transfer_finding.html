@@ -36,8 +36,30 @@
 {% endblock %}
 {% block content %}
     {{ block.super }}
+  
+    <!-- Tu modal confirmed-->
+    <div class="modal fade" id="confirmedModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+          <h5 class="modal-title" id="confirmModalLabel"><h3> Action Confirmed <h3></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+          </button>
+          </div>
+          <div id="id_modal_message" class="modal-body">
+          Are you sure to perform this action?
+          </div>
+          <div class="modal-footer">
+          <input type="button" class="btn btn-primary" data-dismiss="modal" value="Cancel">
+          <input id="confirmed_action_modal" type="button" class="btn btn-primary" name="#" value="Confirmed">
+          </div>
+      </div>
+      </div>
+  </div>
+  
     <!-- Tu modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="modalTransferFinding" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
@@ -66,14 +88,14 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal"><i class="fa-solid fa-circle-xmark"></i> Close</button>
-          <button type="button" class="btn btn-primary btn-sm" id="send-message-btn"><i class="fa-solid fa-floppy-disk"></i> Save</i> </button>
+          <button type="button" class="btn btn-primary btn-sm" id="send-message-btn" ><i class="fa-solid fa-floppy-disk"></i> Save</i> </button>
         </div>
       </div>
     </div>
   </div>
   
   
-    {% comment %} <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Transfer Finding</button> {% endcomment %}
+    {% comment %} <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalTransferFinding" data-whatever="@mdo">Transfer Finding</button> {% endcomment %}
     <div id="risk_acceptance" class="panel panel-default table-responsive">
         <div class="panel-heading">
             <h3>Transfer Finding</h3>
@@ -84,6 +106,7 @@
                         <th>Id</th>
                         <th>Title</th>
                         <th>Date</th>
+                        <th>Origin ProductType</th>
                         <th>Destination ProductType</th>
                         <th>Accepted by</th>
                         <th>Actions</th>
@@ -94,23 +117,24 @@
                         <tr>
                             <td>{{transfer_findings.id}}</td>
                             <td>
-                              <a href="#" class="table-link" type="button" data-toggle="modal" data-target="#exampleModal" 
+                              <a href="#" class="table-link" type="button" data-toggle="modal" data-target="#modalTransferFinding" 
                               data-transfer-id={{transfer_findings.id}} data-product-id={{transfer_findings.origin_product}}
                               data-product-type-id={{transfer_findings.origin_product_type_id}}>
                                  {{transfer_findings.title}}</a>
                             </td>
                             <td>{{transfer_findings.date}}</td>
+                            <td>{{transfer_findings.origin_product_type_name}}</td>
                             <td>{{transfer_findings.destination_product_type_name}}</td>
                             <td>{{transfer_findings.accepted_by_username}}</td>
                             <td>
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Edit" %}
-                                    <button type="button" class="btn btn-success btn-sm btn-tf-accepted" data-tf-accepted="{{transfer_findings.id}}">
+                                    <button type="button" data-toggle="modal" data-target="#confirmedModal" class="btn btn-success btn-sm btn-tf-accepted" data-tf-accepted="{{transfer_findings.id}}">
                                     <i class="fas fa-check"></i>
                                     </button>
-                                    <button type="button" class="btn btn-warning btn-sm btn-tf-rejected" data-tf-rejected="{{transfer_findings.id}}">
+                                    <button type="button" data-toggle="modal" data-target="#confirmedModal" class="btn btn-warning btn-sm btn-tf-rejected" data-tf-rejected="{{transfer_findings.id}}">
                                     <i class="fas fa-times"></i>
                                     </button>
-                                    <button type="button" class="btn btn-danger btn-sm btn-tf-remove" data-tf-removed="{{transfer_findings.id}}">
+                                    <button type="button" data-toggle="modal" data-target="#confirmedModal" class="btn btn-danger btn-sm btn-tf-remove" data-tf-removed="{{transfer_findings.id}}">
                                     <i class="fas fa-trash-alt"></i>
                                     </button></i>
                             {% else%}
@@ -149,6 +173,7 @@
     {{ block.super }}
 {% csrf_token %}
 <script src="{% static 'dojo/js/transfer_finding/index.js' %}"></script>
+<script str="{% static 'dojo/js/confirmed/index.js' %}"></script>
 <script type="text/javascript">
      {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
     // cookies token
@@ -156,7 +181,8 @@
     // Event update
     $(document).ready(function() {
       $('#send-message-btn').on("click", function(){
-        let tranferAcceptedFinding = filterForStatus(["Transfer Accepted", "Transfer Reject"])
+
+        let tranferAcceptedFinding = filterForStatus(["Transfer Accepted", "Transfer Rejected"])
         if (typeof tranferAcceptedFinding === 'object' && Object.keys(tranferAcceptedFinding).length > 0){
           updateFindings(tranferAcceptedFinding)
         }
@@ -165,7 +191,7 @@
           removeFindings(removedFinding)
         }
 
-      $("#exampleModal").modal("hide");
+      $("#modalTransferFinding").modal("hide");
       });
 
 
@@ -185,7 +211,7 @@
 
         if (btnClass.includes('btn-warning')) {
             let transferFindingIdRejected = $(this).data('tf-rejected');
-              generateRequestTransferFindingUpdate(transferFindingIdRejected, "Transfer Reject")
+              generateRequestTransferFindingUpdate(transferFindingIdRejected, "Transfer Rejected")
               .then(function(requestFindingStatus) {
                   updateFindings(requestFindingStatus)
               })
@@ -198,6 +224,9 @@
             removeTransferFinding(transferFindingIdRemoved)
         }
     });
+
+    $('#confirmed_action_modal').on("click")
+      console.log("realizar")
 
     });
 

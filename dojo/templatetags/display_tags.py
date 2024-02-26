@@ -722,7 +722,7 @@ def finding_display_status(finding):
         display_status = display_status.replace('Transfer Pending', link)
     if 'Transfer Accepted' in display_status:
         url = reverse('view_transfer_finding', args=(finding.test.engagement.product.id, ))
-        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Accepted"><span style="color: red;">Transfer Accepted</span></a>'
+        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Accepted"><span style="color: green;">Transfer Accepted</span></a>'
         display_status = display_status.replace('Transfer Accepted', link)
     if 'Risk Rejected' in display_status:
         ra = finding.risk_acceptance

@@ -3847,7 +3847,12 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
                 finding_id = str(finding.id)
                 if finding_id in request_findings:
                     dict_findings = request_findings[finding_id]
-                    finding.risk_status = dict_findings["risk_status"]
+                    if dict_findings["risk_status"] == "Transfer Accepted":
+                        finding.risk_status = dict_findings["risk_status"]
+                        finding.active = False
+                    elif dict_findings["risk_status"] == "Transfer Rejected":
+                        finding.risk_status = dict_findings["risk_status"]
+                        finding.active = True
                     finding.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:

@@ -14,7 +14,7 @@ $(document).on('click', '.table-link', function(event) {
 
 
 $(document).ready(function() {
-    $('#exampleModal').on('click', '.btn-success, .btn-warning, .btn-danger', function() {
+    $('#modalTransferFinding').on('click', '.btn-success, .btn-warning, .btn-danger', function() {
         let btnClass = $(this).attr('class');
         let row = $(this).closest('tr');
         if (btnClass.includes('btn-success')) {
@@ -32,7 +32,7 @@ $(document).ready(function() {
         }
     });
 
-$('#exampleModal').on('hidden.bs.modal', function () {
+$('#modalTransferFinding').on('hidden.bs.modal', function () {
         // Limpiar las variables aquí
         variable1 = null;
         variable2 = null;
