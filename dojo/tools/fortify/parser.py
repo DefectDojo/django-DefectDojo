@@ -187,8 +187,8 @@ class FortifyParser(object):
                             test=test,
                             description=description,
                             unique_id_from_tool=ClassID,
-                            file_path = SourceLocationpath,
-                            line = SourceLocationline,
+                            file_path=SourceLocationpath,
+                            line=SourceLocationline,
                         )
                     )
         return items
