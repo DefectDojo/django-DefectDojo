@@ -15,7 +15,7 @@ class OSVScannerParser(object):
 
     def get_findings(self, file, test):
         data = json.load(file)
-
+        findings = list()
         for result in data["results"]:
             source_path = result["source"]["path"]
             source_type = result["source"]["type"]
@@ -24,8 +24,13 @@ class OSVScannerParser(object):
                 package_version = package["package"]["version"]
                 package_ecosystem = package["package"]["ecosystem"]
                 for vulnerability in package["vulnerabilities"]:
-                    print(len(vulnerability))
-        findings = list()
+                    vulnerabilityid = vulnerability["id"]
+                    vulnerabilitysummary = vulnerability["summary"]
+                    vulnerabilitydetails = vulnerability["details"]
+                    vulnerabilitypackagepurl = vulnerability["affected"][0]["package"]["purl"]
+                    cwe = vulnerability["affected"][0]["database_specific"]["cwes"][0]["cweId"]
+                    reference = vulnerability["affected"][0]["references"][0]["url"]
+
         finding = Finding(
             title="title",
             test=test,
