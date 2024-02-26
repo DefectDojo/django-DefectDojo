@@ -43,9 +43,9 @@ class OSVScannerParser(object):
                     cwe = vulnerability["affected"][0]["database_specific"].get("cwes", None)
                     if cwe != None:
                         cwe = cwe[0]["cweId"]
-                    reference = vulnerability["affected"][0].get("references", "")
-                    if reference != "":
-                        reference = reference[0]["url"]
+                    reference = ""
+                    for ref in vulnerability.get("references"):
+                        reference+=ref.get("url") + "\n"
                     description = vulnerabilitysummary + "\n"
                     description += "**source_type**: " + source_type + "\n"
                     description += "**package_ecosystem**: " + package_ecosystem + "\n"
