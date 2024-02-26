@@ -23,7 +23,7 @@ Things to note about the Nosey Parker Parser:
     - **For targeted branch scans:**
       - Keep in mind there may be active secrets that are either in the git history or not in the current branch
 
- JSON Lines Format:
+JSON Lines Format:
 -
 The parser only accepts .jsonl reports. Each line of the JSON Lines file from NoseyParker corresponds to a unique secret found with metadata for every match.
 
