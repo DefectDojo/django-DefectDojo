@@ -1111,7 +1111,7 @@ def add_transfer_finding(request, eid, fid=None):
         if form.is_valid():
             try:
                 transfer_findings = form.save()
-                for finding in transfer_findings.finding_id.prefetch_related('transfer_findings'):
+                for finding in transfer_findings.findings.prefetch_related('transfer_findings'):
                     finding.risk_status = "Transfer Pending"
                     finding.save()
                 
@@ -1124,7 +1124,7 @@ def add_transfer_finding(request, eid, fid=None):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Risk acceptance saved.',
+                'Transfer Finding saved.',
                 extra_tags='alert-success')
 
             return redirect_to_return_url_or_else(request, reverse('view_transfer_finding', args=(product.id, )))
@@ -1133,7 +1133,7 @@ def add_transfer_finding(request, eid, fid=None):
     else:
         form = Transfer_FindingForm(initial={"engagement_name":eng,
                                             "title": f"transfer finding - {finding.title}",
-                                            "finding_id": finding,
+                                            "findings": finding,
                                             "owner": request.user.username,
                                             "status": "Transfer Pending",
                                             "severity": finding.severity})

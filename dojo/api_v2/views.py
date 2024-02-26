@@ -3809,10 +3809,10 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
             return serializers.TransferFindingSerializer
 
     def get_permissions(self):
-        if self.action in ["update", "partial_update"]:
+        if self.action in ["update", "partial_update", "destroy"]:
             permission_classes = [IsAuthenticated()]
         else:
-            permission_classes = ()
+            permission_classes = [IsAuthenticated()]
         return permission_classes
     
     def destroy(self, request, pk=None):
@@ -3841,7 +3841,6 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
         serializer = serializers.TransferFindingUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
-            serializer.save()
             obj_transfer_finding = Transfer_Finding.objects.get(id=pk)
             request_findings = request.data["findings"]
             for finding in obj_transfer_finding.findings.all():

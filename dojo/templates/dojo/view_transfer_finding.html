@@ -104,13 +104,13 @@
                             <td>{{transfer_findings.accepted_by_username}}</td>
                             <td>
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Edit" %}
-                                    <button type="button" class="btn btn-success btn-sm">
+                                    <button type="button" class="btn btn-success btn-sm btn-tf-accepted" data-tf-accepted="{{transfer_findings.id}}">
                                     <i class="fas fa-check"></i>
                                     </button>
-                                    <button type="button" class="btn btn-warning btn-sm">
+                                    <button type="button" class="btn btn-warning btn-sm btn-tf-rejected" data-tf-rejected="{{transfer_findings.id}}">
                                     <i class="fas fa-times"></i>
                                     </button>
-                                    <button type="button" class="btn btn-danger btn-sm">
+                                    <button type="button" class="btn btn-danger btn-sm btn-tf-remove" data-tf-removed="{{transfer_findings.id}}">
                                     <i class="fas fa-trash-alt"></i>
                                     </button></i>
                             {% else%}
@@ -164,17 +164,65 @@
         if (typeof removedFinding === 'object' && Object.keys(removedFinding).length > 0){
           removeFindings(removedFinding)
         }
-        $("#exampleModal").modal("hide")
-      
+
+      $("#exampleModal").modal("hide");
       });
+
+
+      $('#risk_acceptance').on('click', '.btn-success, .btn-warning, .btn-danger', function() {
+        let btnClass = $(this).attr('class');
+        if (btnClass.includes('btn-success')) {
+          let transferFindingId = $(this).data('tf-accepted');
+
+            generateRequestTransferFindingUpdate(transferFindingId, "Transfer Accepted")
+            .then(function(requestFindingStatus) {
+                updateFindings(requestFindingStatus)
+            })
+            .catch(function(error) {
+                console.error("Error:", error);
+            });
+        }
+
+        if (btnClass.includes('btn-warning')) {
+            let transferFindingIdRejected = $(this).data('tf-rejected');
+              generateRequestTransferFindingUpdate(transferFindingIdRejected, "Transfer Reject")
+              .then(function(requestFindingStatus) {
+                  updateFindings(requestFindingStatus)
+              })
+              .catch(function(error) {
+                  console.error("Error:", error);
+              });
+        }
+        if (btnClass.includes('btn-danger')) {
+            let transferFindingIdRemoved = $(this).data('tf-removed');
+            removeTransferFinding(transferFindingIdRemoved)
+        }
+    });
 
     });
 
     function updateFindings(findingChangeStatus){
-    transfer_findings= {"findings" : findingChangeStatus}
+      transfer_findings= {"findings" : findingChangeStatus}
+      $.ajax({
+          url: "/api/v2/transfer_finding/" + transferId + "/",
+          type: "PATCH",
+          headers: { "X-CSRFToken": csrftoken,
+          "Content-Type": "application/json"},
+          data: JSON.stringify(transfer_findings),
+          success: function(response){
+              console.log("OK" +  response)
+          },
+          error: function(error){
+              console.log(error)
+          }
+      })
+  }
+
+  function removeFindings(findingRemoved){
+    transfer_findings= {"findings" : findingRemoved}
     $.ajax({
         url: "/api/v2/transfer_finding/" + transferId + "/",
-        type: "PATCH",
+        type: "DELETE",
         headers: { "X-CSRFToken": csrftoken,
         "Content-Type": "application/json"},
         data: JSON.stringify(transfer_findings),
@@ -187,15 +235,12 @@
     })
   }
 
-  function removeFindings(findingRemoved){
-    console.log(findingRemoved)
-    transfer_findings= {"findings" : findingRemoved}
+  function removeTransferFinding(tranferFindingId){
     $.ajax({
-        url: "/api/v2/transfer_finding/" + transferId + "/",
+        url: "/api/v2/transfer_finding/" + tranferFindingId + "/",
         type: "DELETE",
         headers: { "X-CSRFToken": csrftoken,
         "Content-Type": "application/json"},
-        data: JSON.stringify(transfer_findings),
         success: function(response){
             console.log("OK" +  response)
         },

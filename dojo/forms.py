@@ -110,7 +110,7 @@ from dojo.product_type.queries import (
     get_owner_user,
 )
 from dojo.product.queries import get_authorized_products
-from dojo.finding.queries import get_authorized_findings
+from dojo.finding.queries import get_authorized_findings, get_authorized_findings_by_status
 from dojo.user.queries import (
     get_authorized_users_for_product_and_product_type,
     get_authorized_users,
@@ -1185,7 +1185,7 @@ class Transfer_FindingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwags):
         super().__init__(*args, **kwags)
-        self.fields["finding_id"].queryset = get_authorized_findings(
+        self.fields["findings"].queryset = get_authorized_findings_by_status(
             Permissions.Transfer_Finding_Add
         )
         self.fields["title"].initial = kwags.get("engagement_id")

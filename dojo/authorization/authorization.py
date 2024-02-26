@@ -103,9 +103,16 @@ def user_has_permission(user, obj, permission):
         return user_has_permission(
             user, obj.test.engagement.product, permission
         )
-    elif (isinstance(obj, Transfer_Finding)
-          and permission in Permissions.get_transfer_finding_permissions()):
-          return True
+    elif (isinstance(obj, Transfer_Finding) and permission in Permissions.get_transfer_finding_permissions()):
+        product_type_origin = Product_Type.objects.get(id=obj.origin_product_type_id)
+        product_type_destination = obj.destination_product.prod_type
+        for product_type in [product_type_origin, product_type_destination]:
+            member = get_product_type_member(user, product_type)
+            if member is not None and role_has_permission(
+                member.role.id, permission
+            ):
+                return True
+        return False
     elif (
         isinstance(obj, Finding_Group)
         and permission in Permissions.get_finding_group_permissions()

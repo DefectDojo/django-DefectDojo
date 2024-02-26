@@ -49,30 +49,6 @@
 <script src="{% static 'dojo/js/product_type/index.js' %}"></script>
 <script type="application/javascript" src="{% static 'easymde/dist/easymde.min.js' %}"></script>
 <script type="text/javascript">
-   
-    // Texarea
-    $("#add_risk_acceptance textarea").each(function (index, elem) {
-        if (elem.id != 'id_notes') {
-            if (elem.hasAttribute("required")) {
-                elem.removeAttribute("required");
-                elem.id = "req"
-            }
-
-            var mde = new EasyMDE({
-                spellChecker: false,
-                element: elem,
-                autofocus: false,
-                forceSync: true,
-                toolbar: ["bold", "italic", "heading", "|",
-                    "quote", "unordered-list", "ordered-list", "|",
-                    "link", "image", "|",
-                    "table", "horizontal-rule", "code", "|",
-                    "guide"
-                ]
-            });
-            mde.render();
-        }
-    });
 </script>
 
 {% endblock %}

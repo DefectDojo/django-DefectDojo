@@ -15,8 +15,8 @@ $(document).on('click', '.table-link', function(event) {
 
 $(document).ready(function() {
     $('#exampleModal').on('click', '.btn-success, .btn-warning, .btn-danger', function() {
-        var btnClass = $(this).attr('class');
-        var row = $(this).closest('tr');
+        let btnClass = $(this).attr('class');
+        let row = $(this).closest('tr');
         if (btnClass.includes('btn-success')) {
             row.find('.cls-finding-status').text("Transfer Accepted").css("color", "green");
             let findingId = $(this).attr('data-btn-success');
@@ -41,26 +41,21 @@ $('#exampleModal').on('hidden.bs.modal', function () {
    
 });
 
-$(document).ready(function() {
-    $('#risk_acceptance').on('click', '.btn-success, .btn-warning, .btn-danger', function() {
-        let btnClass = $(this).attr('class');
-        let row = $(this).closest('tr');
-        if (btnClass.includes('btn-success')) {
-            row.find('.cls-transfer-finding-status').text("Transfer Accepted").css("color", "green");
-            let findingId = $(this).attr('data-btn-success');
-            AcceptanceFinding(findingId)
-        } else if (btnClass.includes('btn-warning')) {
-            row.find('.cls-transfer-finding-status').text("Transfer Rejected").css("color", "#e7a100");
-            let findingId = $(this).attr('data-btn-warning');
-            RejectFinding(findingId)
-        } else if (btnClass.includes('btn-danger')) {
-            row.find('.cls-transfer-finding-status').text("Transfer Removed").css("color", "red");
-            let findingId = $(this).attr('data-btn-danger');
-            RemoveFinding(findingId)
-        }
+function getTransferFindingsAsync(transferFindingId) {
+    return new Promise(function(resolve, reject) {
+        $.ajax({
+            url: "/api/v2/transfer_finding?id=" + transferFindingId,
+            type: "GET",
+            success: function(response) {
+                resolve(response);
+            },
+            error: function(error) {
+                console.error(error);
+                reject(error);
+            }
+        });
     });
-});
-
+}
 function AcceptanceFinding(findingId){
     ObjFindings[findingId] = {"risk_status": "Transfer Accepted"}
 }
@@ -72,6 +67,9 @@ function RejectFinding(findingId){
     ObjFindings[findingId] = {"risk_status": "Transfer Reject"}
 }
 
+function requestRiskStatusFinding(findingId, riskStatus){
+    ObjFindings[findingId] = {"risk_status": riskStatus}
+}
 Array.prototype.add = function(value){
     if (!this.includes(value)){
         this.push(value)
@@ -114,7 +112,7 @@ function innerData(data){
                      <button type="button" class="btn btn-warning btn-sm" data-btn-warning=${finding.id}>
                         <i class="fas fa-times"></i>
                      </button>`
-                     :''}
+                     :'--'}
                 ${transfer_finding_item.actions.includes(1218) ? 
                     `<button type="button" class="btn btn-danger btn-sm" data-btn-danger=${finding.id}>
                         <i class="fas fa-trash-alt"></i>
@@ -128,9 +126,9 @@ function innerData(data){
 }
 
 
-function getTransferFindings(transfer_findin_id, productId, productTypeId){
+function getTransferFindings(transfer_findin_id){
     $.ajax({
-        url: "/api/v2/transfer_finding?id=" + transfer_findin_id+'&'+"product="+productId+'&'+"product_type="+productTypeId,
+        url: "/api/v2/transfer_finding?id=" + transfer_findin_id,
         type: "GET",
         success: function(response) {
             innerData(response)
@@ -151,6 +149,28 @@ function filterForStatus(status){
     }
     return ObjFindingsCopy
 }
+
+function generateRequestTransferFindingUpdate(tranferFindingId, riskStatus){
+    return new Promise(function(resolve, reject) {
+        let requestFindingStatus = {};
+
+        getTransferFindingsAsync(tranferFindingId)
+            .then(function(response){
+                response.results.forEach(function(transferFindings){
+                    transferFindings.findings.forEach(function(finding){
+                        requestFindingStatus[finding.id] = {"risk_status": riskStatus};
+                    });
+                });
+                console.log("success", requestFindingStatus);
+                resolve(requestFindingStatus);
+            })
+            .catch(function(error){
+                console.error(error);
+                reject(error);
+            });
+    });
+}
+
 
 function deepCopy(objeto) {
     return JSON.parse(JSON.stringify(objeto));
