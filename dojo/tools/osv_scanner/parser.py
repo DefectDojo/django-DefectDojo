@@ -24,7 +24,10 @@ class OSVScannerParser(object):
         return severity
 
     def get_findings(self, file, test):
-        data = json.load(file)
+        try:
+            data = json.load(file)
+        except json.decoder.JSONDecodeError:
+            return []
         findings = list()
         for result in data["results"]:
             source_path = result["source"]["path"]
