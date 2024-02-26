@@ -121,13 +121,13 @@ class FortifyParser(object):
         return items
 
     def fpr_severity(self, Confidence, InstanceSeverity):
-        if Confidence >= 2.5 and InstanceSeverity >= 2.5:
+        if float(Confidence) >= 2.5 and float(InstanceSeverity) >= 2.5:
             severity = "Critical"
-        elif Confidence >= 2.5 and InstanceSeverity < 2.5:
+        elif float(Confidence) >= 2.5 and float(InstanceSeverity) < 2.5:
             severity = "High"
-        elif Confidence < 2.5 and InstanceSeverity >= 2.5:
+        elif float(Confidence) < 2.5 and float(InstanceSeverity) >= 2.5:
             severity = "Medium"
-        elif Confidence < 2.5 and InstanceSeverity < 2.5:
+        elif float(Confidence) < 2.5 and float(InstanceSeverity) < 2.5:
             severity = "Low"
         else:
             severity = "Info"
