@@ -40,21 +40,21 @@ class OSVScannerParser(object):
                     vulnerabilityid = vulnerability["id"]
                     vulnerabilitysummary = vulnerability.get("summary", "")
                     vulnerabilitydetails = vulnerability["details"]
-                    vulnerabilitypackagepurl = vulnerability["affected"][0].get("package","")
+                    vulnerabilitypackagepurl = vulnerability["affected"][0].get("package", "")
                     if vulnerabilitypackagepurl != "":
                         vulnerabilitypackagepurl = vulnerabilitypackagepurl["purl"]
                     cwe = vulnerability["affected"][0]["database_specific"].get("cwes", None)
-                    if cwe != None:
+                    if cwe is not None:
                         cwe = cwe[0]["cweId"]
                     reference = ""
                     for ref in vulnerability.get("references"):
-                        reference+=ref.get("url") + "\n"
+                        reference += ref.get("url") + "\n"
                     description = vulnerabilitysummary + "\n"
                     description += "**source_type**: " + source_type + "\n"
                     description += "**package_ecosystem**: " + package_ecosystem + "\n"
                     description += "**vulnerabilitydetails**: " + vulnerabilitydetails + "\n"
                     description += "**vulnerabilitypackagepurl**: " + vulnerabilitypackagepurl + "\n"
-                    sev = vulnerability.get("database_specific",{}).get("severity", "")
+                    sev = vulnerability.get("database_specific", {}).get("severity", "")
                     finding = Finding(
                         title=vulnerabilityid + "_" + package_name,
                         test=test,
