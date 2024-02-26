@@ -31,13 +31,19 @@ class OSVScannerParser(object):
                     cwe = vulnerability["affected"][0]["database_specific"]["cwes"][0]["cweId"]
                     reference = vulnerability["affected"][0]["references"][0]["url"]
 
-        finding = Finding(
-            title="title",
-            test=test,
-            description="description",
-            severity="High",
-            static_finding=False,
-            dynamic_finding=True,
-        )
-        findings.append(finding)
+                    finding = Finding(
+                        title="title",
+                        test=test,
+                        description="description",
+                        severity="High",
+                        static_finding=False,
+                        dynamic_finding=True,
+                        component_name=package_name,
+                        component_version=package_version,
+                        cwe=cwe,
+                        cve=vulnerabilityid,
+                        file_path=source_path,
+                        reference=reference,
+                    )
+                    findings.append(finding)
         return findings
