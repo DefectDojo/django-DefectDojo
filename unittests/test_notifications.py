@@ -159,21 +159,18 @@ class TestNotifications(DojoTestCase):
             self.assertEqual(mock.call_count, last_count + 1)
         last_count = mock.call_count
 
-    @patch('dojo.notifications.helper.send_alert_notification', wraps=send_alert_notification)
-    def test_non_default_other_notifications(self, mock):
-        notif, _ = Notifications.objects.get_or_create(user=User.objects.get(username='admin'))
-
         with self.subTest('do not notify other'):
             notif.other = ()  # no alert
             notif.save()
             create_notification(event="dummy_bar_event", recipients=['admin'])
-            self.assertEqual(mock.call_count, 0)
+            self.assertEqual(mock.call_count, last_count)
+        last_count = mock.call_count
 
         with self.subTest('notify other'):
             notif.other = DEFAULT_NOTIFICATION  # alert only
             notif.save()
             create_notification(event="dummy_foo_event", title="title_for_dummy_foo_event", description="description_for_dummy_foo_event", recipients=['admin'])
-            self.assertEqual(mock.call_count, 1)
+            self.assertEqual(last_count, 1)
             self.assertEqual(mock.call_args_list[0].args[0], 'dummy_foo_event')
             alert = Alerts.objects.get(title='title_for_dummy_foo_event')
             self.assertEqual(alert.source, "Dummy Foo Event")
