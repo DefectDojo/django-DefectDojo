@@ -15,7 +15,7 @@ class FortifyParser(object):
         return scan_type  # no custom label for now
 
     def get_description_for_scan_types(self, scan_type):
-        return "Import Findings from XML file format."
+        return "Import Findings in FPR or XML file format."
 
     def get_findings(self, filename, test):
         if str(filename.name).endswith('.xml'):
@@ -158,6 +158,12 @@ class FortifyParser(object):
                     InstanceID = vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}InstanceID").text
                     InstanceSeverity = vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}InstanceSeverity").text
                     Confidence = vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}Confidence").text
+                    SourceLocationpath = vuln.find(f"{namespace}AnalysisInfo").find(f"{namespace}Unified").find(f"{namespace}Trace").find(f"{namespace}Primary").find(f"{namespace}Entry").find(f"{namespace}Node").find(f"{namespace}SourceLocation").attrib.get("path")
+                    SourceLocationline = vuln.find(f"{namespace}AnalysisInfo").find(f"{namespace}Unified").find(f"{namespace}Trace").find(f"{namespace}Primary").find(f"{namespace}Entry").find(f"{namespace}Node").find(f"{namespace}SourceLocation").attrib.get("line")
+                    SourceLocationlineEnd = vuln.find(f"{namespace}AnalysisInfo").find(f"{namespace}Unified").find(f"{namespace}Trace").find(f"{namespace}Primary").find(f"{namespace}Entry").find(f"{namespace}Node").find(f"{namespace}SourceLocation").attrib.get("lineEnd")
+                    SourceLocationcolStart = vuln.find(f"{namespace}AnalysisInfo").find(f"{namespace}Unified").find(f"{namespace}Trace").find(f"{namespace}Primary").find(f"{namespace}Entry").find(f"{namespace}Node").find(f"{namespace}SourceLocation").attrib.get("colStart")
+                    SourceLocationcolEnd = vuln.find(f"{namespace}AnalysisInfo").find(f"{namespace}Unified").find(f"{namespace}Trace").find(f"{namespace}Primary").find(f"{namespace}Entry").find(f"{namespace}Node").find(f"{namespace}SourceLocation").attrib.get("colEnd")
+                    SourceLocationsnippet = vuln.find(f"{namespace}AnalysisInfo").find(f"{namespace}Unified").find(f"{namespace}Trace").find(f"{namespace}Primary").find(f"{namespace}Entry").find(f"{namespace}Node").find(f"{namespace}SourceLocation").attrib.get("snippet")
                     description = Type + "\n"
                     severity = self.fpr_severity(Confidence, InstanceSeverity)
                     description += "**ClassID:** " + ClassID + "\n"
@@ -167,6 +173,12 @@ class FortifyParser(object):
                     description += "**InstanceID:** " + InstanceID + "\n"
                     description += "**InstanceSeverity:** " + InstanceSeverity + "\n"
                     description += "**Confidence:** " + Confidence + "\n"
+                    description += "**SourceLocation:** " + str(SourceLocationpath) + "\n"
+                    description += "**SourceLocationline:** " + str(SourceLocationline) + "\n"
+                    description += "**SourceLocationlineEnd:** " + str(SourceLocationlineEnd) + "\n"
+                    description += "**SourceLocationcolStart:** " + str(SourceLocationcolStart) + "\n"
+                    description += "**SourceLocationcolEnd:** " + str(SourceLocationcolEnd) + "\n"
+                    description += "**SourceLocationsnippet:** " + str(SourceLocationsnippet) + "\n"
                     items.append(
                         Finding(
                             title=Type + " " + ClassID,
