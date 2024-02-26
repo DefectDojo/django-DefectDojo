@@ -2,7 +2,7 @@ from dojo.tasks import flush_auditlog
 from .dojo_test_case import DojoTestCase
 from django.test import override_settings
 from auditlog.models import LogEntry
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from dojo.models import Finding
 from dateutil.relativedelta import relativedelta
 import logging
@@ -29,8 +29,8 @@ class TestFlushAuditlog(DojoTestCase):
 
     @override_settings(AUDITLOG_FLUSH_RETENTION_PERIOD=1)
     def test_delete_entries_with_retention_period(self):
-        entries_before = LogEntry.objects.filter(timestamp__date__lt=date.today()).count()
-        two_weeks_ago = datetime.today() - relativedelta(weeks=2)
+        entries_before = LogEntry.objects.filter(timestamp__date__lt=datetime.now(timezone.utc)).count()
+        two_weeks_ago = datetime.now(timezone.utc) - relativedelta(weeks=2)
         log_entry = LogEntry.objects.log_create(
             instance=Finding.objects.all()[0],
             timestamp=two_weeks_ago,
@@ -40,6 +40,6 @@ class TestFlushAuditlog(DojoTestCase):
         log_entry.timestamp = two_weeks_ago
         log_entry.save()
         flush_auditlog()
-        entries_after = LogEntry.objects.filter(timestamp__date__lt=date.today()).count()
+        entries_after = LogEntry.objects.filter(timestamp__date__lt=datetime.now(timezone.utc)).count()
         # we have three old log entries in our testdata and added a new one
         self.assertEqual(entries_before - 3 + 1, entries_after)

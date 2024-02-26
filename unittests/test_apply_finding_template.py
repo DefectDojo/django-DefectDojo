@@ -161,7 +161,7 @@ class TestApplyFindingTemplate(DojoTestCase):
         test_mitigation = 'template mitigation'
         test_impact = 'template impact'
 
-        result = self.make_request(True, 1, 1,
+        self.make_request(True, 1, 1,
                                    {'title': test_title,
                                     'cwe': test_cwe,
                                     'severity': test_severity,
@@ -191,11 +191,11 @@ class TestApplyFindingTemplate(DojoTestCase):
 
     def test_apply_template_to_finding_with_illegal_finding_fails(self):
         with self.assertRaises(Exception):
-            result = self.make_request(True, None, 1)
+            self.make_request(True, None, 1)
 
     def test_apply_template_to_finding_with_illegal_template_fails(self):
         with self.assertRaises(Exception):
-            result = self.make_request(True, 1, None)
+            self.make_request(True, 1, None)
 
     def test_apply_template_to_finding_with_no_data_returns_view_success(self):
         result = self.make_request(True, 1, 1, None)

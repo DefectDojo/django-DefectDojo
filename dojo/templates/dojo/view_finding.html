@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load multiply %}
 {% load authorization_tags %}
 {% load humanize %}
 {% load static %}
@@ -268,8 +269,17 @@
                             <th>Date Mitigated</th>
                             <th>Mitigated By</th>
                         {% endif %}
-                            <th>CWE</th>
-                            <th>Vulnerability Id</th>
+                        <th>CWE</th>
+                        <th>Vulnerability Id</th>
+                        {% if finding.epss_score != None or finding.epss_percentile != None %}
+                            {% if finding.epss_score != None and finding.epss_percentile != None %}
+                                <th>EPSS Score / Percentile</th>
+                            {% elif finding.epss_score != None and finding.epss_percentile == None %}
+                                <th>EPSS Score</th>
+                            {% elif finding.epss_score == None and finding.epss_percentile != None %}
+                                <th>EPSS Percentile</th>
+                            {% endif %}
+                        {% endif %}
                         <th>Found by</th>
                         {% if finding.vuln_id_from_tool %}
                             <th>Vuln ID from tool</th>
@@ -421,7 +431,16 @@
                             {% endif %}
                         {% endif %}
                         </td>
-                        <td> 
+                        {% if finding.epss_score != None or finding.epss_percentile != None %}
+                                {% if finding.epss_score != None and finding.epss_percentile != None %}
+                                    <td>{{ finding.epss_score|multiply:100|floatformat:"3" }}% / {{ finding.epss_percentile|multiply:100|floatformat:"3" }}%</td>
+                                {% elif finding.epss_score != None and finding.epss_percentile == None %}
+                                    <td>{{ finding.epss_score|multiply:100|floatformat:"3" }}%</td>
+                                {% elif finding.epss_score == None and finding.epss_percentile != None %}
+                                    <td>{{ finding.epss_percentile|multiply:100|floatformat:"3" }}%</td>
+                                {% endif %}
+                        {% endif %}
+                        <td>
                             {% if found_by %}
                                 {% for scanner in found_by %}
                                     {{ scanner }}

@@ -714,7 +714,7 @@ class ImportReimportMixin(object):
         test_id = reimport1['test']
         self.assertEqual(test_id, test_id)
 
-        test = self.get_test_api(test_id)
+        self.get_test_api(test_id)
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
@@ -754,7 +754,7 @@ class ImportReimportMixin(object):
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
-        finding_count_before = self.db_finding_count()
+        self.db_finding_count()
         endpoint_count_before = self.db_endpoint_count()
         endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
         endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
@@ -770,12 +770,12 @@ class ImportReimportMixin(object):
         endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
 
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, closed=1, reactivated=1, untouched=3):
-            reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
+            self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
         test_id = reimport1['test']
         self.assertEqual(test_id, test_id)
 
-        test = self.get_test_api(test_id)
+        self.get_test_api(test_id)
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
@@ -928,7 +928,7 @@ class ImportReimportMixin(object):
         test_id = reimport1['test']
         self.assertEqual(test_id, test_id)
 
-        test = self.get_test_api(test_id)
+        self.get_test_api(test_id)
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
         self.assert_finding_count_json(4 + 2, findings)
@@ -1023,7 +1023,7 @@ class ImportReimportMixin(object):
 
         # reimport exact same report
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, untouched=4):
-            reimport0 = self.reimport_scan_with_params(test_id, self.anchore_file_name, scan_type=self.scan_type_anchore)
+            self.reimport_scan_with_params(test_id, self.anchore_file_name, scan_type=self.scan_type_anchore)
 
         active_findings_after = self.get_test_findings_api(test_id, active=True)
         self.log_finding_summary_json_api(active_findings_after)
@@ -1152,7 +1152,7 @@ class ImportReimportMixin(object):
         self.assert_finding_count_json(6, active_findings_before)
 
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, created=0, untouched=6):
-            reimport0 = self.reimport_scan_with_params(test_id,
+            self.reimport_scan_with_params(test_id,
                                                        self.gitlab_dep_scan_components_filename,
                                                        scan_type=self.scan_type_gtlab_dep_scan,
                                                        minimum_severity='Info')
@@ -1430,12 +1430,12 @@ class ImportReimportMixin(object):
             engagement=test.engagement,
             test_type=test_type,
             scan_type=self.anchore_grype_scan_type,
-            target_start=datetime.datetime.now(),
-            target_end=datetime.datetime.now(),
+            target_start=datetime.datetime.now(datetime.timezone.utc),
+            target_end=datetime.datetime.now(datetime.timezone.utc),
         )
         reimport_test.save()
 
-        reimport0 = self.reimport_scan_with_params(reimport_test.id, self.anchore_grype_file_name, scan_type=self.anchore_grype_scan_type)
+        self.reimport_scan_with_params(reimport_test.id, self.anchore_grype_file_name, scan_type=self.anchore_grype_scan_type)
         findings = Finding.objects.filter(test=reimport_test)
         self.assertEqual(4, len(findings))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)

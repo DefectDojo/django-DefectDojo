@@ -15,6 +15,9 @@ unset DD_DATABASE_URL
 # Unset the celery broker URL so that we can force the other DD_CELERY_BROKER settings
 unset DD_CELERY_BROKER_URL
 
+# We are strict about Warnings during testing
+export PYTHONWARNINGS=error
+
 python3 manage.py makemigrations dojo
 python3 manage.py migrate
 
@@ -48,13 +51,9 @@ EOF
     python3 manage.py spectacular > /dev/null
 }
 
-echo "Swagger Schema Tests - Broken"
-echo "------------------------------------------------------------"
-python3 manage.py test unittests -v 3 --keepdb --no-input --tag broken && true
-
 echo "Unit Tests"
 echo "------------------------------------------------------------"
-python3 manage.py test unittests -v 3 --keepdb --no-input --exclude-tag broken
+python3 manage.py test unittests -v 3 --keepdb --no-input
 
 # you can select a single file to "test" unit tests
 # python3 manage.py test unittests.tools.test_npm_audit_scan_parser.TestNpmAuditParser --keepdb -v 3
