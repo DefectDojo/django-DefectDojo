@@ -85,3 +85,5 @@ class TestFortifyParser(DojoTestCase):
             self.assertEqual("Cross-Site Request Forgery 114E5A67-3446-4DD5-B578-D0E6FDBB304E", finding.title)
             self.assertEqual("High", finding.severity)
             self.assertEqual('114E5A67-3446-4DD5-B578-D0E6FDBB304E', finding.unique_id_from_tool)
+            finding = findings[12]
+            self.assertEqual("Critical", finding.severity)
