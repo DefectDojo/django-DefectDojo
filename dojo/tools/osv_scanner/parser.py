@@ -25,21 +25,32 @@ class OSVScannerParser(object):
                 package_ecosystem = package["package"]["ecosystem"]
                 for vulnerability in package["vulnerabilities"]:
                     vulnerabilityid = vulnerability["id"]
-                    vulnerabilitysummary = vulnerability["summary"]
+                    vulnerabilitysummary = vulnerability.get("summary", "")
                     vulnerabilitydetails = vulnerability["details"]
-                    vulnerabilitypackagepurl = vulnerability["affected"][0]["package"]["purl"]
-                    cwe = vulnerability["affected"][0]["database_specific"]["cwes"][0]["cweId"]
-                    reference = vulnerability["affected"][0]["references"][0]["url"]
+                    vulnerabilitypackagepurl = vulnerability["affected"][0].get("package","")
+                    if vulnerabilitypackagepurl != "":
+                        vulnerabilitypackagepurl = vulnerabilitypackagepurl["purl"]
+                    cwe = vulnerability["affected"][0]["database_specific"].get("cwes", None)
+                    if cwe != None:
+                        cwe = cwe[0]["cweId"]
+                    reference = vulnerability["affected"][0].get("references", "")
+                    if reference != "":
+                        reference = reference[0]["url"]
                     description = vulnerabilitysummary + "\n"
                     description += "**source_type**: " + source_type + "\n"
                     description += "**package_ecosystem**: " + package_ecosystem + "\n"
                     description += "**vulnerabilitydetails**: " + vulnerabilitydetails + "\n"
                     description += "**vulnerabilitypackagepurl**: " + vulnerabilitypackagepurl + "\n"
+                    severity = vulnerability.get("database_specific",{}).get("severity", "")
+                    if severity != "":
+                        severity = severity.lower().capitalize()
+                    else:
+                        severity = "Info"
                     finding = Finding(
                         title=vulnerabilityid + "_" + package_name,
                         test=test,
                         description=description,
-                        severity="High",
+                        severity=severity,
                         static_finding=True,
                         dynamic_finding=False,
                         component_name=package_name,
@@ -47,7 +58,7 @@ class OSVScannerParser(object):
                         cwe=cwe,
                         cve=vulnerabilityid,
                         file_path=source_path,
-                        reference=reference,
+                        references=reference,
                     )
                     findings.append(finding)
         return findings
