@@ -30,14 +30,18 @@ class OSVScannerParser(object):
                     vulnerabilitypackagepurl = vulnerability["affected"][0]["package"]["purl"]
                     cwe = vulnerability["affected"][0]["database_specific"]["cwes"][0]["cweId"]
                     reference = vulnerability["affected"][0]["references"][0]["url"]
-
+                    description = vulnerabilitysummary + "\n"
+                    description += "**source_type**: " + source_type + "\n"
+                    description += "**package_ecosystem**: " + package_ecosystem + "\n"
+                    description += "**vulnerabilitydetails**: " + vulnerabilitydetails + "\n"
+                    description += "**vulnerabilitypackagepurl**: " + vulnerabilitypackagepurl + "\n"
                     finding = Finding(
-                        title="title",
+                        title=vulnerabilityid + "_" + package_name,
                         test=test,
-                        description="description",
+                        description=description,
                         severity="High",
-                        static_finding=False,
-                        dynamic_finding=True,
+                        static_finding=True,
+                        dynamic_finding=False,
                         component_name=package_name,
                         component_version=package_version,
                         cwe=cwe,
