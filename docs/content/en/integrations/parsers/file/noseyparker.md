@@ -4,7 +4,10 @@ toc_hide: true
 ---
 Input Type:
 -
-This parser takes JSON Lines Output from Nosey Parker. Supports version 0.16.0 of https://github.com/praetorian-inc/noseyparker 
+This parser takes JSON Lines Output from Nosey Parker: https://github.com/praetorian-inc/noseyparkerSupports
+
+Supports version 0.16.0: 
+https://github.com/praetorian-inc/noseyparker/releases/tag/v0.16.0
 
 Things to note about the Nosey Parker Parser:
 - 
