@@ -53,7 +53,6 @@ class TestTenableParser(DojoTestCase):
         self.assertEqual("CVE-2004-2761", finding.unsaved_vulnerability_ids[0])
         # this vuln have 'CVE-2013-2566,CVE-2015-2808' as CVE
         finding = findings[3]
-        print(f"finding.unsaved_vulnerability_ids: {finding.unsaved_vulnerability_ids} - {type(finding.unsaved_vulnerability_ids)} - {type(finding.unsaved_vulnerability_ids[0])}")
         self.assertEqual(2, len(finding.unsaved_vulnerability_ids))
         self.assertEqual("CVE-2013-2566", finding.unsaved_vulnerability_ids[0])
         self.assertEqual("CVE-2015-2808", finding.unsaved_vulnerability_ids[1])
@@ -70,7 +69,7 @@ class TestTenableParser(DojoTestCase):
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual("Info", finding.severity)
-        self.assertFalse(finding.unsaved_vulnerability_ids)
+        self.assertEqual(0, len(finding.unsaved_vulnerability_ids))
         self.assertEqual(0, finding.cwe)
         self.assertEqual("HTTP Server Type and Version", finding.title)
         finding = findings[25]
@@ -92,7 +91,7 @@ class TestTenableParser(DojoTestCase):
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual("Info", finding.severity)
-        self.assertFalse(finding.unsaved_vulnerability_ids)
+        self.assertEqual(0, len(finding.unsaved_vulnerability_ids))
         self.assertEqual(0, finding.cwe)
         self.assertEqual("HTTP Server Type and Version", finding.title)
         finding = findings[25]
@@ -136,14 +135,14 @@ class TestTenableParser(DojoTestCase):
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual("Info", finding.severity)
-        self.assertFalse(finding.unsaved_vulnerability_ids)
+        self.assertEqual(0, len(finding.unsaved_vulnerability_ids))
         self.assertEqual("Nessus Scan Information", finding.title)
 
         finding = findings[25]
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual("Nessus SYN scanner", finding.title)
         self.assertEqual("Info", finding.severity)
-        self.assertFalse(finding.unsaved_vulnerability_ids)
+        self.assertEqual(0, len(finding.unsaved_vulnerability_ids))
         endpoint = finding.unsaved_endpoints[26]
         self.assertEqual("http", endpoint.protocol)
         endpoint = finding.unsaved_endpoints[37]
@@ -221,7 +220,7 @@ class TestTenableParser(DojoTestCase):
             finding = findings[i]
             self.assertIn(finding.severity, Finding.SEVERITIES)
             self.assertEqual('google.com', finding.unsaved_endpoints[0].host)
-            self.assertFalse(finding.unsaved_vulnerability_ids)
+            self.assertEqual(0, len(finding.unsaved_vulnerability_ids))
         finding = findings[0]
         self.assertEqual('7.1', finding.cvssv3_score)
         self.assertEqual('High', finding.severity)
@@ -238,7 +237,7 @@ class TestTenableParser(DojoTestCase):
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertEqual('google.com', finding.unsaved_endpoints[0].host)
-        self.assertFalse(finding.unsaved_vulnerability_ids)
+        self.assertEqual(0, len(finding.unsaved_vulnerability_ids))
         self.assertEqual('7.1', finding.cvssv3_score)
         self.assertEqual('High', finding.severity)
         self.assertEqual('http', finding.unsaved_endpoints[0].protocol)
@@ -268,3 +267,13 @@ class TestTenableParser(DojoTestCase):
         self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
         for vulnerability_id in finding.unsaved_vulnerability_ids:
             self.assertEqual('CVE-2023-32233', vulnerability_id)
+
+    def test_parse_issue_6992(self):
+        testfile = open("unittests/scans/tenable/nessus/issue_6992.nessus")
+        parser = TenableParser()
+        findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(1, len(findings))
+        self.assertEqual("High", findings[0].severity)

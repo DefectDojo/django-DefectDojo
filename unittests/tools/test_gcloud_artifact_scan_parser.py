@@ -8,7 +8,7 @@ class TestGCloudArtifactScanParser(DojoTestCase):
         with open(f"{get_unit_tests_path()}/scans/gcloud_artifact_scan/many_vulns.json") as testfile:
             parser = GCloudArtifactScanParser()
             findings = parser.get_findings(testfile, Test())
-        self.assertTrue(7, len(findings))
+        self.assertEqual(7, len(findings))
         finding = findings[0]
         self.assertEqual("projects/goog-vulnz/notes/CVE-2023-29405", finding.title)
         self.assertEqual("Critical", finding.severity)

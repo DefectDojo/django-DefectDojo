@@ -138,13 +138,19 @@ class ApiBugcrowdParser(object):
                 verified=self.is_verified(bugcrowd_state),
                 false_p=self.is_false_p(bugcrowd_state),
                 out_of_scope=self.is_out_of_scope(bugcrowd_state),
-                risk_accepted=self.is_risk_accepted(bugcrowd_state),
                 is_mitigated=self.is_mitigated(bugcrowd_state),
                 static_finding=False,
                 dynamic_finding=True,
                 unique_id_from_tool=unique_id_from_tool,
                 references=links,
             )
+
+            if self.is_not_applicable(bugcrowd_state):
+                # From Bugcrowd - Not Applicable: A submission that you reject because it does not apply to your application.
+                # Because of this, setting finding to inactive and to Informational
+                finding.active = False
+                finding.severity = "Info"
+
             if bug_endpoint:
                 try:
                     bug_endpoint.clean()
@@ -227,16 +233,34 @@ class ApiBugcrowdParser(object):
             self.is_mitigated(bugcrowd_state)
             or self.is_false_p(bugcrowd_state)
             or self.is_out_of_scope(bugcrowd_state)
-            or self.is_risk_accepted(bugcrowd_state)
             or bugcrowd_state == "not_reproducible"
             or bugcrowd_state == "informational"
         )
+
+    # From https://docs.bugcrowd.com/customers/submission-management/submission-status/
+    # Status Options
+    # There are three categories of statuses: open, accepted, and rejected. Within each category are the following statuses:
+
+    # Open
+    # New: A submission that has not been reviewed or assigned a status.
+    # Triaged: A submission that has been confirmed valid and unique by the Bugcrowd ASE team and is ready for the customer to accept.
+
+    # Accepted
+    # Unresolved: A valid submission that needs to be fixed. Typically, you should reward a submission at this point in the process.
+    # Resolved: A valid submission that has been fixed.
+    # Informational: A submission that is reproducible but will not be fixed. Use this if the submission is a best practice issue but
+    # will not be fixed, a minor priority issue, or if you already have a mitigation.
+
+    # Rejected
+    # Out of Scope: A submission you reject because it is not in scope with the criteria outlined in the bounty program.
+    # Not Reproducible: A submission you reject because you cannot reproduce it based on the information you have.
+    # Not Applicable: A submission that you reject because it does not apply to your application.
 
     def is_duplicate(self, bugcrowd_state):
         return bugcrowd_state == "duplicate"
 
     def is_false_p(self, bugcrowd_state):
-        return bugcrowd_state == "not-reproducible"
+        return bugcrowd_state == "not_reproducible"
 
     def is_mitigated(self, bugcrowd_state):
         return bugcrowd_state == "resolved"
@@ -244,7 +268,7 @@ class ApiBugcrowdParser(object):
     def is_out_of_scope(self, bugcrowd_state):
         return bugcrowd_state == "out_of_scope"
 
-    def is_risk_accepted(self, bugcrowd_state):
+    def is_not_applicable(self, bugcrowd_state):
         return bugcrowd_state == "not_applicable"
 
     def is_verified(self, bugcrowd_state):
