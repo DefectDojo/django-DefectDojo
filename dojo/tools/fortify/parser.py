@@ -173,7 +173,7 @@ class FortifyParser(object):
                     description += "**InstanceID:** " + InstanceID + "\n"
                     description += "**InstanceSeverity:** " + InstanceSeverity + "\n"
                     description += "**Confidence:** " + Confidence + "\n"
-                    description += "**SourceLocation:** " + str(SourceLocationpath) + "\n"
+                    description += "**SourceLocationpath:** " + str(SourceLocationpath) + "\n"
                     description += "**SourceLocationline:** " + str(SourceLocationline) + "\n"
                     description += "**SourceLocationlineEnd:** " + str(SourceLocationlineEnd) + "\n"
                     description += "**SourceLocationcolStart:** " + str(SourceLocationcolStart) + "\n"
@@ -187,6 +187,8 @@ class FortifyParser(object):
                             test=test,
                             description=description,
                             unique_id_from_tool=ClassID,
+                            file_path = SourceLocationpath,
+                            line = SourceLocationline,
                         )
                     )
         return items
