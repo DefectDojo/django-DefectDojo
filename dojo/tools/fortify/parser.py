@@ -159,7 +159,7 @@ class FortifyParser(object):
                     InstanceSeverity = vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}InstanceSeverity").text
                     Confidence = vuln.find(f"{namespace}InstanceInfo").find(f"{namespace}Confidence").text
                     description = Type + "\n"
-                    severity = self.fpr_severity(Confidence, InstanceSeverity)                    
+                    severity = self.fpr_severity(Confidence, InstanceSeverity)
                     description += "**ClassID:** " + ClassID + "\n"
                     description += "**Kingdom:** " + Kingdom + "\n"
                     description += "**AnalyzerName:** " + AnalyzerName + "\n"
