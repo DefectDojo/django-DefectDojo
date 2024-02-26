@@ -111,7 +111,6 @@ def delete_finding_group(request, fgid):
         if 'id' in request.POST and str(finding_group.id) == request.POST['id']:
             form = DeleteFindingGroupForm(request.POST, instance=finding_group)
             if form.is_valid():
-                product = finding_group.test.engagement.product
                 finding_group.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,

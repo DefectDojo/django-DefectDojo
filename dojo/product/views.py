@@ -891,7 +891,6 @@ def delete_product(request, pid):
         if 'id' in request.POST and str(product.id) == request.POST['id']:
             form = DeleteProductForm(request.POST, instance=product)
             if form.is_valid():
-                product_type = product.prod_type
                 if get_setting("ASYNC_OBJECT_DELETE"):
                     async_del = async_delete()
                     async_del.delete(product)

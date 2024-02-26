@@ -286,7 +286,6 @@ def delete_test(request, tid):
         if 'id' in request.POST and str(test.id) == request.POST['id']:
             form = DeleteTestForm(request.POST, instance=test)
             if form.is_valid():
-                product = test.engagement.product
                 if get_setting("ASYNC_OBJECT_DELETE"):
                     async_del = async_delete()
                     async_del.delete(test)
