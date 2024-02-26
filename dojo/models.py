@@ -4,6 +4,7 @@ import logging
 import os
 import re
 import copy
+import warnings
 from typing import Dict, Set, Optional
 from uuid import uuid4
 from django.conf import settings
@@ -13,7 +14,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.db.models.expressions import Case, When
 from django.urls import reverse
-from django.core.validators import RegexValidator, validate_ipv46_address
+from django.core.validators import RegexValidator, validate_ipv46_address, MinValueValidator, MaxValueValidator
 from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
 from django.db import models, connection
@@ -27,6 +28,8 @@ from django.utils import timezone
 from django.utils.html import escape
 from pytz import all_timezones
 from polymorphic.models import PolymorphicModel
+from polymorphic.managers import PolymorphicManager
+from polymorphic.base import ManagerInheritanceWarning
 from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
@@ -2207,6 +2210,14 @@ class Finding(models.Model):
                            blank=False,
                            verbose_name=_("Vulnerability Id"),
                            help_text=_("An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources."))
+    epss_score = models.FloatField(default=None, null=True, blank=True,
+                              verbose_name=_("EPSS Score"),
+                              help_text=_("EPSS score for the CVE. Describes how likely it is the vulnerability will be exploited in the next 30 days."),
+                              validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
+    epss_percentile = models.FloatField(default=None, null=True, blank=True,
+                              verbose_name=_("EPSS percentile"),
+                              help_text=_("EPSS percentile for the CVE. Describes how many CVEs are scored at or below this one."),
+                              validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
     cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
     cvssv3 = models.TextField(validators=[cvssv3_regex],
                               max_length=117,
@@ -2501,7 +2512,7 @@ class Finding(models.Model):
                   'High': 1, 'Critical': 0}
 
     class Meta:
-        ordering = ('numerical_severity', '-date', 'title')
+        ordering = ('numerical_severity', '-date', 'title', 'epss_score', 'epss_percentile')
         indexes = [
             models.Index(fields=['test', 'active', 'verified']),
 
@@ -2516,6 +2527,8 @@ class Finding(models.Model):
             models.Index(fields=['test', 'component_name']),
 
             models.Index(fields=['cve']),
+            models.Index(fields=['epss_score']),
+            models.Index(fields=['epss_percentile']),
             models.Index(fields=['cwe']),
             models.Index(fields=['out_of_scope']),
             models.Index(fields=['false_p']),
@@ -3296,7 +3309,7 @@ class Finding(models.Model):
 
     @property
     def violates_sla(self):
-        return (self.sla_expiration_date and self.sla_expiration_date < timezone.now())
+        return (self.sla_expiration_date and self.sla_expiration_date < timezone.now().date())
 
 
 class FindingAdmin(admin.ModelAdmin):
@@ -4340,32 +4353,35 @@ class Benchmark_Product_Summary(models.Model):
 # ==========================
 # Defect Dojo Engaegment Surveys
 # ==============================
+with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
+    class Question(PolymorphicModel, TimeStampedModel):
+        '''
+            Represents a question.
+        '''
 
-class Question(PolymorphicModel, TimeStampedModel):
-    '''
-        Represents a question.
-    '''
+        class Meta:
+            ordering = ['order']
 
-    class Meta:
-        ordering = ['order']
+        order = models.PositiveIntegerField(default=1,
+                                            help_text=_('The render order'))
 
-    order = models.PositiveIntegerField(default=1,
-                                        help_text=_('The render order'))
+        optional = models.BooleanField(
+            default=False,
+            help_text=_("If selected, user doesn't have to answer this question"))
 
-    optional = models.BooleanField(
-        default=False,
-        help_text=_("If selected, user doesn't have to answer this question"))
+        text = models.TextField(blank=False, help_text=_('The question text'), default='')
+        objects = models.Manager()
+        polymorphic = PolymorphicManager()
 
-    text = models.TextField(blank=False, help_text=_('The question text'), default='')
-
-    def __str__(self):
-        return self.text
+        def __str__(self):
+            return self.text
 
 
 class TextQuestion(Question):
     '''
     Question with a text answer
     '''
+    objects = PolymorphicManager()
 
     def get_form(self):
         '''
@@ -4399,8 +4415,8 @@ class ChoiceQuestion(Question):
 
     multichoice = models.BooleanField(default=False,
                                       help_text=_("Select one or more"))
-
     choices = models.ManyToManyField(Choice)
+    objects = PolymorphicManager()
 
     def get_form(self):
         '''
@@ -4469,15 +4485,18 @@ class General_Survey(models.Model):
         return self.survey.name
 
 
-class Answer(PolymorphicModel, TimeStampedModel):
-    ''' Base Answer model
-    '''
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
+    class Answer(PolymorphicModel, TimeStampedModel):
+        ''' Base Answer model
+        '''
+        question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
-    answered_survey = models.ForeignKey(Answered_Survey,
-                                        null=False,
-                                        blank=False,
-                                        on_delete=models.CASCADE)
+        answered_survey = models.ForeignKey(Answered_Survey,
+                                            null=False,
+                                            blank=False,
+                                            on_delete=models.CASCADE)
+        objects = models.Manager()
+        polymorphic = PolymorphicManager()
 
 
 class TextAnswer(Answer):
@@ -4485,6 +4504,7 @@ class TextAnswer(Answer):
         blank=False,
         help_text=_('The answer text'),
         default='')
+    objects = PolymorphicManager()
 
     def __str__(self):
         return self.answer
@@ -4494,6 +4514,7 @@ class ChoiceAnswer(Answer):
     answer = models.ManyToManyField(
         Choice,
         help_text=_('The selected choices as the answer'))
+    objects = PolymorphicManager()
 
     def __str__(self):
         if len(self.answer.all()):

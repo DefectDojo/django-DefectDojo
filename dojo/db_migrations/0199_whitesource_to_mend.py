@@ -34,7 +34,7 @@ def migrate_whitesource_findings_to_mend(apps, schema_editor):
     finding_model = apps.get_model('dojo', 'Finding')
     test_type_model = apps.get_model('dojo', 'Test_Type')
     # Get or create Mend Test Type and fetch the whitesource test types
-    mend_test_type, _ = test_type_model.objects.get_or_create(name="Mend Scan", active=True)
+    mend_test_type, _ = test_type_model.objects.get_or_create(name="Mend Scan", defaults={"active": True})
     whitesource_test_type = test_type_model.objects.filter(name="Whitesource Scan").first()
     # Get all the findings found by whitesource
     findings = finding_model.objects.filter(test__scan_type__in=WHITESOURCE_REFERENCES)
