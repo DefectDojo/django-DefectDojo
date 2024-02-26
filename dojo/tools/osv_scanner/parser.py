@@ -13,6 +13,16 @@ class OSVScannerParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "OSV scan output can be imported in JSON format (option --format json)."
 
+    def classify_severity(self, input):
+        if input != "":
+            if input == "MODERATE":
+                severity = "Medium"
+            else:
+                severity = input.lower().capitalize()
+        else:
+            severity = "Low"
+        return severity
+
     def get_findings(self, file, test):
         data = json.load(file)
         findings = list()
@@ -41,16 +51,12 @@ class OSVScannerParser(object):
                     description += "**package_ecosystem**: " + package_ecosystem + "\n"
                     description += "**vulnerabilitydetails**: " + vulnerabilitydetails + "\n"
                     description += "**vulnerabilitypackagepurl**: " + vulnerabilitypackagepurl + "\n"
-                    severity = vulnerability.get("database_specific",{}).get("severity", "")
-                    if severity != "":
-                        severity = severity.lower().capitalize()
-                    else:
-                        severity = "Info"
+                    sev = vulnerability.get("database_specific",{}).get("severity", "")
                     finding = Finding(
                         title=vulnerabilityid + "_" + package_name,
                         test=test,
                         description=description,
-                        severity=severity,
+                        severity=self.classify_severity(sev),
                         static_finding=True,
                         dynamic_finding=False,
                         component_name=package_name,
