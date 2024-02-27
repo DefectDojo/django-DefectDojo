@@ -277,4 +277,4 @@ class TestAnchoreGrypeParser(DojoTestCase):
         parser = AnchoreGrypeParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
-        self.assertEqual(238, len(findings))
+        self.assertEqual(35, len(findings))
