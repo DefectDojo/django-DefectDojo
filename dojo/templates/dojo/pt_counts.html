@@ -244,6 +244,7 @@
                     <th>{% trans "Name" %}</th>
                     <th>{% trans "Date" %}</th>
                     <th>{% trans "Severity" %}</th>
+                    <th>{% trans "EPSS Score / Percentile" %}</th>
                     <th>{% trans "Age" %}</th>
                     <th>{% trans "Product" %}</th>
                 </tr>
@@ -259,6 +260,11 @@
                         <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
                             <p class="text-danger">
                         {% else %}<p>{% endif %}{{ finding.severity_display }}</p></td>
+                        <td>
+                            {{ finding.epss_score|format_epss }}
+                            /
+                            {{ finding.epss_percentile|format_epss }}
+                        </td>
                         <td>{{ finding.age }}</td>
                         <td><a
                                 href="{% url 'view_product' finding.test.engagement.product.id %}"
