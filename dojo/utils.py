@@ -1784,12 +1784,6 @@ def engagement_post_Save(sender, instance, created, **kwargs):
                             url=reverse('view_engagement', args=(engagement.id,)))
 
 
-def merge_sets_safe(set1, set2):
-    return set(itertools.chain(set1 or [], set2 or []))
-    # This concat looks  better, but requires Python 3.6+
-    # return {*set1, *set2}
-
-
 def is_safe_url(url):
     try:
         # available in django 3+
