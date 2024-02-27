@@ -1706,5 +1706,4 @@ warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager
 if DEBUG:
     from django.utils.deprecation import RemovedInDjango50Warning
     warnings.filterwarnings("ignore", category=RemovedInDjango50Warning)
-    warnings.filterwarnings("ignore", message="'cgi' is deprecated and slated for removal in Python 3\\.13")
     warnings.filterwarnings("ignore", message="unclosed file .+")
