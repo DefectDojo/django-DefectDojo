@@ -49,6 +49,8 @@
         {% endif %}
     </td>
     <td>{{ similar_finding.cve }}</td>
+    <td>{{ similar_finding.epss_score|format_epss }}</td>
+    <td>{{ similar_finding.epss_percentile|format_epss }}</td>
     {% if similar_finding.file_path %}
         <td title="{{similar_finding.file_path}}{% if similar_finding.line > 0 %} (Line {{ similar_finding.line }}){% endif %}">
             {{ similar_finding.file_path|truncatechars_html:20 }}{% if similar_finding.line > 0 %} (Line {{ similar_finding.line }}){% endif %}
