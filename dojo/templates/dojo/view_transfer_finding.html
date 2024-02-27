@@ -88,7 +88,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal"><i class="fa-solid fa-circle-xmark"></i> Close</button>
-          <button type="button" class="btn btn-primary btn-sm" id="send-message-btn" ><i class="fa-solid fa-floppy-disk"></i> Save</i> </button>
+          <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal" id="send-message-btn" ><i class="fa-solid fa-floppy-disk"></i> Save</i> </button>
         </div>
       </div>
     </div>
@@ -192,10 +192,12 @@
       });
 
       $("#confirmed_action_modal").on('click', function(){
-
-
-        updateFindingsRiskStatus()
-        form.submit();
+        modal = $(this).closest('.modal')
+        transferFindingId = modal.data('tf-id')
+        action = modal.data('tf-action')
+        updateFindingsRiskStatus(action, transferFindingId)
+        modal.modal('hide')
+       // form.submit();
       });
 
       $("#risk_acceptance").on('click', '.btn-success, .btn-warning, .btn-danger', function() {
@@ -205,7 +207,7 @@
         if($(this).hasClass('btn-success')){ 
           transferFindingActions = "Accepted"
         }
-        else if($(this).hasClass('btn-warnigin')){
+        else if($(this).hasClass('btn-warning')){
           transferFindingActions = "Rejected"
         }
         else if($(this).hasClass('btn-danger')){
@@ -213,9 +215,8 @@
         }
 
         $('#confirmedModal').on('show.bs.modal', function (event) {
-          console.debug($(this))
-          $(this).data('tf-id', transferFindingId)
-          $(this).data('tf-action', "djaifjd")
+          $(this).data('tf-id', transferFindingId);
+          $(this).data('tf-action', transferFindingActions);
         }); 
       });
     });
@@ -255,6 +256,7 @@
   }
 
   function removeTransferFinding(tranferFindingId){
+    console.debug("Delete", transferFindingId)
     $.ajax({
         url: "/api/v2/transfer_finding/" + tranferFindingId + "/",
         type: "DELETE",
@@ -269,10 +271,9 @@
     })
   }
 
-  function updateFindingsRiskStatus(){
-    let btnClass = $(this).attr('class');
-    if (btnClass.includes('btn-success')){
-      let transferFindingId = $(this).data('tf-id');
+  function updateFindingsRiskStatus(action, transferFindingId ){
+    console.debug("actions is: " + action + " and transerFinding is: " + transferFindingId)
+    if (action == "Accepted"){
         generateRequestTransferFindingUpdate(transferFindingId, "Transfer Accepted")
         .then(function(requestFindingStatus) {
             updateFindings(requestFindingStatus)
@@ -281,19 +282,17 @@
             console.error("Error:", error);
         });
     }
-    if (btnClass.includes('btn-warning')) {
-        let transferFindingIdRejected = $(this).data('tf-id');
-      generateRequestTransferFindingUpdate(transferFindingIdRejected, "Transfer Rejected")
+    if (action == "Rejected"){
+      generateRequestTransferFindingUpdate(transferFindingId, "Transfer Rejected")
       .then(function(requestFindingStatus) {
           updateFindings(requestFindingStatus)
       })
       .catch(function(error) {
           console.error("Error:", error);
       });
-      if (btnClass.includes('btn-danger')) {
-          let transferFindingIdRemoved = $(this).data('tf-id');
-          removeTransferFinding(transferFindingIdRemoved)
-      }
+    }
+    if (action == "Removed"){
+      removeTransferFinding(transferFindingId)
     }
   }
 

@@ -32,11 +32,7 @@ $(document).ready(function() {
         }
     });
 
-$('#modalTransferFinding').on('hidden.bs.modal', function () {
-        // Limpiar las variables aquí
-        variable1 = null;
-        variable2 = null;
-    });
+
 
    
 });
@@ -175,3 +171,7 @@ function generateRequestTransferFindingUpdate(tranferFindingId, riskStatus){
 function deepCopy(objeto) {
     return JSON.parse(JSON.stringify(objeto));
 }
+
+//modal
+
+
