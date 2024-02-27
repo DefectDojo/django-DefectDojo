@@ -38,8 +38,8 @@
     {{ block.super }}
   
     <!-- Tu modal confirmed-->
-    <div class="modal fade" id="confirmedModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
+    <div class="modal fade" id="confirmedModal" data-tf-action="action" data-tf-id="None" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-sm" role="document">
       <div class="modal-content">
           <div class="modal-header">
           <h5 class="modal-title" id="confirmModalLabel"><h3> Action Confirmed <h3></h5>
@@ -52,7 +52,7 @@
           </div>
           <div class="modal-footer">
           <input type="button" class="btn btn-primary" data-dismiss="modal" value="Cancel">
-          <input id="confirmed_action_modal" type="button" class="btn btn-primary" name="#" value="Confirmed">
+          <input id="confirmed_action_modal" type="button" class="btn btn-success" name="#" value="Confirmed">
           </div>
       </div>
       </div>
@@ -128,13 +128,13 @@
                             <td>{{transfer_findings.accepted_by_username}}</td>
                             <td>
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Edit" %}
-                                    <button type="button" data-toggle="modal" data-target="#confirmedModal" class="btn btn-success btn-sm btn-tf-accepted" data-tf-accepted="{{transfer_findings.id}}">
+                                    <button type="button" data-toggle="modal" data-target="#confirmedModal" class="btn btn-success btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
                                     <i class="fas fa-check"></i>
                                     </button>
-                                    <button type="button" data-toggle="modal" data-target="#confirmedModal" class="btn btn-warning btn-sm btn-tf-rejected" data-tf-rejected="{{transfer_findings.id}}">
+                                    <button type="button" data-toggle="modal" data-target="#confirmedModal" class="btn btn-warning btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
                                     <i class="fas fa-times"></i>
                                     </button>
-                                    <button type="button" data-toggle="modal" data-target="#confirmedModal" class="btn btn-danger btn-sm btn-tf-remove" data-tf-removed="{{transfer_findings.id}}">
+                                    <button type="button" data-toggle="modal" data-target="#confirmedModal" class="btn btn-danger btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
                                     <i class="fas fa-trash-alt"></i>
                                     </button></i>
                             {% else%}
@@ -181,7 +181,6 @@
     // Event update
     $(document).ready(function() {
       $('#send-message-btn').on("click", function(){
-
         let tranferAcceptedFinding = filterForStatus(["Transfer Accepted", "Transfer Rejected"])
         if (typeof tranferAcceptedFinding === 'object' && Object.keys(tranferAcceptedFinding).length > 0){
           updateFindings(tranferAcceptedFinding)
@@ -190,44 +189,35 @@
         if (typeof removedFinding === 'object' && Object.keys(removedFinding).length > 0){
           removeFindings(removedFinding)
         }
-
-      $("#modalTransferFinding").modal("hide");
       });
 
+      $("#confirmed_action_modal").on('click', function(){
 
-      $('#risk_acceptance').on('click', '.btn-success, .btn-warning, .btn-danger', function() {
-        let btnClass = $(this).attr('class');
-        if (btnClass.includes('btn-success')) {
-          let transferFindingId = $(this).data('tf-accepted');
 
-            generateRequestTransferFindingUpdate(transferFindingId, "Transfer Accepted")
-            .then(function(requestFindingStatus) {
-                updateFindings(requestFindingStatus)
-            })
-            .catch(function(error) {
-                console.error("Error:", error);
-            });
+        updateFindingsRiskStatus()
+        form.submit();
+      });
+
+      $("#risk_acceptance").on('click', '.btn-success, .btn-warning, .btn-danger', function() {
+        // captura del boton
+        let transferFindingId = $(this).data('tf-id')
+        let transferFindingActions = ""
+        if($(this).hasClass('btn-success')){ 
+          transferFindingActions = "Accepted"
+        }
+        else if($(this).hasClass('btn-warnigin')){
+          transferFindingActions = "Rejected"
+        }
+        else if($(this).hasClass('btn-danger')){
+          transferFindingActions = "Removed"
         }
 
-        if (btnClass.includes('btn-warning')) {
-            let transferFindingIdRejected = $(this).data('tf-rejected');
-              generateRequestTransferFindingUpdate(transferFindingIdRejected, "Transfer Rejected")
-              .then(function(requestFindingStatus) {
-                  updateFindings(requestFindingStatus)
-              })
-              .catch(function(error) {
-                  console.error("Error:", error);
-              });
-        }
-        if (btnClass.includes('btn-danger')) {
-            let transferFindingIdRemoved = $(this).data('tf-removed');
-            removeTransferFinding(transferFindingIdRemoved)
-        }
-    });
-
-    $('#confirmed_action_modal').on("click")
-      console.log("realizar")
-
+        $('#confirmedModal').on('show.bs.modal', function (event) {
+          console.debug($(this))
+          $(this).data('tf-id', transferFindingId)
+          $(this).data('tf-action', "djaifjd")
+        }); 
+      });
     });
 
     function updateFindings(findingChangeStatus){
@@ -277,6 +267,34 @@
             console.log(error)
         }
     })
+  }
+
+  function updateFindingsRiskStatus(){
+    let btnClass = $(this).attr('class');
+    if (btnClass.includes('btn-success')){
+      let transferFindingId = $(this).data('tf-id');
+        generateRequestTransferFindingUpdate(transferFindingId, "Transfer Accepted")
+        .then(function(requestFindingStatus) {
+            updateFindings(requestFindingStatus)
+        })
+        .catch(function(error) {
+            console.error("Error:", error);
+        });
+    }
+    if (btnClass.includes('btn-warning')) {
+        let transferFindingIdRejected = $(this).data('tf-id');
+      generateRequestTransferFindingUpdate(transferFindingIdRejected, "Transfer Rejected")
+      .then(function(requestFindingStatus) {
+          updateFindings(requestFindingStatus)
+      })
+      .catch(function(error) {
+          console.error("Error:", error);
+      });
+      if (btnClass.includes('btn-danger')) {
+          let transferFindingIdRemoved = $(this).data('tf-id');
+          removeTransferFinding(transferFindingIdRemoved)
+      }
+    }
   }
 
 </script>

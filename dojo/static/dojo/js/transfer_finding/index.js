@@ -64,7 +64,7 @@ function RemoveFinding(findingId){
 }
 
 function RejectFinding(findingId){
-    ObjFindings[findingId] = {"risk_status": "Transfer Reject"}
+    ObjFindings[findingId] = {"risk_status": "Transfer Rejected"}
 }
 
 function requestRiskStatusFinding(findingId, riskStatus){
