@@ -32,7 +32,6 @@ from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Pr
 from asteval import Interpreter
 from dojo.notifications.helper import create_notification
 import logging
-import itertools
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 import crum
