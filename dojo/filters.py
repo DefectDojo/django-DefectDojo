@@ -1,4 +1,5 @@
 import collections
+import warnings
 from drf_spectacular.types import OpenApiTypes
 
 from drf_spectacular.utils import extend_schema_field
@@ -28,6 +29,7 @@ from dojo.models import Dojo_User, Finding_Group, Product_API_Scan_Configuration
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 import tagulous
+from polymorphic.base import ManagerInheritanceWarning
 # from tagulous.forms import TagWidget
 # import tagulous
 from dojo.authorization.roles_permissions import Permissions
@@ -154,7 +156,17 @@ class FindingSLAFilter(ChoiceFilter):
 
     def sla_violated(self, qs, name):
         # return active findings that have an sla expiration date before today
-        return qs.filter(Q(active=True) & Q(sla_expiration_date__lt=timezone.now().date()))
+        return qs.filter(
+            Q(
+                active=True,
+                false_p=False,
+                duplicate=False,
+                out_of_scope=False,
+                risk_accepted=False,
+                is_mitigated=False,
+                mitigated=None,
+            ) & Q(sla_expiration_date__lt=timezone.now().date())
+        )
 
     options = {
         None: (_('Any'), any),
@@ -322,6 +334,8 @@ def get_finding_filterset_fields(metrics=False, similar=False):
                 'unique_id_from_tool',
                 'vuln_id_from_tool',
                 'service',
+                'epss_score',
+                'epss_percentile'
     ])
 
     if similar:
@@ -1443,6 +1457,8 @@ class FindingFilter(FindingFilterWithTags):
             ('test__engagement__product__name',
              'test__engagement__product__name'),
             ('service', 'service'),
+            ('epss_score', 'epss_score'),
+            ('epss_percentile', 'epss_percentile'),
         ),
         field_labels={
             'numerical_severity': 'Severity',
@@ -1451,6 +1467,8 @@ class FindingFilter(FindingFilterWithTags):
             'mitigated': 'Mitigated Date',
             'title': 'Finding Name',
             'test__engagement__product__name': 'Product Name',
+            'epss_score': 'EPSS Score',
+            'epss_percentile': 'EPSS Percentile',
         }
     )
 
@@ -1464,7 +1482,8 @@ class FindingFilter(FindingFilterWithTags):
                    'numerical_severity', 'line', 'duplicate_finding',
                    'hash_code', 'reviewers', 'created', 'files',
                    'sla_start_date', 'sla_expiration_date', 'cvssv3',
-                   'severity_justification', 'steps_to_reproduce']
+                   'severity_justification', 'steps_to_reproduce',
+                   'epss_score', 'epss_percentile']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -2404,12 +2423,13 @@ class QuestionTypeFilter(ChoiceFilter):
         return self.options[value][1](self, qs, self.options[value][0])
 
 
-class QuestionFilter(FilterSet):
-    text = CharFilter(lookup_expr='icontains')
-    type = QuestionTypeFilter()
+with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
+    class QuestionFilter(FilterSet):
+        text = CharFilter(lookup_expr='icontains')
+        type = QuestionTypeFilter()
 
-    class Meta:
-        model = Question
-        exclude = ['polymorphic_ctype', 'created', 'modified', 'order']
+        class Meta:
+            model = Question
+            exclude = ['polymorphic_ctype', 'created', 'modified', 'order']
 
-    question_set = FilterSet
+        question_set = FilterSet

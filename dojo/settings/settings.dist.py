@@ -9,6 +9,7 @@ import json
 import logging
 import warnings
 
+
 logger = logging.getLogger(__name__)
 
 # See https://documentation.defectdojo.com/getting_started/configuration/ for options
@@ -1178,6 +1179,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Cloudsploit Scan': ['title', 'description'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube API Import': ['title', 'file_path', 'line'],
+    'Sonatype Application Scan': ['title', 'cwe', 'file_path', 'component_name', 'component_version', 'vulnerability_ids'],
     'Dependency Check Scan': ['title', 'cwe', 'file_path'],
     'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'vulnerability_ids'],
@@ -1241,6 +1243,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Humble Json Importer': ['title'],
     'MSDefender Parser': ['title', 'description'],
     'HCLAppScan XML': ['title', 'description'],
+    'KICS Scan': ['file_path', 'line', 'severity', 'description', 'title'],
     'MobSF Scan': ['title', 'description', 'severity'],
     'OSV Scan': ['title', 'description', 'severity'],
 }
@@ -1368,6 +1371,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
     'SonarQube API Import': DEDUPE_ALGO_HASH_CODE,
+    'Sonatype Application Scan': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
     'Dockle Scan': DEDUPE_ALGO_HASH_CODE,
     'Tenable Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1408,7 +1412,6 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Meterian Scan': DEDUPE_ALGO_HASH_CODE,
     'Github Vulnerability Scan': DEDUPE_ALGO_HASH_CODE,
     'Cloudsploit Scan': DEDUPE_ALGO_HASH_CODE,
-    'KICS Scan': DEDUPE_ALGO_HASH_CODE,
     'SARIF': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Azure Security Center Recommendations Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Hadolint Dockerfile check': DEDUPE_ALGO_HASH_CODE,
@@ -1451,8 +1454,10 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Wazuh Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'MSDefender Parser': DEDUPE_ALGO_HASH_CODE,
     'HCLAppScan XML': DEDUPE_ALGO_HASH_CODE,
+    'KICS Scan': DEDUPE_ALGO_HASH_CODE,
     'MobSF Scan': DEDUPE_ALGO_HASH_CODE,
     'OSV Scan': DEDUPE_ALGO_HASH_CODE,
+    'Nosey Parker Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1688,9 +1693,20 @@ AUDITLOG_FLUSH_RETENTION_PERIOD = env('DD_AUDITLOG_FLUSH_RETENTION_PERIOD')
 ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
 USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
 
-# TODO - these warnings needs to be removed
+
+# ------------------------------------------------------------------------------
+# Ignored Warnings
+# ------------------------------------------------------------------------------
+# These warnings are produce by polymorphic beacuser of weirdness around cascade deletes. We had to do
+# some pretty out of pocket things to correct this behaviors to correct this weirdness, and therefore
+# some warnings are produced trying to steer us in the right direction. Ignore those
+# Reference issue: https://github.com/jazzband/django-polymorphic/issues/229
+warnings.filterwarnings("ignore", message="polymorphic.base.ManagerInheritanceWarning.*")
+warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager.*")
+
+
+# TODO - these warnings needs to be removed after all warnings have been removed
 if DEBUG:
     from django.utils.deprecation import RemovedInDjango50Warning
     warnings.filterwarnings("ignore", category=RemovedInDjango50Warning)
-    warnings.filterwarnings("ignore", message="'cgi' is deprecated and slated for removal in Python 3\\.13")
     warnings.filterwarnings("ignore", message="unclosed file .+")

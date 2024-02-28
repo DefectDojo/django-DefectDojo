@@ -93,3 +93,15 @@ class TestParsers(DojoTestCase):
                         if ".read()" in str(line):
                             read_true = True
                             i = 0
+
+    def test_parser_existence(self):
+        for docs in os.scandir(os.path.join(basedir, 'docs', 'content', 'en', 'integrations', 'parsers', 'file')):
+            if docs.name not in [
+                '_index.md', 'codeql.md', 'edgescan.md'
+            ]:
+                with self.subTest(parser=docs.name.split('.md')[0], category='parser'):
+                    parser = os.path.join(basedir, 'dojo', 'tools', f"{docs.name.split('.md')[0]}", "parser.py")
+                    self.assertTrue(
+                        os.path.isfile(parser),
+                        f"Parser '{parser}' is missing or using different name"
+                                    )

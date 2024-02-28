@@ -322,6 +322,12 @@
                                     <th>
                                         {% trans "Vulnerability Id" %}
                                     </th>
+                                    <th>
+                                        {% trans "EPSS Score" %}
+                                    </th>
+                                    <th>
+                                        {% trans "EPSS Percentile" %}
+                                    </th>
                                     <th class="nowrap">
                                         {% if filter_name == 'Closed' %}
                                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
@@ -594,6 +600,12 @@
                                             {% endwith %}
                                         </td>
                                         <td class="nowrap">
+                                            {{ finding.epss_score|format_epss }}
+                                        </td>
+                                        <td class="nowrap">
+                                            {{ finding.epss_percentile|format_epss }}
+                                        </td>
+                                        <td class="nowrap">
                                             {% if filter_name == 'Closed' %}
                                                 {{ finding.mitigated|date }}
                                             {% else %}
@@ -710,6 +722,12 @@
     <script type="application/javascript" src="{% static "chosen-js/chosen.jquery.min.js" %}"></script>
     <script type="application/javascript">
         {% block datatables_columns %}
+            var percentSort = function(data, type, row, meta) {
+                if(type === 'sort') {
+                    return (data && data.endsWith("%")) ? parseFloat(data.slice(0, -1)) : -1.00;
+                }
+                return data;
+            }
             var datatables_columns = [
                 {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
                     { "data": "checkbox" },
@@ -721,6 +739,8 @@
                     }},
                     { "data": "cwe" },
                     { "data": "cve" },
+                    { "data": "epss_score", "type": "num", "render": percentSort },
+                    { "data": "epss_percentile", "type": "num", "render": percentSort },
                     { "data": "found_date" },
                     { "data": "finding_age" },
                 {% if system_settings.enable_finding_sla %}
