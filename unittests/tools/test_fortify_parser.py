@@ -1,12 +1,11 @@
 from dojo.models import Test
 from dojo.tools.fortify.parser import FortifyParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from ..dojo_test_case import DojoTestCase
 
 
 class TestFortifyParser(DojoTestCase):
     def test_fortify_many_findings(self):
-        testfile = get_unit_tests_path() + "/scans/fortify/fortify_many_findings.xml"
+        testfile = open("unittests/scans/fortify/fortify_many_findings.xml")
         parser = FortifyParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(324, len(findings))
@@ -18,7 +17,7 @@ class TestFortifyParser(DojoTestCase):
             self.assertEqual(81, finding.line)
 
     def test_fortify_few_findings(self):
-        testfile = get_unit_tests_path() + "/scans/fortify/fortify_few_findings.xml"
+        testfile = open("unittests/scans/fortify/fortify_few_findings.xml")
         parser = FortifyParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(2, len(findings))
@@ -31,7 +30,7 @@ class TestFortifyParser(DojoTestCase):
             self.assertEqual('53C25D2FC6950554F16D3CEF9E41EF6F', finding.unique_id_from_tool)
 
     def test_fortify_few_findings_count_chart(self):
-        testfile = get_unit_tests_path() + "/scans/fortify/fortify_few_findings_count_chart.xml"
+        testfile = open("unittests/scans/fortify/fortify_few_findings_count_chart.xml")
         parser = FortifyParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(3, len(findings))
@@ -44,7 +43,7 @@ class TestFortifyParser(DojoTestCase):
             self.assertEqual('53C25D2FC6950554F16D3CEF9E41EF6F', finding.unique_id_from_tool)
 
     def test_fortify_issue6260(self):
-        testfile = get_unit_tests_path() + "/scans/fortify/issue6260.xml"
+        testfile = open("unittests/scans/fortify/issue6260.xml")
         parser = FortifyParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(16, len(findings))
@@ -57,7 +56,7 @@ class TestFortifyParser(DojoTestCase):
             self.assertEqual('7A2F1C728BDDBB17C7CB31CEDF5D8F85', finding.unique_id_from_tool)
 
     def test_fortify_issue6082(self):
-        testfile = get_unit_tests_path() + "/scans/fortify/issue6082.xml"
+        testfile = open("unittests/scans/fortify/issue6082.xml")
         parser = FortifyParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(2, len(findings))
@@ -75,3 +74,16 @@ class TestFortifyParser(DojoTestCase):
             self.assertEqual("src/adrui/MyContextListener.java", finding.file_path)
             self.assertEqual(28, finding.line)
             self.assertEqual('B5B15F27E10F4D7799BD0ED1E6D34C5D', finding.unique_id_from_tool)
+
+    def test_fortify_many_fdr_findings(self):
+        testfile = open("unittests/scans/fortify/many_findings.fpr")
+        parser = FortifyParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(61, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("Cross-Site Request Forgery 114E5A67-3446-4DD5-B578-D0E6FDBB304E", finding.title)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual('114E5A67-3446-4DD5-B578-D0E6FDBB304E', finding.unique_id_from_tool)
+            finding = findings[12]
+            self.assertEqual("Critical", finding.severity)
