@@ -1506,7 +1506,6 @@ class FindingFilter(FindingFilterWithTags):
         self.form.fields['before'].widget = date_input_widget
         self.form.fields['after'].widget = date_input_widget
 
-
         # Don't show the product filter on the product finding view
         if self.pid:
             del self.form.fields['test__engagement__product']
