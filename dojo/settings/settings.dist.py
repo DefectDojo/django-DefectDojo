@@ -9,6 +9,7 @@ import json
 import logging
 import warnings
 
+
 logger = logging.getLogger(__name__)
 
 # See https://documentation.defectdojo.com/getting_started/configuration/ for options
@@ -489,7 +490,6 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.MD5PasswordHasher',
     'django.contrib.auth.hashers.UnsaltedSHA1PasswordHasher',
     'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
-    'django.contrib.auth.hashers.CryptPasswordHasher',
 ]
 
 SOCIAL_AUTH_PIPELINE = (
@@ -1454,6 +1454,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'HCLAppScan XML': DEDUPE_ALGO_HASH_CODE,
     'KICS Scan': DEDUPE_ALGO_HASH_CODE,
     'MobSF Scan': DEDUPE_ALGO_HASH_CODE,
+    'Nosey Parker Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1699,11 +1700,3 @@ USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
 # Reference issue: https://github.com/jazzband/django-polymorphic/issues/229
 warnings.filterwarnings("ignore", message="polymorphic.base.ManagerInheritanceWarning.*")
 warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager.*")
-
-
-# TODO - these warnings needs to be removed after all warnings have been removed
-if DEBUG:
-    from django.utils.deprecation import RemovedInDjango50Warning
-    warnings.filterwarnings("ignore", category=RemovedInDjango50Warning)
-    warnings.filterwarnings("ignore", message="'cgi' is deprecated and slated for removal in Python 3\\.13")
-    warnings.filterwarnings("ignore", message="unclosed file .+")

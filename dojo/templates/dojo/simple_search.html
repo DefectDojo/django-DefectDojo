@@ -112,6 +112,7 @@
                         <thead>
                         <tr>
                             <th>{% trans "Vulnerability Id" %}</th>
+                            <th>{% trans "EPSS Score / Percentile" %}</th>
                             <th>{% trans "Product" %}</th>
                             <th>{% trans "Engagement" %}</th>
                             <th>{% trans "Test" %}</th>
@@ -125,6 +126,11 @@
                                 <td>
                                     <a class="search-finding" href="{% url 'view_finding' vulnerability_id.finding.id %}">
                                         {{ vulnerability_id.vulnerability_id }}</a>
+                                </td>
+                                <td>
+                                    {{ vulnerability_id.finding.epss_score|format_epss }}
+                                    /
+                                    {{ vulnerability_id.finding.epss_percentile|format_epss }}
                                 </td>
                                 <td>
                                     <a href="{% url 'view_product' vulnerability_id.finding.test.engagement.product.id %}">
