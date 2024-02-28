@@ -19,3 +19,6 @@ then analyze it
 ```shell
 CodeChecker analyze ./codechecker.log -o /path/to/codechecker/analyzer/output/directory
 ```
+
+### Sample Scan Data
+Sample Codechecker Report native scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/codechecker).

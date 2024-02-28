@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /secret-file-loader.sh
+
 # Allow for bind-mount multiple settings.py overrides
 FILES=$(ls /app/docker/extra_settings/* 2>/dev/null)
 NUM_FILES=$(echo "$FILES" | wc -w)

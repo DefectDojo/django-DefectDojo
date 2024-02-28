@@ -268,7 +268,7 @@ class BaseListFindings:
         product_id: int = None,
         engagement_id: int = None,
         test_id: int = None,
-        order_by: str = "numerical_severity",
+        order_by: str = "-date",
         prefetch_type: str = "all",
     ):
         self.filter_name = filter_name
@@ -285,7 +285,7 @@ class BaseListFindings:
 
     def get_order_by(self):
         if not hasattr(self, "order_by"):
-            self.order_by = "numerical_severity"
+            self.order_by = "-date"
         return self.order_by
 
     def get_prefetch_type(self):

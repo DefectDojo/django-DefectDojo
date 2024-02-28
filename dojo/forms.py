@@ -117,6 +117,7 @@ from dojo.user.queries import (
 )
 from dojo.user.utils import get_configuration_permissions_fields
 from dojo.group.queries import get_authorized_groups, get_group_member_roles
+import dojo.jira_link.helper as jira_helper
 
 logger = logging.getLogger(__name__)
 
@@ -193,7 +194,6 @@ class MonthYearWidget(Widget):
                 if match:
                     year_val,
                     month_val,
-                    day_val = [int(v) for v in match.groups()]
 
         output = []
 
@@ -382,6 +382,12 @@ class ProductForm(forms.ModelForm):
         self.fields["prod_type"].queryset = get_authorized_product_types(
             Permissions.Product_Type_Add_Product
         )
+
+        # if this product has findings being asynchronously updated, disable the sla config field
+        if self.instance.async_updating:
+            self.fields['sla_configuration'].disabled = True
+            self.fields['sla_configuration'].widget.attrs['message'] = 'Finding SLA expiration dates are currently being recalculated. ' + \
+                                                                       'This field cannot be changed until the calculation is complete.'
 
     class Meta:
         model = Product
@@ -657,21 +663,23 @@ class ImportScanForm(forms.Form):
     # Close Old Findings has changed. The default is engagement only, and it requires a second flag to expand to the product scope.
     # Exposing the choice as two different check boxes.
     # If 'close_old_findings_product_scope' is selected, the backend will ensure that both flags are set.
-    close_old_findings = forms.BooleanField(
-        help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
-        "If service has been set, only the findings for this service will be closed. "
-        "This only affects findings within the same engagement.",
-        label="Close old findings within this engagement",
+    close_old_findings = forms.BooleanField(help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
+                                                        "If service has been set, only the findings for this service will be closed. "
+                                                        "This only affects findings within the same engagement.",
+                                            label="Close old findings within this engagement",
+                                            required=False,
+                                            initial=False)
+    close_old_findings_product_scope = forms.BooleanField(help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
+                                                        "If service has been set, only the findings for this service will be closed. "
+                                                        "This only affects findings within the same product.",
+                                            label="Close old findings within this product",
+                                            required=False,
+                                            initial=False)
+    apply_tags_to_findings = forms.BooleanField(
+        help_text="If set to True, the tags will be applied to the findings",
+        label="Apply Tags to Findings",
         required=False,
-        initial=False,
-    )
-    close_old_findings_product_scope = forms.BooleanField(
-        help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
-        "If service has been set, only the findings for this service will be closed. "
-        "This only affects findings within the same product.",
-        label="Close old findings within this product",
-        required=False,
-        initial=False,
+        initial=False
     )
 
     if is_finding_groups_enabled():
@@ -789,39 +797,21 @@ class ReImportScanForm(forms.Form):
         ),
         label="Choose report file",
         allow_empty_file=True,
+        required=False)
+    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get closed as mitigated when importing.",
+                                            required=False, initial=True)
+    version = forms.CharField(max_length=100, required=False, help_text="Version that will be set on existing Test object. Leave empty to leave existing value in place.")
+    branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
+    commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
+    build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
+    api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
+    service = forms.CharField(max_length=200, required=False, help_text="A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set.")
+    source_code_management_uri = forms.URLField(max_length=600, required=False, help_text="Resource link to source code")
+    apply_tags_to_findings = forms.BooleanField(
+        help_text="If set to True, the tags will be applied to the findings",
+        label="Apply Tags to Findings",
         required=False,
-    )
-    close_old_findings = forms.BooleanField(
-        help_text="Select if old findings no longer present in the report get closed as mitigated when importing.",
-        required=False,
-        initial=True,
-    )
-    version = forms.CharField(
-        max_length=100,
-        required=False,
-        help_text="Version that will be set on existing Test object. Leave empty to leave existing value in place.",
-    )
-    branch_tag = forms.CharField(
-        max_length=100, required=False, help_text="Branch or Tag that was scanned."
-    )
-    commit_hash = forms.CharField(
-        max_length=100, required=False, help_text="Commit that was scanned."
-    )
-    build_id = forms.CharField(
-        max_length=100, required=False, help_text="ID of the build that was scanned."
-    )
-    api_scan_configuration = forms.ModelChoiceField(
-        Product_API_Scan_Configuration.objects,
-        required=False,
-        label="API Scan Configuration",
-    )
-    service = forms.CharField(
-        max_length=200,
-        required=False,
-        help_text="A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set.",
-    )
-    source_code_management_uri = forms.URLField(
-        max_length=600, required=False, help_text="Resource link to source code"
+        initial=False
     )
 
     if is_finding_groups_enabled():
@@ -977,8 +967,8 @@ class MergeFindings(forms.ModelForm):
     )
 
     def __init__(self, *args, **kwargs):
-        finding = kwargs.pop("finding")
-        findings = kwargs.pop("findings")
+        _ = kwargs.pop('finding')
+        findings = kwargs.pop('findings')
         super(MergeFindings, self).__init__(*args, **kwargs)
 
         self.fields["finding_to_merge_into"] = forms.ModelChoiceField(
@@ -1051,17 +1041,12 @@ class EditRiskAcceptanceForm(forms.ModelForm):
 class RiskPendingForm(forms.ModelForm):
     name = forms.CharField(max_length=255, required=True)
     accepted_findings = forms.ModelMultipleChoiceField(
-        queryset=Finding.objects.none(),
-        required=True,
-        widget=forms.widgets.SelectMultiple(attrs={"size": 1}),
-        help_text=("Active, verified findings listed, please select to add findings."),
-    )
-    recommendation = forms.ChoiceField(
-        choices=Risk_Acceptance.TREATMENT_CHOICES,
-        initial=Risk_Acceptance.TREATMENT_ACCEPT,
-        widget=forms.RadioSelect,
-        label="Security Recommendation",
-    )
+        queryset=Finding.objects.none(), required=True,
+        widget=forms.widgets.SelectMultiple(attrs={'size': 1}),
+        help_text=('Active, verified findings listed, please select to add findings.'))
+    # recommendation = forms.ChoiceField(choices=Risk_Acceptance.TREATMENT_CHOICES,
+    #                                    initial=Risk_Acceptance.TREATMENT_ACCEPT,
+    #                                    widget=forms.RadioSelect, label="Security Recommendation")
     accepted_by = forms.ModelMultipleChoiceField(
         queryset=Dojo_User.objects.none(),
         required=True,
@@ -1083,17 +1068,10 @@ class RiskPendingForm(forms.ModelForm):
 
     class Meta:
         model = Risk_Acceptance
-        fields = [
-            "name",
-            "accepted_findings",
-            "recommendation",
-            "recommendation_details",
-            "path",
-            "accepted_by",
-            "path",
-            "expiration_date",
-            "owner",
-        ]
+        fields = ["name", "accepted_findings",
+                  "recommendation", "recommendation_details",
+                  "path", "accepted_by", "path",
+                  "expiration_date", "owner"]
 
     def __init__(self, *args, **kwargs):
         severity = kwargs.pop("severity", None)
@@ -1713,32 +1691,9 @@ class AdHocFindingForm(forms.ModelForm):
     )
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = (
-        "title",
-        "date",
-        "cwe",
-        "vulnerability_ids",
-        "severity",
-        "cvssv3",
-        "description",
-        "mitigation",
-        "impact",
-        "request",
-        "response",
-        "steps_to_reproduce",
-        "severity_justification",
-        "endpoints",
-        "endpoints_to_add",
-        "references",
-        "active",
-        "verified",
-        "false_p",
-        "duplicate",
-        "out_of_scope",
-        "risk_accepted",
-        "under_defect_review",
-        "sla_start_date",
-    )
+    field_order = ('title', 'date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
+                   'severity_justification', 'endpoints', 'endpoints_to_add', 'references', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
+                   'risk_accepted', 'under_defect_review', 'sla_start_date', 'sla_expiration_date')
 
     def __init__(self, *args, **kwargs):
         req_resp = kwargs.pop("req_resp")
@@ -1783,21 +1738,9 @@ class AdHocFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = (
-            "reporter",
-            "url",
-            "numerical_severity",
-            "under_review",
-            "reviewers",
-            "cve",
-            "inherited_tags",
-            "review_requested_by",
-            "is_mitigated",
-            "jira_creation",
-            "jira_change",
-            "endpoint_status",
-            "sla_start_date",
-        )
+        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers', 'cve', 'inherited_tags',
+                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoints', 'sla_start_date',
+                   'sla_expiration_date')
 
 
 class PromoteFindingForm(forms.ModelForm):
@@ -1844,36 +1787,10 @@ class PromoteFindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = (
-        "title",
-        "group",
-        "date",
-        "sla_start_date",
-        "cwe",
-        "vulnerability_ids",
-        "severity",
-        "cvssv3",
-        "cvssv3_score",
-        "description",
-        "mitigation",
-        "impact",
-        "request",
-        "response",
-        "steps_to_reproduce",
-        "severity_justification",
-        "endpoints",
-        "endpoints_to_add",
-        "references",
-        "active",
-        "mitigated",
-        "mitigated_by",
-        "verified",
-        "false_p",
-        "duplicate",
-        "out_of_scope",
-        "risk_accept",
-        "under_defect_review",
-    )
+    field_order = ('title', 'group', 'date', 'sla_start_date', 'sla_expiration_date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3',
+                   'cvssv3_score', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce', 'severity_justification',
+                   'endpoints', 'endpoints_to_add', 'references', 'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
+                   'out_of_scope', 'risk_accept', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
         product = None
@@ -2001,36 +1918,10 @@ class FindingForm(forms.ModelForm):
     )
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = (
-        "title",
-        "group",
-        "date",
-        "sla_start_date",
-        "cwe",
-        "vulnerability_ids",
-        "severity",
-        "cvssv3",
-        "cvssv3_score",
-        "description",
-        "mitigation",
-        "impact",
-        "request",
-        "response",
-        "steps_to_reproduce",
-        "severity_justification",
-        "endpoints",
-        "endpoints_to_add",
-        "references",
-        "active",
-        "mitigated",
-        "mitigated_by",
-        "verified",
-        "false_p",
-        "duplicate",
-        "out_of_scope",
-        "risk_accept",
-        "under_defect_review",
-    )
+    field_order = ('title', 'group', 'date', 'sla_start_date', 'sla_expiration_date', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3',
+                   'cvssv3_score', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce', 'severity_justification',
+                   'endpoints', 'endpoints_to_add', 'references', 'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
+                   'out_of_scope', 'risk_accept', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
         req_resp = None
@@ -2084,7 +1975,8 @@ class FindingForm(forms.ModelForm):
                 "You can mark findings as duplicate only from the view finding page."
             )
 
-        self.fields["sla_start_date"].disabled = True
+        self.fields['sla_start_date'].disabled = True
+        self.fields['sla_expiration_date'].disabled = True
 
         if self.can_edit_mitigated_data:
             if hasattr(self, "instance"):
@@ -3468,7 +3360,8 @@ class JIRAForm(forms.ModelForm):
         form_data = self.cleaned_data
 
         try:
-            jira = jira_helper.get_jira_connection_raw(
+            # Attempt to validate the credentials before moving forward
+            _ = jira_helper.get_jira_connection_raw(
                 form_data["url"], form_data["username"], form_data["password"]
             )
             logger.debug("valid JIRA config!")
@@ -3512,12 +3405,9 @@ class ExpressJIRAForm(forms.ModelForm):
         form_data = self.cleaned_data
 
         try:
-            jira = jira_helper.get_jira_connection_raw(
-                form_data["url"],
-                form_data["username"],
-                form_data["password"],
-            )
-            logger.debug("valid JIRA config!")
+            # Attempt to validate the credentials before moving forward
+            _ = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'],)
+            logger.debug('valid JIRA config!')
         except Exception as e:
             # form only used by admins, so we can show full error message using str(e) which can help debug any problems
             message = (
@@ -3599,6 +3489,23 @@ class ToolTypeForm(forms.ModelForm):
         model = Tool_Type
         exclude = ["product"]
 
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.get('instance', None)
+        self.newly_created = True
+        if instance is not None:
+            self.newly_created = instance.pk is None
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        form_data = self.cleaned_data
+        if self.newly_created:
+            name = form_data.get("name")
+            # Make sure this will not create a duplicate test type
+            if Tool_Type.objects.filter(name=name).count() > 0:
+                raise forms.ValidationError('A Tool Type with the name already exists')
+
+        return form_data
+
 
 class RegulationForm(forms.ModelForm):
     class Meta:
@@ -3666,6 +3573,22 @@ class ToolConfigForm(forms.ModelForm):
 
 
 class SLAConfigForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SLAConfigForm, self).__init__(*args, **kwargs)
+
+        # if this sla config has findings being asynchronously updated, disable the days by severity fields
+        if self.instance.async_updating:
+            msg = 'Finding SLA expiration dates are currently being recalculated. ' + \
+                  'This field cannot be changed until the calculation is complete.'
+            self.fields['critical'].disabled = True
+            self.fields['critical'].widget.attrs['message'] = msg
+            self.fields['high'].disabled = True
+            self.fields['high'].widget.attrs['message'] = msg
+            self.fields['medium'].disabled = True
+            self.fields['medium'].widget.attrs['message'] = msg
+            self.fields['low'].disabled = True
+            self.fields['low'].widget.attrs['message'] = msg
+
     class Meta:
         model = SLA_Configuration
         fields = ["name", "description", "critical", "high", "medium", "low"]
@@ -3850,23 +3773,17 @@ class ProductNotificationsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ProductNotificationsForm, self).__init__(*args, **kwargs)
         if not self.instance.id:
-            self.initial["engagement_added"] = ""
-            self.initial["close_engagement"] = ""
-            self.initial["test_added"] = ""
-            self.initial["scan_added"] = ""
-            self.initial["sla_breach"] = ""
-            self.initial["risk_acceptance_expiration"] = ""
+            self.initial['engagement_added'] = ''
+            self.initial['close_engagement'] = ''
+            self.initial['test_added'] = ''
+            self.initial['scan_added'] = ''
+            self.initial['sla_breach'] = ''
+            self.initial['sla_breach_combined'] = ''
+            self.initial['risk_acceptance_expiration'] = ''
 
     class Meta:
         model = Notifications
-        fields = [
-            "engagement_added",
-            "close_engagement",
-            "test_added",
-            "scan_added",
-            "sla_breach",
-            "risk_acceptance_expiration",
-        ]
+        fields = ['engagement_added', 'close_engagement', 'test_added', 'scan_added', 'sla_breach', 'sla_breach_combined', 'risk_acceptance_expiration']
 
 
 class AjaxChoiceField(forms.ChoiceField):
@@ -4177,11 +4094,9 @@ class JIRAFindingForm(forms.Form):
             self.fields["jira_issue"].disabled = True
 
     def clean(self):
-        logger.debug("jform clean")
-        import dojo.jira_link.helper as jira_helper
-
-        cleaned_data = super(JIRAFindingForm, self).clean()
-        jira_issue_key_new = self.cleaned_data.get("jira_issue")
+        logger.debug('jform clean')
+        super(JIRAFindingForm, self).clean()
+        jira_issue_key_new = self.cleaned_data.get('jira_issue')
         finding = self.instance
         jira_project = self.jira_project
 
@@ -4373,18 +4288,9 @@ class LoginBanner(forms.Form):
 
 
 class AnnouncementCreateForm(forms.ModelForm):
-    dismissable = forms.BooleanField(
-        label=_("Dismissable?"),
-        initial=False,
-        required=False,
-        help_text=_(
-            "Ticking this box allows users to dismiss the current announcement"
-        ),
-    )
-
     class Meta:
         model = Announcement
-        fields = ["message", "style"]
+        fields = "__all__"
 
 
 class AnnouncementRemoveForm(AnnouncementCreateForm):
@@ -4456,8 +4362,6 @@ class TextQuestionForm(QuestionForm):
             required=not self.question.optional,
             initial=initial_answer,
         )
-
-        answer = self.fields["answer"]
 
     def save(self):
         if not self.is_valid():
@@ -4535,7 +4439,7 @@ class ChoiceQuestionForm(QuestionForm):
         real_answer = self.cleaned_data.get("answer")
 
         # for single choice questions, the selected answer is a single string
-        if type(real_answer) is not list:
+        if not isinstance(real_answer, list):
             real_answer = [real_answer]
         return real_answer
 

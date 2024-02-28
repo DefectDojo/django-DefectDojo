@@ -23,7 +23,7 @@ class TwistlockCSVParser(object):
         row.get("Id", "")
         data_severity = row.get("Severity", "")
         data_cvss = row.get("CVSS", "")
-        data_description = description_column = row.get("Description", "")
+        data_description = row.get("Description", "")
 
         if data_vulnerability_id and data_package_name:
             title = (
@@ -185,6 +185,7 @@ def get_item(vulnerability, test):
             vector, cvss, riskFactors
         ),
         impact=severity,
+        vuln_id_from_tool= vulnerability['id']
     )
     finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
     finding.unsaved_vulnerability_ids = [vulnerability["id"]]
@@ -198,6 +199,14 @@ def convert_severity(severity):
         return "High"
     elif severity.lower() == "moderate":
         return "Medium"
+    elif severity.lower() == "unimportant":
+        return "Low"
+    elif severity.lower() == "unassigned":
+        return "Low"
+    elif severity.lower() == "negligible":
+        return "Low"
+    elif severity.lower() == "not yet assigned":
+        return "Low"
     elif severity.lower() == "information":
         return "Info"
     elif severity.lower() == "informational":

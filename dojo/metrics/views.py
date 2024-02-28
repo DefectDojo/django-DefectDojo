@@ -377,7 +377,7 @@ def get_closed_in_period_details(findings):
     return closed_in_period_counts, closed_in_period_details
 
 
-@cache_page(60 * 5)  # cache for 5 minutes
+@cache_page(60 * 15)  # cache for 15 minutes
 @vary_on_cookie
 def metrics(request, mtype):
     template = 'dojo/metrics.html'
@@ -390,7 +390,6 @@ def metrics(request, mtype):
         request.GET._mutable = True
         request.GET.appendlist('test__engagement__product__prod_type', mtype)
         request.GET._mutable = False
-        product = pt[0].name
         show_pt_filter = False
         page_name = _('%(product_type)s Metrics') % {'product_type': mtype}
         prod_type = pt
@@ -465,7 +464,7 @@ simple metrics for easy reporting
 """
 
 
-@cache_page(60 * 5)  # cache for 5 minutes
+@cache_page(60 * 15)  # cache for 15 minutes
 @vary_on_cookie
 def simple_metrics(request):
     page_name = _('Simple Metrics')

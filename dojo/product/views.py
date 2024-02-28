@@ -62,15 +62,7 @@ logger = logging.getLogger(__name__)
 
 
 def product(request):
-    # validate prod_type param
-    product_type = None
-    if 'prod_type' in request.GET:
-        p = request.GET.getlist('prod_type', [])
-        if len(p) == 1:
-            product_type = get_object_or_404(Product_Type, id=p[0])
-
     prods = get_authorized_products(Permissions.Product_View)
-
     # perform all stuff for filtering and pagination first, before annotation/prefetching
     # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records
     # see https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
@@ -517,7 +509,6 @@ def view_product_metrics(request, pid):
 
     start_date = filters['start_date']
     end_date = filters['end_date']
-    week_date = filters['week']
 
     tests = Test.objects.filter(engagement__product=prod).prefetch_related('finding_set', 'test_type')
     tests = tests.annotate(verified_finding_count=Count('finding__id', filter=Q(finding__verified=True)))
@@ -536,7 +527,6 @@ def view_product_metrics(request, pid):
     add_breadcrumb(parent=prod, top_level=False, request=request)
 
     open_close_weekly = OrderedDict()
-    new_weekly = OrderedDict()
     severity_weekly = OrderedDict()
     critical_weekly = OrderedDict()
     high_weekly = OrderedDict()
@@ -605,10 +595,6 @@ def view_product_metrics(request, pid):
             open_objs_by_severity[v.severity] += 1
 
     for a in filters.get('accepted', None):
-        if view == 'Finding':
-            finding = a
-        elif view == 'Endpoint':
-            finding = v.finding
         iso_cal = a.date.isocalendar()
         x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
         y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
@@ -889,11 +875,15 @@ def edit_product(request, pid):
         form = ProductForm(request.POST, instance=product)
         jira_project = jira_helper.get_jira_project(product)
         if form.is_valid():
+            initial_sla_config = Product.objects.get(pk=form.instance.id).sla_configuration
             form.save()
-            tags = request.POST.getlist('tags')
+            msg = 'Product updated successfully.'
+            # check if the SLA config was changed, append additional context to message
+            if initial_sla_config != form.instance.sla_configuration:
+                msg += ' All SLA expiration dates for findings within this product will be recalculated asynchronously for the newly assigned SLA configuration.'
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 _('Product updated successfully.'),
+                                 _(msg),
                                  extra_tags='alert-success')
 
             success, jform = jira_helper.process_jira_project_form(request, instance=jira_project, product=product)
@@ -1004,16 +994,13 @@ def delete_product(request, pid):
 
 @user_is_authorized(Product, Permissions.Engagement_Add, 'pid')
 def new_eng_for_app(request, pid, cicd=False):
-    jira_project = None
     jira_project_form = None
     jira_epic_form = None
 
     product = Product.objects.get(id=pid)
-    jira_error = False
 
     if request.method == 'POST':
         form = EngForm(request.POST, cicd=cicd, product=product, user=request.user)
-        jira_project = jira_helper.get_jira_project(product)
         logger.debug('new_eng_for_app')
 
         if form.is_valid():
@@ -1072,7 +1059,6 @@ def new_eng_for_app(request, pid, cicd=False):
                        product=product, user=request.user)
 
         if get_system_setting('enable_jira'):
-            jira_project = jira_helper.get_jira_project(product)
             logger.debug('showing jira-project-form')
             jira_project_form = JIRAProjectForm(target='engagement', product=product)
             logger.debug('showing jira-epic-form')
@@ -1378,7 +1364,6 @@ class AdHocFindingView(View):
             # if the jira issue key was changed, update database
             new_jira_issue_key = context["jform"].cleaned_data.get('jira_issue')
             if finding.has_jira_issue:
-                jira_issue = finding.jira_issue
                 # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
                 # instead of on the public jira issue key.
                 # I have no idea why, but it means we have to retrieve the issue from JIRA to get the internal JIRA id.

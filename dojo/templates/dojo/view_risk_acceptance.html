@@ -19,6 +19,26 @@
 {% endblock %}
 {% block content %}
     {{ block.super }}
+
+    <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="confirmModalLabel"><h3> Action Confirmed <h3></h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div id="id_modal_message" class="modal-body">
+            Are you sure to perform this action?
+            </div>
+            <div class="modal-footer">
+            <input type="button" class="btn btn-secondary" data-dismiss="modal" value="Cancel">
+            <input id="confirmed_action_risk_pending" type="button" class="btn btn-secondary" name="#" value="Confirmed">
+            </div>
+        </div>
+        </div>
+    </div>
     {% if risk_acceptance.is_expired %}
         <div class="danger-zone panel panel-danger">
             <div class="panel-heading">
@@ -213,17 +233,21 @@
                         <td> <span style="color: green;">{{ finding.accepted_by}} </span></td>
                         <td>
                             {% if engagement|has_object_permission:"Risk_Acceptance" and engagement|has_risk_acceptance_permission:finding%}
-                                <form method="post">
-                                    {% csrf_token %}
-                                    <input class="btn btn-sm btn-success" type="submit" name="risk_accept_pending"
-                                    value="Accept"/>
-                                    <input type="hidden" name="remove_finding_id" value="{{ finding.id }}"/>
-                                    <input class="btn btn-sm btn-warning" type="submit" name="remove_finding"
-                                        value="Remove"/>
-                                    <input type="hidden" name="risk_accept_finding_id" value="{{ finding.id }}"/>
-                                    <input class="btn btn-sm btn-danger" type="submit" name="risk_accept_decline"
-                                        value="Reject"/>
-                                </form>
+                            <form method="post">
+                                {% csrf_token %}
+
+                                <input type="hidden" name="risk_accept_finding_id"
+                                    value="{{ finding.id }}"/>
+                                    
+                                <input type="hidden" name="remove_finding_id" value="{{ finding.id }}"/>
+                                <input class="btn btn-sm btn-success" type="submit" name="risk_accept_pending"
+                                value="Accept"/>
+                                <input class="btn btn-sm btn-warning" type="submit" name="remove_finding"
+                                value="Remove"/>
+                                <input type="hidden" name="risk_accept_finding_id" value="{{ finding.id }}"/>
+                                <input class="btn btn-sm btn-danger" type="submit" name="risk_accept_decline"
+                                value="Reject"/>
+                            </form>
                             {% else %}
                                 Not Authorized
                             {% endif %}
@@ -367,6 +391,7 @@
 
 {% block postscript %}
     {{ block.super }}
+
 {% if not edit_mode %}
     <script type="text/javascript">
         // keyboard shortcuts

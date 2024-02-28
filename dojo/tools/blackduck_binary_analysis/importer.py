@@ -42,7 +42,6 @@ class BlackduckBinaryAnalysisImporter(Importer):
         Process findings for each project.
         """
         for sha1_hash_key in sha1_hash_keys:
-            locations = set()
             for vuln in vulnerabilities[sha1_hash_key]:
                 vuln_dict = dict(vuln)
 

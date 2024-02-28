@@ -24,7 +24,8 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     ProductAPIScanConfigurationViewSet, UserProfileView, EndpointMetaImporterView, \
     ConfigurationPermissionViewSet, QuestionnaireQuestionViewSet, QuestionnaireAnswerViewSet, \
     QuestionnaireGeneralSurveyViewSet, QuestionnaireEngagementSurveyViewSet, QuestionnaireAnsweredSurveyViewSet, \
-    TransferFindingViewSet
+    TransferFindingViewSet, \
+    AnnouncementViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -133,6 +134,7 @@ v2_api.register(r'questionnaire_engagement_questionnaires', QuestionnaireEngagem
 v2_api.register(r'questionnaire_general_questionnaires', QuestionnaireGeneralSurveyViewSet)
 v2_api.register(r'questionnaire_questions', QuestionnaireQuestionViewSet)
 v2_api.register(r'transfer_finding', TransferFindingViewSet)
+v2_api.register(r'announcements', AnnouncementViewSet)
 ur = []
 ur += dev_env_urls
 ur += endpoint_urls
