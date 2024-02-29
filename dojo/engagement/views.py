@@ -375,42 +375,117 @@ def copy_engagement(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
-def view_engagement(request, eid):
-    eng = get_object_or_404(Engagement, id=eid)
-    tests = eng.test_set.all().order_by('test_type__name', '-updated')
+class ViewEngagement(View):
 
-    default_page_num = 10
+    def get_template(self):
+        return 'dojo/view_eng.html'
 
-    tests_filter = EngagementTestFilter(request.GET, queryset=tests, engagement=eng)
-    paged_tests = get_page_items(request, tests_filter.qs, default_page_num)
-    # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
-    paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)
+    def get_risks_accepted(self, eng):
+        risks_accepted = eng.risk_acceptance.all().select_related('owner').annotate(accepted_findings_count=Count('accepted_findings__id'))
+        return risks_accepted
 
-    prod = eng.product
-    risks_accepted = eng.risk_acceptance.all().select_related('owner').annotate(accepted_findings_count=Count('accepted_findings__id'))
-    preset_test_type = None
-    network = None
-    if eng.preset:
-        preset_test_type = eng.preset.test_type.all()
-        network = eng.preset.network_locations.all()
-    system_settings = System_Settings.objects.get()
+    def get(self, request, eid, *args, **kwargs):
+        eng = get_object_or_404(Engagement, id=eid)
+        tests = eng.test_set.all().order_by('test_type__name', '-updated')
+        default_page_num = 10
+        tests_filter = EngagementTestFilter(request.GET, queryset=tests, engagement=eng)
+        paged_tests = get_page_items(request, tests_filter.qs, default_page_num)
+        paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)
+        prod = eng.product
+        risks_accepted = self.get_risks_accepted(eng)
+        preset_test_type = None
+        network = None
+        if eng.preset:
+            preset_test_type = eng.preset.test_type.all()
+            network = eng.preset.network_locations.all()
+        system_settings = System_Settings.objects.get()
 
-    jissue = jira_helper.get_jira_issue(eng)
-    jira_project = jira_helper.get_jira_project(eng)
+        jissue = jira_helper.get_jira_issue(eng)
+        jira_project = jira_helper.get_jira_project(eng)
 
-    try:
-        check = Check_List.objects.get(engagement=eng)
-    except:
-        check = None
-        pass
-    notes = eng.notes.all()
-    note_type_activation = Note_Type.objects.filter(is_active=True).count()
-    if note_type_activation:
-        available_note_types = find_available_notetypes(notes)
-    form = DoneForm()
-    files = eng.files.all()
-    if request.method == 'POST':
+        try:
+            check = Check_List.objects.get(engagement=eng)
+        except:
+            check = None
+            pass
+        notes = eng.notes.all()
+        note_type_activation = Note_Type.objects.filter(is_active=True).count()
+        if note_type_activation:
+            available_note_types = find_available_notetypes(notes)
+        form = DoneForm()
+        files = eng.files.all()
+        if note_type_activation:
+            form = TypedNoteForm(available_note_types=available_note_types)
+        else:
+            form = NoteForm()
+
+        creds = Cred_Mapping.objects.filter(
+            product=eng.product).select_related('cred_id').order_by('cred_id')
+        cred_eng = Cred_Mapping.objects.filter(
+            engagement=eng.id).select_related('cred_id').order_by('cred_id')
+
+        add_breadcrumb(parent=eng, top_level=False, request=request)
+
+        title = ""
+        if eng.engagement_type == "CI/CD":
+            title = " CI/CD"
+        product_tab = Product_Tab(prod, title="View" + title + " Engagement", tab="engagements")
+        product_tab.setEngagement(eng)
+        return render(
+            request, self.get_template(), {
+                'eng': eng,
+                'product_tab': product_tab,
+                'system_settings': system_settings,
+                'tests': paged_tests,
+                'filter': tests_filter,
+                'check': check,
+                'threat': eng.tmodel_path,
+                'form': form,
+                'notes': notes,
+                'files': files,
+                'risks_accepted': risks_accepted,
+                'jissue': jissue,
+                'jira_project': jira_project,
+                'creds': creds,
+                'cred_eng': cred_eng,
+                'network': network,
+                'preset_test_type': preset_test_type
+            })
+
+    def post(self, request, eid, *args, **kwargs):
+        eng = get_object_or_404(Engagement, id=eid)
+        tests = eng.test_set.all().order_by('test_type__name', '-updated')
+
+        default_page_num = 10
+
+        tests_filter = EngagementTestFilter(request.GET, queryset=tests, engagement=eng)
+        paged_tests = get_page_items(request, tests_filter.qs, default_page_num)
+        # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
+        paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)
+
+        prod = eng.product
+        risks_accepted = self.get_risks_accepted(eng)
+        preset_test_type = None
+        network = None
+        if eng.preset:
+            preset_test_type = eng.preset.test_type.all()
+            network = eng.preset.network_locations.all()
+        system_settings = System_Settings.objects.get()
+
+        jissue = jira_helper.get_jira_issue(eng)
+        jira_project = jira_helper.get_jira_project(eng)
+
+        try:
+            check = Check_List.objects.get(engagement=eng)
+        except:
+            check = None
+            pass
+        notes = eng.notes.all()
+        note_type_activation = Note_Type.objects.filter(is_active=True).count()
+        if note_type_activation:
+            available_note_types = find_available_notetypes(notes)
+        form = DoneForm()
+        files = eng.files.all()
         user_has_permission_or_403(request.user, eng, Permissions.Note_Add)
         eng.progress = 'check_list'
         eng.save()
@@ -434,44 +509,38 @@ def view_engagement(request, eid):
                                  messages.SUCCESS,
                                  'Note added successfully.',
                                  extra_tags='alert-success')
-    else:
-        if note_type_activation:
-            form = TypedNoteForm(available_note_types=available_note_types)
-        else:
-            form = NoteForm()
+        creds = Cred_Mapping.objects.filter(
+            product=eng.product).select_related('cred_id').order_by('cred_id')
+        cred_eng = Cred_Mapping.objects.filter(
+            engagement=eng.id).select_related('cred_id').order_by('cred_id')
 
-    creds = Cred_Mapping.objects.filter(
-        product=eng.product).select_related('cred_id').order_by('cred_id')
-    cred_eng = Cred_Mapping.objects.filter(
-        engagement=eng.id).select_related('cred_id').order_by('cred_id')
+        add_breadcrumb(parent=eng, top_level=False, request=request)
 
-    add_breadcrumb(parent=eng, top_level=False, request=request)
-
-    title = ""
-    if eng.engagement_type == "CI/CD":
-        title = " CI/CD"
-    product_tab = Product_Tab(prod, title="View" + title + " Engagement", tab="engagements")
-    product_tab.setEngagement(eng)
-    return render(
-        request, 'dojo/view_eng.html', {
-            'eng': eng,
-            'product_tab': product_tab,
-            'system_settings': system_settings,
-            'tests': paged_tests,
-            'filter': tests_filter,
-            'check': check,
-            'threat': eng.tmodel_path,
-            'form': form,
-            'notes': notes,
-            'files': files,
-            'risks_accepted': risks_accepted,
-            'jissue': jissue,
-            'jira_project': jira_project,
-            'creds': creds,
-            'cred_eng': cred_eng,
-            'network': network,
-            'preset_test_type': preset_test_type
-        })
+        title = ""
+        if eng.engagement_type == "CI/CD":
+            title = " CI/CD"
+        product_tab = Product_Tab(prod, title="View" + title + " Engagement", tab="engagements")
+        product_tab.setEngagement(eng)
+        return render(
+            request, self.get_template(), {
+                'eng': eng,
+                'product_tab': product_tab,
+                'system_settings': system_settings,
+                'tests': paged_tests,
+                'filter': tests_filter,
+                'check': check,
+                'threat': eng.tmodel_path,
+                'form': form,
+                'notes': notes,
+                'files': files,
+                'risks_accepted': risks_accepted,
+                'jissue': jissue,
+                'jira_project': jira_project,
+                'creds': creds,
+                'cred_eng': cred_eng,
+                'network': network,
+                'preset_test_type': preset_test_type
+            })
 
 
 def prefetch_for_view_tests(tests):
