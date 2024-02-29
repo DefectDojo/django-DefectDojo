@@ -130,7 +130,7 @@ def finding_querys(prod_type, request):
     # Get the initial list of findings th use is authorized to see
     findings_query = get_authorized_findings(
         Permissions.Finding_View,
-        request.user
+        user=request.user,
     ).select_related(
         'reporter',
         'test',
@@ -159,17 +159,17 @@ def finding_querys(prod_type, request):
         start_date = timezone.now()
         end_date = timezone.now()
     # Filter by the date ranges supplied
-    findings_query  = findings_query.filter(date__range=[start_date, end_date])
+    findings_query = findings_query.filter(date__range=[start_date, end_date])
     # Get the list of closed and risk accepted findings
     findings_closed = findings_query.filter(CLOSED_FINDINGS_QUERY)
     accepted_findings = findings_query.filter(ACCEPTED_FINDINGS_QUERY)
-    # filter by product type if applicable 
+    # filter by product type if applicable
     if len(prod_type) > 0:
-        findings_closed = findings_closed(test__engagement__product__prod_type__in=prod_type)
-        accepted_findings = Finding.objects.filter(test__engagement__product__prod_type__in=prod_type)
+        findings_closed = findings_closed.filter(test__engagement__product__prod_type__in=prod_type)
+        accepted_findings = accepted_findings.filter(test__engagement__product__prod_type__in=prod_type)
     # Get the severity counts of risk accepted findings
     accepted_findings_counts = severity_count(accepted_findings, 'aggregate', 'severity')
-    
+
     r = relativedelta(end_date, start_date)
     months_between = (r.years * 12) + r.months
     # include current month

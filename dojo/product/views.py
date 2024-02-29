@@ -303,7 +303,6 @@ def finding_querys(request, prod):
     findings = MetricsFindingFilter(request.GET, queryset=findings_query, pid=prod)
     findings_qs = queryset_check(findings)
     filters['form'] = findings.form
-    week = end_date - timedelta(days=7)  # seven days and /newer are considered "new"
 
     try:
         # logger.debug(findings_qs.query)
@@ -321,9 +320,10 @@ def finding_querys(request, prod):
         logger.debug(e)
         start_date = timezone.now()
         end_date = timezone.now()
+    week = end_date - timedelta(days=7)  # seven days and /newer are considered "new"
 
     filters['accepted'] = findings_qs.filter(finding_helper.ACCEPTED_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
-    filters['verified'] = findings_qs.filter(finding_helper.VERIFIED_FINDINGS_QUERY).filter(date__range=[start_date, end_date])).order_by("date")
+    filters['verified'] = findings_qs.filter(finding_helper.VERIFIED_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
     filters['new_verified'] = findings_qs.filter(finding_helper.VERIFIED_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
     filters['open'] = findings_qs.filter(finding_helper.OPEN_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
     filters['inactive'] = findings_qs.filter(finding_helper.INACTIVE_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
