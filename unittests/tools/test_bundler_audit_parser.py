@@ -31,7 +31,7 @@ class TestBundlerAuditParser(DojoTestCase):
         with open(path.join(path.dirname(__file__), "../scans/bundler_audit/version_9.0.txt")) as testfile:
             parser = BundlerAuditParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(3, len(findings))
+            self.assertEqual(4, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Gem rack: Directory traversal in Rack::Directory app bundled with Rack [CVE-2020-8161]", finding.title)
@@ -56,3 +56,11 @@ class TestBundlerAuditParser(DojoTestCase):
                 self.assertEqual("CVE-2018-3760", finding.unsaved_vulnerability_ids[0])
                 self.assertEqual("sprockets", finding.component_name)
                 self.assertEqual("2.2.3", finding.component_version)
+            with self.subTest(i=3):
+                finding = findings[3]
+                self.assertEqual("Gem nokogiri: Improper Handling of Unexpected Data Type in Nokogiri [GHSA-xc9x-jj77-9p9j]", finding.title)
+                self.assertEqual("Medium", finding.severity)
+                self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+                self.assertEqual("GHSA-xc9x-jj77-9p9j", finding.unsaved_vulnerability_ids[0])
+                self.assertEqual("nokogiri", finding.component_name)
+                self.assertEqual("1.15.2", finding.component_version)
