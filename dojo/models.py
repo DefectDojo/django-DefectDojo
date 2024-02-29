@@ -3349,9 +3349,7 @@ class Finding(models.Model):
         return (self.sla_expiration_date and self.sla_expiration_date < timezone.now())
 
 
-class Transfer_Finding(models.Model):
-
-    findings = models.ManyToManyField(Finding, verbose_name=("Finding ID"), related_name="transfer_findings")
+class TransferFinding(models.Model):
     title = models.CharField(max_length=255, verbose_name=("Titile"))
     date = models.DateField(auto_now_add=True, verbose_name=("Date"))
     destination_product_type_name = models.CharField(
@@ -3469,6 +3467,12 @@ class Transfer_Finding(models.Model):
 
         def __str__(self):
             return self.title
+
+class TransferFindingFinding(models.Model):
+    findings = models.ForeignKey(Finding, verbose_name=("Finding ID"), related_name="findings", on_delete=models.CASCADE)
+    transfer_findings = models.ForeignKey(TransferFinding, verbose_name=("Transfer Finding"), related_name="transfer_findings", on_delete=models.CASCADE)
+    finding_related = models.OneToOneField(Finding, "Finding to transfer")
+    engagement_related = models.ManyToManyField(Finding, "")
 
 
 class FindingAdmin(admin.ModelAdmin):

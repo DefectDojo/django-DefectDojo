@@ -40,7 +40,7 @@ from dojo.models import (
     Test_Type,
     Notes,
     Risk_Acceptance,
-    Transfer_Finding,
+    TransferFinding,
     Development_Environment,
     Dojo_User,
     Endpoint,
@@ -1133,7 +1133,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
         )
 
 
-class Transfer_FindingForm(forms.ModelForm):
+class TransferFindingForm(forms.ModelForm):
     findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.none(),
         required=True,
@@ -1169,7 +1169,7 @@ class Transfer_FindingForm(forms.ModelForm):
         self.fields["title"].initial = kwags.get("engagement_id")
     
     class Meta:
-        model = Transfer_Finding
+        model = TransferFinding
         fields = "__all__"
 
 class BaseManageFileFormSet(forms.BaseModelFormSet):

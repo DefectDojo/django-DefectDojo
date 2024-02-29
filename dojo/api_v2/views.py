@@ -83,7 +83,7 @@ from dojo.models import (
     Answered_Survey,
     General_Survey,
     Check_List,
-    Transfer_Finding,
+    TransferFinding,
     Announcement,
 )
 from dojo.endpoint.views import get_endpoint_ids
@@ -3770,7 +3770,7 @@ class AnnouncementViewSet(
 class TransferFindingViewSet(prefetch.PrefetchListMixin,
                              prefetch.PrefetchRetrieveMixin,
                              DojoModelViewSet):
-    queryset = Transfer_Finding.objects.all()
+    queryset = TransferFinding.objects.all()
     # serializer_class = serializers.TransferFindingSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id",
@@ -3808,7 +3808,7 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
         serializer = serializers.TransferFindingDeleteSerializer(data=request.data)
         if serializer.is_valid():
             if request.data.get('findings'):
-                obj_transfer_finding = Transfer_Finding.objects.get(id=pk)
+                obj_transfer_finding = TransferFinding.objects.get(id=pk)
                 request_findings = request.data["findings"]
                 for finding_id_request in request_findings:
                     obj_transfer_finding.findings.remove(finding_id_request)
@@ -3830,7 +3830,7 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
         serializer = serializers.TransferFindingUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
-            obj_transfer_finding = Transfer_Finding.objects.get(id=pk)
+            obj_transfer_finding = TransferFinding.objects.get(id=pk)
             request_findings = request.data["findings"]
             for finding in obj_transfer_finding.findings.all():
                 finding_id = str(finding.id)

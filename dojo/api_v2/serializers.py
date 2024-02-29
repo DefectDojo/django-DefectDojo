@@ -88,7 +88,7 @@ from dojo.models import (
     Answered_Survey,
     General_Survey,
     Check_List,
-    Transfer_Finding,
+    TransferFinding,
     Announcement,
 )
 
@@ -3242,7 +3242,7 @@ class TransferFindingSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['actions'] = []
-        transfer_finding_obj = Transfer_Finding.objects.get(id=representation.get("id"))
+        transfer_finding_obj = TransferFinding.objects.get(id=representation.get("id"))
         for permission in [Permissions.Transfer_Finding_View,
                            Permissions.Transfer_Finding_Edit,
                            Permissions.Transfer_Finding_Delete,
@@ -3256,7 +3256,7 @@ class TransferFindingSerializer(serializers.ModelSerializer):
         return representation
 
     class Meta:
-        model = Transfer_Finding
+        model = TransferFinding
         fields = "__all__"
 
 
@@ -3264,7 +3264,7 @@ class TransferFindingUpdateSerializer(serializers.ModelSerializer):
     findings = TransferFindinFindingsSerializers(many=True, read_only=True)
     
     class Meta:
-        model = Transfer_Finding
+        model = TransferFinding
         fields = ("findings",)
 
 

@@ -25,7 +25,7 @@ from dojo.models import (
     Stub_Finding,
     Product_API_Scan_Configuration,
     Cred_Mapping,
-    Transfer_Finding,
+    TransferFinding,
 )
 
 
@@ -103,7 +103,7 @@ def user_has_permission(user, obj, permission):
         return user_has_permission(
             user, obj.test.engagement.product, permission
         )
-    elif (isinstance(obj, Transfer_Finding) and permission in Permissions.get_transfer_finding_permissions()):
+    elif (isinstance(obj, TransferFinding) and permission in Permissions.get_transfer_finding_permissions()):
         product_type_origin = Product_Type.objects.get(id=obj.origin_product_type_id)
         product_type_destination = obj.destination_product.prod_type
         for product_type in [product_type_origin, product_type_destination]:

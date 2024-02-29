@@ -37,7 +37,7 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, \
     Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Product_Summary, Endpoint_Status, \
     Endpoint, Engagement_Presets, DojoMeta, Notifications, BurpRawRequestResponse, Product_Member, \
-    Product_Group, Product_API_Scan_Configuration, Transfer_Finding
+    Product_Group, Product_API_Scan_Configuration, TransferFinding
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, \
     add_breadcrumb, async_delete, \
     get_system_setting, get_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs, \
@@ -1929,7 +1929,7 @@ def add_product_group(request, pid):
 
 def view_transfer_finding(request, pid=None):
     __pt = get_object_or_404(Product, id=pid)
-    transfer_finding = Transfer_Finding.objects.all()
+    transfer_finding = TransferFinding.objects.all()
     paginator = Paginator(transfer_finding, 25)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)

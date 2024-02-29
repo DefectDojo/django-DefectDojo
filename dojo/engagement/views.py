@@ -25,7 +25,7 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import EngagementFilter, EngagementDirectFilter, EngagementTestFilter
 from dojo.forms import CheckForm, \
-    UploadThreatForm, RiskAcceptanceForm, Transfer_FindingForm, RiskPendingForm, NoteForm, DoneForm, \
+    UploadThreatForm, RiskAcceptanceForm, TransferFindingForm, RiskPendingForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
     CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm, \
     EditRiskAcceptanceForm
@@ -34,7 +34,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Import, Notes, \
     Risk_Acceptance, Development_Environment, Endpoint, \
     Cred_Mapping, System_Settings, Note_Type, Product_API_Scan_Configuration, \
-    Product_Type, Dojo_User, Product_Type, Transfer_Finding
+    Product_Type, Dojo_User, Product_Type, TransferFinding
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, async_delete, \
@@ -1110,7 +1110,7 @@ def add_transfer_finding(request, eid, fid=None):
         accepted_by_username = Dojo_User.objects.get(id=id_accepted_by_username).username if id_accepted_by_username else None
         data["accepted_by_username"] = accepted_by_username
 
-        form = Transfer_FindingForm(request.POST, request.FILES)
+        form = TransferFindingForm(request.POST, request.FILES)
         if form.is_valid():
             try:
                 transfer_findings = form.save()
@@ -1134,7 +1134,7 @@ def add_transfer_finding(request, eid, fid=None):
         else:
             logger.error(form.errors)
     else:
-        form = Transfer_FindingForm(initial={"engagement_name":eng,
+        form = TransferFindingForm(initial={"engagement_name":eng,
                                             "title": f"transfer finding - {finding.title}",
                                             "findings": finding,
                                             "owner": request.user.username,
