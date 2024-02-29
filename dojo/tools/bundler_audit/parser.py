@@ -92,6 +92,7 @@ class BundlerAuditParser(object):
                     dynamic_finding=False,
                     component_name=gem_name,
                     component_version=gem_version,
+                    cve=advisory_id,
                 )
                 if advisory_id:
                     find.unsaved_vulnerability_ids = [advisory_id]
