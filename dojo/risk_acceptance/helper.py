@@ -366,4 +366,10 @@ def risk_accept_provider(
     headers = {}
     headers[header] = token
     response = requests.post(url=formatted_url, headers=headers, verify=False)
-    logger.debug(response)
+    if response.status_code == 200:
+        logger.info(response.json)
+    logger.error(response.json)
+
+def get_matching_value(list_a, list_b):
+    matches = [item for item in list_a if item in list_b]
+    return matches[0] if matches else None

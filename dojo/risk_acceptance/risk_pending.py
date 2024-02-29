@@ -66,14 +66,15 @@ def update_expiration_risk_accepted(finding: Finding):
     return expiration_delta_days.get(finding.severity.lower()), expiration_date, created_date
 
 def handle_from_provider_risk(finding, acceptance_days):
-    if finding.tags in [settings.PROVIDER1, settings.PROVIDER2, settings.PROVIDER3]:
-        if finding.tags == settings.PROVIDER3:
+    tag = ra_helper.get_matching_value(list_a=finding.tags.tags, list_b=[settings.PROVIDER1, settings.PROVIDER2, settings.PROVIDER3])
+    if tag is not None:
+        if tag.name == settings.PROVIDER3:
             finding_id = finding.unique_id_from_tool
         else:
             finding_id = finding.vuln_id_from_tool
         ra_helper.risk_accept_provider(
             finding_id==finding_id,
-            provider=finding.tags,
+            provider=tag.name,
             acceptance_days=acceptance_days,
             url=settings.PROVIDER_URL,
             header=settings.PROVIDER_HEADER,
