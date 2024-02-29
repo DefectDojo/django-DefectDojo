@@ -28,7 +28,7 @@ class BundlerAuditParser(object):
         for warning in warnings:
             if not warning.startswith("Name"):
                 continue
-            advisory_cve = None
+            advisory_id = None
             gem_report_fields = warning.split("\n")
             for field in gem_report_fields:
                 if field.startswith("Name"):
@@ -36,9 +36,11 @@ class BundlerAuditParser(object):
                 elif field.startswith("Version"):
                     gem_version = field.replace("Version: ", "")
                 elif field.startswith("Advisory"):
-                    advisory_cve = field.replace("Advisory: ", "")
+                    advisory_id = field.replace("Advisory: ", "")
                 elif field.startswith("CVE"):
-                    advisory_cve = field.replace("CVE: ", "")
+                    advisory_id = field.replace("CVE: ", "")
+                elif advisory_id is None and field.startswith("GHSA"):
+                    advisory_id = field.replace("GHSA: ", "")
                 elif field.startswith("Criticality"):
                     criticality = field.replace("Criticality: ", "")
                     if criticality.lower() == "unknown":
@@ -58,7 +60,7 @@ class BundlerAuditParser(object):
                 + ": "
                 + advisory_title
                 + " ["
-                + advisory_cve
+                + advisory_id
                 + "]"
             )
             findingdetail = (
@@ -66,11 +68,11 @@ class BundlerAuditParser(object):
             )
             findingdetail += "**Name**: " + gem_name + "\n"
             findingdetail += "**Version**: " + gem_version + "\n"
-            findingdetail += "**Advisory**: " + advisory_cve + "\n"
+            findingdetail += "**Advisory**: " + advisory_id + "\n"
             mitigation = advisory_solution
             references = advisory_url
             fingerprint = (
-                "bundler-audit" + gem_name + gem_version + advisory_cve + sev
+                "bundler-audit" + gem_name + gem_version + advisory_id + sev
             )
             dupe_key = hashlib.md5(fingerprint.encode("utf-8")).hexdigest()
             if dupe_key in dupes:
@@ -91,8 +93,8 @@ class BundlerAuditParser(object):
                     component_name=gem_name,
                     component_version=gem_version,
                 )
-                if advisory_cve:
-                    find.unsaved_vulnerability_ids = [advisory_cve]
+                if advisory_id:
+                    find.unsaved_vulnerability_ids = [advisory_id]
 
                 dupes[dupe_key] = find
 
