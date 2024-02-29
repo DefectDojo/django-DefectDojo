@@ -1394,7 +1394,7 @@ class DevelopmentEnvironmentSerializer(serializers.ModelSerializer):
 
 
 class FindingGroupSerializer(serializers.ModelSerializer):
-    jira_issue = JIRAIssueSerializer(read_only=True)
+    jira_issue = JIRAIssueSerializer(read_only=True, allow_null=True)
 
     class Meta:
         model = Finding_Group
