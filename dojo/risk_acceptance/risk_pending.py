@@ -73,7 +73,7 @@ def handle_from_provider_risk(finding, acceptance_days):
         else:
             finding_id = finding.vuln_id_from_tool
         ra_helper.risk_accept_provider(
-            finding_id==finding_id,
+            finding_id=finding_id,
             provider=tag.name,
             acceptance_days=acceptance_days,
             url=settings.PROVIDER_URL,
