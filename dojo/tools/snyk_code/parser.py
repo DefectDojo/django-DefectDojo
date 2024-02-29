@@ -238,7 +238,8 @@ class SnykCodeParser(object):
             severity = "Critical"
         # create the finding object
         finding = Finding(
-            file_path=ruleId + "_" + locations_uri,
+            vuln_id_from_tool=ruleId,
+            file_path=locations_uri,
             title=ruleId + "_" + locations_uri,
             test=test,
             severity=severity,
