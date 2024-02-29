@@ -1,5 +1,5 @@
 ---
-title: "Snyk"
+title: "Snyk Code"
 toc_hide: true
 ---
 Snyk output file (snyk test \--json \> snyk.json) can be imported in
