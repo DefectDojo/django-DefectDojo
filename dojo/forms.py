@@ -2709,7 +2709,7 @@ class JIRAProjectForm(forms.ModelForm):
     class Meta:
         model = JIRA_Project
         exclude = ['product', 'engagement']
-        fields = ['inherit_from_product', 'jira_instance', 'project_key', 'issue_template_dir', 'component', 'custom_fields', 'jira_labels', 'default_assignee', 'add_vulnerability_id_to_jira_label', 'push_all_issues', 'enable_engagement_epic_mapping', 'push_notes', 'product_jira_sla_notification', 'risk_acceptance_expiration_notification']
+        fields = ['inherit_from_product', 'jira_instance', 'project_key', 'issue_template_dir', 'epic_issue_type_name', 'component', 'custom_fields', 'jira_labels', 'default_assignee', 'add_vulnerability_id_to_jira_label', 'push_all_issues', 'enable_engagement_epic_mapping', 'push_notes', 'product_jira_sla_notification', 'risk_acceptance_expiration_notification']
 
     def __init__(self, *args, **kwargs):
         from dojo.jira_link import helper as jira_helper
@@ -2742,6 +2742,7 @@ class JIRAProjectForm(forms.ModelForm):
                 self.fields['jira_instance'].disabled = False
                 self.fields['project_key'].disabled = False
                 self.fields['issue_template_dir'].disabled = False
+                self.fields['epic_issue_type_name'].disabled = False
                 self.fields['component'].disabled = False
                 self.fields['custom_fields'].disabled = False
                 self.fields['default_assignee'].disabled = False
@@ -2765,6 +2766,7 @@ class JIRAProjectForm(forms.ModelForm):
                     self.initial['jira_instance'] = jira_project_product.jira_instance.id if jira_project_product.jira_instance else None
                     self.initial['project_key'] = jira_project_product.project_key
                     self.initial['issue_template_dir'] = jira_project_product.issue_template_dir
+                    self.initial['epic_issue_type_name'] = jira_project_product.epic_issue_type_name
                     self.initial['component'] = jira_project_product.component
                     self.initial['custom_fields'] = jira_project_product.custom_fields
                     self.initial['default_assignee'] = jira_project_product.default_assignee
@@ -2779,6 +2781,7 @@ class JIRAProjectForm(forms.ModelForm):
                     self.fields['jira_instance'].disabled = True
                     self.fields['project_key'].disabled = True
                     self.fields['issue_template_dir'].disabled = True
+                    self.fields['epic_issue_type_name'].disabled = True
                     self.fields['component'].disabled = True
                     self.fields['custom_fields'].disabled = True
                     self.fields['default_assignee'].disabled = True
