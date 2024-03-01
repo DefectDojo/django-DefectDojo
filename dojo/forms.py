@@ -1143,22 +1143,22 @@ class TransferFindingForm(forms.ModelForm):
 
     title = forms.CharField(required=True, max_length=255)
     severity = forms.CharField(widget=forms.HiddenInput(), required=True)
-    destination_product_type_name = forms.CharField(widget=forms.HiddenInput(), required=True)
-    destination_product_type_id = forms.CharField(widget=forms.HiddenInput(), required=True)
+    # destination_product_type_name = forms.CharField(widget=forms.HiddenInput(), required=True)
+    # destination_product_type_id = forms.CharField(widget=forms.HiddenInput(), required=True)
     destination_product = forms.ModelChoiceField(queryset=Product.objects.all(), required=True)
-    destination_engagement_id = forms.CharField(widget=forms.HiddenInput(), required=False)
-    destination_engagement_name = forms.CharField(widget=forms.HiddenInput(), required=False)
+    # destination_engagement_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    # destination_engagement_name = forms.CharField(widget=forms.HiddenInput(), required=False)
     notes = forms.CharField(
         required=False, max_length=2400, widget=forms.Textarea, label="Notes"
     )
     owner = forms.CharField(widget=forms.HiddenInput(), required=True)
-    origin_product_type_id = forms.CharField(widget=forms.HiddenInput(), required=True)
-    origin_product_type_name = forms.CharField(widget=forms.HiddenInput(), required=True)
-    origin_product_id = forms.CharField(widget=forms.HiddenInput(), required=True)
-    origin_product_name = forms.CharField(widget=forms.HiddenInput(), required=True)
-    origin_engagement_id = forms.CharField(widget=forms.HiddenInput(), required=True)
-    origin_engagement_name = forms.CharField(widget=forms.HiddenInput(), required=True)
-    accepted_by = forms.CharField(widget=forms.Select(), required=True)  # Usar widget Select
+    # origin_product_type_id = forms.CharField(widget=forms.HiddenInput(), required=True)
+    # origin_product_type_name = forms.CharField(widget=forms.HiddenInput(), required=True)
+    # origin_product_id = forms.CharField(widget=forms.HiddenInput(), required=True)
+    # origin_product_name = forms.CharField(widget=forms.HiddenInput(), required=True)
+    # origin_engagement_id = forms.CharField(widget=forms.HiddenInput(), required=True)
+    # origin_engagement_name = forms.CharField(widget=forms.HiddenInput(), required=True)
+    # accepted_by = forms.CharField(widget=forms.Select(), required=True)  # Usar widget Select
     accepted_by_username = forms.CharField(widget=forms.HiddenInput(), required=True)
 
     def __init__(self, *args, **kwags):
@@ -1170,7 +1170,7 @@ class TransferFindingForm(forms.ModelForm):
     
     class Meta:
         model = TransferFinding
-        fields = "__all__"
+        fields = ["findings", "title", "destination_product", "accepted_by", "path", "notes"]
 
 class BaseManageFileFormSet(forms.BaseModelFormSet):
     def clean(self):

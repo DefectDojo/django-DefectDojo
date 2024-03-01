@@ -3352,105 +3352,68 @@ class Finding(models.Model):
 class TransferFinding(models.Model):
     title = models.CharField(max_length=255, verbose_name=("Titile"))
     date = models.DateField(auto_now_add=True, verbose_name=("Date"))
-    destination_product_type_name = models.CharField(
-        max_length=255,
-        editable=True,
+    destination_product_type = models.ForeignKey(
+        Product_Type,
+        related_name="destination_product_type",
         blank=True,
         null=True,
+        on_delete=models.CASCADE,
         help_text=_("Destination Product Type Name"))
-
-    destination_product_type_id = models.CharField(
-        max_length=255,
-        editable=True,
-        blank=True,
-        null=True,
-        help_text=_("Destination Product Type Id"))
-    
-    severity = models.CharField(
-        max_length=50,
-        editable=True,
-        blank=True,
-        null=True,
-        help_text=_("Severity"))
 
     destination_product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
-        max_length=255,
-        editable=True,
+        related_name="destination_product",
         blank=True,
         null=True,
         help_text=_("Destination Product name"))
+    
+    destination_engagement = models.ForeignKey(
+        Engagement,
+        related_name="destination_engagement",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text=_("Destination Engagement"))
 
-    destination_engagement_id = models.CharField(
-        max_length=255,
+    origin_product_type = models.ForeignKey(
+        Product_Type,
+        related_name="origin_product_type",
         editable=True,
         blank=True,
         null=True,
-        help_text=_("Destination Engagement Id"))
-
-    destination_engagement_name = models.CharField(
-        max_length=255,
-        editable=True,
-        blank=True,
-        null=True,
-        help_text=_("Destination Engagement name"))
-
-    origin_product_type_name = models.CharField(
-        max_length=255,
-        editable=True,
-        blank=True,
-        null=True,
+        on_delete=models.CASCADE,
         help_text=_("Origin Product Type"))
 
-    origin_product_type_id = models.CharField(
-        max_length=255,
+    origin_product = models.ForeignKey(
+        Product,
+        related_name="origin_product",
         editable=True,
         blank=True,
         null=True,
-        help_text=_("Origin Product Type Id"))
-
-    origin_product_name = models.CharField(
-        max_length=255,
-        editable=True,
-        blank=True,
-        null=True,
+        on_delete=models.CASCADE,
         help_text=_(" Origin Product name"))
 
-    origin_product_id = models.IntegerField(
-        editable=True,
+    origin_engagement = models.ForeignKey(
+        Engagement,
+        related_name="origin_engagement",
         blank=True,
         null=True,
-        help_text=_("Origin Product Id"))
-
-    origin_engagement_name = models.CharField(
-        max_length=255,
-        editable=True,
-        blank=True,
-        null=True,
+        on_delete=models.CASCADE,
         help_text=_("Origin Engagement Name"))
 
-    origin_engagement_id = models.CharField(
-        max_length=255,
-        editable=True,
+    severity = models.CharField(
+        max_length=50,
         blank=True,
-        null=True,
-        help_text=_("Origin Engagement Id"))
+        help_text=_("Severity"))
 
-    accepted_by = models.CharField(
-        max_length=255,
-        editable=True,
+    accepted_by = models.ForeignKey(
+        Dojo_User,
+        related_name="accepted_by",
         blank=True,
         null=True,
+        on_delete=models.CASCADE,
         help_text=_("The user that accepts the tranfer finding, The user must belong to the product whit contact"))
-
-    accepted_by_username = models.CharField(
-        max_length=255,
-        editable=True,
-        blank=True,
-        null=True,
-        help_text=_("The user that accepts the tranfer finding, The user must belong to the product whit contact"))
-
 
     path = models.FileField(upload_to='transfer_finding/%Y/%m/%d',
                             editable=True, null=True,
@@ -3461,7 +3424,7 @@ class TransferFinding(models.Model):
                              blank=False,
                              verbose_name=_('Owner'), help_text=_("The person that Owner the Tranfer finding"))
 
-    notes = models.CharField(max_length=2500, editable=True, blank=True, null=True)
+    notes = models.CharField(max_length=2500, editable=True, blank=True)
 
     class Meta:
 
@@ -3471,8 +3434,8 @@ class TransferFinding(models.Model):
 class TransferFindingFinding(models.Model):
     findings = models.ForeignKey(Finding, verbose_name=("Finding ID"), related_name="findings", on_delete=models.CASCADE)
     transfer_findings = models.ForeignKey(TransferFinding, verbose_name=("Transfer Finding"), related_name="transfer_findings", on_delete=models.CASCADE)
-    finding_related = models.OneToOneField(Finding, "Finding to transfer")
-    engagement_related = models.ManyToManyField(Finding, "")
+    finding_related = models.OneToOneField(Finding, verbose_name=("finding_related"), on_delete=models.CASCADE)
+    engagement_related = models.ForeignKey(Finding, related_name="engagement_related", on_delete=models.CASCADE)
 
 
 class FindingAdmin(admin.ModelAdmin):

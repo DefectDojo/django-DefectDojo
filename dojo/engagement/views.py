@@ -1110,14 +1110,10 @@ def add_transfer_finding(request, eid, fid=None):
         accepted_by_username = Dojo_User.objects.get(id=id_accepted_by_username).username if id_accepted_by_username else None
         data["accepted_by_username"] = accepted_by_username
 
-        form = TransferFindingForm(request.POST, request.FILES)
+        # form = TransferFindingForm(request.POST, request.FILES)
         if form.is_valid():
             try:
                 transfer_findings = form.save()
-                for finding in transfer_findings.findings.prefetch_related('transfer_findings'):
-                    finding.risk_status = "Transfer Pending"
-                    finding.save()
-                
 
             except Exception as e:
                 logger.debug(vars(request.POST))
