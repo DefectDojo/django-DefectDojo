@@ -228,6 +228,14 @@ class OpenVASCSVParser(object):
         date_column_strategy.successor = title_column_strategy
         return date_column_strategy
 
+    def read_column_names(self, row):
+        column_names = dict()
+        index = 0
+        for column in row:
+            column_names[index] = column
+            index += 1
+        return column_names
+
     def get_findings(self, filename, test):
         column_names = dict()
         dupes = dict()
