@@ -2,14 +2,11 @@ import hashlib
 import dateutil
 import html2text
 import logging
-
 import hyperlink
 from cvss import parser as cvss_parser
 from defusedxml.ElementTree import parse
 from dojo.models import Endpoint, Finding
-
 logger = logging.getLogger(__name__)
-
 
 
 class AcunetixXMLParser(object):
@@ -138,7 +135,7 @@ class AcunetixXMLParser(object):
                 else:
                     dupes[dupe_key] = finding
         return list(dupes.values())
-    
+
     def get_cwe_number(self, cwe):
         """
             Returns cwe number.
