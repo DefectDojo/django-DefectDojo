@@ -93,6 +93,22 @@ def _extract_cvss_vectors(cvss_base, cvss_temporal):
         return cvss_vector
 
 
+def _clean_cve_data(cve_string: str) -> list:
+    # Determine if a CVE was even provided
+    if len(cve_string) == 0:
+        return []
+    # Determine if there is more than one CVE
+    cve_list = []
+    if "," in cve_string:
+        # Split everything up
+        cve_list = [single_cve.strip() for single_cve in cve_string.split(",")]
+    else:
+        # There is just one CVE here, but we must return a list
+        cve_list = [cve_string.strip()]
+
+    return cve_list
+
+
 def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
     """
     Takes a list of Dictionaries built from CSV and creates a Finding object
@@ -110,12 +126,18 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
     }
     dojo_findings = []
     for report_finding in report_findings:
+        # Get endpoint meta
         if report_finding.get("FQDN"):
             endpoint = Endpoint.from_uri(report_finding.get("FQDN"))
         elif report_finding.get("DNS"):
             endpoint = Endpoint(host=report_finding.get("DNS"))
         else:
             endpoint = Endpoint(host=report_finding["IP"])
+
+        # Get CVE meta
+        cve_data = report_finding.get("CVE ID", report_finding.get("CVEID", ""))
+        # Clean up the CVE data appropriately
+        cve_list = _clean_cve_data(cve_data)
 
         if "CVSS3 Base" in report_finding:
             cvssv3 = _extract_cvss_vectors(
@@ -151,7 +173,6 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
                     vuln_id_from_tool=report_finding["QID"],
                     cvssv3=cvssv3
                 )
-                cve_data = report_finding.get("CVE ID")
                 # Qualys reports regression findings as active, but with a Date Last
                 # Fixed.
                 if report_finding["Date Last Fixed"]:
@@ -192,11 +213,13 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
                     date=date,
                     vuln_id_from_tool=report_finding["QID"]
                 )
-                cve_data = report_finding.get("CVEID")
-
-        finding.unsaved_vulnerability_ids = (
-            cve_data.split(",") if "," in cve_data else [cve_data]
-        )
+        # Make sure we have something to append to
+        if isinstance(finding.unsaved_vulnerability_ids, list):
+            # Append CVEs if there is a chance for duplicates
+            finding.unsaved_vulnerability_ids += cve_list
+        else:
+            # Set the initial cve list for new findings
+            finding.unsaved_vulnerability_ids = cve_list
         finding.verified = True
         finding.unsaved_endpoints.append(endpoint)
         if not finding_with_id:
