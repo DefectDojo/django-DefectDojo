@@ -1244,6 +1244,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'HCLAppScan XML': ['title', 'description'],
     'KICS Scan': ['file_path', 'line', 'severity', 'description', 'title'],
     'MobSF Scan': ['title', 'description', 'severity'],
+    'Snyk Code Scan': ['vuln_id_from_tool', 'file_path']
 }
 
 # Override the hardcoded settings here via the env var
