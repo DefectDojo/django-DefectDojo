@@ -5,6 +5,8 @@ from dateutil.parser import parse
 from xml.dom import NamespaceErr
 from defusedxml import ElementTree as ET
 from dojo.models import Finding, Endpoint
+from dojo.tools.openvas.csv_parser import OpenVASCSVParser
+from dojo.tools.openvas.xml_parser import OpenVASXMLParser
 
 
 class ColumnMappingStrategy(object):
