@@ -14,6 +14,7 @@ from django.contrib.admin.utils import NestedObjects
 from django.contrib.postgres.aggregates import StringAgg
 from django.db import DEFAULT_DB_ALIAS, connection
 from django.db.models import Sum, Count, Q, Max, Prefetch, F, OuterRef, Subquery
+from django.db.models.expressions import Value
 from django.db.models.query import QuerySet
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.http import HttpResponseRedirect, Http404, JsonResponse, HttpRequest
@@ -238,7 +239,7 @@ def view_product_components(request, pid):
     if connection.vendor == 'postgresql':
         component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name").order_by(
             'component_name').annotate(
-            component_version=StringAgg('component_version', delimiter=separator, distinct=True))
+            component_version=StringAgg('component_version', delimiter=separator, distinct=True, default=Value('')))
     else:
         component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name")
         component_query = component_query.annotate(
