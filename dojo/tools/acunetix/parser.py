@@ -1,8 +1,5 @@
-import logging
 from dojo.tools.acunetix.parse_acunetix360_json import AcunetixJSONParser
 from dojo.tools.acunetix.parse_acunetix_xml import AcunetixXMLParser
-
-logger = logging.getLogger(__name__)
 
 
 class AcunetixParser(object):
