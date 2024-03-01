@@ -94,41 +94,4 @@ class AcunetixJSONParser(object):
                 dupes[dupe_key] = finding
         return list(dupes.values())
 
-    def get_cwe_number(self, cwe):
-        """
-            Returns cwe number.
-        :param cwe:
-        :return: cwe number
-        """
-        if cwe is None:
-            return None
-        else:
-            return int(cwe.split("-")[1])
-
-    def get_severity(self, severity):
-        """
-            Returns Severity as per DefectDojo standards.
-        :param severity:
-        :return:
-        """
-        if severity == "high":
-            return "High"
-        elif severity == "medium":
-            return "Medium"
-        elif severity == "low":
-            return "Low"
-        elif severity == "informational":
-            return "Info"
-        else:
-            return "Critical"
-
-    def get_false_positive(self, false_p):
-        """
-            Returns True, False for false positive as per DefectDojo standards.
-        :param false_p:
-        :return:
-        """
-        if false_p:
-            return True
-        else:
-            return False
+    
