@@ -4,9 +4,9 @@ from cvss.cvss3 import CVSS3
 from dojo.models import Finding
 
 
-class SnykParser(object):
+class SnykCodeParser(object):
     def get_scan_types(self):
-        return ["Snyk Scan"]
+        return ["Snyk Code Scan"]
 
     def get_label_for_scan_types(self, scan_type):
         return scan_type  # no custom label for now
@@ -144,10 +144,6 @@ class SnykParser(object):
         if vulnerability.get("CVSSv3"):
             finding.cvssv3 = CVSS3(vulnerability["CVSSv3"]).clean_vector()
 
-        if vulnerability.get("epssDetails") is not None:
-            finding.epss_score = vulnerability["epssDetails"]["probability"]
-            finding.epss_percentile = vulnerability["epssDetails"]["percentile"]
-
         # manage CVE and CWE with idnitifiers
         cwe_references = ""
         if "identifiers" in vulnerability:
@@ -231,6 +227,7 @@ class SnykParser(object):
         locations_startColumn = vulnerability["locations"][0]["physicalLocation"]["region"]["startColumn"]
         locations_endColumn = vulnerability["locations"][0]["physicalLocation"]["region"]["endColumn"]
         isAutofixable = vulnerability["properties"]["isAutofixable"]
+
         if score <= 399:
             severity = "Low"
         elif score <= 699:
@@ -241,6 +238,8 @@ class SnykParser(object):
             severity = "Critical"
         # create the finding object
         finding = Finding(
+            vuln_id_from_tool=ruleId,
+            file_path=locations_uri,
             title=ruleId + "_" + locations_uri,
             test=test,
             severity=severity,

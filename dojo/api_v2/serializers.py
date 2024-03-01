@@ -1,3 +1,4 @@
+from dojo.finding.queries import get_authorized_findings
 from dojo.group.utils import get_auth_group_name
 from django.contrib.auth.models import Group
 from typing import List
@@ -1393,7 +1394,7 @@ class DevelopmentEnvironmentSerializer(serializers.ModelSerializer):
 
 
 class FindingGroupSerializer(serializers.ModelSerializer):
-    jira_issue = JIRAIssueSerializer(read_only=True)
+    jira_issue = JIRAIssueSerializer(read_only=True, allow_null=True)
 
     class Meta:
         model = Finding_Group
@@ -1531,13 +1532,27 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
+        findings = data.get('accepted_findings', [])
+        findings_ids = [x.id for x in findings]
+        finding_objects = Finding.objects.filter(id__in=findings_ids)
+        authed_findings = get_authorized_findings(Permissions.Finding_Edit).filter(id__in=findings_ids)
+        if len(findings) != len(authed_findings):
+            raise PermissionDenied(
+                "You are not permitted to add one or more selected findings to this risk acceptance"
+            )
         if self.context["request"].method == "POST":
-            findings = data['accepted_findings']
-            for finding in findings:
-                if not user_has_permission(self.context["request"].user, finding, Permissions.Finding_View):
-                    raise PermissionDenied(
-                        "You are not permitted to add one or more selected findings to this risk acceptance"
-                    )
+            engagements = finding_objects.values_list('test__engagement__id', flat=True).distinct().count()
+            if engagements > 1:
+                raise PermissionDenied(
+                    "You are not permitted to add findings to a distinct engagement"
+                )
+        elif self.context['request'].method in ['PATCH', 'PUT']:
+            engagement = Engagement.objects.filter(risk_acceptance=self.instance.id).first()
+            findings = finding_objects.exclude(test__engagement__id=engagement.id)
+            if len(findings) > 0:
+                raise PermissionDenied(
+                    "You are not permitted to add findings to a distinct engagement"
+                )
         return data
 
     class Meta:
