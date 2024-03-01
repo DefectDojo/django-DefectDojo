@@ -98,7 +98,7 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
             except Exception as e:
                 logger.error(f"Could not call microsoft graph API or save groups to member: {e}")
         if len(group_names) > 0:
-            assign_user_to_groups(user, group_names, 'AzureAD')
+            assign_user_to_groups(user, group_names, Dojo_Group.AZURE)
         if settings.AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS:
             cleanup_old_groups_for_user(user, group_names)
 

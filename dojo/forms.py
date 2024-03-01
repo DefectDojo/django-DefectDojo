@@ -2121,19 +2121,35 @@ def get_years():
     return [(now.year, now.year), (now.year - 1, now.year - 1), (now.year - 2, now.year - 2)]
 
 
-class ProductTypeCountsForm(forms.Form):
+class ProductCountsFormBase(forms.Form):
     month = forms.ChoiceField(choices=list(MONTHS.items()), required=True, error_messages={
         'required': '*'})
     year = forms.ChoiceField(choices=get_years, required=True, error_messages={
         'required': '*'})
+
+
+class ProductTypeCountsForm(ProductCountsFormBase):
     product_type = forms.ModelChoiceField(required=True,
                                           queryset=Product_Type.objects.none(),
                                           error_messages={
                                               'required': '*'})
 
     def __init__(self, *args, **kwargs):
-        super(ProductTypeCountsForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['product_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+
+
+class ProductTagCountsForm(ProductCountsFormBase):
+    product_tag = forms.ModelChoiceField(required=True,
+                                         queryset=Product.tags.tag_model.objects.none().order_by('name'),
+                                         error_messages={
+                                             'required': '*'})
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        prods = get_authorized_products(Permissions.Product_View)
+        tags_available_to_user = Product.tags.tag_model.objects.filter(product__in=prods)
+        self.fields['product_tag'].queryset = tags_available_to_user
 
 
 class APIKeyForm(forms.ModelForm):

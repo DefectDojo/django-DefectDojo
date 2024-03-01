@@ -144,6 +144,10 @@ class SnykParser(object):
         if vulnerability.get("CVSSv3"):
             finding.cvssv3 = CVSS3(vulnerability["CVSSv3"]).clean_vector()
 
+        if vulnerability.get("epssDetails") is not None:
+            finding.epss_score = vulnerability["epssDetails"]["probability"]
+            finding.epss_percentile = vulnerability["epssDetails"]["percentile"]
+
         # manage CVE and CWE with idnitifiers
         cwe_references = ""
         if "identifiers" in vulnerability:

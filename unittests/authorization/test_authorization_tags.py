@@ -46,7 +46,7 @@ class TestAuthorizationTags(DojoTestCase):
     def test_has_object_permission_wrong_permission(self):
 
         with self.assertRaises(KeyError):
-            result = has_object_permission(self.product_type, 'Test')
+            has_object_permission(self.product_type, 'Test')
 
     @patch('dojo.templatetags.authorization_tags.configuration_permission')
     @patch('crum.get_current_user')
