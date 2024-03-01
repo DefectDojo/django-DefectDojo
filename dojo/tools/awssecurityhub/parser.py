@@ -47,6 +47,7 @@ def get_item(finding: dict, test):
     impact = []
     references = []
     unsaved_vulnerability_ids = []
+    epss_score = None
     if aws_scanner_type == "Inspector":
         description = f"This is an Inspector Finding\n{finding.get('Description', '')}"
         vulnerabilities = finding.get("Vulnerabilities", [])
@@ -66,6 +67,8 @@ def get_item(finding: dict, test):
             if vendor := vulnerability.get("Vendor"):
                 if vendor_url := vendor.get("Url"):
                     references.append(vendor_url)
+            if vulnerability.get("EpssScore") is not None:
+                epss_score = vulnerability.get("EpssScore")
 
         if finding.get("ProductFields", {}).get("aws/inspector/FindingStatus", "ACTIVE") == "ACTIVE":
             mitigated = None
@@ -81,11 +84,31 @@ def get_item(finding: dict, test):
                     mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
             else:
                 mitigated = datetime.utcnow()
-
+    elif aws_scanner_type == "GuardDuty":
+        mitigations = finding.get("FindingProviderFields", {}).get("Types")
+        for mitigate in mitigations:
+            mitigation += mitigate + "\n"
+        mitigation += "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html"
+        active = True
+        if finding.get("RecordState") == "ACTIVE":
+            is_Mitigated = False
+            mitigated = None
+        else:
+            is_Mitigated = True
+            if finding.get("LastObservedAt", None):
+                try:
+                    mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
+                except Exception:
+                    mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
+            else:
+                mitigated = datetime.utcnow()
+        description = f"This is a GuardDuty Finding\n{finding.get('Description', '')}"
+        description += f"SourceURL: {finding.get('SourceUrl', '')}\n"
+        description += f"AwsAccountId: {finding.get('AwsAccountId', '')}\n"
+        description += f"Region: {finding.get('Region', '')}\n"
     else:
         mitigation = finding.get("Remediation", {}).get("Recommendation", {}).get("Text", "")
         description = "This is a Security Hub Finding \n" + finding.get("Description", "")
-
         if finding.get("Compliance", {}).get("Status", "PASSED") == "PASSED":
             is_Mitigated = True
             active = False
@@ -140,6 +163,10 @@ def get_item(finding: dict, test):
         dynamic_finding=False,
         component_name=component_name,
     )
+
+    if epss_score is not None:
+        result.epss_score = epss_score
+
     # Add the unsaved vulnerability ids
     result.unsaved_vulnerability_ids = unsaved_vulnerability_ids
 

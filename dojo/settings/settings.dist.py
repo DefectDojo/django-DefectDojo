@@ -42,6 +42,7 @@ env = environ.FileAwareEnv(
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
     DD_CSRF_COOKIE_SAMESITE=(str, 'Lax'),
     DD_SESSION_COOKIE_SAMESITE=(str, 'Lax'),
+    DD_APPEND_SLASH=(bool, True),
     DD_TIME_ZONE=(str, 'UTC'),
     DD_LANG=(str, 'en-us'),
     DD_TEAM_NAME=(str, 'Security Team'),
@@ -55,7 +56,6 @@ env = environ.FileAwareEnv(
     DD_LANGUAGE_CODE=(str, 'en-us'),
     DD_SITE_ID=(int, 1),
     DD_USE_I18N=(bool, True),
-    DD_USE_L10N=(bool, True),
     DD_USE_TZ=(bool, True),
     DD_MEDIA_URL=(str, '/media/'),
     DD_MEDIA_ROOT=(str, root('media')),
@@ -345,10 +345,6 @@ SITE_ID = env('DD_SITE_ID')
 # to load the internationalization machinery.
 USE_I18N = env('DD_USE_I18N')
 
-# If you set this to False, Django will not format dates, numbers and
-# calendars according to the current locale.
-USE_L10N = env('DD_USE_L10N')
-
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = env('DD_USE_TZ')
 
@@ -494,7 +490,6 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.MD5PasswordHasher',
     'django.contrib.auth.hashers.UnsaltedSHA1PasswordHasher',
     'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
-    'django.contrib.auth.hashers.CryptPasswordHasher',
 ]
 
 SOCIAL_AUTH_PIPELINE = (
@@ -674,6 +669,9 @@ CSRF_COOKIE_HTTPONLY = env('DD_CSRF_COOKIE_HTTPONLY')
 SESSION_COOKIE_SECURE = env('DD_SESSION_COOKIE_SECURE')
 SESSION_COOKIE_SAMESITE = env('DD_SESSION_COOKIE_SAMESITE')
 
+# Override default Django behavior for incorrect URLs
+APPEND_SLASH = env('DD_APPEND_SLASH')
+
 # Whether to use a secure cookie for the CSRF cookie.
 CSRF_COOKIE_SECURE = env('DD_CSRF_COOKIE_SECURE')
 CSRF_COOKIE_SAMESITE = env('DD_CSRF_COOKIE_SAMESITE')
@@ -755,29 +753,6 @@ REST_FRAMEWORK = {
 if API_TOKENS_ENABLED:
     REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += ('rest_framework.authentication.TokenAuthentication',)
 
-SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'basicAuth': {
-            'type': 'basic'
-        },
-        'cookieAuth': {
-            'type': 'apiKey',
-            'in': 'cookie',
-            'name': 'sessionid'
-        },
-    },
-    'DOC_EXPANSION': "none",
-    'JSON_EDITOR': True,
-    'SHOW_REQUEST_HEADERS': True,
-}
-
-if API_TOKENS_ENABLED:
-    SWAGGER_SETTINGS['SECURITY_DEFINITIONS']['tokenAuth'] = {
-        'type': 'apiKey',
-        'in': 'header',
-        'name': 'Authorization'
-    }
-
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Defect Dojo API v2',
     'DESCRIPTION': 'Defect Dojo - Open Source vulnerability Management made easy. Prefetch related parameters/responses not yet in the schema.',
@@ -851,7 +826,6 @@ INSTALLED_APPS = (
     'dbbackup',
     'django_celery_results',
     'social_django',
-    'drf_yasg',
     'drf_spectacular',
     'drf_spectacular_sidecar',  # required for Django collectstatic discovery
     'tagulous',
@@ -1085,11 +1059,6 @@ if AUTH_REMOTEUSER_ENABLED:
         ('dojo.remote_user.RemoteUserAuthentication',) + \
         REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES']
 
-    SWAGGER_SETTINGS['SECURITY_DEFINITIONS']['remoteUserAuth'] = {
-        'type': 'apiKey',
-        'in': 'header',
-        'name': AUTH_REMOTEUSER_USERNAME_HEADER[5:].replace('_', '-')
-    }
 # ------------------------------------------------------------------------------
 # CELERY
 # ------------------------------------------------------------------------------
@@ -1209,9 +1178,10 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Cloudsploit Scan': ['title', 'description'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube API Import': ['title', 'file_path', 'line'],
+    'Sonatype Application Scan': ['title', 'cwe', 'file_path', 'component_name', 'component_version', 'vulnerability_ids'],
     'Dependency Check Scan': ['title', 'cwe', 'file_path'],
     'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
-    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'vulnerability_ids', 'severity'],
+    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'vulnerability_ids'],
     'Mobsfscan Scan': ['title', 'severity', 'cwe'],
     'Tenable Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     'Nexpose Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
@@ -1264,7 +1234,6 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'NeuVector (compliance)': ['title', 'vuln_id_from_tool', 'description'],
     'Wpscan': ['title', 'description', 'severity'],
     'Popeye Scan': ['title', 'description'],
-    'Wazuh Scan': ['title'],
     'Nuclei Scan': ['title', 'cwe', 'severity'],
     'KubeHunter Scan': ['title', 'description'],
     'kube-bench Scan': ['title', 'vuln_id_from_tool', 'description'],
@@ -1273,6 +1242,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Humble Json Importer': ['title'],
     'MSDefender Parser': ['title', 'description'],
     'HCLAppScan XML': ['title', 'description'],
+    'KICS Scan': ['file_path', 'line', 'severity', 'description', 'title'],
+    'MobSF Scan': ['title', 'description', 'severity'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1398,6 +1369,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
     'SonarQube API Import': DEDUPE_ALGO_HASH_CODE,
+    'Sonatype Application Scan': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
     'Dockle Scan': DEDUPE_ALGO_HASH_CODE,
     'Tenable Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1438,7 +1410,6 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Meterian Scan': DEDUPE_ALGO_HASH_CODE,
     'Github Vulnerability Scan': DEDUPE_ALGO_HASH_CODE,
     'Cloudsploit Scan': DEDUPE_ALGO_HASH_CODE,
-    'KICS Scan': DEDUPE_ALGO_HASH_CODE,
     'SARIF': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Azure Security Center Recommendations Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Hadolint Dockerfile check': DEDUPE_ALGO_HASH_CODE,
@@ -1478,8 +1449,12 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'kube-bench Scan': DEDUPE_ALGO_HASH_CODE,
     'Threagile risks report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Humble Json Importer': DEDUPE_ALGO_HASH_CODE,
+    'Wazuh Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'MSDefender Parser': DEDUPE_ALGO_HASH_CODE,
     'HCLAppScan XML': DEDUPE_ALGO_HASH_CODE,
+    'KICS Scan': DEDUPE_ALGO_HASH_CODE,
+    'MobSF Scan': DEDUPE_ALGO_HASH_CODE,
+    'Nosey Parker Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1662,8 +1637,6 @@ TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separat
 
 EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 
-USE_L10N = True
-
 # FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
 FEATURE_FINDING_GROUPS = env('DD_FEATURE_FINDING_GROUPS')
 JIRA_TEMPLATE_ROOT = env('DD_JIRA_TEMPLATE_ROOT')
@@ -1727,11 +1700,3 @@ USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
 # Reference issue: https://github.com/jazzband/django-polymorphic/issues/229
 warnings.filterwarnings("ignore", message="polymorphic.base.ManagerInheritanceWarning.*")
 warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager.*")
-
-
-# TODO - these warnings needs to be removed after all warnings have been removed
-if DEBUG:
-    from django.utils.deprecation import RemovedInDjango50Warning
-    warnings.filterwarnings("ignore", category=RemovedInDjango50Warning)
-    warnings.filterwarnings("ignore", message="'cgi' is deprecated and slated for removal in Python 3\\.13")
-    warnings.filterwarnings("ignore", message="unclosed file .+")

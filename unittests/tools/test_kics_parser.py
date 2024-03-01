@@ -15,7 +15,7 @@ class TestKICSParser(DojoTestCase):
         testfile = open("unittests/scans/kics/many_findings.json")
         parser = KICSParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertEqual(13, len(findings))
+        self.assertEqual(18, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
             self.assertEqual("Secret Management: Passwords And Secrets In Infrastructure Code", finding.title)
@@ -129,7 +129,7 @@ class TestKICSParser(DojoTestCase):
             self.assertEqual(5, finding.line)
             self.assertEqual("Terraform", finding.component_name)
             self.assertIsNotNone(finding.description)
-            self.assertEqual(2, finding.nb_occurences)
+            self.assertEqual(1, finding.nb_occurences)
 
         with self.subTest(i=8):
             finding = findings[8]
@@ -181,7 +181,7 @@ class TestKICSParser(DojoTestCase):
             self.assertEqual(20, finding.line)
             self.assertEqual("Kubernetes", finding.component_name)
             self.assertIsNotNone(finding.description)
-            self.assertEqual(5, finding.nb_occurences)
+            self.assertEqual(1, finding.nb_occurences)
 
         with self.subTest(i=12):
             finding = findings[12]

@@ -10,7 +10,7 @@ urlpatterns = [
     re_path(r'^engagements_all$', views.engagements_all, name='engagements_all'),
     re_path(r'^engagement/all$', views.engagements, {'view': 'all'}, name='all_engagements'),
     re_path(r'^engagement/active$', views.engagements, {'view': 'active'}, name='active_engagements'),
-    re_path(r'^engagement/(?P<eid>\d+)$', views.view_engagement,
+    re_path(r'^engagement/(?P<eid>\d+)$', views.ViewEngagement.as_view(),
         name='view_engagement'),
     re_path(r'^engagement/(?P<eid>\d+)/ics$', views.engagement_ics,
         name='engagement_ics'),

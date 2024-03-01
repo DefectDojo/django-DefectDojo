@@ -201,8 +201,8 @@ class DependencyTrackParser(object):
         dependency_track_severity = dependency_track_finding['vulnerability']['severity']
         vulnerability_severity = self._convert_dependency_track_severity_to_dojo_severity(dependency_track_severity)
         if vulnerability_severity is None:
-            logger.warning("Detected severity of %s that could not be mapped for %s. Defaulting to Critical!", dependency_track_severity, title)
-            vulnerability_severity = "Critical"
+            logger.warning("Detected severity of %s that could not be mapped for %s. Defaulting to Informational!", dependency_track_severity, title)
+            vulnerability_severity = "Informational"
 
         # Get the cvss score of the vulnerabililty
         cvss_score = dependency_track_finding['vulnerability'].get("cvssV3BaseScore")
@@ -210,6 +210,17 @@ class DependencyTrackParser(object):
         # Use the analysis state from Dependency Track to determine if the finding has already been marked as a false positive upstream
         analysis = dependency_track_finding.get('analysis')
         is_false_positive = True if analysis is not None and analysis.get('state') == 'FALSE_POSITIVE' else False
+
+        # Get the EPSS details
+        if 'epssPercentile' in dependency_track_finding['vulnerability']:
+            epss_percentile = dependency_track_finding['vulnerability']['epssPercentile']
+        else:
+            epss_percentile = None
+
+        if 'epssScore' in dependency_track_finding['vulnerability']:
+            epss_score = dependency_track_finding['vulnerability']['epssScore']
+        else:
+            epss_score = None
 
         # Build and return Finding model
         finding = Finding(
@@ -235,6 +246,11 @@ class DependencyTrackParser(object):
 
         if cvss_score:
             finding.cvssv3_score = cvss_score
+
+        if epss_score:
+            finding.epss_score = epss_score
+        if epss_percentile:
+            finding.epss_percentile = epss_percentile
 
         return finding
 

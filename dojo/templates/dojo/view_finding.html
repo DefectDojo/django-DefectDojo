@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load multiply %}
 {% load authorization_tags %}
 {% load humanize %}
 {% load static %}
@@ -268,8 +269,17 @@
                             <th>Date Mitigated</th>
                             <th>Mitigated By</th>
                         {% endif %}
-                            <th>CWE</th>
-                            <th>Vulnerability Id</th>
+                        <th>CWE</th>
+                        <th>Vulnerability Id</th>
+                        {% if finding.epss_score != None or finding.epss_percentile != None %}
+                            {% if finding.epss_score != None and finding.epss_percentile != None %}
+                                <th>EPSS Score / Percentile</th>
+                            {% elif finding.epss_score != None and finding.epss_percentile == None %}
+                                <th>EPSS Score</th>
+                            {% elif finding.epss_score == None and finding.epss_percentile != None %}
+                                <th>EPSS Percentile</th>
+                            {% endif %}
+                        {% endif %}
                         <th>Found by</th>
                         {% if finding.vuln_id_from_tool %}
                             <th>Vuln ID from tool</th>
@@ -421,7 +431,16 @@
                             {% endif %}
                         {% endif %}
                         </td>
-                        <td> 
+                        {% if finding.epss_score != None or finding.epss_percentile != None %}
+                                {% if finding.epss_score != None and finding.epss_percentile != None %}
+                                    <td>{{ finding.epss_score|multiply:100|floatformat:"2" }}% / {{ finding.epss_percentile|multiply:100|floatformat:"2" }}%</td>
+                                {% elif finding.epss_score != None and finding.epss_percentile == None %}
+                                    <td>{{ finding.epss_score|multiply:100|floatformat:"2" }}%</td>
+                                {% elif finding.epss_score == None and finding.epss_percentile != None %}
+                                    <td>{{ finding.epss_percentile|multiply:100|floatformat:"2" }}%</td>
+                                {% endif %}
+                        {% endif %}
+                        <td>
                             {% if found_by %}
                                 {% for scanner in found_by %}
                                     {{ scanner }}
@@ -1462,6 +1481,12 @@
         $(document).ready(function() {
             date =  new Date().toISOString().slice(0, 10);
             var fileDated = 'Findings_List_' + date;
+            var percentSort = function(data, type, row, meta) {
+                if(type === 'sort') {
+                    return (data && data.endsWith("%")) ? parseFloat(data.slice(0, -1)) : -1.00;
+                }
+                return data;
+            }
             var columns = [
                 { "data": "relationship" },
                 { "data": "severity" },
@@ -1475,6 +1500,8 @@
                 { "data": "product" },
                 { "data": "cwe" },
                 { "data": "cve" },
+                { "data": "epss_score", "type": "num", "render": percentSort },
+                { "data": "epss_percentile", "type": "num", "render": percentSort },
                 { "data": "file_path" },
                 {% if system_settings.enable_jira %}
                     { "data": "jira_id" },

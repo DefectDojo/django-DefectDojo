@@ -182,3 +182,15 @@ class TestSnykParser(DojoTestCase):
             parser = SnykParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(39, len(findings))
+
+    def test_snykcode_issue_9270_epss(self):
+        with open("unittests/scans/snyk/snykcontainer_issue_epss.json") as testfile:
+            parser = SnykParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            self.assertEqual(0.00046, float(findings[0].epss_score))
+            self.assertEqual(0.14414, float(findings[0].epss_percentile))
+            self.assertEqual(
+                "docker-image|sarim04/juiceshop@latest: CVE-2023-4039",
+                findings[0].title,
+            )
