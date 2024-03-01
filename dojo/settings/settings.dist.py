@@ -525,7 +525,7 @@ else:
 # ------------------------------------------------------------------------------
 if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
     secret_engine_backend = get_secret(env("DD_PROVIDER_SECRET"))
-    PROVIDER_TOKEN = secret_engine_backend["riskAcceptApi"]
+    PROVIDER_TOKEN = secret_engine_backend["tokenRiskAcceptanceApi"]
 else:
     PROVIDER_TOKEN = env("DD_PROVIDER_TOKEN")
 
