@@ -290,10 +290,7 @@ def identify_view(request):
 
 def finding_querys(request, prod):
     filters = dict()
-
-    findings_query = Finding.objects.filter(test__engagement__product=prod,
-                                            severity__in=('Critical', 'High', 'Medium', 'Low', 'Info'))
-
+    findings_query = Finding.objects.filter(test__engagement__product=prod)
     # prefetch only what's needed to avoid lots of repeated queries
     findings_query = findings_query.prefetch_related(
         # 'test__engagement',
@@ -307,81 +304,34 @@ def finding_querys(request, prod):
     findings_qs = queryset_check(findings)
     filters['form'] = findings.form
 
-    # dead code:
-    # if not findings_qs and not findings_query:
-    #     # logger.debug('all filtered')
-    #     findings = findings_query
-    #     findings_qs = queryset_check(findings)
-    #     messages.add_message(request,
-    #                                  messages.ERROR,
-    #                                  'All objects have been filtered away. Displaying all objects',
-    #                                  extra_tags='alert-danger')
-
     try:
         # logger.debug(findings_qs.query)
         start_date = findings_qs.earliest('date').date
-        start_date = datetime(start_date.year,
-                              start_date.month, start_date.day,
-                              tzinfo=timezone.get_current_timezone())
+        start_date = datetime(
+            start_date.year,
+            start_date.month, start_date.day,
+            tzinfo=timezone.get_current_timezone())
         end_date = findings_qs.latest('date').date
-        end_date = datetime(end_date.year,
-                            end_date.month, end_date.day,
-                            tzinfo=timezone.get_current_timezone())
+        end_date = datetime(
+            end_date.year,
+            end_date.month, end_date.day,
+            tzinfo=timezone.get_current_timezone())
     except Exception as e:
         logger.debug(e)
         start_date = timezone.now()
         end_date = timezone.now()
-    week = end_date - timedelta(days=7)  # seven days and /newnewer are considered "new"
+    week = end_date - timedelta(days=7)  # seven days and /newer are considered "new"
 
-    # risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=prod)).prefetch_related('accepted_findings')
-    # filters['accepted'] = [finding for ra in risk_acceptances for finding in ra.accepted_findings.all()]
-
-    from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY
-    filters['accepted'] = findings_qs.filter(ACCEPTED_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
-    filters['verified'] = findings_qs.filter(date__range=[start_date, end_date],
-                                             false_p=False,
-                                             active=True,
-                                             verified=True,
-                                             duplicate=False,
-                                             out_of_scope=False).order_by("date")
-    filters['new_verified'] = findings_qs.filter(date__range=[week, end_date],
-                                                 false_p=False,
-                                                 verified=True,
-                                                 active=True,
-                                                 duplicate=False,
-                                                 out_of_scope=False).order_by("date")
-    filters['open'] = findings_qs.filter(date__range=[start_date, end_date],
-                                         false_p=False,
-                                         duplicate=False,
-                                         out_of_scope=False,
-                                         active=True,
-                                         is_mitigated=False)
-    filters['inactive'] = findings_qs.filter(date__range=[start_date, end_date],
-                                             duplicate=False,
-                                             out_of_scope=False,
-                                             active=False,
-                                             is_mitigated=False)
-    filters['closed'] = findings_qs.filter(date__range=[start_date, end_date],
-                                           false_p=False,
-                                           duplicate=False,
-                                           out_of_scope=False,
-                                           active=False,
-                                           is_mitigated=True)
-    filters['false_positive'] = findings_qs.filter(date__range=[start_date, end_date],
-                                                   false_p=True,
-                                                   duplicate=False,
-                                                   out_of_scope=False)
-    filters['out_of_scope'] = findings_qs.filter(date__range=[start_date, end_date],
-                                                 false_p=False,
-                                                 duplicate=False,
-                                                 out_of_scope=True)
+    filters['accepted'] = findings_qs.filter(finding_helper.ACCEPTED_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
+    filters['verified'] = findings_qs.filter(finding_helper.VERIFIED_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
+    filters['new_verified'] = findings_qs.filter(finding_helper.VERIFIED_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
+    filters['open'] = findings_qs.filter(finding_helper.OPEN_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
+    filters['inactive'] = findings_qs.filter(finding_helper.INACTIVE_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
+    filters['closed'] = findings_qs.filter(finding_helper.CLOSED_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
+    filters['false_positive'] = findings_qs.filter(finding_helper.FALSE_POSITIVE_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
+    filters['out_of_scope'] = findings_qs.filter(finding_helper.OUT_OF_SCOPE_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
     filters['all'] = findings_qs
-    filters['open_vulns'] = findings_qs.filter(
-        false_p=False,
-        duplicate=False,
-        out_of_scope=False,
-        active=True,
-        mitigated__isnull=True,
+    filters['open_vulns'] = findings_qs.filter(finding_helper.OPEN_FINDINGS_QUERY).filter(
         cwe__isnull=False,
     ).order_by('cwe').values(
         'cwe'

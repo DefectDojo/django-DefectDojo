@@ -32,6 +32,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.finding.queries import get_authorized_findings
+from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY
 from dojo.endpoint.queries import get_authorized_endpoint_status
 from dojo.authorization.authorization import user_has_permission_or_403
 from django.utils.translation import gettext as _
@@ -126,9 +127,10 @@ def identify_view(request):
 
 
 def finding_querys(prod_type, request):
-    findings_query = Finding.objects.filter(
-        verified=True,
-        severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')
+    # Get the initial list of findings th use is authorized to see
+    findings_query = get_authorized_findings(
+        Permissions.Finding_View,
+        user=request.user,
     ).select_related(
         'reporter',
         'test',
@@ -139,49 +141,34 @@ def finding_querys(prod_type, request):
         'test__engagement__risk_acceptance',
         'test__test_type',
     )
-
-    findings_query = get_authorized_findings(Permissions.Finding_View, findings_query, request.user)
-
     findings = MetricsFindingFilter(request.GET, queryset=findings_query)
     findings_qs = queryset_check(findings)
-
+    # Quick check to determine if the filters were too tight and filtered everything away
     if not findings_qs and not findings_query:
         findings = findings_query
         findings_qs = findings if isinstance(findings, QuerySet) else findings.qs
-        messages.add_message(request,
-                                     messages.ERROR,
-                                     _('All objects have been filtered away. Displaying all objects'),
-                                     extra_tags='alert-danger')
-
+        messages.add_message(
+            request,
+            messages.ERROR,
+            _('All objects have been filtered away. Displaying all objects'),
+            extra_tags='alert-danger')
+    # Attempt to parser the date ranges
     try:
         start_date, end_date = get_date_range(findings_qs)
     except:
         start_date = timezone.now()
         end_date = timezone.now()
-
+    # Filter by the date ranges supplied
+    findings_query = findings_query.filter(date__range=[start_date, end_date])
+    # Get the list of closed and risk accepted findings
+    findings_closed = findings_query.filter(CLOSED_FINDINGS_QUERY)
+    accepted_findings = findings_query.filter(ACCEPTED_FINDINGS_QUERY)
+    # filter by product type if applicable
     if len(prod_type) > 0:
-        findings_closed = Finding.objects.filter(mitigated__date__range=[start_date, end_date],
-                                                 test__engagement__product__prod_type__in=prod_type).prefetch_related(
-            'test__engagement__product')
-        # capture the accepted findings in period
-        accepted_findings = Finding.objects.filter(risk_accepted=True, date__range=[start_date, end_date],
-                                                   test__engagement__product__prod_type__in=prod_type). \
-            prefetch_related('test__engagement__product')
-        accepted_findings_counts = Finding.objects.filter(risk_accepted=True, date__range=[start_date, end_date],
-                                                          test__engagement__product__prod_type__in=prod_type). \
-            prefetch_related('test__engagement__product')
-    else:
-        findings_closed = Finding.objects.filter(mitigated__date__range=[start_date, end_date]).prefetch_related(
-            'test__engagement__product')
-        accepted_findings = Finding.objects.filter(risk_accepted=True, date__range=[start_date, end_date]). \
-            prefetch_related('test__engagement__product')
-        accepted_findings_counts = Finding.objects.filter(risk_accepted=True, date__range=[start_date, end_date]). \
-            prefetch_related('test__engagement__product')
-
-    findings_closed = get_authorized_findings(Permissions.Finding_View, findings_closed, request.user)
-    accepted_findings = get_authorized_findings(Permissions.Finding_View, accepted_findings, request.user)
-    accepted_findings_counts = get_authorized_findings(Permissions.Finding_View, accepted_findings_counts, request.user)
-    accepted_findings_counts = severity_count(accepted_findings_counts, 'aggregate', 'severity')
+        findings_closed = findings_closed.filter(test__engagement__product__prod_type__in=prod_type)
+        accepted_findings = accepted_findings.filter(test__engagement__product__prod_type__in=prod_type)
+    # Get the severity counts of risk accepted findings
+    accepted_findings_counts = severity_count(accepted_findings, 'aggregate', 'severity')
 
     r = relativedelta(end_date, start_date)
     months_between = (r.years * 12) + r.months
