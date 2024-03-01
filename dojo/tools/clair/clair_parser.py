@@ -1,7 +1,7 @@
-import json
 import logging
 from dojo.models import Finding
 logger = logging.getLogger(__name__)
+
 
 class ClairScan(object):
     def get_items_clair(self, tree, test):
