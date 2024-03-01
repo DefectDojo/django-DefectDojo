@@ -57,6 +57,8 @@ jobs:
     strategy:
       matrix:
           docker-image: [django, nginx]
+          os: [debian]
+          platform: [amd64]
     steps:
       - name: set Docker tag to the release
         if: ${{ startsWith(github.ref_name, 'nca/release/') }}
@@ -89,10 +91,10 @@ jobs:
           echo packaging Helm chart into ${{ env.NCA_HELM_BRANCH }} branch
 
       - name: checkout the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: login to Docker repository
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.DD_REGISTRY }}
           username: ${{ secrets.NCA_REPO_USERNAME }}
@@ -100,10 +102,10 @@ jobs:
 
       - name: setup Docker buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: cache Docker layers
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           docker-image: ${{ matrix.docker-image }}
         with:
@@ -119,7 +121,7 @@ jobs:
         run: echo "$AD_CERT" > docker/certs/ad-ca.crt
 
       - name: build and push image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         env:
           docker-image: ${{ matrix.docker-image }}
         with:
@@ -166,10 +168,14 @@ jobs:
           echo packaging Helm chart into ${{ env.NCA_HELM_BRANCH }} branch
 
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: install Helm
         uses: azure/setup-helm@v3
+        with:
+          version: v3.4.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -191,25 +197,18 @@ jobs:
 
       - name: create a release
         id: create_release
-        uses: ncipollo/release-action@v1.11.2
-        with:
-          commit: ${{ github.sha }}
-          tag: ${{ env.NCA_HELM_RELEASE }}
-          draft: false
-          prerelease: false
-          removeArtifacts: true
-          name: Release ${{ env.NCA_HELM_RELEASE }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: upload release asset
-        uses: actions/upload-release-asset@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: netceteragroup/django-DefectDojo
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/defectdojo-${{ env.chart_version }}.tgz
-          asset_name: defectdojo-${{ env.chart_version }}.tgz
-          asset_content_type: application/tar+gzip
+          draft: false
+          prerelease: false
+          files: ./build/defectdojo-${{ env.chart_version }}.tgz
+          name: Release ${{ env.NCA_HELM_RELEASE }}
+          tag_name: ${{ env.NCA_HELM_RELEASE }}
+          target_commitish: ${{ github.sha }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: update Helm repository index
         run: |
@@ -217,6 +216,7 @@ jobs:
           git config --global user.email "${{ env.GIT_EMAIL }}"
           git remote update
           git fetch --all
+          git stash
           git checkout -b "${{ env.NCA_HELM_BRANCH }}" origin/helm-charts
           if [ ! -f ./index.yaml ]; then
             helm repo index ./build --url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${{ env.NCA_HELM_RELEASE }}/"
