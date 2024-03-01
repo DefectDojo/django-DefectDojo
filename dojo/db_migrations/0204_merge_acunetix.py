@@ -15,7 +15,7 @@ def update_parser_test(test, parser_test_type) -> None:
         test.save()
 
 
-# Update the found_by field to remove Veracode SourceClear Scan and add Veracode Scan
+# Update the found_by field to remove Acunetix360 and add Acunetix
 def update_parser_finding(finding, newparser_test_type, parser_test_type) -> None:
     # Check if nessus is in found by list and remove
     if parser_test_type in finding.found_by.all():
@@ -26,14 +26,14 @@ def update_parser_finding(finding, newparser_test_type, parser_test_type) -> Non
     finding.save()
 
 
-# Update all finding objects that came from Veracode SourceClear reports
-def merge_parser(apps, schema_editor):
+# Update all finding objects that came from Acunetix360 reports
+def forward_merge_parser(apps, schema_editor):
     finding_model = apps.get_model('dojo', 'Finding')
     test_type_model = apps.get_model('dojo', 'Test_Type')
-    # Get or create Veracode Scan Test Type and fetch the Veracode SourceClear Scan test types
+    # Get or create Acunetix Scan Test Type and fetch the Acunetix360 Scan test types
     newparser_test_type, _ = test_type_model.objects.get_or_create(name="Acunetix Scan", defaults={"active": True})
     parser_test_type = test_type_model.objects.filter(name="Acunetix360 Scan").first()
-    # Get all the findings found by Veracode SourceClear Scan
+    # Get all the findings found by Acunetix360 Scan
     findings = finding_model.objects.filter(test__scan_type__in=PARSER_REFERENCES)
     logger.warning(f'We identified {findings.count()} Acunetix360 Scan findings to migrate to Acunetix Scan findings')
     # Iterate over all findings and change
@@ -43,6 +43,10 @@ def merge_parser(apps, schema_editor):
         # Update the test object
         update_parser_test(finding.test, newparser_test_type)
 
+def reverse_uncouple_parser(apps, schema_editor):
+    finding_model = apps.get_model('dojo', 'Finding')
+    test_type_model = apps.get_model('dojo', 'Test_Type')
+    #TODO How can I distinguish now between original Acunetix360 findings and Acunetix findings if they were merged?
 
 class Migration(migrations.Migration):
 
@@ -51,5 +55,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(merge_parser),
+        migrations.RunPython(forward_merge_parser, reverse_uncouple_parser),
     ]
