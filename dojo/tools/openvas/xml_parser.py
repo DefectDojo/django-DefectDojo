@@ -1,10 +1,6 @@
-import csv
-import hashlib
-import io
-from dateutil.parser import parse
 from xml.dom import NamespaceErr
 from defusedxml import ElementTree as ET
-from dojo.models import Finding, Endpoint
+from dojo.models import Finding
 
 
 class OpenVASXMLParser(object):
@@ -48,7 +44,7 @@ class OpenVASXMLParser(object):
             )
             findings.append(finding)
         return findings
-    
+
     def convert_cvss_score(self, raw_value):
         val = float(raw_value)
         if val == 0.0:

@@ -2,9 +2,8 @@ import csv
 import hashlib
 import io
 from dateutil.parser import parse
-from xml.dom import NamespaceErr
-from defusedxml import ElementTree as ET
 from dojo.models import Finding, Endpoint
+
 
 class ColumnMappingStrategy(object):
     mapped_column = None
@@ -192,6 +191,7 @@ class DuplicateColumnMappingStrategy(ColumnMappingStrategy):
     def map_column_value(self, finding, column_value):
         finding.duplicate = self.evaluate_bool_value(column_value)
 
+
 class OpenVASCSVParser(object):
     def create_chain(self):
         date_column_strategy = DateColumnMappingStrategy()
@@ -210,7 +210,6 @@ class OpenVASCSVParser(object):
         duplicate_strategy = DuplicateColumnMappingStrategy()
         port_strategy = PortColumnMappingStrategy()
         protocol_strategy = ProtocolColumnMappingStrategy()
-
         port_strategy.successor = protocol_strategy
         duplicate_strategy.successor = port_strategy
         false_positive_strategy.successor = duplicate_strategy
@@ -240,35 +239,29 @@ class OpenVASCSVParser(object):
         column_names = dict()
         dupes = dict()
         chain = self.create_chain()
-
         content = filename.read()
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.reader(io.StringIO(content), delimiter=",", quotechar='"')
-
         row_number = 0
         for row in reader:
             finding = Finding(test=test)
             finding.unsaved_endpoints = [Endpoint()]
-
             if row_number == 0:
                 column_names = self.read_column_names(row)
                 row_number += 1
                 continue
-
             column_number = 0
             for column in row:
                 chain.process_column(
                     column_names[column_number], column, finding
                 )
                 column_number += 1
-
             if finding is not None and row_number > 0:
                 if finding.title is None:
                     finding.title = ""
                 if finding.description is None:
                     finding.description = ""
-
                 key = hashlib.sha256(
                     (
                         str(finding.unsaved_endpoints[0])
@@ -280,9 +273,7 @@ class OpenVASCSVParser(object):
                         + finding.description
                     ).encode("utf-8")
                 ).hexdigest()
-
                 if key not in dupes:
                     dupes[key] = finding
-
             row_number += 1
         return list(dupes.values())
