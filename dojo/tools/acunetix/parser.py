@@ -8,6 +8,8 @@ import hyperlink
 from cvss import parser as cvss_parser
 from defusedxml.ElementTree import parse
 from dojo.models import Endpoint, Finding
+from dojo.tools.acunetix.json_parser import AcunetixJSONParser
+from dojo.tools.acunetix.xml_parser import AcunetixXMLParser
 
 logger = logging.getLogger(__name__)
 
