@@ -17,13 +17,6 @@ class CycloneDXParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Support CycloneDX XML and JSON report formats (compatible with 1.4)."
 
-    def internal_deduplicate(self, dupes, dupe_key, finding):
-        if dupe_key in dupes:
-            find = dupes[dupe_key]
-            find.nb_occurences += 1
-        else:
-            dupes[dupe_key] = finding
-
     def get_findings(self, file, test):
         if file.name.strip().lower().endswith(".json"):
             return CycloneDXJSONParser()._get_findings_json(file, test)
