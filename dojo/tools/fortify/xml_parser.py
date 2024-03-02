@@ -1,15 +1,11 @@
-import logging
 from defusedxml import ElementTree
 from dojo.models import Finding
-logger = logging.getLogger(__name__)
-
 
 
 class FortifyXMLParser(object):
     def parse_xml(self, filename, test):
         fortify_scan = ElementTree.parse(filename)
         root = fortify_scan.getroot()
-
         # Get Category Information:
         # Abstract, Explanation, Recommendation, Tips
         cat_meta = {}
@@ -41,14 +37,12 @@ class FortifyXMLParser(object):
                 # Collect all issues
                 for issue in ReportSection.iter("Issue"):
                     issue_pair[place].append(issue)
-
         if len(issue_pair[0]) > len(issue_pair[1]):
             issues = issue_pair[0]
             cat_meta = meta_pair[0]
         else:
             issues = issue_pair[1]
             cat_meta = meta_pair[1]
-
         # All issues obtained, create a map for reference
         issue_map = {}
         for issue in issues:
@@ -63,12 +57,10 @@ class FortifyXMLParser(object):
                 "FilePath": issue.find("Primary").find("FilePath").text,
                 "LineStart": issue.find("Primary").find("LineStart").text,
             }
-
             if issue.find("Primary").find("Snippet"):
                 details["Snippet"] = issue.find("Primary").find("Snippet").text
             else:
                 details["Snippet"] = "n/a"
-
             if issue.find("Source"):
                 source = {
                     "FileName": issue.find("Source").find("FileName").text,
@@ -77,9 +69,7 @@ class FortifyXMLParser(object):
                     "Snippet": issue.find("Source").find("Snippet").text,
                 }
                 details["Source"] = source
-
             issue_map.update({issue.attrib["iid"]: details})
-
         items = []
         dupes = set()
         for issue_key, issue in issue_map.items():
@@ -102,7 +92,7 @@ class FortifyXMLParser(object):
                 )
                 dupes.add(title)
         return items
-    
+
     def format_description(self, issue, meta_info) -> str:
         """
         Returns a formatted Description. This will contain information about the category,
@@ -155,7 +145,6 @@ class FortifyXMLParser(object):
         recommendation = meta_info[issue["Category"]].get("Recommendations")
         if recommendation:
             mitigation += "###Recommendation:\n {}\n".format(recommendation)
-
         tips = meta_info[issue["Category"]].get("Tips")
         if tips:
             mitigation += "###Tips:\n {}".format(tips)

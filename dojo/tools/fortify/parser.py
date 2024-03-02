@@ -1,12 +1,5 @@
-import re
-import logging
-import zipfile
-from defusedxml import ElementTree
-from dojo.models import Finding
 from dojo.tools.fortify.xml_parser import FortifyXMLParser
 from dojo.tools.fortify.fpr_parser import FortifyFPRParser
-
-logger = logging.getLogger(__name__)
 
 
 class FortifyParser(object):
@@ -24,8 +17,3 @@ class FortifyParser(object):
             return FortifyXMLParser().parse_xml(filename, test)
         elif str(filename.name).endswith('.fpr'):
             return FortifyFPRParser().parse_fpr(filename, test)
-
-        
-
-    
-    
