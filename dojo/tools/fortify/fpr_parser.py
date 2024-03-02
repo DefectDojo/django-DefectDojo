@@ -1,10 +1,9 @@
 import re
-import logging
 import zipfile
 from defusedxml import ElementTree
 from dojo.models import Finding
 
-logger = logging.getLogger(__name__)
+
 class FortifyFPRParser(object):
    def parse_fpr(self, filename, test):
       if str(filename.__class__) == "<class '_io.TextIOWrapper'>":

@@ -1,5 +1,9 @@
+import logging
 from defusedxml import ElementTree
 from dojo.models import Finding
+logger = logging.getLogger(__name__)
+
+
 
 class FortifyXMLParser(object):
     def parse_xml(self, filename, test):
