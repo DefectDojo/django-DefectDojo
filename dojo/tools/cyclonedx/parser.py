@@ -43,24 +43,8 @@ class CycloneDXParser(object):
 
 
 
-    def _flatten_components(self, components, flatted_components):
-        for component in components:
-            if "components" in component:
-                self._flatten_components(
-                    component.get("components", []), flatted_components
-                )
-            # according to specification 1.4, 'bom-ref' is mandatory but some
-            # tools don't provide it
-            if "bom-ref" in component:
-                flatted_components[component["bom-ref"]] = component
-        return None
+    
 
     
 
-    def fix_severity(self, severity):
-        severity = severity.capitalize()
-        if severity is None:
-            severity = "Medium"
-        elif "Unknown" == severity or "None" == severity:
-            severity = "Info"
-        return severity
+    

@@ -4,7 +4,7 @@ import re
 from dojo.models import Finding
 import logging
 from cvss import CVSS3
-
+from dojo.tools.cyclonedx.helpers import Cyclonedxhelper
 LOGGER = logging.getLogger(__name__)
 
 
@@ -149,7 +149,7 @@ class CycloneDXXMLParser(object):
             if "CVSSv3" == rating.findtext("v:method", namespaces=ns):
                 raw_vector = rating.findtext("v:vector", namespaces=ns)
                 severity = rating.findtext("v:severity", namespaces=ns)
-                cvssv3 = self._get_cvssv3(raw_vector)
+                cvssv3 = Cyclonedxhelper()._get_cvssv3(raw_vector)
                 if cvssv3:
                     finding.cvssv3 = cvssv3.clean_vector()
                     if severity:
@@ -184,18 +184,7 @@ class CycloneDXXMLParser(object):
             severity = "Info"
         return severity
     
-    def _get_cvssv3(self, raw_vector):
-        if raw_vector is None or "" == raw_vector:
-            return None
-        if not raw_vector.startswith("CVSS:3"):
-            raw_vector = "CVSS:3.1/" + raw_vector
-        try:
-            return CVSS3(raw_vector)
-        except BaseException:
-            LOGGER.exception(
-                f"error while parsing vector CVSS v3 {raw_vector}"
-            )
-            return None
+    
 
     def get_cwes(self, node, prefix, namespaces):
         cwes = []
@@ -294,7 +283,7 @@ class CycloneDXXMLParser(object):
                 if "CVSSv3" == method or "CVSSv31" == method:
                     raw_vector = rating.findtext("b:vector", namespaces=ns)
                     severity = rating.findtext("b:severity", namespaces=ns)
-                    cvssv3 = self._get_cvssv3(raw_vector)
+                    cvssv3 = Cyclonedxhelper()._get_cvssv3(raw_vector)
                     if cvssv3:
                         finding.cvssv3 = cvssv3.clean_vector()
                         if severity:
