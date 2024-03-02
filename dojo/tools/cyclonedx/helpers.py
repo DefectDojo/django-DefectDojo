@@ -1,11 +1,9 @@
 from cvss import CVSS3
 import logging
-from dojo.models import Finding
-
 LOGGER = logging.getLogger(__name__)
 
-class Cyclonedxhelper(object):
 
+class Cyclonedxhelper(object):
     def _get_cvssv3(self, raw_vector):
         if raw_vector is None or "" == raw_vector:
             return None
@@ -18,7 +16,7 @@ class Cyclonedxhelper(object):
                 f"error while parsing vector CVSS v3 {raw_vector}"
             )
             return None
-        
+
     def _get_component(self, components, reference):
         if reference not in components:
             LOGGER.warning(f"reference:{reference} not found in the BOM")
@@ -29,7 +27,7 @@ class Cyclonedxhelper(object):
             components[reference]["name"],
             components[reference]["version"],
         )
-    
+
     def fix_severity(self, severity):
         severity = severity.capitalize()
         if severity is None:

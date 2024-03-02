@@ -1,12 +1,10 @@
-from defusedxml import ElementTree
-import dateutil
 import re
-from dojo.models import Finding
 import logging
-from cvss import CVSS3
+import dateutil
+from defusedxml import ElementTree
+from dojo.models import Finding
 from dojo.tools.cyclonedx.helpers import Cyclonedxhelper
 LOGGER = logging.getLogger(__name__)
-
 
 
 class CycloneDXXMLParser(object):
@@ -57,7 +55,6 @@ class CycloneDXXMLParser(object):
                     component_version=component_version,
                 )
                 findings.append(finding_vuln)
-
         # manage adhoc vulnerabilities
         for vulnerability in root.findall(
             "v:vulnerabilities/v:vulnerability", namespaces=ns
@@ -66,7 +63,6 @@ class CycloneDXXMLParser(object):
                 vulnerability, ns, bom_refs, report_date
             )
             findings.append(finding_vuln)
-
         # manage adhoc vulnerabilities (compatible with 1.4 of the spec)
         for vulnerability in root.findall(
             "b:vulnerabilities/b:vulnerability", namespaces=ns
@@ -76,7 +72,6 @@ class CycloneDXXMLParser(object):
                     vulnerability, ns, bom_refs, report_date
                 )
             )
-
         return findings
     
     def get_namespace(self, element):
@@ -110,7 +105,6 @@ class CycloneDXXMLParser(object):
                     f"**Severity:** {str(severity)}",
                 ]
             )
-
         if component_name is None:
             bom = bom_refs[ref]
             component_name = bom["name"]
@@ -141,7 +135,6 @@ class CycloneDXXMLParser(object):
             mitigation += f"{recommend.text}\n"
         if mitigation != "":
             finding.mitigation = mitigation
-
         # manage CVSS
         for rating in vulnerability.findall(
             "v:ratings/v:rating", namespaces=ns
@@ -156,7 +149,6 @@ class CycloneDXXMLParser(object):
                         finding.severity = Cyclonedxhelper().fix_severity(severity)
                     else:
                         finding.severity = cvssv3.severities()[0]
-
         # if there is some CWE
         cwes = self.get_cwes(vulnerability, "v", ns)
         if len(cwes) > 1:
@@ -166,19 +158,13 @@ class CycloneDXXMLParser(object):
             )
         if len(cwes) > 0:
             finding.cwe = cwes[0]
-
         vulnerability_ids = list()
         # set id as first vulnerability id
         if vuln_id:
             vulnerability_ids.append(vuln_id)
         if vulnerability_ids:
             finding.unsaved_vulnerability_ids = vulnerability_ids
-
         return finding
-    
-    
-    
-    
 
     def get_cwes(self, node, prefix, namespaces):
         cwes = []
@@ -199,7 +185,6 @@ class CycloneDXXMLParser(object):
         component_version=None,
     ):
         vuln_id = vulnerability.findtext("b:id", namespaces=ns)
-
         description = vulnerability.findtext("b:description", namespaces=ns)
         detail = vulnerability.findtext("b:detail", namespaces=ns)
         if detail:
@@ -207,12 +192,10 @@ class CycloneDXXMLParser(object):
                 description += f"\n{detail}"
             else:
                 description = f"\n{detail}"
-
         severity = vulnerability.findtext(
             "b:ratings/b:rating/b:severity", namespaces=ns
         )
         severity = Cyclonedxhelper().fix_severity(severity)
-
         references = ""
         for advisory in vulnerability.findall(
             "b:advisories/b:advisory", namespaces=ns
@@ -224,7 +207,6 @@ class CycloneDXXMLParser(object):
             if url:
                 references += f"**URL:** {url}\n"
             references += "\n"
-
         vulnerability_ids = list()
         # set id as first vulnerability id
         if vuln_id:
@@ -236,7 +218,6 @@ class CycloneDXXMLParser(object):
             vulnerability_id = reference.findtext("b:id", namespaces=ns)
             if vulnerability_id:
                 vulnerability_ids.append(vulnerability_id)
-
         # for all component affected
         findings = []
         for target in vulnerability.findall(
@@ -246,7 +227,6 @@ class CycloneDXXMLParser(object):
             component_name, component_version = Cyclonedxhelper()._get_component(
                 bom_refs, ref.text
             )
-
             finding = Finding(
                 title=f"{component_name}:{component_version} | {vuln_id}",
                 description=description,
@@ -262,13 +242,10 @@ class CycloneDXXMLParser(object):
                 vuln_id_from_tool=vuln_id,
                 nb_occurences=1,
             )
-
             if vulnerability_ids:
                 finding.unsaved_vulnerability_ids = vulnerability_ids
-
             if report_date:
                 finding.date = report_date
-
             # manage CVSS
             for rating in vulnerability.findall(
                 "b:ratings/b:rating", namespaces=ns
@@ -284,7 +261,6 @@ class CycloneDXXMLParser(object):
                             finding.severity = Cyclonedxhelper().fix_severity(severity)
                         else:
                             finding.severity = cvssv3.severities()[0]
-
             # if there is some CWE. Check both for old namespace and for 1.4
             cwes = self.get_cwes(vulnerability, "v", ns)
             if not cwes:
@@ -296,7 +272,6 @@ class CycloneDXXMLParser(object):
                 )
             if len(cwes) > 0:
                 finding.cwe = cwes[0]
-
             # Check for mitigation
             analysis = vulnerability.findall("b:analysis", namespaces=ns)
             if analysis and len(analysis) == 1:
@@ -323,9 +298,5 @@ class CycloneDXXMLParser(object):
                                     detail
                                 )
                             )
-
             findings.append(finding)
-
         return findings
-    
-    
