@@ -4,6 +4,8 @@ import re
 
 import dateutil
 from cvss import CVSS3
+from dojo.tools.cyclonedx.json_parser import CycloneDXJSONParser
+from dojo.tools.cyclonedx.xml_parser import CycloneDXXMLParser
 from defusedxml import ElementTree
 from dojo.models import Finding
 
