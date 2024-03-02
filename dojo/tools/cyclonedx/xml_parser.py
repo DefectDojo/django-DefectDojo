@@ -249,7 +249,7 @@ class CycloneDXXMLParser(object):
             "b:affects/b:target", namespaces=ns
         ):
             ref = target.find("b:ref", namespaces=ns)
-            component_name, component_version = self._get_component(
+            component_name, component_version = Cyclonedxhelper()._get_component(
                 bom_refs, ref.text
             )
 
@@ -334,13 +334,4 @@ class CycloneDXXMLParser(object):
 
         return findings
     
-    def _get_component(self, components, reference):
-        if reference not in components:
-            LOGGER.warning(f"reference:{reference} not found in the BOM")
-            return (None, None)
-        if "version" not in components[reference]:
-            return (components[reference]["name"], None)
-        return (
-            components[reference]["name"],
-            components[reference]["version"],
-        )
+    

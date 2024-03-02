@@ -18,3 +18,14 @@ class Cyclonedxhelper(object):
                 f"error while parsing vector CVSS v3 {raw_vector}"
             )
             return None
+        
+    def _get_component(self, components, reference):
+        if reference not in components:
+            LOGGER.warning(f"reference:{reference} not found in the BOM")
+            return (None, None)
+        if "version" not in components[reference]:
+            return (components[reference]["name"], None)
+        return (
+            components[reference]["name"],
+            components[reference]["version"],
+        )

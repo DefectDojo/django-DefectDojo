@@ -59,7 +59,7 @@ class CycloneDXJSONParser(object):
             # node is here
             for affect in vulnerability.get("affects", []):
                 reference = affect["ref"]  # required by the specification
-                component_name, component_version = self._get_component(
+                component_name, component_version = Cyclonedxhelper()._get_component(
                     components, reference
                 )
                 if not description:
@@ -167,15 +167,6 @@ class CycloneDXJSONParser(object):
             severity = "Info"
         return severity
 
-    def _get_component(self, components, reference):
-        if reference not in components:
-            LOGGER.warning(f"reference:{reference} not found in the BOM")
-            return (None, None)
-        if "version" not in components[reference]:
-            return (components[reference]["name"], None)
-        return (
-            components[reference]["name"],
-            components[reference]["version"],
-        )
+    
     
  
