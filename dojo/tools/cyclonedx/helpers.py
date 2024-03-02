@@ -29,3 +29,11 @@ class Cyclonedxhelper(object):
             components[reference]["name"],
             components[reference]["version"],
         )
+    
+    def fix_severity(self, severity):
+        severity = severity.capitalize()
+        if severity is None:
+            severity = "Medium"
+        elif "Unknown" == severity or "None" == severity:
+            severity = "Info"
+        return severity

@@ -116,7 +116,7 @@ class CycloneDXXMLParser(object):
             component_name = bom["name"]
             component_version = bom["version"]
 
-        severity = self.fix_severity(severity)
+        severity = Cyclonedxhelper().fix_severity(severity)
         references = ""
         for adv in vulnerability.findall(
             "v:advisories/v:advisory", namespaces=ns
@@ -153,7 +153,7 @@ class CycloneDXXMLParser(object):
                 if cvssv3:
                     finding.cvssv3 = cvssv3.clean_vector()
                     if severity:
-                        finding.severity = self.fix_severity(severity)
+                        finding.severity = Cyclonedxhelper().fix_severity(severity)
                     else:
                         finding.severity = cvssv3.severities()[0]
 
@@ -176,13 +176,7 @@ class CycloneDXXMLParser(object):
 
         return finding
     
-    def fix_severity(self, severity):
-        severity = severity.capitalize()
-        if severity is None:
-            severity = "Medium"
-        elif "Unknown" == severity or "None" == severity:
-            severity = "Info"
-        return severity
+    
     
     
 
@@ -217,7 +211,7 @@ class CycloneDXXMLParser(object):
         severity = vulnerability.findtext(
             "b:ratings/b:rating/b:severity", namespaces=ns
         )
-        severity = self.fix_severity(severity)
+        severity = Cyclonedxhelper().fix_severity(severity)
 
         references = ""
         for advisory in vulnerability.findall(
@@ -287,7 +281,7 @@ class CycloneDXXMLParser(object):
                     if cvssv3:
                         finding.cvssv3 = cvssv3.clean_vector()
                         if severity:
-                            finding.severity = self.fix_severity(severity)
+                            finding.severity = Cyclonedxhelper().fix_severity(severity)
                         else:
                             finding.severity = cvssv3.severities()[0]
 

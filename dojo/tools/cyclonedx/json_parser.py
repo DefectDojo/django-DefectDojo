@@ -40,7 +40,7 @@ class CycloneDXJSONParser(object):
             ratings = vulnerability.get("ratings")
             if ratings:
                 severity = ratings[0]["severity"]
-                severity = self.fix_severity(severity)
+                severity = Cyclonedxhelper().fix_severity(severity)
             else:
                 severity = "Medium"
 
@@ -93,7 +93,7 @@ class CycloneDXJSONParser(object):
                         if cvssv3:
                             finding.cvssv3 = cvssv3.clean_vector()
                             if severity:
-                                finding.severity = self.fix_severity(severity)
+                                finding.severity = Cyclonedxhelper().fix_severity(severity)
                             else:
                                 finding.severity = cvssv3.severities()[0]
 
@@ -159,14 +159,5 @@ class CycloneDXJSONParser(object):
                 flatted_components[component["bom-ref"]] = component
         return None
 
-    def fix_severity(self, severity):
-        severity = severity.capitalize()
-        if severity is None:
-            severity = "Medium"
-        elif "Unknown" == severity or "None" == severity:
-            severity = "Info"
-        return severity
-
-    
-    
+   
  
