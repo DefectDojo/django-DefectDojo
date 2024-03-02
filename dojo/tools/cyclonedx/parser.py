@@ -1,13 +1,5 @@
-import json
-import logging
-
-import dateutil
-from cvss import CVSS3
 from dojo.tools.cyclonedx.json_parser import CycloneDXJSONParser
 from dojo.tools.cyclonedx.xml_parser import CycloneDXXMLParser
-from dojo.models import Finding
-
-LOGGER = logging.getLogger(__name__)
 
 
 class CycloneDXParser(object):
@@ -25,8 +17,6 @@ class CycloneDXParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Support CycloneDX XML and JSON report formats (compatible with 1.4)."
 
-
-
     def internal_deduplicate(self, dupes, dupe_key, finding):
         if dupe_key in dupes:
             find = dupes[dupe_key]
@@ -34,17 +24,8 @@ class CycloneDXParser(object):
         else:
             dupes[dupe_key] = finding
 
-
     def get_findings(self, file, test):
         if file.name.strip().lower().endswith(".json"):
             return CycloneDXJSONParser()._get_findings_json(file, test)
         else:
             return CycloneDXXMLParser()._get_findings_xml(file, test)
-
-
-
-    
-
-    
-
-    

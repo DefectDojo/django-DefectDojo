@@ -73,12 +73,12 @@ class CycloneDXXMLParser(object):
                 )
             )
         return findings
-    
+
     def get_namespace(self, element):
         """Extract namespace present in XML file."""
         m = re.match(r"\{.*\}", element.tag)
         return m.group(0) if m else ""
-    
+
     def manage_vulnerability_legacy(
         self,
         vulnerability,
@@ -174,7 +174,7 @@ class CycloneDXXMLParser(object):
             if cwe.text.isdigit():
                 cwes.append(int(cwe.text))
         return cwes
-    
+
     def _manage_vulnerability_xml(
         self,
         vulnerability,
