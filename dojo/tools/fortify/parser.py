@@ -3,6 +3,8 @@ import logging
 import zipfile
 from defusedxml import ElementTree
 from dojo.models import Finding
+from dojo.tools.fortify.xml_parser import FortifyXMLParser
+from dojo.tools.fortify.fpr_parser import FortifyFPRParser
 
 logger = logging.getLogger(__name__)
 
