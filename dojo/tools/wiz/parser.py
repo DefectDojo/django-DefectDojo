@@ -84,7 +84,6 @@ class WizParser(object):
                         static_finding=False,
                         dynamic_finding=True,
                         mitigation=row.get("Remediation Recommendation"),
-                        dynamic_finding=False,
                         test=test,
                     )
                 )
