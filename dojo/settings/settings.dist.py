@@ -206,7 +206,7 @@ env = environ.FileAwareEnv(
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
     DD_LOGGING_HANDLER=(str, 'console'),
     # If true, drf-spectacular will load CSS & JS from default CDN, otherwise from static resources
-    DD_DEFAULT_SWAGGER_UI=(bool, True),
+    DD_DEFAULT_SWAGGER_UI=(bool, False),
     DD_ALERT_REFRESH=(bool, True),
     DD_DISABLE_ALERT_COUNTER=(bool, False),
     # to disable deleting alerts per user set value to -1
