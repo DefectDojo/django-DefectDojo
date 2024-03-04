@@ -1,4 +1,3 @@
-
 from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.wiz.parser import WizParser
@@ -6,17 +5,26 @@ from dojo.tools.wiz.parser import WizParser
 
 class TestWizParser(DojoTestCase):
     def test_multiple_findings(self):
-        with self.assertRaises(ValueError):
-            testfile = open("unittests/scans/wiz/multiple_findings.csv")
-            parser = WizParser()
-            parser.get_findings(testfile, Test())
-            findings = parser.get_findings(testfile, Test())
-            self.assertEqual(3, len(findings))
+        testfile = open("unittests/scans/wiz/multiple_findings.csv")
+        parser = WizParser()
+        findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(838, len(findings))
+        finding = findings[0]
+        self.assertEqual("AKS role/cluster role assigned permissions that contain wildcards ", finding.title)
+        self.assertEqual("Informational", finding.severity)
+        finding = findings[1]
+        self.assertEqual("Unusual activity by a principal from previously unseen country", finding.title)
+        self.assertEqual("High", finding.severity)
+        finding = findings[20]
+        self.assertEqual("User/service account with get/list/watch permissions on secrets in an AKS cluster", finding.title)
+        self.assertEqual("Informational", finding.severity)
 
     def test_multiple_oscf_findings(self):
-        with self.assertRaises(ValueError):
-            testfile = open("unittests/scans/wiz/multiple_oscf_findings.csv")
-            parser = WizParser()
-            parser.get_findings(testfile, Test())
-            findings = parser.get_findings(testfile, Test())
-            self.assertEqual(3, len(findings))
+        testfile = open("unittests/scans/wiz/multiple_ocsf_findings.csv")
+        parser = WizParser()
+        parser.get_findings(testfile, Test())
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(3, len(findings))
