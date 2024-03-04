@@ -43,10 +43,6 @@ def forward_merge_parser(apps, schema_editor):
         # Update the test object
         update_parser_test(finding.test, newparser_test_type)
 
-def reverse_uncouple_parser(apps, schema_editor):
-    finding_model = apps.get_model('dojo', 'Finding')
-    test_type_model = apps.get_model('dojo', 'Test_Type')
-    #TODO How can I distinguish now between original Acunetix360 findings and Acunetix findings if they were merged?
 
 class Migration(migrations.Migration):
 
@@ -55,5 +51,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(forward_merge_parser, reverse_uncouple_parser),
+        migrations.RunPython(forward_merge_parser),
     ]
