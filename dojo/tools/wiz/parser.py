@@ -1,6 +1,7 @@
 import csv
 import io
 import sys
+import json
 from dojo.models import Finding
 
 
@@ -26,7 +27,7 @@ class WizParser(object):
                 Title = row.get("Title")
                 Severity = row.get("Severity")
                 Description = row.get("Description")
-                Resource_Type_= row.get("Resource Type")
+                Resource_Type = row.get("Resource Type")
                 Resource_external_ID = row.get("Resource external ID")
                 Subscription_ID = row.get("Subscription ID")
                 Project_IDs = row.get("Project IDs")
@@ -52,7 +53,7 @@ class WizParser(object):
                 Container_Service = row.get("Container Service")
                 description=""
                 description += "**Description**: " + Description + "\n"
-                description += "**Resource Type**: " + Resource_Type_ + "\n"
+                description += "**Resource Type**: " + Resource_Type + "\n"
                 description += "**external ID**: " + Resource_external_ID + "\n"
                 description += "**Subscription ID**: " + Subscription_ID + "\n"
                 description += "**Project IDs**: " + Project_IDs + "\n"

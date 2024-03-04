@@ -4,6 +4,20 @@ from dojo.tools.wiz.parser import WizParser
 
 
 class TestWizParser(DojoTestCase):
+    def test_no_findings(self):
+        testfile = open("unittests/scans/wiz/no_findings.csv")
+        parser = WizParser()
+        parser.get_findings(testfile, Test())
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(0, len(findings))
+    
+    def test_one_finding(self):
+        testfile = open("unittests/scans/wiz/one_finding.csv")
+        parser = WizParser()
+        parser.get_findings(testfile, Test())
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(3, len(findings))
+    
     def test_multiple_findings(self):
         testfile = open("unittests/scans/wiz/multiple_findings.csv")
         parser = WizParser()
@@ -21,10 +35,3 @@ class TestWizParser(DojoTestCase):
         finding = findings[20]
         self.assertEqual("User/service account with get/list/watch permissions on secrets in an AKS cluster", finding.title)
         self.assertEqual("Informational", finding.severity)
-
-    def test_multiple_oscf_findings(self):
-        testfile = open("unittests/scans/wiz/multiple_ocsf_findings.csv")
-        parser = WizParser()
-        parser.get_findings(testfile, Test())
-        findings = parser.get_findings(testfile, Test())
-        self.assertEqual(3, len(findings))
