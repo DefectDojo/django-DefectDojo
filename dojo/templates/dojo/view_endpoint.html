@@ -3,6 +3,7 @@
 {% load humanize %}
 {% load display_tags %}
 {% load authorization_tags %}
+{% load multiply %}
 {% load static %}
 {% block add_styles %}
     {{ block.super }}
@@ -259,6 +260,7 @@
                 <tr>
                     <th>Title</th>
                     <th class="text-center">Severity</th>
+                    <th class="text-center">EPSS Score / Percentile</th>
                     <th class="text-center">Date</th>
                     <th class="text-center">Age</th>
                     <th>Found by</th>
@@ -274,6 +276,11 @@
                             <span class="label severity severity-{{ finding.severity }}">
                             {{ finding.severity }}
                             </span>
+                        </td>
+                        <td class="text-center">
+                            {{ finding.epss_score|format_epss }}
+                            /
+                            {{ finding.epss_percentile|format_epss }}
                         </td>
                         <td class="text-center">
                             {{ finding.date }}
@@ -308,7 +315,6 @@
     <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
     <script src="{% static "flot/jquery.flot.time.js" %}"></script>
     <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
-    <script src="{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
     {% block metrics %}
         <script src="{% static "dojo/js/metrics.js" %}"></script>
     {% endblock metrics %}

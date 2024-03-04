@@ -34,6 +34,10 @@ class AsffParser(object):
             else:
                 mitigation = None
                 references = None
+            if item.get("RecordState") and item.get("RecordState") == "ACTIVE":
+                active = True
+            else:
+                active = False
 
             finding = Finding(
                 title=item.get("Title"),
@@ -42,7 +46,7 @@ class AsffParser(object):
                 mitigation=mitigation,
                 references=references,
                 severity=self.get_severity(item.get("Severity")),
-                active=True,  # TODO: manage attribute 'RecordState'
+                active=active,
                 unique_id_from_tool=item.get("Id"),
             )
 

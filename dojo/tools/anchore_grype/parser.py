@@ -31,7 +31,7 @@ class AnchoreGrypeParser(object):
             vuln_id = vulnerability["id"]
             vuln_namespace = vulnerability.get("namespace")
             vuln_datasource = vulnerability.get("dataSource")
-            vuln_severity = self._convert_severity(vulnerability["severity"])
+            vuln_severity = self._convert_severity(vulnerability.get("severity", "Info"))
             vuln_urls = vulnerability.get("urls")
             vuln_description = vulnerability.get("description")
             vuln_fix_versions = None

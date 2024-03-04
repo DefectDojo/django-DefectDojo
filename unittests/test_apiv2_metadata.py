@@ -26,7 +26,7 @@ class MetadataTest(APITestCase):
         return self.client.post(reverse('metadata-list'), kwargs, format='json')
 
     def test_docs(self):
-        r = self.client.get(reverse('api_v2_schema'))
+        r = self.client.get(reverse('swagger-ui_oa3'))
         self.assertEqual(r.status_code, 200)
 
     def test_query_metadata(self):
@@ -35,7 +35,7 @@ class MetadataTest(APITestCase):
 
     def test_query_product_endpoint(self):
         r = self.client.get(reverse('product-detail', args=(1,)))
-        self.assertTrue(dict(name='foo', value='bar') in r.json()['product_meta'])
+        self.assertIn(dict(name='foo', value='bar'), r.json()['product_meta'])
 
     def test_delete(self):
         r = self.client.delete(reverse('metadata-detail', args=(self.mid,)))
@@ -45,7 +45,7 @@ class MetadataTest(APITestCase):
         self.assertEqual(r.status_code, 404)
 
         r = self.client.get(reverse('product-detail', args=(1,)))
-        self.assertTrue(dict(name='foo', value='bar') not in r.json()['product_meta'])
+        self.assertNotIn(dict(name='foo', value='bar'), r.json()['product_meta'])
 
     def test_no_product_or_endpoint_as_parameter(self):
         r = self.create(name='foo', value='bar')

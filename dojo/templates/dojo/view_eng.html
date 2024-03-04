@@ -385,6 +385,7 @@
                                     class="tablesorter-bootstrap table table-condensed table-striped">
                                     <thead>
                                         <tr>
+                                            {% block risk_acceptance_header %}
                                             <th></th>
                                             <th>Date</th>
                                             <th>Accepted By</th>
@@ -395,10 +396,13 @@
                                             <th>Findings</th>
                                             <th>Proof</th>
                                             <th>Owner</th>
+                                            {% endblock risk_acceptance_header %}
+                                        </tr>
                                     </thead>
                                     <tbody>
                                         {% for risk_acceptance in risks_accepted %}
                                             <tr>
+                                                {% block risk_acceptances %}
                                                 <td class="centered">
                                                     <ul>
                                                         <li class="dropdown" style="list-style:none;position:absolute">
@@ -439,6 +443,7 @@
                                                     <td>No</a></td>
                                                 {% endif %}
                                                 <td>{{ risk_acceptance.owner.get_full_name }}</td>
+                                                {% endblock risk_acceptances %}
                                             </tr>
                                         {% endfor %}
                                     </tbody>
@@ -452,6 +457,7 @@
                     </div>
                 </div>
             </div>
+            {% block global_risk_acceptances %}{% endblock %}
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4>Additional Features<span class="pull-right"><a name="collapsible" data-toggle="collapse" href="#add_feat">

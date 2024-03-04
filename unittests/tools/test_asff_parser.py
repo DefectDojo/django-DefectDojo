@@ -59,3 +59,4 @@ class TestAsffParser(DojoTestCase):
             for index, finding in enumerate(findings):
                 self.common_check_finding(finding, data, index, guarddutydate=True)
             self.assertEqual(finding.unsaved_endpoints[0], Endpoint(host="10.0.0.1"))
+            self.assertTrue(finding.active)
