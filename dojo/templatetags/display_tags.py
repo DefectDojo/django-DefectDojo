@@ -181,6 +181,13 @@ def percentage(fraction, value):
     return return_value
 
 
+@register.filter
+def format_epss(value):
+    if value is None:
+        return 'N.A.'
+    return f'{value:.2%}'
+
+
 def asvs_calc_level(benchmark_score):
     total = 0
     total_pass = 0

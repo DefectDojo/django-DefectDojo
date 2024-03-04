@@ -253,7 +253,7 @@ class DojoTestUtilsMixin(object):
                     product = Product.objects.get(id=response.url.split('/')[-2])
                 except:
                     raise ValueError('error parsing id from redirect uri: ' + response.url)
-            self.assertTrue(response.url == (expect_redirect_to % product.id))
+            self.assertEqual(response.url, (expect_redirect_to % product.id))
         else:
             self.assertEqual(response.status_code, 200)
 
@@ -401,12 +401,12 @@ class DojoTestUtilsMixin(object):
         response = jira._session.get(url).json().get('fields', {})
         epic_link = response.get(epic_link_field, None)
         if epic_id is None and epic_link is None or issue_in_epic:
-            self.assertTrue(epic_id == epic_link)
+            self.assertEqual(epic_id, epic_link)
         else:
-            self.assertTrue(epic_id != epic_link)
+            self.assertNotEqual(epic_id, epic_link)
 
     def assert_jira_updated_change(self, old, new):
-        self.assertTrue(old != new)
+        self.assertNotEqual(old, new)
 
     def get_latest_model(self, model):
         return model.objects.order_by('id').last()

@@ -165,6 +165,7 @@
                 <thead>
                 <tr>
                     <th>Severity</th>
+                    <th>EPSS Score / Percentile</th>
                     <th>Name</th>
                     <th>Date</th>
                     <th>Active</th>
@@ -177,6 +178,11 @@
                           <span class="label severity severity-{{ finding.severity }}">
                               {{ finding.severity_display }}
                           </span>
+                        </td>
+                        <td>
+                            {{ finding.epss_score|format_epss }}
+                            /
+                            {{ finding.epss_percentile|format_epss }}
                         </td>
                         <td><a href="{% url 'view_finding' finding.id %}"
                                title="{{ finding.title }}">{{ finding.title|truncatechars_html:140 }}</a></td>

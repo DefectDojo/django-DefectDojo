@@ -134,7 +134,7 @@ class MobSFParser(object):
                         mobsf_item = {
                             "category": "Certificate Analysis",
                             "title": details[2],
-                            "severity": details[0].replace("warning", "low").title(),
+                            "severity": details[0].title(),
                             "description": details[1] + "\n\n**Certificate Info:** " + certificate_info,
                             "file_path": None
                         }
@@ -143,7 +143,7 @@ class MobSFParser(object):
                         mobsf_item = {
                             "category": "Certificate Analysis",
                             "title": details[1],
-                            "severity": details[0].replace("warning", "low").title(),
+                            "severity": details[0].title(),
                             "description": details[1] + "\n\n**Certificate Info:** " + certificate_info,
                             "file_path": None
                         }
@@ -159,7 +159,7 @@ class MobSFParser(object):
                         mobsf_item = {
                             "category": "Manifest Analysis",
                             "title": details["title"],
-                            "severity": details["severity"].replace("warning", "low").title(),
+                            "severity": details["severity"].title(),
                             "description": details["description"] + "\n\n " + details["name"],
                             "file_path": None
                         }
@@ -169,7 +169,7 @@ class MobSFParser(object):
                         mobsf_item = {
                             "category": "Manifest Analysis",
                             "title": details["title"],
-                            "severity": details["stat"].replace("warning", "low").title(),
+                            "severity": details["stat"].title(),
                             "description": details["desc"] + "\n\n " + details["name"],
                             "file_path": None
                         }
@@ -184,7 +184,7 @@ class MobSFParser(object):
                         mobsf_item = {
                             "category": "Code Analysis",
                             "title": details,
-                            "severity": metadata["metadata"]["severity"].replace("warning", "low").title(),
+                            "severity": metadata["metadata"]["severity"].title(),
                             "description": metadata["metadata"]["description"],
                             "file_path": None
                         }
@@ -196,7 +196,7 @@ class MobSFParser(object):
                             mobsf_item = {
                                 "category": "Code Analysis",
                                 "title": details,
-                                "severity": metadata["metadata"]["severity"].replace("warning", "low").title(),
+                                "severity": metadata["metadata"]["severity"].title(),
                                 "description": metadata["metadata"]["description"],
                                 "file_path": None
                             }
@@ -211,7 +211,7 @@ class MobSFParser(object):
                             mobsf_item = {
                                 "category": "Binary Analysis",
                                 "title": details[binary_analysis_type]["description"].split(".")[0],
-                                "severity": details[binary_analysis_type]["severity"].replace("warning", "low").title(),
+                                "severity": details[binary_analysis_type]["severity"].title(),
                                 "description": details[binary_analysis_type]["description"],
                                 "file_path": details["name"]
                             }
@@ -230,7 +230,7 @@ class MobSFParser(object):
                     mobsf_item = {
                         "category": "Binary Analysis",
                         "title": details["detailed_desc"],
-                        "severity": details["severity"].replace("good", "info").title(),
+                        "severity": details["severity"].title(),
                         "description": details["detailed_desc"],
                         "file_path": None
                     }
@@ -248,7 +248,7 @@ class MobSFParser(object):
                     mobsf_item = {
                         "category": "Binary Analysis",
                         "title": details["detailed_desc"],
-                        "severity": details["severity"].replace("good", "info").title(),
+                        "severity": details["severity"].title(),
                         "description": details["detailed_desc"],
                         "file_path": None
                     }
@@ -280,7 +280,7 @@ class MobSFParser(object):
                 mobsf_item = {
                     "category": "Android API",
                     "title": details["metadata"]["description"],
-                    "severity": details["metadata"]["severity"].replace("warning", "low").title(),
+                    "severity": details["metadata"]["severity"].title(),
                     "description": "**API:** " + api + "\n\n**Description:** " + details["metadata"]["description"],
                     "file_path": None
                 }
@@ -320,7 +320,16 @@ class MobSFParser(object):
                 }
 
                 mobsf_findings.append(mobsf_item)
-
+        if isinstance(data, list):
+            for finding in data:
+                mobsf_item = {
+                    "category": finding["category"],
+                    "title": finding["name"],
+                    "severity": finding["severity"],
+                    "description": finding["description"] + "\n" + "**apk_exploit_dict:** " + str(finding["apk_exploit_dict"]) + "\n" + "**line_number:** " + str(finding["line_number"]),
+                    "file_path": finding["file_object"]
+                }
+                mobsf_findings.append(mobsf_item)
         for mobsf_finding in mobsf_findings:
             title = mobsf_finding["title"]
             sev = self.getCriticalityRating(mobsf_finding["severity"])
@@ -343,8 +352,11 @@ class MobSFParser(object):
             )
             if mobsf_finding["file_path"]:
                 finding.file_path = mobsf_finding["file_path"]
-
-            dupe_key = sev + title
+                dupe_key = sev + title + description + mobsf_finding["file_path"]
+            else:
+                dupe_key = sev + title + description
+            if mobsf_finding["category"]:
+                dupe_key += mobsf_finding["category"]
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 if description is not None:
@@ -372,11 +384,14 @@ class MobSFParser(object):
     # Criticality rating
     def getCriticalityRating(self, rating):
         criticality = "Info"
-        if rating == "warning":
+        if rating.lower() == "good":
             criticality = "Info"
+        elif rating.lower() == "warning":
+            criticality = "Low"
+        elif rating.lower() == "vulnerability":
+            criticality = "Medium"
         else:
-            criticality = rating.capitalize()
-
+            criticality = rating.lower().capitalize()
         return criticality
 
     def suite_data(self, suites):
