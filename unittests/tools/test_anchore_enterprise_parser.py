@@ -31,7 +31,7 @@ class TestAnchoreEnterpriseParser(DojoTestCase):
         with open(path.join(path.dirname(__file__), "../scans/anchore_enterprise/invalid_checks_format.json")) as testfile:
             with self.assertRaises(Exception):
                 parser = AnchoreEnterpriseParser()
-                findings = parser.get_findings(testfile, Test())
+                parser.get_findings(testfile, Test())
 
     def test_anchore_policy_check_extract_vulnerability_id(self):
         vulnerability_id = extract_vulnerability_id("CVE-2019-14540+openapi-generator-cli-4.0.0.jar:jackson-databind")

@@ -2693,6 +2693,10 @@ msgid "Product Type Counts"
 msgstr ""
 
 #: dojo/templates/base.html
+msgid "Product Tag Counts"
+msgstr ""
+
+#: dojo/templates/base.html
 msgid "Users"
 msgstr ""
 

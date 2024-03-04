@@ -31,7 +31,7 @@ class ReportBuilderTest(BaseTestCase):
                 for field in inputs:
                     field.send_keys('cover words')
             if 'wysiwyg-content' in class_names:
-                content = widget.find_element(By.CLASS_NAME, "editor").send_keys('wysiwyg')
+                widget.find_element(By.CLASS_NAME, "editor").send_keys('wysiwyg')
 
     def generate_HTML_report(self):
         driver = self.driver
