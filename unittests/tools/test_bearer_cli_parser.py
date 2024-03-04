@@ -20,7 +20,7 @@ class TestBearerParser(TestCase):
         self.assertEqual(581, findings[0].line)
 
     def test_bearer_parser_with_many_vuln_has_many_findings(self):
-        testfile = open("unittests/scans/bearer_cli/beare_cli_many_vul.json")
+        testfile = open("unittests/scans/bearer_cli/bearer_cli_many_vul.json")
         parser = BearerParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
