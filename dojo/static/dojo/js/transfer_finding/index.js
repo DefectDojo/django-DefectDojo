@@ -83,34 +83,34 @@ function innerData(data){
     let tableBody = document.getElementById("id_data_transfer_finding")
     tableBody.innerHTML = ""
     data.results.forEach(function(transfer_finding_item){
-        transfer_finding_item.findings.forEach(function(finding){
+        transfer_finding_item.transfer_findings.forEach(function(findings){
             let row = document.createElement("tr") 
             let cell_status = document.createElement("td")
             cell_status.className = "cls-finding-status"
             row.innerHTML = `
-            <td>${finding.id}</td>
-            <td>${finding.title}</td>
-            <td>${finding.severity}</td>
-            <td>${finding.cve}</td>`
-            if(finding.risk_status.includes("Transfer Accepted")){
+            <td>${findings.findings.id}</td>
+            <td>${findings.findings.title}</td>
+            <td>${findings.findings.severity}</td>
+            <td>${findings.findings.cve}</td>`
+            if(findings.findings.risk_status.includes("Transfer Accepted")){
                 cell_status.innerHTML= `<span style="color:green">Transfer Accepted</span>`
-            }else if(finding.risk_status.includes("Transfer Reject")){
+            }else if(findings.findings.risk_status.includes("Transfer Reject")){
                 cell_status.innerHTML = `<span style="color:#e7a100">Transfer Rejected</span>`
             }else{
-                cell_status.innerHTML = `${finding.risk_status}`
+                cell_status.innerHTML = `${findings.findings.risk_status}`
             }
             row.appendChild(cell_status)
             row.innerHTML += `<td>
                 ${transfer_finding_item.actions.includes(1216) && transfer_finding_item.actions.includes(1217)? 
-                    `<button type="button" class="btn btn-success btn-sm" data-btn-success=${finding.id}>
+                    `<button type="button" class="btn btn-success btn-sm" data-btn-success=${findings.findings.id}>
                         <i class="fas fa-check"></i>
                      </button>
-                     <button type="button" class="btn btn-warning btn-sm" data-btn-warning=${finding.id}>
+                     <button type="button" class="btn btn-warning btn-sm" data-btn-warning=${findings.findings.id}>
                         <i class="fas fa-times"></i>
                      </button>`
                      :'--'}
                 ${transfer_finding_item.actions.includes(1218) ? 
-                    `<button type="button" class="btn btn-danger btn-sm" data-btn-danger=${finding.id}>
+                    `<button type="button" class="btn btn-danger btn-sm" data-btn-danger=${findings.findings.id}>
                         <i class="fas fa-trash-alt"></i>
                     </button>
                      `: ''}

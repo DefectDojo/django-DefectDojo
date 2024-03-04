@@ -3402,11 +3402,6 @@ class TransferFinding(models.Model):
         on_delete=models.CASCADE,
         help_text=_("Origin Engagement Name"))
 
-    severity = models.CharField(
-        max_length=50,
-        blank=True,
-        help_text=_("Severity"))
-
     accepted_by = models.ForeignKey(
         Dojo_User,
         related_name="accepted_by",
@@ -3434,8 +3429,8 @@ class TransferFinding(models.Model):
 class TransferFindingFinding(models.Model):
     findings = models.ForeignKey(Finding, verbose_name=("Finding ID"), related_name="findings", on_delete=models.CASCADE)
     transfer_findings = models.ForeignKey(TransferFinding, verbose_name=("Transfer Finding"), related_name="transfer_findings", on_delete=models.CASCADE)
-    finding_related = models.OneToOneField(Finding, verbose_name=("finding_related"), on_delete=models.CASCADE)
-    engagement_related = models.ForeignKey(Finding, related_name="engagement_related", on_delete=models.CASCADE)
+    finding_related = models.OneToOneField(Finding, verbose_name=("finding_related"), on_delete=models.CASCADE, null=True)
+    engagement_related = models.ForeignKey(Finding, related_name="engagement_related", on_delete=models.CASCADE, null=True)
 
 
 class FindingAdmin(admin.ModelAdmin):

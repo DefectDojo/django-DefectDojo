@@ -34,7 +34,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Import, Notes, \
     Risk_Acceptance, Development_Environment, Endpoint, \
     Cred_Mapping, System_Settings, Note_Type, Product_API_Scan_Configuration, \
-    Product_Type, Dojo_User, Product_Type, TransferFinding
+    Product_Type, Dojo_User, Product_Type, TransferFinding, TransferFindingFinding
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, async_delete, \
@@ -1082,7 +1082,6 @@ def add_risk_acceptance(request, eid, fid=None):
 def add_transfer_finding(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
     product = eng.product
-    origin_product_type = product.prod_type
     finding = None
     if fid:
         finding = get_object_or_404(Finding, id=fid)
@@ -1090,30 +1089,30 @@ def add_transfer_finding(request, eid, fid=None):
     if request.method == 'POST':
         request.POST._mutable = True
         data = request.POST
-        # Origin Transfer Finding
-        origin_product_type = eng.product.prod_type
-        data["origin_product_type_name"] = origin_product_type.name
-        data["origin_product_type_id"] = str(origin_product_type.id)
-        data["origin_engagement_name"] = eng.name
-        data["origin_engagement_id"] = str(eng.id)
-        data["origin_product_name"] = eng.product.name
-        data["origin_product_id"] = str(eng.product.id)
-        # Destination Transfer Finding
-        id_destination_product = data.get("destination_product")
-        destination_product_obj = Product.objects.get(id=id_destination_product) if id_destination_product else None
-        data["destination_product_type_id"] = destination_product_obj.id
-        data["destination_product_type_name"] = destination_product_obj.name
-        id_destination_engagement = data.get("destination_engagement_id")
-        destination_engagement_name = Engagement.objects.get(id=id_destination_engagement).name if id_destination_engagement else None
-        data["destination_engagement_name"] = destination_engagement_name
-        id_accepted_by_username = data.get("accepted_by")
-        accepted_by_username = Dojo_User.objects.get(id=id_accepted_by_username).username if id_accepted_by_username else None
-        data["accepted_by_username"] = accepted_by_username
-
-        # form = TransferFindingForm(request.POST, request.FILES)
+        data["accepted_by"] = Dojo_User.objects.get(id=int(data["accepted_by"]))
+        form = TransferFindingForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                transfer_findings = form.save()
+                # Save
+                transfer_findings: TransferFinding = form.save()
+                # Origin
+                transfer_findings.origin_product_type = eng.product.prod_type
+                transfer_findings.origin_product = eng.product
+                # Destination
+                id_destination_product = data.get("destination_product")
+                destination_product_obj: Product = Product.objects.get(id=id_destination_product) if id_destination_product else None
+                transfer_findings.destination_product_type = destination_product_obj.prod_type
+                transfer_findings.destination_product = destination_product_obj
+                transfer_findings.save()
+                findings = request.POST.getlist('findings')
+                for finding in findings:
+                    # create tansferFindigFinding
+                    obj_finding = Finding.objects.get(id=int(finding))
+                    transfer_finding_finding = TransferFindingFinding.objects.create(findings=obj_finding,
+                                                                                     transfer_findings=transfer_findings,
+                                                                                     finding_related=None,
+                                                                                     engagement_related=None)
+                    transfer_finding_finding.save()
 
             except Exception as e:
                 logger.debug(vars(request.POST))

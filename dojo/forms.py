@@ -1158,8 +1158,8 @@ class TransferFindingForm(forms.ModelForm):
     # origin_product_name = forms.CharField(widget=forms.HiddenInput(), required=True)
     # origin_engagement_id = forms.CharField(widget=forms.HiddenInput(), required=True)
     # origin_engagement_name = forms.CharField(widget=forms.HiddenInput(), required=True)
-    # accepted_by = forms.CharField(widget=forms.Select(), required=True)  # Usar widget Select
-    accepted_by_username = forms.CharField(widget=forms.HiddenInput(), required=True)
+    accepted_by = forms.ModelChoiceField(queryset=Dojo_User.objects.all(), required=True)  # Usar widget Select
+    # accepted_by_username = forms.CharField(widget=forms.HiddenInput(), required=True)
 
     def __init__(self, *args, **kwags):
         super().__init__(*args, **kwags)

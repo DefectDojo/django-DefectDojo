@@ -89,6 +89,7 @@ from dojo.models import (
     General_Survey,
     Check_List,
     TransferFinding,
+    TransferFindingFinding,
     Announcement,
 )
 
@@ -3236,8 +3237,22 @@ class TransferFindingDeleteSerializer(serializers.Serializer):
     findings = FindingDeleteSerializers(required=False)
 
 
+class FindingTfSerlilizer(serializers.ModelSerializer):
+    class Meta:
+        model = Finding 
+        fields = '__all__'
+
+
+class TransferFindingFindingSerializer(serializers.ModelSerializer):
+    findings = FindingTfSerlilizer(read_only=True)
+
+    class Meta:
+        model = TransferFindingFinding
+        fields = '__all__'
+
+
 class TransferFindingSerializer(serializers.ModelSerializer):
-    findings = TransferFindinFindingsSerializers(many=True, read_only=True)
+    transfer_findings = TransferFindingFindingSerializer(many=True)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -3267,6 +3282,21 @@ class TransferFindingUpdateSerializer(serializers.ModelSerializer):
         model = TransferFinding
         fields = ("findings",)
 
+
+class TransferFindingFindingsSerializer(serializers.ModelSerializer):
+    findings = FindingTfSerlilizer(read_only=True)
+
+    class Meta:
+        model = TransferFindingFinding
+        fields = '__all__'
+
+
+class TransferFindingFindingsDetailSerializer(serializers.Serializer):
+    risk_status = serializers.CharField()
+
+
+class TransferFindingFindingsUpdateSerializer(serializers.Serializer):
+    findings = serializers.DictField(child=TransferFindingFindingsDetailSerializer())
 
 class AnnouncementSerializer(serializers.ModelSerializer):
 

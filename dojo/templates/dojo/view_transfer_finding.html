@@ -119,13 +119,13 @@
                             <td>
                               <a href="#" class="table-link" type="button" data-toggle="modal" data-target="#modalTransferFinding" 
                               data-transfer-id={{transfer_findings.id}} data-product-id={{transfer_findings.origin_product}}
-                              data-product-type-id={{transfer_findings.origin_product_type_id}}>
+                              data-product-type-id={{transfer_findings.origin_product_type}}>
                                  {{transfer_findings.title}}</a>
                             </td>
                             <td>{{transfer_findings.date}}</td>
-                            <td>{{transfer_findings.origin_product_type_name}}</td>
-                            <td>{{transfer_findings.destination_product_type_name}}</td>
-                            <td>{{transfer_findings.accepted_by_username}}</td>
+                            <td>{{transfer_findings.origin_product_type}}</td>
+                            <td>{{transfer_findings.destination_product_type}}</td>
+                            <td>{{transfer_findings.accepted_by}}</td>
                             <td>
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Edit" %}
                                     <button type="button" data-toggle="modal" data-target="#confirmedModal" class="btn btn-success btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
@@ -224,8 +224,8 @@
     function updateFindings(findingChangeStatus){
       transfer_findings= {"findings" : findingChangeStatus}
       $.ajax({
-          url: "/api/v2/transfer_finding/" + transferId + "/",
-          type: "PATCH",
+          url: "/api/v2/transfer_finding_findings/" + transferId + "/" + "change_status" + "/",
+          type: "POST",
           headers: { "X-CSRFToken": csrftoken,
           "Content-Type": "application/json"},
           data: JSON.stringify(transfer_findings),
@@ -241,7 +241,7 @@
   function removeFindings(findingRemoved){
     transfer_findings= {"findings" : findingRemoved}
     $.ajax({
-        url: "/api/v2/transfer_finding/" + transferId + "/",
+        url: "/api/v2/transfer_finding_findings/" + transferId + "/",
         type: "DELETE",
         headers: { "X-CSRFToken": csrftoken,
         "Content-Type": "application/json"},
