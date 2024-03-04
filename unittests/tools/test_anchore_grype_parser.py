@@ -271,3 +271,10 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertEqual('GHSA-v6rh-hp5x-86rv', finding.vuln_id_from_tool)
         self.assertEqual(['python'], finding.tags)
         self.assertEqual(2, finding.nb_occurences)
+
+    def test_grype_issue_9618(self):
+        testfile = open("unittests/scans/anchore_grype/issue_9618.json")
+        parser = AnchoreGrypeParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(35, len(findings))
