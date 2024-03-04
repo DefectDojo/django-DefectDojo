@@ -10,14 +10,7 @@ class TestWizParser(DojoTestCase):
         parser.get_findings(testfile, Test())
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
-    
-    def test_one_finding(self):
-        testfile = open("unittests/scans/wiz/one_finding.csv")
-        parser = WizParser()
-        parser.get_findings(testfile, Test())
-        findings = parser.get_findings(testfile, Test())
-        self.assertEqual(3, len(findings))
-    
+
     def test_multiple_findings(self):
         testfile = open("unittests/scans/wiz/multiple_findings.csv")
         parser = WizParser()

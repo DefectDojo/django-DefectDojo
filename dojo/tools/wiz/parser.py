@@ -1,7 +1,6 @@
 import csv
 import io
 import sys
-import json
 from dojo.models import Finding
 
 
@@ -51,7 +50,7 @@ class WizParser(object):
                 Kubernetes_Cluster = row.get("Kubernetes Cluster")
                 Kubernetes_Namespace = row.get("Kubernetes Namespace")
                 Container_Service = row.get("Container Service")
-                description=""
+                description = ""
                 description += "**Description**: " + Description + "\n"
                 description += "**Resource Type**: " + Resource_Type + "\n"
                 description += "**external ID**: " + Resource_external_ID + "\n"
