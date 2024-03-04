@@ -16,8 +16,8 @@ class TestRemoteUser(DojoTestCase):
             last_name='original_last',
             email='original@mail.com',
         )
-        self.group1, _ = Dojo_Group.objects.get_or_create(name="group1", social_provider="Remote")
-        self.group2, _ = Dojo_Group.objects.get_or_create(name="group2", social_provider="Remote")
+        self.group1, _ = Dojo_Group.objects.get_or_create(name="group1", social_provider=Dojo_Group.REMOTE)
+        self.group2, _ = Dojo_Group.objects.get_or_create(name="group2", social_provider=Dojo_Group.REMOTE)
 
     @override_settings(AUTH_REMOTEUSER_ENABLED=False)
     def test_disabled(self):

@@ -124,7 +124,7 @@ class TestCopyFindingModel(DojoTestCase):
         # Make sure the number of endpoints stayed the same
         self.assertEqual(current_endpoint_count, Endpoint.objects.all().count())
         # Make sure the number of findings on the endpoint grew
-        self.assertEqual(current_endpoint_finding_count + 1, endpoint.findings_count)  # TODO
+        self.assertEqual(current_endpoint_finding_count + 1, endpoint.findings_count)
         # Make sure the number of endpoint status objects grew
         self.assertEqual(current_endpoint_status_count + 1, Endpoint_Status.objects.filter(endpoint=endpoint).count())
         # Make sure the endpoint status objects point at different findings

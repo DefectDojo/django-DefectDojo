@@ -1,8 +1,8 @@
+from dojo.finding.queries import get_authorized_findings
 from dojo.group.utils import get_auth_group_name
 from django.contrib.auth.models import Group
 from typing import List
 from drf_spectacular.utils import extend_schema_field
-from drf_yasg.utils import swagger_serializer_method
 from rest_framework.exceptions import NotFound
 from rest_framework.fields import DictField, MultipleChoiceField
 from datetime import datetime
@@ -1394,7 +1394,7 @@ class DevelopmentEnvironmentSerializer(serializers.ModelSerializer):
 
 
 class FindingGroupSerializer(serializers.ModelSerializer):
-    jira_issue = JIRAIssueSerializer(read_only=True)
+    jira_issue = JIRAIssueSerializer(read_only=True, allow_null=True)
 
     class Meta:
         model = Finding_Group
@@ -1500,17 +1500,14 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
     path = serializers.SerializerMethodField()
 
     @extend_schema_field(serializers.CharField())
-    @swagger_serializer_method(serializers.CharField())
     def get_recommendation(self, obj):
         return Risk_Acceptance.TREATMENT_TRANSLATIONS.get(obj.recommendation)
 
     @extend_schema_field(serializers.CharField())
-    @swagger_serializer_method(serializers.CharField())
     def get_decision(self, obj):
         return Risk_Acceptance.TREATMENT_TRANSLATIONS.get(obj.decision)
 
     @extend_schema_field(serializers.CharField())
-    @swagger_serializer_method(serializers.CharField())
     def get_path(self, obj):
         engagement = Engagement.objects.filter(
             risk_acceptance__id__in=[obj.id]
@@ -1526,7 +1523,6 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         return path
 
     @extend_schema_field(serializers.IntegerField())
-    @swagger_serializer_method(serializers.IntegerField())
     def get_engagement(self, obj):
         engagement = Engagement.objects.filter(
             risk_acceptance__id__in=[obj.id]
@@ -1534,6 +1530,30 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         return EngagementSerializer(read_only=True).to_representation(
             engagement
         )
+
+    def validate(self, data):
+        findings = data.get('accepted_findings', [])
+        findings_ids = [x.id for x in findings]
+        finding_objects = Finding.objects.filter(id__in=findings_ids)
+        authed_findings = get_authorized_findings(Permissions.Finding_Edit).filter(id__in=findings_ids)
+        if len(findings) != len(authed_findings):
+            raise PermissionDenied(
+                "You are not permitted to add one or more selected findings to this risk acceptance"
+            )
+        if self.context["request"].method == "POST":
+            engagements = finding_objects.values_list('test__engagement__id', flat=True).distinct().count()
+            if engagements > 1:
+                raise PermissionDenied(
+                    "You are not permitted to add findings to a distinct engagement"
+                )
+        elif self.context['request'].method in ['PATCH', 'PUT']:
+            engagement = Engagement.objects.filter(risk_acceptance=self.instance.id).first()
+            findings = finding_objects.exclude(test__engagement__id=engagement.id)
+            if len(findings) > 0:
+                raise PermissionDenied(
+                    "You are not permitted to add findings to a distinct engagement"
+                )
+        return data
 
     class Meta:
         model = Risk_Acceptance
@@ -1619,14 +1639,12 @@ class FindingRelatedFieldsSerializer(serializers.Serializer):
     jira = serializers.SerializerMethodField()
 
     @extend_schema_field(FindingTestSerializer)
-    @swagger_serializer_method(FindingTestSerializer)
     def get_test(self, obj):
         return FindingTestSerializer(read_only=True).to_representation(
             obj.test
         )
 
     @extend_schema_field(JIRAIssueSerializer)
-    @swagger_serializer_method(JIRAIssueSerializer)
     def get_jira(self, obj):
         issue = jira_helper.get_jira_issue(obj)
         if issue is None:
@@ -1673,17 +1691,14 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         )
 
     @extend_schema_field(serializers.DateTimeField())
-    @swagger_serializer_method(serializers.DateTimeField())
     def get_jira_creation(self, obj):
         return jira_helper.get_jira_creation(obj)
 
     @extend_schema_field(serializers.DateTimeField())
-    @swagger_serializer_method(serializers.DateTimeField())
     def get_jira_change(self, obj):
         return jira_helper.get_jira_change(obj)
 
     @extend_schema_field(FindingRelatedFieldsSerializer)
-    @swagger_serializer_method(FindingRelatedFieldsSerializer)
     def get_related_fields(self, obj):
         request = self.context.get("request", None)
         if request is None:
@@ -1788,9 +1803,6 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         return super().build_relational_field(field_name, relation_info)
 
     @extend_schema_field(BurpRawRequestResponseSerializer)
-    @swagger_serializer_method(
-        serializer_or_field=BurpRawRequestResponseSerializer
-    )
     def get_request_response(self, obj):
         # burp_req_resp = BurpRawRequestResponse.objects.filter(finding=obj)
         burp_req_resp = obj.burprawrequestresponse_set.all()
@@ -2029,12 +2041,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_findings_count(self, obj) -> int:
         return obj.findings_count
 
-    #  -> List[int] as return type doesn't seem enough for drf-yasg
-    @swagger_serializer_method(
-        serializer_or_field=serializers.ListField(
-            child=serializers.IntegerField()
-        )
-    )
+    # TODO, maybe extend_schema_field is needed here?
     def get_findings_list(self, obj) -> List[int]:
         return obj.open_findings_list
 
@@ -3175,9 +3182,6 @@ class QuestionnaireEngagementSurveySerializer(serializers.ModelSerializer):
     questions = serializers.SerializerMethodField()
 
     @extend_schema_field(serializers.ListField(child=serializers.CharField()))
-    @swagger_serializer_method(
-        serializers.ListField(child=serializers.CharField())
-    )
     def get_questions(self, obj):
         questions = obj.questions.all()
         formated_questions = []

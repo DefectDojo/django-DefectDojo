@@ -12,7 +12,7 @@
 {% block content %}
     {{ block.super }}
 
-    <form class="biweekly-metrics" action="{% url 'product_type_counts' %}" method="get">
+    <form class="biweekly-metrics" method="get">
         {{ form.as_p }}
         <input class="btn btn-sm btn-primary" type="submit" value="{% trans "Generate Metrics For Selected Period" %}"/>
     </form>
@@ -20,8 +20,12 @@
     {% if pt %}
         <h2>{% blocktrans with start_date=start_date.date end_date=end_date.date%}Finding Information For Period of {{ start_date }} - {{ end_date }}
             {% endblocktrans %}</h2>
-        <h3 class="inline-block">{{ pt.name }}</h3> [
-        <a href="{% url 'product_type_metrics' pt.id %}" class="inline-block">{% trans "View Details" %}</a>]
+        <h3 class="inline-block">{{ pt.name }}</h3>
+        {% if pt|class_name == "Product_Type" %}
+        [<a href="{% url 'product_type_metrics' pt.id %}" class="inline-block">{% trans "View Details" %}</a>]
+        {% elif pt|class_name == "Tagulous_Product_tags" %}
+        [<a href="{% url 'product' %}?tags={{ pt }}" class="inline-block">{% trans "View Details" %}</a>]
+        {% endif %}
         <div class="panel panel-default table-responsive">
             <div class="panel-heading">
                 <h4>{% trans "Total Security Bug Count In Period" %}</h4>
@@ -240,6 +244,7 @@
                     <th>{% trans "Name" %}</th>
                     <th>{% trans "Date" %}</th>
                     <th>{% trans "Severity" %}</th>
+                    <th>{% trans "EPSS Score / Percentile" %}</th>
                     <th>{% trans "Age" %}</th>
                     <th>{% trans "Product" %}</th>
                 </tr>
@@ -255,6 +260,11 @@
                         <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
                             <p class="text-danger">
                         {% else %}<p>{% endif %}{{ finding.severity_display }}</p></td>
+                        <td>
+                            {{ finding.epss_score|format_epss }}
+                            /
+                            {{ finding.epss_percentile|format_epss }}
+                        </td>
                         <td>{{ finding.age }}</td>
                         <td><a
                                 href="{% url 'view_product' finding.test.engagement.product.id %}"

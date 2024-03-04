@@ -60,7 +60,7 @@ class TestBurpGraphQLParser(DojoTestCase):
 
             with self.assertRaises(ValueError):
                 parser = BurpGraphQLParser()
-                findings = parser.get_findings(test_file, Test())
+                parser.get_findings(test_file, Test())
 
     def test_burp_null_request_segments(self):
         with open(path.join(path.dirname(__file__), "../scans/burp_graphql/null_request_segments.json")) as test_file:

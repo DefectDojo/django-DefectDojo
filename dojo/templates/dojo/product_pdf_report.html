@@ -216,6 +216,7 @@
                             <table id="notes" class="table-striped table table-condensed table-hover centered">
                                 <tr>
                                     <th>Severity</th>
+                                    <th>EPSS Score / Percentile</th>
                                     <th>Status</th>
                                     {% if finding.risk_acceptance_set.all %}
                                         <th>Acceptance</th>
@@ -241,6 +242,11 @@
                                             Unknown
                                         {% endif %}
                                     </span>
+                                    </td>
+                                    <td>
+                                        {{ finding.epss_score|format_epss }}
+                                        /
+                                        {{ finding.epss_percentile|format_epss }}
                                     </td>
                                     <td>{{ finding.status }}</td>
                                     {% if finding.risk_acceptance_set.all %}
@@ -383,7 +389,6 @@
     <script src="{{ host }}{% static "flot/excanvas.min.js" %}"></script>
     <script src="{{ host }}{% static "flot/jquery.flot.js" %}"></script>
     <script src="{{ host }}{% static "flot/jquery.flot.resize.js" %}"></script>
-    <script src="{{ host }}{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
     {% if punchcard %}
         <script src="{{ host }}{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
         <script src="{{ host }}{% static "JUMFlot/javascripts/JUMFlot.min.js" %}"></script>

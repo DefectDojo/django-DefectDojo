@@ -214,7 +214,7 @@ class TestDuplicationLogic(DojoTestCase):
         finding_new, finding_24 = self.copy_and_reset_finding(id=24)
         finding_new.file_path = '/dev/null'
 
-        finding_22 = Finding.objects.get(id=22)
+        Finding.objects.get(id=22)
 
         finding_new.save(dedupe_option=True)
 

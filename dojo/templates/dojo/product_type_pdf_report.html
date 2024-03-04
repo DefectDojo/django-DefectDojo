@@ -146,6 +146,7 @@
                                 <table id="notes" class="table-striped table table-condensed table-hover centered">
                                     <tr>
                                         <th>Severity</th>
+                                        <th>EPSS Score / Percentile</th>
                                         <th>Status</th>
                                         {% if finding.risk_acceptance_set.all %}
                                             <th>Acceptance</th>
@@ -163,13 +164,18 @@
                                     </tr>
                                     <tr>
                                         <td>
-                                        <span class="label severity severity-{{ finding.severity }}">
-                                            {% if finding.severity %}
-                                                {{ finding.severity }}
-                                            {% else %}
-                                                Unknown
-                                            {% endif %}
-                                        </span>
+                                            <span class="label severity severity-{{ finding.severity }}">
+                                                {% if finding.severity %}
+                                                    {{ finding.severity }}
+                                                {% else %}
+                                                    Unknown
+                                                {% endif %}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {{ finding.epss_score|format_epss }}
+                                            /
+                                            {{ finding.epss_percentile|format_epss }}
                                         </td>
                                         <td>{{ finding.status }}</td>
                                         {% if finding.risk_acceptance_set.all %}
@@ -314,7 +320,6 @@
     <script src="{{ host }}{% static "flot/jquery.flot.resize.js" %}"></script>
     <script src="{{ host }}{% static "flot/jquery.flot.time.js" %}"></script>
     <script src="{{ host }}{% static "flot/jquery.flot.stack.js" %}"></script>
-    <script src="{{ host }}{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
     <script src="{{ host }}{% static "dojo/js/metrics.js" %}"></script>
     <script type="text/javascript">
         $(function () {
