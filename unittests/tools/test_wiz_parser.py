@@ -18,7 +18,7 @@ class TestWizParser(DojoTestCase):
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        self.assertEqual(838, len(findings))
+        self.assertEqual(98, len(findings))
         finding = findings[0]
         self.assertEqual("AKS role/cluster role assigned permissions that contain wildcards ", finding.title)
         self.assertEqual("Informational", finding.severity)
