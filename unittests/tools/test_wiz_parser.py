@@ -7,9 +7,23 @@ class TestWizParser(DojoTestCase):
     def test_no_findings(self):
         testfile = open("unittests/scans/wiz/no_findings.csv")
         parser = WizParser()
-        parser.get_findings(testfile, Test())
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(0, len(findings))
+
+    def test_one_findings(self):
+        testfile = open("unittests/scans/wiz/one_finding.csv")
+        parser = WizParser()
+        findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual("AKS role/cluster role assigned permissions that contain wildcards ", finding.title)
+        self.assertEqual("Informational", finding.severity)
 
     def test_multiple_findings(self):
         testfile = open("unittests/scans/wiz/multiple_findings.csv")
