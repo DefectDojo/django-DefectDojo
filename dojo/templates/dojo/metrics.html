@@ -335,6 +335,7 @@
                                                 <th class="nowrap">{% trans "Team" %}</th>
                                                 <th class="">{% trans "Product" %}</th>
                                                 <th>{% trans "Severity" %}</th>
+                                                <th>{% trans "EPSS Score / Percentile" %}</th>
                                                 <th>{% trans "Description" %}</th>
                                                 <th class="nowrap">{% trans "Days<br/>Open" %}</th>
                                                 <th class="nowrap">{% trans "Status" %}</th>
@@ -350,6 +351,11 @@
                                         </span>
                                                     </td>
                                                     <td>{{ finding.severity_display }}</td>
+                                                    <td>
+                                                        {{ finding.epss_score|format_epss }}
+                                                        /
+                                                        {{ finding.epss_percentile|format_epss }}
+                                                    </td>
                                                     <td><a href="{% url 'view_finding' finding.id %}"
                                                            title="{{ finding.title }}">{{ finding.title|truncatechars_html:20 }}</a>
                                                     </td>

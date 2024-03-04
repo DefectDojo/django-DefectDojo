@@ -222,12 +222,13 @@
     {% if engagement.risk_acceptance.count %}
         <h3 id="risk_acceptance">== ?Risk Accepted Findings ==</h3>
         |===<br>
-        |Name |Date |Severity<br>
+        |Name |Date |Severity |EPSS Score / Percentile<br>
         {% for risk in engagement.risk_acceptance.all %}
             {% for finding in risk.accepted_findings.all %}
                 |{{ finding.title }}<br>
                 |{{ finding.date }}<br>
                 |{{ finding.severity }}<br>
+                |{{ finding.epss_score|format_epss }} / {{ finding.epss_percentile|format_epss }}<br>
             {% endfor %}
         {% endfor %}
         |===<br>
@@ -279,6 +280,12 @@
 {{ find.severity }} ({{ find.numerical_severity }})
 </span>
         </p>
+        <br>
+        <p><b>==== EPSS Score / Percentile: ====</b>
+            <br>
+            {{ find.epss_score|format_epss }} / {{ find.epss_percentile|format_epss }}
+        </p>
+        <br>
         <p><b>==== Description / Exploit: ====</b>
             <br>
             {{ find.description|linebreaksbr }}
@@ -432,6 +439,12 @@
 {{ find.severity }} ({{ find.numerical_severity }})
 </span>
                 </p>
+                <br>
+                <p><b>==== EPSS Score / Percentile: ====</b>
+                    <br>
+                    {{ find.epss_score|format_epss }} / {{ find.epss_percentile|format_epss }}
+                </p>
+                <br>
                 <p><b>==== Description / Exploit: ====</b>
                     <br>
                     {{ find.description|linebreaksbr }}

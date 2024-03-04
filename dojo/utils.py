@@ -15,7 +15,6 @@ from math import pi, sqrt
 import vobject
 from dateutil.relativedelta import relativedelta, MO, SU
 from django.conf import settings
-from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse, get_script_prefix
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
@@ -1361,29 +1360,6 @@ def reopen_external_issue(find, note, external_issue_provider, **kwargs):
         reopen_external_issue_github(find, note, prod, eng)
 
 
-def send_review_email(request, user, finding, users, new_note):
-    # TODO remove apparent dead code
-
-    recipients = [u.email for u in users]
-    msg = "\nGreetings, \n\n"
-    msg += "{0} has requested that you please review ".format(str(user))
-    msg += "the following finding for accuracy:"
-    msg += "\n\n" + finding.title
-    msg += "\n\nIt can be reviewed at " + request.build_absolute_uri(
-        reverse("view_finding", args=(finding.id, )))
-    msg += "\n\n{0} provided the following details:".format(str(user))
-    msg += "\n\n" + new_note.entry
-    msg += "\n\nThanks\n"
-
-    send_mail(
-        'DefectDojo Finding Review Request',
-        msg,
-        user.email,
-        recipients,
-        fail_silently=False)
-    pass
-
-
 def process_notifications(request, note, parent_url, parent_title):
     regex = re.compile(r'(?:\A|\s)@(\w+)\b')
 
@@ -1407,22 +1383,6 @@ def process_notifications(request, note, parent_url, parent_title):
         url=parent_url,
         icon='commenting',
         recipients=users_to_notify)
-
-
-def send_atmention_email(user, users, parent_url, parent_title, new_note):
-    recipients = [u.email for u in users]
-    msg = "\nGreetings, \n\n"
-    msg += "User {0} mentioned you in a note on {1}".format(
-        str(user), parent_title)
-    msg += "\n\n" + new_note.entry
-    msg += "\n\nIt can be reviewed at " + parent_url
-    msg += "\n\nThanks\n"
-    send_mail(
-        'DefectDojo - {0} @mentioned you in a note'.format(str(user)),
-        msg,
-        user.email,
-        recipients,
-        fail_silently=False)
 
 
 def encrypt(key, iv, plaintext):

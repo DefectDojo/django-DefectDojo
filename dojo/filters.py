@@ -156,7 +156,17 @@ class FindingSLAFilter(ChoiceFilter):
 
     def sla_violated(self, qs, name):
         # return active findings that have an sla expiration date before today
-        return qs.filter(Q(active=True) & Q(sla_expiration_date__lt=timezone.now().date()))
+        return qs.filter(
+            Q(
+                active=True,
+                false_p=False,
+                duplicate=False,
+                out_of_scope=False,
+                risk_accepted=False,
+                is_mitigated=False,
+                mitigated=None,
+            ) & Q(sla_expiration_date__lt=timezone.now().date())
+        )
 
     options = {
         None: (_('Any'), any),
@@ -1204,6 +1214,9 @@ class ApiFindingFilter(DojoFilter):
     # DateRangeFilter
     created = DateRangeFilter()
     date = DateRangeFilter()
+    on = DateFilter(field_name='date', lookup_expr='exact')
+    before = DateFilter(field_name='date', lookup_expr='lt')
+    after = DateFilter(field_name='date', lookup_expr='gt')
     jira_creation = DateRangeFilter(field_name='jira_issue__jira_creation')
     jira_change = DateRangeFilter(field_name='jira_issue__jira_change')
     last_reviewed = DateRangeFilter()
@@ -1298,9 +1311,11 @@ class ApiFindingFilter(DojoFilter):
 
 class FindingFilter(FindingFilterWithTags):
     # tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
-
     title = CharFilter(lookup_expr='icontains')
     date = DateRangeFilter()
+    on = DateFilter(field_name='date', lookup_expr='exact', label='On')
+    before = DateFilter(field_name='date', lookup_expr='lt', label='Before')
+    after = DateFilter(field_name='date', lookup_expr='gt', label='After')
     last_reviewed = DateRangeFilter()
     last_status_update = DateRangeFilter()
     cwe = MultipleChoiceFilter(choices=[])
@@ -1492,6 +1507,10 @@ class FindingFilter(FindingFilterWithTags):
         super().__init__(*args, **kwargs)
 
         self.form.fields['cwe'].choices = cwe_options(self.queryset)
+        date_input_widget = forms.DateInput(attrs={'class': 'datepicker', 'placeholder': 'YYYY-MM-DD'}, format="%Y-%m-%d")
+        self.form.fields['on'].widget = date_input_widget
+        self.form.fields['before'].widget = date_input_widget
+        self.form.fields['after'].widget = date_input_widget
 
         # Don't show the product filter on the product finding view
         if self.pid:

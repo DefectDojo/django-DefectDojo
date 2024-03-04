@@ -9,6 +9,7 @@ import json
 import logging
 import warnings
 
+
 logger = logging.getLogger(__name__)
 
 # See https://documentation.defectdojo.com/getting_started/configuration/ for options
@@ -205,7 +206,7 @@ env = environ.FileAwareEnv(
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
     DD_LOGGING_HANDLER=(str, 'console'),
     # If true, drf-spectacular will load CSS & JS from default CDN, otherwise from static resources
-    DD_DEFAULT_SWAGGER_UI=(bool, True),
+    DD_DEFAULT_SWAGGER_UI=(bool, False),
     DD_ALERT_REFRESH=(bool, True),
     DD_DISABLE_ALERT_COUNTER=(bool, False),
     # to disable deleting alerts per user set value to -1
@@ -489,7 +490,6 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.MD5PasswordHasher',
     'django.contrib.auth.hashers.UnsaltedSHA1PasswordHasher',
     'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
-    'django.contrib.auth.hashers.CryptPasswordHasher',
 ]
 
 SOCIAL_AUTH_PIPELINE = (
@@ -1244,6 +1244,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'HCLAppScan XML': ['title', 'description'],
     'KICS Scan': ['file_path', 'line', 'severity', 'description', 'title'],
     'MobSF Scan': ['title', 'description', 'severity'],
+    'OSV Scan': ['title', 'description', 'severity'],
+    'Snyk Code Scan': ['vuln_id_from_tool', 'file_path']
 }
 
 # Override the hardcoded settings here via the env var
@@ -1454,6 +1456,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'HCLAppScan XML': DEDUPE_ALGO_HASH_CODE,
     'KICS Scan': DEDUPE_ALGO_HASH_CODE,
     'MobSF Scan': DEDUPE_ALGO_HASH_CODE,
+    'OSV Scan': DEDUPE_ALGO_HASH_CODE,
+    'Nosey Parker Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1700,10 +1704,11 @@ USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
 warnings.filterwarnings("ignore", message="polymorphic.base.ManagerInheritanceWarning.*")
 warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager.*")
 
-
-# TODO - these warnings needs to be removed after all warnings have been removed
-if DEBUG:
-    from django.utils.deprecation import RemovedInDjango50Warning
-    warnings.filterwarnings("ignore", category=RemovedInDjango50Warning)
-    warnings.filterwarnings("ignore", message="'cgi' is deprecated and slated for removal in Python 3\\.13")
-    warnings.filterwarnings("ignore", message="unclosed file .+")
+# This setting is here to override default renderer of forms (use div-based, instred of table-based).
+# It has effect only on templates that use "{{ form }}" in the body. Only "Delete forms" now.
+# The setting is here to avoid RemovedInDjango50Warning. It is here only for transition period.
+# TODO - Remove this setting in Django 5.0 because DjangoDivFormRenderer will become deprecated and the same class will be used by default DjangoTemplates.
+# More info:
+# - https://docs.djangoproject.com/en/4.1/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
+# - https://docs.djangoproject.com/en/5.0/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
+FORM_RENDERER = "django.forms.renderers.DjangoDivFormRenderer"
