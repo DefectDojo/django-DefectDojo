@@ -3772,7 +3772,8 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
                              prefetch.PrefetchRetrieveMixin,
                              DojoModelViewSet):
     queryset = TransferFinding.objects.all()
-    # serializer_class = serializers.TransferFindingSerializer
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.TransferFindingSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id",
                         "destination_engagement",
@@ -3787,67 +3788,6 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
         ],
         serializers.TransferFindingSerializer,
     ).to_schema()
-
-    def get_serializer_class(self):
-        if self.action == 'update':
-            return serializers.TransferFindingSerializer
-        elif self.action == 'partial_update':
-            return serializers.TransferFindingUpdateSerializer
-        else:
-            return serializers.TransferFindingSerializer
-
-    def get_permissions(self):
-        permission_classes = [IsAuthenticated()]
-        return permission_classes
-    
-    # def list(self, request, pk=None):
-    #     # serializer (queryset or Data(dict))
-    #     queryset = TransferFinding.objects.all()
-    #     serializer = serializers.TransferFindingSerializer(queryset, many=True, context={'request': request})
-    #     return Response(serializer.data)
-
-    def destroy(self, request, pk=None):
-        serializer = serializers.TransferFindingDeleteSerializer(data=request.data)
-        if serializer.is_valid():
-            if request.data.get('findings'):
-                obj_transfer_finding = TransferFinding.objects.get(id=pk)
-                request_findings = request.data["findings"]
-                for finding_id_request in request_findings:
-                    obj_transfer_finding.findings.remove(finding_id_request)
-                return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
-            else:
-                super().destroy(request, pk)
-                return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def update(self, request, pk=None):
-        serializer = serializers.TransferFinding(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def partial_update(self, request, pk=None):
-        serializer = serializers.TransferFindingUpdateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        if serializer.is_valid():
-            obj_transfer_finding = TransferFinding.objects.get(id=pk)
-            request_findings = request.data["findings"]
-            for finding in obj_transfer_finding.transfer_findings.findings.all():
-                finding_id = str(finding.id)
-                if finding_id in request_findings:
-                    dict_findings = request_findings[finding_id]
-                    if dict_findings["risk_status"] == "Transfer Accepted":
-                        finding.risk_status = dict_findings["risk_status"]
-                        finding.active = False
-                    elif dict_findings["risk_status"] == "Transfer Rejected":
-                        finding.risk_status = dict_findings["risk_status"]
-                        finding.active = True
-                    finding.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
