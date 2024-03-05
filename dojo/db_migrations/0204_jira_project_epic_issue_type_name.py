@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jira_project',
             name='epic_issue_type_name',
-            field=models.CharField(default='Epic', help_text='The name of the of structure that represents an Epic', max_length=64),
+            field=models.CharField(default='Epic', blank=True, help_text='The name of the of structure that represents an Epic', max_length=64),
         ),
     ]

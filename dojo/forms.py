@@ -2801,6 +2801,7 @@ class JIRAProjectForm(forms.ModelForm):
         if self.instance.id:
             self.fields['jira_instance'].required = True
             self.fields['project_key'].required = True
+            self.fields['epic_issue_type_name'].required = True
 
     def clean(self):
         logger.debug('validating jira project form')
@@ -2810,17 +2811,18 @@ class JIRAProjectForm(forms.ModelForm):
         if not self.cleaned_data.get('inherit_from_product', False):
             jira_instance = self.cleaned_data.get('jira_instance')
             project_key = self.cleaned_data.get('project_key')
+            epic_issue_type_name = self.cleaned_data.get('epic_issue_type_name')
 
-            if project_key and jira_instance:
+            if project_key and jira_instance and epic_issue_type_name:
                 return cleaned_data
 
-            if not project_key and not jira_instance:
+            if not project_key and not jira_instance and not epic_issue_type_name:
                 return cleaned_data
 
             if self.target == 'engagement':
-                raise ValidationError('JIRA Project needs a JIRA Instance and JIRA Project Key, or choose to inherit settings from product')
+                raise ValidationError('JIRA Project needs a JIRA Instance, JIRA Project Key, and Epic issue type name, or choose to inherit settings from product')
             else:
-                raise ValidationError('JIRA Project needs a JIRA Instance and JIRA Project Key, leave empty to have no JIRA integration setup')
+                raise ValidationError('JIRA Project needs a JIRA Instance, JIRA Project Key, and Epic issue type name, leave empty to have no JIRA integration setup')
 
 
 class GITHUBFindingForm(forms.Form):
