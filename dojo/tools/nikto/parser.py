@@ -9,7 +9,8 @@ from django.core.exceptions import ValidationError
 from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
-
+from dojo.tools.nikto.json_parser import NiktoJSONParser
+from dojo.tools.nikto.xml_parser import NiktoXMLParser
 
 class NiktoParser(object):
     """Nikto web server scanner - https://cirt.net/Nikto2
