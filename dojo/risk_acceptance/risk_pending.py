@@ -209,7 +209,8 @@ def get_contacts(engagement: Engagement, finding_serverity: str, user):
         if contact in get_contacts_dict.keys():
             if not get_contacts_dict[contact]:
                 logger.warning("Risk_pending: contact not related to a product_type")
-            contact_list.append(get_contacts_dict[contact])
+            else:
+                contact_list.append(get_contacts_dict[contact])
         else:
             raise ValueError(f"Contact {contact} not found")
     if contact_list == []:
@@ -228,10 +229,11 @@ def is_permissions_risk_acceptance(
         result = True
         
     contacts = get_contacts(engagement, finding.severity, user)
-    contacts_ids = [contact.id for contact in contacts]
-    if user.id in contacts_ids and finding.risk_accepted is False:
-        # has the permissions remove and reject risk pending
-        result = True
+    if contacts:
+        contacts_ids = [contact.id for contact in contacts]
+        if user.id in contacts_ids and finding.risk_accepted is False:
+            # has the permissions remove and reject risk pending
+            result = True
     return result
 
 

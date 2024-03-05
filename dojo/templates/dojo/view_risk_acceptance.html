@@ -242,11 +242,11 @@
                                 <input type="hidden" name="remove_finding_id" value="{{ finding.id }}"/>
                                 <input class="btn btn-sm btn-success" type="submit" name="risk_accept_pending"
                                 value="Accept"/>
-                                <input class="btn btn-sm btn-warning" type="submit" name="remove_finding"
+                                <input class="btn btn-sm btn-warning" type="submit" name="risk_accept_decline"
+                                value="Reject"/>
+                                <input class="btn btn-sm btn-danger" type="submit" name="remove_finding"
                                 value="Remove"/>
                                 <input type="hidden" name="risk_accept_finding_id" value="{{ finding.id }}"/>
-                                <input class="btn btn-sm btn-danger" type="submit" name="risk_accept_decline"
-                                value="Reject"/>
                             </form>
                             {% else %}
                                 Not Authorized
