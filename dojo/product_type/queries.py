@@ -5,7 +5,6 @@ from dojo.authorization.authorization import get_roles_for_permission, user_has_
     role_has_permission
 from dojo.group.queries import get_authorized_groups
 from dojo.authorization.roles_permissions import Permissions
-# from dojo.risk_acceptance import risk_pending
 from django.conf import settings
 
 
@@ -87,15 +86,19 @@ def get_authorized_contacts_for_product_type(severity, product_type):
     contacts_list = rule["type_contacts"]
     product_type_obj = Product_Type.objects.get(id=product_type)
 
-    if contacts_list == [] and rule["number_acceptors"] == 0:
+    if hasattr(user, "global_role"):
+        if user.global_role.role:
+            if user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
+                contacts_result.append(user.id)
+    elif contacts_list == [] and rule["number_acceptors"] == 0:
         contacts_result.append(user.id)
-
-    for contact_type in contacts_list:
-        leader = getattr(product_type_obj, contact_type, None)
-        if leader:
-            contacts_result.append(leader.id)
-        else:
-            raise ValueError(f"Leader {contact_type} found")
+    elif not contacts_result:
+        for contact_type in contacts_list:
+            leader = getattr(product_type_obj, contact_type, None)
+            if leader:
+                contacts_result.append(leader.id)
+            else:
+                raise ValueError(f"Leader {contact_type} found")
     
     if contacts_result:
         contacts_result += query_user_by_rol(settings.ROLE_ALLOWED_TO_ACCEPT_RISKS)
