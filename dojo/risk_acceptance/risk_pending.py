@@ -87,8 +87,6 @@ def risk_accepted_succesfully(
     risk_acceptance: Risk_Acceptance,
     send_notification: bool = True,
 ):
-    logger.info(finding.tags)
-    logger.info(finding.tags == 'fluidattacks')
     if not finding.active:
         return True
     finding.risk_status = "Risk Accepted"
