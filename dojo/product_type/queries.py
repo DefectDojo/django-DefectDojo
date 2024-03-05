@@ -90,8 +90,10 @@ def get_authorized_contacts_for_product_type(severity, product_type):
         if user.global_role.role:
             if user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
                 contacts_result.append(user.id)
-    elif contacts_list == [] and rule["number_acceptors"] == 0:
+
+    if contacts_list == [] and rule["number_acceptors"] == 0:
         contacts_result.append(user.id)
+
     elif not contacts_result:
         for contact_type in contacts_list:
             leader = getattr(product_type_obj, contact_type, None)
