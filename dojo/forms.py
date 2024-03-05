@@ -43,7 +43,7 @@ from dojo.utils import get_system_setting, get_product, is_finding_groups_enable
     get_password_requirements_string, sla_expiration_risk_acceptance
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions
-from dojo.product_type.queries import get_authorized_product_types, get_authorized_contacts, get_owner_user
+from dojo.product_type.queries import get_authorized_product_types, get_authorized_contacts, get_authorized_contacts_for_product_type, get_owner_user
 from dojo.product.queries import get_authorized_products
 from dojo.finding.queries import get_authorized_findings
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users
@@ -747,6 +747,7 @@ class RiskPendingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         severity = kwargs.pop("severity", None)
+        product_type = kwargs.pop("product_type_id", None)
         super().__init__(*args, **kwargs)
         expiration_delta_days = sla_expiration_risk_acceptance('RiskAcceptanceExpiration')
         logger.debug(f"RiskAcceptanceExpiration: {expiration_delta_days}")
@@ -755,7 +756,7 @@ class RiskPendingForm(forms.ModelForm):
         self.fields["expiration_date"].disabled = True
 
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
-        self.fields['accepted_by'].queryset = get_authorized_contacts(severity)
+        self.fields['accepted_by'].queryset = get_authorized_contacts_for_product_type(severity, product_type)
         self.fields['owner'].queryset = get_owner_user()
     
     def clean(self):
@@ -768,6 +769,7 @@ class RiskPendingForm(forms.ModelForm):
         else:
             raise ValidationError("Accepted_by key no found")
         return data
+
 
 class RiskAcceptanceForm(EditRiskAcceptanceForm):
     accepted_findings = forms.ModelMultipleChoiceField(

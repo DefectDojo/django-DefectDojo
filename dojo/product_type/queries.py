@@ -78,6 +78,29 @@ def query_contacts(*args):
     for contact_dict in contacts:
         contacts_dict.update({value: key for key, value in contact_dict.items()})
     return contacts_dict
+    
+
+def get_authorized_contacts_for_product_type(severity, product_type):
+    contacts_result = []
+    user = get_current_user()
+    rule = settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(severity)
+    contacts_list = rule["type_contacts"]
+    product_type_obj = Product_Type.objects.get(id=product_type)
+
+    if contacts_list == [] and rule["number_acceptors"] == 0:
+        contacts_result.append(user.id)
+
+    for contact_type in contacts_list:
+        leader = getattr(product_type_obj, contact_type, None)
+        if leader:
+            contacts_result.append(leader.id)
+        else:
+            raise ValueError(f"Leader {contact_type} found")
+    
+    if contacts_result:
+        contacts_result += query_user_by_rol(settings.ROLE_ALLOWED_TO_ACCEPT_RISKS)
+        return Dojo_User.objects.filter(id__in=contacts_result)
+
 
 def query_user_by_rol(rol):
     # get ids for rol name
