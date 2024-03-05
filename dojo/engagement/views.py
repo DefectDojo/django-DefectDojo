@@ -1180,7 +1180,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             finding = get_object_or_404(Finding,
                                         pk=request.POST['risk_accept_finding_id'])
             response=rp_helper.risk_acceptance_decline(eng, finding, risk_acceptance)
-        
+
         if response:
             if response.status == "OK":
                 messages.add_message(

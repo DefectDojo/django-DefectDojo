@@ -9,7 +9,7 @@ from dojo.utils import get_system_setting, get_product, is_finding_groups_enable
     get_password_requirements_string, sla_expiration_risk_acceptance
 from django.urls import reverse
 from dojo.models import Engagement, Risk_Acceptance, Finding, Product_Type_Member, Role, Product_Member, \
-    Product, Product_Type   
+    Product, Product_Type
 from dojo.risk_acceptance.helper import create_notification, expiration_message_creator, post_jira_comments
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.product.queries import get_authorized_members_for_product
@@ -63,8 +63,22 @@ def update_expiration_risk_accepted(finding: Finding):
     logger.debug(f"Update RiskAcceptanceExpiration: {expiration_delta_days}")
     expiration_date = timezone.now().date() + relativedelta(days=expiration_delta_days.get(finding.severity.lower()))
     created_date = timezone.now().date()
-    return expiration_date, created_date
+    return expiration_delta_days.get(finding.severity.lower()), expiration_date, created_date
 
+def handle_from_provider_risk(finding, acceptance_days):
+    tag = ra_helper.get_matching_value(list_a=finding.tags.tags, list_b=[settings.PROVIDER1, settings.PROVIDER2, settings.PROVIDER3])
+    if tag is not None:
+        if tag.name == settings.PROVIDER3:
+            finding_id = finding.unique_id_from_tool
+        else:
+            finding_id = finding.vuln_id_from_tool
+        ra_helper.risk_accept_provider(
+            finding_id=finding_id,
+            provider=tag.name,
+            acceptance_days=acceptance_days,
+            url=settings.PROVIDER_URL,
+            header=settings.PROVIDER_HEADER,
+            token=settings.PROVIDER_TOKEN)
 
 def risk_accepted_succesfully(
     user,
@@ -75,11 +89,11 @@ def risk_accepted_succesfully(
 ):
     if not finding.active:
         return True
-        
     finding.risk_status = "Risk Accepted"
     finding.risk_accepted = True
     finding.active = False
-    expiration_date, created_date = update_expiration_risk_accepted(finding)
+    acceptance_days, expiration_date, created_date = update_expiration_risk_accepted(finding)
+    handle_from_provider_risk(finding, acceptance_days)
     risk_acceptance.expiration_date = expiration_date
     risk_acceptance.created = created_date
     risk_acceptance.save()

@@ -757,7 +757,7 @@ class RiskPendingForm(forms.ModelForm):
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
         self.fields['accepted_by'].queryset = get_authorized_contacts(severity)
         self.fields['owner'].queryset = get_owner_user()
-    
+
     def clean(self):
         data = self.cleaned_data
         if "accepted_by" in data.keys():

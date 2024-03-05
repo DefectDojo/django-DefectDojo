@@ -336,6 +336,14 @@ env = environ.FileAwareEnv(
     # ---------------RISK PENDING-------------------------
     # The variable that allows enabling pending risk acceptance.
     DD_RISK_PENDING=(bool, False),
+    # These variables are the params of providers name
+     DD_PROVIDER1=(str, ""),
+     DD_PROVIDER2=(str, ""),
+     DD_PROVIDER3=(str, ""),
+    # The variable that sets the provider risk accept api and credentials
+    DD_PROVIDER_URL=(str, ""),
+    DD_PROVIDER_HEADER=(str, ""),
+    DD_PROVIDER_SECRET=(str, ""),
     # Role that allows risk acceptance bypassing restrictions.
     DD_ROLE_ALLOWED_TO_ACCEPT_RISKS=(list, ["Maintainer"]),
     # Blacklist to define CVEs that will not be accepted for any reason.
@@ -513,6 +521,15 @@ else:
                 "PORT": env("DD_DATABASE_PORT"),
             }
         }
+
+# ------------------------------------------------------------------------------
+# ENGINE BACKEND
+# ------------------------------------------------------------------------------
+if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
+    secret_engine_backend = get_secret(env("DD_PROVIDER_SECRET"))
+    PROVIDER_TOKEN = secret_engine_backend["tokenRiskAcceptanceApi"]
+else:
+    PROVIDER_TOKEN = env("DD_PROVIDER_TOKEN")
 
 # Track migrations through source control rather than making migrations locally
 if env("DD_TRACK_MIGRATIONS"):
@@ -1949,6 +1966,12 @@ ROLE_ALLOWED_TO_ACCEPT_RISKS = env("DD_ROLE_ALLOWED_TO_ACCEPT_RISKS")
 BLACK_LIST_FINDING = env("DD_BLACK_LIST_FINDING")
 WHITE_LIST_FINDING = env("DD_WHITE_LIST_FINDING")
 RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = env("DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY")
+# Engine Backend
+PROVIDER1 = env("DD_PROVIDER1")
+PROVIDER2 = env("DD_PROVIDER2")
+PROVIDER3 = env("DD_PROVIDER3")
+PROVIDER_URL = env("DD_PROVIDER_URL")
+PROVIDER_HEADER = env("DD_PROVIDER_HEADER")
 # Abuse Control
 LIMIT_ASSUMPTION_OF_VULNERABILITY = env("DD_LIMIT_ASSUMPTION_OF_VULNERABILITY")
 LIMIT_OF_TEMPORARILY_ASSUMED_VULNERABILITIES_LIMITED_TO_TOLERANCE = env("DD_LIMIT_OF_TEMPORARILY_ASSUMED_VULNERABILITIES_LIMITED_TO_TOLERANCE")
