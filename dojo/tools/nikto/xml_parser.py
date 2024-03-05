@@ -10,11 +10,9 @@ logger = logging.getLogger(__name__)
 class NiktoXMLParser(object):
     def process_xml(self, file, test):
         dupes = dict()
-
         tree = ET.parse(file)
         root = tree.getroot()
         scan = root.find("scandetails")
-
         if scan is not None:
             self.process_scandetail(scan, test, dupes)
         else:
@@ -23,7 +21,6 @@ class NiktoXMLParser(object):
             # breaking older Nikto scan files versions.
             for scan in root.findall("./niktoscan/scandetails"):
                 self.process_scandetail(scan, test, dupes)
-
         return list(dupes.values())
 
     def process_scandetail(self, scan, test, dupes):
@@ -39,7 +36,6 @@ class NiktoXMLParser(object):
                 titleText = sentences[0][:900]
             else:
                 titleText = description[:900]
-
             # Description
             description = "\n".join(
                 [
@@ -48,12 +44,10 @@ class NiktoXMLParser(object):
                     f"**HTTP Method:** `{item.attrib.get('method')}`",
                 ]
             )
-
             # Manage severity the same way with JSON
             severity = "Info"  # Nikto doesn't assign severity, default to Info
             if item.get("osvdbid") is not None and "0" != item.get("osvdbid"):
                 severity = "Medium"
-
             finding = Finding(
                 title=titleText,
                 test=test,
@@ -64,7 +58,6 @@ class NiktoXMLParser(object):
                 vuln_id_from_tool=item.attrib.get("id"),
                 nb_occurences=1,
             )
-
             # endpoint
             try:
                 ip = item.findtext("iplink")
@@ -72,14 +65,11 @@ class NiktoXMLParser(object):
                 finding.unsaved_endpoints = [endpoint]
             except ValidationError:
                 logger.debug("Invalid iplink in the report")
-
             dupe_key = hashlib.sha256(description.encode("utf-8")).hexdigest()
-
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 find.description += "\n-----\n" + finding.description
                 find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                 find.nb_occurences += 1
-
             else:
                 dupes[dupe_key] = finding

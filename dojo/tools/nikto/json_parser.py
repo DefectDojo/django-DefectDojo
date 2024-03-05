@@ -42,7 +42,6 @@ class NiktoJSONParser(object):
                 path=vulnerability.get("url"),
             )
             finding.unsaved_endpoints = [endpoint]
-
             # internal de-duplication
             dupe_key = finding.severity + finding.title
             if dupe_key in dupes:
@@ -58,5 +57,4 @@ class NiktoJSONParser(object):
                 find.nb_occurences += 1
             else:
                 dupes[dupe_key] = finding
-
         return list(dupes.values())
