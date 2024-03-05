@@ -47,6 +47,10 @@ jobs:
       # load docker images from build jobs
       - name: Load images from artifacts
         uses: actions/download-artifact@v4
+        with:
+          pattern: *
+          
+        
 
       - name: Load docker images
         run: |-
