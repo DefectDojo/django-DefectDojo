@@ -167,7 +167,7 @@ def get_item(vulnerability, test):
         + vulnerability["packageVersion"],
         test=test,
         severity=severity,
-        description=vulnerability["description"]
+        description=vulnerability.get("description", "")
         + "<p> Vulnerable Package: "
         + vulnerability["packageName"]
         + "</p><p> Current Version: "
