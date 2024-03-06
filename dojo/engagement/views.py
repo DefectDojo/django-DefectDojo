@@ -897,24 +897,7 @@ def get_risk_acceptance_pending(request,
     return form
 
 
-def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: Product, product_type: Product_Type):
-    if any(vulnerability_id in settings.BLACK_LIST_FINDING for vulnerability_id in finding.vulnerability_ids):
-        messages.add_message(request,
-        messages.WARNING,
-        'This risk is on the black list',
-        extra_tags='alert-danger')
-        return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
-
-    abuse_control_result = rp_helper.abuse_control(request.user, finding, product, product_type)
-    for abuse_control, result in abuse_control_result.items():
-        if not abuse_control_result[abuse_control]["status"]:
-            messages.add_message(
-            request,
-            messages.SUCCESS,
-            abuse_control_result[abuse_control]["message"],
-            extra_tags='alert-danger')
-            return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
-
+def post_risk_acceptance_pending_successfully(request, finding: Finding, eng, eid, product: Product, product_type: Product_Type, white_list=False):
     form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity, product_type_id=product_type.id)
 
     if form.is_valid():
@@ -948,6 +931,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
         if settings.RISK_PENDING is True:
             if (request.user.is_superuser is True
                 or rp_helper.role_has_exclusive_permissions(request.user)
+                or white_list
                 or rp_helper.get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
             elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
@@ -964,6 +948,35 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
         return redirect_to_return_url_or_else(request, reverse('view_risk_acceptance', args=(eid, id_risk_acceptance)))
 
     return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
+
+
+def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: Product, product_type: Product_Type):
+    if any(vulnerability_id in settings.BLACK_LIST_FINDING for vulnerability_id in finding.vulnerability_ids):
+        messages.add_message(request,
+        messages.WARNING,
+        'This risk is on the black list',
+        extra_tags='alert-danger')
+        return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, ))) 
+
+    if any(vulnerability_id in settings.WHITE_LIST_FINDING for vulnerability_id in finding.vulnerability_ids):
+        messages.add_message(request,
+        messages.WARNING,
+        'This risk is on the white list',
+        extra_tags='alert-warning')
+        return post_risk_acceptance_pending_successfully(request, finding, eng, eid, product, product_type, white_list=True)
+
+    abuse_control_result = rp_helper.abuse_control(request.user, finding, product, product_type)
+    for abuse_control, result in abuse_control_result.items():
+        if not abuse_control_result[abuse_control]["status"]:
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                abuse_control_result[abuse_control]["message"],
+                extra_tags='alert-danger')
+            return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
+
+    return post_risk_acceptance_pending_successfully(request, finding, eng, eid, product, product_type)
+
 
 def add_risk_acceptance_pending(request, eid, fid):
     eng = get_object_or_404(Engagement, id=eid)
