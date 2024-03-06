@@ -323,15 +323,15 @@ def finding_querys(request, prod):
         end_date = timezone.now()
     week = end_date - timedelta(days=7)  # seven days and /newer are considered "new"
 
-    filters['accepted'] = findings_qs.filter(finding_helper.ACCEPTED_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
+    filters['accepted'] = findings_qs.filter(finding_helper.ACCEPTED_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
     filters['verified'] = findings_qs.filter(finding_helper.VERIFIED_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
     filters['new_verified'] = findings_qs.filter(finding_helper.VERIFIED_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
-    filters['open'] = findings_qs.filter(finding_helper.OPEN_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
-    filters['inactive'] = findings_qs.filter(finding_helper.INACTIVE_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
-    filters['closed'] = findings_qs.filter(finding_helper.CLOSED_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
-    filters['false_positive'] = findings_qs.filter(finding_helper.FALSE_POSITIVE_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
-    filters['out_of_scope'] = findings_qs.filter(finding_helper.OUT_OF_SCOPE_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
-    filters['all'] = findings_qs
+    filters['open'] = findings_qs.filter(finding_helper.OPEN_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
+    filters['inactive'] = findings_qs.filter(finding_helper.INACTIVE_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
+    filters['closed'] = findings_qs.filter(finding_helper.CLOSED_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
+    filters['false_positive'] = findings_qs.filter(finding_helper.FALSE_POSITIVE_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
+    filters['out_of_scope'] = findings_qs.filter(finding_helper.OUT_OF_SCOPE_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
+    filters['all'] = findings_qs.order_by("date")
     filters['open_vulns'] = findings_qs.filter(finding_helper.OPEN_FINDINGS_QUERY).filter(
         cwe__isnull=False,
     ).order_by('cwe').values(
