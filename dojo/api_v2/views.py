@@ -174,6 +174,7 @@ from drf_spectacular.views import SpectacularAPIView
 from drf_spectacular.renderers import OpenApiJsonRenderer2
 from dojo.authorization.roles_permissions import Permissions
 from dojo.user.utils import get_configuration_permissions_codenames
+import dojo.transfer_findings.helper as helper_tf
 
 logger = logging.getLogger(__name__)
 
@@ -3831,6 +3832,7 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
                         if dict_findings["risk_status"] == "Transfer Accepted":
                             finding.risk_status = dict_findings["risk_status"]
                             finding.active = False
+                            helper_tf.transfer_finding(finding)
                         elif dict_findings["risk_status"] == "Transfer Rejected":
                             finding.risk_status = dict_findings["risk_status"]
                             finding.active = True
