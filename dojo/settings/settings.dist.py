@@ -1196,7 +1196,6 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # 'Qualys Webapp Scan': ['title', 'unique_id_from_tool'],
     'PHP Symfony Security Check': ['title', 'vulnerability_ids'],
     'Clair Scan': ['title', 'vulnerability_ids', 'description', 'severity'],
-    'Clair Klar Scan': ['title', 'description', 'severity'],
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': ['title', 'vulnerability_ids'],
     'DSOP Scan': ['vulnerability_ids'],
@@ -1385,7 +1384,6 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Acunetix Scan': DEDUPE_ALGO_HASH_CODE,
     'Acunetix360 Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Scan': DEDUPE_ALGO_HASH_CODE,
-    'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
     # 'Qualys Webapp Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,  # Must also uncomment qualys webapp line in hashcode fields per scanner
     'Veracode Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Veracode SourceClear Scan': DEDUPE_ALGO_HASH_CODE,
