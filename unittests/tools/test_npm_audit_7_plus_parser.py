@@ -19,7 +19,7 @@ class TestNpmAudit7PlusParser(DojoTestCase):
         testfile.close()
         self.assertEqual(1, len(findings))
 
-    def test_npm_audit_7_plus_parser_with_one_vuln_has_one_findings(self):
+    def test_npm_audit_7_plus_parser_with_many_vuln_has_many_findings(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_7_plus/many_vulns.json"))
         parser = NpmAudit7PlusParser()
         findings = parser.get_findings(testfile, Test())
