@@ -365,7 +365,7 @@ def risk_accept_provider(
     formatted_url = url + f'{provider}?vulnerabilityId={finding_id}&acceptanceDays={acceptance_days}'
     headers = {}
     headers[header] = token
-    response = requests.post(url=formatted_url, headers=headers, verify=True)
+    response = requests.post(url=formatted_url, headers=headers, verify=False)
     if response.status_code == 200:
         logger.info(response.text)
     logger.error(response.text)
