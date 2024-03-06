@@ -344,6 +344,7 @@ env = environ.FileAwareEnv(
     DD_PROVIDER_URL=(str, ""),
     DD_PROVIDER_HEADER=(str, ""),
     DD_PROVIDER_SECRET=(str, ""),
+    DD_PROVIDER_TOKEN=(str, ""),
     # Role that allows risk acceptance bypassing restrictions.
     DD_ROLE_ALLOWED_TO_ACCEPT_RISKS=(list, ["Maintainer"]),
     # Blacklist to define CVEs that will not be accepted for any reason.
