@@ -878,14 +878,14 @@ def get_risk_acceptance_pending(request,
                                                         finding,
                                                         product,
                                                         product_type):
-            form = RiskPendingForm(severity=finding.severity,
+            form = RiskPendingForm(severity=finding.severity, product_type_id=product_type.id,
                 initial={'owner': request.user,
                         'name': risk_acceptance_title_suggestion,
                         'accepted_by': request.user,
                         "severity": finding.severity})
         elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
             risk_acceptance_title_suggestion = 'Accept: %s' % finding
-            form = RiskPendingForm(severity=finding.severity,
+            form = RiskPendingForm(severity=finding.severity, product_type_id=product_type.id,
                 initial={'owner': request.user,
                         'name': risk_acceptance_title_suggestion,
                         'accepted_by': rp_helper.get_contacts(eng, finding.severity, request.user),
@@ -915,7 +915,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
             extra_tags='alert-danger')
             return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
 
-    form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity)
+    form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity, product_type_id=product_type.id)
 
     if form.is_valid():
         notes = None
