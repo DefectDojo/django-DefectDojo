@@ -2529,6 +2529,7 @@ class Finding(models.Model):
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
 
+
     class Meta:
         ordering = ('numerical_severity', '-date', 'title')
         indexes = [
@@ -2826,7 +2827,7 @@ class Finding(models.Model):
         return None
 
     def __str__(self):
-        return f"{self.id} - {self.title}"
+        return f"{self.id} - {self.title[:50] + '...'}"
 
     def status(self):
         status = []
