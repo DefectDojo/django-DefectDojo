@@ -1,6 +1,6 @@
 from os import path
 from ..dojo_test_case import DojoTestCase
-from dojo.tools.npm_audit_7_plus import NpmAudit7PlusParser
+from dojo.tools.npm_audit_7_plus.parser import NpmAudit7PlusParser
 from dojo.models import Test
 
 
