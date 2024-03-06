@@ -1,7 +1,4 @@
-import csv
-import io
 import json
-from dateutil import parser
 from dojo.models import Finding
 
 
