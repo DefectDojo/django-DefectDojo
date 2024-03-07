@@ -30,18 +30,19 @@ class PipAuditParser:
         """Return the collection of Findings ingested."""
         data = json.load(scan_file)
         findings = None
-        ##this parser can handle two distinct formats see sample scan files
+        # this parser can handle two distinct formats see sample scan files
         if "dependencies" in data:
-            ##new format of report
+            # new format of report
             findings = get_file_findings(data, test)
         else:
-            ##legacy format of report
+            # legacy format of report
             findings = get_legacy_findings(data, test)
 
-        return findings 
+        return findings
 
 
 def get_file_findings(data, test):
+    """Return the findings in the vluns array inside the dependencies key."""
     findings = list()
     for dependency in data["dependencies"]:
         logger.debug("**-**")
@@ -51,7 +52,9 @@ def get_file_findings(data, test):
             findings.extend(item_findings)
     return findings
 
+
 def get_legacy_findings(data, test):
+    """Return the findings gathered from the vulns element."""
     findings = list()
     for item in data:
         item_findings = get_item_findings(item, test)
@@ -59,7 +62,9 @@ def get_legacy_findings(data, test):
             findings.extend(item_findings)
     return findings
 
+
 def get_item_findings(item, test):
+    """Return list of Findings."""
     findings = list()
     vulnerabilities = item.get("vulns", [])
     if vulnerabilities:
