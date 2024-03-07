@@ -1,8 +1,6 @@
 import csv
 import sys
 import io
-
-from dateutil import parser
 from dojo.models import Finding
 
 
@@ -24,70 +22,157 @@ class DeepfenceThreatmapperParser(object):
         reader = csv.DictReader(io.StringIO(content))
         findings = []
         for row in reader:
-            # if row.get("Status").lower() == "open":
-            #     Title = row.get("Title")
-            #     Severity = row.get("Severity")
-            #     Description = row.get("Description")
-            #     Resource_Type = row.get("Resource Type")
-            #     Resource_external_ID = row.get("Resource external ID")
-            #     Subscription_ID = row.get("Subscription ID")
-            #     Project_IDs = row.get("Project IDs")
-            #     Project_Names = row.get("Project Names")
-            #     Control_ID = row.get("Control ID")
-            #     Resource_Name = row.get("Resource Name")
-            #     Resource_Region = row.get("Resource Region")
-            #     Resource_Status = row.get("Resource Status")
-            #     Resource_Platform = row.get("Resource Platform")
-            #     Resource_OS = row.get("Resource OS")
-            #     Resource_original_JSON = row.get("Resource original JSON")
-            #     Issue_ID = row.get("Issue ID")
-            #     Resource_vertex_ID = row.get("Resource vertex ID")
-            #     Ticket_URLs = row.get("Ticket URLs")
-            #     Note = row.get("Note")
-            #     Due_At = row.get("Due At")
-            #     Subscription_Name = row.get("Subscription Name")
-            #     Wiz_URL = row.get("Wiz URL")
-            #     Cloud_Provider_URL = row.get("Cloud Provider URL")
-            #     Resource_Tags = row.get("Resource Tags")
-            #     Kubernetes_Cluster = row.get("Kubernetes Cluster")
-            #     Kubernetes_Namespace = row.get("Kubernetes Namespace")
-            #     Container_Service = row.get("Container Service")
-            #     description = ""
-            #     description += "**Description**: " + Description + "\n"
-            #     description += "**Resource Type**: " + Resource_Type + "\n"
-            #     description += "**external ID**: " + Resource_external_ID + "\n"
-            #     description += "**Subscription ID**: " + Subscription_ID + "\n"
-            #     description += "**Project IDs**: " + Project_IDs + "\n"
-            #     description += "**Project Names**: " + Project_Names + "\n"
-            #     description += "**Control ID**: " + Control_ID + "\n"
-            #     description += "**Resource Name**: " + Resource_Name + "\n"
-            #     description += "**Resource Region**: " + Resource_Region + "\n"
-            #     description += "**Resource Status**: " + Resource_Status + "\n"
-            #     description += "**Resource Platform**: " + Resource_Platform + "\n"
-            #     description += "**Resource OS**: " + Resource_OS + "\n"
-            #     description += "**original JSON**: " + Resource_original_JSON + "\n"
-            #     description += "**Issue ID**: " + Issue_ID + "\n"
-            #     description += "**vertex ID**: " + Resource_vertex_ID + "\n"
-            #     description += "**Ticket URLs**: " + Ticket_URLs + "\n"
-            #     description += "**Note**: " + Note + "\n"
-            #     description += "**Due At**: " + Due_At + "\n"
-            #     description += "**Subscription Name**: " + Subscription_Name + "\n"
-            #     description += "**Wiz URL**: " + Wiz_URL + "\n"
-            #     description += "**Provider URL**: " + Cloud_Provider_URL + "\n"
-            #     description += "**Resource Tags**: " + Resource_Tags + "\n"
-            #     description += "**Kubernetes Cluster**: " + Kubernetes_Cluster + "\n"
-            #     description += "**Kubernetes Namespace**: " + Kubernetes_Namespace + "\n"
-            #     description += "**Container Service**: " + Container_Service + "\n"
-            #     findings.append(
-            #         Finding(
-            #             title=Title,
-            #             description=description,
-            #             severity=Severity.lower().capitalize(),
-            #             static_finding=False,
-            #             dynamic_finding=True,
-            #             mitigation=row.get("Remediation Recommendation"),
-            #             test=test,
-            #         )
-                # )
-            print(row)
+            description = ""
+            if row.get("Rule Name") and row.get("Class"):
+                Rule_Name = row.get("Rule Name")
+                Class = row.get("Class")
+                File_Name = row.get("File Name")
+                Summary = row.get("Summary")
+                Severity = row.get("Severity")
+                Node_Name = row.get("Node Name")
+                NodeType = row.get("NodeType")
+                Container_Name = row.get("Container Name")
+                Kubernetes_Cluster_Name = row.get("Kubernetes Cluster Name")
+                description += "**Summary: **" + Summary + "\n"
+                description += "**Rule Name: **" + Rule_Name + "\n"
+                description += "**Class: **" + Class + "\n"
+                description += "**File Name: **" + File_Name + "\n"
+                description += "**Node Name: **" + Node_Name + "\n"
+                description += "**NodeType: **" + NodeType + "\n"
+                description += "**Container Name: **" + Container_Name + "\n"
+                description += "**Kubernetes Cluster Name: **" + Kubernetes_Cluster_Name + "\n"
+                findings.append(
+                    Finding(
+                        title=Rule_Name,
+                        description=description,
+                        file_path=File_Name,
+                        severity=Severity.capitalize(),
+                        static_finding=False,
+                        dynamic_finding=True,
+                        test=test,
+                    )
+                )
+            elif row.get("Filename") and row.get("Content"):
+                Filename = row.get("Filename")
+                Content = row.get("Content")
+                Name = row.get("Name")
+                Rule = row.get("Rule")
+                Severity = row.get("Severity")
+                Node_Name = row.get("Node Name")
+                Container_Name = row.get("Container Name")
+                Kubernetes_Cluster_Name = row.get("Kubernetes Cluster Name")
+                Signature = row.get("Signature")
+                description += "**Filename: **" + Filename + "\n"
+                description += "**Name: **" + Name + "\n"
+                description += "**Rule: **" + Rule + "\n"
+                description += "**Node Name: **" + Node_Name + "\n"
+                description += "**Container Name: **" + Container_Name + "\n"
+                description += "**Kubernetes Cluster Name: **" + Kubernetes_Cluster_Name + "\n"
+                description += "**Content: **" + Content + "\n"
+                description += "**Signature: **" + Signature + "\n"
+                findings.append(
+                    Finding(
+                        title=Name,
+                        description=description,
+                        file_path=Filename,
+                        severity=Severity.capitalize(),
+                        static_finding=False,
+                        dynamic_finding=True,
+                        test=test,
+                    )
+                )
+            elif row.get("@timestamp") and row.get("cve_attack_vector"):
+                cve_attack_vector = row.get("cve_attack_vector")
+                cve_caused_by_package = row.get("cve_caused_by_package")
+                cve_container_image = row.get("cve_container_image")
+                scan_id = row.get("scan_id")
+                cve_container_image_id = row.get("cve_container_image_id")
+                cve_cvss_score = row.get("cve_cvss_score")
+                cve_description = row.get("cve_description")
+                cve_fixed_in = row.get("cve_fixed_in")
+                cve_id = row.get("cve_id")
+                cve_link = row.get("cve_link")
+                cve_severity = row.get("cve_severity")
+                cve_overall_score = row.get("cve_overall_score")
+                cve_type = row.get("cve_type")
+                host_name = row.get("host_name")
+                cloud_account_id = row.get("cloud_account_id")
+                masked = row.get("masked")
+                description += "**cve_attack_vector: **" + cve_attack_vector + "\n"
+                description += "**cve_caused_by_package: **" + cve_caused_by_package + "\n"
+                description += "**cve_container_image: **" + cve_container_image + "\n"
+                description += "**cve_container_image_id: **" + cve_container_image_id + "\n"
+                description += "**cve_description: **" + cve_description + "\n"
+                description += "**cve_severity: **" + cve_severity + "\n"
+                description += "**cve_overall_score: **" + cve_overall_score + "\n"
+                description += "**cve_type: **" + cve_type + "\n"
+                description += "**host_name: **" + host_name + "\n"
+                description += "**cloud_account_id: **" + cloud_account_id + "\n"
+                description += "**masked: **" + masked + "\n"
+                description += "**scan_id: **" + scan_id + "\n"
+                findings.append(
+                    Finding(
+                        title="Threatmapper_Vuln_Report-" + cve_id,
+                        description=description,
+                        component_name=cve_caused_by_package,
+                        cvssv3_score=cve_cvss_score,
+                        severity=cve_severity.capitalize(),
+                        static_finding=False,
+                        dynamic_finding=True,
+                        mitigation=cve_fixed_in,
+                        references=cve_link,
+                        cve=cve_id,
+                        test=test,
+                    )
+                )
+            elif row.get("@timestamp") and row.get("compliance_check_type"):
+                compliance_check_type = row.get("compliance_check_type")
+                count = row.get("count")
+                doc_id = row.get("doc_id")
+                host_name = row.get("host_name")
+                cloud_account_id = row.get("cloud_account_id")
+                masked = row.get("masked")
+                node_id = row.get("node_id")
+                node_name = row.get("node_name")
+                node_type = row.get("node_type")
+                status = row.get("status")
+                test_category = row.get("test_category")
+                test_desc = row.get("test_desc")
+                test_info = row.get("test_info")
+                test_number = row.get("test_number")
+                description += "**compliance_check_type: **" + compliance_check_type + "\n"
+                description += "**host_name: **" + host_name + "\n"
+                description += "**cloud_account_id: **" + cloud_account_id + "\n"
+                description += "**masked: **" + masked + "\n"
+                description += "**node_id: **" + node_id + "\n"
+                description += "**node_name: **" + node_name + "\n"
+                description += "**node_type: **" + node_type + "\n"
+                description += "**status: **" + status + "\n"
+                description += "**test_category: **" + test_category + "\n"
+                description += "**test_desc: **" + test_desc + "\n"
+                description += "**test_info: **" + test_info + "\n"
+                description += "**test_number: **" + test_number + "\n"
+                description += "**count: **" + count + "\n"
+                description += "**doc_id: **" + doc_id + "\n"
+                findings.append(
+                    Finding(
+                        title="Threatmapper_Compliance_Report-" + test_number,
+                        description=description,
+                        severity=self.compliance_severity(status),
+                        static_finding=False,
+                        dynamic_finding=True,
+                        test=test,
+                    )
+                )
         return findings
+
+    def compliance_severity(self, input):
+        if input == "pass":
+            output = "Info"
+        elif input == "info":
+            output = "Info"
+        elif input == "warn":
+            output = "Medium"
+        else:
+            output = "Info"
+        return output
