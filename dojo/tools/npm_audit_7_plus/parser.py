@@ -88,7 +88,6 @@ class NpmAudit7PlusParser(object):
 
 def get_item(item_node, tree, test):
     """Return the individual Findigns from items found in report."""
-    vuln_ids = []
     references = []
     mitigation = ""
     test = test
@@ -119,7 +118,6 @@ def get_item(item_node, tree, test):
         title = item_node["via"][0]["title"]
         component_name = item_node["nodes"][0]
         cwe = item_node["via"][0]["cwe"][0]
-        vuln_ids.append(cwe)
         references.append(item_node["via"][0]["url"])
         unique_id_from_tool = str(item_node["via"][0]["source"])
         cvssv3 = item_node["via"][0]["cvss"]["vectorString"]
@@ -140,7 +138,6 @@ def get_item(item_node, tree, test):
         # vulnerability_ids and references
         for vuln in item_node["via"][1:]:  # have to decide if str or object
             if isinstance(vuln, dict):
-                vuln_ids.append(vuln["cwe"][0])
                 references.append(vuln["url"])
 
     if len(cwe):
@@ -168,8 +165,6 @@ def get_item(item_node, tree, test):
     if (cvssv3 is not None) and (len(cvssv3) > 0):
         dojo_finding.cvssv3 = cvssv3
 
-    dojo_finding.unsaved_vulnerability_ids = vuln_ids
-
     return dojo_finding
 
 
@@ -179,7 +174,7 @@ def get_vuln_description(item_node, tree):
     description = ""
 
     description += (item_node["name"] + " " +
-                   item_node["range"] + "\n")
+                    item_node["range"] + "\n")
     description += "Severity: " + item_node["severity"] + "\n"
 
     for via in item_node["via"]:
@@ -211,11 +206,11 @@ def get_vuln_description(item_node, tree):
             if isinstance(ev, dict):
                 if tree[effect]["name"] != ev["name"]:
                     description += ("  Depends on vulnerable versions of " +
-                                   ev["name"] + "\n")
+                                    ev["name"] + "\n")
             else:
                 if tree[effect]["name"] != ev:
                     description += ("  Depends on vulnerable versions of " +
-                                   ev + "\n")
+                                    ev + "\n")
         for en in tree[effect]["nodes"]:
             description += "  " + en + "\n"
 
