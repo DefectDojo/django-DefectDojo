@@ -100,7 +100,7 @@ def get_authorized_contacts_for_product_type(severity, product_type):
             if leader:
                 contacts_result.append(leader.id)
             else:
-                raise ValueError(f"Leader {contact_type} found")
+                raise ValueError(f"Leader {contact_type} not found")
     
     if contacts_result:
         contacts_result += query_user_by_rol(settings.ROLE_ALLOWED_TO_ACCEPT_RISKS)
