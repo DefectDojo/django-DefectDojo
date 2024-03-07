@@ -38,4 +38,4 @@ class TestNpmAudit7PlusParser(DojoTestCase):
             self.assertEqual(1035, finding.cwe)
             self.assertIsNotNone(finding.description)
             self.assertGreater(len(finding.description), 0)
-            self.assertEqual("@Vercel/Fun", finding.title)
+            self.assertEqual("@vercel/fun", finding.title)
