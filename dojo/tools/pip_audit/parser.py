@@ -1,70 +1,110 @@
+"""Parser for pip-audit."""
 import json
+import logging
 
 from dojo.models import Finding
 
+logger = logging.getLogger(__name__)
+
 
 class PipAuditParser:
+    """Represents a file parser capable of ingesting pip-audit results."""
+
     def get_scan_types(self):
+        """Return the type of scan this parser ingests."""
         return ["pip-audit Scan"]
 
     def get_label_for_scan_types(self, scan_type):
+        """Return the friendly name for this parser."""
         return "pip-audit Scan"
 
     def get_description_for_scan_types(self, scan_type):
+        """Return the description for this parser."""
         return "Import pip-audit JSON scan report."
 
     def requires_file(self, scan_type):
+        """Return boolean indicating if parser requires a file to process."""
         return True
 
     def get_findings(self, scan_file, test):
+        """Return the collection of Findings ingested."""
         data = json.load(scan_file)
+        findings = None
+        ##this parser can handle two distinct formats see sample scan files
+        if "dependencies" in data:
+            ##new format of report
+            findings = get_file_findings(data, test)
+        else:
+            ##legacy format of report
+            findings = get_legacy_findings(data, test)
 
-        findings = list()
-        for item in data:
-            vulnerabilities = item.get("vulns", [])
-            if vulnerabilities:
-                component_name = item["name"]
-                component_version = item.get("version")
-                for vulnerability in vulnerabilities:
-                    vuln_id = vulnerability.get("id")
-                    vuln_fix_versions = vulnerability.get("fix_versions")
-                    vuln_description = vulnerability.get("description")
+        return findings 
 
-                    title = (
-                        f"{vuln_id} in {component_name}:{component_version}"
-                    )
 
-                    description = ""
-                    description += vuln_description
+def get_file_findings(data, test):
+    findings = list()
+    for dependency in data["dependencies"]:
+        logger.debug("**-**")
+        logger.debug(dependency)
+        item_findings = get_item_findings(dependency, test)
+        if item_findings is not None:
+            findings.extend(item_findings)
+    return findings
 
-                    mitigation = None
-                    if vuln_fix_versions:
-                        mitigation = "Upgrade to version:"
-                        if len(vuln_fix_versions) == 1:
-                            mitigation += f" {vuln_fix_versions[0]}"
-                        else:
-                            for fix_version in vuln_fix_versions:
-                                mitigation += f"\n- {fix_version}"
+def get_legacy_findings(data, test):
+    findings = list()
+    for item in data:
+        item_findings = get_item_findings(item, test)
+        if item_findings is not None:
+            findings.extend(item_findings)
+    return findings
 
-                    finding = Finding(
-                        test=test,
-                        title=title,
-                        cwe=1352,
-                        severity="Medium",
-                        description=description,
-                        mitigation=mitigation,
-                        component_name=component_name,
-                        component_version=component_version,
-                        vuln_id_from_tool=vuln_id,
-                        static_finding=True,
-                        dynamic_finding=False,
-                    )
-                    vulnerability_ids = list()
-                    if vuln_id:
-                        vulnerability_ids.append(vuln_id)
-                    if vulnerability_ids:
-                        finding.unsaved_vulnerability_ids = vulnerability_ids
+def get_item_findings(item, test):
+    findings = list()
+    vulnerabilities = item.get("vulns", [])
+    if vulnerabilities:
+        component_name = item["name"]
+        component_version = item.get("version")
+        for vulnerability in vulnerabilities:
+            vuln_id = vulnerability.get("id")
+            vuln_fix_versions = vulnerability.get("fix_versions")
+            vuln_description = vulnerability.get("description")
 
-                    findings.append(finding)
+            title = (
+                f"{vuln_id} in {component_name}:{component_version}"
+            )
 
-        return findings
+            description = ""
+            description += vuln_description
+
+            mitigation = None
+            if vuln_fix_versions:
+                mitigation = "Upgrade to version:"
+                if len(vuln_fix_versions) == 1:
+                    mitigation += f" {vuln_fix_versions[0]}"
+                else:
+                    for fix_version in vuln_fix_versions:
+                        mitigation += f"\n- {fix_version}"
+
+            finding = Finding(
+                test=test,
+                title=title,
+                cwe=1352,
+                severity="Medium",
+                description=description,
+                mitigation=mitigation,
+                component_name=component_name,
+                component_version=component_version,
+                vuln_id_from_tool=vuln_id,
+                static_finding=True,
+                dynamic_finding=False,
+            )
+            vulnerability_ids = list()
+            if vuln_id:
+                vulnerability_ids.append(vuln_id)
+            if vulnerability_ids:
+                finding.unsaved_vulnerability_ids = vulnerability_ids
+
+            findings.append(finding)
+
+    return findings
