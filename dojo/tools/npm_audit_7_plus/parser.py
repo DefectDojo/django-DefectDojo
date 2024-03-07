@@ -215,7 +215,7 @@ def get_vuln_description(item_node, tree):
             if isinstance(ev, dict):
                 if tree[effect]["name"] != ev["name"]:
                     description = (description +
-                                   "  Depends on vulnearble versions of " +
+                                   "  Depends on vulnerable versions of " +
                                    ev["name"] + "\n")
             else:
                 if tree[effect]["name"] != ev:
