@@ -53,7 +53,7 @@ class AsffParser(object):
 
             finding = Finding(
                 title=item.get("Title"),
-                description=item.get("Description"),
+                description=self.get_description(item),
                 date=dateutil.parser.parse(item.get("CreatedAt")),
                 mitigation=mitigation,
                 references=references,
