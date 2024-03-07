@@ -97,7 +97,6 @@ def get_item(item_node, tree, test):
     unique_id_from_tool = ""
     cvssv3 = ""
     cwe = ""
-    component_version = ""
 
     if item_node["severity"] == "low":
         severity = "Low"
@@ -119,7 +118,6 @@ def get_item(item_node, tree, test):
     elif item_node["via"] and isinstance(item_node["via"][0], dict):
         title = item_node["via"][0]["title"]
         component_name = item_node["nodes"][0]
-        component_version = item_node["range"]
         cwe = item_node["via"][0]["cwe"][0]
         vuln_ids.append(cwe)
         references.append(item_node["via"][0]["url"])
@@ -157,7 +155,6 @@ def get_item(item_node, tree, test):
         mitigation=mitigation,
         references=", ".join(references),
         component_name=component_name,
-        component_version=component_version,
         false_p=False,
         duplicate=False,
         out_of_scope=False,
