@@ -36,7 +36,7 @@ class NpmAudit7PlusParser(object):
         return "NPM Audit Scan json output from v7 and above."
 
     def get_findings(self, json_output, test):
-        """Return the findigs gathered from file upload."""
+        """Return the findings gathered from file upload."""
         tree = self.parse_json(json_output)
         return self.get_items(tree, test)
 
