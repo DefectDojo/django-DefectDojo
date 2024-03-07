@@ -476,6 +476,7 @@ def view_product_metrics(request, pid):
 
     add_breadcrumb(parent=prod, top_level=False, request=request)
 
+    # An ordered dict does not make sense here.
     open_close_weekly = OrderedDict()
     severity_weekly = OrderedDict()
     critical_weekly = OrderedDict()
@@ -486,88 +487,163 @@ def view_product_metrics(request, pid):
     closed_objs_by_severity = get_zero_severity_level()
     accepted_objs_by_severity = get_zero_severity_level()
 
-    for v in filters.get('open', None):
-        iso_cal = v.date.isocalendar()
-        x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
-        y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
-        x = (tcalendar.timegm(x.timetuple()) * 1000)
-        if x not in critical_weekly:
-            critical_weekly[x] = {'count': 0, 'week': y}
-        if x not in high_weekly:
-            high_weekly[x] = {'count': 0, 'week': y}
-        if x not in medium_weekly:
-            medium_weekly[x] = {'count': 0, 'week': y}
+    for finding in filters.get("all", []):
+        iso_cal = finding.date.isocalendar()
+        date = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
+        html_date = date.strftime("<span class='small'>%m/%d<br/>%Y</span>")
+        unix_timestamp = (tcalendar.timegm(date.timetuple()) * 1000)
 
-        if x in open_close_weekly:
-            open_close_weekly[x]['open'] += 1
-        else:
-            open_close_weekly[x] = {'closed': 0, 'open': 1, 'accepted': 0}
-            open_close_weekly[x]['week'] = y
+        # Open findings
+        if finding in filters.get("open", []):
+            if unix_timestamp not in critical_weekly:
+                critical_weekly[unix_timestamp] = {'count': 0, 'week': html_date}
+            if unix_timestamp not in high_weekly:
+                high_weekly[unix_timestamp] = {'count': 0, 'week': html_date}
+            if unix_timestamp not in medium_weekly:
+                medium_weekly[unix_timestamp] = {'count': 0, 'week': html_date}
 
-        if view == 'Finding':
-            severity = v.severity
-        elif view == 'Endpoint':
-            severity = v.finding.severity
-
-        if x in severity_weekly:
-            if severity in severity_weekly[x]:
-                severity_weekly[x][severity] += 1
+            if unix_timestamp in open_close_weekly:
+                open_close_weekly[unix_timestamp]['open'] += 1
             else:
-                severity_weekly[x][severity] = 1
-        else:
-            severity_weekly[x] = get_zero_severity_level()
-            severity_weekly[x][severity] = 1
-            severity_weekly[x]['week'] = y
+                open_close_weekly[unix_timestamp] = {'closed': 0, 'open': 1, 'accepted': 0}
+                open_close_weekly[unix_timestamp]['week'] = html_date
 
-        if severity == 'Critical':
-            if x in critical_weekly:
-                critical_weekly[x]['count'] += 1
+            if view == 'Finding':
+                severity = finding.severity
+            elif view == 'Endpoint':
+                severity = finding.finding.severity
+
+            if unix_timestamp in severity_weekly:
+                if severity in severity_weekly[unix_timestamp]:
+                    severity_weekly[unix_timestamp][severity] += 1
+                else:
+                    severity_weekly[unix_timestamp][severity] = 1
             else:
-                critical_weekly[x] = {'count': 1, 'week': y}
-        elif severity == 'High':
-            if x in high_weekly:
-                high_weekly[x]['count'] += 1
+                severity_weekly[unix_timestamp] = get_zero_severity_level()
+                severity_weekly[unix_timestamp][severity] = 1
+                severity_weekly[unix_timestamp]['week'] = html_date
+
+            if severity == 'Critical':
+                if unix_timestamp in critical_weekly:
+                    critical_weekly[unix_timestamp]['count'] += 1
+                else:
+                    critical_weekly[unix_timestamp] = {'count': 1, 'week': html_date}
+            elif severity == 'High':
+                if unix_timestamp in high_weekly:
+                    high_weekly[unix_timestamp]['count'] += 1
+                else:
+                    high_weekly[unix_timestamp] = {'count': 1, 'week': html_date}
+            elif severity == 'Medium':
+                if unix_timestamp in medium_weekly:
+                    medium_weekly[unix_timestamp]['count'] += 1
+                else:
+                    medium_weekly[unix_timestamp] = {'count': 1, 'week': html_date}
+            # Optimization: count severity level on server side
+            if open_objs_by_severity.get(finding.severity) is not None:
+                open_objs_by_severity[finding.severity] += 1
+        # Close findings
+        if finding in filters.get("closed", []):
+            if unix_timestamp in open_close_weekly:
+                open_close_weekly[unix_timestamp]['closed'] += 1
             else:
-                high_weekly[x] = {'count': 1, 'week': y}
-        elif severity == 'Medium':
-            if x in medium_weekly:
-                medium_weekly[x]['count'] += 1
+                open_close_weekly[unix_timestamp] = {'closed': 1, 'open': 0, 'accepted': 0}
+                open_close_weekly[unix_timestamp]['week'] = html_date
+            # Optimization: count severity level on server side
+            if closed_objs_by_severity.get(finding.severity) is not None:
+                closed_objs_by_severity[finding.severity] += 1
+        # Risk Accepted findings
+        if finding in filters.get("accepted", []):
+            if unix_timestamp in open_close_weekly:
+                open_close_weekly[unix_timestamp]['accepted'] += 1
             else:
-                medium_weekly[x] = {'count': 1, 'week': y}
+                open_close_weekly[unix_timestamp] = {'closed': 0, 'open': 0, 'accepted': 1}
+                open_close_weekly[unix_timestamp]['week'] = html_date
+            # Optimization: count severity level on server side
+            if accepted_objs_by_severity.get(finding.severity) is not None:
+                accepted_objs_by_severity[finding.severity] += 1
 
-        # Optimization: count severity level on server side
-        if open_objs_by_severity.get(v.severity) is not None:
-            open_objs_by_severity[v.severity] += 1
+    # for v in filters.get('open', None):
+    #     iso_cal = v.date.isocalendar()
+    #     x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
+    #     y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
+    #     x = (tcalendar.timegm(x.timetuple()) * 1000)
+    #     if x not in critical_weekly:
+    #         critical_weekly[x] = {'count': 0, 'week': y}
+    #     if x not in high_weekly:
+    #         high_weekly[x] = {'count': 0, 'week': y}
+    #     if x not in medium_weekly:
+    #         medium_weekly[x] = {'count': 0, 'week': y}
 
-    for c in filters.get('closed', None):
-        iso_cal = c.date.isocalendar()
-        x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
-        y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
-        x = (tcalendar.timegm(x.timetuple()) * 1000)
+    #     if x in open_close_weekly:
+    #         open_close_weekly[x]['open'] += 1
+    #     else:
+    #         open_close_weekly[x] = {'closed': 0, 'open': 1, 'accepted': 0}
+    #         open_close_weekly[x]['week'] = y
 
-        if x in open_close_weekly:
-            open_close_weekly[x]['closed'] += 1
-        else:
-            open_close_weekly[x] = {'closed': 1, 'open': 0, 'accepted': 0}
-            open_close_weekly[x]['week'] = y
+    #     if view == 'Finding':
+    #         severity = v.severity
+    #     elif view == 'Endpoint':
+    #         severity = v.finding.severity
 
-        if closed_objs_by_severity.get(c.severity) is not None:
-            closed_objs_by_severity[c.severity] += 1
+    #     if x in severity_weekly:
+    #         if severity in severity_weekly[x]:
+    #             severity_weekly[x][severity] += 1
+    #         else:
+    #             severity_weekly[x][severity] = 1
+    #     else:
+    #         severity_weekly[x] = get_zero_severity_level()
+    #         severity_weekly[x][severity] = 1
+    #         severity_weekly[x]['week'] = y
 
-    for a in filters.get('accepted', None):
-        iso_cal = a.date.isocalendar()
-        x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
-        y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
-        x = (tcalendar.timegm(x.timetuple()) * 1000)
+    #     if severity == 'Critical':
+    #         if x in critical_weekly:
+    #             critical_weekly[x]['count'] += 1
+    #         else:
+    #             critical_weekly[x] = {'count': 1, 'week': y}
+    #     elif severity == 'High':
+    #         if x in high_weekly:
+    #             high_weekly[x]['count'] += 1
+    #         else:
+    #             high_weekly[x] = {'count': 1, 'week': y}
+    #     elif severity == 'Medium':
+    #         if x in medium_weekly:
+    #             medium_weekly[x]['count'] += 1
+    #         else:
+    #             medium_weekly[x] = {'count': 1, 'week': y}
 
-        if x in open_close_weekly:
-            open_close_weekly[x]['accepted'] += 1
-        else:
-            open_close_weekly[x] = {'closed': 0, 'open': 0, 'accepted': 1}
-            open_close_weekly[x]['week'] = y
+    #     # Optimization: count severity level on server side
+    #     if open_objs_by_severity.get(v.severity) is not None:
+    #         open_objs_by_severity[v.severity] += 1
 
-        if accepted_objs_by_severity.get(a.severity) is not None:
-            accepted_objs_by_severity[a.severity] += 1
+    # for c in filters.get('closed', None):
+    #     iso_cal = c.date.isocalendar()
+    #     x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
+    #     y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
+    #     x = (tcalendar.timegm(x.timetuple()) * 1000)
+
+    #     if x in open_close_weekly:
+    #         open_close_weekly[x]['closed'] += 1
+    #     else:
+    #         open_close_weekly[x] = {'closed': 1, 'open': 0, 'accepted': 0}
+    #         open_close_weekly[x]['week'] = y
+
+    #     if closed_objs_by_severity.get(c.severity) is not None:
+    #         closed_objs_by_severity[c.severity] += 1
+
+    # for a in filters.get('accepted', None):
+    #     iso_cal = a.date.isocalendar()
+    #     x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
+    #     y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
+    #     x = (tcalendar.timegm(x.timetuple()) * 1000)
+
+    #     if x in open_close_weekly:
+    #         open_close_weekly[x]['accepted'] += 1
+    #     else:
+    #         open_close_weekly[x] = {'closed': 0, 'open': 0, 'accepted': 1}
+    #         open_close_weekly[x]['week'] = y
+
+    #     if accepted_objs_by_severity.get(a.severity) is not None:
+    #         accepted_objs_by_severity[a.severity] += 1
 
     test_data = {}
     for t in tests:
