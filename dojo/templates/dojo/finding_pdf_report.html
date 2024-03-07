@@ -87,6 +87,7 @@
                         <div class="table-responsive">
                             <table id="notes" class="table-striped table table-condensed table-hover centered">
                                 <tr>
+                                    {% block finding_header %}
                                     <th>Severity</th>
                                     <th>EPSS Score / Percentile</th>
                                     <th>Status</th>
@@ -103,8 +104,10 @@
                                     {% if finding.cwe > 0 %}
                                         <th>CWE</th>
                                     {% endif %}
+                                    {% endblock finding_header %}
                                 </tr>
                                 <tr>
+                                    {% block finding_data %}
                                     <td>
                                     <span class="label severity severity-{{ finding.severity }}">
                                         {% if finding.severity %}
@@ -144,7 +147,7 @@
                                             </a>
                                         </td>
                                     {% endif %}
-
+                                    {% endblock finding_data %}
                                 </tr>
                             </table>
                         </div>
