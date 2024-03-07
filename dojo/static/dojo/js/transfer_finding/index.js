@@ -91,7 +91,9 @@ function innerData(data){
             <td>${findings.findings.id}</td>
             <td>${findings.findings.title}</td>
             <td>${findings.findings.severity}</td>
-            <td>${findings.findings.cve}</td>`
+            <td>${findings.findings.cve}</td>
+            <td>${findings.findings.severity}</td>
+            <td>${findings.findings.severity}</td>`
             if(findings.findings.risk_status.includes("Transfer Accepted")){
                 cell_status.innerHTML= `<span style="color:green">Transfer Accepted</span>`
             }else if(findings.findings.risk_status.includes("Transfer Reject")){

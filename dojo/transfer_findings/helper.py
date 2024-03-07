@@ -2,8 +2,10 @@ import logging
 from dojo.api_v2.api_error import ApiError
 from crum import get_current_user
 from dojo.risk_acceptance import risk_pending
-from dojo.models import Test, Finding, Product, Engagement, Test_Type
+from dojo.models import Test, Finding, Product, Engagement, Test_Type, TransferFinding
 from dojo.authorization.authorization import user_has_global_permission
+from dojo.notifications.helper import create_notification
+from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 
@@ -14,15 +16,15 @@ def get_permissions_tranfer_finding(permission):
     roles = roles_permissions.get_roles_with_permissions()
 
 
-def transfer_finding(finding: Finding):
+def transfer_finding(finding: Finding, transfer_finding: TransferFinding):
     try:
-        if isinstance(finding, Finding):
+        if isinstance(finding, Finding) and isinstance(transfer_finding.engagement, Engagement):
             test = Test.objects.create(engagement=finding.test.engagement,
-                                       test_type=finding.test_type,
-                                       target_start=finding.target_start,
-                                       target_end=finding.target_end)
+                                       test_type=finding.test.test_type,
+                                       target_start=finding.test.target_start,
+                                       target_end=finding.test.target_end)
 
-            logger.debug(f"Created test {e}")
+            logger.debug(f"Created test {test}")
             obj_finding = Finding(test=test,
                                   title=finding.title,
                                   cve=finding.cve,
@@ -36,8 +38,16 @@ def transfer_finding(finding: Finding):
                                   dynamic_finding=finding.dynamic_finding)
 
             logger.debug(f"Creation Finding {obj_finding}")
-            tf = obj_finding.save()
-            logger.debug(f"Transfer Finding  Save {tf}")
+            obj_finding.save()
+            logger.debug(f"Transfer Finding  Save {obj_finding}")
+
+            create_notification(
+                event="transfer finding",
+                title=transfer_finding.title,
+                recipients=["developer"]
+                    )
+            logger.debug(f"Transfer Finding  creation notificaion {create_notification}")
+
             return True
 
     except ApiError as e:

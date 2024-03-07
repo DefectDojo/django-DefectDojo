@@ -3832,7 +3832,8 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
                         if dict_findings["risk_status"] == "Transfer Accepted":
                             finding.risk_status = dict_findings["risk_status"]
                             finding.active = False
-                            helper_tf.transfer_finding(finding)
+                            helper_tf.transfer_finding(origin_finding=finding,
+                                                       destination_engagement=transfer_finding.transfer_findings)
                         elif dict_findings["risk_status"] == "Transfer Rejected":
                             finding.risk_status = dict_findings["risk_status"]
                             finding.active = True

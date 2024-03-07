@@ -4139,6 +4139,9 @@ class Notifications(models.Model):
     risk_acceptance_request = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
         verbose_name=_('Risk Acceptance Request'),
         help_text=_('Send notification to the contacts of the product type'))
+    transfer_finding = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
+        verbose_name=_('Transfer Finding'),
+        help_text=_('Send notification to the contacts of the product'))
     sla_breach_combined = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
         verbose_name=_('SLA breach (combined)'),
         help_text=_('Get notified of (upcoming) SLA breaches (a message per project)'))

@@ -110,6 +110,7 @@ from dojo.product_type.queries import (
     get_owner_user,
 )
 from dojo.product.queries import get_authorized_products
+from dojo.transfer_findings.queries import get_products_for_transfer_findings
 from dojo.finding.queries import get_authorized_findings, get_authorized_findings_by_status
 from dojo.user.queries import (
     get_authorized_users_for_product_and_product_type,
@@ -1143,29 +1144,19 @@ class TransferFindingForm(forms.ModelForm):
 
     title = forms.CharField(required=True, max_length=255)
     severity = forms.CharField(widget=forms.HiddenInput(), required=True)
-    # destination_product_type_name = forms.CharField(widget=forms.HiddenInput(), required=True)
-    # destination_product_type_id = forms.CharField(widget=forms.HiddenInput(), required=True)
-    destination_product = forms.ModelChoiceField(queryset=Product.objects.all(), required=True)
-    # destination_engagement_id = forms.CharField(widget=forms.HiddenInput(), required=False)
-    # destination_engagement_name = forms.CharField(widget=forms.HiddenInput(), required=False)
+    destination_product = forms.ModelChoiceField(queryset=Product.objects.none(), required=True)
     notes = forms.CharField(
         required=False, max_length=2400, widget=forms.Textarea, label="Notes"
     )
     owner = forms.CharField(widget=forms.HiddenInput(), required=True)
-    # origin_product_type_id = forms.CharField(widget=forms.HiddenInput(), required=True)
-    # origin_product_type_name = forms.CharField(widget=forms.HiddenInput(), required=True)
-    # origin_product_id = forms.CharField(widget=forms.HiddenInput(), required=True)
-    # origin_product_name = forms.CharField(widget=forms.HiddenInput(), required=True)
-    # origin_engagement_id = forms.CharField(widget=forms.HiddenInput(), required=True)
-    # origin_engagement_name = forms.CharField(widget=forms.HiddenInput(), required=True)
     accepted_by = forms.ModelChoiceField(queryset=Dojo_User.objects.all(), required=True)  # Usar widget Select
-    # accepted_by_username = forms.CharField(widget=forms.HiddenInput(), required=True)
 
     def __init__(self, *args, **kwags):
         super().__init__(*args, **kwags)
         self.fields["findings"].queryset = get_authorized_findings_by_status(
             Permissions.Transfer_Finding_Add
         )
+        self.fields["destination_product"].queryset = get_products_for_transfer_findings(Permissions.Transfer_Finding_Add)
         self.fields["title"].initial = kwags.get("engagement_id")
     
     class Meta:

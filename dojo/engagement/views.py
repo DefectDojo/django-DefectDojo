@@ -1113,6 +1113,15 @@ def add_transfer_finding(request, eid, fid=None):
                                                                                      finding_related=None,
                                                                                      engagement_related=None)
                     transfer_finding_finding.save()
+                    logger.debug("Risk Transfer created {transfer_finding_finding.name}")
+                    # Create notification
+                    create_notification(event="transfer_finding",
+                                        title=transfer_findings.title,
+                                        icon="check-circle",
+                                        color_icon="#096C11",
+                                        recipients=["developer"],
+                                        engagement=eng, url=reverse('engagement_all_findings', args=(eng.id, )))
+                    logger.debug("Transfer Finding send notification {transfer_finding.title}")
 
             except Exception as e:
                 logger.debug(vars(request.POST))
