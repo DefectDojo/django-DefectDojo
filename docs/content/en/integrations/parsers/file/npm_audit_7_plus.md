@@ -10,7 +10,7 @@ JSON format. Only imports the \'vulnerabilities\' subtree.
 
 ### File Types
 This parser expects a JSON file.  Can only import NPM Audit files from NPM Audit v7 or newer. It aims to provide the same
-information as the none json formatted outpt.
+information as the non-JSON formatted output.
 
 Attempting to import a file from a version less than 7 of NPM Audit will raise an error message.
 
