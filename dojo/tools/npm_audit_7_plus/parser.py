@@ -188,7 +188,7 @@ def get_vuln_description(item_node, tree):
     for via in item_node["via"]:
         if isinstance(via, str):
             description = (description +
-                           "Depends on vulnearble versions of " + via + "\n")
+                           "Depends on vulnerable versions of " + via + "\n")
         else:
             description = (description + via["title"] + " - " + via["url"] +
                            "\n")
