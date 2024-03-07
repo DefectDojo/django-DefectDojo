@@ -159,7 +159,8 @@ def get_item(item_node, tree, test):
         impact="No impact provided",
         static_finding=static_finding,
         dynamic_finding=False,
-        vuln_id_from_tool=unique_id_from_tool
+        vuln_id_from_tool=unique_id_from_tool,
+        unique_id_from_tool=unique_id_from_tool,
     )
 
     if (cvssv3 is not None) and (len(cvssv3) > 0):
