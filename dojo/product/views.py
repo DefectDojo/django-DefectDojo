@@ -483,6 +483,7 @@ def view_product_metrics(request, pid):
     medium_weekly = OrderedDict()
 
     open_objs_by_severity = get_zero_severity_level()
+    closed_objs_by_severity = get_zero_severity_level()
     accepted_objs_by_severity = get_zero_severity_level()
 
     for v in filters.get('open', None):
@@ -498,15 +499,9 @@ def view_product_metrics(request, pid):
             medium_weekly[x] = {'count': 0, 'week': y}
 
         if x in open_close_weekly:
-            if v.mitigated:
-                open_close_weekly[x]['closed'] += 1
-            else:
-                open_close_weekly[x]['open'] += 1
+            open_close_weekly[x]['open'] += 1
         else:
-            if v.mitigated:
-                open_close_weekly[x] = {'closed': 1, 'open': 0, 'accepted': 0}
-            else:
-                open_close_weekly[x] = {'closed': 0, 'open': 1, 'accepted': 0}
+            open_close_weekly[x] = {'closed': 0, 'open': 1, 'accepted': 0}
             open_close_weekly[x]['week'] = y
 
         if view == 'Finding':
@@ -543,6 +538,21 @@ def view_product_metrics(request, pid):
         # Optimization: count severity level on server side
         if open_objs_by_severity.get(v.severity) is not None:
             open_objs_by_severity[v.severity] += 1
+
+    for c in filters.get('closed', None):
+        iso_cal = c.date.isocalendar()
+        x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
+        y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
+        x = (tcalendar.timegm(x.timetuple()) * 1000)
+
+        if x in open_close_weekly:
+            open_close_weekly[x]['closed'] += 1
+        else:
+            open_close_weekly[x] = {'closed': 1, 'open': 0, 'accepted': 0}
+            open_close_weekly[x]['week'] = y
+
+        if closed_objs_by_severity.get(c.severity) is not None:
+            closed_objs_by_severity[c.severity] += 1
 
     for a in filters.get('accepted', None):
         iso_cal = a.date.isocalendar()
@@ -584,7 +594,7 @@ def view_product_metrics(request, pid):
         'inactive_objs': filters.get('inactive', None),
         'inactive_objs_by_severity': sum_by_severity_level(filters.get('inactive')),
         'closed_objs': filters.get('closed', None),
-        'closed_objs_by_severity': sum_by_severity_level(filters.get('closed')),
+        'closed_objs_by_severity': closed_objs_by_severity,
         'false_positive_objs': filters.get('false_positive', None),
         'false_positive_objs_by_severity': sum_by_severity_level(filters.get('false_positive')),
         'out_of_scope_objs': filters.get('out_of_scope', None),
