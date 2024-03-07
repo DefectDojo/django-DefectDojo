@@ -207,7 +207,7 @@ def get_vuln_description(item_node, tree):
 
     for effect in item_node["effects"]:
         # look up info in the main tree
-        description += ("  " + tree[effect]["name"] + " " + 
+        description += ("  " + tree[effect]["name"] + " " +
                         tree[effect]["range"] + "\n")
         effects_handled.append(tree[effect]["name"])
         for ev in tree[effect]["via"]:
