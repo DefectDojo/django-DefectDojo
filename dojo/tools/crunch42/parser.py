@@ -54,7 +54,7 @@ class Crunch42Parser(object):
         return list(items.values())
 
     def get_item(self, issue, title, test):
-        fiingerprint = issue["fingerprint"]
+        fingerprint = issue["fingerprint"]
         pointer = issue["pointer"]
         message = issue["specificDescription"] if 'specificDescription' in issue else title
         score = issue["score"]
@@ -71,11 +71,11 @@ class Crunch42Parser(object):
             severity = "Critical"
         # create the finding object
         finding = Finding(
-            unique_id_from_tool=fiingerprint,
+            unique_id_from_tool=fingerprint,
             title=title,
             test=test,
             severity=severity,
-            description="**fingerprint**: " + str(fiingerprint) + "\n"
+            description="**fingerprint**: " + str(fingerprint) + "\n"
             + "**pointer**: " + str(pointer) + "\n"
             + "**message**: " + str(message) + "\n"
             + "**score**: " + str(score) + "\n",
