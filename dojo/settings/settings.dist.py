@@ -1278,7 +1278,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Tenable Scan': True,
     'Nexpose Scan': True,
     'NPM Audit Scan': True,
-    "NPM Audit v7+ Scan": True,
+    'NPM Audit v7+ Scan': True,
     'Yarn Audit Scan': True,
     'Mend Scan': True,
     'ZAP Scan': False,
