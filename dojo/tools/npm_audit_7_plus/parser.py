@@ -97,6 +97,7 @@ def get_item(item_node, tree, test):
     unique_id_from_tool = ""
     cvssv3 = ""
     cwe = ""
+    component_version = ""
 
     if item_node["severity"] == "low":
         severity = "Low"
@@ -114,7 +115,6 @@ def get_item(item_node, tree, test):
         title = item_node["name"]
         cwe = "CWE-1035"  # default
         component_name = title
-        component_version = "n/a"
 
     elif item_node["via"] and isinstance(item_node["via"][0], dict):
         title = item_node["via"][0]["title"]
@@ -181,17 +181,16 @@ def get_vuln_description(item_node, tree):
     effects_handled = []
     description = ""
 
-    description = (description + item_node["name"] + " " +
+    description += (item_node["name"] + " " +
                    item_node["range"] + "\n")
-    description = description + "Severity: " + item_node["severity"] + "\n"
+    description += "Severity: " + item_node["severity"] + "\n"
 
     for via in item_node["via"]:
         if isinstance(via, str):
-            description = (description +
-                           "Depends on vulnerable versions of " + via + "\n")
+            description += ("Depends on vulnerable versions of " +
+                            via + "\n")
         else:
-            description = (description + via["title"] + " - " + via["url"] +
-                           "\n")
+            description += (via["title"] + " - " + via["url"] + "\n")
 
     if isinstance(item_node["fixAvailable"], dict):
         fix_name = item_node["fixAvailable"]["name"]
@@ -201,36 +200,34 @@ def get_vuln_description(item_node, tree):
     else:
         mitigation = "No specific mitigation provided by tool."
 
-    description = description + mitigation + "\n"
+    description += mitigation + "\n"
 
     for node in item_node["nodes"]:
-        description = description + node + "\n"
+        description += node + "\n"
 
     for effect in item_node["effects"]:
         # look up info in the main tree
-        description = (description + "  " + tree[effect]["name"] + " " +
-                       tree[effect]["range"] + "\n")
+        description += ("  " + tree[effect]["name"] + " " + 
+                        tree[effect]["range"] + "\n")
         effects_handled.append(tree[effect]["name"])
         for ev in tree[effect]["via"]:
             if isinstance(ev, dict):
                 if tree[effect]["name"] != ev["name"]:
-                    description = (description +
-                                   "  Depends on vulnerable versions of " +
+                    description += ("  Depends on vulnerable versions of " +
                                    ev["name"] + "\n")
             else:
                 if tree[effect]["name"] != ev:
-                    description = (description +
-                                   "  Depends on vulnerable versions of " +
+                    description += ("  Depends on vulnerable versions of " +
                                    ev + "\n")
         for en in tree[effect]["nodes"]:
-            description = description + "  " + en + "\n"
+            description += "  " + en + "\n"
 
         for ee in tree[effect]["effects"]:
             if ee in effects_handled:
                 continue  # already added to description
-            description = (description + "    " + tree[ee]["name"] + " " +
-                           tree[ee]["range"] + "\n")
+            description += ("    " + tree[ee]["name"] + " " +
+                            tree[ee]["range"] + "\n")
             for en in tree[effect]["nodes"]:
-                description = description + "    " + en + "\n"
+                description += "    " + en + "\n"
 
     return description
