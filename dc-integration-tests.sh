@@ -29,7 +29,7 @@ while [[ $# -gt 0 ]]; do
       usage
       exit 0
       ;;
-    -*|--*)
+    -*)
       echo "Unknown option $1"
       usage
       exit 1
