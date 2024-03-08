@@ -31,12 +31,8 @@ def create_notification(event=None, **kwargs):
         # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
         logger.debug('creating notifications for recipients: %s', kwargs['recipients'])
         for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True, product=None):
-            # merge the system level notifications with the personal level
-            # this allows for system to trump the personal
-            merged_notifications = Notifications.merge_notifications_list([system_notifications, recipient_notifications])
-            merged_notifications.user = recipient_notifications.user
-            logger.debug('Sent notification to %s', merged_notifications.user)
-            process_notifications(event, merged_notifications, **kwargs)
+            logger.debug('Sent notification to %s', recipient_notifications.user)
+            process_notifications(event, recipient_notifications, **kwargs)
 
     else:
         logger.debug('creating system notifications for event: %s', event)
