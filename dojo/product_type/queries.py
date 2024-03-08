@@ -1,3 +1,4 @@
+import json
 from crum import get_current_user
 from django.db.models import Exists, OuterRef, Q
 from dojo.models import Product_Type, Product_Type_Member, Product_Type_Group, Dojo_User, Role, Global_Role
@@ -100,7 +101,11 @@ def get_authorized_contacts_for_product_type(severity, product_type):
             if leader:
                 contacts_result.append(leader.id)
             else:
-                raise ValueError(f"Leader {contact_type} not found")
+                lider_dict = json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split('//')[2])
+                dict_inverter = {valor: clave for clave, valor in lider_dict.items()}
+                user_leader = dict_inverter.get(contact_type, "Leader")
+                message = f"The {user_leader} must log in to proceed with the acceptance of findings process"
+                raise ValueError(message)
     
     if contacts_result:
         contacts_result += query_user_by_rol(settings.ROLE_ALLOWED_TO_ACCEPT_RISKS)

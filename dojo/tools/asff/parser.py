@@ -25,17 +25,17 @@ class AsffParser(object):
         return """AWS Security Finding Format (ASFF).
         https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-findings-format-syntax.html"""
 
-    def get_sources_id(self, item):
-        resource_id = ""
+    def get_resource_arn(self, item):
+        resource_arn = ""
         for i in item.get("Resources"):
-            resource_id += "source_id: " + i.get("Id") + "\n"
-        return resource_id
+            resource_arn += "resource_arn: " + i.get("Id") + "\n"
+        return resource_arn
 
     def get_description(self, item):
         description = ""
         description = description.join(
             ["ID: ", item.get("Id"), "\n",
-             self.get_sources_id(item), "\n",
+             self.get_resource_arn(item), "\n",
              "AwsAccountID: ", item.get("AwsAccountId"), "\n",
              item.get("Description")])
         return description
@@ -53,7 +53,7 @@ class AsffParser(object):
 
             finding = Finding(
                 title=item.get("Title"),
-                description=item.get("Description"),
+                description=self.get_description(item),
                 date=dateutil.parser.parse(item.get("CreatedAt")),
                 mitigation=mitigation,
                 references=references,
