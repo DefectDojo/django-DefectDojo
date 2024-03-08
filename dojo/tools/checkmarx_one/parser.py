@@ -31,7 +31,7 @@ class CheckmarxOneParser(object):
                 id = result.get("identifiers")[0].get("value")
                 severity = result.get("severity")
                 locations_uri = result.get("location").get("file")
-                locations_startLine = result.get("location").get("star_line")
+                locations_startLine = result.get("location").get("start_line")
                 locations_endLine = result.get("location").get("end_line")
                 finding = Finding(
                     unique_id_from_tool=id,
