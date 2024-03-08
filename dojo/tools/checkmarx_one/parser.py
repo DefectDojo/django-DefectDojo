@@ -11,6 +11,9 @@ class CheckmarxOneParser(object):
     def get_label_for_scan_types(self, scan_type):
         return scan_type
 
+    def get_description_for_scan_types(self, scan_type):
+        return "Checkmarx One Scan"
+
     def _parse_date(self, value):
         if isinstance(value, str):
             return parser.parse(value)
