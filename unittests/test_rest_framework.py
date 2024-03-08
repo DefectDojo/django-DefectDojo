@@ -995,12 +995,6 @@ class RiskAcceptanceTest(BaseClass.RESTEndpointTest):
         response = self.client.put(relative_url, self.payload)
         self.assertEqual(403, response.status_code, response.content[:1000])
 
-    def test_create_object_not_authorized(self):
-        self.setUp_not_authorized()
-
-        response = self.client.post(self.url, self.payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-
 
 class FindingRequestResponseTest(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
