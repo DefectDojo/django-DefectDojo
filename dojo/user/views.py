@@ -137,7 +137,7 @@ def login_view(request):
         elif settings.GITLAB_OAUTH2_ENABLED:
             social_auth = 'gitlab'
         elif settings.KEYCLOAK_OAUTH2_ENABLED:
-            social_auth = 'keycloak'
+            social_auth = 'oidc'
         elif settings.AUTH0_OAUTH2_ENABLED:
             social_auth = 'auth0'
         elif settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED:

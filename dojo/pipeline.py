@@ -6,6 +6,7 @@ import requests
 import social_core.pipeline.user
 from django.conf import settings
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
+from social_core.backends.open_id_connect import OpenIdConnectAuth
 from social_core.backends.google import GoogleOAuth2
 
 from dojo.authorization.roles_permissions import Permissions, Roles
@@ -64,6 +65,25 @@ def social_uid(backend, details, response, *args, **kwargs):
 
 def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
     pass
+
+
+def update_keycloak_groups(backend, uid, user=None, social=None, *args, **kwargs):
+    if settings.KEYCLOAK_OAUTH2_ENABLED and settings.KEYCLOAK_TENANT_OAUTH2_GET_GROUPS and isinstance(backend, OpenIdConnectAuth):
+        group_names = []
+        if 'groups' not in kwargs['response'] or kwargs['response']['groups'] == "":
+            logger.warning("No groups in response. Stopping to update groups of user based on azureAD")
+            return
+        group_ids = kwargs['response']['groups']
+        for group_from_response in group_ids:
+            if settings.KEYCLOAK_TENANT_OAUTH2_GROUPS_FILTER == "" or re.search(settings.KEYCLOAK_TENANT_OAUTH2_GROUPS_FILTER, group_from_response):
+                group_names.append(group_from_response)
+            else:
+                logger.debug("Skipping group " + group_from_response + " due to KEYCLOAK_TENANT_OAUTH2_GROUPS_FILTER " + settings.KEYCLOAK_TENANT_OAUTH2_GROUPS_FILTER)
+
+        if len(group_names) > 0:
+            assign_user_to_groups(user, group_names, 'Keycloak')
+        if settings.KEYCLOAK_TENANT_OAUTH2_CLEANUP_GROUPS:
+            cleanup_old_groups_for_user(user, group_names)
 
 
 def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):

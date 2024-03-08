@@ -88,7 +88,7 @@
                 {% if KEYCLOAK_ENABLED is True %}
                     <div class="col-sm-offset-1 col-sm-2">
                         <button class="btn btn-success" type="button">
-                            <a href="{% url 'social:begin' 'keycloak' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">{{ SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT }}</a>
+                            <a href="{% url 'social:begin' 'oidc' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">{{ SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT }}</a>
                         </button>
                     </div>
                 {% endif %}
