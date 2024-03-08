@@ -1878,8 +1878,8 @@ class EndpointFilter(DojoFilter):
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
 
-    test__engagement__product__tags = ModelMultipleChoiceFilter(
-        field_name='test__engagement__product__tags__name',
+    product__tags = ModelMultipleChoiceFilter(
+        field_name='product__tags__name',
         to_field_name='name',
         queryset=Product.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
