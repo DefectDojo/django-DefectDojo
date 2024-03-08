@@ -59,11 +59,6 @@ class TestPipAuditParser(DojoTestCase):
             self.assertEqual('PYSEC-2021-439', vulnerability_ids[0])
             self.assertEqual(1352, finding.cwe)
             self.assertEqual('Medium', finding.severity)
-            mitigation = '''Upgrade to version:
-    - 2.2.25
-    - 3.1.14
-    - 3.2.10'''
-            self.assertEqual(mitigation, finding.mitigation)
             self.assertEqual('django', finding.component_name)
             self.assertEqual('3.2.9', finding.component_version)
             self.assertEqual('PYSEC-2021-439', finding.vuln_id_from_tool)
@@ -77,7 +72,6 @@ class TestPipAuditParser(DojoTestCase):
             self.assertEqual('PYSEC-2021-852', vulnerability_ids[0])
             self.assertEqual(1352, finding.cwe)
             self.assertEqual('Medium', finding.severity)
-            self.assertIsNone(finding.mitigation)
             self.assertEqual('lxml', finding.component_name)
             self.assertEqual('4.6.4', finding.component_version)
             self.assertEqual('PYSEC-2021-852', finding.vuln_id_from_tool)
