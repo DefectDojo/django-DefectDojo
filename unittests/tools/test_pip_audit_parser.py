@@ -40,7 +40,7 @@ class TestPipAuditParser(DojoTestCase):
             self.assertEqual('PYSEC-2021-76 in aiohttp:3.6.2', finding.title)
             description = 'aiohttp is an asynchronous HTTP client/server framework for asyncio and Python. In aiohttp before version 3.7.4 there is an open redirect vulnerability. A maliciously crafted link to an aiohttp-based web-server could redirect the browser to a different website. It is caused by a bug in the `aiohttp.web_middlewares.normalize_path_middleware` middleware. This security problem has been fixed in 3.7.4. Upgrade your dependency using pip as follows "pip install aiohttp >= 3.7.4". If upgrading is not an option for you, a workaround can be to avoid using `aiohttp.web_middlewares.normalize_path_middleware` in your applications.'
             self.assertEqual(description, finding.description)
-            self.assertEqual(1352, finding.cwe)
+            self.assertEqual(1395, finding.cwe)
             vulnerability_ids = finding.unsaved_vulnerability_ids
             self.assertEqual(1, len(vulnerability_ids))
             self.assertEqual('PYSEC-2021-76', vulnerability_ids[0])
