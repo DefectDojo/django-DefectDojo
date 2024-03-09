@@ -33,14 +33,14 @@ class DeepfenceThreatmapperParser(object):
                 NodeType = row.get("NodeType")
                 Container_Name = row.get("Container Name")
                 Kubernetes_Cluster_Name = row.get("Kubernetes Cluster Name")
-                description += "**Summary: **" + Summary + "\n"
-                description += "**Rule Name: **" + Rule_Name + "\n"
-                description += "**Class: **" + Class + "\n"
-                description += "**File Name: **" + File_Name + "\n"
-                description += "**Node Name: **" + Node_Name + "\n"
-                description += "**NodeType: **" + NodeType + "\n"
-                description += "**Container Name: **" + Container_Name + "\n"
-                description += "**Kubernetes Cluster Name: **" + Kubernetes_Cluster_Name + "\n"
+                description += "**Summary:** " + Summary + "\n"
+                description += "**Rule Name:** " + Rule_Name + "\n"
+                description += "**Class:** " + Class + "\n"
+                description += "**File Name:** " + File_Name + "\n"
+                description += "**Node Name:** " + Node_Name + "\n"
+                description += "**NodeType:** " + NodeType + "\n"
+                description += "**Container Name:** " + Container_Name + "\n"
+                description += "**Kubernetes Cluster Name:** " + Kubernetes_Cluster_Name + "\n"
                 findings.append(
                     Finding(
                         title=Rule_Name,
@@ -62,14 +62,14 @@ class DeepfenceThreatmapperParser(object):
                 Container_Name = row.get("Container Name")
                 Kubernetes_Cluster_Name = row.get("Kubernetes Cluster Name")
                 Signature = row.get("Signature")
-                description += "**Filename: **" + Filename + "\n"
-                description += "**Name: **" + Name + "\n"
-                description += "**Rule: **" + Rule + "\n"
-                description += "**Node Name: **" + Node_Name + "\n"
-                description += "**Container Name: **" + Container_Name + "\n"
-                description += "**Kubernetes Cluster Name: **" + Kubernetes_Cluster_Name + "\n"
-                description += "**Content: **" + Content + "\n"
-                description += "**Signature: **" + Signature + "\n"
+                description += "**Filename:** " + Filename + "\n"
+                description += "**Name:** " + Name + "\n"
+                description += "**Rule:** " + Rule + "\n"
+                description += "**Node Name:** " + Node_Name + "\n"
+                description += "**Container Name:** " + Container_Name + "\n"
+                description += "**Kubernetes Cluster Name:** " + Kubernetes_Cluster_Name + "\n"
+                description += "**Content:** " + Content + "\n"
+                description += "**Signature:** " + Signature + "\n"
                 findings.append(
                     Finding(
                         title=Name,
@@ -85,7 +85,6 @@ class DeepfenceThreatmapperParser(object):
                 cve_attack_vector = row.get("cve_attack_vector")
                 cve_caused_by_package = row.get("cve_caused_by_package")
                 cve_container_image = row.get("cve_container_image")
-                scan_id = row.get("scan_id")
                 cve_container_image_id = row.get("cve_container_image_id")
                 cve_cvss_score = row.get("cve_cvss_score")
                 cve_description = row.get("cve_description")
@@ -98,18 +97,17 @@ class DeepfenceThreatmapperParser(object):
                 host_name = row.get("host_name")
                 cloud_account_id = row.get("cloud_account_id")
                 masked = row.get("masked")
-                description += "**cve_attack_vector: **" + cve_attack_vector + "\n"
-                description += "**cve_caused_by_package: **" + cve_caused_by_package + "\n"
-                description += "**cve_container_image: **" + cve_container_image + "\n"
-                description += "**cve_container_image_id: **" + cve_container_image_id + "\n"
-                description += "**cve_description: **" + cve_description + "\n"
-                description += "**cve_severity: **" + cve_severity + "\n"
-                description += "**cve_overall_score: **" + cve_overall_score + "\n"
-                description += "**cve_type: **" + cve_type + "\n"
-                description += "**host_name: **" + host_name + "\n"
-                description += "**cloud_account_id: **" + cloud_account_id + "\n"
-                description += "**masked: **" + masked + "\n"
-                description += "**scan_id: **" + scan_id + "\n"
+                description += "**cve_attack_vector:** " + cve_attack_vector + "\n"
+                description += "**cve_caused_by_package:** " + cve_caused_by_package + "\n"
+                description += "**cve_container_image:** " + cve_container_image + "\n"
+                description += "**cve_container_image_id:** " + cve_container_image_id + "\n"
+                description += "**cve_description:** " + cve_description + "\n"
+                description += "**cve_severity:** " + cve_severity + "\n"
+                description += "**cve_overall_score:** " + cve_overall_score + "\n"
+                description += "**cve_type:** " + cve_type + "\n"
+                description += "**host_name:** " + host_name + "\n"
+                description += "**cloud_account_id:** " + cloud_account_id + "\n"
+                description += "**masked:** " + masked + "\n"
                 findings.append(
                     Finding(
                         title="Threatmapper_Vuln_Report-" + cve_id,
@@ -140,20 +138,20 @@ class DeepfenceThreatmapperParser(object):
                 test_desc = row.get("test_desc")
                 test_info = row.get("test_info")
                 test_number = row.get("test_number")
-                description += "**compliance_check_type: **" + compliance_check_type + "\n"
-                description += "**host_name: **" + host_name + "\n"
-                description += "**cloud_account_id: **" + cloud_account_id + "\n"
-                description += "**masked: **" + masked + "\n"
-                description += "**node_id: **" + node_id + "\n"
-                description += "**node_name: **" + node_name + "\n"
-                description += "**node_type: **" + node_type + "\n"
-                description += "**status: **" + status + "\n"
-                description += "**test_category: **" + test_category + "\n"
-                description += "**test_desc: **" + test_desc + "\n"
-                description += "**test_info: **" + test_info + "\n"
-                description += "**test_number: **" + test_number + "\n"
-                description += "**count: **" + count + "\n"
-                description += "**doc_id: **" + doc_id + "\n"
+                description += "**compliance_check_type:** " + compliance_check_type + "\n"
+                description += "**host_name:** " + host_name + "\n"
+                description += "**cloud_account_id:** " + cloud_account_id + "\n"
+                description += "**masked:** " + masked + "\n"
+                description += "**node_id:** " + node_id + "\n"
+                description += "**node_name:** " + node_name + "\n"
+                description += "**node_type:** " + node_type + "\n"
+                description += "**status:** " + status + "\n"
+                description += "**test_category:** " + test_category + "\n"
+                description += "**test_desc:** " + test_desc + "\n"
+                description += "**test_info:** " + test_info + "\n"
+                description += "**test_number:** " + test_number + "\n"
+                description += "**count:** " + count + "\n"
+                description += "**doc_id:** " + doc_id + "\n"
                 findings.append(
                     Finding(
                         title="Threatmapper_Compliance_Report-" + test_number,
