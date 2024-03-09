@@ -35,6 +35,7 @@
         <form id="add_transfer_finding" enctype="multipart/form-data" class="form-horizontal" method="post">
             {% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
+            <input type="hidden" id="id_accepted_by" name="accepted_by_username">
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <input class="btn btn-primary" type="submit" value="Save"/>

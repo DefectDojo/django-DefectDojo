@@ -4,9 +4,6 @@ window.onload = function(){
     element = document.getElementById('id_accepted_by');
     element.selectedIndex = 0;
 }
-$(document).ready(function() {
-    $("#id_destination_product_type").on("change", handleProductTypeChange);
-});
 
 $(document).ready(function() {
   $('#myModal').modal('show');
@@ -19,6 +16,7 @@ $(document).ready(function() {
 function handleProductChange(){
     let idProduct = $("#id_destination_product").val();
     let contactsElement = document.getElementById('id_accepted_by') 
+    clearLabel("id_accepted_by");
     if (idProduct !== '') {
         getContacs(idProduct, contactsElement)
     } else {
@@ -34,9 +32,9 @@ function getContacs(idProduct, contactsElement){
             clearSelect(contactsElement);
             addOption(contactsElement, '', 'Select Contact Product...');
             response.products.forEach(function(product){
-                contactsElement.innerHTML += `<option value='1'>${product.contacts.product_manager}</option>`;
-                contactsElement.innerHTML += `<option value='2'>${product.contacts.technical_contact}</option>`;
-                contactsElement.innerHTML += `<option value='3'>${product.contacts.team_manager}</option>`;
+                contactsElement.innerHTML += `<option value=${product.contacts.product_manager.id}>${product.contacts.product_manager.username}</option>`;
+                contactsElement.innerHTML += `<option value=${product.contacts.technical_contact.id}>${product.contacts.technical_contact.username}</option>`;
+                contactsElement.innerHTML += `<option value=${product.contacts.team_manager.id}>${product.contacts.team_manager.username}</option>`;
             });
             refreshSelectPicker();
         },
@@ -67,17 +65,6 @@ function getEngagementOptions(idProduct, engagementElement){
             console.error(error);
         }
     });
-}
-
-function handleProductTypeChange() {
-    let idProductType = $("#id_destination_product_type").val();
-    let productTypeElement = document.getElementById('id_destination_product');
-    clearLabel()
-    if (idProductType !== '') {
-        getTransferFindings(idProductType, productTypeElement);
-    } else {
-        clearSelect(productTypeElement);
-    }
 }
 
 function getTransferFindings(product_type_id, productTypeElement) {
@@ -112,15 +99,12 @@ function refreshSelectPicker() {
 };
 
 
-function clearLabel(){
+function clearLabel(id_element){
     try
     {
-        element = document.getElementById('id_destination_product');
+        element = document.getElementById(id_element);
         element.selectedIndex = 0;
-        element = document.getElementById('id_destination_engagement_id');
-        element.selectedIndex = 0;
-        element = document.getElementById('id_accepted_by');
-        element.selectedIndex = 0;
+        element.innerHTML = '';
         refreshSelectPicker();
 
     }

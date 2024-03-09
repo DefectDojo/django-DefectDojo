@@ -1089,7 +1089,6 @@ def add_transfer_finding(request, eid, fid=None):
     if request.method == 'POST':
         request.POST._mutable = True
         data = request.POST
-        data["accepted_by"] = Dojo_User.objects.get(id=int(data["accepted_by"]))
         form = TransferFindingForm(request.POST, request.FILES)
         if form.is_valid():
             try:
@@ -1116,11 +1115,11 @@ def add_transfer_finding(request, eid, fid=None):
                     logger.debug("Risk Transfer created {transfer_finding_finding.name}")
                     # Create notification
                     create_notification(event="transfer_finding",
-                                        title=transfer_findings.title,
+                                        title=f"{transfer_findings.title[:30]}",
                                         icon="check-circle",
                                         color_icon="#096C11",
-                                        recipients=["developer"],
-                                        engagement=eng, url=reverse('engagement_all_findings', args=(eng.id, )))
+                                        recipients=[transfer_findings.accepted_by.get_username()],
+                                        engagement=eng, url=reverse('view_transfer_finding', args=(product.id, )))
                     logger.debug("Transfer Finding send notification {transfer_finding.title}")
 
             except Exception as e:
@@ -1143,7 +1142,8 @@ def add_transfer_finding(request, eid, fid=None):
                                             "findings": finding,
                                             "owner": request.user.username,
                                             "status": "Transfer Pending",
-                                            "severity": finding.severity})
+                                            "severity": finding.severity,
+                                            "owner": request.user})
 
     return render(request, 'dojo/add_transfer_finding.html', {
                   'eng': eng,

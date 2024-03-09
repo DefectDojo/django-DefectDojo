@@ -12,20 +12,24 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    .modal fade {
-        max-width: 200%;
-    }
-    {% comment %} .modal-dialog{
-      max-width: 50%;
-      width: 50%;
-      margin: 0 auto; /* Centro horizontalmente */
 
+    .fade{
+      max-width: 100%;
+      width: 100%;
+      margin: 0 auto;
     }
-    .modal-content{
+
+    .modal-dialog{
       max-width: 90%;
       width: 90%;
-      margin: 0 auto; /* Centro horizontalmente */
-  } {% endcomment %}
+      margin: 0 auto;
+
+    }
+    .confirmed-modal{
+      max-width: 20%;
+      width: 20%;
+      margin: 0 auto;
+  }
     
 </style>
     {{ block.super }}
@@ -38,8 +42,8 @@
     {{ block.super }}
   
     <!-- Tu modal confirmed-->
-    <div class="modal fade" id="confirmedModal" data-tf-action="action" data-tf-id="None" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-sm" role="document">
+    <div class="modal fade confirmed-modal" id="confirmedModal" data-tf-action="action" data-tf-id="None" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-sm" id="id="idconfirmedmodal" role="document">
       <div class="modal-content">
           <div class="modal-header">
           <h5 class="modal-title" id="confirmModalLabel"><h3> Action Confirmed <h3></h5>
@@ -107,7 +111,7 @@
                     <tr>
                         <th>Id</th>
                         <th>Title</th>
-                        <th>Date</th>
+                        <th>Creation Date</th>
                         <th>Origin ProductType</th>
                         <th>Destination Product</th>
                         <th>Accepted by</th>

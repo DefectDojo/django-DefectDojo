@@ -3414,9 +3414,11 @@ class TransferFinding(models.Model):
                             editable=True, null=True,
                             blank=True, verbose_name=('Proof'))
 
-    owner = models.CharField(max_length=200,
+    owner = models.ForeignKey(Dojo_User,
+                             related_name="owner",
                              null=False,
                              blank=False,
+                             on_delete=models.CASCADE,
                              verbose_name=_('Owner'), help_text=_("The person that Owner the Tranfer finding"))
 
     notes = models.CharField(max_length=2500, editable=True, blank=True)

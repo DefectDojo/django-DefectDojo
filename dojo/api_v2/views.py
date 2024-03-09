@@ -3819,12 +3819,11 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
     @action(detail=True, methods=['post'])
     def change_status(self, request, pk=None):
         serializer = serializers.TransferFindingFindingsUpdateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
-            obj_transfer_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
+            transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
             request_findings = request.data["findings"]
-            for transfer_finding in obj_transfer_findings:
-                finding = transfer_finding.findings
+            for transfer_finding_finding in transfer_finding_findings:
+                finding = transfer_finding_finding.findings
                 finding_id = str(finding.id)
                 if finding_id in request_findings:
                     dict_findings = request_findings[finding_id]
@@ -3833,7 +3832,8 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
                             finding.risk_status = dict_findings["risk_status"]
                             finding.active = False
                             helper_tf.transfer_finding(origin_finding=finding,
-                                                       destination_engagement=transfer_finding.transfer_findings)
+                                                       transfer_finding=transfer_finding_finding.transfer_findings)
+                            helper_tf.send_notification_transfer_finding(transfer_finding_finding.transfer_findings)
                         elif dict_findings["risk_status"] == "Transfer Rejected":
                             finding.risk_status = dict_findings["risk_status"]
                             finding.active = True

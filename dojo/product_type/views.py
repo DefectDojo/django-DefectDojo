@@ -33,15 +33,27 @@ Product Type views
 
 
 def get_description_product(_request, pid):
+    """
+    Returns a list of products with their contacts.
+    """
     products = Product.objects.filter(id=pid).prefetch_related("product_manager", "technical_contact", "team_manager")
     product_list = []
     for product in products:
         item = {
             "id": product.id,
             "contacts": {
-                "product_manager": product.product_manager.username if product.product_manager else "",
-                "technical_contact": product.technical_contact.username if product.technical_contact else "",
-                "team_manager": product.team_manager.username if product.team_manager else ""
+                "product_manager": {
+                    "id": product.product_manager.id if product.product_manager.id else "",
+                    "username": product.product_manager.username if product.product_manager else ""
+                },
+                "technical_contact": {
+                    "id": product.technical_contact.id if product.technical_contact.id else "",
+                    "username": product.technical_contact.username if product.technical_contact else ""
+                },
+                "team_manager": {
+                    "id": product.team_manager.id if product.team_manager.id else "",
+                    "username": product.team_manager.username if product.team_manager else ""
+                }
             }
         }
         product_list.append(item)

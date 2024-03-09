@@ -1148,7 +1148,6 @@ class TransferFindingForm(forms.ModelForm):
     notes = forms.CharField(
         required=False, max_length=2400, widget=forms.Textarea, label="Notes"
     )
-    owner = forms.CharField(widget=forms.HiddenInput(), required=True)
     accepted_by = forms.ModelChoiceField(queryset=Dojo_User.objects.all(), required=True)  # Usar widget Select
 
     def __init__(self, *args, **kwags):
@@ -1158,10 +1157,11 @@ class TransferFindingForm(forms.ModelForm):
         )
         self.fields["destination_product"].queryset = get_products_for_transfer_findings(Permissions.Transfer_Finding_Add)
         self.fields["title"].initial = kwags.get("engagement_id")
+        self.fields["owner"].queryset = get_owner_user()
     
     class Meta:
         model = TransferFinding
-        fields = ["findings", "title", "destination_product", "accepted_by", "path", "notes"]
+        fields = ["findings", "title", "destination_product", "accepted_by", "path", "notes", "owner"]
 
 class BaseManageFileFormSet(forms.BaseModelFormSet):
     def clean(self):

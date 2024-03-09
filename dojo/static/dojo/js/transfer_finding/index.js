@@ -155,11 +155,10 @@ function generateRequestTransferFindingUpdate(tranferFindingId, riskStatus){
         getTransferFindingsAsync(tranferFindingId)
             .then(function(response){
                 response.results.forEach(function(transferFindings){
-                    transferFindings.findings.forEach(function(finding){
-                        requestFindingStatus[finding.id] = {"risk_status": riskStatus};
+                    transferFindings.transfer_findings.forEach(function(finding){
+                            requestFindingStatus[finding.findings.id] = {"risk_status": riskStatus};
                     });
                 });
-                console.log("success", requestFindingStatus);
                 resolve(requestFindingStatus);
             })
             .catch(function(error){
