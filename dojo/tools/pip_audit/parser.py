@@ -1,10 +1,7 @@
 """Parser for pip-audit."""
 import json
-import logging
 
 from dojo.models import Finding
-
-logger = logging.getLogger(__name__)
 
 
 class PipAuditParser:
@@ -45,8 +42,6 @@ def get_file_findings(data, test):
     """Return the findings in the vluns array inside the dependencies key."""
     findings = list()
     for dependency in data["dependencies"]:
-        logger.debug("**-**")
-        logger.debug(dependency)
         item_findings = get_item_findings(dependency, test)
         if item_findings is not None:
             findings.extend(item_findings)
