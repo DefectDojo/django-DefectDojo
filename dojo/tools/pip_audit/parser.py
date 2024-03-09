@@ -89,7 +89,7 @@ def get_item_findings(item, test):
             finding = Finding(
                 test=test,
                 title=title,
-                cwe=1352,
+                cwe=1395,
                 severity="Medium",
                 description=description,
                 mitigation=mitigation,
