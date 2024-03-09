@@ -70,7 +70,7 @@ class TestPipAuditParser(DojoTestCase):
             vulnerability_ids = finding.unsaved_vulnerability_ids
             self.assertEqual(1, len(vulnerability_ids))
             self.assertEqual('PYSEC-2021-852', vulnerability_ids[0])
-            self.assertEqual(1352, finding.cwe)
+            self.assertEqual(1395, finding.cwe)
             self.assertEqual('Medium', finding.severity)
             self.assertEqual('lxml', finding.component_name)
             self.assertEqual('4.6.4', finding.component_version)
