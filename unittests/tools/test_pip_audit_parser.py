@@ -57,7 +57,7 @@ class TestPipAuditParser(DojoTestCase):
             vulnerability_ids = finding.unsaved_vulnerability_ids
             self.assertEqual(1, len(vulnerability_ids))
             self.assertEqual('PYSEC-2021-439', vulnerability_ids[0])
-            self.assertEqual(1352, finding.cwe)
+            self.assertEqual(1395, finding.cwe)
             self.assertEqual('Medium', finding.severity)
             self.assertEqual('django', finding.component_name)
             self.assertEqual('3.2.9', finding.component_version)
