@@ -29,6 +29,9 @@ class CheckmarxOneParser(object):
             results = data.get("vulnerabilities", [])
             for result in results:
                 id = result.get("identifiers")[0].get("value")
+                cve = None
+                if 'vulnerabilityDetails' in result:
+                    cve = result.get("vulnerabilites").get("cweId")
                 severity = result.get("severity")
                 locations_uri = result.get("location").get("file")
                 locations_startLine = result.get("location").get("start_line")
@@ -38,6 +41,7 @@ class CheckmarxOneParser(object):
                     file_path=locations_uri,
                     title=id + "_" + locations_uri,
                     test=test,
+                    cve=cve,
                     severity=severity,
                     description="**id**: " + str(id) + "\n"
                     + "**uri**: " + locations_uri + "\n"
@@ -55,15 +59,18 @@ class CheckmarxOneParser(object):
             for vulnerability in results:
                 result_type = vulnerability.get("type")
                 date = self._parse_date(vulnerability.get("firstFoundAt"))
+                cve = None
+                if 'vulnerabilityDetails' in vulnerability:
+                    cve = vulnerability.get("vulnerabilites", {}).get("cweId")
                 if result_type == "sast":
                     descriptionDetails = vulnerability.get("description")
                     file_path = vulnerability.get("data").get("nodes")[0].get("fileName")
-
                     finding = Finding(
                         description=descriptionDetails,
                         title=descriptionDetails,
                         file_path=file_path,
                         date=date,
+                        cve=cve,
                         severity=vulnerability.get("severity").title(),
                         test=test,
                         static_finding=True,
@@ -84,6 +91,7 @@ class CheckmarxOneParser(object):
                         title=f'{description}',
                         description=description,
                         date=date,
+                        cve=cve,
                         severity=vulnerability.get("severity").title(),
                         verified=vulnerability.get("state") != "TO_VERIFY",
                         file_path=file_path,
