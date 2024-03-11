@@ -31,9 +31,9 @@ urlpatterns = [
     re_path(r'^reports/custom$',
         views.custom_report, name='custom_report'),
     re_path(r'^reports/quick$',
-        views.quick_report, name='quick_report'),
+        views.QuickReportView.as_view(), name='quick_report'),
     re_path(r'^reports/csv_export$',
-        views.csv_export, name='csv_export'),
+        views.CSVExportView.as_view(), name='csv_export'),
     re_path(r'^reports/excel_export$',
-        views.excel_export, name='excel_export'),
+        views.ExcelExportView.as_view(), name='excel_export'),
 ]
