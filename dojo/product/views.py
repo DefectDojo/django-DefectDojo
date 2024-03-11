@@ -112,8 +112,11 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.prefetch_related('members')
         prefetched_prods = prefetched_prods.prefetch_related('prod_type__members')
         active_endpoint_query = Endpoint.objects.filter(
-            finding__active=True,
-            finding__mitigated__isnull=True).distinct()
+            status_endpoint__mitigated=False,
+            status_endpoint__false_positive=False,
+            status_endpoint__out_of_scope=False,
+            status_endpoint__risk_accepted=False,
+        ).distinct()
         prefetched_prods = prefetched_prods.prefetch_related(
             Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
         prefetched_prods = prefetched_prods.prefetch_related('tags')
@@ -323,15 +326,15 @@ def finding_querys(request, prod):
         end_date = timezone.now()
     week = end_date - timedelta(days=7)  # seven days and /newer are considered "new"
 
-    filters['accepted'] = findings_qs.filter(finding_helper.ACCEPTED_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
+    filters['accepted'] = findings_qs.filter(finding_helper.ACCEPTED_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
     filters['verified'] = findings_qs.filter(finding_helper.VERIFIED_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
     filters['new_verified'] = findings_qs.filter(finding_helper.VERIFIED_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
-    filters['open'] = findings_qs.filter(finding_helper.OPEN_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
-    filters['inactive'] = findings_qs.filter(finding_helper.INACTIVE_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
-    filters['closed'] = findings_qs.filter(finding_helper.CLOSED_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
-    filters['false_positive'] = findings_qs.filter(finding_helper.FALSE_POSITIVE_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
-    filters['out_of_scope'] = findings_qs.filter(finding_helper.OUT_OF_SCOPE_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
-    filters['all'] = findings_qs
+    filters['open'] = findings_qs.filter(finding_helper.OPEN_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
+    filters['inactive'] = findings_qs.filter(finding_helper.INACTIVE_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
+    filters['closed'] = findings_qs.filter(finding_helper.CLOSED_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
+    filters['false_positive'] = findings_qs.filter(finding_helper.FALSE_POSITIVE_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
+    filters['out_of_scope'] = findings_qs.filter(finding_helper.OUT_OF_SCOPE_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
+    filters['all'] = findings_qs.order_by("date")
     filters['open_vulns'] = findings_qs.filter(finding_helper.OPEN_FINDINGS_QUERY).filter(
         cwe__isnull=False,
     ).order_by('cwe').values(
@@ -476,6 +479,7 @@ def view_product_metrics(request, pid):
 
     add_breadcrumb(parent=prod, top_level=False, request=request)
 
+    # An ordered dict does not make sense here.
     open_close_weekly = OrderedDict()
     severity_weekly = OrderedDict()
     critical_weekly = OrderedDict()
@@ -483,81 +487,83 @@ def view_product_metrics(request, pid):
     medium_weekly = OrderedDict()
 
     open_objs_by_severity = get_zero_severity_level()
+    closed_objs_by_severity = get_zero_severity_level()
     accepted_objs_by_severity = get_zero_severity_level()
 
-    for v in filters.get('open', None):
-        iso_cal = v.date.isocalendar()
-        x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
-        y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
-        x = (tcalendar.timegm(x.timetuple()) * 1000)
-        if x not in critical_weekly:
-            critical_weekly[x] = {'count': 0, 'week': y}
-        if x not in high_weekly:
-            high_weekly[x] = {'count': 0, 'week': y}
-        if x not in medium_weekly:
-            medium_weekly[x] = {'count': 0, 'week': y}
+    for finding in filters.get("all", []):
+        iso_cal = finding.date.isocalendar()
+        date = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
+        html_date = date.strftime("<span class='small'>%m/%d<br/>%Y</span>")
+        unix_timestamp = (tcalendar.timegm(date.timetuple()) * 1000)
 
-        if x in open_close_weekly:
-            if v.mitigated:
-                open_close_weekly[x]['closed'] += 1
+        # Open findings
+        if finding in filters.get("open", []):
+            if unix_timestamp not in critical_weekly:
+                critical_weekly[unix_timestamp] = {'count': 0, 'week': html_date}
+            if unix_timestamp not in high_weekly:
+                high_weekly[unix_timestamp] = {'count': 0, 'week': html_date}
+            if unix_timestamp not in medium_weekly:
+                medium_weekly[unix_timestamp] = {'count': 0, 'week': html_date}
+
+            if unix_timestamp in open_close_weekly:
+                open_close_weekly[unix_timestamp]['open'] += 1
             else:
-                open_close_weekly[x]['open'] += 1
-        else:
-            if v.mitigated:
-                open_close_weekly[x] = {'closed': 1, 'open': 0, 'accepted': 0}
+                open_close_weekly[unix_timestamp] = {'closed': 0, 'open': 1, 'accepted': 0}
+                open_close_weekly[unix_timestamp]['week'] = html_date
+
+            if view == 'Finding':
+                severity = finding.severity
+            elif view == 'Endpoint':
+                severity = finding.finding.severity
+
+            if unix_timestamp in severity_weekly:
+                if severity in severity_weekly[unix_timestamp]:
+                    severity_weekly[unix_timestamp][severity] += 1
+                else:
+                    severity_weekly[unix_timestamp][severity] = 1
             else:
-                open_close_weekly[x] = {'closed': 0, 'open': 1, 'accepted': 0}
-            open_close_weekly[x]['week'] = y
+                severity_weekly[unix_timestamp] = get_zero_severity_level()
+                severity_weekly[unix_timestamp][severity] = 1
+                severity_weekly[unix_timestamp]['week'] = html_date
 
-        if view == 'Finding':
-            severity = v.severity
-        elif view == 'Endpoint':
-            severity = v.finding.severity
-
-        if x in severity_weekly:
-            if severity in severity_weekly[x]:
-                severity_weekly[x][severity] += 1
+            if severity == 'Critical':
+                if unix_timestamp in critical_weekly:
+                    critical_weekly[unix_timestamp]['count'] += 1
+                else:
+                    critical_weekly[unix_timestamp] = {'count': 1, 'week': html_date}
+            elif severity == 'High':
+                if unix_timestamp in high_weekly:
+                    high_weekly[unix_timestamp]['count'] += 1
+                else:
+                    high_weekly[unix_timestamp] = {'count': 1, 'week': html_date}
+            elif severity == 'Medium':
+                if unix_timestamp in medium_weekly:
+                    medium_weekly[unix_timestamp]['count'] += 1
+                else:
+                    medium_weekly[unix_timestamp] = {'count': 1, 'week': html_date}
+            # Optimization: count severity level on server side
+            if open_objs_by_severity.get(finding.severity) is not None:
+                open_objs_by_severity[finding.severity] += 1
+        # Close findings
+        if finding in filters.get("closed", []):
+            if unix_timestamp in open_close_weekly:
+                open_close_weekly[unix_timestamp]['closed'] += 1
             else:
-                severity_weekly[x][severity] = 1
-        else:
-            severity_weekly[x] = get_zero_severity_level()
-            severity_weekly[x][severity] = 1
-            severity_weekly[x]['week'] = y
-
-        if severity == 'Critical':
-            if x in critical_weekly:
-                critical_weekly[x]['count'] += 1
+                open_close_weekly[unix_timestamp] = {'closed': 1, 'open': 0, 'accepted': 0}
+                open_close_weekly[unix_timestamp]['week'] = html_date
+            # Optimization: count severity level on server side
+            if closed_objs_by_severity.get(finding.severity) is not None:
+                closed_objs_by_severity[finding.severity] += 1
+        # Risk Accepted findings
+        if finding in filters.get("accepted", []):
+            if unix_timestamp in open_close_weekly:
+                open_close_weekly[unix_timestamp]['accepted'] += 1
             else:
-                critical_weekly[x] = {'count': 1, 'week': y}
-        elif severity == 'High':
-            if x in high_weekly:
-                high_weekly[x]['count'] += 1
-            else:
-                high_weekly[x] = {'count': 1, 'week': y}
-        elif severity == 'Medium':
-            if x in medium_weekly:
-                medium_weekly[x]['count'] += 1
-            else:
-                medium_weekly[x] = {'count': 1, 'week': y}
-
-        # Optimization: count severity level on server side
-        if open_objs_by_severity.get(v.severity) is not None:
-            open_objs_by_severity[v.severity] += 1
-
-    for a in filters.get('accepted', None):
-        iso_cal = a.date.isocalendar()
-        x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
-        y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
-        x = (tcalendar.timegm(x.timetuple()) * 1000)
-
-        if x in open_close_weekly:
-            open_close_weekly[x]['accepted'] += 1
-        else:
-            open_close_weekly[x] = {'closed': 0, 'open': 0, 'accepted': 1}
-            open_close_weekly[x]['week'] = y
-
-        if accepted_objs_by_severity.get(a.severity) is not None:
-            accepted_objs_by_severity[a.severity] += 1
+                open_close_weekly[unix_timestamp] = {'closed': 0, 'open': 0, 'accepted': 1}
+                open_close_weekly[unix_timestamp]['week'] = html_date
+            # Optimization: count severity level on server side
+            if accepted_objs_by_severity.get(finding.severity) is not None:
+                accepted_objs_by_severity[finding.severity] += 1
 
     test_data = {}
     for t in tests:
@@ -584,7 +590,7 @@ def view_product_metrics(request, pid):
         'inactive_objs': filters.get('inactive', None),
         'inactive_objs_by_severity': sum_by_severity_level(filters.get('inactive')),
         'closed_objs': filters.get('closed', None),
-        'closed_objs_by_severity': sum_by_severity_level(filters.get('closed')),
+        'closed_objs_by_severity': closed_objs_by_severity,
         'false_positive_objs': filters.get('false_positive', None),
         'false_positive_objs_by_severity': sum_by_severity_level(filters.get('false_positive')),
         'out_of_scope_objs': filters.get('out_of_scope', None),
