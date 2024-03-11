@@ -1576,7 +1576,12 @@ class Product_Tab():
                                                           active=True,
                                                           mitigated__isnull=True).count()
         active_endpoints = Endpoint.objects.filter(
-            product=self.product, finding__active=True, finding__mitigated__isnull=True)
+            product=self.product,
+            status_endpoint__mitigated=False,
+            status_endpoint__false_positive=False,
+            status_endpoint__out_of_scope=False,
+            status_endpoint__risk_accepted=False,
+        )
         self.endpoints_count = active_endpoints.distinct().count()
         self.endpoint_hosts_count = active_endpoints.values('host').distinct().count()
         self.benchmark_type = Benchmark_Type.objects.filter(
