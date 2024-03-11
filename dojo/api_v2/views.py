@@ -22,6 +22,8 @@ from drf_yasg.utils import swagger_auto_schema, no_body
 import base64
 import mimetypes
 from dojo.engagement.services import close_engagement, reopen_engagement
+from dojo.api_v2.api_error import ApiError
+from dojo.api_v2.utils import http_response
 from dojo.importers.reimporter.utils import (
     get_target_engagement_if_exists,
     get_target_product_if_exists,
@@ -3822,25 +3824,19 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
         if serializer.is_valid():
             transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
             request_findings = request.data["findings"]
-            for transfer_finding_finding in transfer_finding_findings:
-                finding = transfer_finding_finding.findings
-                finding_id = str(finding.id)
-                if finding_id in request_findings:
-                    dict_findings = request_findings[finding_id]
-                    if dict_findings:
-                        if dict_findings["risk_status"] == "Transfer Accepted":
-                            finding.risk_status = dict_findings["risk_status"]
-                            finding.active = False
-                            helper_tf.transfer_finding(origin_finding=finding,
-                                                       transfer_finding=transfer_finding_finding.transfer_findings)
-                            helper_tf.send_notification_transfer_finding(transfer_finding_finding.transfer_findings)
-                        elif dict_findings["risk_status"] == "Transfer Rejected":
-                            finding.risk_status = dict_findings["risk_status"]
-                            finding.active = True
-                        finding.save()
-                else:
-                    logger.warning(f"Finding not Found: {finding.id}")
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            if transfer_finding_findings:
+                helper_tf.transfer_findings(transfer_finding_findings, request_findings)
+                create_notification(
+                    event="transfer_finding",
+                    title=transfer_finding.title,
+                    recipients=[transfer_finding.owner.get_username()],
+                )
+                logger.debug(
+                    f"Transfer Finding  creation notificaion {create_notification}"
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return http_response.no_content(data=serializer.data, message=f"Transfer Finding {pk} Not Found")
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     

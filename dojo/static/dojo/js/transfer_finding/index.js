@@ -84,6 +84,7 @@ function innerData(data){
     tableBody.innerHTML = ""
     data.results.forEach(function(transfer_finding_item){
         transfer_finding_item.transfer_findings.forEach(function(findings){
+            console.log(findings)
             let row = document.createElement("tr") 
             let cell_status = document.createElement("td")
             cell_status.className = "cls-finding-status"
@@ -92,8 +93,7 @@ function innerData(data){
             <td>${findings.findings.title}</td>
             <td>${findings.findings.severity}</td>
             <td>${findings.findings.cve}</td>
-            <td>${findings.findings.severity}</td>
-            <td>${findings.findings.severity}</td>`
+            <td>${findings.finding_related}</td>`
             if(findings.findings.risk_status.includes("Transfer Accepted")){
                 cell_status.innerHTML= `<span style="color:green">Transfer Accepted</span>`
             }else if(findings.findings.risk_status.includes("Transfer Reject")){

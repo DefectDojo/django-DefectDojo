@@ -13,22 +13,19 @@
         text-overflow: ellipsis;
     }
 
-    .fade{
-      max-width: 100%;
-      width: 100%;
-      margin: 0 auto;
-    }
-
     .modal-dialog{
-      max-width: 90%;
-      width: 90%;
+      max-width: 70%;
+      width: 70%;
       margin: 0 auto;
 
     }
     .confirmed-modal{
-      max-width: 20%;
-      width: 20%;
+      max-width: 30%;
+      width: 30%;
       margin: 0 auto;
+  }
+  #miTabla th {
+    white-space: normal;
   }
     
 </style>
@@ -80,7 +77,6 @@
                 <th scope="col">Name</th>
                 <th scope="col">Severity</th>
                 <th scope="col">Vulnerability Id</th>
-                <th scope="col">Destination Engagement</th>
                 <th scope="col">Related Finding</th>
                 <th scope="col">Status</th>
                 <th scope="col">Actions</th>
@@ -113,7 +109,9 @@
                         <th>Title</th>
                         <th>Creation Date</th>
                         <th>Origin ProductType</th>
+                        <th>Destination ProductType</th>
                         <th>Destination Product</th>
+                        <th>Destination Engagement</th>
                         <th>Accepted by</th>
                         <th>Actions</th>
                     </tr>
@@ -131,6 +129,8 @@
                             <td>{{transfer_findings.date}}</td>
                             <td>{{transfer_findings.origin_product_type}}</td>
                             <td>{{transfer_findings.destination_product_type}}</td>
+                            <td>{{transfer_findings.destination_product}}</td>
+                            <td>{{transfer_findings.destination_engagement}}</td>
                             <td>{{transfer_findings.accepted_by}}</td>
                             <td>
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Edit" %}

@@ -16,26 +16,33 @@ $(document).ready(function() {
 function handleProductChange(){
     let idProduct = $("#id_destination_product").val();
     let contactsElement = document.getElementById('id_accepted_by') 
+    let engagementElement = document.getElementById('id_destination_engagement');
+    clearLabel("id_destination_engagement");
     clearLabel("id_accepted_by");
     if (idProduct !== '') {
-        getContacs(idProduct, contactsElement)
+        getProductDescription(idProduct, contactsElement, engagementElement)
     } else {
         clearSelect(engagementElement);
+        clearSelect(contactsElement);
     }
 }
 
-function getContacs(idProduct, contactsElement){
+function getProductDescription(idProduct, contactsElement, engagementElement){
     $.ajax({
         url: "/product/type/description/" + idProduct,
         type: "GET",
         success: function(response) {
             clearSelect(contactsElement);
+            clearSelect(engagementElement);
             addOption(contactsElement, '', 'Select Contact Product...');
-            response.products.forEach(function(product){
-                contactsElement.innerHTML += `<option value=${product.contacts.product_manager.id}>${product.contacts.product_manager.username}</option>`;
-                contactsElement.innerHTML += `<option value=${product.contacts.technical_contact.id}>${product.contacts.technical_contact.username}</option>`;
-                contactsElement.innerHTML += `<option value=${product.contacts.team_manager.id}>${product.contacts.team_manager.username}</option>`;
+            contactsElement.innerHTML += `<option value=${response.contacts.product_manager.id}>${response.contacts.product_manager.username}</option>`;
+            contactsElement.innerHTML += `<option value=${response.contacts.technical_contact.id}>${response.contacts.technical_contact.username}</option>`;
+            contactsElement.innerHTML += `<option value=${response.contacts.team_manager.id}>${response.contacts.team_manager.username}</option>`;
+            addOption(engagementElement, '', 'Select Engagement...');
+            response.engagements.forEach(function(engagement){
+                engagementElement.innerHTML += `<option value=${engagement.id}>${engagement.engagement_name}</option>`;
             });
+
             refreshSelectPicker();
         },
         error: function(error) {
@@ -54,8 +61,9 @@ function getEngagementOptions(idProduct, engagementElement){
         url: "/api/v2/engagements/?product=" + idProduct,
         type: "GET",
         success: function(response) {
+            console.log(response);
             clearSelect(engagementElement);
-            addOption(engagementElement, '', 'Select Product Name...');
+            addOption(engagementElement, '', 'Select Engagement Name...');
             response.results.forEach(function(engagement) {
                 addOption(engagementElement, engagement.id, engagement.name);
             });

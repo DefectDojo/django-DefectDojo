@@ -1145,6 +1145,7 @@ class TransferFindingForm(forms.ModelForm):
     title = forms.CharField(required=True, max_length=255)
     severity = forms.CharField(widget=forms.HiddenInput(), required=True)
     destination_product = forms.ModelChoiceField(queryset=Product.objects.none(), required=True)
+    destination_engagement = forms.ModelChoiceField(queryset=Engagement.objects.all(), required=False)
     notes = forms.CharField(
         required=False, max_length=2400, widget=forms.Textarea, label="Notes"
     )
@@ -1161,7 +1162,14 @@ class TransferFindingForm(forms.ModelForm):
     
     class Meta:
         model = TransferFinding
-        fields = ["findings", "title", "destination_product", "accepted_by", "path", "notes", "owner"]
+        fields = ["findings", 
+                  "title",
+                  "destination_product",
+                  "destination_engagement",
+                  "accepted_by",
+                  "path",
+                  "notes",
+                  "owner"]
 
 class BaseManageFileFormSet(forms.BaseModelFormSet):
     def clean(self):
