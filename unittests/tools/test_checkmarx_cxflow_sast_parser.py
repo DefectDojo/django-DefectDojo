@@ -33,5 +33,5 @@ class TestCheckmarxCxflowSast(DojoTestCase):
         self.assertEqual(1, len(findings))
         finding = findings[0]
         self.assertEqual("Reflected XSS All Clients", finding.title)
-        self.assertEqual(79, finding.cwe1)
-        self.assertEqual(dateutil.parser.parse("Sunday, January 19, 2020 2:40:11 AM"), finding.)
+        self.assertEqual(79, finding.cwe)
+        self.assertEqual(dateutil.parser.parse("Sunday, January 19, 2020 2:40:11 AM"), finding.date)
