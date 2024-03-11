@@ -2163,6 +2163,9 @@ class ImportScanSerializer(serializers.Serializer):
         required=False,
     )
 
+    def get_importer(self):
+        return Importer()
+
     def save(self, push_to_jira=False):
         data = self.validated_data
         close_old_findings = data.get("close_old_findings")
@@ -2242,7 +2245,7 @@ class ImportScanSerializer(serializers.Serializer):
             if scan_date
             else None
         )
-        importer = Importer()
+        importer = self.get_importer()
         try:
             (
                 test,
@@ -2447,6 +2450,12 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         required=False
     )
 
+    def get_importer(self):
+        return Importer()
+
+    def get_reimporter(self):
+        return ReImporter()
+
     def save(self, push_to_jira=False):
         logger.debug("push_to_jira: %s", push_to_jira)
         data = self.validated_data
@@ -2529,7 +2538,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             if test:
                 # reimport into provided / latest test
                 statistics_before = test.statistics
-                reimporter = ReImporter()
+                reimporter = self.get_reimporter()
                 (
                     test,
                     finding_count,
@@ -2579,7 +2588,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     source_code_management_uri=source_code_management_uri,
                     target_end=engagement_end_date,
                 )
-                importer = Importer()
+                importer = self.get_importer()
                 (
                     test,
                     finding_count,

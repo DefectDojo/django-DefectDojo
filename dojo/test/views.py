@@ -780,33 +780,68 @@ def search(request, tid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Import_Scan_Result, 'tid')
-def re_import_scan_results(request, tid):
-    additional_message = _("When re-uploading a scan, any findings not found in original scan will be updated as "
-                           "mitigated.  The process attempts to identify the differences, however manual verification "
-                           "is highly recommended.")
-    test = get_object_or_404(Test, id=tid)
-    # by default we keep a trace of the scan_type used to create the test
-    # if it's not here, we use the "name" of the test type
-    # this feature exists to provide custom label for tests for some parsers
-    if test.scan_type:
-        scan_type = test.scan_type
-    else:
-        scan_type = test.test_type.name
-    engagement = test.engagement
-    form = ReImportScanForm(test=test)
-    jform = None
-    jira_project = jira_helper.get_jira_project(test)
-    push_all_jira_issues = jira_helper.is_push_all_issues(test)
+class ReImportScanResultsView(View):
+    def get_reimporter():
+        return ReImporter()
 
-    # Decide if we need to present the Push to JIRA form
-    if get_system_setting('enable_jira') and jira_project:
-        jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
+    @user_is_authorized(Test, Permissions.Import_Scan_Result, 'tid')
+    def get(self, request, tid):
+        additional_message = _("When re-uploading a scan, any findings not found in the original scan will be updated as "
+                               "mitigated. The process attempts to identify the differences, however, manual verification "
+                               "is highly recommended.")
+        test = get_object_or_404(Test, id=tid)
 
-    if request.method == "POST":
+        if test.scan_type:
+            scan_type = test.scan_type
+        else:
+            scan_type = test.test_type.name
+        engagement = test.engagement
+        form = ReImportScanForm(test=test)
+        jform = None
+        jira_project = jira_helper.get_jira_project(test)
+        push_all_jira_issues = jira_helper.is_push_all_issues(test)
+
+        # Decide if we need to present the Push to JIRA form
+        if get_system_setting('enable_jira') and jira_project:
+            jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
+
+        product_tab = Product_Tab(engagement.product, title=_("Re-upload a %(scan_type)s") % {"scan_type": scan_type},
+                                  tab="engagements")
+        product_tab.setEngagement(engagement)
+        form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
+        form.initial['api_scan_configuration'] = test.api_scan_configuration
+        form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(
+            product__id=product_tab.product.id)
+
+        return render(request,
+                      'dojo/import_scan_results.html',
+                      {'form': form,
+                       'product_tab': product_tab,
+                       'eid': engagement.id,
+                       'additional_message': additional_message,
+                       'jform': jform,
+                       'scan_types': get_scan_types_sorted(),
+                       })
+
+    def post(self, request, tid):
+        additional_message = _("When re-uploading a scan, any findings not found in the original scan will be updated as "
+                               "mitigated. The process attempts to identify the differences, however, manual verification "
+                               "is highly recommended.")
+        test = get_object_or_404(Test, id=tid)
+        if test.scan_type:
+            scan_type = test.scan_type
+        else:
+            scan_type = test.test_type.name
+        engagement = test.engagement
         form = ReImportScanForm(request.POST, request.FILES, test=test)
-        if jira_project:
+        jform = None
+        jira_project = jira_helper.get_jira_project(test)
+        push_all_jira_issues = jira_helper.is_push_all_issues(test)
+
+        # Decide if we need to present the Push to JIRA form
+        if get_system_setting('enable_jira') and jira_project:
             jform = JIRAImportScanForm(request.POST, push_all=push_all_jira_issues, prefix='jiraform')
+
         if form.is_valid() and (jform is None or jform.is_valid()):
             scan_date = form.cleaned_data['scan_date']
 
@@ -856,7 +891,7 @@ def re_import_scan_results(request, tid):
             push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
             error = False
             finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = 0, 0, 0, 0, 0
-            reimporter = ReImporter()
+            reimporter = self.get_reimporter()
             try:
                 test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count, test_import = \
                     reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
@@ -881,17 +916,21 @@ def re_import_scan_results(request, tid):
 
             return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
 
-    product_tab = Product_Tab(engagement.product, title=_("Re-upload a %(scan_type)s") % {"scan_type": scan_type}, tab="engagements")
-    product_tab.setEngagement(engagement)
-    form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
-    form.initial['api_scan_configuration'] = test.api_scan_configuration
-    form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id)
-    return render(request,
-                  'dojo/import_scan_results.html',
-                  {'form': form,
-                   'product_tab': product_tab,
-                   'eid': engagement.id,
-                   'additional_message': additional_message,
-                   'jform': jform,
-                   'scan_types': get_scan_types_sorted(),
-                   })
+        # If form is not valid, render the template with the error messages
+        product_tab = Product_Tab(engagement.product, title=_("Re-upload a %(scan_type)s") % {"scan_type": scan_type},
+                                  tab="engagements")
+        product_tab.setEngagement(engagement)
+        form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
+        form.initial['api_scan_configuration'] = test.api_scan_configuration
+        form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(
+            product__id=product_tab.product.id)
+
+        return render(request,
+                      'dojo/import_scan_results.html',
+                      {'form': form,
+                       'product_tab': product_tab,
+                       'eid': engagement.id,
+                       'additional_message': additional_message,
+                       'jform': jform,
+                       'scan_types': get_scan_types_sorted(),
+                       })

@@ -100,6 +100,7 @@
         <div class="table-responsive">
             <table class="table-striped table table-condensed table-hover centered">
                 <tr>
+                    {% block test_header %}
                     <th>{% trans "Engagement" %}</th>
                     <th>{% trans "Environment" %}</th>
                     <th>{% trans "Dates" %}</th>
@@ -120,8 +121,10 @@
                         </th>
                     {% endif %}
                     {% if test.api_scan_configuration %}<th>{% trans "API Scan Configuration" %}</th>{% endif %}
+                    {% endblock test_header %}
                 </tr>
                 <tr>
+                    {% block test_body %}
                     <td>
                         <a href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement.name }}</a>
                     </td>
@@ -168,6 +171,7 @@
                             {% endif %}
                         </td>
                     {% endif %}
+                    {% endblock test_body %}
                 </tr>
             </table>
         </div>

@@ -2592,10 +2592,12 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     imported Findings to the newly created Engagement.
     """
 
-    serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.none()
     permission_classes = (IsAuthenticated, permissions.UserHasImportPermission)
+
+    def get_serializer_class(self):
+        return serializers.ImportScanSerializer
 
     def perform_create(self, serializer):
         (
@@ -2765,13 +2767,15 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     imported Findings to the newly created Engagement.
     """
 
-    serializer_class = serializers.ReImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.none()
     permission_classes = (
         IsAuthenticated,
         permissions.UserHasReimportPermission,
     )
+
+    def get_serializer_class(self):
+        return serializers.ReImportScanSerializer
 
     def get_queryset(self):
         return get_authorized_tests(Permissions.Import_Scan_Result)

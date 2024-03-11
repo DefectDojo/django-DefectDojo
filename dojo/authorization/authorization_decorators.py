@@ -6,6 +6,7 @@ from dojo.authorization.authorization import (
     user_has_permission_or_403,
     user_has_configuration_permission,
 )
+from django.core.handlers.wsgi import WSGIRequest
 
 
 def user_is_authorized(model, permission, arg, lookup="pk", func=None):
@@ -18,6 +19,7 @@ def user_is_authorized(model, permission, arg, lookup="pk", func=None):
 
     @functools.wraps(func)
     def _wrapped(request, *args, **kwargs):
+
         # Fetch object from database
         if isinstance(arg, int):
             # Lookup value came as a positional argument
@@ -26,6 +28,9 @@ def user_is_authorized(model, permission, arg, lookup="pk", func=None):
         else:
             # Lookup value was passed as keyword argument
             lookup_value = kwargs.get(arg)
+
+        if not isinstance(request, WSGIRequest):
+            request = args[0]
 
         # object must exist
         obj = get_object_or_404(model.objects.filter(**{lookup: lookup_value}))

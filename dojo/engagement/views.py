@@ -543,6 +543,155 @@ class ViewEngagement(View):
             })
 
 
+class ViewEngagement(View):
+    def get_tests(self, engagement):
+        return engagement.test_set.all().order_by('test_type__name', '-updated')
+
+    def get_template(self):
+        return 'dojo/view_eng.html'
+
+    def get(self, request, eid):
+        eng = get_object_or_404(Engagement, id=eid)
+        tests = self.get_tests(eng)
+
+        default_page_num = 10
+
+        tests_filter = EngagementTestFilter(request.GET, queryset=tests, engagement=eng)
+        paged_tests = get_page_items(request, tests_filter.qs, default_page_num)
+        paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)
+
+        prod = eng.product
+        risks_accepted = eng.risk_acceptance.all().select_related('owner').annotate(
+            accepted_findings_count=Count('accepted_findings__id')
+        )
+        preset_test_type = None
+        network = None
+        if eng.preset:
+            preset_test_type = eng.preset.test_type.all()
+            network = eng.preset.network_locations.all()
+        system_settings = System_Settings.objects.get()
+
+        jissue = jira_helper.get_jira_issue(eng)
+        jira_project = jira_helper.get_jira_project(eng)
+
+        try:
+            check = Check_List.objects.get(engagement=eng)
+        except Check_List.DoesNotExist:
+            check = None
+
+        notes = eng.notes.all()
+        note_type_activation = Note_Type.objects.filter(is_active=True).count()
+        form = DoneForm()
+
+        if note_type_activation:
+            form = TypedNoteForm(request.POST, available_note_types=find_available_notetypes(eng.notes.all()))
+        else:
+            form = NoteForm(request.POST)
+
+        creds = Cred_Mapping.objects.filter(
+            product=eng.product
+        ).select_related('cred_id').order_by('cred_id')
+        cred_eng = Cred_Mapping.objects.filter(
+            engagement=eng.id
+        ).select_related('cred_id').order_by('cred_id')
+
+        add_breadcrumb(parent=eng, top_level=False, request=request)
+
+        title = ""
+        if eng.engagement_type == "CI/CD":
+            title = " CI/CD"
+        product_tab = Product_Tab(
+            prod, title="View" + title + " Engagement", tab="engagements"
+        )
+        product_tab.setEngagement(eng)
+
+        return render(
+            request,
+            self.get_template(),
+            {
+                'eng': eng,
+                'product_tab': product_tab,
+                'system_settings': system_settings,
+                'tests': paged_tests,
+                'filter': tests_filter,
+                'check': check,
+                'threat': eng.tmodel_path,
+                'form': form,
+                'notes': notes,
+                'files': eng.files.all(),
+                'risks_accepted': risks_accepted,
+                'jissue': jissue,
+                'jira_project': jira_project,
+                'creds': creds,
+                'cred_eng': cred_eng,
+                'network': network,
+                'preset_test_type': preset_test_type
+            },
+        )
+
+    def post(self, request, eid):
+        eng = get_object_or_404(Engagement, id=eid)
+        tests = self.get_tests(eng)
+        user_has_permission_or_403(request.user, eng, Permissions.Note_Add)
+        eng.progress = 'check_list'
+        eng.save()
+
+        note_type_activation = Note_Type.objects.filter(is_active=True).count()
+
+        if form.is_valid():
+            new_note = form.save(commit=False)
+            new_note.author = request.user
+            new_note.date = timezone.now()
+            new_note.save()
+            eng.notes.add(new_note)
+
+            if note_type_activation:
+                form = TypedNoteForm(request.POST, available_note_types=available_note_types)
+            else:
+                form = NoteForm(request.POST)
+
+            title = f"Engagement: {eng.name} on {eng.product.name}"
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Note added successfully.',
+                extra_tags='alert-success'
+            )
+        prod = eng.product
+        product_tab = Product_Tab(
+            prod, title="View" + title + " Engagement", tab="engagements"
+        )
+        product_tab.setEngagement(eng)
+
+        return render(
+            request,
+            self.get_template(),
+            {
+                'eng': eng,
+                'product_tab': Product_Tab(
+                    eng.product,
+                    title=f"View Engagement: {eng.name}",
+                    tab="engagements"
+                ),
+                'system_settings': System_Settings.objects.get(),
+                'tests': tests,
+                'filter': EngagementTestFilter(request.GET, queryset=eng.test_set.all(), engagement=eng),
+                'check': Check_List.objects.get(engagement=eng) if Check_List.objects.filter(engagement=eng).exists() else None,
+                'threat': eng.tmodel_path,
+                'form': form,
+                'notes': eng.notes.all(),
+                'files': eng.files.all(),
+                'risks_accepted': eng.risk_acceptance.all().select_related('owner').annotate(accepted_findings_count=Count('accepted_findings__id')),
+                'jissue': jira_helper.get_jira_issue(eng),
+                'jira_project': jira_helper.get_jira_project(eng),
+                'creds': Cred_Mapping.objects.filter(product=eng.product).select_related('cred_id').order_by('cred_id'),
+                'cred_eng': Cred_Mapping.objects.filter(engagement=eng.id).select_related('cred_id').order_by('cred_id'),
+                'network': eng.preset.network_locations.all() if eng.preset else None,
+                'preset_test_type': eng.preset.test_type.all() if eng.preset else None
+            },
+        )
+
+
 def prefetch_for_view_tests(tests):
     prefetched = tests
     if isinstance(tests,
@@ -642,6 +791,7 @@ def add_tests(request, eid):
 
 
 class ImportScanResultsView(View):
+
     def get(self, request, eid=None, pid=None):
         environment = Development_Environment.objects.filter(name='Development').first()
         engagement = None
@@ -799,12 +949,18 @@ class ImportScanResultsView(View):
                     verified = False
 
             try:
-                importer = Importer()
-                test, finding_count, closed_finding_count, _ = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
+                if self.importer:
+                    importer = self.importer
+                    test = self.test
+                else:
+                    importer = Importer()
+                    test = None
+
+                test, finding_count, closed_finding_count, _ = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags, user=user,
                             minimum_severity=minimum_severity, endpoints_to_add=list(form.cleaned_data['endpoints']) + added_endpoints, scan_date=scan_date,
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
                             close_old_findings=close_old_findings, close_old_findings_product_scope=close_old_findings_product_scope, group_by=group_by, api_scan_configuration=api_scan_configuration, service=service,
-                            create_finding_groups_for_all_findings=create_finding_groups_for_all_findings, apply_tags_to_findings=apply_tags_to_findings)
+                            create_finding_groups_for_all_findings=create_finding_groups_for_all_findings, apply_tags_to_findings=apply_tags_to_findings, test_object=test)
 
                 message = f'{scan_type} processed a total of {finding_count} findings'
 
