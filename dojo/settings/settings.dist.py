@@ -1187,6 +1187,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Nexpose Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'vulnerability_ids', 'cwe'],
+    'NPM Audit v7+ Scan': ['title', 'severity', 'cwe', 'vuln_id_from_tool'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'Yarn Audit Scan': ['title', 'severity', 'file_path', 'vulnerability_ids', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on vulnerability_ids + file_path + severity
@@ -1280,6 +1281,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Tenable Scan': True,
     'Nexpose Scan': True,
     'NPM Audit Scan': True,
+    'NPM Audit v7+ Scan': True,
     'Yarn Audit Scan': True,
     'Mend Scan': True,
     'ZAP Scan': False,
@@ -1377,6 +1379,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Tenable Scan': DEDUPE_ALGO_HASH_CODE,
     'Nexpose Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
+    'NPM Audit v7+ Scan': DEDUPE_ALGO_HASH_CODE,
     'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Mend Scan': DEDUPE_ALGO_HASH_CODE,
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
