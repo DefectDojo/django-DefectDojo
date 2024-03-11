@@ -1263,7 +1263,7 @@ def add_epic(engagement, **kwargs):
             'summary': epic_name,
             'description': epic_name,
             'issuetype': {
-                'name': 'Epic'
+                'name': getattr(jira_project, "epic_issue_type_name", "Epic"),
             },
             get_epic_name_field_name(jira_instance): epic_name,
         }
