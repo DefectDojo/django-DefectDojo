@@ -4,6 +4,35 @@ import dateutil.parser
 from dojo.models import Finding
 
 
+class _PathNode(object):
+    def __init__(self, file: str, line: str, column: str, _object: str, length: str, snippet: str):
+        self.file = file
+        self.line = line
+        self.column = int(column)
+        self._object = _object
+        self.length = int(length)
+        self.snippet = snippet
+
+    @classmethod
+    def from_json_object(cls, data):
+        return _PathNode(
+            data.get("file"),
+            data.get("line"),
+            data.get("column"),
+            data.get("object"),
+            data.get("length"),
+            data.get("snippet")
+        )
+
+
+class _Path(object):
+    def __init__(self, sink: _PathNode, source: _PathNode, state: int, paths: [_PathNode]):
+        self.sink = sink
+        self.source = source
+        self.state = int(state)
+        self.paths = paths
+
+
 class CheckmarxCXFlowSastParser(object):
     def __init__(self):
         pass
@@ -46,17 +75,38 @@ class CheckmarxCXFlowSastParser(object):
             filename = issue.get("filename")
             similarity_id = issue.get("similarityId")
 
-            finding = Finding(
-                title=vulnerability.replace("_", " "),
-                cwe=int(cwe),
-                file_path=filename,
-                date=dateutil.parser.parse(scan_start_date),
-                static_finding=True,
-                unique_id_from_tool=similarity_id,
-            )
+            issue_additional_details = issue.get("additionalDetails")
+            categories = issue_additional_details.get("categories")
+            results = issue_additional_details.get("results")
+
+            map_paths = {}
+
+            for result in results:
+                # all path nodes exclude sink, source, state
+                path_keys = sorted(filter(lambda k: isinstance(k, str) and k.isnumeric(), result.keys()))
+
+                path = _Path(
+                    sink=_PathNode.from_json_object(result.get("sink")),
+                    source=_PathNode.from_json_object(result.get("source")),
+                    state=result.get("state"),
+                    paths=list([result[k] for k in path_keys])
+                )
+
+                map_paths[path.source.line] = path
+
+            for detail_key in issue.get("details").keys():
+                pass
+
+                finding = Finding(
+                    title=vulnerability.replace("_", " "),
+                    cwe=int(cwe),
+                    file_path=filename,
+                    date=dateutil.parser.parse(scan_start_date),
+                    static_finding=True,
+                    unique_id_from_tool=similarity_id,
+                )
 
             findings.append(finding)
-
 
         return findings
 
