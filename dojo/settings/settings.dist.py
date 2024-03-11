@@ -1366,6 +1366,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Codechecker Report native': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Coverity API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Cobalt.io API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Crunch42 Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Dependency Track Finding Packaging Format (FPF) Export': DEDUPE_ALGO_HASH_CODE,
     'Mobsfscan Scan': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
