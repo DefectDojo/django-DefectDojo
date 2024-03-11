@@ -40,7 +40,7 @@
   
     <!-- Tu modal confirmed-->
     <div class="modal fade confirmed-modal" id="confirmedModal" data-tf-action="action" data-tf-id="None" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-sm" id="id="idconfirmedmodal" role="document">
+      <div class="modal-dialog modal-sm" id="idconfirmedmodal" role="document">
       <div class="modal-content">
           <div class="modal-header">
           <h5 class="modal-title" id="confirmModalLabel"><h3> Action Confirmed <h3></h5>
@@ -121,7 +121,7 @@
                         <tr>
                             <td>{{transfer_findings.id}}</td>
                             <td>
-                              <a href="#" class="table-link" type="button" data-toggle="modal" data-target="#modalTransferFinding" 
+                              <a href="#" class="table-link" id="id_transfer_finding_show_modal" type="button" data-toggle="modal" data-target="#modalTransferFinding" 
                               data-transfer-id={{transfer_findings.id}} data-product-id={{transfer_findings.origin_product}}
                               data-product-type-id={{transfer_findings.origin_product_type}}>
                                  {{transfer_findings.title}}</a>

@@ -2,9 +2,10 @@ var ObjFindings= {};
 var transferId = 0;
 var productId = 0;
 var productTypeId = 0;
-
+var host = window.location.host;
+console.log("host", host)
 // Obtener el valor de la cookie 'csrftoken'
-$(document).on('click', '.table-link', function(event) {
+$(document).on('click', '#id_transfer_finding_show_modal', function(event) {
     event.preventDefault();
     transferId = $(this).data('transfer-id');
     productId = $(this).data('product-id');
@@ -32,10 +33,8 @@ $(document).ready(function() {
         }
     });
 
-
-
-   
 });
+
 
 function getTransferFindingsAsync(transferFindingId) {
     return new Promise(function(resolve, reject) {
@@ -89,11 +88,11 @@ function innerData(data){
             let cell_status = document.createElement("td")
             cell_status.className = "cls-finding-status"
             row.innerHTML = `
-            <td>${findings.findings.id}</td>
+            <td><a href="http://${host}/finding/${findings.findings.id}", class="table-link" type="button">${findings.findings.id}</a></td>
             <td>${findings.findings.title}</td>
             <td>${findings.findings.severity}</td>
             <td>${findings.findings.cve}</td>
-            <td>${findings.finding_related}</td>`
+            <td><a href="${host}/finding/${findings.finding_related}" class="table-link" type="button"> ${findings.finding_related} </a></td>`
             if(findings.findings.risk_status.includes("Transfer Accepted")){
                 cell_status.innerHTML= `<span style="color:green">Transfer Accepted</span>`
             }else if(findings.findings.risk_status.includes("Transfer Reject")){
