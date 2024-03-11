@@ -31,7 +31,7 @@ class CheckmarxOneParser(object):
                 id = result.get("identifiers")[0].get("value")
                 cwe = None
                 if 'vulnerabilityDetails' in result:
-                    cve = result.get("vulnerabilites").get("cweId")
+                    cwe = result.get("vulnerabilites").get("cweId")
                 severity = result.get("severity")
                 locations_uri = result.get("location").get("file")
                 locations_startLine = result.get("location").get("start_line")
