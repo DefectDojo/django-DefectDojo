@@ -765,10 +765,8 @@
                                             <a class="dropdown-toggle" data-toggle="dropdown" href="">
                                                 <span class="fa-solid fa-sitemap" aria-hidden="true"></span>
                                                 <span class="hidden-xs">
-                                                    {% trans "Endpoints" %}
-                                                    {% if product_tab.endpoints > 0 %}
-                                                        <span class="badge">{{ product_tab.endpoint_hosts }} / {{ product_tab.endpoints }}</span>
-                                                    {% endif %}
+                                                    {% trans "Hosts / Endpoints" %}
+                                                    <span class="badge">{{ product_tab.endpoint_hosts }} / {{ product_tab.endpoints }}</span>
                                                 </span>
                                                 <span class="caret"></span>
                                             </a>
