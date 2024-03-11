@@ -3177,7 +3177,7 @@ class Finding(models.Model):
         elif self.test.engagement.branch_tag:
             link += intermediate_path + self.test.engagement.branch_tag + '/' + self.file_path
         else:
-            link +=  intermediate_path + 'master/' + self.file_path
+            link += intermediate_path + 'master/' + self.file_path
 
         return link
 
