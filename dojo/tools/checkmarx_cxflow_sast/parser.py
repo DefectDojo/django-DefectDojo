@@ -53,7 +53,8 @@ class CheckmarxCXFlowSastParser(object):
         if file.name.strip().lower().endswith(".json"):
             return self._get_findings_json(file, test)
         else:
-            return []
+            logger.warning(f"Not supported file format ${file}")
+            return list()
 
     def _get_findings_json(self, file, test):
         data = json.load(file)
@@ -124,7 +125,7 @@ class CheckmarxCXFlowSastParser(object):
                         severity=severity,
                         file_path=filename,
                         line=detail.sink.line,
-                        false_p=issue.get("details")[detail_key].get("falsePositive"),
+                        false_p=issue.get("details")[detail_key].get("falsePositive") or self.is_not_exploitable(detail.state),
                         description=finding_detail,
                         verified=self.is_verify(detail.state),
                         active=self.is_active(detail.state)
@@ -135,6 +136,7 @@ class CheckmarxCXFlowSastParser(object):
         return findings
 
     def _get_findings_xml(self):
+        # TODO: move logic from checkmarx to here
         pass
 
     def is_verify(self, state):
@@ -147,5 +149,5 @@ class CheckmarxCXFlowSastParser(object):
         activeStates = ["0", "2", "3", "4"]
         return state in activeStates
 
-    def is_mitigated(self, state):
-        pass
+    def is_not_exploitable(self, state):
+        return state == "1"
