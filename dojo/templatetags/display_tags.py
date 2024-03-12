@@ -714,15 +714,15 @@ def finding_display_status(finding):
     display_status = finding.status()
     if 'Transfer Rejected' in display_status:
         url = reverse('view_transfer_finding', args=(finding.test.engagement.product.id, ))
-        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Rejected"><span style="color: red;">Transfer Rejected</span></a>'
+        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Rejected"><span style="color: #b97a0c;">Transfer Rejected</span></a>'
         display_status = display_status.replace('Transfer Rejected', link)
     if 'Transfer Pending' in display_status:
         url = reverse('view_transfer_finding', args=(finding.test.engagement.product.id, ))
-        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Pending"><span style="color: blue;">Transfer Pending</span></a>'
+        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Pending"><span style="color: #1B30DE;">Transfer Pending</span></a>'
         display_status = display_status.replace('Transfer Pending', link)
     if 'Transfer Accepted' in display_status:
         url = reverse('view_transfer_finding', args=(finding.test.engagement.product.id, ))
-        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Accepted"><span style="color: green;">Transfer Accepted</span></a>'
+        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Accepted"><span style="color: #096C11;">Transfer Accepted</span></a>'
         display_status = display_status.replace('Transfer Accepted', link)
     if 'Risk Rejected' in display_status:
         ra = finding.risk_acceptance

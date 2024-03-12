@@ -2,7 +2,14 @@ import logging
 from dojo.api_v2.api_error import ApiError
 from crum import get_current_user
 from dojo.risk_acceptance import risk_pending
-from dojo.models import Test, Finding, Engagement, TransferFinding, TransferFindingFinding, Test
+from dojo.models import (
+    Test,
+    Finding,
+    Engagement,
+    TransferFinding,
+    TransferFindingFinding,
+    Test,
+)
 from dojo.authorization.authorization import user_has_global_permission
 from dojo.notifications.helper import create_notification
 from django.urls import reverse
@@ -10,7 +17,9 @@ from django.urls import reverse
 logger = logging.getLogger(__name__)
 
 
-def transfer_findings(transfer_finding_findings: TransferFindingFinding, request_findings):
+def transfer_findings(
+    transfer_finding_findings: TransferFindingFinding, request_findings
+):
     test = None
     for transfer_finding_finding in transfer_finding_findings:
         finding = transfer_finding_finding.findings
@@ -18,23 +27,39 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, request
         if finding_id in request_findings:
             dict_findings = request_findings[finding_id]
             if dict_findings:
-                if (dict_findings["risk_status"] == "Transfer Accepted"
-                    and finding.risk_status in ["Transfer Rejected", "Risk Active", "Transfer Pending"]):
+                if dict_findings[
+                    "risk_status"
+                ] == "Transfer Accepted" and finding.risk_status in [
+                    "Transfer Rejected",
+                    "Risk Active",
+                    "Transfer Pending",
+                ]:
 
                     finding.risk_status = dict_findings["risk_status"]
                     finding.active = False
                     if not test:
-                        test = created_test(origin_finding=finding,
-                                        transfer_finding=transfer_finding_finding.transfer_findings)
-                    transfer_finding(origin_finding=finding,
-                                            transfer_finding=transfer_finding_finding.transfer_findings,
-                                            test=test,
-                                            transferfinding_findigns=transfer_finding_findings)
+                        test = created_test(
+                            origin_finding=finding,
+                            transfer_finding=transfer_finding_finding.transfer_findings,
+                        )
+                    transfer_finding(
+                        origin_finding=finding,
+                        transfer_finding=transfer_finding_finding.transfer_findings,
+                        test=test,
+                        transferfinding_findigns=transfer_finding_findings,
+                    )
 
-                    send_notification_transfer_finding(transfer_finding_finding.transfer_findings)
+                    send_notification_transfer_finding(
+                        transfer_findings=transfer_finding_finding.transfer_findings,
+                        status="accepted"
+                    )
                 elif dict_findings["risk_status"] == "Transfer Rejected":
                     finding.risk_status = dict_findings["risk_status"]
                     finding.active = True
+                    send_notification_transfer_finding(
+                        transfer_findings=transfer_finding_finding.transfer_findings,
+                        status="rejected"
+                    )
                 finding.save()
         else:
             logger.warning(f"Finding not Found: {finding.id}")
@@ -51,10 +76,12 @@ def created_test(origin_finding: Finding, transfer_finding: TransferFinding) -> 
     return test
 
 
-def transfer_finding(origin_finding: Finding,
-                     transfer_finding: TransferFinding,
-                     test: Test,
-                     transferfinding_findigns: TransferFindingFinding):
+def transfer_finding(
+    origin_finding: Finding,
+    transfer_finding: TransferFinding,
+    test: Test,
+    transferfinding_findigns: TransferFindingFinding,
+):
     if isinstance(origin_finding, Finding) and isinstance(
         transfer_finding.destination_engagement, Engagement
     ):
@@ -71,7 +98,7 @@ def transfer_finding(origin_finding: Finding,
             numerical_severity=origin_finding.numerical_severity,
             static_finding=origin_finding.static_finding,
             dynamic_finding=origin_finding.dynamic_finding,
-            risk_status="Transfer Accepted"
+            risk_status="Transfer Accepted",
         )
 
         new_finding.save()
@@ -81,24 +108,38 @@ def transfer_finding(origin_finding: Finding,
             raise ApiError.bad_request("You must select an engagement")
 
 
-def add_finding_related(transfer_finding_findings: TransferFindingFinding, finding: Finding, origin_finding: Finding):
+def add_finding_related(
+    transfer_finding_findings: TransferFindingFinding,
+    finding: Finding,
+    origin_finding: Finding,
+):
     for transferfinding_finding in transfer_finding_findings:
-        if (transferfinding_finding.findings == origin_finding
-            and transferfinding_finding.finding_related is None):
+        if (
+            transferfinding_finding.findings == origin_finding
+            and transferfinding_finding.finding_related is None
+        ):
             transferfinding_finding.finding_related = finding
             transferfinding_finding.save()
             break
-        logger.debug("Transfer Finding: add related_finding to Transferfinding_finding id: {transferfinding_finding.id}")
+        logger.debug(
+            "Transfer Finding: add related_finding to Transferfinding_finding id: {transferfinding_finding.id}"
+        )
 
 
-def send_notification_transfer_finding(transfer_findings):
+def send_notification_transfer_finding(transfer_findings, status="accepted"):
+
+    dict_rule = {"accepted": {"icon": "check-circle", "color_icon": "#096C11"},
+                 "rejected": {"icon": "times-circle", "color_icon": "#b97a0c"},
+                 "removed": {"icon": "times-circle", "color_icon": "#B90C0C"},
+                 "pending": {"icon": "bell", "color_icon": "#1B30DE"}}
+
     logger.debug("Send notification transfer_finding id {transfer_findings.id}")
     pid = transfer_findings.origin_product.id
     create_notification(
         event="transfer_finding",
-        title=f"{transfer_findings.title[:30]}",
-        icon="check-circle",
-        color_icon="#096C11",
-        recipients=[transfer_findings.owner],
+        title=f"{transfer_findings.title[:30]} {status}",
+        icon=dict_rule[status]["icon"],
+        color_icon=dict_rule[status]["color_icon"],
+        recipients=[transfer_findings.owner.get_username()],
         url=reverse("view_transfer_finding", args=(pid,)),
     )

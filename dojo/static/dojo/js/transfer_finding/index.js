@@ -33,6 +33,9 @@ $(document).ready(function() {
         }
     });
 
+
+
+   
 });
 
 
@@ -88,11 +91,11 @@ function innerData(data){
             let cell_status = document.createElement("td")
             cell_status.className = "cls-finding-status"
             row.innerHTML = `
-            <td><a href="http://${host}/finding/${findings.findings.id}", class="table-link" type="button">${findings.findings.id}</a></td>
+            <td><a href="http://${host}/finding/${findings.findings.id}", class="table-link" target="_blank" type="button">${findings.findings.id}</a></td>
             <td>${findings.findings.title}</td>
             <td>${findings.findings.severity}</td>
             <td>${findings.findings.cve}</td>
-            <td><a href="${host}/finding/${findings.finding_related}" class="table-link" type="button"> ${findings.finding_related} </a></td>`
+            <td><a href="http://${host}/finding/${findings.finding_related}" class="table-link" target="_blank" type="button"> ${findings.finding_related} </a></td>`
             if(findings.findings.risk_status.includes("Transfer Accepted")){
                 cell_status.innerHTML= `<span style="color:green">Transfer Accepted</span>`
             }else if(findings.findings.risk_status.includes("Transfer Reject")){

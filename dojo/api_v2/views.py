@@ -3774,7 +3774,7 @@ class AnnouncementViewSet(
 class TransferFindingViewSet(prefetch.PrefetchListMixin,
                              prefetch.PrefetchRetrieveMixin,
                              DojoModelViewSet):
-    queryset = TransferFinding.objects.all()
+    queryset = TransferFinding.objects.all().order_by('id')
     permission_classes = (IsAuthenticated,)
     serializer_class = serializers.TransferFindingSerializer
     filter_backends = (DjangoFilterBackend,)
@@ -3826,14 +3826,6 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
             request_findings = request.data["findings"]
             if transfer_finding_findings:
                 helper_tf.transfer_findings(transfer_finding_findings, request_findings)
-                create_notification(
-                    event="transfer_finding",
-                    title=transfer_finding.title,
-                    recipients=[transfer_finding.owner.get_username()],
-                )
-                logger.debug(
-                    f"Transfer Finding  creation notificaion {create_notification}"
-                )
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return http_response.no_content(data=serializer.data, message=f"Transfer Finding {pk} Not Found")
@@ -3846,9 +3838,11 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
             if request.data.get('findings'):
                 obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
                 request_findings = request.data["findings"]
-                for transfer_finding in obj_transfer_finding_findings:
-                    if str(transfer_finding.findings.id) in request_findings:
-                        transfer_finding.delete()
+                for transfer_finding_finding in obj_transfer_finding_findings:
+                    if str(transfer_finding_finding.findings.id) in request_findings:
+                        helper_tf.send_notification_transfer_finding(transfer_finding_finding.transfer_findings, status="removed")
+                        transfer_finding_finding.delete()
+
                 return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
             else:
                 super().destroy(request, pk)
