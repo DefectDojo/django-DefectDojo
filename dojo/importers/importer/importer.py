@@ -126,8 +126,6 @@ class DojoDefaultImporter(object):
             # if scan_date was provided, override value from parser
             if scan_date:
                 item.date = scan_date.date()
-            elif scan_date is None:
-                scan_date = datetime.today()
 
             if service:
                 item.service = service

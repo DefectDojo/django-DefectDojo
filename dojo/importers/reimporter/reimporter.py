@@ -332,8 +332,6 @@ class DojoDefaultReImporter(object):
                 # if scan_date was provided, override value from parser
                 if scan_date:
                     item.date = scan_date.date()
-                elif scan_date is None:
-                    scan_date = datetime.today()
 
                 # Save it. Don't dedupe before endpoints are added.
                 item.save(dedupe_option=False)
@@ -580,6 +578,8 @@ class DojoDefaultReImporter(object):
         create_finding_groups_for_all_findings=True,
         apply_tags_to_findings=False,
     ):
+        if scan_date is None:
+            scan_date = timezone.make_aware(datetime.today())
 
         logger.debug(f"REIMPORT_SCAN: parameters: {locals()}")
 
