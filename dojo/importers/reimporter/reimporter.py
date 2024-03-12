@@ -17,6 +17,7 @@ from dojo.models import BurpRawRequestResponse, FileUpload, Finding, Notes, Test
 from dojo.tools.factory import get_parser
 from dojo.utils import get_current_user, is_finding_groups_enabled
 from django.db.models import Q
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -331,6 +332,8 @@ class DojoDefaultReImporter(object):
                 # if scan_date was provided, override value from parser
                 if scan_date:
                     item.date = scan_date.date()
+                elif scan_date is None:
+                    scan_date = datetime.today()
 
                 # Save it. Don't dedupe before endpoints are added.
                 item.save(dedupe_option=False)
