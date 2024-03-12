@@ -312,21 +312,18 @@
                                     <th class="nowrap centered severity-sort">
                                         {% trans "Severity" %}
                                     </th>
+                                    {% if show_product_column and product_tab is None %}
+                                        <th class="nowrap">
+                                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
+                                            {% dojo_sort request 'Product' 'test__engagement__product__name' %}
+                                        </th>
+                                    {% endif %}
                                     <th class="nowrap">
                                         {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                         {% dojo_sort request 'Name' 'title' %}
                                     </th>
                                     <th>
-                                        {% trans "CWE" %}
-                                    </th>
-                                    <th>
-                                        {% trans "Vulnerability Id" %}
-                                    </th>
-                                    <th>
-                                        {% trans "EPSS Score" %}
-                                    </th>
-                                    <th>
-                                        {% trans "EPSS Percentile" %}
+                                        {% trans "Found By" %}
                                     </th>
                                     <th class="nowrap">
                                         {% if filter_name == 'Closed' %}
@@ -337,22 +334,14 @@
                                             {% dojo_sort request 'Date' 'date' %}
                                         {% endif %}
                                     </th>
-                                    <th class="nowrap">
-                                        {% trans "Age" %}
-                                    </th>
-                                    {% if system_settings.enable_finding_sla %}
-                                        <th>
-                                            {% trans "SLA" %}
-                                        </th>
-                                    {% endif %}
-                                    <th>
-                                        {% trans "Reporter" %}
-                                    </th>
-                                    <th>
-                                        {% trans "Found By" %}
-                                    </th>
                                     <th>
                                         {% trans "Status" %}
+                                    </th>
+                                    <th>
+                                        {% trans "CWE" %}
+                                    </th>
+                                    <th>
+                                        {% trans "Vulnerability Id" %}
                                     </th>
                                     {% if system_settings.enable_jira %}
                                         {% if jira_project and product_tab or not product_tab %}
@@ -367,22 +356,31 @@
                                             </th>
                                         {% endif %}
                                     {% endif %}
-                                    {% if 'is_finding_groups_enabled'|system_setting_enabled %}
+                                    <th class="nowrap">
+                                        {% trans "Age" %}
+                                    </th>
+                                    {% if system_settings.enable_finding_sla %}
                                         <th>
-                                            {% trans "Group" %}
+                                            {% trans "SLA" %}
                                         </th>
                                     {% endif %}
-                                    {% if show_product_column and product_tab is None %}
-                                        <th class="nowrap">
-                                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
-                                            {% dojo_sort request 'Product' 'test__engagement__product__name' %}
-                                        </th>
-                                    {% endif %}
+                                    <th>
+                                        {% trans "Planned Remediation" %}
+                                    </th>
+                                    <th>
+                                        {% trans "Group" %}
+                                    </th>
                                     <th>
                                         {% trans "Service" %}
                                     </th>
                                     <th>
-                                        {% trans "Planned Remediation" %}
+                                        {% trans "EPSS Score" %}
+                                    </th>
+                                    <th>
+                                        {% trans "EPSS Percentile" %}
+                                    </th>
+                                    <th>
+                                        {% trans "Reporter" %}
                                     </th>
                                 {% endblock header %}
                             </tr>
@@ -527,6 +525,13 @@
                                                 {{ finding.severity_display }}
                                             </span>
                                         </td>
+                                        {% if show_product_column and product_tab is None %}
+                                            <td>
+                                                <a href="{% url 'view_product' finding.test.engagement.product.id %}"
+                                                title="{{ finding.test.engagement }}"
+                                                alt="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product }}</a>
+                                            </td>
+                                        {% endif %}
                                         <td>
                                             {% if finding.title %}
                                                 <a title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
@@ -579,6 +584,30 @@
                                             {% endif %}
                                             {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                                         </td>
+                                        <td>
+                                            {% if finding.found_by %}
+                                                <a target="#"
+                                                data-toggle="tooltip"
+                                                data-placement="bottom"
+                                                title="Test: {{ finding.test }}">{{ finding.found_by.all|join:", " }}</a>
+                                            {% else %}
+                                                <a target="#"
+                                                data-toggle="tooltip"
+                                                data-placement="bottom"
+                                                title="Test: {{ finding.test }}">{{ finding.test.test_type }}</a>
+                                            {% endif %}
+                                        </td>
+                                        <td class="nowrap">
+                                            {% if filter_name == 'Closed' %}
+                                                {{ finding.mitigated|date }}
+                                            {% else %}
+                                                {{ finding.date }}
+                                            {% endif %}
+                                        </td>
+                                        <td class="nowrap">
+                                            {{ finding|finding_display_status|safe }}&nbsp;{{ finding|import_history }}
+                                        </td>
+                                        
                                         <td class="nowrap">
                                             {% if finding.cwe > 0 %}
                                                 <a target="_blank" href="{{ finding.cwe|cwe_url }}">
@@ -598,51 +627,7 @@
                                                     {% endif %}
                                                 {% endif %}
                                             {% endwith %}
-                                        </td>
-                                        <td class="nowrap">
-                                            {{ finding.epss_score|format_epss }}
-                                        </td>
-                                        <td class="nowrap">
-                                            {{ finding.epss_percentile|format_epss }}
-                                        </td>
-                                        <td class="nowrap">
-                                            {% if filter_name == 'Closed' %}
-                                                {{ finding.mitigated|date }}
-                                            {% else %}
-                                                {{ finding.date }}
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {{ finding.age }}
-                                        </td>
-                                        {% if system_settings.enable_finding_sla %}
-                                            <td>
-                                                {{ finding|finding_sla }}
-                                            </td>
-                                        {% endif %}
-                                        <td>
-                                            {% if finding.reporter.get_full_name and finding.reporter.get_full_name.strip %}
-                                                {{ finding.reporter.get_full_name }}
-                                            {% else %}
-                                                {{ finding.reporter }}
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if finding.found_by %}
-                                                <a target="#"
-                                                data-toggle="tooltip"
-                                                data-placement="bottom"
-                                                title="Test: {{ finding.test }}">{{ finding.found_by.all|join:", " }}</a>
-                                            {% else %}
-                                                <a target="#"
-                                                data-toggle="tooltip"
-                                                data-placement="bottom"
-                                                title="Test: {{ finding.test }}">{{ finding.test.test_type }}</a>
-                                            {% endif %}
-                                        </td>
-                                        <td class="nowrap">
-                                            {{ finding|finding_display_status|safe }}&nbsp;{{ finding|import_history }}
-                                        </td>
+                                        </td>                                        
                                         {% if system_settings.enable_jira %}
                                             {% if jira_project and product_tab or not product_tab %}
                                                 <td class="nowrap">
@@ -678,6 +663,17 @@
                                                 </td>
                                             {% endif %}
                                         {% endif %}
+                                        <td>
+                                            {{ finding.age }}
+                                        </td>
+                                        {% if system_settings.enable_finding_sla %}
+                                            <td>
+                                                {{ finding|finding_sla }}
+                                            </td>
+                                        {% endif %}
+                                        <td class="nowrap">
+                                            {% if finding.planned_remediation_date %}{{ finding.planned_remediation_date }}{% endif %}
+                                        </td>
                                         {% if 'is_finding_groups_enabled'|system_setting_enabled %}
                                             <td class="centered">
                                                 {% if finding.has_finding_group %}
@@ -685,18 +681,21 @@
                                                 {% endif %}
                                             </td>
                                         {% endif %}
-                                        {% if show_product_column and product_tab is None %}
-                                            <td>
-                                                <a href="{% url 'view_product' finding.test.engagement.product.id %}"
-                                                title="{{ finding.test.engagement }}"
-                                                alt="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product }}</a>
-                                            </td>
-                                        {% endif %}
                                         <td>
                                             {% if finding.service %}{{ finding.service }}{% endif %}
                                         </td>
                                         <td class="nowrap">
-                                            {% if finding.planned_remediation_date %}{{ finding.planned_remediation_date }}{% endif %}
+                                            {{ finding.epss_score|format_epss }}
+                                        </td>
+                                        <td class="nowrap">
+                                            {{ finding.epss_percentile|format_epss }}
+                                        </td>
+                                        <td>
+                                            {% if finding.reporter.get_full_name and finding.reporter.get_full_name.strip %}
+                                                {{ finding.reporter.get_full_name }}
+                                            {% else %}
+                                                {{ finding.reporter }}
+                                            {% endif %}
                                         </td>
                                     {% endblock body %}
                                 </tr>
