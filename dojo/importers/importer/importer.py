@@ -38,8 +38,6 @@ class DojoDefaultImporter(object):
 
         if scan_date and not scan_date.tzinfo:
             scan_date = timezone.make_aware(scan_date)
-        elif scan_date is None:
-            scan_date = timezone.make_aware(datetime.today())
 
         if now and not now.tzinfo:
             now = timezone.make_aware(now)
