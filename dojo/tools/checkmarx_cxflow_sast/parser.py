@@ -1,15 +1,18 @@
 import json
 import dateutil.parser
+import logging
 
 from dojo.models import Finding
 
+logger = logging.getLogger(__name__)
+
 
 class _PathNode(object):
-    def __init__(self, file: str, line: str, column: str, _object: str, length: str, snippet: str):
+    def __init__(self, file: str, line: str, column: str, node_object: str, length: str, snippet: str):
         self.file = file
         self.line = line
         self.column = int(column)
-        self._object = _object
+        self.node_object = node_object
         self.length = int(length)
         self.snippet = snippet
 
@@ -26,10 +29,10 @@ class _PathNode(object):
 
 
 class _Path(object):
-    def __init__(self, sink: _PathNode, source: _PathNode, state: int, paths: [_PathNode]):
+    def __init__(self, sink: _PathNode, source: _PathNode, state: str, paths: [_PathNode]):
         self.sink = sink
         self.source = source
-        self.state = int(state)
+        self.state = state
         self.paths = paths
 
 
@@ -38,16 +41,13 @@ class CheckmarxCXFlowSastParser(object):
         pass
 
     def get_scan_types(self):
-        return ["CheckmarxCxFlow"]
+        return ["Checkmarx CxFlow SAST"]
 
     def get_label_for_scan_types(self, scan_type):
         return scan_type  # no custom label for now
 
     def get_description_for_scan_types(self, scan_type):
-        if scan_type == "CheckmarxCxFlow Scan":
-            return "Simple Report. Aggregates vulnerabilities per categories, cwe, name, sinkFilename"
-        else:
-            return "Detailed Report. Import all vulnerabilities from checkmarx without aggregation"
+        return "Detailed Report. Import all vulnerabilities from checkmarx without aggregation"
 
     def get_findings(self, file, test):
         if file.name.strip().lower().endswith(".json"):
@@ -92,32 +92,60 @@ class CheckmarxCXFlowSastParser(object):
                     paths=list([result[k] for k in path_keys])
                 )
 
-                map_paths[path.source.line] = path
+                map_paths[str(path.source.line)] = path
 
             for detail_key in issue.get("details").keys():
-                pass
+                if detail_key not in map_paths:
+                    logger.warning(f"{detail_key} not found in path, ignore")
+                else:
+                    detail = map_paths[detail_key]
 
-                finding = Finding(
-                    title=vulnerability.replace("_", " "),
-                    cwe=int(cwe),
-                    file_path=filename,
-                    date=dateutil.parser.parse(scan_start_date),
-                    static_finding=True,
-                    unique_id_from_tool=similarity_id,
-                )
+                    finding_detail = f"**Category:** {categories}\n"
+                    finding_detail += f"**Language:** {language}\n"
+                    finding_detail += f"**Status:** {status}\n"
+                    finding_detail += f"**Finding link:** [{link}]({link})\n"
+                    finding_detail += f"**Description:** {description}\n"
+                    finding_detail += f"**Source snippet:** `{detail.source.snippet if detail.source is not None else ''}`\n"
+                    finding_detail += f"**Sink snippet:** `{detail.sink.snippet if detail.sink is not None else ''}`\n"
 
-            findings.append(finding)
+                    finding = Finding(
+                        title=vulnerability.replace("_", " ") + " " + detail.sink.file.split("/")[
+                            -1] if detail.sink is not None else "",
+                        cwe=int(cwe),
+                        date=dateutil.parser.parse(scan_start_date),
+                        static_finding=True,
+                        unique_id_from_tool=str(similarity_id) + str(detail_key),
+                        test=test,
+                        sast_source_object=detail.source.node_object if detail.source is not None else None,
+                        sast_sink_object=detail.sink.node_object if detail.sink is not None else None,
+                        sast_source_file_path=detail.source.file if detail.source is not None else None,
+                        sast_source_line=detail.source.line if detail.source is not None else None,
+                        vuln_id_from_tool=similarity_id,
+                        severity=severity,
+                        file_path=filename,
+                        line=detail.sink.line,
+                        false_p=issue.get("details")[detail_key].get("falsePositive"),
+                        description=finding_detail,
+                        verified=self.is_verify(detail.state),
+                        active=self.is_active(detail.state)
+                    )
+
+                    findings.append(finding)
 
         return findings
 
     def _get_findings_xml(self):
         pass
 
-    def is_verify(self, status):
-        pass
+    def is_verify(self, state):
+        # Confirmed, urgent
+        verifiedStates = ["2", "3"]
+        return state in verifiedStates
 
-    def is_active(self, status):
-        pass
+    def is_active(self, state):
+        # To verify, Confirmed, Urgent, Proposed not exploitable
+        activeStates = ["0", "2", "3", "4"]
+        return state in activeStates
 
-    def is_mitigated(self, status):
+    def is_mitigated(self, state):
         pass
