@@ -325,7 +325,7 @@ class NexposeParser(object):
             if dupe_text not in find.description:
                 find.description += "\n\n" + dupe_text
         else:
-            if vuln.get("vulnerableSince") != None:
+            if vuln.get("vulnerableSince") is not None:
                 find = Finding(
                     title=vuln["name"],
                     description=html2text.html2text(vuln["desc"].strip())
