@@ -325,22 +325,39 @@ class NexposeParser(object):
             if dupe_text not in find.description:
                 find.description += "\n\n" + dupe_text
         else:
-            find = Finding(
-                title=vuln["name"],
-                description=html2text.html2text(vuln["desc"].strip())
-                + "\n\n"
-                + html2text.html2text(vuln.get("pluginOutput", "").strip()),
-                severity=vuln["severity"],
-                mitigation=html2text.html2text(vuln.get("resolution"))
-                if vuln.get("resolution")
-                else None,
-                impact=vuln.get("vector") if vuln.get("vector") else None,
-                false_p=False,
-                duplicate=False,
-                out_of_scope=False,
-                dynamic_finding=True,
-                date=vuln.get("vulnerableSince"),
-            )
+            if vuln.get("vulnerableSince") != None:
+                find = Finding(
+                    title=vuln["name"],
+                    description=html2text.html2text(vuln["desc"].strip())
+                    + "\n\n"
+                    + html2text.html2text(vuln.get("pluginOutput", "").strip()),
+                    severity=vuln["severity"],
+                    mitigation=html2text.html2text(vuln.get("resolution"))
+                    if vuln.get("resolution")
+                    else None,
+                    impact=vuln.get("vector") if vuln.get("vector") else None,
+                    false_p=False,
+                    duplicate=False,
+                    out_of_scope=False,
+                    dynamic_finding=True,
+                    date=vuln.get("vulnerableSince"),
+                )
+            else:
+                find = Finding(
+                    title=vuln["name"],
+                    description=html2text.html2text(vuln["desc"].strip())
+                    + "\n\n"
+                    + html2text.html2text(vuln.get("pluginOutput", "").strip()),
+                    severity=vuln["severity"],
+                    mitigation=html2text.html2text(vuln.get("resolution"))
+                    if vuln.get("resolution")
+                    else None,
+                    impact=vuln.get("vector") if vuln.get("vector") else None,
+                    false_p=False,
+                    duplicate=False,
+                    out_of_scope=False,
+                    dynamic_finding=True,
+                )
             # build references
             refs = ""
             for ref in vuln.get("refs", {}):
