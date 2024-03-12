@@ -9,6 +9,7 @@ from dojo.models import (
     TransferFinding,
     TransferFindingFinding,
     Test,
+    System_Settings
 )
 from dojo.authorization.authorization import user_has_global_permission
 from dojo.notifications.helper import create_notification
@@ -21,6 +22,7 @@ def transfer_findings(
     transfer_finding_findings: TransferFindingFinding, request_findings
 ):
     test = None
+    system_settings = System_Settings.objects.get()
     for transfer_finding_finding in transfer_finding_findings:
         finding = transfer_finding_finding.findings
         finding_id = str(finding.id)
@@ -47,6 +49,7 @@ def transfer_findings(
                         transfer_finding=transfer_finding_finding.transfer_findings,
                         test=test,
                         transferfinding_findigns=transfer_finding_findings,
+                        system_settings=system_settings
                     )
 
                     send_notification_transfer_finding(
@@ -81,6 +84,7 @@ def transfer_finding(
     transfer_finding: TransferFinding,
     test: Test,
     transferfinding_findigns: TransferFindingFinding,
+    system_settings: System_Settings
 ):
     if isinstance(origin_finding, Finding) and isinstance(
         transfer_finding.destination_engagement, Engagement
@@ -98,11 +102,16 @@ def transfer_finding(
             numerical_severity=origin_finding.numerical_severity,
             static_finding=origin_finding.static_finding,
             dynamic_finding=origin_finding.dynamic_finding,
-            risk_status="Transfer Accepted",
+            risk_status="Risk Active",
         )
 
         new_finding.save()
         add_finding_related(transferfinding_findigns, new_finding, origin_finding)
+        if transfer_finding.destination_product_type.name == system_settings.orphan_findings:
+            logger.debug("Removed orphan findings {origin_finding.id}")
+            origin_finding.delete()
+            origin_finding.save()
+            send_notification_transfer_finding(transfer_finding, status="removed")
     else:
         if not transfer_finding.destination_engagement:
             raise ApiError.bad_request("You must select an engagement")
@@ -127,13 +136,12 @@ def add_finding_related(
 
 
 def send_notification_transfer_finding(transfer_findings, status="accepted"):
-
+    logger.debug("Send notification transfer_finding id {transfer_findings.id}")
     dict_rule = {"accepted": {"icon": "check-circle", "color_icon": "#096C11"},
                  "rejected": {"icon": "times-circle", "color_icon": "#b97a0c"},
                  "removed": {"icon": "times-circle", "color_icon": "#B90C0C"},
                  "pending": {"icon": "bell", "color_icon": "#1B30DE"}}
 
-    logger.debug("Send notification transfer_finding id {transfer_findings.id}")
     pid = transfer_findings.origin_product.id
     create_notification(
         event="transfer_finding",
