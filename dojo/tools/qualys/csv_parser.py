@@ -163,16 +163,27 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
             finding = finding_with_id
         else:
             if report_finding.get("Title"):
-                finding = Finding(
-                    title=f"QID-{report_finding['QID']} | {report_finding['Title']}",
-                    mitigation=report_finding["Solution"],
-                    description=f"{report_finding['Threat']}\nResult Evidence: \n{report_finding.get('Threat', 'Not available')}",
-                    severity=severity_lookup.get(report_finding["Severity"], "Info"),
-                    impact=report_finding["Impact"],
-                    date=date,
-                    vuln_id_from_tool=report_finding["QID"],
-                    cvssv3=cvssv3
-                )
+                if date is not None:
+                    finding = Finding(
+                        title=f"QID-{report_finding['QID']} | {report_finding['Title']}",
+                        mitigation=report_finding["Solution"],
+                        description=f"{report_finding['Threat']}\nResult Evidence: \n{report_finding.get('Threat', 'Not available')}",
+                        severity=severity_lookup.get(report_finding["Severity"], "Info"),
+                        impact=report_finding["Impact"],
+                        date=date,
+                        vuln_id_from_tool=report_finding["QID"],
+                        cvssv3=cvssv3
+                    )
+                else:
+                    finding = Finding(
+                        title=f"QID-{report_finding['QID']} | {report_finding['Title']}",
+                        mitigation=report_finding["Solution"],
+                        description=f"{report_finding['Threat']}\nResult Evidence: \n{report_finding.get('Threat', 'Not available')}",
+                        severity=severity_lookup.get(report_finding["Severity"], "Info"),
+                        impact=report_finding["Impact"],
+                        vuln_id_from_tool=report_finding["QID"],
+                        cvssv3=cvssv3
+                    )
                 # Qualys reports regression findings as active, but with a Date Last
                 # Fixed.
                 if report_finding["Date Last Fixed"]:
@@ -203,16 +214,25 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
                             date = parser.parse(date.replace("Z", ""))
                 except Exception:
                     date = None
-
-                finding = Finding(
-                    title=f"QID-{report_finding['QID']} | {report_finding['VULN TITLE']}",
-                    mitigation=report_finding["SOLUTION"],
-                    description=f"{report_finding['THREAT']}\nResult Evidence: \n{report_finding.get('THREAT', 'Not available')}",
-                    severity=report_finding["SEVERITY"],
-                    impact=report_finding["IMPACT"],
-                    date=date,
-                    vuln_id_from_tool=report_finding["QID"]
-                )
+                if date is not None:
+                    finding = Finding(
+                        title=f"QID-{report_finding['QID']} | {report_finding['VULN TITLE']}",
+                        mitigation=report_finding["SOLUTION"],
+                        description=f"{report_finding['THREAT']}\nResult Evidence: \n{report_finding.get('THREAT', 'Not available')}",
+                        severity=report_finding["SEVERITY"],
+                        impact=report_finding["IMPACT"],
+                        date=date,
+                        vuln_id_from_tool=report_finding["QID"]
+                    )
+                else:
+                    finding = Finding(
+                        title=f"QID-{report_finding['QID']} | {report_finding['VULN TITLE']}",
+                        mitigation=report_finding["SOLUTION"],
+                        description=f"{report_finding['THREAT']}\nResult Evidence: \n{report_finding.get('THREAT', 'Not available')}",
+                        severity=report_finding["SEVERITY"],
+                        impact=report_finding["IMPACT"],
+                        vuln_id_from_tool=report_finding["QID"]
+                    )
         # Make sure we have something to append to
         if isinstance(finding.unsaved_vulnerability_ids, list):
             # Append CVEs if there is a chance for duplicates
