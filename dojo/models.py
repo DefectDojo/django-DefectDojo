@@ -1124,7 +1124,7 @@ class Product(models.Model):
         endpoints = getattr(self, 'active_endpoints', None)
         if endpoints:
             return len(self.active_endpoints)
-        return 0
+        return None
 
     def open_findings(self, start_date=None, end_date=None):
         if start_date is None or end_date is None:

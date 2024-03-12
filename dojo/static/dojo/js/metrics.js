@@ -1618,6 +1618,8 @@ function open_close_weekly(opened, closed, accepted, ticks) {
     var options = {
         xaxes: [{
             ticks: ticks,
+            transform: function(v) { return -v; },
+            inverseTransform: function(v) { return -v; }
         }],
         yaxes: [{
             min: 0
@@ -1659,6 +1661,8 @@ function severity_weekly(critical, high, medium, low, info, ticks) {
     var options = {
         xaxes: [{
             ticks: ticks,
+            transform: function(v) { return -v; },
+            inverseTransform: function(v) { return -v; }
         }],
         yaxes: [{
             min: 0
@@ -1709,6 +1713,8 @@ function severity_counts_weekly(critical, high, medium, ticks) {
     var options = {
         xaxes: [{
             ticks: ticks,
+            transform: function(v) { return -v; },
+            inverseTransform: function(v) { return -v; }
         }],
         yaxes: [{
             min: 0
