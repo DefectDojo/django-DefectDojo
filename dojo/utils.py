@@ -31,7 +31,6 @@ from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Pr
 from asteval import Interpreter
 from dojo.notifications.helper import create_notification
 import logging
-import itertools
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 import crum
@@ -1579,7 +1578,12 @@ class Product_Tab():
                                                           active=True,
                                                           mitigated__isnull=True).count()
         active_endpoints = Endpoint.objects.filter(
-            product=self.product, finding__active=True, finding__mitigated__isnull=True)
+            product=self.product,
+            status_endpoint__mitigated=False,
+            status_endpoint__false_positive=False,
+            status_endpoint__out_of_scope=False,
+            status_endpoint__risk_accepted=False,
+        )
         self.endpoints_count = active_endpoints.distinct().count()
         self.endpoint_hosts_count = active_endpoints.values('host').distinct().count()
         self.benchmark_type = Benchmark_Type.objects.filter(
@@ -1745,12 +1749,6 @@ def engagement_post_Save(sender, instance, created, **kwargs):
         title = 'Engagement created for ' + str(engagement.product) + ': ' + str(engagement.name)
         create_notification(event='engagement_added', title=title, engagement=engagement, product=engagement.product,
                             url=reverse('view_engagement', args=(engagement.id,)))
-
-
-def merge_sets_safe(set1, set2):
-    return set(itertools.chain(set1 or [], set2 or []))
-    # This concat looks  better, but requires Python 3.6+
-    # return {*set1, *set2}
 
 
 def is_safe_url(url):
