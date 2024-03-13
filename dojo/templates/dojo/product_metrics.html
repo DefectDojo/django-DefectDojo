@@ -490,11 +490,6 @@
     <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
     <script src="{% static "flot/jquery.flot.categories.js" %}"></script>
     {% include "dojo/filter_js_snippet.html" %}
-    {% if punchcard %}
-        <script src="{% static "JUMFlot/javascripts/JUMFlot.min.js" %}"></script>
-        <script src="{% static "JUMFlot/javascripts/jquery.flot.mouse.js" %}"></script>
-        <script src="{% static "JUMFlot/javascripts/jquery.flot.bubbles.js" %}"></script>
-    {% endif %}
     <script src="{% static "flot/jquery.flot.time.js" %}"></script>
     <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
     {% block metrics %}

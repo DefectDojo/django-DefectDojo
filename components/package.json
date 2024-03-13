@@ -4,7 +4,6 @@
   "license" : "BSD-3-Clause",
   "private": true,
   "dependencies": {
-    "JUMFlot": "jumjum123/JUMFlot#*",
     "bootstrap": "^3.4.1",
     "bootstrap-select": "^1.13.18",
     "bootstrap-social": "^4.0.0",
