@@ -59,7 +59,6 @@ class CheckmarxCXFlowSastParser(object):
     def _get_findings_json(self, file, test):
         data = json.load(file)
         findings = []
-        # deepLink = data.get("deepLink")
         additional_details = data.get("additionalDetails")
         scan_start_date = additional_details.get("scanStartDate")
 
@@ -134,10 +133,6 @@ class CheckmarxCXFlowSastParser(object):
                     findings.append(finding)
 
         return findings
-
-    def _get_findings_xml(self):
-        # TODO: move logic from checkmarx to here
-        pass
 
     def is_verify(self, state):
         # Confirmed, urgent
