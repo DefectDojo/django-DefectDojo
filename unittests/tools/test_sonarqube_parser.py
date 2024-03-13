@@ -547,3 +547,13 @@ class TestSonarQubeParser(DojoTestCase):
         # common verifications
         # (there is no aggregation to be done here)
         self.assertEqual(6, len(findings))
+
+    def test_parse_json_file_from_api_with_multiple_findings(self):
+        my_file_handle, product, engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/findings_over_api.json"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        # common verifications
+        # (there is no aggregation to be done here)
+        self.assertEqual(3, len(findings))
