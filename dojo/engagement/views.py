@@ -1110,8 +1110,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
 
         if 'add_findings' in request.POST:
             add_findings_form = AddFindingsRiskAcceptanceForm(
-                request.POST, request.FILES, instance=risk_acceptance)
-
+                request.POST, request.FILES, request=request, instance=risk_acceptance)
             errors = errors or not add_findings_form.is_valid()
             if not errors:
                 findings = add_findings_form.cleaned_data['accepted_findings']
@@ -1124,7 +1123,6 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                     'Finding%s added successfully.' % ('s' if len(findings) > 1
                                                        else ''),
                     extra_tags='alert-success')
-
         if not errors:
             logger.debug('redirecting to return_url')
             return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
@@ -1137,7 +1135,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
 
     note_form = NoteForm()
     replace_form = ReplaceRiskAcceptanceProofForm(instance=risk_acceptance)
-    add_findings_form = AddFindingsRiskAcceptanceForm(instance=risk_acceptance)
+    add_findings_form = AddFindingsRiskAcceptanceForm(instance=risk_acceptance, request=request)
 
     accepted_findings = risk_acceptance.accepted_findings.order_by('numerical_severity')
     fpage = get_page_items(request, accepted_findings, 15)
@@ -1146,8 +1144,13 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         .exclude(id__in=accepted_findings).order_by("title")
     add_fpage = get_page_items(request, unaccepted_findings, 10, 'apage')
     # on this page we need to add unaccepted findings as possible findings to add as accepted
+
     add_findings_form.fields[
         "accepted_findings"].queryset = add_fpage.object_list
+
+    add_findings_form.fields["accepted_findings"].widget.request = request
+    add_findings_form.fields["accepted_findings"].widget.findings = unaccepted_findings
+    add_findings_form.fields["accepted_findings"].widget.page_number = add_fpage.number
 
     product_tab = Product_Tab(eng.product, title="Risk Acceptance", tab="engagements")
     product_tab.setEngagement(eng)
