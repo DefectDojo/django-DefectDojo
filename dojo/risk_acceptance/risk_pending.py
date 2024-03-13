@@ -123,17 +123,19 @@ def risk_accepted_succesfully(
 
 
 def get_role_members(user, product: Product, product_type: Product_Type):
-    user_members: Product_Type_Member = get_authorized_product_type_members_for_user(user, Permissions.Risk_Acceptance)
-    if not user_members:
-        user_members: Product_Member = get_authorized_members_for_product(product=product, permission=Permissions.Risk_Acceptance)
+    user_members = None
+    user_members_product_type: Product_Type_Member = get_authorized_product_type_members_for_user(user, Permissions.Risk_Acceptance)
+    user_members_product: Product_Member = get_authorized_members_for_product(product=product, permission=Permissions.Risk_Acceptance)
+    if user_members_product:
+        user_members = list(user_members_product_type) + list(user_members_product)
     if not user_members:
         raise ValueError("The user does not have any product_type or product associated with it")
-    for user_member in user_members.all():
+    for user_member in user_members:
         if hasattr(user_member,"product_type_id"):
             if user_member.product_type_id == product_type.id:
                 return user_member.role.name
         elif hasattr(user_member, "product_id"):
-            if user_member.product_id == product_type.id:
+            if user_member.product_id == product.id:
                 return user_member.role.name
     raise ValueError(f"The user is not related to the object {product_type}")    
 
