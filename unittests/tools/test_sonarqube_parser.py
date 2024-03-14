@@ -548,22 +548,38 @@ class TestSonarQubeParser(DojoTestCase):
         # (there is no aggregation to be done here)
         self.assertEqual(6, len(findings))
 
-    def test_parse_json_file_from_api_with_multiple_findings(self):
+    def test_parse_json_file_from_api_with_multiple_findings_json(self):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/findings_over_api.json"
         )
         parser = SonarQubeParser()
         findings = parser.get_findings(my_file_handle, test)
-        # common verifications
-        # (there is no aggregation to be done here)
         self.assertEqual(3, len(findings))
+        item = findings[0]
+        self.assertEqual(str, type(item.description))
+        self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwoefijo", item.title)
+        self.assertEqual("Medium", item.severity)
+        item = findings[1]
+        self.assertEqual("Web:TableWithoutCaptionCheck_asdfwfewfwefewf", item.title)
+        self.assertEqual("Low", item.severity)
+        item = findings[2]
+        self.assertEqual("typescript:S1533_fjoiewfjoweifjoihugu-", item.title)
+        self.assertEqual("Low", item.severity)
 
-    def test_parse_json_file_from_api_with_multiple_findings(self):
+    def test_parse_json_file_from_api_with_multiple_findings_zip(self):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/findings_over_api.zip"
         )
         parser = SonarQubeParser()
         findings = parser.get_findings(my_file_handle, test)
-        # common verifications
-        # (there is no aggregation to be done here)
         self.assertEqual(6, len(findings))
+        item = findings[0]
+        self.assertEqual(str, type(item.description))
+        self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwoefijo", item.title)
+        self.assertEqual("Medium", item.severity)
+        item = findings[3]
+        self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwo1123efijo", item.title)
+        self.assertEqual("Low", item.severity)
+        item = findings[5]
+        self.assertEqual("typescript:S112533_fjoiewfjo1235gweifjoihugu-", item.title)
+        self.assertEqual("Medium", item.severity)
