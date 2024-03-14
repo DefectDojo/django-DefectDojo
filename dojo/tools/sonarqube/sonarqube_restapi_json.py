@@ -15,7 +15,7 @@ class SonarQubeRESTAPIJSON(object):
                 flows = str(issue.get("flows"))
                 status = issue.get("status")
                 message = issue.get("message")
-                tags = issue.get("tags")
+                tags = str(issue.get("tags"))
                 type = issue.get("type")
                 scope = issue.get("scope")
                 quickFixAvailable = str(issue.get("quickFixAvailable"))
@@ -33,6 +33,7 @@ class SonarQubeRESTAPIJSON(object):
                 description += "**tags:** " + tags + "\n"
                 description += "**type:** " + type + "\n"
                 description += "**scope:** " + scope + "\n"
+                description += self.returncomponent(json_content, component)
                 item = Finding(
                     title="vuln_title",
                     description="vuln_description",
@@ -65,6 +66,7 @@ class SonarQubeRESTAPIJSON(object):
                 description += "**quickFixAvailable:** " + quickFixAvailable + "\n"
                 description += "**codeVariants:** " + codeVariants + "\n"
                 description += "**tags:** " + tags + "\n"
+                description += self.returncomponent(json_content, component)
                 item = Finding(
                     title=rule + "_" + key,
                     description=description,
@@ -100,6 +102,7 @@ class SonarQubeRESTAPIJSON(object):
                 description += "**scope:** " + scope + "\n"
                 description += "**quickFixAvailable:** " + quickFixAvailable + "\n"
                 description += "**codeVariants:** " + codeVariants + "\n"
+                description += self.returncomponent(json_content, component)
                 item = Finding(
                     title=rule + "_" + key,
                     description=description,
@@ -120,3 +123,13 @@ class SonarQubeRESTAPIJSON(object):
             return "Low"
         else:
             return severity.lower().capitalize()
+
+    def returncomponent(self, json_content, key):
+        components = json_content.get("components")
+        description = ""
+        for comp in components:
+            if comp.get("key") == key:
+                componentkeys = comp.keys()
+                for ck in componentkeys:
+                    description += "**Componentkey " + ck + "**: " + str(comp.get("ck")) + "\n"
+        return description
