@@ -3,8 +3,8 @@ title: "SonarQube"
 toc_hide: true
 ---
 # SonarQube Scan
-There are two ways to retrieve findings from SonarQube. You can either use the [soprasteria package](https://github.com/soprasteria/sonar-report) or the SonarQube REST API with. 
-Both ways are descriped closer below. 
+There are two ways to retrieve findings from SonarQube. You can either use the [soprasteria package](https://github.com/soprasteria/sonar-report) or the SonarQube REST API directly. 
+Both ways (**SonarQube REST API** and **Soprasteria**) are depicted below. 
 
 ### Sample Scan Data
 Sample SonarQube scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/sonarqube).
