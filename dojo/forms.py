@@ -788,7 +788,6 @@ class AddFindingsRiskAcceptanceForm(forms.ModelForm):
         fields = ['accepted_findings']
 
     def __init__(self, *args, **kwargs):
-        request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
 
