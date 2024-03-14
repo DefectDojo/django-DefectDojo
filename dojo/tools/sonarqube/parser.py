@@ -2,7 +2,9 @@ import logging
 from dojo.tools.sonarqube.soprasteria_json import SonarQubeSoprasteriaJSON
 from dojo.tools.sonarqube.soprasteria_html import SonarQubeSoprasteriaHTML
 from dojo.tools.sonarqube.sonarqube_restapi_json import SonarQubeRESTAPIJSON
+from dojo.tools.sonarqube.sonarqube_restapi_zip import SonarQubeRESTAPIZIP
 from lxml import etree
+import zipfile
 import json
 logger = logging.getLogger(__name__)
 
@@ -34,6 +36,15 @@ class SonarQubeParser(object):
                 return SonarQubeRESTAPIJSON().get_json_items(json_content, test, self.mode)
             else:
                 return []
+        if filename.name.endswith(".zip"):
+            if str(filename.__class__) == "<class '_io.TextIOWrapper'>":
+                input_zip = zipfile.ZipFile(filename.name, 'r')
+            else:
+                input_zip = zipfile.ZipFile(filename, 'r')
+            zipdata = {name: input_zip.read(name) for name in input_zip.namelist()}
+            # print(len(zipdata))
+            # print(zipdata)
+            return SonarQubeRESTAPIZIP().get_items(zipdata, test, self.mode)
         else:
             parser = etree.HTMLParser()
             tree = etree.parse(filename, parser)
