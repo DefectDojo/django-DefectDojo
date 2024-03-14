@@ -4,8 +4,11 @@
 <table id="findings_table" class="tablesorter-bootstrap table table-condensed table-striped table-hover">
     {% for finding in findings %}
     <tr>
-        <td><input type="checkbox" name="accepted_findings" value="{{ finding.id }}"></td>
-        <td>{{ finding.id }}</td>
+        <td>
+            <label for="id_accepted_findings_{{ finding.id }}"></span>
+            <input type="checkbox" name="accepted_findings" value="{{ finding.id }}">
+        </td>
+        <td>{{finding.id}}</td>
         <td>
             <span class="label severity severity-{{ finding.severity }}">
                 {{ finding.severity_display }}
