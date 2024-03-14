@@ -1110,7 +1110,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
 
         if 'add_findings' in request.POST:
             add_findings_form = AddFindingsRiskAcceptanceForm(
-                request.POST, request.FILES, request=request, instance=risk_acceptance)
+                request.POST, request.FILES, instance=risk_acceptance)
             errors = errors or not add_findings_form.is_valid()
             if not errors:
                 findings = add_findings_form.cleaned_data['accepted_findings']
@@ -1135,7 +1135,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
 
     note_form = NoteForm()
     replace_form = ReplaceRiskAcceptanceProofForm(instance=risk_acceptance)
-    add_findings_form = AddFindingsRiskAcceptanceForm(instance=risk_acceptance, request=request)
+    add_findings_form = AddFindingsRiskAcceptanceForm(instance=risk_acceptance)
 
     accepted_findings = risk_acceptance.accepted_findings.order_by('numerical_severity')
     fpage = get_page_items(request, accepted_findings, 15)
