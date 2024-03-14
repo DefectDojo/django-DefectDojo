@@ -19,7 +19,7 @@ class TableCheckboxWidget(forms.widgets.Widget):
 
     def render(self, name, value, attrs=None, renderer=None):
         page_number = self.page_number
-        paginator = Paginator(self.findings, 10)  # 10 items per page
+        paginator = Paginator(self.findings, 500)  # 10 items per page
         page = paginator.get_page(page_number)
         context = {
             'name': name, 

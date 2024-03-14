@@ -1,27 +1,7 @@
-
-<!-- custom_multiple_choice_field.html -->
-{% for checkbox in field %}
-    <div class="checkbox">
-        <label for="{{ checkbox.id_for_label }}">
-            {{ checkbox.choice_label }}
-            {{ checkbox.tag }}
-        </label>
-    </div>
-{% endfor %}
-
-
 {% load i18n %}
 {% load display_tags %}
-<table id="findings_table"class="table table-striped table-condensed">
-    <tr>
-        <th></th>
-        <th>ID</th>
-        <th>Severity</th>
-        <th>EPSS Score / Percentile</th>
-        <th>Name</th>
-        <th>Date</th>
-        <th>Active</th>
-    </tr>
+{% load static %}
+<table id="findings_table" class="tablesorter-bootstrap table table-condensed table-striped table-hover">
     {% for finding in findings %}
     <tr>
         <td><input type="checkbox" name="accepted_findings" value="{{ finding.id }}"></td>
@@ -43,10 +23,3 @@
     {% endfor %}
 </table>
 
-{% block js %}
-    <script>
-        $(document).ready(function() {
-            $('#findings-table').DataTable();
-        });
-    </script>
-{% endblock js %}

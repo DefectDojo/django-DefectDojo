@@ -384,4 +384,34 @@
 <script type="text/javascript">
      {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
 </script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        setTimeout(function() {
+            var table = $('#findings_table').DataTable({
+                "paging": true,
+                "searching": true,
+                "ordering": true,
+                columns: [
+                    { title: '' },
+                    { title: 'ID' },
+                    { title: 'Severity' },
+                    { title: 'EPSS Score / Percentile' },
+                    { title: 'Name' },
+                    { 
+                        title: 'Date', 
+                        render: function(data) {
+                            var date = new Date(data);
+                            var year = date.getFullYear();
+                            var month = (1 + date.getMonth()).toString().padStart(2, '0');
+                            var day = date.getDate().toString().padStart(2, '0');
+
+                            return year + '-' + month + '-' + day;
+                        }
+                    },
+                    { title: 'Active' }
+                ]
+            });
+        }, 0);
+    });
+</script>
 {% endblock %}

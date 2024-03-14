@@ -774,15 +774,13 @@ class ReplaceRiskAcceptanceProofForm(forms.ModelForm):
         fields = ['path']
 
 
-
-
 class AddFindingsRiskAcceptanceForm(forms.ModelForm):
 
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.none(),
         required=True,
         label="Add findings as accepted:",
-        widget=TableCheckboxWidget(attrs={'size': 10})
+        widget=TableCheckboxWidget(attrs={'size': 500})
     )
 
     class Meta:
