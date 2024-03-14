@@ -35,8 +35,8 @@ class SonarQubeRESTAPIJSON(object):
                 description += "**scope:** " + scope + "\n"
                 description += self.returncomponent(json_content, component)
                 item = Finding(
-                    title="vuln_title",
-                    description="vuln_description",
+                    title=rule + "_" + key,
+                    description=description,
                     test=test,
                     severity=self.severitytranslator(issue.get("severity")),
                     static_finding=True,
@@ -131,5 +131,5 @@ class SonarQubeRESTAPIJSON(object):
             if comp.get("key") == key:
                 componentkeys = comp.keys()
                 for ck in componentkeys:
-                    description += "**Componentkey " + ck + "**: " + str(comp.get("ck")) + "\n"
+                    description += "**Componentkey " + ck + "**: " + str(comp.get(ck)) + "\n"
         return description
