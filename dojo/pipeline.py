@@ -226,7 +226,7 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
             ]
 
             role_assigned = {"role": Role.objects.get(id=Roles.Developer)}
-            if any(job_title in part for part in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[:2]):
+            if any(job_title in part for part in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[:2]) or settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[0].split("-")[0] in job_title:
                 role_assigned = {"role": Role.objects.get(id=Roles.Leader)}
                 assign_product_type_product_to_leaders(user, job_title, office_location, role_assigned, connection, user_login, user_product_types_names)
 
@@ -248,7 +248,7 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
                     )
 
                     # create a new product type or update product's type authorized_users
-                    if group_team_leve2 is not None:
+                    if group_team_leve2 is not None and user_login.split("@")[0] not in settings.AZURE_DEVOPS_USERS_EXCLUDED_TPM:
                         if group_team_leve2.display_name not in user_product_types_names:
                             try:
                                 # Check if there is a product type with the name
@@ -271,7 +271,6 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
                         for product_type_name in user_product_types_names:
                             if (
                                 product_type_name != group_team_leve2.display_name
-                                and user_login.split("@")[0] not in settings.AZURE_DEVOPS_USERS_EXCLUDED_TPM
                             ):
                                 product_type = Product_Type.objects.get(name=product_type_name)
                                 Product_Type_Member.objects.filter(product_type=product_type, user=user).delete()
