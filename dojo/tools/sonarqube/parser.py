@@ -1,7 +1,7 @@
 import logging
 from dojo.tools.sonarqube.soprasteria_json import SonarQubeSoprasteriaJSON
 from dojo.tools.sonarqube.soprasteria_html import SonarQubeSoprasteriaHTML
-from dojo.tools.sonarqube.sonarquberestapi_json import SonarQubeRESTAPIJSON
+from dojo.tools.sonarqube.sonarqube_restapi_json import SonarQubeRESTAPIJSON
 from lxml import etree
 import json
 logger = logging.getLogger(__name__)
@@ -32,6 +32,8 @@ class SonarQubeParser(object):
                 return SonarQubeSoprasteriaJSON().get_json_items(json_content, test, self.mode)
             elif json_content.get("total") and json_content.get("ps") and json_content.get("components"):
                 return SonarQubeRESTAPIJSON().get_json_items(json_content, test, self.mode)
+            else:
+                return []
         else:
             parser = etree.HTMLParser()
             tree = etree.parse(filename, parser)
