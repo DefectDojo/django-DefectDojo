@@ -222,8 +222,9 @@
             </div>
             <br/>
             <form method="post" class="form-horizontal">{% csrf_token %}
-                <div class="show_add_findings_form">
-                    {% include "dojo/form_fields.html" with form=add_findings_form %}
+                <div class="show_add_findings_form" style="padding: 1em;">
+                    <div class="text-left"><b>Add findings as accepted:</b></div>
+                    {{ add_findings_form.as_p }}
                 </div>
                 <div class="panel-body">
                     {% include "dojo/paging_snippet.html" with page=add_findings prefix="apage" %}
