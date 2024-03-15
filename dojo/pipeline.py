@@ -226,7 +226,7 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
             ]
 
             role_assigned = {"role": Role.objects.get(id=Roles.Developer)}
-            if any(job_title in part for part in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[:2]) or settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[0].split("-")[0] in job_title:
+            if any(any(sub_part in job_title for sub_part in part.split("-")) for part in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[:2]):
                 role_assigned = {"role": Role.objects.get(id=Roles.Leader)}
                 assign_product_type_product_to_leaders(user, job_title, office_location, role_assigned, connection, user_login, user_product_types_names)
 
@@ -285,11 +285,11 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
 
 def assign_product_type_product_to_leaders(user, job_title, office_location, role_assigned, connection, user_login, user_product_types_names):
     conf_jobs = settings.AZURE_DEVOPS_JOBS_TITLE.split(",")
-    if job_title in conf_jobs[0]:
+    if any(sub_part in job_title for sub_part in conf_jobs[0].split("-")):
         Product.objects.filter(
             description__contains=re.sub(conf_jobs[2], "", office_location).replace(" ", "-")
         ).update(team_manager=user)
-    elif job_title in conf_jobs[1]:
+    elif any(sub_part in job_title for sub_part in conf_jobs[1].split("-")):
         keys = [
             (key_pt, key_user)
             for key_pt, value in get_remote_json_config(connection).items()

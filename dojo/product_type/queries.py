@@ -1,7 +1,7 @@
 import json
 from crum import get_current_user
 from django.db.models import Exists, OuterRef, Q
-from dojo.models import Product_Type, Product_Type_Member, Product_Type_Group, Dojo_User, Role, Global_Role
+from dojo.models import Product_Type, Product, Product_Type_Member, Product_Type_Group, Dojo_User, Role, Global_Role
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission, user_has_permission, \
     role_has_permission
 from dojo.group.queries import get_authorized_groups
@@ -80,24 +80,26 @@ def query_contacts(*args):
     return contacts_dict
     
 
-def get_authorized_contacts_for_product_type(severity, product_type):
+def get_authorized_contacts_for_product_type(severity, product, product_type):
     contacts_result = []
     user = get_current_user()
     rule = settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(severity)
-    contacts_list = rule["type_contacts"]
+    product_obj = Product.objects.get(id=product)
     product_type_obj = Product_Type.objects.get(id=product_type)
+    type_contacts = rule["type_contacts"][json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])[product_type_obj.name.split(" - ")[0]]]
+    contacts_list = type_contacts["users"]
 
     if hasattr(user, "global_role"):
         if user.global_role.role:
             if user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
                 contacts_result.append(user.id)
 
-    if contacts_list == [] and rule["number_acceptors"] == 0:
+    if contacts_list == [] and type_contacts["number_acceptors"] == 0:
         contacts_result.append(user.id)
 
     elif not contacts_result:
         for contact_type in contacts_list:
-            leader = getattr(product_type_obj, contact_type, None)
+            leader = getattr(product_obj, contact_type, None) if contact_type == "team_manager" else getattr(product_type_obj, contact_type, None)
             if leader:
                 contacts_result.append(leader.id)
             else:
@@ -125,30 +127,6 @@ def get_owner_user():
     user = get_current_user()
     user_owner = Dojo_User.objects.filter(id=user.id)
     return user_owner
-
-def get_authorized_contacts(severity, queryset=None):
-    user = get_current_user()
-    rule = settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(severity)
-    contacts_dict = {}
-    contacts_list = []
-    contacts = rule["type_contacts"]
-    if contacts:
-        contacts_dict = query_contacts(*contacts)
-        if contacts_dict:
-            for key in contacts_dict.keys():
-                contacts_list.append(key)
-        contacts_list += query_user_by_rol(settings.ROLE_ALLOWED_TO_ACCEPT_RISKS)
-    else:
-        # in the event that risk does not need acceptance by leaders
-        contacts_list.append(user.id)
-
-    # add user current to form acceptance_by field
-
-    if contacts_list:
-        return Dojo_User.objects.filter(id__in=contacts_list)
-
-    return Dojo_User.objects.all()
-
 
 def get_authorized_product_type_members_for_user(user, permission):
     request_user = get_current_user()

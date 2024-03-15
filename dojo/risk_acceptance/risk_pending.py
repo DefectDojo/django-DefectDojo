@@ -16,6 +16,7 @@ from dojo.product.queries import get_authorized_members_for_product
 from dojo.authorization.roles_permissions import Permissions
 import dojo.risk_acceptance.helper as ra_helper
 import crum
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -125,9 +126,10 @@ def risk_accepted_succesfully(
 def get_role_members(user, product: Product, product_type: Product_Type):
     user_members = None
     user_members_product_type: Product_Type_Member = get_authorized_product_type_members_for_user(user, Permissions.Risk_Acceptance)
+    user_members = list(user_members_product_type)
     user_members_product: Product_Member = get_authorized_members_for_product(product=product, permission=Permissions.Risk_Acceptance)
     if user_members_product:
-        user_members = list(user_members_product_type) + list(user_members_product)
+        user_members += list(user_members_product)
     if not user_members:
         raise ValueError("The user does not have any product_type or product associated with it")
     for user_member in user_members:
@@ -156,9 +158,13 @@ def risk_acceptante_pending(
     status = "Failed"
     message = "Cannot perform action"
     number_of_acceptors_required = (
-        settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity).get(
-            "number_acceptors"
-        )
+        settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity)
+        .get("type_contacts")
+        .get(
+            json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])[
+                product_type.name.split(" - ")[0]
+            ]
+        ).get("number_acceptors")
     )
     if (
         user.is_superuser is True
@@ -212,9 +218,10 @@ def get_confirmed_acceptors(finding: Finding):
 def get_contacts(engagement: Engagement, finding_serverity: str, user):
     rule = settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding_serverity)
     product_type = engagement.product.get_product_type
-    contacts = rule.get("type_contacts")
+    contacts = rule.get("type_contacts").get(json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])[product_type.name.split(" - ")[0]]).get("users")
 
     get_contacts_dict = {
+        "team_manager": engagement.product.team_manager,
         "product_type_manager": product_type.product_type_manager,
         "product_type_technical_contact": product_type.product_type_technical_contact,
         "environment_manager": product_type.environment_manager,
@@ -259,9 +266,8 @@ def is_rol_permissions_risk_acceptance(user, finding: Finding, product: Product,
         user.is_superuser is True
         or role_has_exclusive_permissions(user)
         or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
-        or settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity).get(
-            "number_acceptors"
-        )
+        or settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity).get("type_contacts")
+        .get(json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])[product_type.name.split(" - ")[0]]).get("number_acceptors")
         == 0
     ):
         result = True
@@ -273,12 +279,13 @@ def rule_risk_acceptance_according_to_critical(severity, user, product: Product,
     user_rol = get_role_members(user, product, product_type)
     risk_rule = settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(severity)
     view_risk_pending = False
+    num_acceptors = risk_rule.get("type_contacts").get(json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])[product_type.name.split(" - ")[0]]).get("number_acceptors")
     if risk_rule:
-        if risk_rule.get("number_acceptors") == 0 and user_rol in risk_rule.get(
+        if num_acceptors == 0 and user_rol in risk_rule.get(
             "roles"
         ):
             view_risk_pending = False
-        elif risk_rule.get("number_acceptors") != 0 and user_rol not in risk_rule.get(
+        elif num_acceptors != 0 and user_rol not in risk_rule.get(
             "roles"
         ):
             view_risk_pending = True
@@ -314,14 +321,12 @@ def percentage_of_vulnerabilitiese_closed(**kwargs):
     return result
 
 
-
 def temporaly_assumed_vulnerabilities(**kwargs):
     # "TAV - Temporarily Assumed Vulnerabilities"
     result = {}
     result["status"] = True
     result["message"] = ""
     return result
-
 
 
 def abuse_control(user, finding: Finding, product: Product, product_type: Product_Type):
@@ -443,4 +448,3 @@ def risk_unaccept(finding):
             finding.acceptances_confirmed = 0
             finding.save()
         ra_helper.post_jira_comment(finding, ra_helper.unaccepted_message_creator)
-

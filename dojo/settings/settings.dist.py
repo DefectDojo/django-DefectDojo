@@ -368,21 +368,57 @@ env = environ.FileAwareEnv(
 
     DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY=(dict, {
         "Low": {
-            "number_acceptors": 0,
             "roles": ["Developer"],
-            "type_contacts": []},
+            "type_contacts": {
+                "PT1": {
+                    "users": [],
+                    "number_acceptors": 0
+                },
+                "PT2": {
+                    "users": [],
+                    "number_acceptors": 0
+                }
+            }
+        },
         "Medium": {
-            "number_acceptors": 1,
             "roles": ["Leader"],
-            "type_contacts": ["product_type_technical_contact"]},
+            "type_contacts": {
+                "PT1": {
+                    "users": ["team_manager"],
+                    "number_acceptors" : 1
+                },
+                "PT2": {
+                    "users": ["product_type_technical_contact"],
+                    "number_acceptors" : 1
+                }
+            }
+        },
         "High": {
-            "number_acceptors": 2,
-            "type_contacts": ["product_type_manager", "product_type_technical_contact"],
-            "roles": ["Leader"]},
-        "Critical": {
-            "number_acceptors": 2,
             "roles": ["Leader"],
-            "type_contacts": ["environment_manager", "environment_technical_contact"]},
+            "type_contacts": {
+                "PT1": {
+                    "users": ["product_type_technical_contact"],
+                    "number_acceptors" : 1
+                },
+                "PT2": {
+                    "users": ["product_type_manager", "product_type_technical_contact"],
+                    "number_acceptors" : 2
+                }
+            }
+        },
+        "Critical": {
+            "roles": ["Leader"],
+            "type_contacts": {
+                "PT1": {
+                    "users": ["product_type_technical_contact", "environment_technical_contact"],
+                    "number_acceptors" : 2
+                },
+                "PT2": {
+                    "users": ["environment_manager", "environment_technical_contact"],
+                    "number_acceptors" : 2
+                }
+            }
+        }
     })
 )
 
