@@ -780,7 +780,7 @@ class AddFindingsRiskAcceptanceForm(forms.ModelForm):
         queryset=Finding.objects.none(),
         required=True,
         label="",
-        widget=TableCheckboxWidget(attrs={'size': 500})
+        widget=TableCheckboxWidget(attrs={'size': 25})
     )
 
     class Meta:
