@@ -389,9 +389,12 @@
     $(document).ready(function() {
         setTimeout(function() {
             var table = $('#findings_table').DataTable({
-                "paging": true,
+                "paging": false,
                 "searching": true,
                 "ordering": true,
+                "info": false,
+                scrollCollapse: true,
+                scrollY: '30vh',
                 columns: [
                     { title: '' },
                     { title: 'ID' },
