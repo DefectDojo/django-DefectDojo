@@ -1718,7 +1718,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     # Overriding this to push add Push to JIRA functionality
     def update(self, instance, validated_data):
         # cvssv3 handling cvssv3 vector takes precedence,
-        # then cvssv3_score and finally severity 
+        # then cvssv3_score and finally severity
         if validated_data.get("cvssv3"):
             validated_data["cvssv3_score"] = None
             validated_data["severity"] = ""
