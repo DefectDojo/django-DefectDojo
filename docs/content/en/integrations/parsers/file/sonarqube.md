@@ -12,10 +12,10 @@ Sample SonarQube scans can be found [here](https://github.com/DefectDojo/django-
 ## SonarQube REST API 
 You can retrieve the JSON directly from SonarQube if you use the following REST API endpoint:  `<sonarqubeurl>/api/issues/pull?projectKey=<projectkey>&branchName=<branchName>`
 ### JSON
-The JSON output can be directly uploaded with "SonarQube Scan" to parse the findings. 
+The REST API JSON output can be uploaded to DefectDojo with "SonarQube Scan". 
 
 ### ZIP
-If you have too many findings in one project, you can implement a small script to handle pagination and put all JSON files in a .zip file. This zip file can also be parsed from SonarQube with "SonarQube Scan" as it extracts all files from the .zip file. 
+If you have too many findings in one project, you can implement a small script to handle pagination and put all JSON files in a .zip file. This zip file can also be parsed from DefectDojo with "SonarQube Scan". 
 
 ## Soprasteria
 ### Soprasteria SonarQube Scan (Aggregates findings per cwe, title, description, file\_path.)
