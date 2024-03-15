@@ -41,6 +41,7 @@ class SonarQubeRESTAPIJSON(object):
                     severity=self.severitytranslator(issue.get("severity")),
                     static_finding=True,
                     dynamic_finding=False,
+                    tags=["bug"],
                 )
             elif issue.get("type") == "VULNERABILITY":
                 key = issue.get("key")
@@ -74,6 +75,7 @@ class SonarQubeRESTAPIJSON(object):
                     severity=self.severitytranslator(issue.get("severity")),
                     static_finding=True,
                     dynamic_finding=False,
+                    tags=["vulnerability"],
                 )
             elif issue.get("type") == "CODE_SMELL":
                 key = issue.get("key")
@@ -110,6 +112,7 @@ class SonarQubeRESTAPIJSON(object):
                     severity=self.severitytranslator(issue.get("severity")),
                     static_finding=True,
                     dynamic_finding=False,
+                    tags=["code_smell"],
                 )
             items.append(item)
         return items

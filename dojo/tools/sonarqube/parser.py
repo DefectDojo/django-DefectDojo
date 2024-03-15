@@ -42,8 +42,6 @@ class SonarQubeParser(object):
             else:
                 input_zip = zipfile.ZipFile(filename, 'r')
             zipdata = {name: input_zip.read(name) for name in input_zip.namelist()}
-            # print(len(zipdata))
-            # print(zipdata)
             return SonarQubeRESTAPIZIP().get_items(zipdata, test, self.mode)
         else:
             parser = etree.HTMLParser()
