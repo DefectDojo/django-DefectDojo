@@ -3295,7 +3295,7 @@ class Finding(models.Model):
         for match in matches:
             # Check if match isn't already a markdown link
             # Only replace the same matches one time, otherwise the links will be corrupted
-            if not (match[0].startswith('[') or match[0].startswith('(')) and not match[0] in processed_matches:
+            if not (match[0].startswith('[') or match[0].startswith('(')) and match[0] not in processed_matches:
                 self.references = self.references.replace(match[0], create_bleached_link(match[0], match[0]), 1)
                 processed_matches.append(match[0])
 
