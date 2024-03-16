@@ -21,7 +21,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     ProductAPIScanConfigurationViewSet, UserProfileView, EndpointMetaImporterView, \
     ConfigurationPermissionViewSet, QuestionnaireQuestionViewSet, QuestionnaireAnswerViewSet, \
     QuestionnaireGeneralSurveyViewSet, QuestionnaireEngagementSurveyViewSet, QuestionnaireAnsweredSurveyViewSet, \
-    AnnouncementViewSet, WebhookEndpointsViewset
+    AnnouncementViewSet, NotificationWebhooksViewset
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
