@@ -11,13 +11,11 @@ from django.views import View
 from dojo.forms import NotificationsForm
 
 from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404
-from django.contrib.admin.utils import NestedObjects
-from django.db import DEFAULT_DB_ALIAS
+from django.http import HttpResponseRedirect, Http404
 
-from dojo.models import Notifications, Notification_Webhooks
-from dojo.utils import get_enabled_notifications_list, add_breadcrumb, get_system_setting
-from dojo.forms import NotificationsForm, NotificationsWebhookForm, DeleteNotificationsWebhookForm
+from dojo.models import Notification_Webhooks
+from dojo.utils import get_system_setting
+from dojo.forms import NotificationsWebhookForm, DeleteNotificationsWebhookForm
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.notifications.helper import test_webhooks_notification
 from dojo.models import Notifications

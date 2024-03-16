@@ -8,7 +8,7 @@ import multiselectfield.db.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0193_remove_system_settings_enable_auditlog'),
+        ('dojo', '0204_jira_project_epic_issue_type_name'),
     ]
 
     operations = [
