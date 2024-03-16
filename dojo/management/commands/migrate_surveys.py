@@ -1,8 +1,9 @@
+import sys
+
 from django.core.management.base import BaseCommand
 from django.db import connection
-import sys
-from dojo.models import TextQuestion
 
+from dojo.models import TextQuestion
 
 """
 Author: Cody Maffucci

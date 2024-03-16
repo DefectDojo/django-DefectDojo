@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import NamedTuple, List
+from typing import List, NamedTuple
 
 from django.db.models import QuerySet
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.decorators import action
@@ -9,11 +10,9 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
 from dojo.api_v2.serializers import RiskAcceptanceSerializer
-from dojo.models import Risk_Acceptance, User, Vulnerability_Id
-from django.utils import timezone
 from dojo.authorization.roles_permissions import Permissions
 from dojo.engagement.queries import get_authorized_engagements
-
+from dojo.models import Risk_Acceptance, User, Vulnerability_Id
 
 AcceptedRisk = NamedTuple('AcceptedRisk', (('vulnerability_id', str), ('justification', str), ('accepted_by', str)))
 

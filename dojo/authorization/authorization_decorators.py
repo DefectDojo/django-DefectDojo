@@ -1,10 +1,12 @@
 import functools
+
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
+
 from dojo.authorization.authorization import (
+    user_has_configuration_permission,
     user_has_global_permission_or_403,
     user_has_permission_or_403,
-    user_has_configuration_permission,
 )
 
 

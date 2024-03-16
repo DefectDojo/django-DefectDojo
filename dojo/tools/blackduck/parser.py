@@ -1,6 +1,7 @@
 import hashlib
 
 from dojo.models import Finding
+
 from .importer import BlackduckImporter
 
 

@@ -1,14 +1,15 @@
 import logging
 import re
+import textwrap
 
 import html2text
-from lxml import etree
-import textwrap
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from lxml import etree
 
 from dojo.models import Finding, Sonarqube_Issue
 from dojo.notifications.helper import create_notification
+
 from .api_client import SonarQubeAPI
 
 logger = logging.getLogger(__name__)

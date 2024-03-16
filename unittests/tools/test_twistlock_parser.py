@@ -1,7 +1,9 @@
 from os import path
-from ..dojo_test_case import DojoTestCase
+
 from dojo.models import Test
 from dojo.tools.twistlock.parser import TwistlockParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestTwistlockParser(DojoTestCase):

@@ -1,16 +1,17 @@
 # # test types
 import logging
 
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.filters import TestTypeFilter
 from dojo.forms import Test_TypeForm
 from dojo.models import Test_Type
-from dojo.utils import get_page_items, add_breadcrumb
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+from dojo.utils import add_breadcrumb, get_page_items
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,6 @@
+from django import forms
 from django.core.paginator import Paginator
 from django.template.loader import render_to_string
-from django import forms
 
 
 # agrega los imports necesarios

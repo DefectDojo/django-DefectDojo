@@ -1,8 +1,15 @@
 from crum import get_current_user
 from django.db.models import Q
-from dojo.models import Dojo_Group_Member, Product_Member, Product_Type_Member, \
-    Product_Group, Product_Type_Group, Dojo_User
+
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
+from dojo.models import (
+    Dojo_Group_Member,
+    Dojo_User,
+    Product_Group,
+    Product_Member,
+    Product_Type_Group,
+    Product_Type_Member,
+)
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.request_cache import cache_for_request

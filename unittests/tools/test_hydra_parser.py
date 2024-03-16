@@ -1,7 +1,7 @@
-from datetime import datetime, date
+from datetime import date, datetime
 
+from dojo.models import Finding, Test
 from dojo.tools.hydra.parser import HydraParser
-from dojo.models import Test, Finding
 from unittests.dojo_test_case import DojoTestCase
 
 

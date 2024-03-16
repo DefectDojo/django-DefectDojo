@@ -1,26 +1,29 @@
 # Standard library imports
+import datetime
 import json
 import logging
-import datetime
+
 # Third party imports
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
-from django.urls import reverse
+from django.core.exceptions import PermissionDenied
 from django.db import DEFAULT_DB_ALIAS
-from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseBadRequest
-from django.shortcuts import render, get_object_or_404
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.views.decorators.csrf import csrf_exempt
-from django.core.exceptions import PermissionDenied
-# Local application/library imports
-from dojo.forms import JIRAForm, DeleteJIRAInstanceForm, ExpressJIRAForm
-from dojo.models import User, JIRA_Instance, JIRA_Issue, Notes
-from dojo.utils import add_breadcrumb, add_error_message_to_response, get_system_setting
-from dojo.notifications.helper import create_notification
 from django.views.decorators.http import require_POST
+
 import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+
+# Local application/library imports
+from dojo.forms import DeleteJIRAInstanceForm, ExpressJIRAForm, JIRAForm
+from dojo.models import JIRA_Instance, JIRA_Issue, Notes, User
+from dojo.notifications.helper import create_notification
+from dojo.utils import add_breadcrumb, add_error_message_to_response, get_system_setting
 
 logger = logging.getLogger(__name__)
 

@@ -1,19 +1,17 @@
 import logging
+
 from django.contrib import messages
-from django.urls import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.utils import timezone
-from dojo.models import Finding, Product, Engagement, Cred_User, Cred_Mapping, Test
-from dojo.utils import add_breadcrumb, Product_Tab
-from dojo.forms import CredUserForm, NoteForm, CredMappingFormProd, CredMappingForm
 
-from dojo.utils import dojo_crypto_encrypt, prepare_for_view
-from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.cred.queries import get_authorized_cred_mappings
-
+from dojo.forms import CredMappingForm, CredMappingFormProd, CredUserForm, NoteForm
+from dojo.models import Cred_Mapping, Cred_User, Engagement, Finding, Product, Test
+from dojo.utils import Product_Tab, add_breadcrumb, dojo_crypto_encrypt, prepare_for_view
 
 logger = logging.getLogger(__name__)
 

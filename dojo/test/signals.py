@@ -1,8 +1,10 @@
 import contextlib
+import logging
+
 from django.db.models import signals
 from django.dispatch import receiver
-import logging
-from dojo.models import Test, Finding
+
+from dojo.models import Finding, Test
 
 logger = logging.getLogger(__name__)
 

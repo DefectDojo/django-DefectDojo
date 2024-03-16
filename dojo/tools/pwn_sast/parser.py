@@ -1,5 +1,5 @@
-import json
 import hashlib
+import json
 
 from dojo.models import Finding
 

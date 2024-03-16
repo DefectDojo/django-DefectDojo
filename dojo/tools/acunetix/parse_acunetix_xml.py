@@ -1,11 +1,14 @@
 import hashlib
+import logging
+
 import dateutil
 import html2text
-import logging
 import hyperlink
 from cvss import parser as cvss_parser
 from defusedxml.ElementTree import parse
+
 from dojo.models import Endpoint, Finding
+
 logger = logging.getLogger(__name__)
 
 

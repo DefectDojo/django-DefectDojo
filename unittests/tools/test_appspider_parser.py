@@ -1,7 +1,9 @@
 from os import path
-from ..dojo_test_case import DojoTestCase
+
+from dojo.models import Engagement, Finding, Product, Test
 from dojo.tools.appspider.parser import AppSpiderParser
-from dojo.models import Product, Engagement, Test, Finding
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestAppSpiderParser(DojoTestCase):

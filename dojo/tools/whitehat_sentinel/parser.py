@@ -2,9 +2,9 @@ import hashlib
 import json
 import logging
 import re
-from typing import Union, List
+from typing import List, Union
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
 
 
 class WhiteHatSentinelParser(object):

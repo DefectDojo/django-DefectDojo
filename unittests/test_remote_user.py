@@ -1,6 +1,8 @@
 from django.test import Client, override_settings
 from netaddr import IPSet
-from dojo.models import User, Dojo_Group, Dojo_Group_Member
+
+from dojo.models import Dojo_Group, Dojo_Group_Member, User
+
 from .dojo_test_case import DojoTestCase
 
 

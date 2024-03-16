@@ -1,8 +1,9 @@
 from os import path
 
-from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.burp_graphql.parser import BurpGraphQLParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestBurpGraphQLParser(DojoTestCase):

@@ -1,13 +1,26 @@
 from crum import get_current_user
 from django.db.models import Exists, OuterRef, Q
-from dojo.models import Product, Product_Member, Product_Type_Member, App_Analysis, \
-    DojoMeta, Product_Group, Product_Type_Group, Languages, Engagement_Presets, \
-    Product_API_Scan_Configuration
-from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission, user_has_permission, \
-    role_has_permission
 
-from dojo.group.queries import get_authorized_groups
+from dojo.authorization.authorization import (
+    get_roles_for_permission,
+    role_has_permission,
+    user_has_global_permission,
+    user_has_permission,
+)
 from dojo.authorization.roles_permissions import Permissions
+from dojo.group.queries import get_authorized_groups
+from dojo.models import (
+    App_Analysis,
+    DojoMeta,
+    Engagement_Presets,
+    Languages,
+    Product,
+    Product_API_Scan_Configuration,
+    Product_Group,
+    Product_Member,
+    Product_Type_Group,
+    Product_Type_Member,
+)
 
 
 def get_authorized_products(permission, user=None):

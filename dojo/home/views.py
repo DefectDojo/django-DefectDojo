@@ -3,19 +3,18 @@ from datetime import timedelta
 from typing import Dict
 
 from dateutil.relativedelta import relativedelta
-
-from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
+from django.db.models import Count, Q
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils import timezone
 
-from django.db.models import Count, Q
-from dojo.utils import add_breadcrumb, get_punchcard_data
-from dojo.models import Answered_Survey
+from dojo.authorization.authorization import user_has_configuration_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings
-from dojo.authorization.authorization import user_has_configuration_permission
+from dojo.models import Answered_Survey
+from dojo.utils import add_breadcrumb, get_punchcard_data
 
 
 def home(request: HttpRequest) -> HttpResponse:

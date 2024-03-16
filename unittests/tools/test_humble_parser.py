@@ -1,5 +1,5 @@
-from dojo.tools.humble.parser import HumbleParser
 from dojo.models import Test
+from dojo.tools.humble.parser import HumbleParser
 from unittests.dojo_test_case import DojoTestCase
 
 

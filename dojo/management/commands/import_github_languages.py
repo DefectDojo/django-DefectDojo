@@ -1,9 +1,10 @@
 import json
 import logging
+
 import requests
 from django.core.management.base import BaseCommand
-from dojo.models import Language_Type
 
+from dojo.models import Language_Type
 
 logger = logging.getLogger(__name__)
 

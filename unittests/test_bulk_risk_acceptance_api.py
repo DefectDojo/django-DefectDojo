@@ -2,10 +2,21 @@ import datetime
 
 from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
-from rest_framework.test import APITestCase, APIClient
+from rest_framework.test import APIClient, APITestCase
 
-from dojo.models import Product_Type, Product, Engagement, Product_Type_Member, Test, Finding, User, Test_Type, Role, Vulnerability_Id
 from dojo.authorization.roles_permissions import Roles
+from dojo.models import (
+    Engagement,
+    Finding,
+    Product,
+    Product_Type,
+    Product_Type_Member,
+    Role,
+    Test,
+    Test_Type,
+    User,
+    Vulnerability_Id,
+)
 
 
 class TestBulkRiskAcceptanceApi(APITestCase):

@@ -1,4 +1,5 @@
 import json
+
 from dojo.models import Finding
 from dojo.tools.sonatype.identifier import ComponentIdentifier
 

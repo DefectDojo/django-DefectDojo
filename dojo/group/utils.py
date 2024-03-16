@@ -1,9 +1,10 @@
 from crum import get_current_user
-from django.contrib.auth.models import Group
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
-from dojo.models import Dojo_Group, Dojo_Group_Member, Role
 from django.conf import settings
+from django.contrib.auth.models import Group
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
+
+from dojo.models import Dojo_Group, Dojo_Group_Member, Role
 
 
 def get_auth_group_name(group, attempt=0):

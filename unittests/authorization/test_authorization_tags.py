@@ -1,10 +1,17 @@
-from ..dojo_test_case import DojoTestCase
 from unittest.mock import patch
-from django.contrib.auth.models import Permission, Group
-from dojo.models import Product_Type, Dojo_User
+
+from django.contrib.auth.models import Group, Permission
+
 from dojo.authorization.roles_permissions import Permissions
-from dojo.templatetags.authorization_tags import has_object_permission, has_configuration_permission, \
-    user_has_configuration_permission_without_group, group_has_configuration_permission
+from dojo.models import Dojo_User, Product_Type
+from dojo.templatetags.authorization_tags import (
+    group_has_configuration_permission,
+    has_configuration_permission,
+    has_object_permission,
+    user_has_configuration_permission_without_group,
+)
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestAuthorizationTags(DojoTestCase):

@@ -1,8 +1,8 @@
 import csv
+import datetime
 import hashlib
 import io
 import sys
-import datetime
 
 from dojo.models import Endpoint, Finding
 

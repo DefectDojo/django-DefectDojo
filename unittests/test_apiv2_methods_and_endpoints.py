@@ -1,34 +1,36 @@
-from dojo.urls import v2_api
-from .dojo_test_case import DojoTestCase
-from .test_rest_framework import get_open_api3_json_schema, BASE_API_URL
 import django.apps
+
 from dojo.api_v2 import serializers
 from dojo.models import (
-    Contact,
-    Product_Line,
-    Report_Type,
     CWE,
-    BurpRawRequestResponse,
-    FileAccessToken,
-    UserAnnouncement,
     BannerConf,
-    GITHUB_Conf,
-    GITHUB_Issue,
-    GITHUB_Clone,
-    GITHUB_Details_Cache,
-    GITHUB_PKey,
-    Tool_Product_History,
-    Objects_Review,
-    Objects_Product,
-    Testing_Guide_Category,
-    Testing_Guide,
-    Benchmark_Type,
     Benchmark_Category,
-    Benchmark_Requirement,
     Benchmark_Product,
     Benchmark_Product_Summary,
+    Benchmark_Requirement,
+    Benchmark_Type,
+    BurpRawRequestResponse,
     Choice,
+    Contact,
+    FileAccessToken,
+    GITHUB_Clone,
+    GITHUB_Conf,
+    GITHUB_Details_Cache,
+    GITHUB_Issue,
+    GITHUB_PKey,
+    Objects_Product,
+    Objects_Review,
+    Product_Line,
+    Report_Type,
+    Testing_Guide,
+    Testing_Guide_Category,
+    Tool_Product_History,
+    UserAnnouncement,
 )
+from dojo.urls import v2_api
+
+from .dojo_test_case import DojoTestCase
+from .test_rest_framework import BASE_API_URL, get_open_api3_json_schema
 
 
 class ApiEndpointMethods(DojoTestCase):

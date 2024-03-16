@@ -1,11 +1,11 @@
-import unittest
 import sys
-
+import unittest
 from operator import xor
+
 from base_test_class import BaseTestCase
-from user_test import UserTest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+from user_test import UserTest
 
 
 class AnnouncementBannerTest(BaseTestCase):

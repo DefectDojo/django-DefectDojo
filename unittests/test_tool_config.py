@@ -1,7 +1,8 @@
-from .dojo_test_case import DojoTestCase
-from dojo.tools.factory import get_api_scan_configuration_hints, PARSERS
-from dojo.tool_config.factory import SCAN_APIS
 from dojo.models import Tool_Configuration, Tool_Type
+from dojo.tool_config.factory import SCAN_APIS
+from dojo.tools.factory import PARSERS, get_api_scan_configuration_hints
+
+from .dojo_test_case import DojoTestCase
 
 
 class TestApiScanConfigEntry(DojoTestCase):

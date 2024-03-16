@@ -1,7 +1,7 @@
 import hashlib
 import json
-
 from datetime import datetime
+
 from dojo.models import Finding
 
 

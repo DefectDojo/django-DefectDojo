@@ -1,7 +1,8 @@
-from dojo.models import Announcement, UserAnnouncement, Dojo_User
+from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.conf import settings
+
+from dojo.models import Announcement, Dojo_User, UserAnnouncement
 
 
 @receiver(post_save, sender=Dojo_User)

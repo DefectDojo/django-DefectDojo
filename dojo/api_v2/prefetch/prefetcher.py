@@ -1,7 +1,9 @@
-from rest_framework.serializers import ModelSerializer
-from . import utils
 import inspect
 import sys
+
+from rest_framework.serializers import ModelSerializer
+
+from . import utils
 
 # Reduce the scope of search for serializers.
 SERIALIZER_DEFS_MODULE = "dojo.api_v2.serializers"

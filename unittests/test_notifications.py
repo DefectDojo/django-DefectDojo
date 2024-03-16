@@ -1,5 +1,6 @@
+from dojo.models import Notifications, Product, User
+
 from .dojo_test_case import DojoTestCase
-from dojo.models import Product, User, Notifications
 
 
 class TestNotifications(DojoTestCase):

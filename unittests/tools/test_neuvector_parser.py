@@ -1,7 +1,9 @@
 from os import path
-from ..dojo_test_case import DojoTestCase
+
 from dojo.models import Test
 from dojo.tools.neuvector.parser import NeuVectorParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestNeuVectorParser(DojoTestCase):

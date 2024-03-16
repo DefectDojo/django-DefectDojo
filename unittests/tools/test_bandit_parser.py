@@ -1,9 +1,11 @@
 import datetime
 
 from dateutil.tz import tzlocal
-from ..dojo_test_case import DojoTestCase
+
 from dojo.models import Test
 from dojo.tools.bandit.parser import BanditParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestBanditParser(DojoTestCase):

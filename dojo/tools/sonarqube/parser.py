@@ -1,9 +1,9 @@
+import json
 import logging
 import re
 
 from django.utils.html import strip_tags
 from lxml import etree
-import json
 
 from dojo.models import Finding
 

@@ -1,7 +1,9 @@
 import json
-from dateutil import parser
+
 import html2text
 from cvss import parser as cvss_parser
+from dateutil import parser
+
 from dojo.models import Endpoint, Finding
 
 

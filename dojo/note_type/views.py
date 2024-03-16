@@ -1,15 +1,15 @@
 import logging
 
-from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
-from django.urls import reverse
 from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 
-from dojo.forms import NoteTypeForm, EditNoteTypeForm, DisableOrEnableNoteTypeForm
-from dojo.models import Note_Type
-from dojo.filters import NoteTypesFilter
-from dojo.utils import get_page_items, add_breadcrumb
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+from dojo.filters import NoteTypesFilter
+from dojo.forms import DisableOrEnableNoteTypeForm, EditNoteTypeForm, NoteTypeForm
+from dojo.models import Note_Type
+from dojo.utils import add_breadcrumb, get_page_items
 
 logger = logging.getLogger(__name__)
 

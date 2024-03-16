@@ -1,6 +1,7 @@
 from dojo.forms import ChangePasswordForm
+from dojo.models import Dojo_User, System_Settings
+
 from .dojo_test_case import DojoTestCase
-from dojo.models import System_Settings, Dojo_User
 
 
 class TestUserValidators(DojoTestCase):

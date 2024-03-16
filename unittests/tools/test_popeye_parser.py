@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.popeye.parser import PopeyeParser
 from dojo.models import Test
+from dojo.tools.popeye.parser import PopeyeParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestPopeyeParser(DojoTestCase):
