@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class AquaParser(object):
+class AquaParser:
     def get_scan_types(self):
         return ["Aqua Scan"]
 
@@ -61,7 +61,7 @@ def get_item(resource, vuln, test):
         score = vuln.get("aqua_severity")
         severity = aqua_severity_of(score)
         used_for_classification = (
-            "Aqua security score ({}) used for classification.\n".format(score)
+            f"Aqua security score ({score}) used for classification.\n"
         )
         severity_justification = vuln.get("aqua_severity_classification")
         if "nvd_score_v3" in vuln:
@@ -70,17 +70,17 @@ def get_item(resource, vuln, test):
         if "aqua_score" in vuln:
             score = vuln.get("aqua_score")
             used_for_classification = (
-                "Aqua score ({}) used for classification.\n".format(score)
+                f"Aqua score ({score}) used for classification.\n"
             )
         elif "vendor_score" in vuln:
             score = vuln.get("vendor_score")
             used_for_classification = (
-                "Vendor score ({}) used for classification.\n".format(score)
+                f"Vendor score ({score}) used for classification.\n"
             )
         elif "nvd_score_v3" in vuln:
             score = vuln.get("nvd_score_v3")
             used_for_classification = (
-                "NVD score v3 ({}) used for classification.\n".format(score)
+                f"NVD score v3 ({score}) used for classification.\n"
             )
             severity_justification += "\nNVD v3 vectors: {}".format(
                 vuln.get("nvd_vectors_v3")
@@ -90,13 +90,13 @@ def get_item(resource, vuln, test):
         elif "nvd_score" in vuln:
             score = vuln.get("nvd_score")
             used_for_classification = (
-                "NVD score v2 ({}) used for classification.\n".format(score)
+                f"NVD score v2 ({score}) used for classification.\n"
             )
             severity_justification += "\nNVD v2 vectors: {}".format(
                 vuln.get("nvd_vectors")
             )
         severity = severity_of(score)
-        severity_justification += "\n{}".format(used_for_classification)
+        severity_justification += f"\n{used_for_classification}"
 
     finding = Finding(
         title=vulnerability_id

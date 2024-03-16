@@ -29,7 +29,7 @@ class RiskReconAPI:
 
     def map_toes(self):
         response = self.session.get(
-            url="{}/toes".format(self.url),
+            url=f"{self.url}/toes",
             headers={"accept": "application/json", "Authorization": self.key},
         )
 
@@ -51,9 +51,7 @@ class RiskReconAPI:
                     self.toe_map[toe_id] = filters if filters else self.data
         else:
             raise Exception(
-                "Unable to query Target of Evaluations due to {} - {}".format(
-                    response.status_code, response.content
-                )
+                f"Unable to query Target of Evaluations due to {response.status_code} - {response.content}"
             )
 
     def filter_finding(self, finding):
@@ -71,7 +69,7 @@ class RiskReconAPI:
     def get_findings(self):
         for toe in self.toe_map.keys():
             response = self.session.get(
-                url="{}/findings/{}".format(self.url, toe),
+                url=f"{self.url}/findings/{toe}",
                 headers={
                     "accept": "application/json",
                     "Authorization": self.key,
@@ -85,7 +83,5 @@ class RiskReconAPI:
                         self.findings.append(finding)
             else:
                 raise Exception(
-                    "Unable to collect findings from toe: {} due to {} - {}".format(
-                        toe, response.status_code, response.content
-                    )
+                    f"Unable to collect findings from toe: {toe} due to {response.status_code} - {response.content}"
                 )

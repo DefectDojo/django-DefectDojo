@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class JIRAConfigEngagementBase(object):
+class JIRAConfigEngagementBase:
     def get_new_engagement_with_jira_project_data(self):
         return {
             'name': 'new engagement',

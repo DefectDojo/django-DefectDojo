@@ -484,8 +484,7 @@ def create_question(request):
                     error = True
 
             if '_popup' in request.GET and not error:
-                resp = '<script type="text/javascript">opener.dismissAddAnotherPopupDojo(window, "%s", "%s");</script>' \
-                       % (escape(created_question._get_pk_val()), escape(created_question.text))
+                resp = f'<script type="text/javascript">opener.dismissAddAnotherPopupDojo(window, "{escape(created_question._get_pk_val())}", "{escape(created_question.text)}");</script>'
                 resp += '<script type="text/javascript">window.close();</script>'
                 return HttpResponse(resp)
 
@@ -577,8 +576,7 @@ def add_choices(request):
             if '_popup' in request.GET:
                 resp = ''
                 if created:
-                    resp = '<script type="text/javascript">opener.dismissAddAnotherPopupDojo(window, "%s", "%s");</script>' \
-                           % (escape(choice._get_pk_val()), escape(choice.label))
+                    resp = f'<script type="text/javascript">opener.dismissAddAnotherPopupDojo(window, "{escape(choice._get_pk_val())}", "{escape(choice.label)}");</script>'
                 resp += '<script type="text/javascript">window.close();</script>'
                 return HttpResponse(resp)
     add_breadcrumb(title="Add Choice", top_level=False, request=request)

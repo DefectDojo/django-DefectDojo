@@ -5,7 +5,7 @@ from cvss import parser as cvss_parser
 from dojo.models import Endpoint, Finding
 
 
-class AcunetixJSONParser(object):
+class AcunetixJSONParser:
     """This parser is written for Acunetix JSON Findings."""
     def get_findings(self, filename, test):
         dupes = dict()

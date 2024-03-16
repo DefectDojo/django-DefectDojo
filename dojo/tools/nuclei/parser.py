@@ -9,7 +9,7 @@ from dojo.models import Finding, Endpoint
 logger = logging.getLogger(__name__)
 
 
-class NucleiParser(object):
+class NucleiParser:
     """
     A class that can be used to parse the nuclei (https://github.com/projectdiscovery/nuclei) JSON report file
     """

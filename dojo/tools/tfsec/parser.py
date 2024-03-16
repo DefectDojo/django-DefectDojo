@@ -3,7 +3,7 @@ import hashlib
 from dojo.models import Finding
 
 
-class TFSecParser(object):
+class TFSecParser:
     """
     A class that can be used to parse the tfsec JSON report file
     """

@@ -5,7 +5,7 @@ import io
 from dojo.models import Endpoint, Finding
 
 
-class TestsslParser(object):
+class TestsslParser:
     def get_scan_types(self):
         return ["Testssl Scan"]
 

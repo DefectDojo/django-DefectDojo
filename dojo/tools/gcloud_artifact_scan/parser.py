@@ -2,7 +2,7 @@ import json
 from dojo.models import Finding
 
 
-class GCloudArtifactScanParser(object):
+class GCloudArtifactScanParser:
     def get_scan_types(self):
         return ["Google Cloud Artifact Vulnerability Scan"]
 

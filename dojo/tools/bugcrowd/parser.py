@@ -6,7 +6,7 @@ from dateutil import parser
 from dojo.models import Endpoint, Finding
 
 
-class BugCrowdParser(object):
+class BugCrowdParser:
     def get_scan_types(self):
         return ["BugCrowd Scan"]
 

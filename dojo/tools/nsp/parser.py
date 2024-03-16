@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class NspParser(object):
+class NspParser:
     def get_scan_types(self):
         return ["Node Security Platform Scan"]
 

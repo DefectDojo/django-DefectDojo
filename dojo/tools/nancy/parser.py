@@ -4,7 +4,7 @@ from cvss.cvss3 import CVSS3
 from dojo.models import Finding
 
 
-class NancyParser(object):
+class NancyParser:
     def get_scan_types(self):
         return ["Nancy Scan"]
 

@@ -310,7 +310,7 @@ def delete_engagement(request, eid):
                 create_notification(event='other',
                                     title='Deletion of %s' % engagement.name,
                                     product=product,
-                                    description='The engagement "%s" was deleted by %s' % (engagement.name, request.user),
+                                    description=f'The engagement "{engagement.name}" was deleted by {request.user}',
                                     url=request.build_absolute_uri(reverse('view_engagements', args=(product.id, ))),
                                     recipients=[engagement.lead],
                                     icon="exclamation-triangle")
@@ -352,7 +352,7 @@ def copy_engagement(request, eid):
                 extra_tags='alert-success')
             create_notification(event='other',
                                 title='Copying of %s' % engagement.name,
-                                description='The engagement "%s" was copied by %s' % (engagement.name, request.user),
+                                description=f'The engagement "{engagement.name}" was copied by {request.user}',
                                 product=product,
                                 url=request.build_absolute_uri(reverse('view_engagement', args=(engagement_copy.id, ))),
                                 recipients=[engagement.lead],
@@ -504,7 +504,7 @@ class ViewEngagement(View):
                 form = TypedNoteForm(available_note_types=available_note_types)
             else:
                 form = NoteForm()
-            title = "Engagement: %s on %s" % (eng.name, eng.product.name)
+            title = f"Engagement: {eng.name} on {eng.product.name}"
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Note added successfully.',
@@ -755,7 +755,7 @@ class ImportScanResultsView(View):
             if scan and is_scan_file_too_large(scan):
                 messages.add_message(request,
                                      messages.ERROR,
-                                     "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
+                                     f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB",
                                      extra_tags='alert-danger')
                 return HttpResponseRedirect(reverse('import_scan_results', args=(engagement,)))
 
@@ -1288,11 +1288,10 @@ def engagement_ics(request, eid):
     uid = "dojo_eng_%d_%d" % (eng.id, eng.product.id)
     cal = get_cal_event(
         start_date, end_date,
-        "Engagement: %s (%s)" % (eng.name, eng.product.name),
-        "Set aside for engagement %s, on product %s.  Additional detail can be found at %s"
-        % (eng.name, eng.product.name,
+        f"Engagement: {eng.name} ({eng.product.name})",
+        "Set aside for engagement {}, on product {}.  Additional detail can be found at {}".format(eng.name, eng.product.name,
            request.build_absolute_uri(
-               (reverse("view_engagement", args=(eng.id, ))))), uid)
+               reverse("view_engagement", args=(eng.id, )))), uid)
     output = cal.serialize()
     response = HttpResponse(content=output)
     response['Content-Type'] = 'text/calendar'

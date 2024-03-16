@@ -8,7 +8,7 @@ from base_test_class import BaseTestCase, on_exception_html_source_logger, set_s
 from notifications_test import NotificationTest
 
 
-class WaitForPageLoad(object):
+class WaitForPageLoad:
     def __init__(self, browser, timeout):
         self.browser = browser
         self.timeout = time.time() + timeout
@@ -27,7 +27,7 @@ class WaitForPageLoad(object):
             else:
                 time.sleep(0.2)
         raise Exception(
-            'Timeout waiting for {}s'.format(self.timeout)
+            f'Timeout waiting for {self.timeout}s'
         )
 
 

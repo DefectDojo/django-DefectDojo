@@ -27,7 +27,7 @@ class BlackduckBinaryAnalysisImporter(Importer):
         If passed a CSV file, process.
         """
         vulnerabilities = dict()
-        with open(str(report), "r") as f:
+        with open(str(report)) as f:
             vulnerabilities = self.__partition_by_key(f)
 
         sha1_hash_keys = set(vulnerabilities.keys())

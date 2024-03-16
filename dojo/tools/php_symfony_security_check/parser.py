@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class PhpSymfonySecurityCheckParser(object):
+class PhpSymfonySecurityCheckParser:
     def get_scan_types(self):
         return ["PHP Symfony Security Check"]
 

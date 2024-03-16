@@ -2,7 +2,7 @@ from dojo.tools.veracode.json_parser import VeracodeJSONParser
 from dojo.tools.veracode.xml_parser import VeracodeXMLParser
 
 
-class VeracodeParser(object):
+class VeracodeParser:
     def get_scan_types(self):
         return ["Veracode Scan"]
 

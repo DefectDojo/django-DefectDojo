@@ -13,7 +13,7 @@ from dojo.models import Endpoint, Finding, Test
 LOGGER = logging.getLogger(__name__)
 
 
-class TenableCSVParser(object):
+class TenableCSVParser:
     def _validated_severity(self, severity):
         if severity not in Finding.SEVERITIES.keys():
             severity = "Info"

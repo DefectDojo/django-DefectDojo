@@ -7,7 +7,7 @@ from datetime import date
 from dojo.models import Finding
 
 
-class AWSProwlerV3Parser(object):
+class AWSProwlerV3Parser:
     SCAN_TYPE = ["AWS Prowler V3"]
 
     def get_scan_types(self):

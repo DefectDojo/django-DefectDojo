@@ -6,7 +6,7 @@ import cvss.parser
 import json
 
 
-class SysdigReportsParser(object):
+class SysdigReportsParser:
     """
     Sysdig Report Importer - Runtime CSV
     """

@@ -464,7 +464,7 @@ def qualys_webapp_parser(qualys_xml_file, test, unique, enable_weakness=False):
     return items
 
 
-class QualysWebAppParser(object):
+class QualysWebAppParser:
     def get_scan_types(self):
         return ["Qualys Webapp Scan"]
 

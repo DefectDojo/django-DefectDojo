@@ -10,7 +10,7 @@ from datetime import date
 from dojo.models import Finding
 
 
-class AWSProwlerParser(object):
+class AWSProwlerParser:
     def get_scan_types(self):
         return ["AWS Prowler Scan"]
 

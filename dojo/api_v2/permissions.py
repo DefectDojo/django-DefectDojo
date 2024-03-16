@@ -40,9 +40,7 @@ def check_post_permission(request, post_model, post_pk, post_permission):
     if request.method == "POST":
         if request.data.get(post_pk) is None:
             raise ParseError(
-                "Unable to check for permissions: Attribute '{}' is required".format(
-                    post_pk
-                )
+                f"Unable to check for permissions: Attribute '{post_pk}' is required"
             )
         object = get_object_or_404(post_model, pk=request.data.get(post_pk))
         return user_has_permission(request.user, object, post_permission)
@@ -965,8 +963,7 @@ def raise_no_auto_create_import_validation_error(
     if product_name and not product:
         if product_type_name:
             raise serializers.ValidationError(
-                "Product '%s' doesn't exist in Product_Type '%s'"
-                % (product_name, product_type_name)
+                f"Product '{product_name}' doesn't exist in Product_Type '{product_type_name}'"
             )
         else:
             raise serializers.ValidationError(
@@ -975,21 +972,18 @@ def raise_no_auto_create_import_validation_error(
 
     if engagement_name and not engagement:
         raise serializers.ValidationError(
-            "Engagement '%s' doesn't exist in Product '%s'"
-            % (engagement_name, product_name)
+            f"Engagement '{engagement_name}' doesn't exist in Product '{product_name}'"
         )
 
     # these are only set for reimport
     if test_title:
         raise serializers.ValidationError(
-            "Test '%s' with scan_type '%s' doesn't exist in Engagement '%s'"
-            % (test_title, scan_type, engagement_name)
+            f"Test '{test_title}' with scan_type '{scan_type}' doesn't exist in Engagement '{engagement_name}'"
         )
 
     if scan_type:
         raise serializers.ValidationError(
-            "Test with scan_type '%s' doesn't exist in Engagement '%s'"
-            % (scan_type, engagement_name)
+            f"Test with scan_type '{scan_type}' doesn't exist in Engagement '{engagement_name}'"
         )
 
     raise ValidationError(error_message)

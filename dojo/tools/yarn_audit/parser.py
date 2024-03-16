@@ -4,7 +4,7 @@ from dojo.models import Finding
 from dojo.tools.utils import get_npm_cwe
 
 
-class YarnAuditParser(object):
+class YarnAuditParser:
     def get_scan_types(self):
         return ["Yarn Audit Scan"]
 

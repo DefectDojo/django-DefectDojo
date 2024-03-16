@@ -7,7 +7,7 @@ from dojo.models import Endpoint, Finding
 __author__ = "properam"
 
 
-class ImmuniwebParser(object):
+class ImmuniwebParser:
     def get_scan_types(self):
         return ["Immuniweb Scan"]
 

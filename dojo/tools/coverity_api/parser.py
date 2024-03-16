@@ -4,7 +4,7 @@ from datetime import datetime
 from dojo.models import Finding
 
 
-class CoverityApiParser(object):
+class CoverityApiParser:
     """Parser that can load data from Synopsys Coverity API"""
 
     def get_scan_types(self):

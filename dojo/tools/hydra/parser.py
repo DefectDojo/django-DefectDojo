@@ -20,7 +20,7 @@ class HydraScanMetadata:
         self.server = generator.get("server")
 
 
-class HydraParser(object):
+class HydraParser:
     """
     Weak password findings from THC-Hydra (https://github.com/vanhauser-thc/thc-hydra)
     """

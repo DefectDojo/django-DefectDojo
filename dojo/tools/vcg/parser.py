@@ -7,7 +7,7 @@ from defusedxml import ElementTree
 from dojo.models import Finding
 
 
-class VCGFinding(object):
+class VCGFinding:
     def get_finding_severity(self):
         return self.priority_mapping[self.priority]
 
@@ -57,7 +57,7 @@ class VCGFinding(object):
         self.priority_mapping[7] = "Info"
 
 
-class VCGXmlParser(object):
+class VCGXmlParser:
     @staticmethod
     def get_field_from_xml(issue, field):
         if (
@@ -128,7 +128,7 @@ class VCGXmlParser(object):
         return dupes
 
 
-class VCGCsvParser(object):
+class VCGCsvParser:
     @staticmethod
     def get_field_from_row(row, column):
         if row[column] is not None:
@@ -199,7 +199,7 @@ class VCGCsvParser(object):
         pass
 
 
-class VCGParser(object):
+class VCGParser:
     """VCG (VisualCodeGrepper) support CSV and XML"""
 
     def get_scan_types(self):

@@ -49,7 +49,7 @@ WEAK_CIPHER_LIST = [
 PROTOCOLS = ["sslv2", "sslv3", "tlsv1", "tlsv1_1", "tlsv1_2", "tlsv1_3"]
 
 
-class SSLyzeXMLParser(object):
+class SSLyzeXMLParser:
     def get_findings(self, file, test):
         tree = ET.parse(file)
         # get root of tree.

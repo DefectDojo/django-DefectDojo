@@ -4,7 +4,7 @@ import math
 from dojo.models import Finding
 
 
-class PhpSecurityAuditV2Parser(object):
+class PhpSecurityAuditV2Parser:
     def get_scan_types(self):
         return ["PHP Security Audit v2"]
 

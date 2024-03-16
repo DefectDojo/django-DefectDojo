@@ -7,7 +7,7 @@ from dojo.models import Finding
 __author__ = "dr3dd589"
 
 
-class CobaltParser(object):
+class CobaltParser:
     def get_scan_types(self):
         return ["Cobalt.io Scan"]
 

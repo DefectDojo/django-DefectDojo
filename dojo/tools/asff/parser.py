@@ -13,7 +13,7 @@ SEVERITY_MAPPING = {
 }
 
 
-class AsffParser(object):
+class AsffParser:
     def get_scan_types(self):
         return ["AWS Security Finding Format (ASFF) Scan"]
 

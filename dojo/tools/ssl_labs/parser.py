@@ -6,7 +6,7 @@ from datetime import datetime
 from dojo.models import Endpoint, Finding
 
 
-class SslLabsParser(object):
+class SslLabsParser:
     def get_scan_types(self):
         return ["SSL Labs Scan"]
 
@@ -57,36 +57,36 @@ class SslLabsParser(object):
                 if "ipAddress" in endpoints:
                     ipAddress = endpoints["ipAddress"]
 
-                title = "TLS Grade '%s' for %s" % (grade, hostName)
+                title = f"TLS Grade '{grade}' for {hostName}"
 
                 sev = self.getCriticalityRating(grade)
                 description = "%s \n\n" % title
                 cert = ""
                 if "cert" in endpoints["details"]:
                     cert = endpoints["details"]["cert"]
-                    description = "%sCertifcate Subject: %s\n" % (
+                    description = "{}Certifcate Subject: {}\n".format(
                         description,
                         cert["subject"],
                     )
-                    description = "%sIssuer Subject: %s\n" % (
+                    description = "{}Issuer Subject: {}\n".format(
                         description,
                         cert["issuerSubject"],
                     )
-                    description = "%sSignature Algorithm: %s\n" % (
+                    description = "{}Signature Algorithm: {}\n".format(
                         description,
                         cert["sigAlg"],
                     )
                 else:
                     for cert in host["certs"]:
-                        description = "%sCertifcate Subject: %s\n" % (
+                        description = "{}Certifcate Subject: {}\n".format(
                             description,
                             cert["subject"],
                         )
-                        description = "%sIssuer Subject: %s\n" % (
+                        description = "{}Issuer Subject: {}\n".format(
                             description,
                             cert["issuerSubject"],
                         )
-                        description = "%sSignature Algorithm: %s\n" % (
+                        description = "{}Signature Algorithm: {}\n".format(
                             description,
                             cert["sigAlg"],
                         )
@@ -307,7 +307,7 @@ class SslLabsParser(object):
 
                 protoName = ""
                 for protocols in endpoints["details"]["protocols"]:
-                    protoName = "%s %s %s\n" % (
+                    protoName = "{} {} {}\n".format(
                         protoName,
                         protocols["name"],
                         protocols["version"],

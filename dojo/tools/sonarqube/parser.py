@@ -10,7 +10,7 @@ from dojo.models import Finding
 logger = logging.getLogger(__name__)
 
 
-class SonarQubeParser(object):
+class SonarQubeParser:
     mode = None
 
     def set_mode(self, mode):
@@ -203,9 +203,7 @@ class SonarQubeParser(object):
     ):
         # vuln_key is the unique id from tool which means that there is
         # basically no aggregation except real duplicates
-        aggregateKeys = "{}{}{}{}{}".format(
-            vuln_cwe, vuln_title, vuln_description, vuln_file_path, vuln_key
-        )
+        aggregateKeys = f"{vuln_cwe}{vuln_title}{vuln_description}{vuln_file_path}{vuln_key}"
         find = Finding(
             title=vuln_title,
             cwe=int(vuln_cwe),
@@ -245,10 +243,8 @@ class SonarQubeParser(object):
         vuln_mitigation,
         vuln_references,
     ):
-        aggregateKeys = "{}{}{}{}".format(
-            vuln_cwe, vuln_title, vuln_description, vuln_file_path
-        )
-        descriptionOneOccurence = "Line: {}".format(vuln_line)
+        aggregateKeys = f"{vuln_cwe}{vuln_title}{vuln_description}{vuln_file_path}"
+        descriptionOneOccurence = f"Line: {vuln_line}"
         if aggregateKeys not in dupes:
             find = Finding(
                 title=vuln_title,
@@ -278,12 +274,8 @@ class SonarQubeParser(object):
             # description, nb_occurences and mitigation (message field in the
             # report which may vary for each vuln)
             find = dupes[aggregateKeys]
-            find.description = "{}\n{}".format(
-                find.description, descriptionOneOccurence
-            )
-            find.mitigation = "{}\n______\n{}".format(
-                find.mitigation, vuln_mitigation
-            )
+            find.description = f"{find.description}\n{descriptionOneOccurence}"
+            find.mitigation = f"{find.mitigation}\n______\n{vuln_mitigation}"
             find.nb_occurences = find.nb_occurences + 1
 
     def convert_sonar_severity(self, sonar_severity):

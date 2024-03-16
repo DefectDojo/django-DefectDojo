@@ -4,7 +4,7 @@ from dateutil import parser
 from dojo.models import Finding
 
 
-class CheckmarxOneParser(object):
+class CheckmarxOneParser:
     def get_scan_types(self):
         return ["Checkmarx One Scan"]
 

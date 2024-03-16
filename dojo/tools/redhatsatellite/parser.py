@@ -2,7 +2,7 @@ import json
 from dojo.models import Finding
 
 
-class RedHatSatelliteParser(object):
+class RedHatSatelliteParser:
     def get_scan_types(self):
         return ["Red Hat Satellite"]
 

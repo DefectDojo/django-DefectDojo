@@ -6,7 +6,7 @@ from .api_client import BugcrowdAPI
 logger = logging.getLogger(__name__)
 
 
-class BugcrowdApiImporter(object):
+class BugcrowdApiImporter:
     """
     Import from Bugcrowd API
     """
@@ -14,9 +14,7 @@ class BugcrowdApiImporter(object):
     def get_findings(self, test):
         client, config = self.prepare_client(test)
         logger.debug(
-            "Fetching submissions program {} and target {}".format(
-                str(config.service_key_1), str(config.service_key_2)
-            )
+            f"Fetching submissions program {str(config.service_key_1)} and target {str(config.service_key_2)}"
         )
 
         submissions_paged = client.get_findings(
@@ -29,7 +27,7 @@ class BugcrowdApiImporter(object):
         for page in submissions_paged:
             submissions += page
             counter += 1
-        logger.debug("{} Bugcrowd submissions pages fetched".format(counter))
+        logger.debug(f"{counter} Bugcrowd submissions pages fetched")
 
         return submissions, config
 

@@ -5,7 +5,7 @@ from dojo.models import Finding
 logger = logging.getLogger(__name__)
 
 
-class BurpDastardlyParser(object):
+class BurpDastardlyParser:
 
     def get_scan_types(self):
         return ["Burp Dastardly Scan"]

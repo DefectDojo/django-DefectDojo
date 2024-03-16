@@ -259,7 +259,7 @@ def user_has_global_permission_or_403(user, permission):
 def get_roles_for_permission(permission):
     if not Permissions.has_value(permission):
         raise PermissionDoesNotExistError(
-            "Permission {} does not exist".format(permission)
+            f"Permission {permission} does not exist"
         )
     roles_for_permissions = set()
     roles = get_roles_with_permissions()
@@ -274,7 +274,7 @@ def role_has_permission(role, permission):
     if role is None:
         return False
     if not Roles.has_value(role):
-        raise RoleDoesNotExistError("Role {} does not exist".format(role))
+        raise RoleDoesNotExistError(f"Role {role} does not exist")
     roles = get_roles_with_permissions()
     permissions = roles.get(role)
     if not permissions:
@@ -286,7 +286,7 @@ def role_has_global_permission(role, permission):
     if role is None:
         return False
     if not Roles.has_value(role):
-        raise RoleDoesNotExistError("Role {} does not exist".format(role))
+        raise RoleDoesNotExistError(f"Role {role} does not exist")
     roles = get_global_roles_with_permissions()
     permissions = roles.get(role)
     if permissions and permission in permissions:

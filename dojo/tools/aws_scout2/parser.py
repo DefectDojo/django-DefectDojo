@@ -6,7 +6,7 @@ from dojo.models import Finding
 from html2text import html2text
 
 
-class AWSScout2Parser(object):
+class AWSScout2Parser:
     # FIXME bad very bad
     item_data = ""
     pdepth = 0
@@ -31,20 +31,17 @@ class AWSScout2Parser(object):
 
         test_description = ""
         aws_account_id = data["aws_account_id"]
-        test_description = "%s  **AWS Account:** %s\n" % (
-            test_description,
-            aws_account_id,
-        )
+        test_description = f"{test_description}  **AWS Account:** {aws_account_id}\n"
         last_run = data["last_run"]
-        test_description = "%s  **Ruleset:** %s\n" % (
+        test_description = "{}  **Ruleset:** {}\n".format(
             test_description,
             last_run["ruleset_name"],
         )
-        test_description = "%s  **Ruleset Description:** %s\n" % (
+        test_description = "{}  **Ruleset Description:** {}\n".format(
             test_description,
             last_run["ruleset_about"],
         )
-        test_description = "%s  **Command:** %s\n" % (
+        test_description = "{}  **Command:** {}\n".format(
             test_description,
             last_run["cmd"],
         )
@@ -52,27 +49,24 @@ class AWSScout2Parser(object):
         # Summary for AWS Services
         test_description = "%s\n**AWS Services** \n\n" % (test_description)
         for service, items in list(last_run["summary"].items()):
-            test_description = "%s\n**%s** \n" % (
-                test_description,
-                service.upper(),
-            )
-            test_description = "%s\n* **Checked Items:** %s\n" % (
+            test_description = f"{test_description}\n**{service.upper()}** \n"
+            test_description = "{}\n* **Checked Items:** {}\n".format(
                 test_description,
                 items["checked_items"],
             )
-            test_description = "%s* **Flagged Items:** %s\n" % (
+            test_description = "{}* **Flagged Items:** {}\n".format(
                 test_description,
                 items["flagged_items"],
             )
-            test_description = "%s* **Max Level:** %s\n" % (
+            test_description = "{}* **Max Level:** {}\n".format(
                 test_description,
                 items["max_level"],
             )
-            test_description = "%s* **Resource Count:** %s\n" % (
+            test_description = "{}* **Resource Count:** {}\n".format(
                 test_description,
                 items["resources_count"],
             )
-            test_description = "%s* **Rules Count:** %s\n\n" % (
+            test_description = "{}* **Rules Count:** {}\n\n".format(
                 test_description,
                 items["rules_count"],
             )
@@ -178,7 +172,7 @@ class AWSScout2Parser(object):
                 self.item_data = (
                     self.item_data
                     + self.formatview(depth)
-                    + "**%s:** %s\n\n" % (key.title(), src)
+                    + f"**{key.title()}:** {src}\n\n"
                 )
             else:
                 self.item_data = (

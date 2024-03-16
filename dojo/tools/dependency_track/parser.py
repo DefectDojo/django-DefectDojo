@@ -6,7 +6,7 @@ from dojo.models import Finding
 logger = logging.getLogger(__name__)
 
 
-class DependencyTrackParser(object):
+class DependencyTrackParser:
     """
     A class that can be used to parse the JSON Finding Packaging Format (FPF) export from OWASP Dependency Track.
 
@@ -138,8 +138,7 @@ class DependencyTrackParser(object):
         else:
             version_description = ''
 
-        title = "{component_name}:{version_description} affected by: {vuln_id} ({source})"\
-            .format(vuln_id=vuln_id, source=source, version_description=version_description, component_name=component_name)
+        title = f"{component_name}:{version_description} affected by: {vuln_id} ({source})"
 
         # We should collect all the vulnerability ids, the FPF format can add additional IDs as aliases
         # we add these aliases in the vulnerability_id list making sure duplicate findings get correctly deduplicated
@@ -168,17 +167,16 @@ class DependencyTrackParser(object):
         # Build the description of the Dojo finding
         # We already know (from above) that the version information is not always present
         if component_version is not None:
-            component_description = "Version {component_version} of the {component_name} component".format(component_version=component_version, component_name=component_name)
+            component_description = f"Version {component_version} of the {component_name} component"
         else:
-            component_description = "The {component_name} component".format(component_name=component_name)
+            component_description = f"The {component_name} component"
         vulnerability_description = "You are using a component with a known vulnerability. " \
-                "{component_description} is affected by the vulnerability with an id of {vuln_id} as " \
-                "identified by {source}." \
-            .format(component_description=component_description, vuln_id=vuln_id, source=source)
+                f"{component_description} is affected by the vulnerability with an id of {vuln_id} as " \
+                f"identified by {source}."
         # Append purl info if it is present
         if 'purl' in dependency_track_finding['component'] and dependency_track_finding['component']['purl'] is not None:
             component_purl = dependency_track_finding['component']['purl']
-            vulnerability_description = vulnerability_description + "\nThe purl of the affected component is: {purl}.".format(purl=component_purl)
+            vulnerability_description = vulnerability_description + f"\nThe purl of the affected component is: {component_purl}."
             # there is no file_path in the report, but defect dojo needs it otherwise it skips deduplication:
             # see https://github.com/DefectDojo/django-DefectDojo/issues/3647
             # might be no longer needed in the future, and is not needed if people use the default

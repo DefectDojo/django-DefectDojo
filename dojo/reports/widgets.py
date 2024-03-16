@@ -57,7 +57,7 @@ class Div(form_widget):
         default_attrs = {'style': 'width:100%;min-height:400px'}
         if attrs:
             default_attrs.update(attrs)
-        super(Div, self).__init__(default_attrs)
+        super().__init__(default_attrs)
 
     def render(self, name, value, attrs=None, renderer=None):
         if value is None:
@@ -109,7 +109,7 @@ class WYSIWYGContentForm(forms.Form):
 
 
 # base Widget class others will inherit from
-class Widget(object):
+class Widget:
     def __init__(self, *args, **kwargs):
         self.title = 'Base Widget'
         self.form = None
@@ -130,7 +130,7 @@ class Widget(object):
 
 class PageBreak(Widget):
     def __init__(self, *args, **kwargs):
-        super(PageBreak, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.title = 'Page Break'
         self.form = None
         self.multiple = "true"
@@ -151,7 +151,7 @@ class PageBreak(Widget):
 
 class ReportOptions(Widget):
     def __init__(self, *args, **kwargs):
-        super(ReportOptions, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.title = 'Report Options'
         self.form = CustomReportOptionsForm()
         self.extra_help = "Choose additional report options.  These will apply to the overall report."
@@ -172,7 +172,7 @@ class ReportOptions(Widget):
 
 class CoverPage(Widget):
     def __init__(self, *args, **kwargs):
-        super(CoverPage, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.title = 'Cover Page'
         self.form = CoverPageForm()
         self.help_text = "The cover page includes a page break after its content."
@@ -197,7 +197,7 @@ class CoverPage(Widget):
 
 class TableOfContents(Widget):
     def __init__(self, *args, **kwargs):
-        super(TableOfContents, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.title = 'Table Of Contents'
         self.form = TableOfContentsForm()
         self.help_text = "The table of contents includes a page break after its content."
@@ -220,7 +220,7 @@ class TableOfContents(Widget):
 
 class WYSIWYGContent(Widget):
     def __init__(self, *args, **kwargs):
-        super(WYSIWYGContent, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.title = 'WYSIWYG Content'
         self.form = WYSIWYGContentForm()
         self.multiple = 'true'
@@ -267,7 +267,7 @@ class FindingList(Widget):
         else:
             self.finding_images = False
 
-        super(FindingList, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.title = 'Finding List'
         if hasattr(self.findings, 'form'):
@@ -342,7 +342,7 @@ class EndpointList(Widget):
         else:
             self.finding_images = False
 
-        super(EndpointList, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.title = 'Endpoint List'
         self.form = self.endpoints.form

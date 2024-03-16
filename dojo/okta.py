@@ -12,7 +12,7 @@ from social_core.backends.oauth import BaseOAuth2
 from social_core.backends.open_id_connect import OpenIdConnectAuth
 
 
-class OktaMixin(object):
+class OktaMixin:
     def api_url(self):
         return append_slash(self.setting('API_URL'))
 
