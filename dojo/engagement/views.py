@@ -1224,7 +1224,7 @@ def download_risk_acceptance(request, eid, raid):
             open(settings.MEDIA_ROOT + "/" + risk_acceptance.path.name, mode='rb')))
     response['Content-Disposition'] = 'attachment; filename="%s"' \
                                       % risk_acceptance.filename()
-    mimetype, encoding = mimetypes.guess_type(risk_acceptance.path.name)
+    mimetype, _encoding = mimetypes.guess_type(risk_acceptance.path.name)
     response['Content-Type'] = mimetype
     return response
 
