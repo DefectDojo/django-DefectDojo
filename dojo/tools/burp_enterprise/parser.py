@@ -8,7 +8,7 @@ from dojo.models import Endpoint, Finding
 logger = logging.getLogger(__name__)
 
 
-class BurpEnterpriseParser(object):
+class BurpEnterpriseParser:
     def get_scan_types(self):
         return ["Burp Enterprise Scan"]
 

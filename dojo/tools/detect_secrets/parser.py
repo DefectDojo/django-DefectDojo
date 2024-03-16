@@ -4,7 +4,7 @@ import dateutil.parser
 from dojo.models import Finding
 
 
-class DetectSecretsParser(object):
+class DetectSecretsParser:
     """
     A class that can be used to parse the detect-secrets JSON report file
     """

@@ -33,7 +33,7 @@ class Command(BaseCommand):
                 try:
                     language_type, created = Language_Type.objects.get_or_create(language=name)
                 except Language_Type.MultipleObjectsReturned:
-                    logger.warning('Language_Type {} exists multiple times'.format(name))
+                    logger.warning(f'Language_Type {name} exists multiple times')
                     continue
 
                 if created:
@@ -42,4 +42,4 @@ class Command(BaseCommand):
                 language_type.color = element.get('color', 0)
                 language_type.save()
 
-        logger.info('Finished importing languages from GitHub, added {} Language_Types'.format(new_language_types))
+        logger.info(f'Finished importing languages from GitHub, added {new_language_types} Language_Types')

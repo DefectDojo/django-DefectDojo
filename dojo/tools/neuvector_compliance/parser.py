@@ -80,28 +80,26 @@ def get_item(node, test):
 
     test_profile = node.get("profile", "profile unknown")
 
-    full_description = "{} ({}), {}:\n".format(
-        test_number, category, test_profile
-    )
-    full_description += "{}\n".format(test_description)
-    full_description += "Audit: {}\n".format(test_severity)
+    full_description = f"{test_number} ({category}), {test_profile}:\n"
+    full_description += f"{test_description}\n"
+    full_description += f"Audit: {test_severity}\n"
     if "evidence" in node:
         full_description += "Evidence:\n{}\n".format(node.get("evidence"))
     if "location" in node:
         full_description += "Location:\n{}\n".format(node.get("location"))
-    full_description += "Mitigation:\n{}\n".format(mitigation)
+    full_description += f"Mitigation:\n{mitigation}\n"
 
     tags = node.get("tags", [])
     if len(tags) > 0:
         full_description += "Tags:\n"
         for t in tags:
-            full_description += "{}\n".format(str(t).rstrip())
+            full_description += f"{str(t).rstrip()}\n"
 
     messages = node.get("message", [])
     if len(messages) > 0:
         full_description += "Messages:\n"
         for m in messages:
-            full_description += "{}\n".format(str(m).rstrip())
+            full_description += f"{str(m).rstrip()}\n"
 
     finding = Finding(
         title=title,
@@ -135,7 +133,7 @@ def convert_severity(severity):
         return severity.title()
 
 
-class NeuVectorComplianceParser(object):
+class NeuVectorComplianceParser:
     def get_scan_types(self):
         return [NEUVECTOR_SCAN_NAME]
 

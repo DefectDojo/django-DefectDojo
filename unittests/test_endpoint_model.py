@@ -37,7 +37,7 @@ class TestEndpointModel(DojoTestCase):
         path = "foo" * 1000
         query = "bar" * 1000
         fragment = "baz" * 1000
-        endpoint = Endpoint.from_uri('http://alice@foo.bar:8080/{}?{}#{}'.format(path, query, fragment))
+        endpoint = Endpoint.from_uri(f'http://alice@foo.bar:8080/{path}?{query}#{fragment}')
         self.assertEqual(len(endpoint.path), 500)
         self.assertEqual(len(endpoint.query), 1000)
         self.assertEqual(len(endpoint.fragment), 500)

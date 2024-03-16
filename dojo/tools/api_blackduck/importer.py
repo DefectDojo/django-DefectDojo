@@ -4,7 +4,7 @@ from dojo.models import Product_API_Scan_Configuration
 from .api_client import BlackduckAPI
 
 
-class BlackduckApiImporter(object):
+class BlackduckApiImporter:
     """
     Import from BlackDuck API
     """

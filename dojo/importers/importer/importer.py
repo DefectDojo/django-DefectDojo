@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
-class DojoDefaultImporter(object):
+class DojoDefaultImporter:
 
     def create_test(self, scan_type, test_type_name, engagement, lead, environment, tags=None,
                     scan_date=None, version=None, branch_tag=None, build_id=None, commit_hash=None, now=timezone.now(),

@@ -85,7 +85,7 @@ def edit_dev_env(request, deid):
             except RestrictedError as err:
                 messages.add_message(request,
                                         messages.WARNING,
-                                        'Environment cannot be deleted: {}'.format(err),
+                                        f'Environment cannot be deleted: {err}',
                                         extra_tags='alert-warning')
             return HttpResponseRedirect(reverse('dev_env'))
 

@@ -93,7 +93,7 @@ def create_notification(event=None, **kwargs):
                 queryset=Notifications.objects.filter(Q(product_id=product) | Q(product__isnull=True)),
                 to_attr="applicable_notifications"
             )).annotate(applicable_notifications_count=Count('notifications__id', filter=Q(notifications__product_id=product) | Q(notifications__product__isnull=True)))\
-                .filter((Q(applicable_notifications_count__gt=0) | Q(is_superuser=True)))
+                .filter(Q(applicable_notifications_count__gt=0) | Q(is_superuser=True))
 
             # only send to authorized users or admin/superusers
             logger.debug('Filtering users for the product %s', product)
@@ -126,11 +126,11 @@ def create_notification(event=None, **kwargs):
 def create_description(event, *args, **kwargs):
     if "description" not in kwargs.keys():
         if event == 'product_added':
-            kwargs["description"] = _('Product %(title)s has been created successfully.' % {'title': kwargs['title']})
+            kwargs["description"] = _('Product {title} has been created successfully.'.format(title=kwargs['title']))
         elif event == 'product_type_added':
-            kwargs["description"] = _('Product Type %(title)s has been created successfully.' % {'title': kwargs['title']})
+            kwargs["description"] = _('Product Type {title} has been created successfully.'.format(title=kwargs['title']))
         else:
-            kwargs["description"] = _('Event %(event)s  has occurred.' % {'event': str(event)})
+            kwargs["description"] = _('Event {event}  has occurred.'.format(event=str(event)))
 
     return kwargs["description"]
 
@@ -227,7 +227,7 @@ def send_slack_notification(event, user=None, *args, **kwargs):
 
                 # only send notification if we managed to find the slack_user_id
                 if slack_user_id:
-                    channel = '@{}'.format(slack_user_id)
+                    channel = f'@{slack_user_id}'
                     _post_slack_message(channel)
             else:
                 logger.info("The user %s does not have a email address informed for Slack in profile.", user)
@@ -235,7 +235,7 @@ def send_slack_notification(event, user=None, *args, **kwargs):
             # System scope slack notifications, and not personal would still see this go through
             if get_system_setting('slack_channel') is not None:
                 channel = get_system_setting('slack_channel')
-                logger.info("Sending system notification to system channel {}.".format(channel))
+                logger.info(f"Sending system notification to system channel {channel}.")
                 _post_slack_message(channel)
             else:
                 logger.debug('slack_channel not configured: skipping system notification')
@@ -354,10 +354,10 @@ def get_slack_user_id(user_email):
                 if user_email == user["user"]["profile"]["email"]:
                     if "id" in user["user"]:
                         user_id = user["user"]["id"]
-                        logger.debug("Slack user ID is {}".format(user_id))
+                        logger.debug(f"Slack user ID is {user_id}")
                         slack_user_is_found = True
                 else:
-                    logger.warning("A user with email {} could not be found in this Slack workspace.".format(user_email))
+                    logger.warning(f"A user with email {user_email} could not be found in this Slack workspace.")
 
             if not slack_user_is_found:
                 logger.warning("The Slack user was not found.")
