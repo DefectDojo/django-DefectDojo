@@ -41,7 +41,6 @@ import tagulous.admin
 from django.db.models import JSONField
 import hyperlink
 from cvss import CVSS3
-from dojo.utils import calculate_grade, to_str_typed
 
 
 logger = logging.getLogger(__name__)
@@ -4559,6 +4558,8 @@ if settings.ENABLE_AUDITLOG:
     auditlog.register(Risk_Acceptance)
     auditlog.register(Finding_Template)
     auditlog.register(Cred_User, exclude_fields=['password'])
+
+from dojo.utils import calculate_grade, to_str_typed  # noqa: E402  # there is issue due to a circular import
 
 tagulous.admin.register(Product.tags)
 tagulous.admin.register(Test.tags)
