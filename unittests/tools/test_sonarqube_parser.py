@@ -560,10 +560,12 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwoefijo", item.title)
         self.assertEqual("Medium", item.severity)
         self.assertEqual("CVE-2024-2529", item.cve)
+        self.assertEqual("120", item.cwe)
         item = findings[1]
         self.assertEqual("Web:TableWithoutCaptionCheck_asdfwfewfwefewf", item.title)
         self.assertEqual("Low", item.severity)
-        self.assertEqual(None, item.cve)
+        self.assertIsNone(item.cve)
+        self.assertEqual("0", item.cwe)
         item = findings[2]
         self.assertEqual("typescript:S1533_fjoiewfjoweifjoihugu-", item.title)
         self.assertEqual("Low", item.severity)

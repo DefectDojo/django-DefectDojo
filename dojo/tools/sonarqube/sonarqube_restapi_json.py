@@ -52,12 +52,18 @@ class SonarQubeRESTAPIJSON(object):
                 flows = str(issue.get("flows"))
                 status = issue.get("status")
                 message = issue.get("message")
-                if "Reference: CVE" in message: #Searching for "Reference: CVE" as in the description could theoretically be other CVEs linked
-                    cve = None
+                cve = None
+                if "Reference: CVE" in message:
                     cve_pattern = r'Reference: CVE-\d{4}-\d{4,7}'
                     cves = re.findall(cve_pattern, message)
                     if cves:
                         cve = cves[0].split("Reference: ")[1]
+                cwe = None
+                if "Category: CWE-" in message:
+                    cwe_pattern = r'Category: CWE-\d{1,5}'
+                    cwes = re.findall(cwe_pattern, message)
+                    if cwes:
+                        cwe = cwes[0].split("Category: CWE-")[1]
                 scope = issue.get("scope")
                 quickFixAvailable = str(issue.get("quickFixAvailable"))
                 codeVariants = str(issue.get("codeVariants"))
@@ -83,6 +89,7 @@ class SonarQubeRESTAPIJSON(object):
                     static_finding=True,
                     dynamic_finding=False,
                     cve=cve,
+                    cwe=cwe,
                     tags=["vulnerability"],
                 )
             elif issue.get("type") == "CODE_SMELL":
