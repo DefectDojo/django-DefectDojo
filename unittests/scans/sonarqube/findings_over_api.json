@@ -17,7 +17,7 @@
         "project": "testapplication",
         "flows": [],
         "status": "OPEN",
-        "message": "Filename: package:1.1.2 | Reference: CVE-2024-259 | CVSS Score: 6.4 | Category: CWE-120 | Versions of the package vulndescription .",
+        "message": "Filename: package:1.1.2 | Reference: CVE-2024-2529 | CVSS Score: 6.4 | Category: CWE-120 | Versions of the package vulndescription .",
         "author": "",
         "tags": [
           "cve",
