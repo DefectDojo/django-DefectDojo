@@ -1,4 +1,5 @@
 from dojo.models import Finding
+import re
 
 
 class SonarQubeRESTAPIJSON(object):
@@ -51,6 +52,12 @@ class SonarQubeRESTAPIJSON(object):
                 flows = str(issue.get("flows"))
                 status = issue.get("status")
                 message = issue.get("message")
+                if "Reference: CVE" in message: #Searching for "Reference: CVE" as in the description could theoretically be other CVEs linked
+                    cve = None
+                    cve_pattern = r'Reference: CVE-\d{4}-\d{4,7}'
+                    cves = re.findall(cve_pattern, message)
+                    if cves:
+                        cve = cves[0].split("Reference: ")[1]
                 scope = issue.get("scope")
                 quickFixAvailable = str(issue.get("quickFixAvailable"))
                 codeVariants = str(issue.get("codeVariants"))
@@ -75,6 +82,7 @@ class SonarQubeRESTAPIJSON(object):
                     severity=self.severitytranslator(issue.get("severity")),
                     static_finding=True,
                     dynamic_finding=False,
+                    cve=cve,
                     tags=["vulnerability"],
                 )
             elif issue.get("type") == "CODE_SMELL":
