@@ -729,13 +729,13 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             logger.debug('no findings')
         else:
             for finding in findings_content_json['results']:
-                print(str(finding['id']) + ': ' + finding['title'][:5] + ':' + finding['severity'] + ': active: ' + str(finding['active']) + ': verified: ' + str(finding['verified']) +
-                        ': is_mitigated: ' + str(finding['is_mitigated']) + ": notes: " + str([n['id'] for n in finding['notes']]) +
-                        ": endpoints: " + str(finding['endpoints']))
+                print(str(finding['id']) + ': ' + finding['title'][:5] + ':' + finding['severity'] + ': active: ' + str(finding['active']) + ': verified: ' + str(finding['verified'])
+                        + ': is_mitigated: ' + str(finding['is_mitigated']) + ": notes: " + str([n['id'] for n in finding['notes']])
+                        + ": endpoints: " + str(finding['endpoints']))
 
-                logger.debug(str(finding['id']) + ': ' + finding['title'][:5] + ':' + finding['severity'] + ': active: ' + str(finding['active']) + ': verified: ' + str(finding['verified']) +
-                        ': is_mitigated: ' + str(finding['is_mitigated']) + ": notes: " + str([n['id'] for n in finding['notes']]) +
-                        ": endpoints: " + str(finding['endpoints']))
+                logger.debug(str(finding['id']) + ': ' + finding['title'][:5] + ':' + finding['severity'] + ': active: ' + str(finding['active']) + ': verified: ' + str(finding['verified'])
+                        + ': is_mitigated: ' + str(finding['is_mitigated']) + ": notes: " + str([n['id'] for n in finding['notes']])
+                        + ": endpoints: " + str(finding['endpoints']))
 
         logger.debug('endpoints')
         for ep in Endpoint.objects.all():

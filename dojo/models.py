@@ -1821,15 +1821,15 @@ class Endpoint(models.Model):
     def host_mitigated_endpoints(self):
         meps = Endpoint_Status.objects \
                   .filter(endpoint__in=self.host_endpoints()) \
-                  .filter(Q(mitigated=True) |
-                          Q(false_positive=True) |
-                          Q(out_of_scope=True) |
-                          Q(risk_accepted=True) |
-                          Q(finding__out_of_scope=True) |
-                          Q(finding__mitigated__isnull=False) |
-                          Q(finding__false_p=True) |
-                          Q(finding__duplicate=True) |
-                          Q(finding__active=False))
+                  .filter(Q(mitigated=True)
+                          | Q(false_positive=True)
+                          | Q(out_of_scope=True)
+                          | Q(risk_accepted=True)
+                          | Q(finding__out_of_scope=True)
+                          | Q(finding__mitigated__isnull=False)
+                          | Q(finding__false_p=True)
+                          | Q(finding__duplicate=True)
+                          | Q(finding__active=False))
         return Endpoint.objects.filter(status_endpoint__in=meps).distinct()
 
     @property
@@ -2641,8 +2641,8 @@ class Finding(models.Model):
         # Make sure that we have a cwe if we need one
         if self.cwe == 0 and not self.test.hash_code_allows_null_cwe:
             deduplicationLogger.warning(
-                "Cannot compute hash_code based on configured fields because cwe is 0 for finding of title '" + self.title + "' found in file '" + str(self.file_path) +
-                "'. Fallback to legacy mode for this finding.")
+                "Cannot compute hash_code based on configured fields because cwe is 0 for finding of title '" + self.title + "' found in file '" + str(self.file_path)
+                + "'. Fallback to legacy mode for this finding.")
             return self.compute_hash_code_legacy()
 
         deduplicationLogger.debug("computing hash_code for finding id " + str(self.id) + " based on: " + ', '.join(hash_code_fields))
