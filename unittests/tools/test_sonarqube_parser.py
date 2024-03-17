@@ -567,7 +567,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual("Low", item.severity)
         self.assertIsNone(item.cve)
         self.assertEqual(0, item.cwe)
-        self.assertEqual(None, item.cvssv3_score)
+        self.assertIsNone(item.cvssv3_score)
         item = findings[2]
         self.assertEqual("typescript:S1533_fjoiewfjoweifjoihugu-", item.title)
         self.assertEqual("Low", item.severity)
