@@ -70,6 +70,15 @@ class SonarQubeRESTAPIJSON(object):
                     cvsss = re.findall(cvss_pattern, message)
                     if cvsss:
                         cvss = cvsss[0].split("CVSS Score: ")[1]
+                component_name = None
+                component_version = None
+                if "Filename: " in message and " | Reference" in message:
+                    component_pattern = r'Filename: .* \| Reference'
+                    comp = re.findall(component_pattern, message)
+                    if comp:
+                        component_result = comp[0].split("Filename: ")[1].split(" | Reference")[0]
+                        component_name = component_result.split(":")[0]
+                        component_version = component_result.split(":")[1]
                 scope = issue.get("scope")
                 quickFixAvailable = str(issue.get("quickFixAvailable"))
                 codeVariants = str(issue.get("codeVariants"))
@@ -94,6 +103,8 @@ class SonarQubeRESTAPIJSON(object):
                     severity=self.severitytranslator(issue.get("severity")),
                     static_finding=True,
                     dynamic_finding=False,
+                    component_name=component_name,
+                    component_version=component_version,
                     cve=cve,
                     cwe=cwe,
                     cvssv3_score=cvss,
