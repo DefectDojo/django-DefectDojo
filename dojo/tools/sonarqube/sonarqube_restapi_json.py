@@ -58,6 +58,11 @@ class SonarQubeRESTAPIJSON(object):
                     cves = re.findall(cve_pattern, message)
                     if cves:
                         cve = cves[0].split("Reference: ")[1]
+                if "Reference: GHSA" in message and cve is None:
+                    cve_pattern = r'Reference: GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}'
+                    cves = re.findall(cve_pattern, message)
+                    if cves:
+                        cve = cves[0].split("Reference: ")[1]
                 cwe = None
                 if "Category: CWE-" in message:
                     cwe_pattern = r'Category: CWE-\d{1,5}'
