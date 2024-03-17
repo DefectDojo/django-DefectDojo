@@ -10,8 +10,6 @@ ignore =
     E127
     # Suppress - Function is too complex
     C901
-    # Multiple statements on one line
-    E704
     # Bare except
     E722
     # Local variable
