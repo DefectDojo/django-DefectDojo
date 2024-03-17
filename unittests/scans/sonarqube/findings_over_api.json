@@ -96,6 +96,31 @@
         "quickFixAvailable": true,
         "messageFormattings": [],
         "codeVariants": []
+      },
+      {
+        "key": "fjioefjwoefisdfjo",
+        "rule": "OWASP:UsingComponentWithKnownVulnerability",
+        "severity": "MAJOR",
+        "component": "testapplication",
+        "project": "testapplication",
+        "flows": [],
+        "status": "OPEN",
+        "message": "Filename: package:1.1.2 | Reference: GHSA-frr2-c345-p7c2 | CVSS Score: 6.4 | Category: CWE-120 | Versions of the package vulndescription .",
+        "author": "",
+        "tags": [
+          "cve",
+          "cwe",
+          "cwe-937",
+          "owasp-a9",
+          "vulnerability"
+        ],
+        "creationDate": "2023-10-16T15:05:35+0000",
+        "updateDate": "2023-11-03T08:00:46+0000",
+        "type": "VULNERABILITY",
+        "scope": "MAIN",
+        "quickFixAvailable": false,
+        "messageFormattings": [],
+        "codeVariants": []
       }
     ],
     "components": [
