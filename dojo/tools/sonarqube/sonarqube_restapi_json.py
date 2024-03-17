@@ -64,6 +64,12 @@ class SonarQubeRESTAPIJSON(object):
                     cwes = re.findall(cwe_pattern, message)
                     if cwes:
                         cwe = cwes[0].split("Category: CWE-")[1]
+                cvss = None
+                if "CVSS Score: " in message:
+                    cvss_pattern = r'CVSS Score: \d{1}.\d{1}'
+                    cvsss = re.findall(cvss_pattern, message)
+                    if cvsss:
+                        cvss = cvsss[0].split("CVSS Score: ")[1]
                 scope = issue.get("scope")
                 quickFixAvailable = str(issue.get("quickFixAvailable"))
                 codeVariants = str(issue.get("codeVariants"))
@@ -90,6 +96,7 @@ class SonarQubeRESTAPIJSON(object):
                     dynamic_finding=False,
                     cve=cve,
                     cwe=cwe,
+                    cvssv3_score=cvss,
                     tags=["vulnerability"],
                 )
             elif issue.get("type") == "CODE_SMELL":
