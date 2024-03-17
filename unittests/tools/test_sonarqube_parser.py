@@ -561,11 +561,13 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual("Medium", item.severity)
         self.assertEqual("CVE-2024-2529", item.cve)
         self.assertEqual("120", item.cwe)
+        self.assertEqual("6.4", item.cvssv3_score)
         item = findings[1]
         self.assertEqual("Web:TableWithoutCaptionCheck_asdfwfewfwefewf", item.title)
         self.assertEqual("Low", item.severity)
         self.assertIsNone(item.cve)
-        self.assertEqual("0", item.cwe)
+        self.assertEqual(0, item.cwe)
+        self.assertEqual(None, item.cvssv3_score)
         item = findings[2]
         self.assertEqual("typescript:S1533_fjoiewfjoweifjoihugu-", item.title)
         self.assertEqual("Low", item.severity)
