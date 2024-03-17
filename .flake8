@@ -14,8 +14,6 @@ ignore =
     E704
     # Bare except
     E722
-    # Local variable
-    F841
     # May be undefined
     F405
     # list comprehension redefines
@@ -41,4 +39,10 @@ exclude =
     __pycache__,
     # This contains of branch that we don't want to check
     # dev
+
+# We should not touch migrations that are already used, but check new migrations 
+per-file-ignores =
+    dojo/db_migrations/00*:F841
+    dojo/db_migrations/01*:F841
+
 max-complexity = 10
