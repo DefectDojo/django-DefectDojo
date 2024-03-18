@@ -233,9 +233,11 @@ class SonarQubeAPI:
 
         return hotspots
 
-    def get_hotspots(self, issue_key):
+    def get_hotspots(self, branch, issue_key, project_key):
         request_filter = {
+            "branch": branch,
             "hotspots": issue_key,
+            "projectKey": project_key,
         }
 
         response = self.session.get(
@@ -258,7 +260,7 @@ class SonarQubeAPI:
             "{[x.get('key') for x in response.json().get('hotspots')]}."""
         )
 
-    def get_issue(self, issue_key):
+    def get_issue(self, branch, issue_key):
 
         """
         Search for issues.
@@ -269,6 +271,7 @@ class SonarQubeAPI:
         :return:
         """
         request_filter = {
+            "branch": branch,
             "issues": issue_key,
             "types": "BUG,VULNERABILITY,CODE_SMELL",
         }

@@ -130,9 +130,9 @@ class SonarQubeApiUpdater(object):
 
         target_status = self.get_sonarqube_status_for(finding)
         if sonarqube_issue.type == "SECURITY_HOTSPOT":
-            issue = client.get_hotspots(sonarqube_issue.key)
+            issue = client.get_hotspots(finding.test.branch_tag, sonarqube_issue.key, finding.service)
         else:
-            issue = client.get_issue(sonarqube_issue.key)
+            issue = client.get_issue(finding.test.branch_tag,sonarqube_issue.key)
         if (
             issue
         ):  # Issue could have disappeared in SQ because a previous scan has resolved the issue as fixed

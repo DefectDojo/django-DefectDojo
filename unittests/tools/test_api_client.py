@@ -37,5 +37,5 @@ class TestSonarQubeApi(TestCase):
     def test_get_hotspots(self):
         print("init test")
         issue_key = "AYlhtIhyqRxoJ-kHfc60"
-        hotspot = self.sonar_qube_api.get_hotspots(issue_key)
+        hotspot = self.sonar_qube_api.get_hotspots("main", issue_key, "test")
         assert hotspot["key"] == "AYlhtIhyqRxoJ-kHfc60"
