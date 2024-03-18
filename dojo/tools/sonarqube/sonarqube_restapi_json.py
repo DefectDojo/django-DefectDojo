@@ -58,11 +58,21 @@ class SonarQubeRESTAPIJSON(object):
                     cves = re.findall(cve_pattern, message)
                     if cves:
                         cve = cves[0].split("Reference: ")[1]
-                if "Reference: GHSA" in message and cve is None:
+                elif "References: CVE" in message:
+                    cve_pattern = r'References: CVE-\d{4}-\d{4,7}'
+                    cves = re.findall(cve_pattern, message)
+                    if cves:
+                        cve = cves[0].split("References: ")[1]
+                elif "Reference: GHSA" in message and cve is None:
                     cve_pattern = r'Reference: GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}'
                     cves = re.findall(cve_pattern, message)
                     if cves:
                         cve = cves[0].split("Reference: ")[1]
+                elif "References: GHSA" in message and cve is None:
+                    cve_pattern = r'References: GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}'
+                    cves = re.findall(cve_pattern, message)
+                    if cves:
+                        cve = cves[0].split("References: ")[1]
                 cwe = None
                 if "Category: CWE-" in message:
                     cwe_pattern = r'Category: CWE-\d{1,5}'
@@ -77,13 +87,16 @@ class SonarQubeRESTAPIJSON(object):
                         cvss = cvsss[0].split("CVSS Score: ")[1]
                 component_name = None
                 component_version = None
-                if "Filename: " in message and " | Reference" in message:
-                    component_pattern = r'Filename: .* \| Reference'
+                if "Filename: " in message and " | " in message:
+                    component_pattern = r'Filename: .* \| '
                     comp = re.findall(component_pattern, message)
                     if comp:
-                        component_result = comp[0].split("Filename: ")[1].split(" | Reference")[0]
+                        component_result = comp[0].split("Filename: ")[1].split(" | ")[0]
                         component_name = component_result.split(":")[0]
-                        component_version = component_result.split(":")[1]
+                        try:
+                            component_version = component_result.split(":")[1]
+                        except IndexError:
+                            component_version = None
                 scope = issue.get("scope")
                 quickFixAvailable = str(issue.get("quickFixAvailable"))
                 codeVariants = str(issue.get("codeVariants"))

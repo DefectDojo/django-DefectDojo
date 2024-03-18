@@ -121,6 +121,31 @@
         "quickFixAvailable": false,
         "messageFormattings": [],
         "codeVariants": []
+      },
+      {
+        "key": "fjioefjwoefisdfjo",
+        "rule": "OWASP:UsingComponentWithKnownVulnerability",
+        "severity": "CRITICAL",
+        "component": "testapplication",
+        "project": "testapplication",
+        "flows": [],
+        "status": "OPEN",
+        "message": "Filename: nimbus-jose-jwt-9.24.4.jar | Highest CVSS Score: 7.5 | Amount of CVSS: 1 | References: CVE-2023-52428 (7.5)",
+        "author": "",
+        "tags": [
+          "cve",
+          "cwe",
+          "cwe-937",
+          "owasp-a9",
+          "vulnerability"
+        ],
+        "creationDate": "2023-10-16T15:05:35+0000",
+        "updateDate": "2023-11-03T08:00:46+0000",
+        "type": "VULNERABILITY",
+        "scope": "MAIN",
+        "quickFixAvailable": false,
+        "messageFormattings": [],
+        "codeVariants": []
       }
     ],
     "components": [

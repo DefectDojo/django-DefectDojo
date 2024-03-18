@@ -554,7 +554,7 @@ class TestSonarQubeParser(DojoTestCase):
         )
         parser = SonarQubeParser()
         findings = parser.get_findings(my_file_handle, test)
-        self.assertEqual(4, len(findings))
+        self.assertEqual(5, len(findings))
         item = findings[0]
         self.assertEqual(str, type(item.description))
         self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwoefijo", item.title)
@@ -575,6 +575,10 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual("Low", item.severity)
         item = findings[3]
         self.assertEqual("GHSA-frr2-c345-p7c2", item.cve)
+        item = findings[4]
+        self.assertEqual("CVE-2023-52428", item.cve)
+        self.assertEqual("nimbus-jose-jwt-9.24.4.jar", item.component_name)
+        self.assertIsNone(item.component_version)
 
     def test_parse_json_file_from_api_with_empty_json(self):
         my_file_handle, product, engagement, test = self.init(
