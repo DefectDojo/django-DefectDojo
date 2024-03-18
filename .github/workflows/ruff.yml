@@ -33,4 +33,4 @@ jobs:
         run: pip install -r requirements-lint.txt
 
       - name: Run Ruff Linter
-        run: ruff .
+        run: ruff check .
