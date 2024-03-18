@@ -12,8 +12,6 @@ ignore =
     C901
     # Multiple statements on one line
     E704
-    # Assign a lambda expression
-    E731
     # Bare except
     E722
     # Local variable
