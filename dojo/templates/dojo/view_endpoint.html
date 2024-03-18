@@ -103,7 +103,7 @@
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">&nbsp;</span>
                                     <span>
-                                        Finding Age ({{ all_findings|length|apnumber }} verified
+                                        Finding Age ({{ all_findings|length|apnumber }}
                                         finding{{ all_findings|length|pluralize }})
                                     </span>
                                 </div>
@@ -178,9 +178,9 @@
                                 <td>{% if item %}
                                       <a data-toggle="tooltip" data-placement="top" data-original-title="{{ item }}" href="{% url 'view_endpoint' item.id %}">
                                       {% if item.vulnerable %}
-                                        <span style="color:OrangeRed" class="fa-solid fa-thumbs-down"></span>
+                                        <span style="color:OrangeRed" class="fa-solid fa-xmark"></span>
                                       {% else %}
-                                        <span class="fa-solid fa-thumbs-up"></span>
+                                        <span style="color:LimeGreen" class="fa-solid fa-check"></span>
                                       {% endif %}
                                       &nbsp;{{ item|url_shortner }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
                                     {% endif %}
@@ -248,7 +248,7 @@
 
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
-            <h4>Active Verified Findings</h4>
+            <h4>Open Findings</h4>
         </div>
     {% if findings %}
     <div class="clearfix pagination-in-panel">

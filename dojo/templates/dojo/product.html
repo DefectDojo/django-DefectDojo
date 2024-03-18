@@ -248,12 +248,8 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-center">
-                                  {% if prod.endpoint_count %}
                                     <a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><b>{{ prod.endpoint_host_count }}</b></a> /
                                     <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
-                                    {% else %}
-                                      0
-                                  {% endif %}
                                 </td>
                                 <td>
                                   {% if prod.product_manager %}

@@ -29,14 +29,6 @@ env:
     --set mysql.enabled=false \
     --set createPostgresqlSecret=true \
    "
-  HELM_PGHA_DATABASE_SETTINGS: " \
-    --set database=postgresqlha \
-    --set postgresql.enabled=false \
-    --set mysql.enabled=false \
-    --set postgresqlha.enabled=true \
-    --set createPostgresqlHaSecret=true \
-    --set createPostgresqlHaPgpoolSecret=true \
-   "
 jobs:
   setting_minikube_cluster:
     name: Kubernetes Deployment
@@ -62,10 +54,6 @@ jobs:
             os: debian
           - databases: mysql
             brokers: redis
-            k8s: 'v1.29.2'
-            os: debian
-          - databases: pgsqlha
-            brokers: rabbit
             k8s: 'v1.29.2'
             os: debian
           - databases: pgsql
