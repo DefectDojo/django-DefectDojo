@@ -1,6 +1,7 @@
 ---
 sensitiveCodepaths:
-  - 'dojo/object/*.py' # FIXME
+  - 'dojo/object/urls.py'
+  - 'dojo/object/views.py'
   - 'dojo/announcement/*.py'
   - 'dojo/api_v2/*.py'
   - 'dojo/api_v2/**/*.py'
@@ -62,6 +63,10 @@ allowedAuthors:
     - cneill
     - Maffooch
     - blakeowens
+    - kiblik
+    - dsever
+    - dogboat
+    - FelixHernandez
 notificationList:
   - '@mtesauro'
   - '@grendel513'

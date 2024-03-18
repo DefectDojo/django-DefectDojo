@@ -265,7 +265,8 @@ class DojoDefaultImporter(object):
     def import_scan(self, scan, scan_type, engagement, lead, environment, active=None, verified=None, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, close_old_findings_product_scope=False,
-                    group_by=None, api_scan_configuration=None, service=None, title=None, create_finding_groups_for_all_findings=True, apply_tags_to_findings=False):
+                    group_by=None, api_scan_configuration=None, service=None, title=None, create_finding_groups_for_all_findings=True,
+                    apply_tags_to_findings=False, apply_tags_to_endpoints=False):
 
         logger.debug(f'IMPORT_SCAN: parameters: {locals()}')
 
@@ -388,6 +389,12 @@ class DojoDefaultImporter(object):
                 for finding in test_import.findings_affected.all():
                     for tag in tags:
                         finding.tags.add(tag)
+
+            if apply_tags_to_endpoints and tags:
+                for finding in test_import.findings_affected.all():
+                    for endpoint in finding.endpoints.all():
+                        for tag in tags:
+                            endpoint.tags.add(tag)
 
         logger.debug('IMPORT_SCAN: Generating notifications')
         notifications_helper.notify_test_created(test)
