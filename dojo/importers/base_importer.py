@@ -15,6 +15,7 @@ from dojo.decorators import dojo_async_task
 from dojo.celery import app
 from dojo.utils import max_safe
 from dojo.endpoint.utils import endpoint_get_or_create
+from dojo.tools.factory import get_parser
 from dojo.models import (
     # models
     Engagement,
@@ -56,9 +57,31 @@ class Parser:
         pass
 
 
-class ImportBase(ABC):
+class BaseImporter(ABC):
+    """
+    A collection of utilities sed by various importers within DefectDojo.
+    Some of these commonalities may be fully used by children importers,
+    or even extended
+    """
     def __init__(self, *args: list, **kwargs: dict):
-        if isinstance(self, ImportBase):
+        self.new_or_init(args, kwargs)
+
+    def __new__(self, *args: list, **kwargs: dict):
+        self.new_or_init(args, kwargs)
+
+    def new_or_init(self, *args: list, **kwargs: dict):
+        """
+        Initializing or constructing this parent class is prohibited
+        and will raise a `NotImplemented` exception
+        """
+        self.check_child_implementation_exception()
+
+    def check_child_implementation_exception(self):
+        """
+        This is a helper function for a quick check to ensure that the methods of the
+        BaseImporter are not being used directly
+        """
+        if isinstance(self, BaseImporter):
             raise NotImplementedError((
                 "The Import class must not be used directly. "
                 "Please use a class that extends the Import class."
@@ -79,7 +102,7 @@ class ImportBase(ABC):
         """
         TODO FILL ME IN PLEASE
         """
-        pass
+        self.check_child_implementation_exception()
 
     @abstractmethod
     def process_findings(
@@ -93,7 +116,7 @@ class ImportBase(ABC):
         """
         TODO FILL ME IN PLEASE
         """
-        pass
+        self.check_child_implementation_exception()
 
     @abstractmethod
     def close_old_findings(
@@ -105,45 +128,100 @@ class ImportBase(ABC):
         **kwargs: dict,
     ) -> List[Finding]:
         """
-        TODO FILL ME IN PLEASE
-        """
-        pass
+        Identify any findings that have been imported before,
+        but are no longer present in later reports so that
+        we can automatically close them as "implied mitigated"
 
-    def get_test_type(
-        self,
-        scan_type: str,
-    ) -> Test_Type:
+        This function will vary by importer, so it is marked as
+        abstract with a prohibitive exception raised if the
+        method is attempted to to be used by the BaseImporter class
         """
-        TODO FILL ME IN PLEASE
-        """
-        pass
+        self.check_child_implementation_exception()
 
     def get_parser(
         self,
-        test_type: Test_Type,
+        scan_type: str,
     ) -> Parser:
         """
-        TODO FILL ME IN PLEASE
+        Returns the correct parser based on the the test type supplied. If a test type
+        is supplied that does not have a parser created for it, an exception is raised
+        from the factory `get_parser` function
         """
-        pass
+        return get_parser(scan_type)
+
+    def process_scan_file(
+        self,
+        scan: TemporaryUploadedFile,
+    ) -> TemporaryUploadedFile:
+        """
+        Make any preprocessing actions or changes on the report before submitting
+        to the parser to generate findings from the file
+        """
+        return scan
+
+    def parse_findings_from_file(
+        self,
+        parser: Parser,
+        scan_type: str,
+        scan: TemporaryUploadedFile,
+        test: Test,
+    ) -> List[Finding]:
+        """
+        Parse the scan report submitted with the parser class and generate some findings
+        that are not saved to the database yet. This step is crucial in determining if
+        there are any errors in the parser before creating any new resources
+        """
+        logger.debug(f"REIMPORT_SCAN: Parse findings from {scan_type}")
+        try:
+            return parser.get_findings(scan, test)
+        except ValueError as e:
+            logger.warning(e)
+            raise ValidationError(e)
+
+    def parse_findings_from_api_configuration(
+        self,
+        parser: Parser,
+        scan_type: str,
+        scan: TemporaryUploadedFile,
+    ) -> List[Finding]:
+        """
+        Use the API configuration object to get the tests to be used by the parser
+        to dump findings into
+
+        This version of this function is intended to be extended by children classes
+        """
+        self.check_child_implementation_exception()
+        logger.debug("REIMPORT_SCAN parser v2: Create parse findings")
+        try:
+            return parser.get_tests(scan_type, scan)
+        except ValueError as e:
+            logger.warning(e)
+            raise ValidationError(e)
 
     def parse_findings(
         self,
         parser: Parser,
         scan_type: str,
-        test: Test
+        test: Test,
+        scan: TemporaryUploadedFile,
     ) -> List[Finding]:
         """
-        TODO FILL ME IN PLEASE
+        Determine how to parse the findings based on the presence of the
+        `get_tests` function on the parser object
         """
-        return parser.get_findings(scan_type)
-
-    # TODO move me to importer class
-    def get_test(self, test_type: Test_Type) -> Test:
-        """
-        TODO FILL ME IN PLEASE
-        """
-        pass
+        if hasattr(parser, 'get_tests'):
+            return self.parse_findings_from_api_configuration(
+                parser,
+                scan_type,
+                scan,
+            )
+        else:
+            return self.parse_findings_from_file(
+                parser,
+                scan_type,
+                scan,
+                test,
+            )
 
     def update_timestamps(
         self,
@@ -360,7 +438,7 @@ class ImportBase(ABC):
                     vulnerability_id=vulnerability_id,
                     finding=finding,
                 )
- 
+
     def chunk_objects(
         self,
         object_list: List[Finding | Endpoint],
