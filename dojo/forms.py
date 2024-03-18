@@ -485,6 +485,12 @@ class ImportScanForm(forms.Form):
         required=False,
         initial=False
     )
+    apply_tags_to_endpoints = forms.BooleanField(
+        help_text="If set to True, the tags will be applied to the endpoints",
+        label="Apply Tags to Endpoints",
+        required=False,
+        initial=False
+    )
 
     if is_finding_groups_enabled():
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
@@ -574,6 +580,12 @@ class ReImportScanForm(forms.Form):
     apply_tags_to_findings = forms.BooleanField(
         help_text="If set to True, the tags will be applied to the findings",
         label="Apply Tags to Findings",
+        required=False,
+        initial=False
+    )
+    apply_tags_to_endpoints = forms.BooleanField(
+        help_text="If set to True, the tags will be applied to the endpoints",
+        label="Apply Tags to Endpoints",
         required=False,
         initial=False
     )
@@ -1190,6 +1202,7 @@ class FindingForm(forms.ModelForm):
     cwe = forms.IntegerField(required=False)
     vulnerability_ids = vulnerability_ids_field
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
+    cvssv3_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
