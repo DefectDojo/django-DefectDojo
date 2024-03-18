@@ -131,7 +131,7 @@
                             </h4>
                         </div>
 
-                        <table id="vuln_endpoints" class="table-striped table table-hover">
+                        <table id="vuln_endpoints" class="table-striped table table-hover" style="table-layout: fixed"">
                             <thead>
                                 {% if finding|has_object_permission:"Finding_Edit" %}
                                     <th class="" title="Select all vulnerable endpoints." style="width: 10%;">
@@ -141,7 +141,7 @@
                                         <span>Select All</span>
                                     </th>
                                 {% endif %}
-                                <th>Endpoint</th>
+                                <th style="width:65%">Endpoint</th>
                                 <th>Status</th>
                                 <th>Date Discovered</th>
                                 <th>Last Modified</th>
@@ -157,8 +157,8 @@
                                                 </form>
                                             </td>
                                         {% endif %}
-                                        <td>
-                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortner }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
+                                        <td style="word-wrap: break-word">
+                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
                                             {% include "dojo/snippets/tags.html" with tags=endpoint.tags.all %}
                                         </td>
                                         <td>{{ endpoint|endpoint_display_status:finding|safe }}</td>
