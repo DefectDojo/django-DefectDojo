@@ -1769,7 +1769,13 @@ class Endpoint(models.Model):
 
     @property
     def vulnerable(self):
-        return self.active_findings_count > 0
+        return Endpoint_Status.objects.filter(
+            endpoint=self,
+            mitigated=False,
+            false_positive=False,
+            out_of_scope=False,
+            risk_accepted=False
+        ).count() > 0
 
     @property
     def findings_count(self):
