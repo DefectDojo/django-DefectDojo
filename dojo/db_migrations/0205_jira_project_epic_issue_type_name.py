@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0203_alter_finding_options_finding_epss_percentile_and_more'),
+        ('dojo', '0204_jira_project_epic_issue_type_name'),
     ]
 
     operations = [
