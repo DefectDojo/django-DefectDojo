@@ -16,6 +16,7 @@ from dojo.models import (
     Test_Import_Finding_Action,
     Endpoint_Status,
     Vulnerability_Id,
+    Finding
 )
 import json
 import logging
@@ -116,9 +117,10 @@ def update_import_history(
         )
     for finding in new_findings:
         logger.debug("preparing Test_Import_Finding_Action for created finding: %i", finding.id)
-        test_import_finding_action_list.append(
-            Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CREATED_FINDING)
-        )
+        if Finding.objects.filter(id=finding.id).exists():
+            test_import_finding_action_list.append(
+                Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CREATED_FINDING)
+            )
     for finding in reactivated_findings:
         logger.debug("preparing Test_Import_Finding_Action for reactivated finding: %i", finding.id)
         test_import_finding_action_list.append(

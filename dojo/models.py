@@ -2848,7 +2848,7 @@ class Finding(models.Model):
         return None
 
     def __str__(self):
-        return f"{self.id} - {self.title}"
+        return f"{self.id} - {self.title[:80] + '...' if len(self.title) > 80 else self.title}"
 
     def status(self):
         status = []

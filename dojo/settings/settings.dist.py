@@ -149,6 +149,8 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_AZURE_DEVOPS_GROUP_TEAM_FILTERS=(str, ""),
     DD_SOCIAL_AUTH_AZURE_DEVOPS_JOBS_TITLE=(str, ""),
     DD_SOCIAL_AUTH_AZURE_DEVOPS_USERS_EXCLUDED_TPM=(str, ""),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_REPOSITORY_ID=(str, ""),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH=(str, ""),
     DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_TAGS=(bool, False),
@@ -336,6 +338,15 @@ env = environ.FileAwareEnv(
     # ---------------RISK PENDING-------------------------
     # The variable that allows enabling pending risk acceptance.
     DD_RISK_PENDING=(bool, False),
+    # These variables are the params of providers name
+     DD_PROVIDER1=(str, ""),
+     DD_PROVIDER2=(str, ""),
+     DD_PROVIDER3=(str, ""),
+    # The variable that sets the provider risk accept api and credentials
+    DD_PROVIDER_URL=(str, ""),
+    DD_PROVIDER_HEADER=(str, ""),
+    DD_PROVIDER_SECRET=(str, ""),
+    DD_PROVIDER_TOKEN=(str, ""),
     # Role that allows risk acceptance bypassing restrictions.
     DD_ROLE_ALLOWED_TO_ACCEPT_RISKS=(list, ["Maintainer"]),
     # Blacklist to define CVEs that will not be accepted for any reason.
@@ -359,21 +370,57 @@ env = environ.FileAwareEnv(
 
     DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY=(dict, {
         "Low": {
-            "number_acceptors": 0,
             "roles": ["Developer"],
-            "type_contacts": []},
+            "type_contacts": {
+                "PT1": {
+                    "users": [],
+                    "number_acceptors": 0
+                },
+                "PT2": {
+                    "users": [],
+                    "number_acceptors": 0
+                }
+            }
+        },
         "Medium": {
-            "number_acceptors": 1,
             "roles": ["Leader"],
-            "type_contacts": ["product_type_technical_contact"]},
+            "type_contacts": {
+                "PT1": {
+                    "users": ["team_manager"],
+                    "number_acceptors" : 1
+                },
+                "PT2": {
+                    "users": ["product_type_technical_contact"],
+                    "number_acceptors" : 1
+                }
+            }
+        },
         "High": {
-            "number_acceptors": 2,
-            "type_contacts": ["product_type_manager", "product_type_technical_contact"],
-            "roles": ["Leader"]},
-        "Critical": {
-            "number_acceptors": 2,
             "roles": ["Leader"],
-            "type_contacts": ["environment_manager", "environment_technical_contact"]},
+            "type_contacts": {
+                "PT1": {
+                    "users": ["product_type_technical_contact"],
+                    "number_acceptors" : 1
+                },
+                "PT2": {
+                    "users": ["product_type_manager", "product_type_technical_contact"],
+                    "number_acceptors" : 2
+                }
+            }
+        },
+        "Critical": {
+            "roles": ["Leader"],
+            "type_contacts": {
+                "PT1": {
+                    "users": ["product_type_technical_contact", "environment_technical_contact"],
+                    "number_acceptors" : 2
+                },
+                "PT2": {
+                    "users": ["environment_manager", "environment_technical_contact"],
+                    "number_acceptors" : 2
+                }
+            }
+        }
     })
 )
 
@@ -509,6 +556,15 @@ else:
                 "PORT": env("DD_DATABASE_PORT"),
             }
         }
+
+# ------------------------------------------------------------------------------
+# ENGINE BACKEND
+# ------------------------------------------------------------------------------
+if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
+    secret_engine_backend = get_secret(env("DD_PROVIDER_SECRET"))
+    PROVIDER_TOKEN = secret_engine_backend["tokenRiskAcceptanceApi"]
+else:
+    PROVIDER_TOKEN = env("DD_PROVIDER_TOKEN")
 
 # Track migrations through source control rather than making migrations locally
 if env("DD_TRACK_MIGRATIONS"):
@@ -691,6 +747,8 @@ AZURE_DEVOPS_OFFICES_LOCATION = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_OFFICES_LOCATIO
 AZURE_DEVOPS_JOBS_TITLE = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_JOBS_TITLE")
 AZURE_DEVOPS_GROUP_TEAM_FILTERS = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_GROUP_TEAM_FILTERS")
 AZURE_DEVOPS_USERS_EXCLUDED_TPM = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_USERS_EXCLUDED_TPM")
+AZURE_DEVOPS_REPOSITORY_ID = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_REPOSITORY_ID")
+AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH")
 
 GITLAB_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED")
 GITLAB_PROJECT_AUTO_IMPORT = env("DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT")
@@ -1930,6 +1988,12 @@ ROLE_ALLOWED_TO_ACCEPT_RISKS = env("DD_ROLE_ALLOWED_TO_ACCEPT_RISKS")
 BLACK_LIST_FINDING = env("DD_BLACK_LIST_FINDING")
 WHITE_LIST_FINDING = env("DD_WHITE_LIST_FINDING")
 RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = env("DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY")
+# Engine Backend
+PROVIDER1 = env("DD_PROVIDER1")
+PROVIDER2 = env("DD_PROVIDER2")
+PROVIDER3 = env("DD_PROVIDER3")
+PROVIDER_URL = env("DD_PROVIDER_URL")
+PROVIDER_HEADER = env("DD_PROVIDER_HEADER")
 # Abuse Control
 LIMIT_ASSUMPTION_OF_VULNERABILITY = env("DD_LIMIT_ASSUMPTION_OF_VULNERABILITY")
 LIMIT_OF_TEMPORARILY_ASSUMED_VULNERABILITIES_LIMITED_TO_TOLERANCE = env("DD_LIMIT_OF_TEMPORARILY_ASSUMED_VULNERABILITIES_LIMITED_TO_TOLERANCE")
