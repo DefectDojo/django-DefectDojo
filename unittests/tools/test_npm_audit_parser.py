@@ -36,10 +36,8 @@ class TestNpmAuditParser(DojoTestCase):
             if find.file_path == "express>fresh":
                 self.assertEqual(1, len(find.unsaved_vulnerability_ids))
                 self.assertEqual("CVE-2017-16119", find.unsaved_vulnerability_ids[0])
-
-        # TODO ordering seems to be different in ci compared to local, so disable for now
-        # self.assertEqual('mime', findings[4].component_name)
-        # self.assertEqual('1.3.4', findings[4].component_version)
+        self.assertEqual('mime', findings[4].component_name)
+        self.assertEqual('1.3.4', findings[4].component_version)
 
     def test_npm_audit_parser_multiple_cwes_per_finding(self):
         # cwes formatted as escaped list: "cwe": "[\"CWE-346\",\"CWE-453\"]",
@@ -74,19 +72,18 @@ class TestNpmAuditParser(DojoTestCase):
         with self.assertRaises(ValueError) as context:
             testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/empty_with_error.json"))
             parser = NpmAuditParser()
-            findings = parser.get_findings(testfile, Test())
+            parser.get_findings(testfile, Test())
             testfile.close()
-            self.assertTrue("npm audit report contains errors:" in str(context.exception))
-            self.assertTrue("ENOAUDIT" in str(context.exception))
+        self.assertIn("npm audit report contains errors:", str(context.exception))
+        self.assertIn("ENOAUDIT", str(context.exception))
 
     def test_npm_audit_parser_many_vuln_npm7(self):
         with self.assertRaises(ValueError) as context:
             testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit/many_vuln_npm7.json"))
             parser = NpmAuditParser()
-            findings = parser.get_findings(testfile, Test())
+            parser.get_findings(testfile, Test())
             testfile.close()
-            self.assertTrue("npm7 with auditReportVersion 2 or higher not yet supported" in str(context.exception))
-            self.assertEqual(findings, None)
+        self.assertIn("npm7 with auditReportVersion 2 or higher not yet supported", str(context.exception))
 
     def test_npm_audit_censored_hash(self):
         path = "77d76e075ae87483063c4c74885422f98300f9fc0ecbd3b8dfb60152a36e5269>axios"

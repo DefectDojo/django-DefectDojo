@@ -6,7 +6,7 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("dojo", "0202_populate_finding_sla_expiration_date"),
+        ("dojo", "0205_alter_finding_cvssv3_score"),
     ]
 
     operations = [

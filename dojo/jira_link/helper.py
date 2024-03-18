@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 from dojo.utils import add_error_message_to_response, get_system_setting, to_str_typed
 import os
 import io
@@ -695,6 +696,13 @@ def prepare_jira_issue_fields(
 
 
 def add_jira_issue(obj, *args, **kwargs):
+    def failure_to_add_message(message: str, exception: Exception, object: Any) -> bool:
+        if exception:
+            logger.exception(exception)
+        logger.error(message)
+        log_jira_alert(message, obj)
+        return False
+
     logger.info('trying to create a new jira issue for %d:%s', obj.id, to_str_typed(obj))
 
     if not is_jira_enabled():
@@ -702,9 +710,7 @@ def add_jira_issue(obj, *args, **kwargs):
 
     if not is_jira_configured_and_enabled(obj):
         message = 'Object %s cannot be pushed to JIRA as there is no JIRA configuration for %s.' % (obj.id, to_str_typed(obj))
-        logger.error(message)
-        log_jira_alert(message, obj)
-        return False
+        return failure_to_add_message(message, None, obj)
 
     jira_project = get_jira_project(obj)
     jira_instance = get_jira_instance(obj)
@@ -719,19 +725,23 @@ def add_jira_issue(obj, *args, **kwargs):
             logger.warning("The JIRA issue will NOT be created.")
         return False
     logger.debug('Trying to create a new JIRA issue for %s...', to_str_typed(obj))
-    meta = None
+    # Attempt to get the jira connection
     try:
         JIRAError.log_to_tempfile = False
         jira = get_jira_connection(jira_instance)
-
-        labels = get_labels(obj) + get_tags(obj)
-        if labels:
-            labels = list(dict.fromkeys(labels))  # de-dup
-
-        duedate = None
-        if System_Settings.objects.get().enable_finding_sla:
-            duedate = obj.sla_deadline()
-
+    except Exception as e:
+        message = f"The following jira instance could not be connected: {jira_instance} - {e.text}"
+        return failure_to_add_message(message, e, obj)
+    # Set the list of labels to set on the jira issue
+    labels = get_labels(obj) + get_tags(obj)
+    if labels:
+        labels = list(dict.fromkeys(labels))  # de-dup
+    # Determine what due date to set on the jira issue
+    duedate = None
+    if System_Settings.objects.get().enable_finding_sla:
+        duedate = obj.sla_deadline()
+    # Set the fields that will compose the jira issue
+    try:
         issuetype_fields = get_issuetype_fields(jira, jira_project.project_key, jira_instance.default_issue_type)
         fields = prepare_jira_issue_fields(
             project_key=jira_project.project_key,
@@ -747,16 +757,40 @@ def add_jira_issue(obj, *args, **kwargs):
             duedate=duedate,
             issuetype_fields=issuetype_fields,
             default_assignee=jira_project.default_assignee)
-
+    except TemplateDoesNotExist as e:
+        message = f"Failed to find a jira issue template to be used - {e}"
+        return failure_to_add_message(message, e, obj)
+    except Exception as e:
+        message = f"Failed to fetch fields for {jira_instance.default_issue_type} under project {jira_project.project_key} - {e}"
+        return failure_to_add_message(message, e, obj)
+    # Create a new issue in Jira with the fields set in the last step
+    try:
         logger.debug('sending fields to JIRA: %s', fields)
         new_issue = jira.create_issue(fields)
+        logger.debug('saving JIRA_Issue for %s finding %s', new_issue.key, obj.id)
+        j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue.key, jira_project=jira_project)
+        j_issue.set_obj(obj)
+        j_issue.jira_creation = timezone.now()
+        j_issue.jira_change = timezone.now()
+        j_issue.save()
+        jira.issue(new_issue.id)
+        logger.info('Created the following jira issue for %d:%s', obj.id, to_str_typed(obj))
+    except Exception as e:
+        message = f"Failed to create jira issue with the following payload: {fields} - {e}"
+        return failure_to_add_message(message, e, obj)
+    # Attempt to set a default assignee
+    try:
         if jira_project.default_assignee:
             created_assignee = str(new_issue.get_field('assignee'))
             logger.debug("new issue created with assignee %s", created_assignee)
             if created_assignee != jira_project.default_assignee:
                 jira.assign_issue(new_issue.key, jira_project.default_assignee)
-
-        # Upload dojo finding screenshots to Jira
+    except Exception as e:
+        message = f"Failed to assign the default user: {jira_project.default_assignee} - {e}"
+        # Do not return here as this should be a soft failure that should be logged
+        failure_to_add_message(message, e, obj)
+    # Upload dojo finding screenshots to Jira
+    try:
         findings = [obj]
         if isinstance(obj, Finding_Group):
             findings = obj.findings.all()
@@ -771,7 +805,22 @@ def add_jira_issue(obj, *args, **kwargs):
                         settings.MEDIA_ROOT + '/' + pic)
                 except FileNotFoundError as e:
                     logger.info(e)
-
+    except Exception as e:
+        message = f"Failed to attach attachments to the jira issue: {e}"
+        # Do not return here as this should be a soft failure that should be logged
+        failure_to_add_message(message, e, obj)
+    # Add any notes that already exist in the finding to the JIRA
+    try:
+        for find in findings:
+            if find.notes.all():
+                for note in find.notes.all().reverse():
+                    add_comment(obj, note)
+    except Exception as e:
+        message = f"Failed to add notes to the jira ticket: {e}"
+        # Do not return here as this should be a soft failure that should be logged
+        failure_to_add_message(message, e, obj)
+    # Determine whether to assign this new jira issue to a mapped epic
+    try:
         if jira_project.enable_engagement_epic_mapping:
             eng = obj.test.engagement
             logger.debug('Adding to EPIC Map: %s', eng.name)
@@ -780,36 +829,11 @@ def add_jira_issue(obj, *args, **kwargs):
                 add_issues_to_epic(jira, obj, epic_id=epic.jira_id, issue_keys=[str(new_issue.id)], ignore_epics=True)
             else:
                 logger.info('The following EPIC does not exist: %s', eng.name)
+    except Exception as e:
+        message = f"Failed to assign jira issue to existing epic: {e}"
+        return failure_to_add_message(message, e, obj)
 
-        # only link the new issue if it was successfully created, incl attachments and epic link
-        logger.debug('saving JIRA_Issue for %s finding %s', new_issue.key, obj.id)
-        j_issue = JIRA_Issue(
-            jira_id=new_issue.id, jira_key=new_issue.key, jira_project=jira_project)
-        j_issue.set_obj(obj)
-
-        j_issue.jira_creation = timezone.now()
-        j_issue.jira_change = timezone.now()
-        j_issue.save()
-        jira.issue(new_issue.id)
-
-        logger.info('Created the following jira issue for %d:%s', obj.id, to_str_typed(obj))
-
-        # Add any notes that already exist in the finding to the JIRA
-        for find in findings:
-            if find.notes.all():
-                for note in find.notes.all().reverse():
-                    add_comment(obj, note)
-
-        return True
-    except TemplateDoesNotExist as e:
-        logger.exception(e)
-        log_jira_alert(str(e), obj)
-        return False
-    except JIRAError as e:
-        logger.exception(e)
-        logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
-        log_jira_alert(e.text, obj)
-        return False
+    return True
 
 
 # we need two separate celery tasks due to the decorators we're using to map to/from ids
@@ -831,6 +855,13 @@ def update_jira_issue_for_finding_group(finding_group, *args, **kwargs):
 
 
 def update_jira_issue(obj, *args, **kwargs):
+    def failure_to_update_message(message: str, exception: Exception, obj: Any) -> bool:
+        if exception:
+            logger.exception(exception)
+        logger.error(message)
+        log_jira_alert(message, obj)
+        return False
+
     logger.debug('trying to update a linked jira issue for %d:%s', obj.id, to_str_typed(obj))
 
     if not is_jira_enabled():
@@ -841,21 +872,22 @@ def update_jira_issue(obj, *args, **kwargs):
 
     if not is_jira_configured_and_enabled(obj):
         message = 'Object %s cannot be pushed to JIRA as there is no JIRA configuration for %s.' % (obj.id, to_str_typed(obj))
-        logger.error(message)
-        log_jira_alert(message, obj)
-        return False
+        return failure_to_update_message(message, None, obj)
 
     j_issue = obj.jira_issue
-    meta = None
     try:
         JIRAError.log_to_tempfile = False
         jira = get_jira_connection(jira_instance)
         issue = jira.issue(j_issue.jira_id)
-
-        labels = get_labels(obj) + get_tags(obj)
-        if labels:
-            labels = list(dict.fromkeys(labels))  # de-dup
-
+    except Exception as e:
+        message = f"The following jira instance could not be connected: {jira_instance} - {e}"
+        return failure_to_update_message(message, e, obj)
+    # Set the list of labels to set on the jira issue
+    labels = get_labels(obj) + get_tags(obj)
+    if labels:
+        labels = list(dict.fromkeys(labels))  # de-dup
+    # Set the fields that will compose the jira issue
+    try:
         issuetype_fields = get_issuetype_fields(jira, jira_project.project_key, jira_instance.default_issue_type)
         fields = prepare_jira_issue_fields(
             project_key=jira_project.project_key,
@@ -863,29 +895,43 @@ def update_jira_issue(obj, *args, **kwargs):
             summary=jira_summary(obj),
             description=jira_description(obj),
             component_name=jira_project.component if not issue.fields.components else None,
-            labels=labels,
+            labels=labels + issue.fields.labels,
             environment=jira_environment(obj),
-            priority_name=jira_priority(obj),
+            # Do not update the priority in jira after creation as this could have changed in jira, but should not change in dojo
+            # priority_name=jira_priority(obj),
             issuetype_fields=issuetype_fields)
-
+    except Exception as e:
+        message = f"Failed to fetch fields for {jira_instance.default_issue_type} under project {jira_project.project_key} - {e}"
+        return failure_to_update_message(message, e, obj)
+    # Update the issue in jira
+    try:
         logger.debug('sending fields to JIRA: %s', fields)
-
         issue.update(
             summary=fields['summary'],
             description=fields['description'],
-            priority=fields['priority'],
+            # Do not update the priority in jira after creation as this could have changed in jira, but should not change in dojo
+            # priority=fields['priority'],
             fields=fields)
-
+        j_issue.jira_change = timezone.now()
+        j_issue.save()
+    except Exception as e:
+        message = f"Failed to update the jira issue with the following payload: {fields} - {e}"
+        return failure_to_update_message(message, e, obj)
+    # Update the status in jira
+    try:
         push_status_to_jira(obj, jira_instance, jira, issue)
-
-        # Upload dojo finding screenshots to Jira
+    except Exception as e:
+        message = f"Failed to update the jira issue status - {e}"
+        return failure_to_update_message(message, e, obj)
+    # Upload dojo finding screenshots to Jira
+    try:
         findings = [obj]
         if isinstance(obj, Finding_Group):
             findings = obj.findings.all()
 
         for find in findings:
             for pic in get_file_images(find):
-                # It doesn't look like the celery cotainer has anything in the media
+                # It doesn't look like the celery container has anything in the media
                 # folder. Has this feature ever worked?
                 try:
                     jira_attachment(
@@ -893,7 +939,12 @@ def update_jira_issue(obj, *args, **kwargs):
                         settings.MEDIA_ROOT + '/' + pic)
                 except FileNotFoundError as e:
                     logger.info(e)
-
+    except Exception as e:
+        message = f"Failed to attach attachments to the jira issue: {e}"
+        # Do not return here as this should be a soft failure that should be logged
+        failure_to_update_message(message, e, obj)
+    # Determine whether to assign this new jira issue to a mapped epic
+    try:
         if jira_project.enable_engagement_epic_mapping:
             eng = find.test.engagement
             logger.debug('Adding to EPIC Map: %s', eng.name)
@@ -902,20 +953,11 @@ def update_jira_issue(obj, *args, **kwargs):
                 add_issues_to_epic(jira, obj, epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
             else:
                 logger.info('The following EPIC does not exist: %s', eng.name)
+    except Exception as e:
+        message = f"Failed to assign jira issue to existing epic: {e}"
+        return failure_to_update_message(message, e, obj)
 
-        j_issue.jira_change = timezone.now()
-        j_issue.save()
-
-        logger.debug('Updated the following linked jira issue for %d:%s', find.id, find.title)
-        return True
-
-    except JIRAError as e:
-        logger.exception(e)
-        logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
-        if issue_from_jira_is_active(issue):
-            # Only alert if the upstream JIRA is active, we don't care about closed issues
-            log_jira_alert(e.text, obj)
-        return False
+    return True
 
 
 def get_jira_issue_from_jira(find):

@@ -15,7 +15,6 @@ from math import pi, sqrt
 import vobject
 from dateutil.relativedelta import relativedelta, MO, SU
 from django.conf import settings
-from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse, get_script_prefix
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
@@ -572,22 +571,20 @@ def deduplicate_uid_or_hash_code(new_finding):
 
 
 def set_duplicate(new_finding, existing_finding):
+    deduplicationLogger.debug(f"new_finding.status(): {new_finding.id} {new_finding.status()}")
+    deduplicationLogger.debug(f"existing_finding.status(): {existing_finding.id} {existing_finding.status()}")
     if existing_finding.duplicate:
-        logger.debug(
-            "existing finding: %s:%s:duplicate=%s;duplicate_finding=%s",
-            existing_finding.id,
-            existing_finding.title,
-            existing_finding.duplicate,
-            existing_finding.duplicate_finding.id if existing_finding.duplicate_finding else "None",
-        )
+        deduplicationLogger.debug('existing finding: %s:%s:duplicate=%s;duplicate_finding=%s', existing_finding.id, existing_finding.title, existing_finding.duplicate, existing_finding.duplicate_finding.id if existing_finding.duplicate_finding else 'None')
         raise Exception("Existing finding is a duplicate")
     if existing_finding.id == new_finding.id:
         raise Exception("Can not add duplicate to itself")
-    deduplicationLogger.debug(
-        "Setting new finding " + str(new_finding.id) + " as a duplicate of existing finding " + str(existing_finding.id)
-    )
+    deduplicationLogger.debug('Setting new finding ' + str(new_finding.id) + ' as a duplicate of existing finding ' + str(existing_finding.id))
     if is_duplicate_reopen(new_finding, existing_finding):
-        set_duplicate_reopen(new_finding, existing_finding)
+        raise Exception("Found a regression. Ignore this so that a new duplicate chain can be made")
+    if new_finding.duplicate and finding_mitigated(existing_finding):
+        raise Exception("Skip this finding as we do not want to attach a new duplicate to a mitigated finding")
+
+    deduplicationLogger.debug('Setting new finding ' + str(new_finding.id) + ' as a duplicate of existing finding ' + str(existing_finding.id))
     new_finding.duplicate = True
     new_finding.active = False
     new_finding.verified = False
@@ -606,17 +603,16 @@ def set_duplicate(new_finding, existing_finding):
     super(Finding, existing_finding).save()
 
 
-def is_duplicate_reopen(new_finding, existing_finding):
-    if (
-        (existing_finding.is_mitigated or existing_finding.mitigated)
-        and not existing_finding.out_of_scope
-        and not existing_finding.false_p
-        and new_finding.active
-        and not new_finding.is_mitigated
-    ):
-        return True
-    else:
-        return False
+def is_duplicate_reopen(new_finding, existing_finding) -> bool:
+    return finding_mitigated(existing_finding) and finding_not_human_set_status(existing_finding) and not finding_mitigated(new_finding)
+
+
+def finding_mitigated(finding: Finding) -> bool:
+    return finding.active is False and (finding.is_mitigated is True or finding.mitigated is not None)
+
+
+def finding_not_human_set_status(finding: Finding) -> bool:
+    return finding.out_of_scope is False and finding.false_p is False
 
 
 def set_duplicate_reopen(new_finding, existing_finding):
@@ -1175,27 +1171,32 @@ def get_period_counts(
     }
 
 
-def opened_in_period(start_date, end_date, pt):
-    start_date = datetime(start_date.year, start_date.month, start_date.day, tzinfo=timezone.get_current_timezone())
-    end_date = datetime(end_date.year, end_date.month, end_date.day, tzinfo=timezone.get_current_timezone())
-    opened_in_period = (
-        Finding.objects.filter(
-            date__range=[start_date, end_date],
-            test__engagement__product__prod_type=pt,
-            verified=True,
-            false_p=False,
-            duplicate=False,
-            out_of_scope=False,
-            mitigated__isnull=True,
-            severity__in=("Critical", "High", "Medium", "Low"),
-        )
-        .values("numerical_severity")
-        .annotate(Count("numerical_severity"))
-        .order_by("numerical_severity")
-    )
+def opened_in_period(start_date, end_date, **kwargs):
+    start_date = datetime(
+        start_date.year,
+        start_date.month,
+        start_date.day,
+        tzinfo=timezone.get_current_timezone())
+    end_date = datetime(
+        end_date.year,
+        end_date.month,
+        end_date.day,
+        tzinfo=timezone.get_current_timezone())
+    opened_in_period = Finding.objects.filter(
+        date__range=[start_date, end_date],
+        **kwargs,
+        verified=True,
+        false_p=False,
+        duplicate=False,
+        out_of_scope=False,
+        mitigated__isnull=True,
+        severity__in=(
+            'Critical', 'High', 'Medium',
+            'Low')).values('numerical_severity').annotate(
+                Count('numerical_severity')).order_by('numerical_severity')
     total_opened_in_period = Finding.objects.filter(
         date__range=[start_date, end_date],
-        test__engagement__product__prod_type=pt,
+        **kwargs,
         verified=True,
         false_p=False,
         duplicate=False,
@@ -1220,27 +1221,24 @@ def opened_in_period(start_date, end_date, pt):
         "end_date": end_date,
         "closed": Finding.objects.filter(
             mitigated__date__range=[start_date, end_date],
-            test__engagement__product__prod_type=pt,
-            severity__in=("Critical", "High", "Medium", "Low"),
-        ).aggregate(
-            total=Sum(
-                Case(
-                    When(severity__in=("Critical", "High", "Medium", "Low"), then=Value(1)), output_field=IntegerField()
-                )
-            )
-        )[
-            "total"
-        ],
-        "to_date_total": Finding.objects.filter(
+            **kwargs,
+            severity__in=('Critical', 'High', 'Medium', 'Low')).aggregate(
+                total=Sum(
+                    Case(
+                        When(
+                            severity__in=('Critical', 'High', 'Medium', 'Low'),
+                            then=Value(1)),
+                        output_field=IntegerField())))['total'],
+        'to_date_total':
+        Finding.objects.filter(
             date__lte=end_date.date(),
             verified=True,
             false_p=False,
             duplicate=False,
             out_of_scope=False,
             mitigated__isnull=True,
-            test__engagement__product__prod_type=pt,
-            severity__in=("Critical", "High", "Medium", "Low"),
-        ).count(),
+            **kwargs,
+            severity__in=('Critical', 'High', 'Medium', 'Low')).count()
     }
 
     for o in opened_in_period:
@@ -1426,23 +1424,6 @@ def reopen_external_issue(find, note, external_issue_provider, **kwargs):
         reopen_external_issue_github(find, note, prod, eng)
 
 
-def send_review_email(request, user, finding, users, new_note):
-    # TODO remove apparent dead code
-
-    recipients = [u.email for u in users]
-    msg = "\nGreetings, \n\n"
-    msg += "{0} has requested that you please review ".format(str(user))
-    msg += "the following finding for accuracy:"
-    msg += "\n\n" + finding.title
-    msg += "\n\nIt can be reviewed at " + request.build_absolute_uri(reverse("view_finding", args=(finding.id,)))
-    msg += "\n\n{0} provided the following details:".format(str(user))
-    msg += "\n\n" + new_note.entry
-    msg += "\n\nThanks\n"
-
-    send_mail("DefectDojo Finding Review Request", msg, user.email, recipients, fail_silently=False)
-    pass
-
-
 def process_notifications(request, note, parent_url, parent_title):
     regex = re.compile(r"(?:\A|\s)@(\w+)\b")
 
@@ -1466,18 +1447,6 @@ def process_notifications(request, note, parent_url, parent_title):
         url=parent_url,
         icon="commenting",
         recipients=users_to_notify,
-    )
-
-
-def send_atmention_email(user, users, parent_url, parent_title, new_note):
-    recipients = [u.email for u in users]
-    msg = "\nGreetings, \n\n"
-    msg += "User {0} mentioned you in a note on {1}".format(str(user), parent_title)
-    msg += "\n\n" + new_note.entry
-    msg += "\n\nIt can be reviewed at " + parent_url
-    msg += "\n\nThanks\n"
-    send_mail(
-        "DefectDojo - {0} @mentioned you in a note".format(str(user)), msg, user.email, recipients, fail_silently=False
     )
 
 
@@ -1694,7 +1663,11 @@ class Product_Tab:
             mitigated__isnull=True,
         ).count()
         active_endpoints = Endpoint.objects.filter(
-            product=self.product, finding__active=True, finding__mitigated__isnull=True
+            product=self.product,
+            status_endpoint__mitigated=False,
+            status_endpoint__false_positive=False,
+            status_endpoint__out_of_scope=False,
+            status_endpoint__risk_accepted=False,
         )
         self.endpoints_count = active_endpoints.distinct().count()
         self.endpoint_hosts_count = active_endpoints.values("host").distinct().count()
@@ -2541,14 +2514,14 @@ def get_password_requirements_string():
         maximum_length=int(get_system_setting("maximum_password_length")),
     )
 
-    if bool(get_system_setting("lowercase_character_required")):
-        s += ", one lowercase letter (a-z)"
-    if bool(get_system_setting("uppercase_character_required")):
-        s += ", one uppercase letter (A-Z)"
-    if bool(get_system_setting("number_character_required")):
-        s += ", one number (0-9)"
-    if bool(get_system_setting("special_character_required")):
-        s += ", one special chacter (()[]{}|\`~!@#$%^&*_-+=;:'\",<>./?)"  # noqa W605
+    if bool(get_system_setting('lowercase_character_required')):
+        s += ', one lowercase letter (a-z)'
+    if bool(get_system_setting('uppercase_character_required')):
+        s += ', one uppercase letter (A-Z)'
+    if bool(get_system_setting('number_character_required')):
+        s += ', one number (0-9)'
+    if bool(get_system_setting('special_character_required')):
+        s += ', one special character (()[]{}|\\`~!@#$%^&*_-+=;:\'\",<>./?)'
 
     if s.count(", ") == 1:
         password_requirements_string = s.rsplit(", ", 1)[0] + " and " + s.rsplit(", ", 1)[1]

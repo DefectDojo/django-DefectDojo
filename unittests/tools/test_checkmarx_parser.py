@@ -203,8 +203,8 @@ class TestCheckmarxParser(DojoTestCase):
             item.file_path,
         )
         # ScanStart
-        self.assertEqual(datetime.datetime, type(item.date))
-        self.assertEqual(datetime.datetime(2018, 2, 25, 11, 35, 52), item.date)
+        self.assertEqual(datetime.date, type(item.date))
+        self.assertEqual(datetime.date(2018, 2, 25), item.date)
         self.assertEqual(bool, type(item.static_finding))
         self.assertEqual(True, item.static_finding)
 
@@ -293,7 +293,7 @@ class TestCheckmarxParser(DojoTestCase):
             finding = findings[0]
             self.assertEqual("SQL Injection (Assignment5.java)", finding.title)
             self.assertEqual("High", finding.severity)
-            self.assertEqual(datetime.datetime(2018, 2, 25, 11, 35, 52), finding.date)
+            self.assertEqual(datetime.date(2018, 2, 25), finding.date)
             self.assertEqual(True, finding.static_finding)
             self.assertEqual("WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java", finding.file_path)
 
@@ -312,7 +312,7 @@ class TestCheckmarxParser(DojoTestCase):
             finding = findings[0]
             self.assertEqual("SQL Injection (Assignment5.java)", finding.title)
             self.assertEqual("High", finding.severity)
-            self.assertEqual(datetime.datetime(2018, 2, 25, 11, 35, 52), finding.date)
+            self.assertEqual(datetime.date(2018, 2, 25), finding.date)
             self.assertEqual(True, finding.static_finding)
             self.assertEqual("WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java", finding.file_path)
             self.assertEqual(50, finding.line)
@@ -330,7 +330,6 @@ class TestCheckmarxParser(DojoTestCase):
         self.teardown(my_file_handle)
         # aggregation is on sink filename so all vuln with different source filenames are aggregated
         self.assertEqual(1, len(findings))
-        item = findings[0]
         # nb_occurences counts the number of aggregated vulnerabilities from tool
         self.assertEqual(2, findings[0].nb_occurences)
         mock.assert_called_with(product, 'Java', files=2)
@@ -517,8 +516,8 @@ class TestCheckmarxParser(DojoTestCase):
             item.file_path,
         )
         # ScanStart
-        self.assertEqual(datetime.datetime, type(item.date))
-        self.assertEqual(datetime.datetime(2018, 2, 25, 11, 35, 52), item.date)
+        self.assertEqual(datetime.date, type(item.date))
+        self.assertEqual(datetime.date(2018, 2, 25), item.date)
         self.assertEqual(bool, type(item.static_finding))
         self.assertEqual(True, item.static_finding)
 
@@ -666,8 +665,8 @@ class TestCheckmarxParser(DojoTestCase):
             item.file_path,
         )
         # ScanStart
-        self.assertEqual(datetime.datetime, type(item.date))
-        self.assertEqual(datetime.datetime(2018, 2, 25, 11, 35, 52), item.date)
+        self.assertEqual(datetime.date, type(item.date))
+        self.assertEqual(datetime.date(2018, 2, 25), item.date)
         self.assertEqual(bool, type(item.static_finding))
         self.assertEqual(True, item.static_finding)
 
@@ -686,8 +685,8 @@ class TestCheckmarxParser(DojoTestCase):
             # ScanStart
             self.assertEqual("Client Potential ReDoS In Match (prettify.js)", finding.title)
             self.assertEqual("Low", finding.severity)
-            self.assertEqual(datetime.datetime, type(finding.date))
-            self.assertEqual(datetime.datetime(2021, 11, 17, 13, 50, 45), finding.date)
+            self.assertEqual(datetime.date, type(finding.date))
+            self.assertEqual(datetime.date(2021, 11, 17), finding.date)
             self.assertEqual(bool, type(finding.static_finding))
             self.assertEqual(True, finding.static_finding)
 
@@ -706,8 +705,8 @@ class TestCheckmarxParser(DojoTestCase):
             # ScanStart
             self.assertEqual("Missing HSTS Header", finding.title)
             self.assertEqual("Medium", finding.severity)
-            self.assertEqual(datetime.datetime, type(finding.date))
-            self.assertEqual(datetime.datetime(2021, 12, 24, 9, 12, 14), finding.date)
+            self.assertEqual(datetime.date, type(finding.date))
+            self.assertEqual(datetime.date(2021, 12, 24), finding.date)
             self.assertEqual(bool, type(finding.static_finding))
             self.assertEqual(True, finding.static_finding)
 
@@ -792,7 +791,7 @@ class TestCheckmarxParser(DojoTestCase):
                     self.assertEqual(89, finding.cwe)
                     self.assertEqual("/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/challenges/challenge5/Assignment5.java", finding.file_path)
                     self.assertEqual(61, finding.line)
-                    self.assertEqual(datetime.date(2022, 5, 6), finding.date.date())
+                    self.assertEqual(datetime.date(2022, 5, 6), finding.date)
             if finding.unique_id_from_tool == "SYlu22e7ZQydKJFOlC/o1EsyixQ=":
                 with self.subTest(i="SYlu22e7ZQydKJFOlC/o1EsyixQ="):
                     self.assertEqual("SQL Injection", finding.title)
@@ -800,7 +799,7 @@ class TestCheckmarxParser(DojoTestCase):
                     self.assertEqual(89, finding.cwe)
                     self.assertEqual("/webgoat-lessons/sql-injection/src/main/java/org/owasp/webgoat/sql_injection/introduction/SqlInjectionLesson5.java", finding.file_path)
                     self.assertEqual(72, finding.line)
-                    self.assertEqual(datetime.date(2022, 5, 6), finding.date.date())
+                    self.assertEqual(datetime.date(2022, 5, 6), finding.date)
             # test one in SCA part
             if finding.unique_id_from_tool == "GkVx1zoIKcd1EF72zqWrGzeVTmo=":
                 with self.subTest(i="GkVx1zoIKcd1EF72zqWrGzeVTmo="):
@@ -813,7 +812,7 @@ class TestCheckmarxParser(DojoTestCase):
                     self.assertTrue(finding.active)
                     self.assertFalse(finding.verified)
                     self.assertIsNone(finding.line)
-                    self.assertEqual(datetime.date(2022, 5, 6), finding.date.date())
+                    self.assertEqual(datetime.date(2022, 5, 6), finding.date)
             # test one in KICS part
             if finding.unique_id_from_tool == "eZrh18HAPbe2LbDAprSPrwncAC0=":
                 with self.subTest(i="eZrh18HAPbe2LbDAprSPrwncAC0="):
@@ -823,4 +822,26 @@ class TestCheckmarxParser(DojoTestCase):
                     self.assertTrue(finding.active)
                     self.assertFalse(finding.verified)
                     self.assertEqual("/webgoat-server/Dockerfile", finding.file_path)
-                    self.assertEqual(datetime.date(2022, 5, 6), finding.date.date())
+                    self.assertEqual(datetime.date(2022, 5, 6), finding.date)
+
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_finding_date_should_be_date_xml(self, mock):
+        my_file_handle, product, engagement, test = self.init(
+            get_unit_tests_path() + "/scans/checkmarx/single_finding.xml"
+        )
+        parser = CheckmarxParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
+        self.teardown(my_file_handle)
+        self.assertEqual(findings[0].date, datetime.date(2018, 2, 25))
+
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_finding_date_should_be_date_json(self, mock):
+        my_file_handle, product, engagement, test = self.init(
+            get_unit_tests_path() + "/scans/checkmarx/multiple_findings.json"
+        )
+        parser = CheckmarxParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
+        self.teardown(my_file_handle)
+        self.assertEqual(findings[0].date, datetime.date(2022, 2, 25))

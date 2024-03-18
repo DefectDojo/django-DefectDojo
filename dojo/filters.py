@@ -1,4 +1,5 @@
 import collections
+import warnings
 from drf_spectacular.types import OpenApiTypes
 
 from drf_spectacular.utils import extend_schema_field
@@ -28,6 +29,7 @@ from dojo.models import Dojo_User, Finding_Group, Product_API_Scan_Configuration
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 import tagulous
+from polymorphic.base import ManagerInheritanceWarning
 # from tagulous.forms import TagWidget
 # import tagulous
 from dojo.authorization.roles_permissions import Permissions
@@ -154,7 +156,17 @@ class FindingSLAFilter(ChoiceFilter):
 
     def sla_violated(self, qs, name):
         # return active findings that have an sla expiration date before today
-        return qs.filter(Q(active=True) & Q(sla_expiration_date__lt=timezone.now().date()))
+        return qs.filter(
+            Q(
+                active=True,
+                false_p=False,
+                duplicate=False,
+                out_of_scope=False,
+                risk_accepted=False,
+                is_mitigated=False,
+                mitigated=None,
+            ) & Q(sla_expiration_date__lt=timezone.now().date())
+        )
 
     options = {
         None: (_('Any'), any),
@@ -322,6 +334,8 @@ def get_finding_filterset_fields(metrics=False, similar=False):
                 'unique_id_from_tool',
                 'vuln_id_from_tool',
                 'service',
+                'epss_score',
+                'epss_percentile'
     ])
 
     if similar:
@@ -1199,6 +1213,9 @@ class ApiFindingFilter(DojoFilter):
     # DateRangeFilter
     created = DateRangeFilter()
     date = DateRangeFilter()
+    on = DateFilter(field_name='date', lookup_expr='exact')
+    before = DateFilter(field_name='date', lookup_expr='lt')
+    after = DateFilter(field_name='date', lookup_expr='gt')
     jira_creation = DateRangeFilter(field_name='jira_issue__jira_creation')
     jira_change = DateRangeFilter(field_name='jira_issue__jira_change')
     last_reviewed = DateRangeFilter()
@@ -1291,9 +1308,11 @@ class ApiFindingFilter(DojoFilter):
 
 class FindingFilter(FindingFilterWithTags):
     # tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
-
     title = CharFilter(lookup_expr='icontains')
     date = DateRangeFilter()
+    on = DateFilter(field_name='date', lookup_expr='exact', label='On')
+    before = DateFilter(field_name='date', lookup_expr='lt', label='Before')
+    after = DateFilter(field_name='date', lookup_expr='gt', label='After')
     last_reviewed = DateRangeFilter()
     last_status_update = DateRangeFilter()
     cwe = MultipleChoiceFilter(choices=[])
@@ -1443,6 +1462,8 @@ class FindingFilter(FindingFilterWithTags):
             ('test__engagement__product__name',
              'test__engagement__product__name'),
             ('service', 'service'),
+            ('epss_score', 'epss_score'),
+            ('epss_percentile', 'epss_percentile'),
         ),
         field_labels={
             'numerical_severity': 'Severity',
@@ -1451,6 +1472,8 @@ class FindingFilter(FindingFilterWithTags):
             'mitigated': 'Mitigated Date',
             'title': 'Finding Name',
             'test__engagement__product__name': 'Product Name',
+            'epss_score': 'EPSS Score',
+            'epss_percentile': 'EPSS Percentile',
         }
     )
 
@@ -1464,7 +1487,8 @@ class FindingFilter(FindingFilterWithTags):
                    'numerical_severity', 'line', 'duplicate_finding',
                    'hash_code', 'reviewers', 'created', 'files',
                    'sla_start_date', 'sla_expiration_date', 'cvssv3',
-                   'severity_justification', 'steps_to_reproduce']
+                   'severity_justification', 'steps_to_reproduce',
+                   'epss_score', 'epss_percentile']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -1477,6 +1501,10 @@ class FindingFilter(FindingFilterWithTags):
         super().__init__(*args, **kwargs)
 
         self.form.fields['cwe'].choices = cwe_options(self.queryset)
+        date_input_widget = forms.DateInput(attrs={'class': 'datepicker', 'placeholder': 'YYYY-MM-DD'}, format="%Y-%m-%d")
+        self.form.fields['on'].widget = date_input_widget
+        self.form.fields['before'].widget = date_input_widget
+        self.form.fields['after'].widget = date_input_widget
 
         # Don't show the product filter on the product finding view
         if self.pid:
@@ -2404,12 +2432,13 @@ class QuestionTypeFilter(ChoiceFilter):
         return self.options[value][1](self, qs, self.options[value][0])
 
 
-class QuestionFilter(FilterSet):
-    text = CharFilter(lookup_expr='icontains')
-    type = QuestionTypeFilter()
+with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
+    class QuestionFilter(FilterSet):
+        text = CharFilter(lookup_expr='icontains')
+        type = QuestionTypeFilter()
 
-    class Meta:
-        model = Question
-        exclude = ['polymorphic_ctype', 'created', 'modified', 'order']
+        class Meta:
+            model = Question
+            exclude = ['polymorphic_ctype', 'created', 'modified', 'order']
 
-    question_set = FilterSet
+        question_set = FilterSet

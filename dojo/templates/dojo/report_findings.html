@@ -1,3 +1,4 @@
+{% load display_tags %}
 {% load navigation_tags %}
 <div data-multiple='true' class="panel panel-available-widget">
     <div class="panel-heading tight" title="Click and drag to move" data-toggle="tooltip">
@@ -36,6 +37,8 @@
                         <th class="nowrap">{% dojo_sort request 'Date' 'date' %}</th>
                         {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                         <th class="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
+                        <th class="nowrap">{% dojo_sort request 'EPSS Score' 'epss_score' %}</th>
+                        <th class="nowrap">{% dojo_sort request 'EPSS Percentile' 'epss_percentile' %}</th>
                         <th class="nowrap">Status</th>
                         {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                         <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name' %}</th>
@@ -50,6 +53,8 @@
                             </td>
                             <td class="nowrap">{{ finding.date }}</td>
                             <td>{{ finding.severity }}</td>
+                            <td>{{ finding.epss_score|format_epss }}</td>
+                            <td>{{ finding.epss_percentile|format_epss }}</td>
                             <td>{{ finding.status }}</td>
                             <td>{{ finding.test.engagement.product }}</td>
                         </tr>

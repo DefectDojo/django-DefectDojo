@@ -194,6 +194,9 @@
                             <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
                                 Severity
                             </th>
+                            <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                EPSS Score / Percentile
+                            </th>
                         </tr>
                         {% for risk in engagement.risk_acceptance.all %}
                             {% for finding in risk.accepted_findings.all %}
@@ -201,6 +204,11 @@
                                     <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.title }}</td>
                                     <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.date }}</td>
                                     <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.severity }}</td>
+                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                        {{ finding.epss_score|format_epss }}
+                                        /
+                                        {{ finding.epss_percentile|format_epss }}
+                                    </td>
                                 </tr>
                             {% endfor %}
                         {% endfor %}
@@ -236,6 +244,7 @@
                             <table id="notes" class="table-striped table table-condensed table-hover centered">
                                 <tr>
                                     <th>Severity</th>
+                                    <th>EPSS Score / Percentile</th>
                                     <th>Status</th>
                                     {% if finding.risk_acceptance_set.all %}
                                         <th>Acceptance</th>
@@ -261,6 +270,11 @@
                                             Unknown
                                         {% endif %}
                                     </span>
+                                    </td>
+                                    <td>
+                                        {{ finding.epss_score|format_epss }}
+                                        /
+                                        {{ finding.epss_percentile|format_epss }}
                                     </td>
                                     <td>{{ finding.status }}</td>
                                     {% if finding.risk_acceptance_set.all %}
@@ -404,7 +418,6 @@
     <script src="{{ host }}{% static "flot/jquery.flot.resize.js" %}"></script>
     <script src="{{ host }}{% static "flot/jquery.flot.time.js" %}"></script>
     <script src="{{ host }}{% static "flot/jquery.flot.stack.js" %}"></script>
-    <script src="{{ host }}{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
     <script src="{{ host }}{% static "dojo/js/metrics.js" %}"></script>
     <script type="text/javascript">
         $(function () {
