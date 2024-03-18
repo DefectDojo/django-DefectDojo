@@ -2173,6 +2173,10 @@ class ImportScanSerializer(serializers.Serializer):
         help_text="If set to True, the tags will be applied to the findings",
         required=False,
     )
+    apply_tags_to_endpoints = serializers.BooleanField(
+        help_text="If set to True, the tags will be applied to the endpoints",
+        required=False,
+    )
 
     def save(self, push_to_jira=False):
         data = self.validated_data
@@ -2192,6 +2196,7 @@ class ImportScanSerializer(serializers.Serializer):
         api_scan_configuration = data.get("api_scan_configuration", None)
         service = data.get("service", None)
         apply_tags_to_findings = data.get("apply_tags_to_findings", False)
+        apply_tags_to_endpoints = data.get("apply_tags_to_endpoints", False)
         source_code_management_uri = data.get(
             "source_code_management_uri", None
         )
@@ -2285,6 +2290,7 @@ class ImportScanSerializer(serializers.Serializer):
                 title=test_title,
                 create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
                 apply_tags_to_findings=apply_tags_to_findings,
+                apply_tags_to_endpoints=apply_tags_to_endpoints,
             )
 
             if test:
@@ -2457,6 +2463,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         help_text="If set to True, the tags will be applied to the findings",
         required=False
     )
+    apply_tags_to_endpoints = serializers.BooleanField(
+        help_text="If set to True, the tags will be applied to the endpoints",
+        required=False,
+    )
 
     def save(self, push_to_jira=False):
         logger.debug("push_to_jira: %s", push_to_jira)
@@ -2470,6 +2480,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             "close_old_findings_product_scope"
         )
         apply_tags_to_findings = data.get("apply_tags_to_findings", False)
+        apply_tags_to_endpoints = data.get("apply_tags_to_endpoints", False)
         do_not_reactivate = data.get("do_not_reactivate", False)
         version = data.get("version", None)
         build_id = data.get("build_id", None)
@@ -2571,6 +2582,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     do_not_reactivate=do_not_reactivate,
                     create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
                     apply_tags_to_findings=apply_tags_to_findings,
+                    apply_tags_to_endpoints=apply_tags_to_endpoints,
                 )
 
                 if test_import:
