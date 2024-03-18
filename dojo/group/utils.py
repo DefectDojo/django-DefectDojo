@@ -34,7 +34,6 @@ def group_post_save_handler(sender, **kwargs):
         group.save()
         user = get_current_user()
         if user and isinstance(user, Dojo_User):
-        #if user and not settings.AZUREAD_TENANT_OAUTH2_GET_GROUPS and not settings.KEYCLOAK_TENANT_OAUTH2_GET_GROUPS:
             # Add the current user as the owner of the group
             member = Dojo_Group_Member()
             member.user = user
