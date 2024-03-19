@@ -8,21 +8,27 @@ from rest_framework.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 from rest_framework.views import exception_handler
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
     if isinstance(exc, RestrictedError):
+        logger.exception(exc)
         response = Response()
         response.status_code = HTTP_409_CONFLICT
         response.data = {"message": str(exc)}
     elif isinstance(exc, ValidationError):
+        logger.exception(exc)
         response = Response()
         response.status_code = HTTP_400_BAD_REQUEST
         response.data = {"message": str(exc)}
     else:
         if response is None:
+            logger.exception(exc)
             response = Response()
             response.status_code = HTTP_500_INTERNAL_SERVER_ERROR
             response.data = {}
