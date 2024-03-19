@@ -47,7 +47,7 @@ def forward_merge_parser(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0204_jira_project_epic_issue_type_name'),
+        ('dojo', '0205_jira_project_epic_issue_type_name'),
     ]
 
     operations = [
