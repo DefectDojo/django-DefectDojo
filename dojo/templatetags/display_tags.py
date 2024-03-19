@@ -87,7 +87,7 @@ def markdown_render(value):
         return mark_safe(bleach.clean(markdown_text, tags=markdown_tags, attributes=markdown_attrs, css_sanitizer=markdown_styles))
 
 
-def text_shortner(value, length):
+def text_shortener(value, length):
     return_value = str(value)
     if len(return_value) > length:
         return_value = return_value[:length] + "..."
@@ -96,12 +96,12 @@ def text_shortner(value, length):
 
 @register.filter(name='url_shortener')
 def url_shortener(value):
-    return text_shortner(value, 80)
+    return text_shortener(value, 80)
 
 
 @register.filter(name='breadcrumb_shortener')
 def breadcrumb_shortener(value):
-    return text_shortner(value, 15)
+    return text_shortener(value, 15)
 
 
 @register.filter(name='get_pwd')
