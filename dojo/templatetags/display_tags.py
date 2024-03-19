@@ -90,9 +90,8 @@ def markdown_render(value):
 @register.filter(name='url_shortner')
 def url_shortner(value):
     return_value = str(value)
-    if len(return_value) > 50:
-        return_value = "..." + return_value[-47:]
-
+    if len(return_value) > 80:
+        return_value = return_value[:80] + "..."
     return return_value
 
 
