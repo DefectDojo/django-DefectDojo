@@ -580,6 +580,24 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual("nimbus-jose-jwt-9.24.4.jar", item.component_name)
         self.assertIsNone(item.component_version)
 
+    def test_parse_json_file_from_api_with_multiple_findings_hotspots_json(self):
+        my_file_handle, product, engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/findings_over_api_hotspots.json"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(4, len(findings))
+        item = findings[0]
+        self.assertEqual(str, type(item.description))
+        self.assertEqual("typescript:7777_fwafewef", item.title)
+        self.assertEqual("High", item.severity)
+        item = findings[1]
+        self.assertEqual("Web:1222_cyxcvyxcvyxv", item.title)
+        self.assertEqual("Low", item.severity)
+        item = findings[2]
+        self.assertEqual("Web:9876_werrwerwerwer", item.title)
+        self.assertEqual("Low", item.severity)
+
     def test_parse_json_file_from_api_with_empty_json(self):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/findings_over_api_empty.json"

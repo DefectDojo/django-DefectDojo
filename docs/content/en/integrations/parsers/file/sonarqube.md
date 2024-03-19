@@ -10,7 +10,10 @@ Both ways (**SonarQube REST API** and **Soprasteria**) are depicted below.
 Sample SonarQube scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/sonarqube).
 
 ## SonarQube REST API 
-You can retrieve the JSON directly from SonarQube if you use the following REST API endpoint:  `<sonarqubeurl>/api/issues/search?projectKey=<projectkey>&branchName=<branchName>`
+You can retrieve the JSON directly from SonarQube if you use one of the following REST API endpoint:  
+- `<sonarqubeurl>/api/issues/search?projects=<projectkey>`
+- `<sonarqubeurl>/api/hotspots/search?projectKey=<projectkey>`
+
 ### JSON
 The REST API JSON output can be uploaded to DefectDojo with "SonarQube Scan". 
 
