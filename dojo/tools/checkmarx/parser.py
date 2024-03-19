@@ -159,7 +159,7 @@ class CheckmarxParser(object):
         active = self.isActive(state)
         verified = self.isVerified(state)
 
-        if not (aggregateKeys in dupes):
+        if aggregateKeys not in dupes:
             find = Finding(
                 title=title,
                 cwe=int(cwe),

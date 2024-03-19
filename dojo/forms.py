@@ -2774,7 +2774,7 @@ class JIRAProjectForm(forms.ModelForm):
                 # we have to check that we are not in a POST request where jira project config data is posted
                 # this is because initial values will overwrite the actual values entered by the user
                 # makes no sense, but seems to be accepted behaviour: https://code.djangoproject.com/ticket/30407
-                if jira_project_product and not (self.prefix + '-jira_instance') in self.data:
+                if jira_project_product and (self.prefix + '-jira_instance') not in self.data:
                     logger.debug('setting jira project fields from product2')
                     self.initial['jira_instance'] = jira_project_product.jira_instance.id if jira_project_product.jira_instance else None
                     self.initial['project_key'] = jira_project_product.project_key
