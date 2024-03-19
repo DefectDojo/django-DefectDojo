@@ -32,7 +32,7 @@ class SonarQubeParser(object):
             json_content = json.load(filename)
             if json_content.get("date") and json_content.get("projectName") and json_content.get("hotspotKeys"):
                 return SonarQubeSoprasteriaJSON().get_json_items(json_content, test, self.mode)
-            elif json_content.get("total") and json_content.get("ps") and json_content.get("components"):
+            elif json_content.get("paging") and json_content.get("components"):
                 return SonarQubeRESTAPIJSON().get_json_items(json_content, test, self.mode)
             else:
                 return []
