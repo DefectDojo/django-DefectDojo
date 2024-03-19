@@ -387,6 +387,17 @@
 </script>
 <script type="text/javascript">
     $(document).ready(function() {
+        var observer = window.ResizeObserver ? new ResizeObserver(function (entries) {
+            entries.forEach(function (entry) {
+                $(entry.target).DataTable().columns.adjust();
+            });
+        }) : null;
+
+        resizeHandler = function ($table) {
+            if (observer)
+                observer.observe($table[0]);
+        };
+    
         setTimeout(function() {
             var table = $('#findings_table').DataTable({
                 "paging": false,
@@ -399,8 +410,11 @@
                     { title: '' },
                     { title: 'ID' },
                     { title: 'Severity' },
-                    { title: 'EPSS Score / Percentile' },
                     { title: 'Name' },
+                    { title: 'CWE' },
+                    { title: 'Vulnerability Id' },
+                    { title: 'EPSS Score' },
+                    { title: 'EPSS Precentile' },
                     { 
                         title: 'Date', 
                         render: function(data) {
@@ -415,6 +429,7 @@
                     { title: 'Active' }
                 ]
             });
+            resizeHandler($('#findings_table'));
         }, 0);
     });
 </script>
