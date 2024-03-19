@@ -158,7 +158,7 @@
                                             </td>
                                         {% endif %}
                                         <td>
-                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortner }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
+                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortener }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
                                             {% include "dojo/snippets/tags.html" with tags=endpoint.tags.all %}
                                         </td>
                                         <td>{{ endpoint|endpoint_display_status:finding|safe }}</td>
@@ -212,7 +212,7 @@
                                             </td>
                                         {% endif %}
                                         <td>
-                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortner }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
+                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortener }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
                                             {% include "dojo/snippets/tags.html" with tags=endpoint.tags.all %}
                                         </td>
                                         <td>{{ endpoint|endpoint_display_status:finding|safe }}</td>
