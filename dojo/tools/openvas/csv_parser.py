@@ -71,6 +71,19 @@ class PortColumnMappingStrategy(ColumnMappingStrategy):
             finding.unsaved_endpoints[0].port = int(column_value)
 
 
+class CveColumnMappingStrategy(ColumnMappingStrategy):
+    def __init__(self):
+        self.mapped_column = "cves"
+        super(CveColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        if "," in column_value:
+            finding.cve = column_value.split(",")[0]
+            finding.description += "\n**All CVEs:** " + str(column_value)
+        else:
+            finding.cve = column_value
+
+
 class ProtocolColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "port protocol"
@@ -210,6 +223,7 @@ class OpenVASCSVParser(object):
         duplicate_strategy = DuplicateColumnMappingStrategy()
         port_strategy = PortColumnMappingStrategy()
         protocol_strategy = ProtocolColumnMappingStrategy()
+        cve_column_strategy = CveColumnMappingStrategy()
         port_strategy.successor = protocol_strategy
         duplicate_strategy.successor = port_strategy
         false_positive_strategy.successor = duplicate_strategy
@@ -224,7 +238,8 @@ class OpenVASCSVParser(object):
         hostname_column_strategy.successor = ip_column_strategy
         cwe_column_strategy.successor = hostname_column_strategy
         title_column_strategy.successor = cwe_column_strategy
-        date_column_strategy.successor = title_column_strategy
+        cve_column_strategy.successor = title_column_strategy
+        date_column_strategy.successor = cve_column_strategy
         return date_column_strategy
 
     def read_column_names(self, row):

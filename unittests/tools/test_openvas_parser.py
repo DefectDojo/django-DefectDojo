@@ -47,6 +47,8 @@ class TestOpenVASParser(DojoTestCase):
             self.assertEqual("LOGSRV", endpoint.host)
             self.assertEqual("tcp", endpoint.protocol)
             self.assertEqual(9200, endpoint.port)
+            finding = findings[2]
+            self.assertEqual(finding.cve, "CVE-2011-3389")
 
     def test_openvas_xml_no_vuln(self):
         with open("unittests/scans/openvas/no_vuln.xml") as f:
