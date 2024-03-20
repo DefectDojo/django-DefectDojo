@@ -1,6 +1,7 @@
 import csv
 import hashlib
 import io
+import re
 from dateutil.parser import parse
 from dojo.models import Finding, Endpoint
 
@@ -78,10 +79,25 @@ class CveColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         if "," in column_value:
-            finding.cve = column_value.split(",")[0]
             finding.description += "\n**All CVEs:** " + str(column_value)
-        else:
-            finding.cve = column_value
+            if finding.cve is None:
+                finding.cve = column_value.split(",")[0]
+        elif column_value is not None:
+            if finding.cve is None:
+                finding.cve = column_value
+
+
+class NVDCVEColumnMappingStrategy(ColumnMappingStrategy):
+    def __init__(self):
+        self.mapped_column = "nvt oid"
+        super(NVDCVEColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        if finding.cve is None:
+            cve_pattern = r'CVE-\d{4}-\d{4,7}'
+            cve = re.findall(cve_pattern, column_value)
+            if cve:
+                finding.cve = column_value
 
 
 class ProtocolColumnMappingStrategy(ColumnMappingStrategy):
@@ -224,6 +240,7 @@ class OpenVASCSVParser(object):
         port_strategy = PortColumnMappingStrategy()
         protocol_strategy = ProtocolColumnMappingStrategy()
         cve_column_strategy = CveColumnMappingStrategy()
+        nvd_cve_column_strategy = NVDCVEColumnMappingStrategy()
         port_strategy.successor = protocol_strategy
         duplicate_strategy.successor = port_strategy
         false_positive_strategy.successor = duplicate_strategy
@@ -239,7 +256,8 @@ class OpenVASCSVParser(object):
         cwe_column_strategy.successor = hostname_column_strategy
         title_column_strategy.successor = cwe_column_strategy
         cve_column_strategy.successor = title_column_strategy
-        date_column_strategy.successor = cve_column_strategy
+        nvd_cve_column_strategy.successor = cve_column_strategy
+        date_column_strategy.successor = nvd_cve_column_strategy
         return date_column_strategy
 
     def read_column_names(self, row):
