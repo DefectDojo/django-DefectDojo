@@ -42,23 +42,23 @@ jobs:
           # are tested (https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#available-versions)
           - databases: pgsql
             brokers: redis
-            k8s: 'v1.22.0'
+            k8s: 'v1.26.11'
             os: debian
           - databases: mysql
             brokers: rabbit
-            k8s: 'v1.22.0'
+            k8s: 'v1.26.11'
             os: debian
           - databases: pgsql
             brokers: rabbit
-            k8s: 'v1.23.9'
+            k8s: 'v1.29.2'
             os: debian
           - databases: mysql
             brokers: redis
-            k8s: 'v1.23.9'
+            k8s: 'v1.29.2'
             os: debian
           - databases: pgsql
             brokers: rabbit
-            k8s: 'v1.23.9'
+            k8s: 'v1.29.2'
             os: alpine
 
     steps:
@@ -68,7 +68,7 @@ jobs:
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@v2.10.0
         with:
-          minikube version: 'v1.24.0'
+          minikube version: 'v1.31.2'
           kubernetes version: ${{ matrix.k8s }}
           driver: docker
           start args: '--addons=ingress --cni calico'
