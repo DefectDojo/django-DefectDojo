@@ -4,10 +4,10 @@ Parser for Aquasecurity trivy-operator (https://github.com/aquasecurity/trivy-op
 
 import json
 import logging
-
-from dojo.models import Finding
 from dojo.tools.trivy_operator.vulnerability_handler import TrivyVulnerabilityHandler
 from dojo.tools.trivy_operator.checks_handler import TrivyChecksHandler
+from dojo.tools.trivy_operator.secrets_handler import TrivySecretsHandler
+
 logger = logging.getLogger(__name__)
 
 TRIVY_SEVERITIES = {
@@ -17,7 +17,6 @@ TRIVY_SEVERITIES = {
     "LOW": "Low",
     "UNKNOWN": "Info",
 }
-
 
 SECRET_DESCRIPTION_TEMPLATE = """{title}
 **Category:** {category}
@@ -74,34 +73,6 @@ class TrivyOperatorParser:
             findings += TrivyChecksHandler().handle_checks(service, checks, test)
         secrets = report.get("secrets", None)
         if secrets is not None:
-            for secret in secrets:
-                secret_title = secret.get("title")
-                secret_category = secret.get("category")
-                secret_match = secret.get("match", "")
-                secret_severity = TRIVY_SEVERITIES[secret.get("severity")]
-                secret_rule_id = secret.get("ruleID", "0")
-                secret_target = secret.get("target", "")
-                secret_references = secret.get("ruleID", "")
-                title = f"Secret detected in {secret_target} - {secret_title}"
-                secret_description = SECRET_DESCRIPTION_TEMPLATE.format(
-                    title=secret_title,
-                    category=secret_category,
-                    match=secret_match,
-                )
-
-                finding = Finding(
-                    test=test,
-                    title=title,
-                    severity=secret_severity,
-                    references=secret_references,
-                    description=secret_description,
-                    file_path=secret_target,
-                    static_finding=True,
-                    dynamic_finding=False,
-                    service=service,
-                )
-                if secret_rule_id:
-                    finding.unsaved_vulnerability_ids = [secret_rule_id]
-                findings.append(finding)
+            findings += TrivySecretsHandler().handle_secrets(service, secrets, test)
 
         return findings
