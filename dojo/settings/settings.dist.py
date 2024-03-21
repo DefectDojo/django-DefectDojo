@@ -1247,7 +1247,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'MobSF Scan': ['title', 'description', 'severity'],
     'OSV Scan': ['title', 'description', 'severity'],
     'Snyk Code Scan': ['vuln_id_from_tool', 'file_path'],
-    'Nancy Scan': ['title', 'cvssv3']
+    'Nancy Scan': ['title', 'vuln_id_from_tool']
 }
 
 # Override the hardcoded settings here via the env var
