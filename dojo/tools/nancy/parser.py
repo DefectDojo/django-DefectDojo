@@ -64,7 +64,7 @@ class NancyParser(object):
                         dynamic_finding=False,
                         vuln_id_from_tool=associated_vuln["Id"],
                         cve=associated_vuln['Cve'],
-                        references=", ".join(references),
+                        references="\n".join(references),
                     )
 
                     finding.unsaved_vulnerability_ids = vulnerability_ids
