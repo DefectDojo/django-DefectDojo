@@ -38,7 +38,7 @@ class NancyParser(object):
             severity = 'Info'
             # the tool does not define severity, however it
             # provides CVSSv3 vector which will calculate
-            # severity dunamically on save()
+            # severity dynamically on save()
             references = []
             if vuln['Vulnerabilities']:
                 comp_name = vuln['Coordinates'].split(':')[1].split('@')[0]
