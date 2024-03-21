@@ -8,6 +8,11 @@ TRIVY_SEVERITIES = {
     "UNKNOWN": "Info",
 }
 
+SECRET_DESCRIPTION_TEMPLATE = """{title}
+**Category:** {category}
+**Match:** {match}
+"""
+
 
 class TrivySecretsHandler:
     def handle_secrets(self, service, secrets, test):

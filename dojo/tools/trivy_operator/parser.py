@@ -10,19 +10,6 @@ from dojo.tools.trivy_operator.secrets_handler import TrivySecretsHandler
 
 logger = logging.getLogger(__name__)
 
-TRIVY_SEVERITIES = {
-    "CRITICAL": "Critical",
-    "HIGH": "High",
-    "MEDIUM": "Medium",
-    "LOW": "Low",
-    "UNKNOWN": "Info",
-}
-
-SECRET_DESCRIPTION_TEMPLATE = """{title}
-**Category:** {category}
-**Match:** {match}
-"""
-
 
 class TrivyOperatorParser:
     def get_scan_types(self):
