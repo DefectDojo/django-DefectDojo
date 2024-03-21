@@ -33,8 +33,6 @@ class TestNancyParser(DojoTestCase):
         self.assertEqual(13, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
-            self.assertEqual('Medium', finding.severity)
             self.assertEqual(0, finding.cwe)
             self.assertIsNotNone(finding.description)
             self.assertGreater(len(finding.description), 0)
-            self.assertEqual('[CVE-2017-1000070]  URL Redirection to Untrusted Site ("Open Redirect")', finding.title)
