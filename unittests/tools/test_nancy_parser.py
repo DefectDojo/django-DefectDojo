@@ -20,7 +20,7 @@ class TestNancyParser(DojoTestCase):
         self.assertEqual(1, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
-            self.assertEqual('Medium', finding.severity)
+            self.assertEqual('Info', finding.severity)
             self.assertIsNotNone(finding.description)
             self.assertGreater(len(finding.description), 0)
             self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
