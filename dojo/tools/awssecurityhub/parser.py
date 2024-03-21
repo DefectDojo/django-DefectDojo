@@ -46,8 +46,8 @@ def get_item(finding: dict, test):
     mitigation = ""
     impact = []
     references = []
-    resource_type = finding.get("Resources", {}).get("Type, "")
-    resource_id = finding.get("Resources", {}).get("Id, "")
+    resource_type = finding.get("Resources", {}).get("Type", "")
+    resource_id = finding.get("Resources", {}).get("Id", "")
     host = f"{resource_type} {resource_id}"
     unsaved_vulnerability_ids = []
     epss_score = None
