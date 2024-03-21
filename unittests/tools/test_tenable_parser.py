@@ -277,3 +277,14 @@ class TestTenableParser(DojoTestCase):
                 endpoint.clean()
         self.assertEqual(1, len(findings))
         self.assertEqual("High", findings[0].severity)
+
+    def test_parse_nessus_new(self):
+        testfile = open("unittests/scans/tenable/nessus/nessus_new.csv")
+        parser = TenableParser()
+        findings = parser.get_findings(testfile, self.create_test())
+        self.assertEqual(99, len(findings))
+        finding = findings[0]
+        self.assertEqual("Blah1", finding.unsaved_endpoints[0].host)
+        self.assertEqual("Blah1", finding.title)
+        self.assertEqual("Low", finding.severity)
+        self.assertEqual("3.1", finding.cvssv3_score)
