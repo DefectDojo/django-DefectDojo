@@ -7,7 +7,7 @@ import logging
 
 from dojo.models import Finding
 from dojo.tools.trivy_operator.vulnerability_handler import TrivyVulnerabilityHandler
-
+from dojo.tools.trivy_operator.checks_handler import TrivyChecksHandler
 logger = logging.getLogger(__name__)
 
 TRIVY_SEVERITIES = {
@@ -71,32 +71,7 @@ class TrivyOperatorParser:
             findings += TrivyVulnerabilityHandler().handle_vulns(service, vulnerabilities, test)
         checks = report.get("checks", None)
         if checks is not None:
-            for check in checks:
-                check_title = check.get("title")
-                check_severity = TRIVY_SEVERITIES[check.get("severity")]
-                check_id = check.get("checkID", "0")
-                check_references = ""
-                if check_id != 0:
-                    check_references = (
-                        "https://avd.aquasec.com/misconfig/kubernetes/"
-                        + check_id.lower()
-                    )
-                check_description = check.get("description", "")
-                title = f"{check_id} - {check_title}"
-                finding = Finding(
-                    test=test,
-                    title=title,
-                    severity=check_severity,
-                    references=check_references,
-                    description=check_description,
-                    static_finding=True,
-                    dynamic_finding=False,
-                    service=service,
-                )
-                if check_id:
-                    finding.unsaved_vulnerability_ids = [check_id]
-                findings.append(finding)
-
+            findings += TrivyChecksHandler().handle_checks(service, checks, test)
         secrets = report.get("secrets", None)
         if secrets is not None:
             for secret in secrets:
