@@ -12,9 +12,9 @@ TRIVY_SEVERITIES = {
 class TrivyComplianceHandler:
     def handle_compliance(self, benchmarkreport, test):
         findings = list()
-        description = "**detailReport description:** " + benchmarkreport.get("description") + "\n"
         for result in benchmarkreport.get("results"):
             for check in result.get("checks"):
+                description = "**detailReport description:** " + benchmarkreport.get("description") + "\n"
                 if check.get("success") is False:
                     result_description = result.get("description", "")
                     result_id = result.get("id", "")
