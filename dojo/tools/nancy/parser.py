@@ -1,5 +1,4 @@
 import json
-import logging
 
 from cvss.cvss3 import CVSS3
 from dojo.models import Finding
