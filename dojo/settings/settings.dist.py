@@ -1591,13 +1591,7 @@ LOGGING = {
             'handlers': [r'%s' % LOGGING_HANDLER],
             'level': '%s' % LOG_LEVEL,
             'propagate': False,
-        },
-        'titlecase': {
-            # The titlecase library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': '%s' % LOG_LEVEL,
-            'propagate': False,
-        },
+        }
     }
 }
 

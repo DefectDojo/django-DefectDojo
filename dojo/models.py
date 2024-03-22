@@ -2995,9 +2995,9 @@ class Finding(models.Model):
             from dojo.utils import get_current_user
             user = get_current_user()
 
-        # Title Casing
-        from titlecase import titlecase
-        self.title = titlecase(self.title[:511])
+        # # Title Casing
+        # from titlecase import titlecase
+        self.title = self.title[:511].title()
 
         # Synchronize cvssv3 score and severity using cvssv3 vector
         # the vector trumps all if we get it
