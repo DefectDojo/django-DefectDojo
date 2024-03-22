@@ -82,7 +82,7 @@ class TestGitlabDastParser(DojoTestCase):
         finding = findings[1]
         # must-have fields
         self.assertEqual(3, finding.scanner_confidence)
-        self.assertTrue("Content Security Policy (CSP)" in finding.description)
+        self.assertIn("Content Security Policy (CSP)", finding.description)
         self.assertEqual(False, finding.static_finding)
         self.assertEqual(True, finding.dynamic_finding)
 
@@ -95,14 +95,14 @@ class TestGitlabDastParser(DojoTestCase):
         # vulnerability does not have a name: fallback to using id as a title
         self.assertEqual(finding.unique_id_from_tool, finding.title)
         self.assertEqual(16, finding.cwe)
-        self.assertTrue("http://www.w3.org/TR/CSP/" in finding.references)
+        self.assertIn("http://www.w3.org/TR/CSP/", finding.references)
         self.assertEqual("Medium", finding.severity)
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual(str(endpoint), "http://api-server/v1/tree/10")
         self.assertEqual(endpoint.host, "api-server")  # host port path
         self.assertEqual(endpoint.port, 80)
         self.assertEqual(endpoint.path, "v1/tree/10")
-        self.assertTrue("Ensure that your web server," in finding.mitigation)
+        self.assertIn("Ensure that your web server,", finding.mitigation)
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings_v15(self):
         testfile = open("unittests/scans/gitlab_dast/gitlab_dast_many_vul_v15.json")
@@ -120,7 +120,7 @@ class TestGitlabDastParser(DojoTestCase):
         finding = findings[1]
         # must-have fields
         self.assertEqual(None, finding.scanner_confidence)
-        self.assertTrue("Content Security Policy (CSP)" in finding.description)
+        self.assertIn("Content Security Policy (CSP)", finding.description)
         self.assertEqual(False, finding.static_finding)
         self.assertEqual(True, finding.dynamic_finding)
 
@@ -133,11 +133,11 @@ class TestGitlabDastParser(DojoTestCase):
         # vulnerability does not have a name: fallback to using id as a title
         self.assertEqual(finding.unique_id_from_tool, finding.title)
         self.assertEqual(16, finding.cwe)
-        self.assertTrue("http://www.w3.org/TR/CSP/" in finding.references)
+        self.assertIn("http://www.w3.org/TR/CSP/", finding.references)
         self.assertEqual("Medium", finding.severity)
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual(str(endpoint), "http://api-server/v1/tree/10")
         self.assertEqual(endpoint.host, "api-server")  # host port path
         self.assertEqual(endpoint.port, 80)
         self.assertEqual(endpoint.path, "v1/tree/10")
-        self.assertTrue("Ensure that your web server," in finding.mitigation)
+        self.assertIn("Ensure that your web server,", finding.mitigation)

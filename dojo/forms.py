@@ -2,6 +2,7 @@ import os
 import re
 from datetime import datetime, date
 import pickle
+import warnings
 from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
@@ -18,6 +19,7 @@ from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from polymorphic.base import ManagerInheritanceWarning
 import tagulous
 
 from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
@@ -484,6 +486,12 @@ class ImportScanForm(forms.Form):
         required=False,
         initial=False
     )
+    apply_tags_to_endpoints = forms.BooleanField(
+        help_text="If set to True, the tags will be applied to the endpoints",
+        label="Apply Tags to Endpoints",
+        required=False,
+        initial=False
+    )
 
     if is_finding_groups_enabled():
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
@@ -573,6 +581,12 @@ class ReImportScanForm(forms.Form):
     apply_tags_to_findings = forms.BooleanField(
         help_text="If set to True, the tags will be applied to the findings",
         label="Apply Tags to Findings",
+        required=False,
+        initial=False
+    )
+    apply_tags_to_endpoints = forms.BooleanField(
+        help_text="If set to True, the tags will be applied to the endpoints",
+        label="Apply Tags to Endpoints",
         required=False,
         initial=False
     )
@@ -1239,6 +1253,7 @@ class FindingForm(forms.ModelForm):
     cwe = forms.IntegerField(required=False)
     vulnerability_ids = vulnerability_ids_field
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
+    cvssv3_score = forms.FloatField(required=False, max_value=10.0, min_value=0.0)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -2170,19 +2185,35 @@ def get_years():
     return [(now.year, now.year), (now.year - 1, now.year - 1), (now.year - 2, now.year - 2)]
 
 
-class ProductTypeCountsForm(forms.Form):
+class ProductCountsFormBase(forms.Form):
     month = forms.ChoiceField(choices=list(MONTHS.items()), required=True, error_messages={
         'required': '*'})
     year = forms.ChoiceField(choices=get_years, required=True, error_messages={
         'required': '*'})
+
+
+class ProductTypeCountsForm(ProductCountsFormBase):
     product_type = forms.ModelChoiceField(required=True,
                                           queryset=Product_Type.objects.none(),
                                           error_messages={
                                               'required': '*'})
 
     def __init__(self, *args, **kwargs):
-        super(ProductTypeCountsForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['product_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+
+
+class ProductTagCountsForm(ProductCountsFormBase):
+    product_tag = forms.ModelChoiceField(required=True,
+                                         queryset=Product.tags.tag_model.objects.none().order_by('name'),
+                                         error_messages={
+                                             'required': '*'})
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        prods = get_authorized_products(Permissions.Product_View)
+        tags_available_to_user = Product.tags.tag_model.objects.filter(product__in=prods)
+        self.fields['product_tag'].queryset = tags_available_to_user
 
 
 class APIKeyForm(forms.ModelForm):
@@ -3302,16 +3333,17 @@ class CreateQuestionnaireForm(forms.ModelForm):
         exclude = ['questions']
 
 
-class EditQuestionnaireQuestionsForm(forms.ModelForm):
-    questions = forms.ModelMultipleChoiceField(
-        Question.objects.all(),
-        required=True,
-        help_text="Select questions to include on this questionnaire.  Field can be used to search available questions.",
-        widget=MultipleSelectWithPop(attrs={'size': '11'}))
+with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
+    class EditQuestionnaireQuestionsForm(forms.ModelForm):
+        questions = forms.ModelMultipleChoiceField(
+            Question.polymorphic.all(),
+            required=True,
+            help_text="Select questions to include on this questionnaire.  Field can be used to search available questions.",
+            widget=MultipleSelectWithPop(attrs={'size': '11'}))
 
-    class Meta:
-        model = Engagement_Survey
-        exclude = ['name', 'description', 'active']
+        class Meta:
+            model = Engagement_Survey
+            exclude = ['name', 'description', 'active']
 
 
 class CreateQuestionForm(forms.Form):

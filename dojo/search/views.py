@@ -410,7 +410,7 @@ def parse_search_query(clean_query):
 
     for query_part in query_parts:
         if ':' in query_part:
-            query_part_split = query_part.split(':')
+            query_part_split = query_part.split(':', 1)
 
             operator = query_part_split[0]
             parameter = query_part_split[1].strip()

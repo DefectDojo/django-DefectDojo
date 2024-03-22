@@ -288,7 +288,7 @@ def product_endpoint_report(request, pid):
                            'verified_findings': verified_findings,
                            'engagement': None,
                            'test': None,
-                           'endpoints': endpoints,
+                           'endpoints': endpoints.qs,
                            'endpoint': None,
                            'findings': None,
                            'include_finding_notes': include_finding_notes,

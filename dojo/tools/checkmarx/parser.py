@@ -58,7 +58,7 @@ class CheckmarxParser(object):
             language = ""
             findingdetail = ""
             group = ""
-            find_date = parser.parse(root.get("ScanStart"))
+            find_date = parser.parse(root.get("ScanStart")).date()
 
             if query.get("Language") is not None:
                 language = query.get("Language")
@@ -389,9 +389,9 @@ class CheckmarxParser(object):
 
     def _parse_date(self, value):
         if isinstance(value, str):
-            return parser.parse(value)
+            return parser.parse(value).date()
         elif isinstance(value, dict) and isinstance(value.get("seconds"), int):
-            return datetime.datetime.utcfromtimestamp(value.get("seconds"))
+            return datetime.datetime.utcfromtimestamp(value.get("seconds")).date()
         else:
             return None
 

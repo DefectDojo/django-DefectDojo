@@ -112,9 +112,10 @@ def update_import_history(
     test_import_finding_action_list = []
     for finding in closed_findings:
         logger.debug("preparing Test_Import_Finding_Action for closed finding: %i", finding.id)
-        test_import_finding_action_list.append(
-            Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING)
-        )
+        if Finding.objects.filter(id=finding.id).exists():
+            test_import_finding_action_list.append(
+                Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING)
+            )
     for finding in new_findings:
         logger.debug("preparing Test_Import_Finding_Action for created finding: %i", finding.id)
         if Finding.objects.filter(id=finding.id).exists():
@@ -123,14 +124,16 @@ def update_import_history(
             )
     for finding in reactivated_findings:
         logger.debug("preparing Test_Import_Finding_Action for reactivated finding: %i", finding.id)
-        test_import_finding_action_list.append(
-            Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_REACTIVATED_FINDING)
-        )
+        if Finding.objects.filter(id=finding.id).exists():
+            test_import_finding_action_list.append(
+                Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_REACTIVATED_FINDING)
+            )
     for finding in untouched_findings:
         logger.debug("preparing Test_Import_Finding_Action for untouched finding: %i", finding.id)
-        test_import_finding_action_list.append(
-            Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_UNTOUCHED_FINDING)
-        )
+        if Finding.objects.filter(id=finding.id).exists():
+            test_import_finding_action_list.append(
+                Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_UNTOUCHED_FINDING)
+            )
 
     Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
 

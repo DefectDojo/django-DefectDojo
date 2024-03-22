@@ -10,7 +10,7 @@ from django.db.models import Q
 import copy
 import dojo.risk_acceptance.helper as ra_helper
 import logging
-from django.conf import settings
+import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +127,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {'id': ra.id}
 
-        response = self.client.post(reverse('delete_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse('delete_risk_acceptance', args=(1, ra.id, )), data)
 
         self.assert_all_active_not_risk_accepted(findings)
         self.assert_all_active_not_risk_accepted(Finding.objects.filter(test__engagement=1))
@@ -142,7 +142,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {'id': ra.id}
 
-        response = self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
 
         ra.refresh_from_db()
         self.assert_all_active_not_risk_accepted(findings)
@@ -164,7 +164,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {'id': ra.id}
 
-        response = self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
 
         ra.refresh_from_db()
         # no reactivation on expiry
@@ -187,7 +187,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {'id': ra.id}
 
-        response = self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
 
         ra.refresh_from_db()
 
@@ -203,7 +203,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {'id': ra.id}
 
-        response = self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
 
         ra.refresh_from_db()
 
@@ -218,7 +218,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {'id': ra.id}
 
-        response = self.client.post(reverse('reinstate_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse('reinstate_risk_acceptance', args=(1, ra.id, )), data)
 
         ra.refresh_from_db()
         expiration_delta_days = get_system_setting('risk_acceptance_form_default_days', 90)
@@ -236,19 +236,19 @@ class RiskAcceptanceTestUI(DojoTestCase):
         ra_data = copy.copy(self.data_risk_accceptance)
         ra_data['accepted_findings'] = [2]
         ra_data['return_url'] = reverse('view_finding', args=(2, ))
-        response = self.add_risk_acceptance(1, ra_data, 2)
+        self.add_risk_acceptance(1, ra_data, 2)
         ra1 = Risk_Acceptance.objects.last()
 
         ra_data = copy.copy(self.data_risk_accceptance)
         ra_data['accepted_findings'] = [7]
         ra_data['return_url'] = reverse('view_finding', args=(7, ))
-        response = self.add_risk_acceptance(1, ra_data, 7)
+        self.add_risk_acceptance(1, ra_data, 7)
         ra2 = Risk_Acceptance.objects.last()
 
         ra_data = copy.copy(self.data_risk_accceptance)
         ra_data['accepted_findings'] = [22]
         ra_data['return_url'] = reverse('view_finding', args=(22, ))
-        response = self.add_risk_acceptance(3, ra_data, 22)
+        self.add_risk_acceptance(3, ra_data, 22)
         ra3 = Risk_Acceptance.objects.last()
 
         return ra1, ra2, ra3
@@ -263,9 +263,9 @@ class RiskAcceptanceTestUI(DojoTestCase):
         # ra1: expire in 9 days -> warn:yes, expire:no
         # ra2: expire in 11 days -> warn:no, expire:no
         # ra3: expire 5 days ago -> warn:no, expire:yes (expiration not handled yet, so expire)
-        ra1.expiration_date = timezone.now().date() + relativedelta(days=heads_up_days - 1)
-        ra2.expiration_date = timezone.now().date() + relativedelta(days=heads_up_days + 1)
-        ra3.expiration_date = timezone.now().date() - relativedelta(days=5)
+        ra1.expiration_date = datetime.datetime.now(datetime.timezone.utc) + relativedelta(days=heads_up_days - 1)
+        ra2.expiration_date = datetime.datetime.now(datetime.timezone.utc) + relativedelta(days=heads_up_days + 1)
+        ra3.expiration_date = datetime.datetime.now(datetime.timezone.utc) - relativedelta(days=5)
         ra1.save()
         ra2.save()
         ra3.save()
@@ -273,13 +273,13 @@ class RiskAcceptanceTestUI(DojoTestCase):
         to_warn = ra_helper.get_almost_expired_risk_acceptances_to_handle(heads_up_days=heads_up_days)
         to_expire = ra_helper.get_expired_risk_acceptances_to_handle()
 
-        self.assertTrue(ra1 in to_warn)
-        self.assertFalse(ra2 in to_warn)
-        self.assertFalse(ra3 in to_warn)
+        self.assertIn(ra1, to_warn)
+        self.assertNotIn(ra2, to_warn)
+        self.assertNotIn(ra3, to_warn)
 
-        self.assertFalse(ra1 in to_expire)
-        self.assertFalse(ra2 in to_expire)
-        self.assertTrue(ra3 in to_expire)
+        self.assertNotIn(ra1, to_expire)
+        self.assertNotIn(ra2, to_expire)
+        self.assertIn(ra3, to_expire)
 
         # run job
         ra_helper.expiration_handler()

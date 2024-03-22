@@ -2693,6 +2693,10 @@ msgid "Product Type Counts"
 msgstr ""
 
 #: dojo/templates/base.html
+msgid "Product Tag Counts"
+msgstr ""
+
+#: dojo/templates/base.html
 msgid "Users"
 msgstr ""
 
@@ -3744,7 +3748,7 @@ msgid ""
 "tags, references, languages or technologies contain the search query and "
 "products whose\n"
 "                                     name, tags or description contain the "
-"search query.</br> Advanced search operators: (Restrict results to a certain "
+"search query.<br/> Advanced search operators: (Restrict results to a certain "
 "type) product:,\n"
 "                                     engagement:, finding:, endpoint:, tag:, "
 "language:, technology: or vulnerability_id:.\n"

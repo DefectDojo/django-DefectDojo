@@ -48,7 +48,7 @@ class TestNiktoParser(DojoTestCase):
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        self.assertTrue(len(findings) == 10)
+        self.assertEqual(len(findings), 10)
 
     def test_parse_file_json_with_multiple_vuln_has_multiple_findings(self):
         testfile = open("unittests/scans/nikto/juice-shop.json")

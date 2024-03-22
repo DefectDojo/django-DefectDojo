@@ -1,0 +1,62 @@
+{
+    "meta": {
+      "baseUrl": "https://dependencytrack.example.com",
+      "application": "Dependency-Track",
+      "version": "4.10.1",
+      "timestamp": "2024-02-03T09:59:36Z"
+    },
+    "findings": [
+      {
+        "component": {
+          "name": "urllib3",
+          "project": "1g2345tc-16rh-7te5-92b5-12345z6789fb",
+          "purl": "pkg:pypi/urllib3@1.26.16",
+          "uuid": "4b5385f9-52fa-4116-a6e8-79197ad27c01",
+          "version": "1.26.16",
+          "latestVersion": "2.2.0"
+        },
+        "attribution": {
+          "alternateIdentifier": "CVE-2023-45803",
+          "analyzerIdentity": "OSSINDEX_ANALYZER",
+          "attributedOn": "2024-01-31 15:19:45.978",
+          "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2023-45803?component-type=pypi&component-name=urllib3&utm_source=dependency-track&utm_medium=integration&utm_content=v4.10.1"
+        },
+        "vulnerability": {
+          "severity": "MEDIUM",
+          "cvssV3BaseScore": 4.2,
+          "vulnId": "CVE-2023-45803",
+          "aliases": [
+            {
+              "ghsaId": "GHSA-g4mx-q9vg-27p4",
+              "cveId": "CVE-2023-45803"
+            }
+          ],
+          "cweId": 200,
+          "description": "urllib3 is a user-friendly HTTP client library for Python. urllib3 previously wouldn't remove the HTTP request body when an HTTP redirect response using status 301, 302, or 303 after the request had its method changed from one that could accept a request body (like `POST`) to `GET` as is required by HTTP RFCs. Although this behavior is not specified in the section for redirects, it can be inferred by piecing together information from different sections and we have observed the behavior in other major HTTP client implementations like curl and web browsers. Because the vulnerability requires a previously trusted service to become compromised in order to have an impact on confidentiality we believe the exploitability of this vulnerability is low. Additionally, many users aren't putting sensitive data in HTTP request bodies, if this is the case then this vulnerability isn't exploitable. Both of the following conditions must be true to be affected by this vulnerability: 1. Using urllib3 and submitting sensitive information in the HTTP request body (such as form data or JSON) and 2. The origin service is compromised and starts redirecting using 301, 302, or 303 to a malicious peer or the redirected-to service becomes compromised. This issue has been addressed in versions 1.26.18 and 2.0.7 and users are advised to update to resolve this issue. Users unable to update should disable redirects for services that aren't expecting to respond with redirects with `redirects=False` and disable automatic redirects with `redirects=False` and handle 301, 302, and 303 redirects manually by stripping the HTTP request body.\n",
+          "epssScore": 0.00043,
+          "source": "NVD",
+          "cwes": [
+            {
+              "cweId": 200,
+              "name": "Exposure of Sensitive Information to an Unauthorized Actor",
+              "id": 0
+            }
+          ],
+          "uuid": "3ef52aaa-6f61-4b8e-9764-d51fe5cd754d",
+          "severityRank": 2,
+          "cweName": "Exposure of Sensitive Information to an Unauthorized Actor",
+          "epssPercentile": 0.07756
+        },
+        "analysis": {
+          "isSuppressed": false
+        },
+        "matrix": "1g2345tc-16rh-7te5-92b5-12345z6789fb:4b5385f9-52fa-4116-a6e8-79197ad27c01:3ef52aaa-6f61-4b8e-9764-d51fe5cd754d"
+      }
+    ],
+    "project": {
+      "name": "blablabla-Requirements-txt",
+      "uuid": "1g2345tc-16rh-7te5-92b5-12345z6789fb",
+      "version": "1"
+    },
+    "version": "1.2"
+  }
