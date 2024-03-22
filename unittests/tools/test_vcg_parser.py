@@ -28,89 +28,17 @@ class TestVCGXmlParser(DojoTestCase):
         self.assertEqual(0, len(results))
 
     def test_parse_single_finding(self):
-        single_finding = """<?xml version="1.0" encoding="utf-8"?>
-        <!--XML Export of VCG Results for directory: C:\\Projects\\WebGoat.Net. Scanned for C# security issues.-->
-        <CodeIssueCollection>
-        <CodeIssue>
-        <Priority>6</Priority>
-        <Severity>Suspicious Comment</Severity>
-        <Title>Comment Indicates Potentially Unfinished Code</Title>
-        <Description>The comment includes some wording which indicates that the developer regards
-        it as unfinished or does not trust it to work correctly.</Description>
-        <FileName>Findings.xml</FileName>
-        <Line>21</Line>
-        <CodeLine>TODO: Check the Code</CodeLine>
-        <Checked>False</Checked>
-        <CheckColour>LawnGreen</CheckColour>
-        </CodeIssue>
-        </CodeIssueCollection>"""
-
+        single_finding = open("unittests/scans/vcg/single_finding.xml")
         results = self.parser.parse(single_finding, Test())
         self.assertEqual(1, len(results))
 
     def test_parse_multiple_findings(self):
-        findings = """<?xml version="1.0" encoding="utf-8"?>
-        <!--XML Export of VCG Results for directory: C:\\Projects\\WebGoat.Net. Scanned for C# security issues.-->
-        <CodeIssueCollection>
-        <CodeIssue>
-        <Priority>6</Priority>
-        <Severity>Suspicious Comment</Severity>
-        <Title>Comment Indicates Potentially Unfinished Code</Title>
-        <Description>The comment includes some wording which indicates that the developer regards
-        it as unfinished or does not trust it to work correctly.</Description>
-        <FileName>Findings.xml</FileName>
-        <Line>21</Line>
-        <CodeLine>TODO: Check the Code</CodeLine>
-        <Checked>False</Checked>
-        <CheckColour>LawnGreen</CheckColour>
-        </CodeIssue>
-        <CodeIssue>
-        <Priority>6</Priority>
-        <Severity>Suspicious Comment</Severity>
-        <Title>Comment Indicates Potentially Unfinished Code</Title>
-        <Description>The comment includes some wording which indicates that the developer regards
-        it as unfinished or does not trust it to work correctly.</Description>
-        <FileName>Findings.xml</FileName>
-        <Line>62</Line>
-        <CodeLine>TODO: Check the Code</CodeLine>
-        <Checked>False</Checked>
-        <CheckColour>LawnGreen</CheckColour>
-        </CodeIssue>
-        </CodeIssueCollection>"""
-
+        findings = open("unittests/scans/vcg/multiple_findings.xml")
         results = self.parser.parse(findings, Test())
         self.assertEqual(2, len(results))
 
     def test_parse_duplicate_findings_dedupes(self):
-        duplicate_finding = """<?xml version="1.0" encoding="utf-8"?>
-        <!--XML Export of VCG Results for directory: C:\\Projects\\WebGoat.Net. Scanned for C# security issues.-->
-        <CodeIssueCollection>
-        <CodeIssue>
-        <Priority>6</Priority>
-        <Severity>Suspicious Comment</Severity>
-        <Title>Comment Indicates Potentially Unfinished Code</Title>
-        <Description>The comment includes some wording which indicates that the developer regards
-        it as unfinished or does not trust it to work correctly.</Description>
-        <FileName>Findings.xml</FileName>
-        <Line>21</Line>
-        <CodeLine>TODO: Check the Code</CodeLine>
-        <Checked>False</Checked>
-        <CheckColour>LawnGreen</CheckColour>
-        </CodeIssue>
-        <CodeIssue>
-        <Priority>6</Priority>
-        <Severity>Suspicious Comment</Severity>
-        <Title>Comment Indicates Potentially Unfinished Code</Title>
-        <Description>The comment includes some wording which indicates that the developer regards
-        it as unfinished or does not trust it to work correctly.</Description>
-        <FileName>Findings.xml</FileName>
-        <Line>21</Line>
-        <CodeLine>TODO: Check the Code</CodeLine>
-        <Checked>False</Checked>
-        <CheckColour>LawnGreen</CheckColour>
-        </CodeIssue>
-        </CodeIssueCollection>"""
-
+        duplicate_finding = open("unittests/scans/vcg/duplicate_findings_dedupes.xml")
         results = self.parser.parse(duplicate_finding, Test())
         self.assertEqual(1, len(results))
 
