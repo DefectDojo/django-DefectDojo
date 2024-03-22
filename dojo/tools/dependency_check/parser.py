@@ -4,7 +4,7 @@ import re
 import dateutil
 
 from cpe import CPE
-from defusedxml import ElementTree
+from lxml import etree
 from packageurl import PackageURL
 from datetime import datetime
 
@@ -357,9 +357,7 @@ class DependencyCheckParser(object):
     def get_findings(self, filename, test):
         dupes = dict()
         namespace = ""
-        content = filename.read()
-        #  'utf-8' This line is to pass a unittest in test_parsers.TestParsers.test_file_existence.
-        scan = ElementTree.fromstring(content)
+        scan = etree.parse(filename).getroot()
         regex = r"{.*}"
         matches = re.match(regex, scan.tag)
         try:
