@@ -49,7 +49,7 @@ class FortifyParser(object):
                 for group in ReportSection.iter("GroupingSection"):
                     title = group.findtext("groupTitle")
                     maj_attr_summary = group.find("MajorAttributeSummary")
-                    if maj_attr_summary:
+                    if maj_attr_summary is not None:
                         meta_info = maj_attr_summary.findall("MetaInfo")
                         meta_pair[place][title] = {
                             x.findtext("Name"): x.findtext("Value")
@@ -80,13 +80,13 @@ class FortifyParser(object):
                 "FilePath": issue.find("Primary").find("FilePath").text,
                 "LineStart": issue.find("Primary").find("LineStart").text,
             }
-
-            if issue.find("Primary").find("Snippet"):
+            snippet = issue.find("Primary").find("Snippet")
+            if snippet is not None:
                 details["Snippet"] = issue.find("Primary").find("Snippet").text
             else:
                 details["Snippet"] = "n/a"
-
-            if issue.find("Source"):
+            sourc = issue.find("Source")
+            if sourc is not None:
                 source = {
                     "FileName": issue.find("Source").find("FileName").text,
                     "FilePath": issue.find("Source").find("FilePath").text,
