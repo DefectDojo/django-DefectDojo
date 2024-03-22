@@ -1,7 +1,7 @@
 import io
 import csv
 
-from defusedxml import ElementTree
+from lxml import etree
 from ..dojo_test_case import DojoTestCase
 
 from dojo.models import Test
@@ -118,24 +118,8 @@ class TestVCGXmlParser(DojoTestCase):
         self.assertIsNone(self.parser.parse_issue(None, Test()))
 
     def test_parseissuexml_with_issue_has_finding(self):
-        single_finding = """<?xml version="1.0" encoding="utf-8"?>
-        <!--XML Export of VCG Results for directory: C:\\Projects\\WebGoat.Net. Scanned for C# security issues.-->
-        <CodeIssueCollection>
-        <CodeIssue>
-        <Priority>6</Priority>
-        <Severity>Suspicious Comment</Severity>
-        <Title>Comment Indicates Potentially Unfinished Code</Title>
-        <Description>The comment includes some wording which indicates that the developer regards
-        it as unfinished or does not trust it to work correctly.</Description>
-        <FileName>Findings.xml</FileName>
-        <Line>21</Line>
-        <CodeLine>TODO: Check the Code</CodeLine>
-        <Checked>False</Checked>
-        <CheckColour>LawnGreen</CheckColour>
-        </CodeIssue>
-        </CodeIssueCollection>"""
-
-        vcgscan = ElementTree.fromstring(single_finding)
+        single_finding = open("unittests/scans/vcg/one_finding.xml")
+        vcgscan = etree.parse(single_finding)
         finding = self.parser.parse_issue(vcgscan.findall("CodeIssue")[0], Test())
         self.assertEqual("Info", finding.severity)
         self.assertEqual("Comment Indicates Potentially Unfinished Code", finding.title)
