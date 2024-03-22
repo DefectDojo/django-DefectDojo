@@ -1,7 +1,7 @@
 import re
 import logging
 import zipfile
-from defusedxml import ElementTree
+from lxml import etree
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ class FortifyParser(object):
             return self.parse_fpr(filename, test)
 
     def parse_xml(self, filename, test):
-        fortify_scan = ElementTree.parse(filename)
+        fortify_scan = etree.parse(filename)
         root = fortify_scan.getroot()
 
         # Get Category Information:
@@ -139,7 +139,7 @@ class FortifyParser(object):
         else:
             input_zip = zipfile.ZipFile(filename, 'r')
         zipdata = {name: input_zip.read(name) for name in input_zip.namelist()}
-        root = ElementTree.fromstring(zipdata["audit.fvdl"].decode('utf-8'))
+        root = etree.fromstring(zipdata["audit.fvdl"])
         regex = r"{.*}"
         matches = re.match(regex, root.tag)
         try:
