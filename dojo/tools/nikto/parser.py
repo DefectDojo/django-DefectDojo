@@ -3,7 +3,7 @@ import logging
 import re
 import json
 
-from defusedxml import ElementTree as ET
+from lxml import etree
 from django.core.exceptions import ValidationError
 
 from dojo.models import Endpoint, Finding
@@ -102,7 +102,7 @@ class NiktoParser(object):
     def process_xml(self, file, test):
         dupes = dict()
 
-        tree = ET.parse(file)
+        tree = etree.parse(file)
         root = tree.getroot()
         scan = root.find("scandetails")
 

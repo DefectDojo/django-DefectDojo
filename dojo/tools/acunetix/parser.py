@@ -5,7 +5,7 @@ import dateutil
 import html2text
 import hyperlink
 from cvss import parser as cvss_parser
-from defusedxml.ElementTree import parse
+from lxml import etree
 from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ class AcunetixParser(object):
         return "XML format"
 
     def get_findings(self, xml_output, test):
-        root = parse(xml_output).getroot()
+        root = etree.parse(xml_output).getroot()
 
         dupes = dict()
         for scan in root.findall("Scan"):

@@ -1,7 +1,7 @@
 import hashlib
 import re
 
-from defusedxml.ElementTree import parse
+from lxml import etree
 
 from dojo.models import Endpoint, Finding
 from django.core.validators import validate_ipv46_address
@@ -19,7 +19,7 @@ class OpenscapParser(object):
         return "Import Openscap Vulnerability Scan in XML formats."
 
     def get_findings(self, file, test):
-        tree = parse(file)
+        tree = etree.parse(file)
         # get root of tree.
         root = tree.getroot()
         namespace = self.get_namespace(root)
