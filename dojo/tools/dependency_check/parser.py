@@ -42,10 +42,10 @@ class DependencyCheckParser(object):
             return dependency.findtext(
                 f"{namespace}fileName"
             ), dependency.findtext(f"{namespace}filePath")
-        if related_dependency.findtext(f"{namespace}fileName"):
-            return related_dependency.findtext(
-                f"{namespace}fileName"
-            ), related_dependency.findtext(f"{namespace}filePath")
+        rel_dep = related_dependency.findtext(f"{namespace}fileName")
+        rel_findpath = related_dependency.findtext(f"{namespace}filePath")
+        if rel_dep is not None:
+            return rel_dep, rel_findpath
         else:
             # without filename, it would be just a duplicate finding so we have to skip it. filename
             # is only present for relateddependencies since v6.0.0
@@ -183,8 +183,9 @@ class DependencyCheckParser(object):
         mitigated = None
         is_Mitigated = False
         name = vulnerability.findtext(f"{namespace}name")
-        if vulnerability.find(f"{namespace}cwes"):
-            cwe_field = vulnerability.find(f"{namespace}cwes").findtext(
+        cwe_namespace = vulnerability.find(f"{namespace}cwes")
+        if cwe_namespace is not None:
+            cwe_field = cwe_namespace.findtext(
                 f"{namespace}cwe"
             )
         else:
@@ -418,20 +419,21 @@ class DependencyCheckParser(object):
                                         if scan_date:
                                             finding.date = scan_date
                                         self.add_finding(finding, dupes)
-
-                    for suppressedVulnerability in vulnerabilities.findall(
+                    suppressVulnerabilities = vulnerabilities.findall(
                         namespace + "suppressedVulnerability"
-                    ):
-                        if suppressedVulnerability:
-                            finding = self.get_finding_from_vulnerability(
-                                dependency,
-                                None,
-                                suppressedVulnerability,
-                                test,
-                                namespace,
-                            )
-                            if scan_date:
-                                finding.date = scan_date
-                            self.add_finding(finding, dupes)
+                    )
+                    if suppressVulnerabilities is not None:
+                        for suppressedVulnerability in suppressVulnerabilities:
+                            if suppressedVulnerability:
+                                finding = self.get_finding_from_vulnerability(
+                                    dependency,
+                                    None,
+                                    suppressedVulnerability,
+                                    test,
+                                    namespace,
+                                )
+                                if scan_date:
+                                    finding.date = scan_date
+                                self.add_finding(finding, dupes)
 
         return list(dupes.values())
