@@ -38,7 +38,7 @@ class DependencyCheckParser(object):
     def get_filename_and_path_from_dependency(
         self, dependency, related_dependency, namespace
     ):
-        if not related_dependency:
+        if related_dependency is None:
             return dependency.findtext(
                 f"{namespace}fileName"
             ), dependency.findtext(f"{namespace}filePath")
@@ -424,7 +424,7 @@ class DependencyCheckParser(object):
                     )
                     if suppressVulnerabilities is not None:
                         for suppressedVulnerability in suppressVulnerabilities:
-                            if suppressedVulnerability:
+                            if suppressedVulnerability is not None:
                                 finding = self.get_finding_from_vulnerability(
                                     dependency,
                                     None,
