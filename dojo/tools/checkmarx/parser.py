@@ -3,7 +3,7 @@ import json
 import logging
 
 from dateutil import parser
-from defusedxml import ElementTree
+from lxml import etree
 
 from dojo.models import Finding
 from dojo.utils import add_language
@@ -44,7 +44,7 @@ class CheckmarxParser(object):
         - Path: There should be only one.Parent tag of Pathnodes
         - Pathnode: all the calls from the source (start) to the sink (end) of the attack vector
         """
-        cxscan = ElementTree.parse(filename)
+        cxscan = etree.parse(filename)
         root = cxscan.getroot()
 
         dupes = dict()

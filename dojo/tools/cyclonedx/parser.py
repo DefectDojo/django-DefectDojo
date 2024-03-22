@@ -4,7 +4,7 @@ import re
 
 import dateutil
 from cvss import CVSS3
-from defusedxml import ElementTree
+from lxml import etree
 from dojo.models import Finding
 
 LOGGER = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ class CycloneDXParser(object):
         return "Support CycloneDX XML and JSON report formats (compatible with 1.4)."
 
     def _get_findings_xml(self, file, test):
-        nscan = ElementTree.parse(file)
+        nscan = etree.parse(file)
         root = nscan.getroot()
         namespace = self.get_namespace(root)
         if not namespace.startswith("{http://cyclonedx.org/schema/bom/"):

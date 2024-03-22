@@ -1,5 +1,5 @@
 from xml.dom import NamespaceErr
-from defusedxml import ElementTree as ET
+from lxml import etree
 from dojo.models import Finding, Endpoint
 
 
@@ -24,7 +24,7 @@ class HCLAppScanParser(object):
 
     def get_findings(self, file, test):
         findings = []
-        tree = ET.parse(file)
+        tree = etree.parse(file)
         root = tree.getroot()
         if "xml-report" not in root.tag:
             raise NamespaceErr(

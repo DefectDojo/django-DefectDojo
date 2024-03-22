@@ -2,7 +2,7 @@ import logging
 import re
 
 from cvss import CVSS3
-from defusedxml import ElementTree
+from lxml import etree
 from hyperlink._url import SCHEME_PORT_MAP
 
 from dojo.models import Endpoint, Finding, Test
@@ -57,7 +57,7 @@ class TenableXMLParser(object):
 
     def get_findings(self, filename: str, test: Test) -> list:
         # Read the XML
-        nscan = ElementTree.parse(filename)
+        nscan = etree.parse(filename)
         root = nscan.getroot()
 
         if "NessusClientData_v2" not in root.tag:
