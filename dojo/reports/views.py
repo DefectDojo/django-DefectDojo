@@ -33,6 +33,8 @@ from dojo.finding.views import BaseListFindings
 
 logger = logging.getLogger(__name__)
 
+EXCEL_CHAR_LIMIT = 32767
+
 
 def down(request):
     return render(request, 'disabled.html')
@@ -902,12 +904,11 @@ class CSVExportView(View):
                 num_endpoints = 0
                 for endpoint in finding.endpoints.all():
                     num_endpoints += 1
-                    if num_endpoints > 5:
-                        endpoint_value += '...'
-                        break
                     endpoint_value += f'{str(endpoint)}; '
                 if endpoint_value.endswith('; '):
                     endpoint_value = endpoint_value[:-2]
+                if len(endpoint_value) > EXCEL_CHAR_LIMIT:
+                    endpoint_value = endpoint_value[:EXCEL_CHAR_LIMIT - 3] + '...'
                 fields.append(endpoint_value)
 
                 vulnerability_ids_value = ''
@@ -1053,12 +1054,11 @@ class ExcelExportView(View):
                 num_endpoints = 0
                 for endpoint in finding.endpoints.all():
                     num_endpoints += 1
-                    if num_endpoints > 5:
-                        endpoint_value += '...'
-                        break
                     endpoint_value += f'{str(endpoint)}; \n'
                 if endpoint_value.endswith('; \n'):
                     endpoint_value = endpoint_value[:-3]
+                if len(endpoint_value) > EXCEL_CHAR_LIMIT:
+                    endpoint_value = endpoint_value[:EXCEL_CHAR_LIMIT - 3] + '...'
                 worksheet.cell(row=row_num, column=col_num, value=endpoint_value)
                 col_num += 1
 

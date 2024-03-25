@@ -249,6 +249,8 @@ class TagListSerializerField(serializers.ListField):
         self.pretty_print = pretty_print
 
     def to_internal_value(self, data):
+        if isinstance(data, list) and data == [''] and self.allow_empty:
+            return []
         if isinstance(data, six.string_types):
             if not data:
                 data = []
@@ -2106,7 +2108,7 @@ class ImportScanSerializer(serializers.Serializer):
         allow_null=True, default=None, queryset=User.objects.all()
     )
     tags = TagListSerializerField(
-        required=False, help_text="Add tags that help describe this scan."
+        required=False, allow_empty=True, help_text="Add tags that help describe this scan."
     )
     close_old_findings = serializers.BooleanField(
         required=False,
@@ -2434,6 +2436,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     )
     tags = TagListSerializerField(
         required=False,
+        allow_empty=True,
         help_text="Modify existing tags that help describe this scan. (Existing test tags will be overwritten)",
     )
 

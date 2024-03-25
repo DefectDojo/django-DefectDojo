@@ -33,6 +33,7 @@ class TestWazuhParser(DojoTestCase):
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
         self.assertEqual(6, len(findings))
+        self.assertEqual("2023-02-08", finding.date)
 
     def test_parse_one_finding_with_endpoint(self):
         testfile = open("unittests/scans/wazuh/one_finding_with_endpoint.json")
@@ -49,3 +50,4 @@ class TestWazuhParser(DojoTestCase):
         self.assertEqual("agent-1", endpoint.host)
         self.assertEqual("asdf", finding.component_name)
         self.assertEqual("1", finding.component_version)
+        self.assertEqual("2023-12-13", finding.date)
