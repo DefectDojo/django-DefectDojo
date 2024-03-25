@@ -298,4 +298,3 @@ class TestTenableParser(DojoTestCase):
                 endpoint.clean()
         self.assertEqual(2, len(findings))
         self.assertEqual("Critical", findings[0].severity)
-
