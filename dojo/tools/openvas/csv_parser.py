@@ -80,11 +80,9 @@ class CveColumnMappingStrategy(ColumnMappingStrategy):
     def map_column_value(self, finding, column_value):
         if "," in column_value:
             finding.description += "\n**All CVEs:** " + str(column_value)
-            if finding.cve is None:
-                finding.cve = column_value.split(",")[0]
+            finding.unsaved_vulnerability_ids.append(column_value.split(",")[0])
         elif column_value is not None:
-            if finding.cve is None:
-                finding.cve = column_value
+            finding.unsaved_vulnerability_ids.append(column_value)
 
 
 class NVDCVEColumnMappingStrategy(ColumnMappingStrategy):
@@ -93,11 +91,10 @@ class NVDCVEColumnMappingStrategy(ColumnMappingStrategy):
         super(NVDCVEColumnMappingStrategy, self).__init__()
 
     def map_column_value(self, finding, column_value):
-        if finding.cve is None:
-            cve_pattern = r'CVE-\d{4}-\d{4,7}'
-            cve = re.findall(cve_pattern, column_value)
-            if cve:
-                finding.cve = column_value
+        cve_pattern = r'CVE-\d{4}-\d{4,7}'
+        cve = re.findall(cve_pattern, column_value)
+        if cve:
+            finding.unsaved_vulnerability_ids.append(column_value)
 
 
 class ProtocolColumnMappingStrategy(ColumnMappingStrategy):
@@ -279,6 +276,7 @@ class OpenVASCSVParser(object):
         row_number = 0
         for row in reader:
             finding = Finding(test=test)
+            finding.unsaved_vulnerability_ids = list()
             finding.unsaved_endpoints = [Endpoint()]
             if row_number == 0:
                 column_names = self.read_column_names(row)
