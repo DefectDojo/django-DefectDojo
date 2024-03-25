@@ -22,14 +22,19 @@ python3 manage.py check
 
 DD_UWSGI_LOGFORMAT_DEFAULT='[pid: %(pid)|app: -|req: -/-] %(addr) (%(dd_user)) {%(vars) vars in %(pktsize) bytes} [%(ctime)] %(method) %(uri) => generated %(rsize) bytes in %(msecs) msecs (%(proto) %(status)) %(headers) headers in %(hsize) bytes (%(switches) switches on core %(core))'
 
-exec uwsgi \
-  "--${DD_UWSGI_MODE}" "${DD_UWSGI_ENDPOINT}" \
-  --protocol uwsgi \
-  --enable-threads \
-  --processes "${DD_UWSGI_NUM_OF_PROCESSES:-2}" \
-  --threads "${DD_UWSGI_NUM_OF_THREADS:-2}" \
-  --wsgi dojo.wsgi:application \
-  --buffer-size="${DD_UWSGI_BUFFER_SIZE:-8192}" \
-  --http 0.0.0.0:8081 --http-to "${DD_UWSGI_ENDPOINT}" \
-  --logformat "${DD_UWSGI_LOGFORMAT:-$DD_UWSGI_LOGFORMAT_DEFAULT}"
-  # HTTP endpoint is enabled for Kubernetes liveness checks. It should not be exposed as a service.
+args="--${DD_UWSGI_MODE} ${DD_UWSGI_ENDPOINT} \
+--protocol uwsgi \
+--enable-threads \
+--processes ${DD_UWSGI_NUM_OF_PROCESSES:-2} \
+--threads ${DD_UWSGI_NUM_OF_THREADS:-2} \
+--wsgi dojo.wsgi:application \
+--buffer-size ${DD_UWSGI_BUFFER_SIZE:-8192} \
+--http 0.0.0.0:8081 \
+--http-to ${DD_UWSGI_ENDPOINT} \
+--logformat ${DD_UWSGI_LOGFORMAT:-$DD_UWSGI_LOGFORMAT_DEFAULT}"
+
+if [ -n "${DD_UWSGI_MAX_FD}" ]; then
+    args="${args} --max-fd ${DD_UWSGI_MAX_FD}"
+fi
+
+exec uwsgi $args
