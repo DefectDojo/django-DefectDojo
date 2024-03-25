@@ -75,17 +75,19 @@ class NetsparkerParser(object):
             elif state == "AcceptedRisk":
                 finding.risk_accepted = True
 
-            if (
-                (item["Classification"] is not None)
-                and (item["Classification"].get("Cvss") is not None)
-                and (item["Classification"].get("Cvss").get("Vector") is not None)
-            ):
-                cvss_objects = cvss_parser.parse_cvss_from_text(
-                    item["Classification"]["Cvss"]["Vector"]
-                )
-                if len(cvss_objects) > 0:
-                    finding.cvssv3 = cvss_objects[0].clean_vector()
-
+            if item["Classification"] is not None:
+                if item["Classification"].get("Cvss") is not None and item["Classification"].get("Cvss").get("Vector") is not None:
+                    cvss_objects = cvss_parser.parse_cvss_from_text(
+                        item["Classification"]["Cvss"]["Vector"]
+                    )
+                    if len(cvss_objects) > 0:
+                        finding.cvssv3 = cvss_objects[0].clean_vector()
+                elif item["Classification"].get("Cvss31") is not None and item["Classification"].get("Cvss31").get("Vector") is not None:
+                    cvss_objects = cvss_parser.parse_cvss_from_text(
+                        item["Classification"]["Cvss31"]["Vector"]
+                    )
+                    if len(cvss_objects) > 0:
+                        finding.cvssv3 = cvss_objects[0].clean_vector()
             finding.unsaved_req_resp = [{"req": request, "resp": response}]
             finding.unsaved_endpoints = [Endpoint.from_uri(url)]
 
