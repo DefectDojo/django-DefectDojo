@@ -106,7 +106,7 @@ class ScoutSuiteParser(object):
             service_item = data["services"][service_name]
             for finding_name in service_item.get("findings", []):
                 finding = service_item["findings"][finding_name]
-                for name in finding["items"]:
+                for name in finding.get("items", []):
                     description_text = (
                         finding.get("rationale", "")
                         + "\n**Location:** "
