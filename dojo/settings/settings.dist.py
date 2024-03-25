@@ -8,6 +8,7 @@ from netaddr import IPNetwork, IPSet
 import json
 import logging
 import warnings
+from email.utils import getaddresses
 
 
 logger = logging.getLogger(__name__)
@@ -718,7 +719,6 @@ MAX_TAG_LENGTH = env('DD_MAX_TAG_LENGTH')
 # ------------------------------------------------------------------------------
 # ADMIN
 # ------------------------------------------------------------------------------
-from email.utils import getaddresses
 ADMINS = getaddresses([env('DD_ADMINS')])
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#managers
