@@ -1,5 +1,5 @@
 from datetime import datetime
-from dojo.models import Finding
+from dojo.models import Finding, Endpoint
 
 
 class GuardDuty(object):
@@ -34,8 +34,13 @@ class GuardDuty(object):
         description += f"AwsAccountId: {finding.get('AwsAccountId', '')}\n"
         description += f"Region: {finding.get('Region', '')}\n"
         title_suffix = ""
+        hosts = list()
         for resource in finding.get("Resources", []):
             component_name = resource.get("Type")
+            print("/777777777777777777777")
+            if component_name in ("AwsEcrContainerImage", "AwsEc2Instance"):
+                print("AFJIEOFJIOEFJOFJIO")
+                hosts.append(Endpoint(host=f"{component_name} {resource.get('Id')}"))
             if component_name == "AwsEcrContainerImage":
                 details = resource.get("Details", {}).get("AwsEcrContainerImage")
                 arn = resource.get("Id")
@@ -70,6 +75,8 @@ class GuardDuty(object):
             dynamic_finding=False,
             component_name=component_name,
         )
+        result.unsaved_endpoints = list()
+        result.unsaved_endpoints.extend(hosts)
         if epss_score is not None:
             result.epss_score = epss_score
         # Add the unsaved vulnerability ids

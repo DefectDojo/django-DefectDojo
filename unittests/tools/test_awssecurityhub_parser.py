@@ -122,3 +122,5 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertTrue(finding.active)
             self.assertEqual("User AssumedRole : 123123123 is anomalously invoking APIs commonly used in Discovery tactics. - Resource: 123123123", finding.title)
             self.assertEqual("TTPs/Discovery/IAMUser-AnomalousBehavior\nhttps://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html", finding.mitigation)
+            endpoint = findings[0].unsaved_endpoints[0]
+            self.assertEqual('AwsEc2Instance arn:aws:ec2:us-east-1:123456789012:instance/i-1234567890', endpoint.host)
