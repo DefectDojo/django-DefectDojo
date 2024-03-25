@@ -17,6 +17,7 @@ from dojo.models import (BurpRawRequestResponse, FileUpload,
                          Finding, Test, Test_Import, Test_Type)
 from dojo.tools.factory import get_parser
 import logging
+from datetime import datetime
 
 
 logger = logging.getLogger(__name__)
@@ -273,6 +274,8 @@ class DojoDefaultImporter(object):
         user = user or get_current_user()
 
         now = timezone.now()
+        if scan_date is None:
+            scan_date = timezone.make_aware(datetime.today())
 
         if api_scan_configuration and api_scan_configuration.product != engagement.product:
             raise ValidationError('API Scan Configuration has to be from same product as  the Engagement')
