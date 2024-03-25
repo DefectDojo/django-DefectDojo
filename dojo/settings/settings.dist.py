@@ -1245,7 +1245,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'KICS Scan': ['file_path', 'line', 'severity', 'description', 'title'],
     'MobSF Scan': ['title', 'description', 'severity'],
     'OSV Scan': ['title', 'description', 'severity'],
-    'Snyk Code Scan': ['vuln_id_from_tool', 'file_path']
+    'Snyk Code Scan': ['vuln_id_from_tool', 'file_path'],
+    'Wiz Scan': ['title', 'description', 'severity'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1461,6 +1462,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'MobSF Scan': DEDUPE_ALGO_HASH_CODE,
     'OSV Scan': DEDUPE_ALGO_HASH_CODE,
     'Nosey Parker Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    'Wiz Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
