@@ -447,7 +447,7 @@ class AddFindingView(View):
         args = [request.POST] if request.method == "POST" else []
         # Set the initial form args
         kwargs = {
-            "initial": {'date': timezone.now().date(), 'verified': True},
+            "initial": {'date': timezone.now().date(), 'verified': True, 'dynamic_finding': False},
             "req_resp": None,
             "product": test.engagement.product,
         }
@@ -474,9 +474,9 @@ class AddFindingView(View):
         return None
 
     def validate_status_change(self, request: HttpRequest, context: dict):
-        if ((context["form"]['active'].value() is False or
-             context["form"]['false_p'].value()) and
-             context["form"]['duplicate'].value() is False):
+        if ((context["form"]['active'].value() is False
+             or context["form"]['false_p'].value())
+             and context["form"]['duplicate'].value() is False):
 
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
