@@ -20,8 +20,6 @@ ignore =
     F405
     # list comprehension redefines
     F812
-    # module level imports
-    E402
     E126
     E128
     # Line break occurred before a binary operator (conflicting with black)
