@@ -829,7 +829,7 @@ class CSVExportView(View):
         pass
 
     def get(self, request):
-        findings, obj = get_findings(request)
+        findings, _obj = get_findings(request)
         self.findings = findings
         findings = self.add_findings_data()
         response = HttpResponse(content_type='text/csv')
@@ -957,7 +957,7 @@ class ExcelExportView(View):
         pass
 
     def get(self, request):
-        findings, obj = get_findings(request)
+        findings, _obj = get_findings(request)
         self.findings = findings
         findings = self.add_findings_data()
         workbook = Workbook()
