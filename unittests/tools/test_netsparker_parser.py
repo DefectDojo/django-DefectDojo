@@ -81,3 +81,4 @@ class TestNetsparkerParser(DojoTestCase):
             finding = findings[0]
             self.assertEqual("High", finding.severity)
             self.assertEqual(614, finding.cwe)
+            self.assertEqual("03/02/2019", finding.date.strftime("%d/%m/%Y"))
