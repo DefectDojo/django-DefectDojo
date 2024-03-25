@@ -447,7 +447,7 @@ class AddFindingView(View):
         args = [request.POST] if request.method == "POST" else []
         # Set the initial form args
         kwargs = {
-            "initial": {'date': timezone.now().date(), 'verified': True},
+            "initial": {'date': timezone.now().date(), 'verified': True, 'dynamic_finding': False},
             "req_resp": None,
             "product": test.engagement.product,
         }
