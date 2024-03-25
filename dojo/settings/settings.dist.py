@@ -1247,7 +1247,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'OSV Scan': ['title', 'description', 'severity'],
     'Snyk Code Scan': ['vuln_id_from_tool', 'file_path'],
     'Nancy Scan': ['title', 'vuln_id_from_tool'],
-    'Wiz Scan': ['title', 'description', 'severity'],
+    'Wiz Scan': ['title', 'description', 'severity']
 }
 
 # Override the hardcoded settings here via the env var
