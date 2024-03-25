@@ -3,6 +3,7 @@ import re
 from datetime import datetime, date
 import pickle
 import warnings
+from dojo.widgets import TableCheckboxWidget
 from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
@@ -786,15 +787,17 @@ class ReplaceRiskAcceptanceProofForm(forms.ModelForm):
 
 
 class AddFindingsRiskAcceptanceForm(forms.ModelForm):
+
     accepted_findings = forms.ModelMultipleChoiceField(
-        queryset=Finding.objects.none(), required=True,
-        widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
-        help_text=('Select to add findings.'), label="Add findings as accepted:")
+        queryset=Finding.objects.none(),
+        required=True,
+        label="",
+        widget=TableCheckboxWidget(attrs={'size': 25})
+    )
 
     class Meta:
         model = Risk_Acceptance
         fields = ['accepted_findings']
-        # exclude = ('name', 'owner', 'path', 'notes', 'accepted_by', 'expiration_date', 'compensating_control')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
