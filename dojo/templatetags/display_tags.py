@@ -220,7 +220,7 @@ def asvs_calc_level(benchmark_score):
 
 @register.filter
 def asvs_level(benchmark_score):
-    benchmark_score.desired_level, total, total_pass, total_wait, total_fail, total_viewed = asvs_calc_level(benchmark_score)
+    benchmark_score.desired_level, total, _total_pass, _total_wait, _total_fail, total_viewed = asvs_calc_level(benchmark_score)
 
     level = percentage(total_viewed, total)
 
