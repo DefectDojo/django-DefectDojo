@@ -1183,10 +1183,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'vulnerability_ids'],
     'Mobsfscan Scan': ['title', 'severity', 'cwe'],
-    'Tenable Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
+    'Tenable Scan': ['title', 'severity', 'vulnerability_ids', 'cwe', 'description'],
     'Nexpose Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'vulnerability_ids', 'cwe'],
+    'NPM Audit v7+ Scan': ['title', 'severity', 'cwe', 'vuln_id_from_tool'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'Yarn Audit Scan': ['title', 'severity', 'file_path', 'vulnerability_ids', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on vulnerability_ids + file_path + severity
@@ -1196,7 +1197,6 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # 'Qualys Webapp Scan': ['title', 'unique_id_from_tool'],
     'PHP Symfony Security Check': ['title', 'vulnerability_ids'],
     'Clair Scan': ['title', 'vulnerability_ids', 'description', 'severity'],
-    'Clair Klar Scan': ['title', 'description', 'severity'],
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': ['title', 'vulnerability_ids'],
     'DSOP Scan': ['vulnerability_ids'],
@@ -1245,7 +1245,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'KICS Scan': ['file_path', 'line', 'severity', 'description', 'title'],
     'MobSF Scan': ['title', 'description', 'severity'],
     'OSV Scan': ['title', 'description', 'severity'],
-    'Snyk Code Scan': ['vuln_id_from_tool', 'file_path']
+    'Snyk Code Scan': ['vuln_id_from_tool', 'file_path'],
+    'Wiz Scan': ['title', 'description', 'severity'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1280,6 +1281,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Tenable Scan': True,
     'Nexpose Scan': True,
     'NPM Audit Scan': True,
+    'NPM Audit v7+ Scan': True,
     'Yarn Audit Scan': True,
     'Mend Scan': True,
     'ZAP Scan': False,
@@ -1379,6 +1381,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Tenable Scan': DEDUPE_ALGO_HASH_CODE,
     'Nexpose Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
+    'NPM Audit v7+ Scan': DEDUPE_ALGO_HASH_CODE,
     'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Mend Scan': DEDUPE_ALGO_HASH_CODE,
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1387,7 +1390,6 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Acunetix Scan': DEDUPE_ALGO_HASH_CODE,
     'Acunetix360 Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Scan': DEDUPE_ALGO_HASH_CODE,
-    'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
     # 'Qualys Webapp Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,  # Must also uncomment qualys webapp line in hashcode fields per scanner
     'Veracode Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Veracode SourceClear Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1460,6 +1462,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'MobSF Scan': DEDUPE_ALGO_HASH_CODE,
     'OSV Scan': DEDUPE_ALGO_HASH_CODE,
     'Nosey Parker Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    'Wiz Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
