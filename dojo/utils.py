@@ -31,7 +31,6 @@ from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Pr
 from asteval import Interpreter
 from dojo.notifications.helper import create_notification
 import logging
-import itertools
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 import crum
@@ -1283,7 +1282,7 @@ def get_page_items_and_count(request, items, page_size, prefix='', do_count=True
 
 
 def handle_uploaded_threat(f, eng):
-    name, extension = os.path.splitext(f.name)
+    _name, extension = os.path.splitext(f.name)
     # Check if threat folder exist.
     if not os.path.isdir(settings.MEDIA_ROOT + '/threat/'):
         # Create the folder
@@ -1298,7 +1297,7 @@ def handle_uploaded_threat(f, eng):
 
 
 def handle_uploaded_selenium(f, cred):
-    name, extension = os.path.splitext(f.name)
+    _name, extension = os.path.splitext(f.name)
     with open(settings.MEDIA_ROOT + '/selenium/%s%s' % (cred.id, extension),
               'wb+') as destination:
         for chunk in f.chunks():
@@ -1747,12 +1746,6 @@ def engagement_post_Save(sender, instance, created, **kwargs):
         title = 'Engagement created for ' + str(engagement.product) + ': ' + str(engagement.name)
         create_notification(event='engagement_added', title=title, engagement=engagement, product=engagement.product,
                             url=reverse('view_engagement', args=(engagement.id,)))
-
-
-def merge_sets_safe(set1, set2):
-    return set(itertools.chain(set1 or [], set2 or []))
-    # This concat looks  better, but requires Python 3.6+
-    # return {*set1, *set2}
 
 
 def is_safe_url(url):

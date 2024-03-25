@@ -46,7 +46,7 @@ class TestFactory(DojoTestCase):
         with self.assertRaises(ValueError):
             get_parser(scan_type)
         # activate the parser
-        test_type, created = Test_Type.objects.update_or_create(
+        _test_type, _created = Test_Type.objects.update_or_create(
             name=scan_type,
             defaults={"active": True},
         )

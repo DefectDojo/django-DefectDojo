@@ -625,7 +625,7 @@ def add_endpoints(new_finding, form):
     new_finding.endpoints.set(form.cleaned_data['endpoints'] | Endpoint.objects.filter(id__in=endpoint_ids))
 
     for endpoint in new_finding.endpoints.all():
-        eps, created = Endpoint_Status.objects.get_or_create(
+        _eps, _created = Endpoint_Status.objects.get_or_create(
             finding=new_finding,
             endpoint=endpoint, defaults={'date': form.cleaned_data['date'] or timezone.now()})
 

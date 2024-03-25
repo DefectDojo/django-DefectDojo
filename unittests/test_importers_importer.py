@@ -44,16 +44,16 @@ class TestDojoDefaultImporter(DojoTestCase):
         scan_type = "Acunetix Scan"
         scan = open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml")
 
-        user, created = User.objects.get_or_create(username="admin")
+        user, _created = User.objects.get_or_create(username="admin")
 
-        product_type, created = Product_Type.objects.get_or_create(name="test")
-        product, created = Product.objects.get_or_create(
+        product_type, _created = Product_Type.objects.get_or_create(name="test")
+        product, _created = Product.objects.get_or_create(
             name="TestDojoDefaultImporter",
             prod_type=product_type,
         )
 
         engagement_name = "Test Create Engagement"
-        engagement, created = Engagement.objects.get_or_create(
+        engagement, _created = Engagement.objects.get_or_create(
             name=engagement_name,
             product=product,
             target_start=timezone.now(),
@@ -98,7 +98,7 @@ class TestDojoDefaultImporter(DojoTestCase):
         scan_type = SarifParser().get_scan_types()[0]  # SARIF format implement the new method
 
         user, _ = User.objects.get_or_create(username="admin")
-        user_reporter, _ = User.objects.get_or_create(username="user_reporter")
+        _user_reporter, _ = User.objects.get_or_create(username="user_reporter")
 
         product_type, _ = Product_Type.objects.get_or_create(name="test2")
         product, _ = Product.objects.get_or_create(
@@ -130,7 +130,7 @@ class TestDojoDefaultImporter(DojoTestCase):
         scan_type = GitlabSastParser().get_scan_types()[0]
 
         user, _ = User.objects.get_or_create(username="admin")
-        user_reporter, _ = User.objects.get_or_create(username="user_reporter")
+        _user_reporter, _ = User.objects.get_or_create(username="user_reporter")
 
         product_type, _ = Product_Type.objects.get_or_create(name="test2")
         product, _ = Product.objects.get_or_create(

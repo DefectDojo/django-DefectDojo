@@ -566,6 +566,11 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("Password must not be common"),
         help_text=_("Requires user passwords to not be part of list of common passwords."))
+    api_expose_error_details = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("API expose error details"),
+        help_text=_("When turned on, the API will expose error details in the response."))
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
@@ -1950,7 +1955,7 @@ class Development_Environment(models.Model):
 
 
 class Sonarqube_Issue(models.Model):
-    key = models.CharField(max_length=30, unique=True, help_text=_("SonarQube issue key"))
+    key = models.CharField(max_length=60, unique=True, help_text=_("SonarQube issue key"))
     status = models.CharField(max_length=20, help_text=_("SonarQube issue status"))
     type = models.CharField(max_length=20, help_text=_("SonarQube issue type"))
 
@@ -3912,6 +3917,7 @@ class JIRA_Project(models.Model):
          help_text=_("Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product."))
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
+    epic_issue_type_name = models.CharField(max_length=64, blank=True, default="Epic", help_text=_("The name of the of structure that represents an Epic"))
     push_notes = models.BooleanField(default=False, blank=True)
     product_jira_sla_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send SLA notifications as comment?"))
     risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send Risk Acceptance expiration notifications as comment?"))
@@ -4051,27 +4057,23 @@ class Notifications(models.Model):
                 result = notifications
                 # result.pk = None # detach from db
             else:
-                # TODO This concat looks  better, but requires Python 3.6+
-                # result.scan_added = [*result.scan_added, *notifications.scan_added]
-                from dojo.utils import merge_sets_safe
-                result.product_type_added = merge_sets_safe(result.product_type_added, notifications.product_type_added)
-                result.product_added = merge_sets_safe(result.product_added, notifications.product_added)
-                result.engagement_added = merge_sets_safe(result.engagement_added, notifications.engagement_added)
-                result.test_added = merge_sets_safe(result.test_added, notifications.test_added)
-                result.scan_added = merge_sets_safe(result.scan_added, notifications.scan_added)
-                result.jira_update = merge_sets_safe(result.jira_update, notifications.jira_update)
-                result.upcoming_engagement = merge_sets_safe(result.upcoming_engagement, notifications.upcoming_engagement)
-                result.stale_engagement = merge_sets_safe(result.stale_engagement, notifications.stale_engagement)
-                result.auto_close_engagement = merge_sets_safe(result.auto_close_engagement, notifications.auto_close_engagement)
-                result.close_engagement = merge_sets_safe(result.close_engagement, notifications.close_engagement)
-                result.user_mentioned = merge_sets_safe(result.user_mentioned, notifications.user_mentioned)
-                result.code_review = merge_sets_safe(result.code_review, notifications.code_review)
-                result.review_requested = merge_sets_safe(result.review_requested, notifications.review_requested)
-                result.other = merge_sets_safe(result.other, notifications.other)
-                result.sla_breach = merge_sets_safe(result.sla_breach, notifications.sla_breach)
-                result.sla_breach_combined = merge_sets_safe(result.sla_breach_combined, notifications.sla_breach_combined)
-                result.risk_acceptance_expiration = merge_sets_safe(result.risk_acceptance_expiration, notifications.risk_acceptance_expiration)
-
+                result.product_type_added = {*result.product_type_added, *notifications.product_type_added}
+                result.product_added = {*result.product_added, *notifications.product_added}
+                result.engagement_added = {*result.engagement_added, *notifications.engagement_added}
+                result.test_added = {*result.test_added, *notifications.test_added}
+                result.scan_added = {*result.scan_added, *notifications.scan_added}
+                result.jira_update = {*result.jira_update, *notifications.jira_update}
+                result.upcoming_engagement = {*result.upcoming_engagement, *notifications.upcoming_engagement}
+                result.stale_engagement = {*result.stale_engagement, *notifications.stale_engagement}
+                result.auto_close_engagement = {*result.auto_close_engagement, *notifications.auto_close_engagement}
+                result.close_engagement = {*result.close_engagement, *notifications.close_engagement}
+                result.user_mentioned = {*result.user_mentioned, *notifications.user_mentioned}
+                result.code_review = {*result.code_review, *notifications.code_review}
+                result.review_requested = {*result.review_requested, *notifications.review_requested}
+                result.other = {*result.other, *notifications.other}
+                result.sla_breach = {*result.sla_breach, *notifications.sla_breach}
+                result.sla_breach_combined = {*result.sla_breach_combined, *notifications.sla_breach_combined}
+                result.risk_acceptance_expiration = {*result.risk_acceptance_expiration, *notifications.risk_acceptance_expiration}
         return result
 
     def __str__(self):

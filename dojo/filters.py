@@ -1,5 +1,6 @@
 import collections
 import warnings
+from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from drf_spectacular.types import OpenApiTypes
 
 from drf_spectacular.utils import extend_schema_field
@@ -1538,9 +1539,15 @@ class AcceptedFindingFilter(FindingFilter):
             queryset=Dojo_User.objects.none(),
             label="Risk Acceptance Owner")
 
+    risk_acceptance = ModelMultipleChoiceFilter(
+        queryset=Risk_Acceptance.objects.none(),
+        label="Accepted By"
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.form.fields['risk_acceptance__owner'].queryset = get_authorized_users(Permissions.Finding_View)
+        self.form.fields['risk_acceptance'].queryset = get_authorized_risk_acceptances(Permissions.Risk_Acceptance)
 
 
 class SimilarFindingFilter(FindingFilter):

@@ -3,6 +3,7 @@ import re
 from datetime import datetime, date
 import pickle
 import warnings
+from dojo.widgets import TableCheckboxWidget
 from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
@@ -786,15 +787,17 @@ class ReplaceRiskAcceptanceProofForm(forms.ModelForm):
 
 
 class AddFindingsRiskAcceptanceForm(forms.ModelForm):
+
     accepted_findings = forms.ModelMultipleChoiceField(
-        queryset=Finding.objects.none(), required=True,
-        widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
-        help_text=('Select to add findings.'), label="Add findings as accepted:")
+        queryset=Finding.objects.none(),
+        required=True,
+        label="",
+        widget=TableCheckboxWidget(attrs={'size': 25})
+    )
 
     class Meta:
         model = Risk_Acceptance
         fields = ['accepted_findings']
-        # exclude = ('name', 'owner', 'path', 'notes', 'accepted_by', 'expiration_date', 'compensating_control')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1544,7 +1547,7 @@ class AddEndpointForm(forms.Form):
     def save(self):
         processed_endpoints = []
         for e in self.endpoints_to_process:
-            endpoint, created = endpoint_get_or_create(
+            endpoint, _created = endpoint_get_or_create(
                 protocol=e[0],
                 userinfo=e[1],
                 host=e[2],
@@ -2722,7 +2725,7 @@ class JIRAProjectForm(forms.ModelForm):
     class Meta:
         model = JIRA_Project
         exclude = ['product', 'engagement']
-        fields = ['inherit_from_product', 'jira_instance', 'project_key', 'issue_template_dir', 'component', 'custom_fields', 'jira_labels', 'default_assignee', 'add_vulnerability_id_to_jira_label', 'push_all_issues', 'enable_engagement_epic_mapping', 'push_notes', 'product_jira_sla_notification', 'risk_acceptance_expiration_notification']
+        fields = ['inherit_from_product', 'jira_instance', 'project_key', 'issue_template_dir', 'epic_issue_type_name', 'component', 'custom_fields', 'jira_labels', 'default_assignee', 'add_vulnerability_id_to_jira_label', 'push_all_issues', 'enable_engagement_epic_mapping', 'push_notes', 'product_jira_sla_notification', 'risk_acceptance_expiration_notification']
 
     def __init__(self, *args, **kwargs):
         from dojo.jira_link import helper as jira_helper
@@ -2755,6 +2758,7 @@ class JIRAProjectForm(forms.ModelForm):
                 self.fields['jira_instance'].disabled = False
                 self.fields['project_key'].disabled = False
                 self.fields['issue_template_dir'].disabled = False
+                self.fields['epic_issue_type_name'].disabled = False
                 self.fields['component'].disabled = False
                 self.fields['custom_fields'].disabled = False
                 self.fields['default_assignee'].disabled = False
@@ -2778,6 +2782,7 @@ class JIRAProjectForm(forms.ModelForm):
                     self.initial['jira_instance'] = jira_project_product.jira_instance.id if jira_project_product.jira_instance else None
                     self.initial['project_key'] = jira_project_product.project_key
                     self.initial['issue_template_dir'] = jira_project_product.issue_template_dir
+                    self.initial['epic_issue_type_name'] = jira_project_product.epic_issue_type_name
                     self.initial['component'] = jira_project_product.component
                     self.initial['custom_fields'] = jira_project_product.custom_fields
                     self.initial['default_assignee'] = jira_project_product.default_assignee
@@ -2792,6 +2797,7 @@ class JIRAProjectForm(forms.ModelForm):
                     self.fields['jira_instance'].disabled = True
                     self.fields['project_key'].disabled = True
                     self.fields['issue_template_dir'].disabled = True
+                    self.fields['epic_issue_type_name'].disabled = True
                     self.fields['component'].disabled = True
                     self.fields['custom_fields'].disabled = True
                     self.fields['default_assignee'].disabled = True
@@ -2811,6 +2817,7 @@ class JIRAProjectForm(forms.ModelForm):
         if self.instance.id:
             self.fields['jira_instance'].required = True
             self.fields['project_key'].required = True
+            self.fields['epic_issue_type_name'].required = True
 
     def clean(self):
         logger.debug('validating jira project form')
@@ -2820,17 +2827,18 @@ class JIRAProjectForm(forms.ModelForm):
         if not self.cleaned_data.get('inherit_from_product', False):
             jira_instance = self.cleaned_data.get('jira_instance')
             project_key = self.cleaned_data.get('project_key')
+            epic_issue_type_name = self.cleaned_data.get('epic_issue_type_name')
 
-            if project_key and jira_instance:
+            if project_key and jira_instance and epic_issue_type_name:
                 return cleaned_data
 
-            if not project_key and not jira_instance:
+            if not project_key and not jira_instance and not epic_issue_type_name:
                 return cleaned_data
 
             if self.target == 'engagement':
-                raise ValidationError('JIRA Project needs a JIRA Instance and JIRA Project Key, or choose to inherit settings from product')
+                raise ValidationError('JIRA Project needs a JIRA Instance, JIRA Project Key, and Epic issue type name, or choose to inherit settings from product')
             else:
-                raise ValidationError('JIRA Project needs a JIRA Instance and JIRA Project Key, leave empty to have no JIRA integration setup')
+                raise ValidationError('JIRA Project needs a JIRA Instance, JIRA Project Key, and Epic issue type name, leave empty to have no JIRA integration setup')
 
 
 class GITHUBFindingForm(forms.Form):
