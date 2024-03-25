@@ -566,6 +566,11 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("Password must not be common"),
         help_text=_("Requires user passwords to not be part of list of common passwords."))
+    api_expose_error_details = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("API expose error details"),
+        help_text=_("When turned on, the API will expose error details in the response."))
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
