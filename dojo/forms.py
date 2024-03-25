@@ -196,8 +196,8 @@ class Add_Product_Type_MemberForm(forms.ModelForm):
         super(Add_Product_Type_MemberForm, self).__init__(*args, **kwargs)
         current_members = Product_Type_Member.objects.filter(product_type=self.initial["product_type"]).values_list('user', flat=True)
         self.fields['users'].queryset = Dojo_User.objects.exclude(
-            Q(is_superuser=True) |
-            Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
+            Q(is_superuser=True)
+            | Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
         self.fields['product_type'].disabled = True
 
     class Meta:
@@ -343,8 +343,8 @@ class Add_Product_MemberForm(forms.ModelForm):
         self.fields['product'].disabled = True
         current_members = Product_Member.objects.filter(product=self.initial["product"]).values_list('user', flat=True)
         self.fields['users'].queryset = Dojo_User.objects.exclude(
-            Q(is_superuser=True) |
-            Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
+            Q(is_superuser=True)
+            | Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
 
     class Meta:
         model = Product_Member
@@ -839,8 +839,8 @@ class CheckForm(forms.ModelForm):
 class EngForm(forms.ModelForm):
     name = forms.CharField(
         max_length=300, required=False,
-        help_text="Add a descriptive name to identify this engagement. " +
-                  "Without a name the target start date will be set.")
+        help_text="Add a descriptive name to identify this engagement. "
+                  + "Without a name the target start date will be set.")
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False, help_text="Description of the engagement and details regarding the engagement.")
     product = forms.ModelChoiceField(label='Product',
@@ -1788,8 +1788,8 @@ class WeeklyMetricsForm(forms.Form):
                                                  hour=0, minute=0, second=0)
 
             wmf_options.append((end_of_period.strftime("%b %d %Y %H %M %S %Z"),
-                                start_of_period.strftime("%b %d") +
-                                " - " + end_of_period.strftime("%b %d")))
+                                start_of_period.strftime("%b %d")
+                                + " - " + end_of_period.strftime("%b %d")))
 
         wmf_options = tuple(wmf_options)
 
@@ -1875,8 +1875,8 @@ class Add_Group_MemberForm(forms.ModelForm):
         self.fields['group'].disabled = True
         current_members = Dojo_Group_Member.objects.filter(group=self.initial['group']).values_list('user', flat=True)
         self.fields['users'].queryset = Dojo_User.objects.exclude(
-            Q(is_superuser=True) |
-            Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
+            Q(is_superuser=True)
+            | Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
         self.fields['role'].queryset = get_group_member_roles()
 
     class Meta:
@@ -2777,7 +2777,7 @@ class JIRAProjectForm(forms.ModelForm):
                 # we have to check that we are not in a POST request where jira project config data is posted
                 # this is because initial values will overwrite the actual values entered by the user
                 # makes no sense, but seems to be accepted behaviour: https://code.djangoproject.com/ticket/30407
-                if jira_project_product and not (self.prefix + '-jira_instance') in self.data:
+                if jira_project_product and (self.prefix + '-jira_instance') not in self.data:
                     logger.debug('setting jira project fields from product2')
                     self.initial['jira_instance'] = jira_project_product.jira_instance.id if jira_project_product.jira_instance else None
                     self.initial['project_key'] = jira_project_product.project_key
