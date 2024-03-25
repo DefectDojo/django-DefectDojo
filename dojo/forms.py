@@ -1547,7 +1547,7 @@ class AddEndpointForm(forms.Form):
     def save(self):
         processed_endpoints = []
         for e in self.endpoints_to_process:
-            endpoint, created = endpoint_get_or_create(
+            endpoint, _created = endpoint_get_or_create(
                 protocol=e[0],
                 userinfo=e[1],
                 host=e[2],

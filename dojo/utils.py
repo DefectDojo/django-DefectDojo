@@ -1282,7 +1282,7 @@ def get_page_items_and_count(request, items, page_size, prefix='', do_count=True
 
 
 def handle_uploaded_threat(f, eng):
-    name, extension = os.path.splitext(f.name)
+    _name, extension = os.path.splitext(f.name)
     # Check if threat folder exist.
     if not os.path.isdir(settings.MEDIA_ROOT + '/threat/'):
         # Create the folder
@@ -1297,7 +1297,7 @@ def handle_uploaded_threat(f, eng):
 
 
 def handle_uploaded_selenium(f, cred):
-    name, extension = os.path.splitext(f.name)
+    _name, extension = os.path.splitext(f.name)
     with open(settings.MEDIA_ROOT + '/selenium/%s%s' % (cred.id, extension),
               'wb+') as destination:
         for chunk in f.chunks():
