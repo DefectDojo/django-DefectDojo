@@ -288,3 +288,14 @@ class TestTenableParser(DojoTestCase):
         self.assertEqual("Blah1", finding.title)
         self.assertEqual("Low", finding.severity)
         self.assertEqual("3.1", finding.cvssv3_score)
+
+    def test_parse_issue_9612(self):
+        testfile = open("unittests/scans/tenable/issue_9612.csv")
+        parser = TenableParser()
+        findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        self.assertEqual(2, len(findings))
+        self.assertEqual("Critical", findings[0].severity)
+

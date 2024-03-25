@@ -715,7 +715,7 @@ def add_jira_issue(obj, *args, **kwargs):
     jira_project = get_jira_project(obj)
     jira_instance = get_jira_instance(obj)
 
-    obj_can_be_pushed_to_jira, error_message, error_code = can_be_pushed_to_jira(obj)
+    obj_can_be_pushed_to_jira, error_message, _error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
         if isinstance(obj, Finding) and obj.duplicate and not obj.active:
             logger.warning("%s will not be pushed to JIRA as it's a duplicate finding", to_str_typed(obj))
@@ -1596,7 +1596,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 finding.active = False
                 finding.mitigated = jira_now
                 finding.is_mitigated = True
-                finding.mitigated_by, created = User.objects.get_or_create(username='JIRA')
+                finding.mitigated_by, _created = User.objects.get_or_create(username='JIRA')
                 finding.endpoints.clear()
                 finding.false_p = False
                 ra_helper.risk_unaccept(finding)

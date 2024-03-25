@@ -566,6 +566,11 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("Password must not be common"),
         help_text=_("Requires user passwords to not be part of list of common passwords."))
+    api_expose_error_details = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("API expose error details"),
+        help_text=_("When turned on, the API will expose error details in the response."))
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
@@ -1950,7 +1955,7 @@ class Development_Environment(models.Model):
 
 
 class Sonarqube_Issue(models.Model):
-    key = models.CharField(max_length=30, unique=True, help_text=_("SonarQube issue key"))
+    key = models.CharField(max_length=60, unique=True, help_text=_("SonarQube issue key"))
     status = models.CharField(max_length=20, help_text=_("SonarQube issue status"))
     type = models.CharField(max_length=20, help_text=_("SonarQube issue type"))
 
