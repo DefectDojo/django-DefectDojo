@@ -5,6 +5,7 @@ from cvss import CVSS3
 
 from dojo.models import Finding
 from django.conf import settings
+from functools import reduce
 
 
 class JFrogXrayOnDemandBinaryScanParser(object):
@@ -33,7 +34,9 @@ class JFrogXrayOnDemandBinaryScanParser(object):
                     item_set = get_item_set(node)
 
                     for item in item_set:
-                        unique_key = item.title + item.component_name + item.component_version
+                        unique_key = (
+                            item.title + item.component_name + item.component_version
+                        )
                         items[unique_key] = item
 
         return list(items.values())
@@ -98,8 +101,14 @@ def get_severity_justification(vulnerability):
             severity_desc += "**JFrog research severity reasons**\n"
             for item in extended_information["jfrog_research_severity_reasons"]:
                 severity_desc += item["name"] + "\n" if item.get("name") else ""
-                severity_desc += item["description"] + "\n" if item.get("description") else ""
-                severity_desc += "_Is positive:_ " + str(item["is_positive"]).lower() + "\n" if item.get("is_positive") else ""
+                severity_desc += (
+                    item["description"] + "\n" if item.get("description") else ""
+                )
+                severity_desc += (
+                    "_Is positive:_ " + str(item["is_positive"]).lower() + "\n"
+                    if item.get("is_positive")
+                    else ""
+                )
     return severity_desc, remediation
 
 
@@ -139,9 +148,9 @@ def get_vuln_id_from_tool(vulnerability):
 
 def clean_title(title):
     if title.startswith("Issue summary: "):
-        title = title[len("Issue summary: "):]
-    if '\n' in title:
-        title = title[:title.index('\n')]
+        title = title[len("Issue summary: ") :]
+    if "\n" in title:
+        title = title[: title.index("\n")]
     return title
 
 
@@ -167,14 +176,18 @@ def get_item_set(vulnerability):
     for component_name, component in vulnerability.get("components", {}).items():
         component_name, component_version = get_component_name_version(component_name)
         mitigation, impact = process_component(component)
-
-        title = clean_title(vulnerability["summary"])
+        summary = reduce(
+            lambda str, kv: str.replace(kv[0], kv[1]),
+            settings.DD_INVALID_ESCAPE_STR.items(),
+            vulnerability["summary"],
+        )
+        title = clean_title(summary)
         # create the finding object
         finding = Finding(
             title=title,
             severity_justification=severity_justification or None,
             severity=severity,
-            description=(vulnerability["summary"]).strip(),
+            description=(summary).strip(),
             mitigation=(mitigation + remediation) or None,
             component_name=component_name,
             component_version=component_version,
