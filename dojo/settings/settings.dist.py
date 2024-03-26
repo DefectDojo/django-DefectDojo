@@ -1246,7 +1246,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'MobSF Scan': ['title', 'description', 'severity'],
     'OSV Scan': ['title', 'description', 'severity'],
     'Snyk Code Scan': ['vuln_id_from_tool', 'file_path'],
-    'Wiz Scan': ['title', 'description', 'severity'],
+    'Nancy Scan': ['title', 'vuln_id_from_tool'],
+    'Wiz Scan': ['title', 'description', 'severity']
 }
 
 # Override the hardcoded settings here via the env var
@@ -1427,6 +1428,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Solar Appscreener Scan': DEDUPE_ALGO_HASH_CODE,
     'Gitleaks Scan': DEDUPE_ALGO_HASH_CODE,
     'pip-audit Scan': DEDUPE_ALGO_HASH_CODE,
+    'Nancy Scan': DEDUPE_ALGO_HASH_CODE,
     'Edgescan Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Bugcrowd API Import': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Rubocop Scan': DEDUPE_ALGO_HASH_CODE,
