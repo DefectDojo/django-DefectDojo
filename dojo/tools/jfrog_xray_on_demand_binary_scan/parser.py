@@ -178,7 +178,7 @@ def get_item_set(vulnerability):
         mitigation, impact = process_component(component)
         summary = reduce(
             lambda str, kv: str.replace(kv[0], kv[1]),
-            {"\\??\\": "/??/", "C:\\x": "C:/x"}.items(),
+            settings.DD_INVALID_ESCAPE_STR.items(),
             vulnerability["summary"],
         )
         title = clean_title(summary)

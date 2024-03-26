@@ -334,6 +334,7 @@ env = environ.FileAwareEnv(
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
     DD_CUSTOM_TAG_PARSER=(dict, {}),
+    DD_INVALID_ESCAPE_STR=(dict, {}),
 
     # ---------------RISK PENDING-------------------------
     # The variable that allows enabling pending risk acceptance.
@@ -1980,7 +1981,9 @@ CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 AUDITLOG_FLUSH_RETENTION_PERIOD = env('DD_AUDITLOG_FLUSH_RETENTION_PERIOD')
 ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
 USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
+
 DD_CUSTOM_TAG_PARSER = env('DD_CUSTOM_TAG_PARSER')
+DD_INVALID_ESCAPE_STR = env('DD_INVALID_ESCAPE_STR')
 
 # Risk Pending
 RISK_PENDING = env("DD_RISK_PENDING")
