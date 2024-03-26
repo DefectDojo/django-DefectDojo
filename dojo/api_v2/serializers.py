@@ -2217,7 +2217,7 @@ class ImportScanSerializer(serializers.Serializer):
             name=environment_name
         )
         tags = data.get("tags", None)
-        # Convert the tags to a list if needed. At this point, the 
+        # Convert the tags to a list if needed. At this point, the
         # TaggitListSerializer has already removed commas supplied
         # by the user, so this operation will consistently return
         # a list to be used by the importer
@@ -2499,7 +2499,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         service = data.get("service", None)
         lead = data.get("lead", None)
         tags = data.get("tags", None)
-        # Convert the tags to a list if needed. At this point, the 
+        # Convert the tags to a list if needed. At this point, the
         # TaggitListSerializer has already removed commas supplied
         # by the user, so this operation will consistently return
         # a list to be used by the importer
