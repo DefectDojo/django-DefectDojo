@@ -1,3 +1,4 @@
+import re
 from dojo.finding.queries import get_authorized_findings
 from dojo.group.utils import get_auth_group_name
 from django.contrib.auth.models import Group
@@ -271,13 +272,8 @@ class TagListSerializerField(serializers.ListField):
                 self.fail("not_a_str")
             # Run the children validation
             self.child.run_validation(s)
-            # Strip out any commas if they are present
-            if len(commas_removed := s.split(",")):
-                # Add any new items to the running list
-                data_safe += commas_removed
-            else:
-                # No commas here, so add the element as usual
-                data_safe.append(s)
+            substrings = re.findall(r'(?:"[^"]*"|[^",]+)', s)
+            data_safe.extend(substrings)
 
         internal_value = tagulous.utils.render_tags(data_safe)
 
