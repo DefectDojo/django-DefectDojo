@@ -78,11 +78,13 @@ class CveColumnMappingStrategy(ColumnMappingStrategy):
         super(CveColumnMappingStrategy, self).__init__()
 
     def map_column_value(self, finding, column_value):
-        if "," in column_value:
-            finding.description += "\n**All CVEs:** " + str(column_value)
-            finding.unsaved_vulnerability_ids.append(column_value.split(",")[0])
-        elif column_value is not None:
-            finding.unsaved_vulnerability_ids.append(column_value)
+        if column_value != "":
+            if "," in column_value:
+                finding.description += "\n**All CVEs:** " + str(column_value)
+                for value in column_value.split(","):
+                    finding.unsaved_vulnerability_ids.append(value)
+            else:
+                finding.unsaved_vulnerability_ids.append(column_value)
 
 
 class NVDCVEColumnMappingStrategy(ColumnMappingStrategy):
@@ -92,9 +94,9 @@ class NVDCVEColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         cve_pattern = r'CVE-\d{4}-\d{4,7}'
-        cve = re.findall(cve_pattern, column_value)
-        if cve:
-            finding.unsaved_vulnerability_ids.append(column_value)
+        cves = re.findall(cve_pattern, column_value)
+        for cve in cves:
+            finding.unsaved_vulnerability_ids.append(cve)
 
 
 class ProtocolColumnMappingStrategy(ColumnMappingStrategy):
