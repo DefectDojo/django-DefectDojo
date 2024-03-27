@@ -17,7 +17,7 @@ class AwsSecurityHubParser(object):
     def get_findings(self, filehandle, test):
         tree = json.load(filehandle)
         if not isinstance(tree, dict):
-            raise ValueError("Incorrect Security Hub report format")
+            raise TypeError("Incorrect Security Hub report format")
         return self.get_items(tree, test)
 
     def get_items(self, tree: dict, test):
@@ -26,13 +26,13 @@ class AwsSecurityHubParser(object):
         findings = tree.get("Findings", tree.get("findings", None))
 
         if not isinstance(findings, list):
-            raise ValueError("Incorrect Security Hub report format")
+            raise TypeError("Incorrect Security Hub report format")
 
         for node in findings:
             item = get_item(node, test)
             key = node["Id"]
             if not isinstance(key, str):
-                raise ValueError("Incorrect Security Hub report format")
+                raise TypeError("Incorrect Security Hub report format")
             items[key] = item
 
         return list(items.values())
