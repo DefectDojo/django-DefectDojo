@@ -367,7 +367,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
             log_jira_generic_alert('Unknown JIRA Connection Error', error_message)
 
         add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(error_message))
-        raise e
+        raise
 
     except requests.exceptions.RequestException as re:
         logger.exception(re)
@@ -376,7 +376,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
 
         add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(error_message))
 
-        raise re
+        raise
 
     # except RequestException as re:
     #     logger.exception(re)
@@ -1063,7 +1063,7 @@ def get_issuetype_fields(
                         expand="projects.issuetypes.fields")
             except JIRAError as e:
                 e.text = f"Jira API call 'createmeta' failed with status: {e.status_code} and message: {e.text}"
-                raise e
+                raise
 
             project = None
             try:
@@ -1081,7 +1081,7 @@ def get_issuetype_fields(
                 issuetypes = jira.project_issue_types(project_key)
             except JIRAError as e:
                 e.text = f"Jira API call 'createmeta/issuetypes' failed with status: {e.status_code} and message: {e.text}. Project misconfigured or no permissions in Jira ?"
-                raise e
+                raise
 
             issuetype_id = None
             for it in issuetypes:
@@ -1096,7 +1096,7 @@ def get_issuetype_fields(
                 issuetype_fields = jira.project_issue_fields(project_key, issuetype_id)
             except JIRAError as e:
                 e.text = f"Jira API call 'createmeta/fieldtypes' failed with status: {e.status_code} and message: {e.text}. Misconfigured project or default issue type ?"
-                raise e
+                raise
 
             try:
                 issuetype_fields = [f.fieldId for f in issuetype_fields]
@@ -1108,7 +1108,7 @@ def get_issuetype_fields(
         logger.warning(e.text)
         add_error_message_to_response(e.text)
 
-        raise e
+        raise
 
     return issuetype_fields
 
