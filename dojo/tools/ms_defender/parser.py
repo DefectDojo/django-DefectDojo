@@ -3,7 +3,7 @@ from dojo.models import Finding, Endpoint
 import zipfile
 
 
-class MSDefenderParser(object):
+class MSDefenderParser:
     """
     Import from MSDefender findings
     """

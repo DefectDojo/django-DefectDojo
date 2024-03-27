@@ -7,7 +7,7 @@ import logging
 from dojo.models import Finding
 
 
-class IntSightsParser(object):
+class IntSightsParser:
     """
     IntSights Threat Intelligence Report
     """

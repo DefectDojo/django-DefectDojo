@@ -3,7 +3,7 @@ import hashlib
 from dojo.models import Finding
 
 
-class TerrascanParser(object):
+class TerrascanParser:
     """
     A class that can be used to parse the terrascan JSON report file
     """

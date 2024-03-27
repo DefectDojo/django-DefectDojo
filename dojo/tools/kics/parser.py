@@ -3,7 +3,7 @@ import hashlib
 from dojo.models import Finding
 
 
-class KICSParser(object):
+class KICSParser:
     """
     A class that can be used to parse the KICS JSON report file
     """

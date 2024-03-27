@@ -251,7 +251,7 @@ def are_endpoints_duplicates(new_finding, to_duplicate_finding):
     list1 = get_endpoints_as_url(new_finding)
     list2 = get_endpoints_as_url(to_duplicate_finding)
 
-    deduplicationLogger.debug("Starting deduplication by endpoint fields for finding {} with urls {} and finding {} with urls {}".format(new_finding.id, list1, to_duplicate_finding.id, list2))
+    deduplicationLogger.debug(f"Starting deduplication by endpoint fields for finding {new_finding.id} with urls {list1} and finding {to_duplicate_finding.id} with urls {list2}")
     if list1 == [] and list2 == []:
         return True
 
@@ -1173,7 +1173,7 @@ def opened_in_period(start_date, end_date, **kwargs):
     return oip
 
 
-class FileIterWrapper(object):
+class FileIterWrapper:
     def __init__(self, flo, chunk_size=1024**2):
         self.flo = flo
         self.chunk_size = chunk_size
@@ -1287,23 +1287,21 @@ def handle_uploaded_threat(f, eng):
     if not os.path.isdir(settings.MEDIA_ROOT + '/threat/'):
         # Create the folder
         os.mkdir(settings.MEDIA_ROOT + '/threat/')
-    with open(settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension),
+    with open(settings.MEDIA_ROOT + f'/threat/{eng.id}{extension}',
               'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
-    eng.tmodel_path = settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id,
-                                                              extension)
+    eng.tmodel_path = settings.MEDIA_ROOT + f'/threat/{eng.id}{extension}'
     eng.save()
 
 
 def handle_uploaded_selenium(f, cred):
     _name, extension = os.path.splitext(f.name)
-    with open(settings.MEDIA_ROOT + '/selenium/%s%s' % (cred.id, extension),
+    with open(settings.MEDIA_ROOT + f'/selenium/{cred.id}{extension}',
               'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
-    cred.selenium_script = settings.MEDIA_ROOT + '/selenium/%s%s' % (cred.id,
-                                                                     extension)
+    cred.selenium_script = settings.MEDIA_ROOT + f'/selenium/{cred.id}{extension}'
     cred.save()
 
 
@@ -1513,8 +1511,7 @@ def calculate_grade(product, *args, **kwargs):
                 low = severity_count['numerical_severity__count']
         aeval = Interpreter()
         aeval(system_settings.product_grade)
-        grade_product = "grade_product(%s, %s, %s, %s)" % (
-            critical, high, medium, low)
+        grade_product = f"grade_product({critical}, {high}, {medium}, {low})"
         product.prod_numeric_grade = aeval(grade_product)
         super(Product, product).save()
 
@@ -1561,7 +1558,7 @@ def get_work_days(start: date, end: date):
 
 
 # Used to display the counts and enabled tabs in the product view
-class Product_Tab():
+class Product_Tab:
     def __init__(self, product, title=None, tab=None):
         self.product = product
         self.title = title
@@ -1896,7 +1893,7 @@ def sla_compute_and_notify(*args, **kwargs):
                         findings_list.append(n.finding)
 
                     # producing a "combined" SLA breach notification
-                    title_combined = "SLA alert (%s): product type '%s', product '%s'" % (kind, pt, p)
+                    title_combined = f"SLA alert ({kind}): product type '{pt}', product '{p}'"
                     product = combined_notifications[pt][p][kind][0].finding.test.engagement.product
                     create_notification(
                         event='sla_breach_combined',
@@ -1920,20 +1917,14 @@ def sla_compute_and_notify(*args, **kwargs):
     try:
         if system_settings.enable_finding_sla:
             logger.info("About to process findings for SLA notifications.")
-            logger.debug("Active {}, Verified {}, Has JIRA {}, pre-breach {}, post-breach {}".format(
-                system_settings.enable_notify_sla_active,
-                system_settings.enable_notify_sla_active_verified,
-                system_settings.enable_notify_sla_jira_only,
-                settings.SLA_NOTIFY_PRE_BREACH,
-                settings.SLA_NOTIFY_POST_BREACH,
-            ))
+            logger.debug(f"Active {system_settings.enable_notify_sla_active}, Verified {system_settings.enable_notify_sla_active_verified}, Has JIRA {system_settings.enable_notify_sla_jira_only}, pre-breach {settings.SLA_NOTIFY_PRE_BREACH}, post-breach {settings.SLA_NOTIFY_POST_BREACH}")
 
             query = None
             if system_settings.enable_notify_sla_active_verified:
                 query = Q(active=True, verified=True, is_mitigated=False, duplicate=False)
             elif system_settings.enable_notify_sla_active:
                 query = Q(active=True, is_mitigated=False, duplicate=False)
-            logger.debug("My query: {}".format(query))
+            logger.debug(f"My query: {query}")
 
             no_jira_findings = {}
             if system_settings.enable_notify_sla_jira_only:
@@ -1966,7 +1957,7 @@ def sla_compute_and_notify(*args, **kwargs):
                 if (sla_age < 0) and (settings.SLA_NOTIFY_POST_BREACH < abs(sla_age)):
                     post_breach_no_notify_count += 1
                     # Skip finding notification if breached for too long
-                    logger.debug("Finding {} breached the SLA {} days ago. Skipping notifications.".format(finding.id, abs(sla_age)))
+                    logger.debug(f"Finding {finding.id} breached the SLA {abs(sla_age)} days ago. Skipping notifications.")
                     continue
 
                 do_jira_sla_comment = False
@@ -1980,29 +1971,26 @@ def sla_compute_and_notify(*args, **kwargs):
                     jira_count += 1
                     jira_instance = jira_helper.get_jira_instance(finding)
                     if jira_instance is not None:
-                        logger.debug("JIRA config for finding is {}".format(jira_instance))
+                        logger.debug(f"JIRA config for finding is {jira_instance}")
                         # global config or product config set, product level takes precedence
                         try:
                             # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
                             product_jira_sla_comment_enabled = jira_helper.get_jira_project(finding).product_jira_sla_notification
                         except Exception as e:
                             logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
-                            logger.error("Error is: {}".format(e))
+                            logger.error(f"Error is: {e}")
 
                         jiraconfig_sla_notification_enabled = jira_instance.global_jira_sla_notification
 
                         if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
-                            logger.debug("Global setting {} -- Product setting {}".format(
-                                jiraconfig_sla_notification_enabled,
-                                product_jira_sla_comment_enabled
-                            ))
+                            logger.debug(f"Global setting {jiraconfig_sla_notification_enabled} -- Product setting {product_jira_sla_comment_enabled}")
                             do_jira_sla_comment = True
-                            logger.debug("JIRA issue is {}".format(jira_issue.jira_key))
+                            logger.debug(f"JIRA issue is {jira_issue.jira_key}")
 
-                logger.debug("Finding {} has {} days left to breach SLA.".format(finding.id, sla_age))
+                logger.debug(f"Finding {finding.id} has {sla_age} days left to breach SLA.")
                 if (sla_age < 0):
                     post_breach_count += 1
-                    logger.info("Finding {} has breached by {} days.".format(finding.id, abs(sla_age)))
+                    logger.info(f"Finding {finding.id} has breached by {abs(sla_age)} days.")
                     abs_sla_age = abs(sla_age)
                     if not system_settings.enable_notify_sla_exponential_backoff or abs_sla_age == 1 or (abs_sla_age & (abs_sla_age - 1) == 0):
                         _add_notification(finding, 'breached')
@@ -2011,23 +1999,16 @@ def sla_compute_and_notify(*args, **kwargs):
                 # The finding is within the pre-breach period
                 elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
                     pre_breach_count += 1
-                    logger.info("Security SLA pre-breach warning for finding ID {}. Days remaining: {}".format(finding.id, sla_age))
+                    logger.info(f"Security SLA pre-breach warning for finding ID {finding.id}. Days remaining: {sla_age}")
                     _add_notification(finding, 'prebreach')
                 # The finding breaches the SLA today
                 elif (sla_age == 0):
                     at_breach_count += 1
-                    logger.info("Security SLA breach warning. Finding ID {} breaching today ({})".format(finding.id, sla_age))
+                    logger.info(f"Security SLA breach warning. Finding ID {finding.id} breaching today ({sla_age})")
                     _add_notification(finding, 'breaching')
 
             _create_notifications()
-            logger.info("SLA run results: Pre-breach: {}, at-breach: {}, post-breach: {}, post-breach-no-notify: {}, with-jira: {}, TOTAL: {}".format(
-                pre_breach_count,
-                at_breach_count,
-                post_breach_count,
-                post_breach_no_notify_count,
-                jira_count,
-                total_count
-            ))
+            logger.info(f"SLA run results: Pre-breach: {pre_breach_count}, at-breach: {at_breach_count}, post-breach: {post_breach_count}, post-breach-no-notify: {post_breach_no_notify_count}, with-jira: {jira_count}, TOTAL: {total_count}")
 
     except System_Settings.DoesNotExist:
         logger.info("Findings SLA is not enabled.")
@@ -2213,7 +2194,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
 
 def to_str_typed(obj):
     """ for code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
-    return '%s: %s' % (type(obj), obj)
+    return f'{type(obj)}: {obj}'
 
 
 def get_product(obj):
@@ -2266,7 +2247,7 @@ def get_enabled_notifications_list():
     # Alerts need to enabled by default
     enabled = ['alert']
     for choice in NOTIFICATION_CHOICES:
-        if get_system_setting('enable_{}_notifications'.format(choice[0])):
+        if get_system_setting(f'enable_{choice[0]}_notifications'):
             enabled.append(choice[0])
     return enabled
 
@@ -2276,7 +2257,7 @@ def is_finding_groups_enabled():
     return get_system_setting("enable_finding_groups")
 
 
-class async_delete():
+class async_delete:
     def __init__(self, *args, **kwargs):
         self.mapping = {
             'Product_Type': [

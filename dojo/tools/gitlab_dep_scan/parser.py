@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class GitlabDepScanParser(object):
+class GitlabDepScanParser:
     def get_scan_types(self):
         return ["GitLab Dependency Scanning Report"]
 

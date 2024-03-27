@@ -1,4 +1,4 @@
-class ParserTest(object):
+class ParserTest:
     def __init__(self, name: str, type: str, version: str):
         self.name = name
         self.type = type

@@ -2,7 +2,7 @@ import json
 from dojo.models import Endpoint, Finding
 
 
-class NiktoJSONParser(object):
+class NiktoJSONParser:
     def process_json(self, file, test):
         data = json.load(file)
         if len(data) == 1 and isinstance(data, list):

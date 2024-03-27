@@ -44,7 +44,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
             self.assertTrue(self.cassette.all_played)
 
     def _get_vcr(self, **kwargs):
-        my_vcr = super(JIRAImportAndPushTestApi, self)._get_vcr(**kwargs)
+        my_vcr = super()._get_vcr(**kwargs)
         my_vcr.record_mode = 'once'
         my_vcr.path_transformer = VCR.ensure_suffix('.yaml')
         my_vcr.filter_headers = ['Authorization', 'X-Atlassian-Token']

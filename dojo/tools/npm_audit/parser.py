@@ -8,7 +8,7 @@ from dojo.tools.utils import get_npm_cwe
 logger = logging.getLogger(__name__)
 
 
-class NpmAuditParser(object):
+class NpmAuditParser:
     def get_scan_types(self):
         return ["NPM Audit Scan"]
 

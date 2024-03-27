@@ -5,7 +5,7 @@ from collections import namedtuple
 from dojo.models import Finding
 
 
-class OrtParser(object):
+class OrtParser:
     """Oss Review Toolkit Parser"""
 
     def get_scan_types(self):

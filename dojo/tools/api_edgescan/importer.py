@@ -3,7 +3,7 @@ from dojo.models import Product_API_Scan_Configuration
 from .api_client import EdgescanAPI
 
 
-class EdgescanImporter(object):
+class EdgescanImporter:
     """
     Import from Edgescan API
     """

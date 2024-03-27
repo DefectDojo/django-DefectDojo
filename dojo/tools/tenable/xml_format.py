@@ -10,7 +10,7 @@ from dojo.models import Endpoint, Finding, Test
 LOGGER = logging.getLogger(__name__)
 
 
-class TenableXMLParser(object):
+class TenableXMLParser:
     def get_text_severity(self, severity_id):
         """Convert data of the report into severity"""
         severity = "Info"

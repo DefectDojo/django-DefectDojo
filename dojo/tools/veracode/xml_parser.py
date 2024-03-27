@@ -10,7 +10,7 @@ from dojo.models import Finding, Endpoint
 XML_NAMESPACE = {"x": "https://www.veracode.com/schema/reports/export/1.0"}
 
 
-class VeracodeXMLParser(object):
+class VeracodeXMLParser:
     """This parser is written for Veracode Detailed XML reports, version 1.5.
 
     Version is annotated in the report, `detailedreport/@report_format_version`.
@@ -298,9 +298,7 @@ class VeracodeXMLParser(object):
         finding.severity = cls.__xml_flaw_to_severity(xml_node)
         finding.unsaved_vulnerability_ids = [xml_node.attrib["cve_id"]]
         finding.cwe = cls._get_cwe(xml_node.attrib["cwe_id"])
-        finding.title = "Vulnerable component: {0}:{1}".format(
-            library, version
-        )
+        finding.title = f"Vulnerable component: {library}:{version}"
         finding.component_name = library
         finding.component_version = version
 
@@ -310,9 +308,9 @@ class VeracodeXMLParser(object):
 
         _description = "This library has known vulnerabilities.\n"
         _description += (
-            "**CVE:** {0} ({1})\n"
-            "CVS Score: {2} ({3})\n"
-            "Summary: \n>{4}"
+            "**CVE:** {} ({})\n"
+            "CVS Score: {} ({})\n"
+            "Summary: \n>{}"
             "\n\n-----\n\n".format(
                 xml_node.attrib["cve_id"],
                 xml_node.attrib.get("first_found_date"),

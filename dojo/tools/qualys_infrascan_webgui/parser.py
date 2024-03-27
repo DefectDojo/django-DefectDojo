@@ -126,7 +126,7 @@ def qualys_convert_severity(raw_val):
         return "Info"
 
 
-class QualysInfrascanWebguiParser(object):
+class QualysInfrascanWebguiParser:
     def get_scan_types(self):
         return ["Qualys Infrastructure Scan (WebGUI XML)"]
 

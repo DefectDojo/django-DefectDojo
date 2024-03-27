@@ -25,7 +25,7 @@ class Severityfilter:
             self.severity = "Info"
 
 
-class KiuwanParser(object):
+class KiuwanParser:
     def get_scan_types(self):
         return ["Kiuwan Scan"]
 

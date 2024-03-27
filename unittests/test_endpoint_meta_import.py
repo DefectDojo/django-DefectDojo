@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 # test methods to be used both by API Test and UI Test
-class EndpointMetaImportMixin(object):
+class EndpointMetaImportMixin:
     def __init__(self, *args, **kwargs):
         self.meta_import_full = 'endpoint_meta_import/full_endpoint_meta_import.csv'
         self.meta_import_no_hostname = 'endpoint_meta_import/no_hostname_endpoint_meta_import.csv'

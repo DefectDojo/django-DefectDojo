@@ -4,7 +4,7 @@ from dojo.models import Finding
 from dateutil import parser
 
 
-class GgshieldParser(object):
+class GgshieldParser:
     """
     A class that can be used to parse the Gitleaks JSON report files
     """

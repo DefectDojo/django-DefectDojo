@@ -8,7 +8,7 @@ from cvss.exceptions import CVSS3RHScoreDoesNotMatch, CVSS3RHMalformedError
 from dojo.models import Finding
 
 
-class JFrogXrayApiSummaryArtifactParser(object):
+class JFrogXrayApiSummaryArtifactParser:
     # This function return a list of all the scan_type supported by your parser
     def get_scan_types(self):
         return ["JFrog Xray API Summary Artifact Scan"]

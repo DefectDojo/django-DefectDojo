@@ -5,7 +5,7 @@ from datetime import datetime
 from dojo.models import Finding
 
 
-class NoseyParkerParser(object):
+class NoseyParkerParser:
     """
     Scanning secrets from repos
     """

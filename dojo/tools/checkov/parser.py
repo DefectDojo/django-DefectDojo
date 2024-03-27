@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class CheckovParser(object):
+class CheckovParser:
     def get_scan_types(self):
         return ["Checkov Scan"]
 

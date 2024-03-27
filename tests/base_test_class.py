@@ -464,7 +464,7 @@ class BaseTestCase(unittest.TestCase):
                 dd_driver.quit()
 
 
-class WebdriverOnlyNewLogFacade(object):
+class WebdriverOnlyNewLogFacade:
 
     last_timestamp = 0
 

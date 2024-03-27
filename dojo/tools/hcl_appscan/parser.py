@@ -3,7 +3,7 @@ from defusedxml import ElementTree as ET
 from dojo.models import Finding, Endpoint
 
 
-class HCLAppScanParser(object):
+class HCLAppScanParser:
     def get_scan_types(self):
         return ["HCLAppScan XML"]
 

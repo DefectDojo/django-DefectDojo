@@ -12,7 +12,7 @@ def sample_path(file_name):
 
 class TestAsffParser(DojoTestCase):
     def load_sample_json(self, file_name):
-        with open(sample_path(file_name), "r") as file:
+        with open(sample_path(file_name)) as file:
             return json.load(file)
 
     def common_check_finding(self, finding, data, index, guarddutydate=False):
@@ -35,7 +35,7 @@ class TestAsffParser(DojoTestCase):
 
     def test_asff_one_vuln(self):
         data = self.load_sample_json("one_vuln.json")
-        with open(sample_path("one_vuln.json"), "r") as file:
+        with open(sample_path("one_vuln.json")) as file:
             parser = AsffParser()
             findings = parser.get_findings(file, Test())
             self.assertEqual(1, len(findings))
@@ -43,7 +43,7 @@ class TestAsffParser(DojoTestCase):
 
     def test_asff_many_vulns(self):
         data = self.load_sample_json("many_vulns.json")
-        with open(sample_path("many_vulns.json"), "r") as file:
+        with open(sample_path("many_vulns.json")) as file:
             parser = AsffParser()
             findings = parser.get_findings(file, Test())
             self.assertEqual(len(findings), 5)
@@ -52,7 +52,7 @@ class TestAsffParser(DojoTestCase):
 
     def test_asff_guardduty(self):
         data = self.load_sample_json("guardduty/Unusual Behaviors-User-Persistence IAMUser-NetworkPermissions.json")
-        with open(sample_path("guardduty/Unusual Behaviors-User-Persistence IAMUser-NetworkPermissions.json"), "r") as file:
+        with open(sample_path("guardduty/Unusual Behaviors-User-Persistence IAMUser-NetworkPermissions.json")) as file:
             parser = AsffParser()
             findings = parser.get_findings(file, Test())
             self.assertEqual(len(findings), 1)

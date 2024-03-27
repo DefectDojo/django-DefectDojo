@@ -5,7 +5,7 @@ from dojo.models import Finding
 from dojo.tools.risk_recon.api import RiskReconAPI
 
 
-class RiskReconParser(object):
+class RiskReconParser:
     def get_scan_types(self):
         return ["Risk Recon API Importer"]
 

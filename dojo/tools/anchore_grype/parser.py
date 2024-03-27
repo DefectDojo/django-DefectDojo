@@ -5,7 +5,7 @@ from cvss.cvss3 import CVSS3
 from dojo.models import Finding
 
 
-class AnchoreGrypeParser(object):
+class AnchoreGrypeParser:
     """Anchore Grype JSON report format generated with `-o json` option.
 
     command: `grype defectdojo/defectdojo-django:1.13.1 -o json > many_vulns.json`

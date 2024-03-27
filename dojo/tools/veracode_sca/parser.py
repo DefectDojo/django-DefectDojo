@@ -12,7 +12,7 @@ from django.utils import timezone
 from dojo.models import Finding
 
 
-class VeracodeScaParser(object):
+class VeracodeScaParser:
     vc_severity_mapping = {
         1: "Info",
         2: "Low",
@@ -79,8 +79,8 @@ class VeracodeScaParser(object):
             severity = self.__cvss_to_severity(cvss_score)
 
             description = (
-                "Project name: {0}\n"
-                "Title: \n>{1}"
+                "Project name: {}\n"
+                "Title: \n>{}"
                 "\n\n-----\n\n".format(
                     issue.get("project_name"), vulnerability.get("title")
                 )
@@ -189,8 +189,8 @@ class VeracodeScaParser(object):
                 date = None
 
             description = (
-                "Project name: {0}\n"
-                "Title: \n>{1}"
+                "Project name: {}\n"
+                "Title: \n>{}"
                 "\n\n-----\n\n".format(row.get("Project"), row.get("Title"))
             )
 

@@ -43,7 +43,7 @@ def add_alerts(self, runinterval):
     for eng in stale_engagements:
         create_notification(event='stale_engagement',
                             title='Stale Engagement: %s' % eng.name,
-                            description='The engagement "%s" is stale. Target end was %s.' % (eng.name, eng.target_end.strftime("%b. %d, %Y")),
+                            description='The engagement "{}" is stale. Target end was {}.'.format(eng.name, eng.target_end.strftime("%b. %d, %Y")),
                             url=reverse('view_engagement', args=(eng.id,)),
                             recipients=[eng.lead])
 
@@ -57,7 +57,7 @@ def add_alerts(self, runinterval):
         for eng in unclosed_engagements:
             create_notification(event='auto_close_engagement',
                                 title=eng.name,
-                                description='The engagement "%s" has auto-closed. Target end was %s.' % (eng.name, eng.target_end.strftime("%b. %d, %Y")),
+                                description='The engagement "{}" has auto-closed. Target end was {}.'.format(eng.name, eng.target_end.strftime("%b. %d, %Y")),
                                 url=reverse('view_engagement', args=(eng.id,)),
                                 recipients=[eng.lead])
 
@@ -139,8 +139,8 @@ def async_dupe_delete(*args, **kwargs):
         originals_with_too_many_duplicates = Finding.objects.filter(id__in=originals_with_too_many_duplicates_ids).order_by('id')
 
         # prefetch to make it faster
-        originals_with_too_many_duplicates = originals_with_too_many_duplicates.prefetch_related((Prefetch("original_finding",
-            queryset=Finding.objects.filter(duplicate=True).order_by('date'))))
+        originals_with_too_many_duplicates = originals_with_too_many_duplicates.prefetch_related(Prefetch("original_finding",
+            queryset=Finding.objects.filter(duplicate=True).order_by('date')))
 
         total_deleted_count = 0
         for original in originals_with_too_many_duplicates:
@@ -148,7 +148,7 @@ def async_dupe_delete(*args, **kwargs):
             dupe_count = len(duplicate_list) - dupe_max
 
             for finding in duplicate_list:
-                deduplicationLogger.debug('deleting finding {}:{} ({}))'.format(finding.id, finding.title, finding.hash_code))
+                deduplicationLogger.debug(f'deleting finding {finding.id}:{finding.title} ({finding.hash_code}))')
                 finding.delete()
                 total_deleted_count += 1
                 dupe_count -= 1
@@ -177,7 +177,7 @@ def async_sla_compute_and_notify_task(*args, **kwargs):
             sla_compute_and_notify(*args, **kwargs)
     except Exception as e:
         logger.exception(e)
-        logger.error("An unexpected error was thrown calling the SLA code: {}".format(e))
+        logger.error(f"An unexpected error was thrown calling the SLA code: {e}")
 
 
 @app.task

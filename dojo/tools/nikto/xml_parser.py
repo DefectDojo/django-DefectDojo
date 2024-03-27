@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 logger = logging.getLogger(__name__)
 
 
-class NiktoXMLParser(object):
+class NiktoXMLParser:
     def process_xml(self, file, test):
         dupes = dict()
         tree = ET.parse(file)

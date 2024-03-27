@@ -8,7 +8,7 @@ from dojo.models import Finding  # , Endpoint
 # from urllib.parse import urlparse
 
 
-class CloudsploitParser(object):
+class CloudsploitParser:
     """
     AquaSecurity CloudSploit https://github.com/aquasecurity/cloudsploit
     """

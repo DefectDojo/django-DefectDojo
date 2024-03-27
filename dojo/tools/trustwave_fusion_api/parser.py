@@ -5,7 +5,7 @@ from dojo.models import Finding, Endpoint
 from cpe import CPE
 
 
-class TrustwaveFusionAPIParser(object):
+class TrustwaveFusionAPIParser:
     """
     Import Trustwave Fusion Report from its API in JSON format
     """

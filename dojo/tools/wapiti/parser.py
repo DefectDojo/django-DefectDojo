@@ -10,7 +10,7 @@ from dojo.models import Endpoint, Finding
 logger = logging.getLogger(__name__)
 
 
-class WapitiParser(object):
+class WapitiParser:
     """The web-application vulnerability scanner
 
     see: https://wapiti.sourceforge.io/

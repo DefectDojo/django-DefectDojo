@@ -4,7 +4,7 @@ import re
 from dojo.models import Finding
 
 
-class MobsfscanParser(object):
+class MobsfscanParser:
     """
     A class that can be used to parse the mobsfscan (https://github.com/MobSF/mobsfscan) JSON report file.
     """

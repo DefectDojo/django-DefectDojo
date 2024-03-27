@@ -5,7 +5,7 @@ import io
 from dojo.models import Endpoint, Finding
 
 
-class TrustwaveParser(object):
+class TrustwaveParser:
     def get_scan_types(self):
         return ["Trustwave Scan (CSV)"]
 

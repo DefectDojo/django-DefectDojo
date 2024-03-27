@@ -244,7 +244,7 @@ class TagListSerializerField(serializers.ListField):
         kwargs["style"] = {"base_template": "textarea.html"}
         kwargs["style"].update(style)
 
-        super(TagListSerializerField, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         self.pretty_print = pretty_print
 
@@ -304,14 +304,14 @@ class TaggitSerializer(serializers.Serializer):
     def create(self, validated_data):
         to_be_tagged, validated_data = self._pop_tags(validated_data)
 
-        tag_object = super(TaggitSerializer, self).create(validated_data)
+        tag_object = super().create(validated_data)
 
         return self._save_tags(tag_object, to_be_tagged)
 
     def update(self, instance, validated_data):
         to_be_tagged, validated_data = self._pop_tags(validated_data)
 
-        tag_object = super(TaggitSerializer, self).update(
+        tag_object = super().update(
             instance, validated_data
         )
 
@@ -393,7 +393,7 @@ class RequestResponseSerializerField(serializers.ListSerializer):
             if isinstance(data, list):
                 kwargs["many"] = True
 
-        super(RequestResponseSerializerField, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         self.pretty_print = pretty_print
 
@@ -1468,10 +1468,7 @@ class TestToFilesSerializer(serializers.Serializer):
             new_files.append(
                 {
                     "id": file.id,
-                    "file": "{site_url}/{file_access_url}".format(
-                        site_url=settings.SITE_URL,
-                        file_access_url=file.get_accessible_url(test, test.id),
-                    ),
+                    "file": f"{settings.SITE_URL}/{file.get_accessible_url(test, test.id)}",
                     "title": file.title,
                 }
             )
@@ -2315,13 +2312,11 @@ class ImportScanSerializer(serializers.Serializer):
         file = data.get("file")
         if not file and requires_file(scan_type):
             raise serializers.ValidationError(
-                "Uploading a Report File is required for {}".format(scan_type)
+                f"Uploading a Report File is required for {scan_type}"
             )
         if file and is_scan_file_too_large(file):
             raise serializers.ValidationError(
-                "Report file is too large. Maximum supported size is {} MB".format(
-                    settings.SCAN_FILE_MAX_SIZE
-                )
+                f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB"
             )
         tool_type = requires_tool_type(scan_type)
         if tool_type:
@@ -2666,13 +2661,11 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         file = data.get("file")
         if not file and requires_file(scan_type):
             raise serializers.ValidationError(
-                "Uploading a Report File is required for {}".format(scan_type)
+                f"Uploading a Report File is required for {scan_type}"
             )
         if file and is_scan_file_too_large(file):
             raise serializers.ValidationError(
-                "Report file is too large. Maximum supported size is {} MB".format(
-                    settings.SCAN_FILE_MAX_SIZE
-                )
+                f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB"
             )
         tool_type = requires_tool_type(scan_type)
         if tool_type:
@@ -2713,9 +2706,7 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
         file = data.get("file")
         if file and is_scan_file_too_large(file):
             raise serializers.ValidationError(
-                "Report file is too large. Maximum supported size is {} MB".format(
-                    settings.SCAN_FILE_MAX_SIZE
-                )
+                f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB"
             )
 
         return data
@@ -2819,9 +2810,7 @@ class ImportLanguagesSerializer(serializers.Serializer):
     def validate(self, data):
         if is_scan_file_too_large(data["file"]):
             raise serializers.ValidationError(
-                "File is too large. Maximum supported size is {} MB".format(
-                    settings.SCAN_FILE_MAX_SIZE
-                )
+                f"File is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB"
             )
         return data
 

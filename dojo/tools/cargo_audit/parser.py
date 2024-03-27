@@ -3,7 +3,7 @@ import hashlib
 from dojo.models import Finding
 
 
-class CargoAuditParser(object):
+class CargoAuditParser:
     """
     A class that can be used to parse the cargo audit JSON report file
     """

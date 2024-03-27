@@ -8,7 +8,7 @@ from dojo.tools.dependency_check.parser import DependencyCheckParser
 from ..dojo_test_case import DojoTestCase
 
 
-class TestFile(object):
+class TestFile:
     def read(self):
         return self.content
 
