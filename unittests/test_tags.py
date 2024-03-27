@@ -161,7 +161,6 @@ class TagTests(DojoAPITestCase):
         response = self.get_finding_tags_api(finding_id)
 
         self.assertEqual(2, len(response.get('tags')))
-        # print("response['tags']:" + str(response['tags']))
         self.assertIn('one', str(response['tags']))
         self.assertIn('two', str(response['tags']))
 
