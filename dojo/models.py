@@ -1912,7 +1912,7 @@ class Endpoint(models.Model):
             if v is None:
                 query_parts.append(k)
             else:
-                query_parts.append(u"=".join([k, v]))
+                query_parts.append(f"{k}={v}")
         query_string = u"&".join(query_parts)
 
         protocol = url.scheme if url.scheme != '' else None
