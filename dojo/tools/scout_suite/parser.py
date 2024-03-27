@@ -106,7 +106,7 @@ class ScoutSuiteParser(object):
             service_item = data["services"][service_name]
             for finding_name in service_item.get("findings", []):
                 finding = service_item["findings"][finding_name]
-                for name in finding["items"]:
+                for name in finding.get("items", []):
                     description_text = (
                         finding.get("rationale", "")
                         + "\n**Location:** "
@@ -160,7 +160,8 @@ class ScoutSuiteParser(object):
             return ""
 
     def recursive_print(self, src, depth=0, key=""):
-        def tabs(n): return " " * n * 2
+        def tabs(n):
+            return " " * n * 2
         if isinstance(src, dict):
             for key, value in src.items():
                 if isinstance(src, str):

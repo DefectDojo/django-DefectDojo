@@ -40,7 +40,7 @@ def get_authorized_tool_product_settings(permission):
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups))
     tool_product_settings = tool_product_settings.filter(
-        Q(product__prod_type__member=True) | Q(product__member=True) |
-        Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
+        Q(product__prod_type__member=True) | Q(product__member=True)
+        | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
 
     return tool_product_settings

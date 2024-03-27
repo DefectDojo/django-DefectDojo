@@ -68,11 +68,11 @@ class TestNiktoParser(DojoTestCase):
                 self.assertEqual(443, endpoint.port)
                 self.assertEqual("juice-shop.herokuapp.com", endpoint.host)
                 self.assertEqual("public/", endpoint.path)
-            if ("Retrieved via header: 1.1 vegur" == finding.title and
-                    "Info" == finding.severity):
+            if ("Retrieved via header: 1.1 vegur" == finding.title
+                   and "Info" == finding.severity):
                 self.assertEqual(1, len(finding.unsaved_endpoints))
-            if ("Potentially Interesting Backup/Cert File Found. " == finding.title and
-                    "Info" == finding.severity):
+            if ("Potentially Interesting Backup/Cert File Found. " == finding.title
+                   and "Info" == finding.severity):
                 self.assertEqual(140, len(finding.unsaved_endpoints))
 
     def test_parse_file_json_with_uri_errors(self):

@@ -566,6 +566,11 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("Password must not be common"),
         help_text=_("Requires user passwords to not be part of list of common passwords."))
+    api_expose_error_details = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("API expose error details"),
+        help_text=_("When turned on, the API will expose error details in the response."))
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
@@ -1827,15 +1832,15 @@ class Endpoint(models.Model):
     def host_mitigated_endpoints(self):
         meps = Endpoint_Status.objects \
                   .filter(endpoint__in=self.host_endpoints()) \
-                  .filter(Q(mitigated=True) |
-                          Q(false_positive=True) |
-                          Q(out_of_scope=True) |
-                          Q(risk_accepted=True) |
-                          Q(finding__out_of_scope=True) |
-                          Q(finding__mitigated__isnull=False) |
-                          Q(finding__false_p=True) |
-                          Q(finding__duplicate=True) |
-                          Q(finding__active=False))
+                  .filter(Q(mitigated=True)
+                          | Q(false_positive=True)
+                          | Q(out_of_scope=True)
+                          | Q(risk_accepted=True)
+                          | Q(finding__out_of_scope=True)
+                          | Q(finding__mitigated__isnull=False)
+                          | Q(finding__false_p=True)
+                          | Q(finding__duplicate=True)
+                          | Q(finding__active=False))
         return Endpoint.objects.filter(status_endpoint__in=meps).distinct()
 
     @property
@@ -1907,7 +1912,7 @@ class Endpoint(models.Model):
             if v is None:
                 query_parts.append(k)
             else:
-                query_parts.append(u"=".join([k, v]))
+                query_parts.append(f"{k}={v}")
         query_string = u"&".join(query_parts)
 
         protocol = url.scheme if url.scheme != '' else None
@@ -1950,7 +1955,7 @@ class Development_Environment(models.Model):
 
 
 class Sonarqube_Issue(models.Model):
-    key = models.CharField(max_length=30, unique=True, help_text=_("SonarQube issue key"))
+    key = models.CharField(max_length=60, unique=True, help_text=_("SonarQube issue key"))
     status = models.CharField(max_length=20, help_text=_("SonarQube issue status"))
     type = models.CharField(max_length=20, help_text=_("SonarQube issue type"))
 
@@ -2648,8 +2653,8 @@ class Finding(models.Model):
         # Make sure that we have a cwe if we need one
         if self.cwe == 0 and not self.test.hash_code_allows_null_cwe:
             deduplicationLogger.warning(
-                "Cannot compute hash_code based on configured fields because cwe is 0 for finding of title '" + self.title + "' found in file '" + str(self.file_path) +
-                "'. Fallback to legacy mode for this finding.")
+                "Cannot compute hash_code based on configured fields because cwe is 0 for finding of title '" + self.title + "' found in file '" + str(self.file_path)
+                + "'. Fallback to legacy mode for this finding.")
             return self.compute_hash_code_legacy()
 
         deduplicationLogger.debug("computing hash_code for finding id " + str(self.id) + " based on: " + ', '.join(hash_code_fields))
@@ -3295,7 +3300,7 @@ class Finding(models.Model):
         for match in matches:
             # Check if match isn't already a markdown link
             # Only replace the same matches one time, otherwise the links will be corrupted
-            if not (match[0].startswith('[') or match[0].startswith('(')) and not match[0] in processed_matches:
+            if not (match[0].startswith('[') or match[0].startswith('(')) and match[0] not in processed_matches:
                 self.references = self.references.replace(match[0], create_bleached_link(match[0], match[0]), 1)
                 processed_matches.append(match[0])
 
@@ -3976,7 +3981,7 @@ class JIRA_Issue(models.Model):
         elif isinstance(obj, Engagement):
             self.engagement = obj
         else:
-            raise ValueError('unknown object type while creating JIRA_Issue: %s' % to_str_typed(obj))
+            raise TypeError('unknown object type while creating JIRA_Issue: %s' % to_str_typed(obj))
 
     def __str__(self):
         text = ""
@@ -4556,7 +4561,7 @@ if settings.ENABLE_AUDITLOG:
     auditlog.register(Finding_Template)
     auditlog.register(Cred_User, exclude_fields=['password'])
 
-from dojo.utils import calculate_grade, to_str_typed
+from dojo.utils import calculate_grade, to_str_typed  # noqa: E402  # there is issue due to a circular import
 
 tagulous.admin.register(Product.tags)
 tagulous.admin.register(Test.tags)
