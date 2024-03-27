@@ -12,10 +12,10 @@ env:
     --set createRabbitMqSecret=true \
     "
   HELM_REDIS_BROKER_SETTINGS: " \
-    --set redis.enabled=false \
-    --set rabbitmq.enabled=true \
-    --set celery.broker=rabbitmq \
-    --set createRabbitMqSecret=true \
+    --set redis.enabled=true \
+    --set rabbitmq.enabled=false \
+    --set celery.broker=redis \
+    --set createRedisSecret=true \
     "
   HELM_MYSQL_DATABASE_SETTINGS: " \
     --set database=mysql \
