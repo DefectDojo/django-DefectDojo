@@ -2297,12 +2297,33 @@ class JIRA_IssueForm(forms.ModelForm):
         exclude = ['product']
 
 
-class JIRAForm(forms.ModelForm):
+class BaseJiraForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+
+    def test_jira_connection(self):
+        import dojo.jira_link.helper as jira_helper
+        try:
+            # Attempt to validate the credentials before moving forward
+            jira_helper.get_jira_connection_raw(self.cleaned_data['url'],
+                                                self.cleaned_data['username'],
+                                                self.cleaned_data['password'])
+            logger.debug('valid JIRA config!')
+        except Exception as e:
+            # form only used by admins, so we can show full error message using str(e) which can help debug any problems
+            message = 'Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(
+                e)
+            self.add_error('username', message)
+            self.add_error('password', message)
+
+    def clean(self):
+        self.test_jira_connection()
+        return self.cleaned_data
+
+
+class JIRAForm(BaseJiraForm):
     issue_template_dir = forms.ChoiceField(required=False,
                                        choices=JIRA_TEMPLATE_CHOICES,
                                        help_text='Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.')
-
-    password = forms.CharField(widget=forms.PasswordInput, required=True)
 
     def __init__(self, *args, **kwargs):
         super(JIRAForm, self).__init__(*args, **kwargs)
@@ -2313,25 +2334,8 @@ class JIRAForm(forms.ModelForm):
         model = JIRA_Instance
         exclude = ['']
 
-    def clean(self):
-        import dojo.jira_link.helper as jira_helper
-        form_data = self.cleaned_data
 
-        try:
-            # Attempt to validate the credentials before moving forward
-            _ = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'])
-            logger.debug('valid JIRA config!')
-        except Exception as e:
-            # form only used by admins, so we can show full error message using str(e) which can help debug any problems
-            message = 'Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(e)
-            self.add_error('username', message)
-            self.add_error('password', message)
-
-        return form_data
-
-
-class ExpressJIRAForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, required=True)
+class ExpressJIRAForm(BaseJiraForm):
     issue_key = forms.CharField(required=True, help_text='A valid issue ID is required to gather the necessary information.')
 
     class Meta:
@@ -2340,22 +2344,6 @@ class ExpressJIRAForm(forms.ModelForm):
                     'close_status_key', 'info_mapping_severity',
                     'low_mapping_severity', 'medium_mapping_severity',
                     'high_mapping_severity', 'critical_mapping_severity', 'finding_text']
-
-    def clean(self):
-        import dojo.jira_link.helper as jira_helper
-        form_data = self.cleaned_data
-
-        try:
-            # Attempt to validate the credentials before moving forward
-            _ = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'],)
-            logger.debug('valid JIRA config!')
-        except Exception as e:
-            # form only used by admins, so we can show full error message using str(e) which can help debug any problems
-            message = 'Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(e)
-            self.add_error('username', message)
-            self.add_error('password', message)
-
-        return form_data
 
 
 class Benchmark_Product_SummaryForm(forms.ModelForm):

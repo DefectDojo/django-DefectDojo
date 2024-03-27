@@ -20,7 +20,6 @@ from dojo.utils import add_breadcrumb, add_error_message_to_response, get_system
 from dojo.notifications.helper import create_notification
 from django.views.decorators.http import require_POST
 import dojo.jira_link.helper as jira_helper
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from django.views import View
 from dojo.authorization.authorization import user_has_configuration_permission
 
