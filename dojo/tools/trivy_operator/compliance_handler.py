@@ -43,13 +43,7 @@ class TrivyComplianceHandler:
                     description += "**checkmessages:** " + check_messages + "\n"
                     description += "**checktarget:** " + check_target + "\n"
                     description += "**checktitle:** " + check_title + "\n"
-                    title = " ".join(
-                        [
-                            result_id,
-                            check_checkID,
-                            check_target,
-                        ]
-                    )
+                    title = f"{result_id} {check_checkID} {check_target}"
                     finding = Finding(
                         test=test,
                         title=title,
