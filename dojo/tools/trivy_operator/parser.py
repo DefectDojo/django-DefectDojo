@@ -59,9 +59,9 @@ class TrivyOperatorParser:
         resource_kind = labels.get("trivy-operator.resource.kind", "")
         resource_name = labels.get("trivy-operator.resource.name", "")
         container_name = labels.get("trivy-operator.container.name", "")
-        service = "/".join([resource_namespace, resource_kind, resource_name])
+        service = f"{resource_namespace}/{resource_kind}/{resource_name}"
         if container_name != "":
-            service = "/".join([service, container_name])
+            service = f"{service}/{container_name}"
 
         report = data.get("report", None)
         if report is None:
@@ -111,13 +111,7 @@ class TrivyOperatorParser:
                 description = DESCRIPTION_TEMPLATE.format(
                     title=vulnerability.get("title"), fixed_version=mitigation
                 )
-                title = " ".join(
-                    [
-                        vuln_id,
-                        package_name,
-                        package_version,
-                    ]
-                )
+                title = f"{vuln_id} {package_name} {package_version}"
                 finding = Finding(
                     test=test,
                     title=title,
