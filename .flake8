@@ -12,8 +12,6 @@ ignore =
     C901
     # Multiple statements on one line
     E704
-    # Assign a lambda expression
-    E731
     # Bare except
     E722
     # Local variable
@@ -22,12 +20,8 @@ ignore =
     F405
     # list comprehension redefines
     F812
-    # module level imports
-    E402
     E126
     E128
-    # line break after binary operator
-    W504
     # Line break occurred before a binary operator (conflicting with black)
     W503
     # undefined file name excpetion

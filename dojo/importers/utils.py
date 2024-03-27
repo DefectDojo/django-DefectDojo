@@ -145,7 +145,7 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
                             "{}".format(e))
         ep = None
         try:
-            ep, created = endpoint_get_or_create(
+            ep, _created = endpoint_get_or_create(
                 protocol=endpoint.protocol,
                 userinfo=endpoint.userinfo,
                 host=endpoint.host,
@@ -158,7 +158,7 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
             raise Exception("Endpoints in your database are broken. Please access {} and migrate them to new format or "
                             "remove them.".format(reverse('endpoint_migrate')))
 
-        eps, created = Endpoint_Status.objects.get_or_create(
+        _eps, _created = Endpoint_Status.objects.get_or_create(
             finding=finding,
             endpoint=ep,
             defaults={'date': finding.date})

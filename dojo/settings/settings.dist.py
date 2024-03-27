@@ -8,6 +8,7 @@ from netaddr import IPNetwork, IPSet
 import json
 import logging
 import warnings
+from email.utils import getaddresses
 
 
 logger = logging.getLogger(__name__)
@@ -206,7 +207,7 @@ env = environ.FileAwareEnv(
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
     DD_LOGGING_HANDLER=(str, 'console'),
     # If true, drf-spectacular will load CSS & JS from default CDN, otherwise from static resources
-    DD_DEFAULT_SWAGGER_UI=(bool, True),
+    DD_DEFAULT_SWAGGER_UI=(bool, False),
     DD_ALERT_REFRESH=(bool, True),
     DD_DISABLE_ALERT_COUNTER=(bool, False),
     # to disable deleting alerts per user set value to -1
@@ -718,7 +719,6 @@ MAX_TAG_LENGTH = env('DD_MAX_TAG_LENGTH')
 # ------------------------------------------------------------------------------
 # ADMIN
 # ------------------------------------------------------------------------------
-from email.utils import getaddresses
 ADMINS = getaddresses([env('DD_ADMINS')])
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#managers
@@ -1183,10 +1183,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'vulnerability_ids'],
     'Mobsfscan Scan': ['title', 'severity', 'cwe'],
-    'Tenable Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
+    'Tenable Scan': ['title', 'severity', 'vulnerability_ids', 'cwe', 'description'],
     'Nexpose Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'vulnerability_ids', 'cwe'],
+    'NPM Audit v7+ Scan': ['title', 'severity', 'cwe', 'vuln_id_from_tool'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'Yarn Audit Scan': ['title', 'severity', 'file_path', 'vulnerability_ids', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on vulnerability_ids + file_path + severity
@@ -1196,7 +1197,6 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # 'Qualys Webapp Scan': ['title', 'unique_id_from_tool'],
     'PHP Symfony Security Check': ['title', 'vulnerability_ids'],
     'Clair Scan': ['title', 'vulnerability_ids', 'description', 'severity'],
-    'Clair Klar Scan': ['title', 'description', 'severity'],
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': ['title', 'vulnerability_ids'],
     'DSOP Scan': ['vulnerability_ids'],
@@ -1247,6 +1247,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'OSV Scan': ['title', 'description', 'severity'],
     'Snyk Code Scan': ['vuln_id_from_tool', 'file_path'],
     'Bearer CLI': ['title', 'severity']
+    'Nancy Scan': ['title', 'vuln_id_from_tool'],
+    'Wiz Scan': ['title', 'description', 'severity']
 }
 
 # Override the hardcoded settings here via the env var
@@ -1281,6 +1283,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Tenable Scan': True,
     'Nexpose Scan': True,
     'NPM Audit Scan': True,
+    'NPM Audit v7+ Scan': True,
     'Yarn Audit Scan': True,
     'Mend Scan': True,
     'ZAP Scan': False,
@@ -1363,10 +1366,12 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'CargoAudit Scan': DEDUPE_ALGO_HASH_CODE,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
+    'Checkmarx One Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx OSA': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Codechecker Report native': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Coverity API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Cobalt.io API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Crunch42 Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Dependency Track Finding Packaging Format (FPF) Export': DEDUPE_ALGO_HASH_CODE,
     'Mobsfscan Scan': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
@@ -1378,6 +1383,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Tenable Scan': DEDUPE_ALGO_HASH_CODE,
     'Nexpose Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
+    'NPM Audit v7+ Scan': DEDUPE_ALGO_HASH_CODE,
     'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Mend Scan': DEDUPE_ALGO_HASH_CODE,
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1386,7 +1392,6 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Acunetix Scan': DEDUPE_ALGO_HASH_CODE,
     'Acunetix360 Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Scan': DEDUPE_ALGO_HASH_CODE,
-    'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
     # 'Qualys Webapp Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,  # Must also uncomment qualys webapp line in hashcode fields per scanner
     'Veracode Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Veracode SourceClear Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1424,6 +1429,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Solar Appscreener Scan': DEDUPE_ALGO_HASH_CODE,
     'Gitleaks Scan': DEDUPE_ALGO_HASH_CODE,
     'pip-audit Scan': DEDUPE_ALGO_HASH_CODE,
+    'Nancy Scan': DEDUPE_ALGO_HASH_CODE,
     'Edgescan Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Bugcrowd API Import': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Rubocop Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1460,6 +1466,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'OSV Scan': DEDUPE_ALGO_HASH_CODE,
     'Nosey Parker Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Bearer CLI': DEDUPE_ALGO_HASH_CODE,
+    'Wiz Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
