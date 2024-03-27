@@ -20,6 +20,9 @@ Here is an example with a product with two tags and four findings each with a si
 
 Tags can be formatted in any of the following ways:
 - StringWithNoSpaces
+- string-with-hyphens
+- string_with_underscores
+- colons:acceptable
 - "quoted string with spaces"
 - "quoted,comma,tag"
 - "quoted with spaces, and also commas!"
