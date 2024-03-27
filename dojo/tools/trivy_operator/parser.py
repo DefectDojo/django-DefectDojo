@@ -35,7 +35,6 @@ class TrivyOperatorParser:
         labels = metadata.get("labels", None)
         if labels is None:
             return list()
-
         report = data.get("report", None)
         benchmark = data.get("status", None)
         if benchmark is not None:
@@ -48,10 +47,9 @@ class TrivyOperatorParser:
             resource_kind = labels.get("trivy-operator.resource.kind", "")
             resource_name = labels.get("trivy-operator.resource.name", "")
             container_name = labels.get("trivy-operator.container.name", "")
-            service = "/".join([resource_namespace, resource_kind, resource_name])
+            service = f"{resource_namespace}/{resource_kind}/{resource_name}"
             if container_name != "":
-                service = "/".join([service, container_name])
-
+                service = f"{service}/{container_name}"
             vulnerabilities = report.get("vulnerabilities", None)
             if vulnerabilities is not None:
                 findings += TrivyVulnerabilityHandler().handle_vulns(service, vulnerabilities, test)
@@ -63,5 +61,4 @@ class TrivyOperatorParser:
                 findings += TrivySecretsHandler().handle_secrets(service, secrets, test)
         elif benchmarkreport is not None:
             findings += TrivyComplianceHandler().handle_compliance(benchmarkreport, test)
-
         return findings

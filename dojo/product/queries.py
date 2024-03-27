@@ -47,8 +47,8 @@ def get_authorized_products(permission, user=None):
         prod_type__authorized_group=Exists(authorized_product_type_groups),
         authorized_group=Exists(authorized_product_groups)).order_by('name')
     products = products.filter(
-        Q(prod_type__member=True) | Q(member=True) |
-        Q(prod_type__authorized_group=True) | Q(authorized_group=True))
+        Q(prod_type__member=True) | Q(member=True)
+        | Q(prod_type__authorized_group=True) | Q(authorized_group=True))
 
     return products
 
@@ -152,8 +152,8 @@ def get_authorized_app_analysis(permission):
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups)).order_by('name')
     app_analysis = app_analysis.filter(
-        Q(product__prod_type__member=True) | Q(product__member=True) |
-        Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
+        Q(product__prod_type__member=True) | Q(product__member=True)
+        | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
 
     return app_analysis
 
@@ -234,18 +234,18 @@ def get_authorized_dojo_meta(permission):
         finding__test__engagement__product__authorized_group=Exists(finding_authorized_product_groups)
     ).order_by('name')
     dojo_meta = dojo_meta.filter(
-        Q(product__prod_type__member=True) |
-        Q(product__member=True) |
-        Q(product__prod_type__authorized_group=True) |
-        Q(product__authorized_group=True) |
-        Q(endpoint__product__prod_type__member=True) |
-        Q(endpoint__product__member=True) |
-        Q(endpoint__product__prod_type__authorized_group=True) |
-        Q(endpoint__product__authorized_group=True) |
-        Q(finding__test__engagement__product__prod_type__member=True) |
-        Q(finding__test__engagement__product__member=True) |
-        Q(finding__test__engagement__product__prod_type__authorized_group=True) |
-        Q(finding__test__engagement__product__authorized_group=True))
+        Q(product__prod_type__member=True)
+        | Q(product__member=True)
+        | Q(product__prod_type__authorized_group=True)
+        | Q(product__authorized_group=True)
+        | Q(endpoint__product__prod_type__member=True)
+        | Q(endpoint__product__member=True)
+        | Q(endpoint__product__prod_type__authorized_group=True)
+        | Q(endpoint__product__authorized_group=True)
+        | Q(finding__test__engagement__product__prod_type__member=True)
+        | Q(finding__test__engagement__product__member=True)
+        | Q(finding__test__engagement__product__prod_type__authorized_group=True)
+        | Q(finding__test__engagement__product__authorized_group=True))
 
     return dojo_meta
 
@@ -285,8 +285,8 @@ def get_authorized_languages(permission):
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups)).order_by('language')
     languages = languages.filter(
-        Q(product__prod_type__member=True) | Q(product__member=True) |
-        Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
+        Q(product__prod_type__member=True) | Q(product__member=True)
+        | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
 
     return languages
 
@@ -326,8 +326,8 @@ def get_authorized_engagement_presets(permission):
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups)).order_by('title')
     engagement_presets = engagement_presets.filter(
-        Q(product__prod_type__member=True) | Q(product__member=True) |
-        Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
+        Q(product__prod_type__member=True) | Q(product__member=True)
+        | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
 
     return engagement_presets
 
@@ -367,7 +367,7 @@ def get_authorized_product_api_scan_configurations(permission):
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups))
     product_api_scan_configurations = product_api_scan_configurations.filter(
-        Q(product__prod_type__member=True) | Q(product__member=True) |
-        Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
+        Q(product__prod_type__member=True) | Q(product__member=True)
+        | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
 
     return product_api_scan_configurations

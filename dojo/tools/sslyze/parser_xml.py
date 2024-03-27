@@ -119,10 +119,7 @@ class SSLyzeXMLParser(object):
                         ):
                             for cipher in ciphers:
                                 if cipher.attrib["name"] in WEAK_CIPHER_LIST:
-                                    if (
-                                        not cipher.attrib["name"]
-                                        in weak_cipher[element.tag]
-                                    ):
+                                    if cipher.attrib["name"] not in weak_cipher[element.tag]:
                                         weak_cipher[element.tag].append(
                                             cipher.attrib["name"]
                                         )
