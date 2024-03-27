@@ -1,4 +1,5 @@
 from django.core.management import call_command
+
 from .dojo_test_case import DojoTestCase
 
 

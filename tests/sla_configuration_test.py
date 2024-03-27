@@ -2,9 +2,8 @@ import os
 import sys
 import unittest
 
-from selenium.webdriver.common.by import By
-
 from base_test_class import BaseTestCase
+from selenium.webdriver.common.by import By
 
 
 class SLAConfigurationTest(BaseTestCase):

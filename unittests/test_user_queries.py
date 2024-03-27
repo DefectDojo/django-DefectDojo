@@ -1,8 +1,10 @@
 from unittest.mock import patch
-from .dojo_test_case import DojoTestCase
+
 from dojo.authorization.roles_permissions import Permissions
-from dojo.models import Dojo_User, Global_Role, Role, Product_Type, Product, Product_Type_Member, Product_Member
+from dojo.models import Dojo_User, Global_Role, Product, Product_Member, Product_Type, Product_Type_Member, Role
 from dojo.user.queries import get_authorized_users
+
+from .dojo_test_case import DojoTestCase
 
 
 class TestUserQueries(DojoTestCase):

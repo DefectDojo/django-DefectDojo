@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-from dojo.tools.codechecker.parser import CodeCheckerParser
 from dojo.models import Test
+from dojo.tools.codechecker.parser import CodeCheckerParser
+
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestCodeCheckerParser(DojoTestCase):

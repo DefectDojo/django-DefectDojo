@@ -1,4 +1,5 @@
 import re
+
 from openpyxl import load_workbook
 
 from dojo.models import Finding

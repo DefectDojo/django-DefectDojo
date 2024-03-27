@@ -1,9 +1,10 @@
 import json
-from datetime import date
 import logging
+from datetime import date
 
-from dojo.models import Finding, Endpoint
 from django.utils.dateparse import parse_datetime
+
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 

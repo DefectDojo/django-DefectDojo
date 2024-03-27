@@ -1,10 +1,14 @@
-from django.urls import reverse
-from .dojo_test_case import DojoTestCase
-from dojo.models import JIRA_Issue
 import json
+
 # from unittest import skip
 import logging
+
+from django.urls import reverse
+
 import dojo.jira_link.helper as jira_helper
+from dojo.models import JIRA_Issue
+
+from .dojo_test_case import DojoTestCase
 
 logger = logging.getLogger(__name__)
 

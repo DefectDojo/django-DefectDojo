@@ -1,8 +1,6 @@
 import re
 
-from django import template
-from django import forms
-
+from django import forms, template
 
 register = template.Library()
 

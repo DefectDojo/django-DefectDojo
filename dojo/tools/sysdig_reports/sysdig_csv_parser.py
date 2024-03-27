@@ -1,5 +1,6 @@
 import csv
 import io
+
 from dojo.tools.sysdig_reports.sysdig_data import SysdigData
 
 

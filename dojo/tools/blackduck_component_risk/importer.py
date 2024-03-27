@@ -1,7 +1,7 @@
 import csv
 import io
-import zipfile
 import logging
+import zipfile
 from pathlib import Path
 
 logger = logging.getLogger(__name__)

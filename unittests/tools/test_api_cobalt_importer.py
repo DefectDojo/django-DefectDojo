@@ -1,10 +1,12 @@
 import json
-from ..dojo_test_case import DojoTestCase
 from unittest.mock import patch
+
 from django.core.exceptions import ValidationError
 
-from dojo.models import Test, Engagement, Product, Product_API_Scan_Configuration, Tool_Type, Tool_Configuration
+from dojo.models import Engagement, Product, Product_API_Scan_Configuration, Test, Tool_Configuration, Tool_Type
 from dojo.tools.api_cobalt.importer import CobaltApiImporter
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestCobaltApiImporter(DojoTestCase):

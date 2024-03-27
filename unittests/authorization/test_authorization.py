@@ -1,15 +1,42 @@
+from unittest.mock import patch
+
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from ..dojo_test_case import DojoTestCase
-from unittest.mock import patch
-from dojo.models import Dojo_User, Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
-    Test, Finding, Endpoint, Dojo_Group, Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, \
-    Languages, App_Analysis, Stub_Finding
+
 import dojo.authorization.authorization
-from dojo.authorization.authorization import role_has_permission, get_roles_for_permission, user_has_global_permission, \
-    user_has_permission_or_403, user_has_permission, user_has_configuration_permission, \
-    RoleDoesNotExistError, PermissionDoesNotExistError
+from dojo.authorization.authorization import (
+    PermissionDoesNotExistError,
+    RoleDoesNotExistError,
+    get_roles_for_permission,
+    role_has_permission,
+    user_has_configuration_permission,
+    user_has_global_permission,
+    user_has_permission,
+    user_has_permission_or_403,
+)
 from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.models import (
+    App_Analysis,
+    Dojo_Group,
+    Dojo_Group_Member,
+    Dojo_User,
+    Endpoint,
+    Engagement,
+    Finding,
+    Global_Role,
+    Languages,
+    Product,
+    Product_Group,
+    Product_Member,
+    Product_Type,
+    Product_Type_Group,
+    Product_Type_Member,
+    Role,
+    Stub_Finding,
+    Test,
+)
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestAuthorization(DojoTestCase):

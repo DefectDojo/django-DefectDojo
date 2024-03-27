@@ -1,12 +1,14 @@
-import re
 import logging
 import os
-from inspect import isclass
-from pathlib import Path
+import re
 from importlib import import_module
 from importlib.util import find_spec
+from inspect import isclass
+from pathlib import Path
+
 from django.conf import settings
-from dojo.models import Test_Type, Tool_Type, Tool_Configuration
+
+from dojo.models import Test_Type, Tool_Configuration, Tool_Type
 
 PARSERS = {}
 

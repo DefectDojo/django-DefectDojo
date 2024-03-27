@@ -1,5 +1,6 @@
-from dojo.tools.factory import get_parser
 from dojo.models import Test, Test_Type
+from dojo.tools.factory import get_parser
+
 from .dojo_test_case import DojoTestCase, get_unit_tests_path
 
 

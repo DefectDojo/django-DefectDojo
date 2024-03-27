@@ -1,6 +1,7 @@
 """Parser for NPM Audit v7+ Scan."""
 import json
 import logging
+
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)

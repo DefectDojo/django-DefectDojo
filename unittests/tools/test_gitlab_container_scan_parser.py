@@ -1,7 +1,9 @@
 from datetime import datetime
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.gitlab_container_scan.parser import GitlabContainerScanParser
+
 from dojo.models import Test
+from dojo.tools.gitlab_container_scan.parser import GitlabContainerScanParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestGitlabContainerScanParser(DojoTestCase):

@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 
 from dateutil.parser import parse
+
 from dojo.models import Finding
 from dojo.tools.parser_test import ParserTest
 

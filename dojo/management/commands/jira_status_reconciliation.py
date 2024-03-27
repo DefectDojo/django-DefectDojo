@@ -1,11 +1,14 @@
+import logging
+
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
-from dojo.models import Engagement, Finding, Product
+
 import dojo.jira_link.helper as jira_helper
-import logging
+from dojo.models import Engagement, Finding, Product
+
 logger = logging.getLogger(__name__)
 
 

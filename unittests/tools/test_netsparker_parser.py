@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.netsparker.parser import NetsparkerParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestNetsparkerParser(DojoTestCase):

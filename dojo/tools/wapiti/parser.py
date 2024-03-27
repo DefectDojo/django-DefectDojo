@@ -1,11 +1,10 @@
-import re
 import hashlib
 import logging
+import re
 
 from defusedxml.ElementTree import parse
 
 from dojo.models import Endpoint, Finding
-
 
 logger = logging.getLogger(__name__)
 

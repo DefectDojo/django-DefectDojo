@@ -1,7 +1,7 @@
 from django.urls import re_path
 
-from dojo.product import views
 from dojo.engagement import views as dojo_engagement_views
+from dojo.product import views
 
 urlpatterns = [
     #  product

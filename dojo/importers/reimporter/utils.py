@@ -1,14 +1,15 @@
+import logging
 from datetime import timedelta
+
 from crum import get_current_user
 from django.conf import settings
-from dojo.importers import utils as importer_utils
-from dojo.models import Engagement, Finding, Q, Product, Product_Member, Product_Type, Product_Type_Member, Role, Test
 from django.utils import timezone
-from dojo.decorators import dojo_async_task
-from dojo.celery import app
-import logging
-from dojo.utils import get_last_object_or_none, get_object_or_none
 
+from dojo.celery import app
+from dojo.decorators import dojo_async_task
+from dojo.importers import utils as importer_utils
+from dojo.models import Engagement, Finding, Product, Product_Member, Product_Type, Product_Type_Member, Q, Role, Test
+from dojo.utils import get_last_object_or_none, get_object_or_none
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")

@@ -1,6 +1,7 @@
 from django.test import TestCase
-from dojo.tools.whispers.parser import WhispersParser
+
 from dojo.models import Test
+from dojo.tools.whispers.parser import WhispersParser
 
 
 class TestWhispersParser(TestCase):

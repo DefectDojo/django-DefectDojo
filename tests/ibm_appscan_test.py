@@ -1,11 +1,11 @@
-from selenium.webdriver.support.ui import Select
-import unittest
-import sys
 import os
+import sys
+import unittest
+
 from base_test_class import BaseTestCase
 from product_test import ProductTest
 from selenium.webdriver.common.by import By
-
+from selenium.webdriver.support.ui import Select
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 

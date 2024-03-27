@@ -1,8 +1,18 @@
 from auditlog.models import LogEntry
 from django.contrib import admin
-from polymorphic.admin import PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
-from dojo.models import Question, TextQuestion, ChoiceQuestion, Choice, \
-    Answer, TextAnswer, ChoiceAnswer, Engagement_Survey, Answered_Survey
+from polymorphic.admin import PolymorphicChildModelAdmin, PolymorphicParentModelAdmin
+
+from dojo.models import (
+    Answer,
+    Answered_Survey,
+    Choice,
+    ChoiceAnswer,
+    ChoiceQuestion,
+    Engagement_Survey,
+    Question,
+    TextAnswer,
+    TextQuestion,
+)
 
 admin.site.unregister(LogEntry)
 

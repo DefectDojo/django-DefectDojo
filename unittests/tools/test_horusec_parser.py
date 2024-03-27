@@ -1,9 +1,10 @@
 import datetime
 from os import path
 
-from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.horusec.parser import HorusecParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestHorusecParser(DojoTestCase):

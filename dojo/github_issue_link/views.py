@@ -4,18 +4,19 @@ import logging
 # Third party imports
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
-from django.urls import reverse
 from django.db import DEFAULT_DB_ALIAS
-from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from github import Github
 
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+
 # Local application/library imports
-from dojo.forms import GITHUBForm, DeleteGITHUBConfForm
+from dojo.forms import DeleteGITHUBConfForm, GITHUBForm
 from dojo.models import GITHUB_Conf
 from dojo.utils import add_breadcrumb
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 
 logger = logging.getLogger(__name__)
 

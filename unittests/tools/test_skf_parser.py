@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.skf.parser import SKFParser
 from dojo.models import Test
+from dojo.tools.skf.parser import SKFParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestSkfParser(DojoTestCase):

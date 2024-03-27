@@ -1,9 +1,16 @@
+import logging
+
 from django.core.management.base import BaseCommand
 from pytz import timezone
 
 from dojo.models import Finding, Product
-from dojo.utils import calculate_grade, do_dedupe_finding, do_dedupe_finding_task, get_system_setting, mass_model_updater
-import logging
+from dojo.utils import (
+    calculate_grade,
+    do_dedupe_finding,
+    do_dedupe_finding_task,
+    get_system_setting,
+    mass_model_updater,
+)
 
 locale = timezone(get_system_setting('time_zone'))
 

@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.api_vulners.parser import ApiVulnersParser
 from dojo.models import Test
+from dojo.tools.api_vulners.parser import ApiVulnersParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestApiVulnersParser(DojoTestCase):

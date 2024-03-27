@@ -1,5 +1,6 @@
-from rest_framework.response import Response
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+from rest_framework.response import Response
+
 from .prefetcher import _Prefetcher
 
 

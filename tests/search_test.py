@@ -1,5 +1,6 @@
-import unittest
 import sys
+import unittest
+
 from base_test_class import BaseTestCase
 from selenium.webdriver.common.by import By
 

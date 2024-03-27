@@ -1,8 +1,10 @@
 import base64
 import logging
 import re
+
 import html2text
 from defusedxml import ElementTree as etree
+
 from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
