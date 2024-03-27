@@ -37,9 +37,7 @@ class GuardDuty(object):
         hosts = list()
         for resource in finding.get("Resources", []):
             component_name = resource.get("Type")
-            print("/777777777777777777777")
             if component_name in ("AwsEcrContainerImage", "AwsEc2Instance"):
-                print("AFJIEOFJIOEFJOFJIO")
                 hosts.append(Endpoint(host=f"{component_name} {resource.get('Id')}"))
             if component_name == "AwsEcrContainerImage":
                 details = resource.get("Details", {}).get("AwsEcrContainerImage")
