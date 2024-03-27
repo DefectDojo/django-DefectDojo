@@ -98,7 +98,6 @@ jobs:
         id: set
         run: |-
               echo "pgsql=${{ env.HELM_PG_DATABASE_SETTINGS }}" >> $GITHUB_ENV
-              echo "pgsqlha=${{ env.HELM_PGHA_DATABASE_SETTINGS }}" >> $GITHUB_ENV
               echo "mysql=${{ env.HELM_MYSQL_DATABASE_SETTINGS }}" >> $GITHUB_ENV
               echo "redis=${{ env.HELM_REDIS_BROKER_SETTINGS }}" >> $GITHUB_ENV
               echo "rabbit=${{ env.HELM_RABBIT_BROKER_SETTINGS }}" >> $GITHUB_ENV
