@@ -2643,6 +2643,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     service=service,
                     title=test_title,
                     create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
+                    apply_tags_to_findings=apply_tags_to_findings,
+                    apply_tags_to_endpoints=apply_tags_to_endpoints,
                 )
 
             else:
