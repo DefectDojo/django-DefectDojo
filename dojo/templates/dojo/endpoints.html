@@ -102,10 +102,10 @@
                                 </td>
                                 {% endif %}
                                 {% if host_view %}
-                                  <td><a href="{% url 'view_endpoint_host' e.id %}">{{ e.host }}</a>
+                                  <td><a href="{% url 'view_endpoint_host' e.id %}" title="{{ e.host }}">{{ e.host|url_shortener }}</a>
                                 {% else %}
                                 <td>
-                                  <a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
+                                  <a href="{% url 'view_endpoint' e.id %}" title="{{ e }}">{{ e|url_shortener }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
                                 {% endif %}
                                   {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                 </td>
