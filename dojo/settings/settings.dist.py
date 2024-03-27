@@ -282,6 +282,8 @@ env = environ.FileAwareEnv(
     DD_ENABLE_AUDITLOG=(bool, True),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
+    # Use System notification settings to override user's notification settings
+    DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP=(list, ["user_mentioned", "review_requested"]),
 )
 
 
@@ -1700,6 +1702,10 @@ AUDITLOG_FLUSH_RETENTION_PERIOD = env('DD_AUDITLOG_FLUSH_RETENTION_PERIOD')
 ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
 USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
 
+# ------------------------------------------------------------------------------
+# Notifications
+# ------------------------------------------------------------------------------
+NOTIFICATIONS_SYSTEM_LEVEL_TRUMP = env('DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP')
 
 # ------------------------------------------------------------------------------
 # Ignored Warnings
