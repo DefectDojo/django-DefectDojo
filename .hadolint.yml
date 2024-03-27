@@ -1,0 +1,10 @@
+name: Lint
+on: pull_request
+
+jobs:
+  hadolint:
+    runs-on: ubuntu-latest
+    name: Hadolint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jbergstroem/hadolint-gh-action@v1
