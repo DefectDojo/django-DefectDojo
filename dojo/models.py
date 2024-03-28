@@ -1654,7 +1654,7 @@ class Endpoint(models.Model):
                     action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
                     for remove_str in null_char_list:
                         self.path = self.path.replace(remove_str, '%00')
-                    errors.append(ValidationError('Path "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
+                    logging.error('Path "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string))
             if self.path == '':
                 self.path = None
 
@@ -1667,7 +1667,7 @@ class Endpoint(models.Model):
                     action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
                     for remove_str in null_char_list:
                         self.query = self.query.replace(remove_str, '%00')
-                    errors.append(ValidationError('Query "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
+                    logging.error('Query "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string))
             if self.query == '':
                 self.query = None
 
@@ -1680,7 +1680,7 @@ class Endpoint(models.Model):
                     action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
                     for remove_str in null_char_list:
                         self.fragment = self.fragment.replace(remove_str, '%00')
-                    errors.append(ValidationError('Fragment "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
+                    logging.error('Fragment "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string))
             if self.fragment == '':
                 self.fragment = None
 
