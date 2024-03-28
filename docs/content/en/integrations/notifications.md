@@ -120,7 +120,7 @@ To activate notifications to Microsoft Teams, you have to:
 
 System notification settings (scope: system) describe the sending of notifications to superadmins. User notification settings (scope: personal) describe sending notifications to the specific user.
 
-However, there is a specific use-case when the user decides to disable notifications (to decrease noise) but the system setting is used to override this behavior. These overrides apply only to `user_mentioned` and `review_requested`.
+However, there is a specific use-case when the user decides to disable notifications (to decrease noise) but the system setting is used to override this behavior. These overrides apply only to `user_mentioned` and `review_requested` by default.
 
 The scope of this setting is customizable (see environmental variable `DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP`).
 
