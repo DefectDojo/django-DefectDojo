@@ -29,3 +29,8 @@ jobs:
     needs: build-docker-containers
     uses: ./.github/workflows/k8s-tests.yml
     secrets: inherit
+
+  test-api:
+    needs: build-docker-containers
+    uses: ./.github/workflows/api-tests.yml
+    secrets: inherit
