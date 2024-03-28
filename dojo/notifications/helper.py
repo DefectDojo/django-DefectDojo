@@ -11,7 +11,7 @@ from django.utils.translation import gettext as _
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
-from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
+from dojo.models import Notifications, Dojo_User, Alerts, System_Settings
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
 
 logger = logging.getLogger(__name__)
@@ -208,23 +208,9 @@ def send_slack_notification(event, user=None, *args, **kwargs):
         if user is not None:
             logger.debug('personal notification to slack for user %s', user)
             if hasattr(user, 'usercontactinfo') and user.usercontactinfo.slack_username is not None:
-                slack_user_id = user.usercontactinfo.slack_user_id
-                if not slack_user_id:
-                    # Lookup the slack userid the first time, then save it.
-                    slack_user_id = get_slack_user_id(
-                        user.usercontactinfo.slack_username)
-
-                    if slack_user_id:
-                        slack_user_save = UserContactInfo.objects.get(user_id=user.id)
-                        slack_user_save.slack_user_id = slack_user_id
-                        slack_user_save.save()
-
-                # only send notification if we managed to find the slack_user_id
-                if slack_user_id:
-                    channel = '@{}'.format(slack_user_id)
-                    _post_slack_message(channel)
+                _post_slack_message(user.usercontactinfo.slack_username)
             else:
-                logger.info("The user %s does not have a email address informed for Slack in profile.", user)
+                logger.info("The user %s does not have a Slack contact in profile.", user)
         else:
             # System scope slack notifications, and not personal would still see this go through
             if get_system_setting('slack_channel') is not None:
@@ -323,41 +309,6 @@ def send_alert_notification(event, user=None, *args, **kwargs):
         logger.exception(e)
         log_alert(e, "Alert Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
         pass
-
-
-def get_slack_user_id(user_email):
-    from dojo.utils import get_system_setting
-    import json
-
-    user_id = None
-
-    res = requests.request(
-        method='POST',
-        url='https://slack.com/api/users.lookupByEmail',
-        data={'token': get_system_setting('slack_token'), 'email': user_email})
-
-    user = json.loads(res.text)
-
-    slack_user_is_found = False
-    if user:
-        if 'error' in user:
-            logger.error("Slack is complaining. See error message below.")
-            logger.error(user)
-            raise RuntimeError('Error getting user list from Slack: ' + res.text)
-        else:
-            if "email" in user["user"]["profile"]:
-                if user_email == user["user"]["profile"]["email"]:
-                    if "id" in user["user"]:
-                        user_id = user["user"]["id"]
-                        logger.debug("Slack user ID is {}".format(user_id))
-                        slack_user_is_found = True
-                else:
-                    logger.warning("A user with email {} could not be found in this Slack workspace.".format(user_email))
-
-            if not slack_user_is_found:
-                logger.warning("The Slack user was not found.")
-
-    return user_id
 
 
 def log_alert(e, notification_type=None, *args, **kwargs):
