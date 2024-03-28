@@ -2,7 +2,7 @@ import base64
 import logging
 import re
 import html2text
-from defusedxml import ElementTree as etree
+from lxml import etree
 from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ class BurpParser(object):
         )
 
     def get_findings(self, xml_output, test):
-        tree = etree.parse(xml_output, etree.XMLParser())
+        tree = etree.parse(xml_output)
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):

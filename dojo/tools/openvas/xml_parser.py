@@ -1,12 +1,12 @@
 from xml.dom import NamespaceErr
-from defusedxml import ElementTree as ET
+from lxml import etree
 from dojo.models import Finding
 
 
 class OpenVASXMLParser(object):
     def get_findings(self, filename, test):
         findings = []
-        tree = ET.parse(filename)
+        tree = etree.parse(filename)
         root = tree.getroot()
         if "report" not in root.tag:
             raise NamespaceErr(

@@ -1,6 +1,6 @@
 import re
 import zipfile
-from defusedxml import ElementTree
+from lxml import etree
 from dojo.models import Finding
 
 
@@ -11,7 +11,7 @@ class FortifyFPRParser(object):
         else:
             input_zip = zipfile.ZipFile(filename, 'r')
         zipdata = {name: input_zip.read(name) for name in input_zip.namelist()}
-        root = ElementTree.fromstring(zipdata["audit.fvdl"].decode('utf-8'))
+        root = etree.fromstring(zipdata["audit.fvdl"])
         regex = r"{.*}"
         matches = re.match(regex, root.tag)
         try:
