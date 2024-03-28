@@ -28,7 +28,7 @@ from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Test, 
     Finding_Template, Cred_Mapping, Test_Import, Product_API_Scan_Configuration, Test_Import_Finding_Action
 
 from dojo.tools.factory import get_choices_sorted, get_scan_types_sorted
-from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
+from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_tag_notifications, get_system_setting, \
     Product_Tab, is_scan_file_too_large, get_words_for_field, get_setting, async_delete, redirect_to_return_url_or_else, calculate_grade
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
@@ -194,7 +194,7 @@ class ViewTest(View):
             # Make a notification for this actions
             url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
             title = f"Test: {test.test_type.name} on {test.engagement.product.name}"
-            process_notifications(request, new_note, url, title)
+            process_tag_notifications(request, new_note, url, title)
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -286,7 +286,6 @@ def delete_test(request, tid):
         if 'id' in request.POST and str(test.id) == request.POST['id']:
             form = DeleteTestForm(request.POST, instance=test)
             if form.is_valid():
-                product = test.engagement.product
                 if get_setting("ASYNC_OBJECT_DELETE"):
                     async_del = async_delete()
                     async_del.delete(test)
@@ -298,13 +297,6 @@ def delete_test(request, tid):
                                      messages.SUCCESS,
                                      message,
                                      extra_tags='alert-success')
-                create_notification(event='other',
-                                    title=_('Deletion of %(title)s') % {"title": test.title},
-                                    product=product,
-                                    description=_('The test "%(title)s" was deleted by %(user)s') % {"title": test.title, "user": request.user},
-                                    url=request.build_absolute_uri(reverse('view_engagement', args=(eng.id, ))),
-                                    recipients=[test.engagement.lead],
-                                    icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
 
     rels = ['Previewing the relationships has been disabled.', '']
@@ -344,7 +336,7 @@ def copy_test(request, tid):
                 messages.SUCCESS,
                 'Test Copied successfully.',
                 extra_tags='alert-success')
-            create_notification(event='other',
+            create_notification(event='test_copied',  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                                 title='Copying of %s' % test.title,
                                 description='The test "%s" was copied by %s to %s' % (test.title, request.user, engagement.name),
                                 product=product,
@@ -590,9 +582,14 @@ class AddFindingView(View):
                 )
                 burp_rr.clean()
                 burp_rr.save()
+
+            # Note: this notification has not be moved to "@receiver(post_save, sender=Finding)" method as many other notifications
+            # Because it could generate too much noise, we keep it here only for findings created by hand in WebUI
+            # TODO: but same should be implemented for API endpoint
+
             # Create a notification
             create_notification(
-                event='other',
+                event='finding_added',
                 title=_('Addition of %(title)s') % {'title': finding.title},
                 finding=finding,
                 description=_('Finding "%(title)s" was added by %(user)s') % {

@@ -7,6 +7,7 @@ from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext as _
+from django.core.exceptions import FieldDoesNotExist
 
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
@@ -30,12 +31,8 @@ def create_notification(event=None, **kwargs):
         # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
         logger.debug('creating notifications for recipients: %s', kwargs['recipients'])
         for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True, product=None):
-            # merge the system level notifications with the personal level
-            # this allows for system to trump the personal
-            merged_notifications = Notifications.merge_notifications_list([system_notifications, recipient_notifications])
-            merged_notifications.user = recipient_notifications.user
-            logger.debug('Sent notification to %s', merged_notifications.user)
-            process_notifications(event, merged_notifications, **kwargs)
+            logger.debug('Sent notification to %s', recipient_notifications.user)
+            process_notifications(event, recipient_notifications, **kwargs)
 
     else:
         logger.debug('creating system notifications for event: %s', event)
@@ -164,20 +161,20 @@ def process_notifications(event, notifications=None, **kwargs):
     msteams_enabled = get_system_setting('enable_msteams_notifications')
     mail_enabled = get_system_setting('enable_mail_notifications')
 
-    if slack_enabled and 'slack' in getattr(notifications, event):
+    if slack_enabled and 'slack' in getattr(notifications, event, getattr(notifications, 'other')):
         logger.debug('Sending Slack Notification')
         send_slack_notification(event, notifications.user, **kwargs)
 
-    if msteams_enabled and 'msteams' in getattr(notifications, event):
+    if msteams_enabled and 'msteams' in getattr(notifications, event, getattr(notifications, 'other')):
         logger.debug('Sending MSTeams Notification')
         send_msteams_notification(event, notifications.user, **kwargs)
 
-    if mail_enabled and 'mail' in getattr(notifications, event):
+    if mail_enabled and 'mail' in getattr(notifications, event, getattr(notifications, 'other')):
         logger.debug('Sending Mail Notification')
         send_mail_notification(event, notifications.user, **kwargs)
 
-    if 'alert' in getattr(notifications, event, None):
-        logger.debug('Sending Alert')
+    if 'alert' in getattr(notifications, event, getattr(notifications, 'other')):
+        logger.debug(f'Sending Alert to {notifications.user}')
         send_alert_notification(event, notifications.user, **kwargs)
 
 
@@ -308,13 +305,17 @@ def send_alert_notification(event, user=None, *args, **kwargs):
     try:
         # no need to differentiate between user/no user
         icon = kwargs.get('icon', 'info-circle')
+        try:
+            source = Notifications._meta.get_field(event).verbose_name.title()[:100]
+        except FieldDoesNotExist:
+            source = event.replace("_", " ").title()[:100]
         alert = Alerts(
             user_id=user,
             title=kwargs.get('title')[:250],
             description=create_notification_message(event, user, 'alert', *args, **kwargs)[:2000],
             url=kwargs.get('url', reverse('alerts')),
             icon=icon[:25],
-            source=Notifications._meta.get_field(event).verbose_name.title()[:100]
+            source=source,
         )
         # relative urls will fail validation
         alert.clean_fields(exclude=['url'])

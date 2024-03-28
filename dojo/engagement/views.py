@@ -225,10 +225,6 @@ def edit_engagement(request, eid):
             engagement = form.save(commit=False)
             if (new_status == "Cancelled" or new_status == "Completed"):
                 engagement.active = False
-                create_notification(event='close_engagement',
-                        title='Closure of %s' % engagement.name,
-                        description='The engagement "%s" was closed' % (engagement.name),
-                        engagement=engagement, url=reverse('engagement_all_findings', args=(engagement.id, ))),
             else:
                 engagement.active = True
             engagement.save()
@@ -307,14 +303,6 @@ def delete_engagement(request, eid):
                     messages.SUCCESS,
                     message,
                     extra_tags='alert-success')
-                create_notification(event='other',
-                                    title='Deletion of %s' % engagement.name,
-                                    product=product,
-                                    description='The engagement "%s" was deleted by %s' % (engagement.name, request.user),
-                                    url=request.build_absolute_uri(reverse('view_engagements', args=(product.id, ))),
-                                    recipients=[engagement.lead],
-                                    icon="exclamation-triangle")
-
                 return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
 
     rels = ['Previewing the relationships has been disabled.', '']
@@ -350,7 +338,7 @@ def copy_engagement(request, eid):
                 messages.SUCCESS,
                 'Engagement Copied successfully.',
                 extra_tags='alert-success')
-            create_notification(event='other',
+            create_notification(event='engagement_copied',  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                                 title='Copying of %s' % engagement.name,
                                 description='The engagement "%s" was copied by %s' % (engagement.name, request.user),
                                 product=product,
@@ -850,10 +838,6 @@ def close_eng(request, eid):
         messages.SUCCESS,
         'Engagement closed successfully.',
         extra_tags='alert-success')
-    create_notification(event='close_engagement',
-                        title='Closure of %s' % eng.name,
-                        description='The engagement "%s" was closed' % (eng.name),
-                        engagement=eng, url=reverse('engagement_all_findings', args=(eng.id, ))),
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
@@ -866,11 +850,6 @@ def reopen_eng(request, eid):
         messages.SUCCESS,
         'Engagement reopened successfully.',
         extra_tags='alert-success')
-    create_notification(event='other',
-                        title='Reopening of %s' % eng.name,
-                        engagement=eng,
-                        description='The engagement "%s" was reopened' % (eng.name),
-                        url=reverse('view_engagement', args=(eng.id, ))),
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 

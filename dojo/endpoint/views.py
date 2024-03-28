@@ -18,7 +18,6 @@ from dojo.forms import EditEndpointForm, \
 from dojo.models import Product, Endpoint, Finding, DojoMeta, Endpoint_Status
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, Product_Tab, calculate_grade, redirect, \
     add_error_message_to_response, is_scan_file_too_large
-from dojo.notifications.helper import create_notification
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_permission_or_403
@@ -213,12 +212,6 @@ def delete_endpoint(request, eid):
                                      messages.SUCCESS,
                                      'Endpoint and relationships removed.',
                                      extra_tags='alert-success')
-                create_notification(event='other',
-                                    title='Deletion of %s' % endpoint,
-                                    product=product,
-                                    description='The endpoint "%s" was deleted by %s' % (endpoint, request.user),
-                                    url=reverse('endpoint'),
-                                    icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)

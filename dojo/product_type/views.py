@@ -13,7 +13,6 @@ from dojo.forms import Product_TypeForm, Delete_Product_TypeForm, Add_Product_Ty
     Edit_Product_Type_Group_Form, Delete_Product_Type_GroupForm
 from dojo.models import Product_Type, Product_Type_Member, Role, Product_Type_Group
 from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs, get_setting, async_delete
-from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
 from dojo.authorization.authorization import user_has_permission
@@ -87,9 +86,6 @@ def add_product_type(request):
                                  messages.SUCCESS,
                                  _('Product type added successfully.'),
                                  extra_tags='alert-success')
-            create_notification(event='product_type_added', title=product_type.name,
-                                product_type=product_type,
-                                url=reverse('view_product_type', args=(product_type.id,)))
             return HttpResponseRedirect(reverse('product_type'))
     add_breadcrumb(title=page_name, top_level=False, request=request)
 
@@ -136,12 +132,6 @@ def delete_product_type(request, ptid):
                                      messages.SUCCESS,
                                      message,
                                      extra_tags='alert-success')
-                create_notification(event='other',
-                                title='Deletion of %s' % product_type.name,
-                                no_users=True,
-                                description='The product type "%s" was deleted by %s' % (product_type.name, request.user),
-                                url=request.build_absolute_uri(reverse('product_type')),
-                                icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('product_type'))
 
     rels = [_('Previewing the relationships has been disabled.'), '']

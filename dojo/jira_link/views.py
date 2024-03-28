@@ -207,11 +207,11 @@ def check_for_and_create_comment(parsed_json):
     findings = None
     if jissue.finding:
         findings = [jissue.finding]
-        create_notification(event='other', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding", args=(jissue.finding.id,)), icon='check')
+        create_notification(event='jira_comment', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding", args=(jissue.finding.id,)), icon='check')
 
     elif jissue.finding_group:
         findings = [jissue.finding_group.findings.all()]
-        create_notification(event='other', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding_group", args=(jissue.finding_group.id,)), icon='check')
+        create_notification(event='jira_comment', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding_group", args=(jissue.finding_group.id,)), icon='check')
 
     elif jissue.engagement:
         return HttpResponse('Comment for engagement ignored')
@@ -327,7 +327,7 @@ def express_new_jira(request):
                 'JIRA Configuration Successfully Created.',
                 extra_tags='alert-success')
             create_notification(
-                event='other',
+                event='jira_config_added',
                 title=f"New addition of JIRA: {jform.cleaned_data.get('configuration_name')}",
                 description=f"JIRA \"{jform.cleaned_data.get('configuration_name')}\" was added by {request.user}",
                 url=request.build_absolute_uri(reverse('jira')))
@@ -361,7 +361,7 @@ def new_jira(request):
                 'JIRA Configuration Successfully Created.',
                 extra_tags='alert-success')
             create_notification(
-                event='other',
+                event='jira_config_added',
                 title=f"New addition of JIRA: {jform.cleaned_data.get('configuration_name')}",
                 description=f"JIRA \"{jform.cleaned_data.get('configuration_name')}\" was added by {request.user}",
                 url=request.build_absolute_uri(reverse('jira')))
@@ -404,7 +404,7 @@ def edit_jira(request, jid):
                 'JIRA Configuration Successfully Saved.',
                 extra_tags='alert-success')
             create_notification(
-                event='other',
+                event='jira_config_edited',
                 title=f"Edit of JIRA: {jform.cleaned_data.get('configuration_name')}",
                 description=f"JIRA \"{jform.cleaned_data.get('configuration_name')}\" was edited by {request.user}",
                 url=request.build_absolute_uri(reverse('jira')))
@@ -444,7 +444,7 @@ def delete_jira(request, tid):
                         'JIRA Conf and relationships removed.',
                         extra_tags='alert-success')
                     create_notification(
-                        event='other',
+                        event='jira_config_deleted',
                         title='Deletion of JIRA: %s' % jira_instance.configuration_name,
                         description=f"JIRA \"{jira_instance.configuration_name}\" was deleted by {request.user}",
                         url=request.build_absolute_uri(reverse('jira')))
