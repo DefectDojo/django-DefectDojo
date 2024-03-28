@@ -10,6 +10,7 @@ services:
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
       DD_EMAIL_URL: "smtp://mailhog:1025"
+      DD_ALERT_REFRESH: "false"
     ports:
       - target: ${DD_DEBUG_PORT:-3000}
         published: ${DD_DEBUG_PORT:-3000}
@@ -57,3 +58,6 @@ services:
         published: 8025
         protocol: tcp
         mode: host
+  "webhook.endpoint":
+    image: mccutchen/go-httpbin:v2.13.4@sha256:bb66e5c7ae2c18950c438d445fc10e2603ee58c4e0ef54cc8d95078ac51015c2
+

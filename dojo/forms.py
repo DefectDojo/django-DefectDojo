@@ -35,7 +35,7 @@ from dojo.models import Announcement, Finding, Finding_Group, Product_Type, Prod
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, EFFORT_FOR_FIXING_CHOICES, Product_Type_Member, \
     Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, \
-    Product_API_Scan_Configuration
+    Product_API_Scan_Configuration, Notification_Webhooks
 
 from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
 from django.urls import reverse
@@ -2669,6 +2669,36 @@ class NotificationsForm(forms.ModelForm):
     class Meta:
         model = Notifications
         exclude = ['template']
+
+
+class NotificationsWebhookForm(forms.ModelForm):
+    class Meta:
+        model = Notification_Webhooks
+        exclude = []
+
+    def __init__(self, *args, **kwargs):
+        is_superuser = kwargs.pop('is_superuser', False)
+        logger.debug(f"is_superuser: {is_superuser}")
+        super(NotificationsWebhookForm, self).__init__(*args, **kwargs)
+        self.fields['status'].disabled = True  # TODO - same for API
+        self.fields['first_error'].disabled = True
+        self.fields['last_error'].disabled = True
+        if not is_superuser:  # Only superadmins can edit owner
+            self.fields['owner'].disabled = True  # TODO needs to be tested
+
+
+class DeleteNotificationsWebhookForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super(DeleteNotificationsWebhookForm, self).__init__(*args, **kwargs)
+        self.fields['name'].disabled = True
+        self.fields['url'].disabled = True
+
+    class Meta:
+        model = Notification_Webhooks
+        fields = ['id', 'name', 'url']
 
 
 class ProductNotificationsForm(forms.ModelForm):

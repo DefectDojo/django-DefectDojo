@@ -87,6 +87,7 @@ from dojo.models import (
     General_Survey,
     Check_List,
     Announcement,
+    Notification_Webhooks,
 )
 
 from dojo.tools.factory import (
@@ -3244,3 +3245,14 @@ class AnnouncementSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("No more than one Announcement is allowed")
             else:
                 raise
+
+
+class NotificationWebhooksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification_Webhooks
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        # if not get_system_setting('enable_webhooks_notifications'):
+        #     raise Http404()  # TODO maybe not 404 but other 4xx, not in init but on request
+        super().__init__(*args, **kwargs)

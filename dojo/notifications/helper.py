@@ -1,17 +1,21 @@
 import logging
 import requests
+import json
+import yaml
 
 from django.core.mail import EmailMessage
+from django.conf import settings
 from django.db.models import Q, Count, Prefetch
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
+from dojo import __version__ as dd_version
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
-from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
+from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings, Notification_Webhooks, get_current_datetime
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
 
 logger = logging.getLogger(__name__)
@@ -163,6 +167,7 @@ def process_notifications(event, notifications=None, **kwargs):
     slack_enabled = get_system_setting('enable_slack_notifications')
     msteams_enabled = get_system_setting('enable_msteams_notifications')
     mail_enabled = get_system_setting('enable_mail_notifications')
+    webhooks_enabled = get_system_setting('enable_webhooks_notifications')
 
     if slack_enabled and 'slack' in getattr(notifications, event):
         logger.debug('Sending Slack Notification')
@@ -175,6 +180,10 @@ def process_notifications(event, notifications=None, **kwargs):
     if mail_enabled and 'mail' in getattr(notifications, event):
         logger.debug('Sending Mail Notification')
         send_mail_notification(event, notifications.user, **kwargs)
+
+    if webhooks_enabled and 'webhooks' in getattr(notifications, event):
+        logger.debug('Sending Webhooks Notification')
+        send_webhooks_notification(event, notifications.user, **kwargs)
 
     if 'alert' in getattr(notifications, event, None):
         logger.debug('Sending Alert')
@@ -301,6 +310,103 @@ def send_mail_notification(event, user=None, *args, **kwargs):
     except Exception as e:
         logger.exception(e)
         log_alert(e, "Email Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
+
+
+def webhooks_notification_request(endpoint, event, *args, **kwargs):
+    headers = {
+        "User-Agent": f"DefectDojo-{dd_version}",
+        "X-DefectDojo-Event": event,
+        "X-DefectDojo-Instance": settings.SITE_URL,
+        "Accept": "application/json",
+        "Contenct-Type": "application/json",
+    }
+    if endpoint.header_name is not None:
+        headers[endpoint.header_name] = endpoint.header_value
+    yaml_data = create_notification_message(event, endpoint.owner, 'webhooks', *args, **kwargs)
+    json_data = json.dumps(yaml.safe_load(yaml_data))
+    res = requests.request(
+        method='POST',
+        url=endpoint.url,
+        headers=headers,
+        data=json_data,
+    )
+    return res
+
+
+def test_webhooks_notification(endpoint):
+    res = webhooks_notification_request(endpoint, 'ping', {"description": "Test webhook notification"})
+    res.raise_for_status()
+    # in "send_webhooks_notification", we are doing deeper analysis, why it failed
+    # for now, "raise_for_status" should be enough
+    logger.debug(f"res: {res.json()}")
+
+
+@dojo_async_task
+@app.task
+def send_webhooks_notification(event, user=None, *args, **kwargs):
+    # TODO check sending notifications (in general) to inactive users
+    for endpoint in Notification_Webhooks.objects.filter(owner=user):
+        if endpoint.status.startswith(Notification_Webhooks._STATUS_ACTIVE):
+            try:
+                if endpoint.url is not None:
+                    logger.debug(f"Sending webhook message to endpoint {endpoint.name}")
+                    res = webhooks_notification_request(endpoint, event, *args, **kwargs)
+                    if res.status_code in [200, 201]:
+                        logger.debug(f"Message sent to endpoint {endpoint.name} sucessfully.")
+                    else:
+                        now = get_current_datetime()
+
+                        # There is no reason to keep endpoint active if it is returning 4xx errors
+                        if 400 <= res.status_code < 500:
+                            endpoint.status = Notification_Webhooks.STATUS_INACTIVE_400
+                            endpoint.first_error = now
+
+                        # 5xx is also not OK
+                        elif 500 <= res.status_code < 600:
+                            # If there is only temporary outage (we detected 5xx first time or it was before more then one hour), we can keep endpoint active (but marked)
+
+                            # First detection
+                            if endpoint.last_error is None or (now - endpoint.last_error).minutes > 60:
+                                endpoint.status = Notification_Webhooks.STATUS_ACTIVE_500
+                                endpoint.first_error = now  # Yes, if last fail happen before more then hour, we are considering it as a new error
+
+                            # Repleated detection
+                            else:
+
+                                # Error is repeating over more then hour
+                                if (now - endpoint.first_error).minutes > 60:
+                                    endpoint.status = Notification_Webhooks.STATUS_INACTIVE_500
+
+                                # This situation shouldn't happen - only if somebody was cleaning status and didn't clean first/last_error
+                                # But we should handle it
+                                else:
+                                    endpoint.status = Notification_Webhooks.STATUS_ACTIVE_500
+                                    endpoint.first_error = now
+
+                        # Well, we really accepts only 200 and 201
+                        else:
+                            endpoint.status = Notification_Webhooks.STATUS_INACTIVE_OTHERS
+                            endpoint.first_error = now
+
+                        endpoint.last_error = now
+                        endpoint.save()
+
+                        logger.error("Error when sending message to Webhooks")
+                        logger.error(res.status_code)
+                        logger.error(res.text)
+                        raise RuntimeError('Error posting message to Webhooks: ' + res.text)
+                else:
+                    logger.info(f"URL for Webhook {endpoint.name} not configured: skipping system notification")
+            except Exception as e:
+                logger.exception(e)
+                log_alert(e, "Webhooks Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
+        else:
+            logger.info(f"URL for Webhook '{endpoint.name}' is not active: {endpoint.get_status_display()} ({endpoint.status})")
+    else:
+        if user:
+            logger.info(f"URLs for Webhooks not configured for user '{user}': skipping user notification")
+        else:
+            logger.info("URLs for Webhooks not configured: skipping system notification")
 
 
 def send_alert_notification(event, user=None, *args, **kwargs):
