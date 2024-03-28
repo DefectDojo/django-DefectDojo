@@ -46,13 +46,16 @@ jobs:
 
       # load docker images from build jobs
       - name: Load images from artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
+
+      - name: Display structure of downloaded files
+        run: ls -R 
 
       - name: Load docker images
         run: |-
-             docker load -i nginx/nginx-${{ matrix.os }}_img
-             docker load -i django/django-${{ matrix.os }}_img
-             docker load -i integration-tests/integration-tests-debian_img
+             docker load -i nginx-${{ matrix.os }}_img
+             docker load -i django-${{ matrix.os }}_img
+             docker load -i integration-tests-debian_img
              docker images
 
       - name: Set integration-test mode
