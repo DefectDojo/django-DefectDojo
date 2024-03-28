@@ -23,6 +23,8 @@ class TestNancyParser(DojoTestCase):
             self.assertEqual('Info', finding.severity)
             self.assertIsNotNone(finding.description)
             self.assertGreater(len(finding.description), 0)
+            self.assertEqual(None, finding.cve)
+            self.assertEqual("CVE-2017-1000070", finding.unsaved_vulnerability_ids[0])
             self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
 
     def test_nancy_plus_parser_with_many_vuln_has_many_findings(self):
