@@ -1,0 +1,162 @@
+{
+    "high": [
+      {
+        "cwe_ids": [
+          "79"
+        ],
+        "id": "javascript_lang_dangerous_insert_html",
+        "title": "Unsanitized user input in dynamic HTML insertion (XSS)",
+        "description": "## Description\nThere are XSS vulnerabilities when dynamically inserting HTML that contains unsanitized data.\n\n## Remediations\nMake sure you use HTML sanitization library before inserting html\n\n```javascript\nimport sanitizeHtml from 'sanitize-html';\n\nconst html = `<strong>${user.Input}</strong>`;\ndocument.body.innerHTML = sanitizeHtml(html)\n```\n\n## Resources\n- [OWASP XSS explained](https://owasp.org/www-community/attacks/xss/)\n",
+        "documentation_url": "https://docs.bearer.com/reference/rules/javascript_lang_dangerous_insert_html",
+        "line_number": 581,
+        "full_filename": "js/adminer/editing.js",
+        "filename": "js/adminer/editing.js",
+        "category_groups": [
+          "PII",
+          "Personal Data",
+          "Personal Data (Sensitive)"
+        ],
+        "source": {
+          "start": 581,
+          "end": 581,
+          "column": {
+            "start": 3,
+            "end": 24
+          }
+        },
+        "sink": {
+          "start": 581,
+          "end": 581,
+          "column": {
+            "start": 3,
+            "end": 24
+          },
+          "content": "help.innerHTML = text"
+        },
+        "parent_line_number": 581,
+        "snippet": "help.innerHTML = text",
+        "fingerprint": "804174abc284c6bc747d886b3e9ba757_0",
+        "old_fingerprint": "2051ee8ff784df0881cb7bfdaefe6cb9_16",
+        "code_extract": "\t\thelp.innerHTML = text;"
+      },
+      {
+        "cwe_ids": [
+          "79"
+        ],
+        "id": "javascript_lang_dangerous_insert_html",
+        "title": "Unsanitized user input in dynamic HTML insertion (XSS)",
+        "description": "## Description\nThere are XSS vulnerabilities when dynamically inserting HTML that contains unsanitized data.\n\n## Remediations\nMake sure you use HTML sanitization library before inserting html\n\n```javascript\nimport sanitizeHtml from 'sanitize-html';\n\nconst html = `<strong>${user.Input}</strong>`;\ndocument.body.innerHTML = sanitizeHtml(html)\n```\n\n## Resources\n- [OWASP XSS explained](https://owasp.org/www-community/attacks/xss/)\n",
+        "documentation_url": "https://docs.bearer.com/reference/rules/javascript_lang_dangerous_insert_html",
+        "line_number": 240,
+        "full_filename": "js/adminer/functions.js",
+        "filename": "js/adminer/functions.js",
+        "category_groups": [
+          "PII",
+          "Personal Data",
+          "Personal Data (Sensitive)"
+        ],
+        "source": {
+          "start": 240,
+          "end": 240,
+          "column": {
+            "start": 4,
+            "end": 23
+          }
+        },
+        "sink": {
+          "start": 240,
+          "end": 240,
+          "column": {
+            "start": 4,
+            "end": 23
+          },
+          "content": "el.innerHTML = html"
+        },
+        "parent_line_number": 240,
+        "snippet": "el.innerHTML = html",
+        "fingerprint": "49180977e4f967d24a868cebe2138529_0",
+        "old_fingerprint": "2a96b7f5d8bf3a186b5c8ecb07a76c8c_6",
+        "code_extract": "\t\t\tel.innerHTML = html;"
+      }
+    ],
+    "medium": [
+        {
+          "cwe_ids": [
+            "601"
+          ],
+          "id": "php_lang_open_redirect",
+          "title": "Unsanitized user input in redirect",
+          "description": "## Description\nA redirect using unsanitized user input is bad practice and puts your application at greater risk of phishing attacks.\n\n## Remediations\n❌ Do not use unsanitized user input when constructing URLs\n\n✅ Instead, ensure the input is validated by using a safe list or a mapping when constructing URLs\n\n```php\n  $paths = [\n    \"1\" => \"/planes\",\n    \"2\" => \"/trains\",\n    \"3\" => \"/automobiles\",\n  ];\n\n  $transport = $_GET[\"transport\"];\n  header(\"Location: {$paths[$transport]}\", true, 301);\n```\n## Resources\n- [OWASP open redirect](https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html)\n",
+          "documentation_url": "https://docs.bearer.com/reference/rules/php_lang_open_redirect",
+          "line_number": 40,
+          "full_filename": "main.php",
+          "filename": "main.php",
+          "category_groups": [
+            "PII",
+            "Personal Data",
+            "Personal Data (Sensitive)"
+          ],
+          "source": {
+            "start": 40,
+            "end": 40,
+            "column": {
+              "start": 13,
+              "end": 116
+            }
+          },
+          "sink": {
+            "start": 40,
+            "end": 40,
+            "column": {
+              "start": 13,
+              "end": 116
+            },
+            "content": "exampleSnippetThatDoesSomeRedirect"
+          },
+          "parent_line_number": 40,
+          "snippet": "exampleSnippetThatDoesSomeRedirect",
+          "fingerprint": "ab13559d1362a42f650bc54334c541d5_0",
+          "old_fingerprint": "9056389665c41ed9932acc94f945638e_0",
+          "code_extract": "            exampleSnippetThatDoesSomeRedirect;"
+        },
+        {
+          "cwe_ids": [
+            "601"
+          ],
+          "id": "php_lang_open_redirect",
+          "title": "Unsanitized user input in redirect",
+          "description": "## Description\nA redirect using unsanitized user input is bad practice and puts your application at greater risk of phishing attacks.\n\n## Remediations\n❌ Do not use unsanitized user input when constructing URLs\n\n✅ Instead, ensure the input is validated by using a safe list or a mapping when constructing URLs\n\n```php\n  $paths = [\n    \"1\" => \"/planes\",\n    \"2\" => \"/trains\",\n    \"3\" => \"/automobiles\",\n  ];\n\n  $transport = $_GET[\"transport\"];\n  header(\"Location: {$paths[$transport]}\", true, 301);\n```\n## Resources\n- [OWASP open redirect](https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html)\n",
+          "documentation_url": "https://docs.bearer.com/reference/rules/php_lang_open_redirect",
+          "line_number": 42,
+          "full_filename": "redirect.php",
+          "filename": "redirect.php",
+          "category_groups": [
+            "PII",
+            "Personal Data",
+            "Personal Data (Sensitive)"
+          ],
+          "source": {
+            "start": 42,
+            "end": 42,
+            "column": {
+              "start": 9,
+              "end": 78
+            }
+          },
+          "sink": {
+            "start": 42,
+            "end": 42,
+            "column": {
+              "start": 9,
+              "end": 78
+            },
+            "content": "exampleSnippetThatDoesSomeRedirect"
+          },
+          "parent_line_number": 42,
+          "snippet": "exampleSnippetThatDoesSomeRedirect",
+          "fingerprint": "d24db09d3ea28f04e5167354825db3b4_0",
+          "old_fingerprint": "e449439cdc2dcfc6c327fd891d333c5d_1",
+          "code_extract": "        exampleSnippetThatDoesSomeRedirect;"
+        }
+    ]
+}
