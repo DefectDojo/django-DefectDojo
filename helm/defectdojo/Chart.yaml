@@ -23,7 +23,7 @@ dependencies:
     alias: postgresqlha
     condition: postgresqlha.enabled
   - name: rabbitmq
-    version: ~11.16.0
+    version: ~13.0.0
     repository: "https://charts.bitnami.com/bitnami"
     condition: rabbitmq.enabled
   - name: redis
