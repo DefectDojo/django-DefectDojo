@@ -1,7 +1,5 @@
 import hashlib
-
-from defusedxml import ElementTree
-
+from lxml import etree
 from dojo.models import Endpoint, Finding
 
 __author__ = "properam"
@@ -18,7 +16,7 @@ class ImmuniwebParser(object):
         return "XML Scan Result File from Imuniweb Scan."
 
     def get_findings(self, file, test):
-        ImmuniScanTree = ElementTree.parse(file)
+        ImmuniScanTree = etree.parse(file)
         root = ImmuniScanTree.getroot()
         # validate XML file
         if "Vulnerabilities" not in root.tag:

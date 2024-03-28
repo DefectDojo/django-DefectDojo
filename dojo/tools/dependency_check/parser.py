@@ -4,7 +4,7 @@ import re
 import dateutil
 
 from cpe import CPE
-from defusedxml import ElementTree
+from lxml import etree
 from packageurl import PackageURL
 from datetime import datetime
 
@@ -38,14 +38,14 @@ class DependencyCheckParser(object):
     def get_filename_and_path_from_dependency(
         self, dependency, related_dependency, namespace
     ):
-        if not related_dependency:
+        if related_dependency is None:
             return dependency.findtext(
                 f"{namespace}fileName"
             ), dependency.findtext(f"{namespace}filePath")
-        if related_dependency.findtext(f"{namespace}fileName"):
-            return related_dependency.findtext(
-                f"{namespace}fileName"
-            ), related_dependency.findtext(f"{namespace}filePath")
+        rel_dep = related_dependency.findtext(f"{namespace}fileName")
+        rel_findpath = related_dependency.findtext(f"{namespace}filePath")
+        if rel_dep is not None:
+            return rel_dep, rel_findpath
         else:
             # without filename, it would be just a duplicate finding so we have to skip it. filename
             # is only present for relateddependencies since v6.0.0
@@ -57,10 +57,10 @@ class DependencyCheckParser(object):
         self, dependency, related_dependency, namespace
     ):
         identifiers_node = dependency.find(namespace + "identifiers")
-        if identifiers_node:
+        if identifiers_node is not None:
             # analyzing identifier from the more generic to
             package_node = identifiers_node.find(".//" + namespace + "package")
-            if package_node:
+            if package_node is not None:
                 id = package_node.findtext(f"{namespace}id")
                 purl = PackageURL.from_string(id)
                 purl_parts = purl.to_dict()
@@ -96,7 +96,7 @@ class DependencyCheckParser(object):
             cpe_node = identifiers_node.find(
                 ".//" + namespace + 'identifier[@type="cpe"]'
             )
-            if cpe_node:
+            if cpe_node is not None:
                 id = cpe_node.findtext(f"{namespace}name")
                 cpe = CPE(id)
                 component_name = (
@@ -118,7 +118,7 @@ class DependencyCheckParser(object):
             maven_node = identifiers_node.find(
                 ".//" + namespace + 'identifier[@type="maven"]'
             )
-            if maven_node:
+            if maven_node is not None:
                 maven_parts = maven_node.findtext(f"{namespace}name").split(
                     ":"
                 )
@@ -133,7 +133,7 @@ class DependencyCheckParser(object):
         evidence_collected_node = dependency.find(
             namespace + "evidenceCollected"
         )
-        if evidence_collected_node:
+        if evidence_collected_node is not None:
             # <evidenceCollected>
             # <evidence type="product" confidence="HIGH">
             #     <source>file</source>
@@ -151,12 +151,12 @@ class DependencyCheckParser(object):
             product_node = evidence_collected_node.find(
                 ".//" + namespace + 'evidence[@type="product"]'
             )
-            if product_node:
+            if product_node is not None:
                 component_name = product_node.findtext(f"{namespace}value")
                 version_node = evidence_collected_node.find(
                     ".//" + namespace + 'evidence[@type="version"]'
                 )
-                if version_node:
+                if version_node is not None:
                     component_version = version_node.findtext(
                         f"{namespace}value"
                     )
@@ -183,8 +183,9 @@ class DependencyCheckParser(object):
         mitigated = None
         is_Mitigated = False
         name = vulnerability.findtext(f"{namespace}name")
-        if vulnerability.find(f"{namespace}cwes"):
-            cwe_field = vulnerability.find(f"{namespace}cwes").findtext(
+        cwe_namespace = vulnerability.find(f"{namespace}cwes")
+        if cwe_namespace is not None:
+            cwe_field = cwe_namespace.findtext(
                 f"{namespace}cwe"
             )
         else:
@@ -357,9 +358,7 @@ class DependencyCheckParser(object):
     def get_findings(self, filename, test):
         dupes = dict()
         namespace = ""
-        content = filename.read()
-        #  'utf-8' This line is to pass a unittest in test_parsers.TestParsers.test_file_existence.
-        scan = ElementTree.fromstring(content)
+        scan = etree.parse(filename).getroot()
         regex = r"{.*}"
         matches = re.match(regex, scan.tag)
         try:
@@ -369,14 +368,15 @@ class DependencyCheckParser(object):
 
         dependencies = scan.find(namespace + "dependencies")
         scan_date = None
-        if scan.find(f"{namespace}projectInfo"):
-            projectInfo_node = scan.find(f"{namespace}projectInfo")
-            if projectInfo_node.findtext(f"{namespace}reportDate"):
+        projectInfo_node = scan.find(f"{namespace}projectInfo")
+        if projectInfo_node is not None:
+            reportDate = projectInfo_node.findtext(f"{namespace}reportDate")
+            if reportDate is not None:
                 scan_date = dateutil.parser.parse(
                     projectInfo_node.findtext(f"{namespace}reportDate")
                 )
 
-        if dependencies:
+        if dependencies is not None:
             for dependency in dependencies.findall(namespace + "dependency"):
                 vulnerabilities = dependency.find(
                     namespace + "vulnerabilities"
@@ -385,7 +385,7 @@ class DependencyCheckParser(object):
                     for vulnerability in vulnerabilities.findall(
                         namespace + "vulnerability"
                     ):
-                        if vulnerability:
+                        if vulnerability is not None:
                             finding = self.get_finding_from_vulnerability(
                                 dependency,
                                 None,
@@ -393,14 +393,14 @@ class DependencyCheckParser(object):
                                 test,
                                 namespace,
                             )
-                            if scan_date:
+                            if scan_date is not None:
                                 finding.date = scan_date
                             self.add_finding(finding, dupes)
 
                             relatedDependencies = dependency.find(
                                 namespace + "relatedDependencies"
                             )
-                            if relatedDependencies:
+                            if relatedDependencies is not None:
                                 for (
                                     relatedDependency
                                 ) in relatedDependencies.findall(
@@ -420,19 +420,21 @@ class DependencyCheckParser(object):
                                             finding.date = scan_date
                                         self.add_finding(finding, dupes)
 
-                    for suppressedVulnerability in vulnerabilities.findall(
+                    suppressVulnerabilities = vulnerabilities.findall(
                         namespace + "suppressedVulnerability"
-                    ):
-                        if suppressedVulnerability:
-                            finding = self.get_finding_from_vulnerability(
-                                dependency,
-                                None,
-                                suppressedVulnerability,
-                                test,
-                                namespace,
-                            )
-                            if scan_date:
-                                finding.date = scan_date
-                            self.add_finding(finding, dupes)
+                    )
+                    if suppressVulnerabilities is not None:
+                        for suppressedVulnerability in suppressVulnerabilities:
+                            if suppressedVulnerability is not None:
+                                finding = self.get_finding_from_vulnerability(
+                                    dependency,
+                                    None,
+                                    suppressedVulnerability,
+                                    test,
+                                    namespace,
+                                )
+                                if scan_date is not None:
+                                    finding.date = scan_date
+                                self.add_finding(finding, dupes)
 
         return list(dupes.values())

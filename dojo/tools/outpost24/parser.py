@@ -1,7 +1,5 @@
 import logging
-
-from defusedxml import ElementTree
-
+from lxml import etree
 from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
@@ -18,7 +16,7 @@ class Outpost24Parser(object):
         return "Import Outpost24 endpoint vulnerability scan in XML format."
 
     def get_findings(self, file, test):
-        tree = ElementTree.parse(file)
+        tree = etree.parse(file)
         items = list()
         for detail in tree.iterfind(".//detaillist/detail"):
             # finding details

@@ -1,9 +1,7 @@
 import io
 import csv
-
-from defusedxml import ElementTree
+from lxml import etree
 from ..dojo_test_case import DojoTestCase
-
 from dojo.models import Test
 from dojo.tools.vcg.parser import VCGCsvParser
 from dojo.tools.vcg.parser import VCGParser
@@ -28,89 +26,17 @@ class TestVCGXmlParser(DojoTestCase):
         self.assertEqual(0, len(results))
 
     def test_parse_single_finding(self):
-        single_finding = """<?xml version="1.0" encoding="utf-8"?>
-        <!--XML Export of VCG Results for directory: C:\\Projects\\WebGoat.Net. Scanned for C# security issues.-->
-        <CodeIssueCollection>
-        <CodeIssue>
-        <Priority>6</Priority>
-        <Severity>Suspicious Comment</Severity>
-        <Title>Comment Indicates Potentially Unfinished Code</Title>
-        <Description>The comment includes some wording which indicates that the developer regards
-        it as unfinished or does not trust it to work correctly.</Description>
-        <FileName>Findings.xml</FileName>
-        <Line>21</Line>
-        <CodeLine>TODO: Check the Code</CodeLine>
-        <Checked>False</Checked>
-        <CheckColour>LawnGreen</CheckColour>
-        </CodeIssue>
-        </CodeIssueCollection>"""
-
+        single_finding = open("unittests/scans/vcg/single_finding.xml")
         results = self.parser.parse(single_finding, Test())
         self.assertEqual(1, len(results))
 
     def test_parse_multiple_findings(self):
-        findings = """<?xml version="1.0" encoding="utf-8"?>
-        <!--XML Export of VCG Results for directory: C:\\Projects\\WebGoat.Net. Scanned for C# security issues.-->
-        <CodeIssueCollection>
-        <CodeIssue>
-        <Priority>6</Priority>
-        <Severity>Suspicious Comment</Severity>
-        <Title>Comment Indicates Potentially Unfinished Code</Title>
-        <Description>The comment includes some wording which indicates that the developer regards
-        it as unfinished or does not trust it to work correctly.</Description>
-        <FileName>Findings.xml</FileName>
-        <Line>21</Line>
-        <CodeLine>TODO: Check the Code</CodeLine>
-        <Checked>False</Checked>
-        <CheckColour>LawnGreen</CheckColour>
-        </CodeIssue>
-        <CodeIssue>
-        <Priority>6</Priority>
-        <Severity>Suspicious Comment</Severity>
-        <Title>Comment Indicates Potentially Unfinished Code</Title>
-        <Description>The comment includes some wording which indicates that the developer regards
-        it as unfinished or does not trust it to work correctly.</Description>
-        <FileName>Findings.xml</FileName>
-        <Line>62</Line>
-        <CodeLine>TODO: Check the Code</CodeLine>
-        <Checked>False</Checked>
-        <CheckColour>LawnGreen</CheckColour>
-        </CodeIssue>
-        </CodeIssueCollection>"""
-
+        findings = open("unittests/scans/vcg/multiple_findings.xml")
         results = self.parser.parse(findings, Test())
         self.assertEqual(2, len(results))
 
     def test_parse_duplicate_findings_dedupes(self):
-        duplicate_finding = """<?xml version="1.0" encoding="utf-8"?>
-        <!--XML Export of VCG Results for directory: C:\\Projects\\WebGoat.Net. Scanned for C# security issues.-->
-        <CodeIssueCollection>
-        <CodeIssue>
-        <Priority>6</Priority>
-        <Severity>Suspicious Comment</Severity>
-        <Title>Comment Indicates Potentially Unfinished Code</Title>
-        <Description>The comment includes some wording which indicates that the developer regards
-        it as unfinished or does not trust it to work correctly.</Description>
-        <FileName>Findings.xml</FileName>
-        <Line>21</Line>
-        <CodeLine>TODO: Check the Code</CodeLine>
-        <Checked>False</Checked>
-        <CheckColour>LawnGreen</CheckColour>
-        </CodeIssue>
-        <CodeIssue>
-        <Priority>6</Priority>
-        <Severity>Suspicious Comment</Severity>
-        <Title>Comment Indicates Potentially Unfinished Code</Title>
-        <Description>The comment includes some wording which indicates that the developer regards
-        it as unfinished or does not trust it to work correctly.</Description>
-        <FileName>Findings.xml</FileName>
-        <Line>21</Line>
-        <CodeLine>TODO: Check the Code</CodeLine>
-        <Checked>False</Checked>
-        <CheckColour>LawnGreen</CheckColour>
-        </CodeIssue>
-        </CodeIssueCollection>"""
-
+        duplicate_finding = open("unittests/scans/vcg/duplicate_findings_dedupes.xml")
         results = self.parser.parse(duplicate_finding, Test())
         self.assertEqual(1, len(results))
 
@@ -118,24 +44,8 @@ class TestVCGXmlParser(DojoTestCase):
         self.assertIsNone(self.parser.parse_issue(None, Test()))
 
     def test_parseissuexml_with_issue_has_finding(self):
-        single_finding = """<?xml version="1.0" encoding="utf-8"?>
-        <!--XML Export of VCG Results for directory: C:\\Projects\\WebGoat.Net. Scanned for C# security issues.-->
-        <CodeIssueCollection>
-        <CodeIssue>
-        <Priority>6</Priority>
-        <Severity>Suspicious Comment</Severity>
-        <Title>Comment Indicates Potentially Unfinished Code</Title>
-        <Description>The comment includes some wording which indicates that the developer regards
-        it as unfinished or does not trust it to work correctly.</Description>
-        <FileName>Findings.xml</FileName>
-        <Line>21</Line>
-        <CodeLine>TODO: Check the Code</CodeLine>
-        <Checked>False</Checked>
-        <CheckColour>LawnGreen</CheckColour>
-        </CodeIssue>
-        </CodeIssueCollection>"""
-
-        vcgscan = ElementTree.fromstring(single_finding)
+        single_finding = open("unittests/scans/vcg/one_finding.xml")
+        vcgscan = etree.parse(single_finding)
         finding = self.parser.parse_issue(vcgscan.findall("CodeIssue")[0], Test())
         self.assertEqual("Info", finding.severity)
         self.assertEqual("Comment Indicates Potentially Unfinished Code", finding.title)
@@ -203,22 +113,7 @@ class TestVCGCsvParser(DojoTestCase):
 class TestVCGImport(DojoTestCase):
 
     def test_can_parse_xml(self):
-        content = """<?xml version="1.0" encoding="utf-8"?>
-        <!--XML Export of VCG Results for directory: C:\\Projects\\WebGoat.Net. Scanned for C# security issues.-->
-        <CodeIssueCollection>
-        <CodeIssue>
-        <Priority>6</Priority>
-        <Severity>Suspicious Comment</Severity>
-        <Title>Comment Indicates Potentially Unfinished Code</Title>
-        <Description>The comment includes some wording which indicates that the developer regards
-        it as unfinished or does not trust it to work correctly.</Description>
-        <FileName>Findings.xml</FileName>
-        <Line>21</Line>
-        <CodeLine>TODO: Check the Code</CodeLine>
-        <Checked>False</Checked>
-        <CheckColour>LawnGreen</CheckColour>
-        </CodeIssue>
-        </CodeIssueCollection>"""
+        content = open("unittests/scans/vcg/can_parse_xml.xml")
         filename = TestFile("data.xml", content)
         parser = VCGParser()
         findings = parser.get_findings(filename, Test())

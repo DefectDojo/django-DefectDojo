@@ -2,7 +2,7 @@ import re
 import hashlib
 import logging
 from dojo.models import Endpoint, Finding
-from defusedxml import ElementTree as ET
+from lxml import etree
 from django.core.exceptions import ValidationError
 logger = logging.getLogger(__name__)
 
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class NiktoXMLParser(object):
     def process_xml(self, file, test):
         dupes = dict()
-        tree = ET.parse(file)
+        tree = etree.parse(file)
         root = tree.getroot()
         scan = root.find("scandetails")
         if scan is not None:
