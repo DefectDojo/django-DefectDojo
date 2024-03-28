@@ -13,7 +13,7 @@ from django.urls import reverse
 
 from dojo.decorators import dojo_async_task
 from dojo.celery import app
-from dojo.utils import max_safe
+from dojo.utils import max_safe, get_current_user
 from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.tools.factory import get_parser
 from dojo.models import (
@@ -29,6 +29,7 @@ from dojo.models import (
     Test_Import,
     Test_Import_Finding_Action,
     Vulnerability_Id,
+    Tool_Configuration,
     # Import History States
     IMPORT_CLOSED_FINDING,
     IMPORT_CREATED_FINDING,
@@ -100,7 +101,9 @@ class BaseImporter(ABC):
         **kwargs: dict,
     ) -> Tuple[Test, int, int, int, int, int, Test_Import]:
         """
-        TODO FILL ME IN PLEASE
+        A helper method that executes the entire import process in a single method.
+        This includes parsing the file, processing the findings, and returning the
+        statistics from the import
         """
         self.check_child_implementation_exception()
 
@@ -114,7 +117,9 @@ class BaseImporter(ABC):
         **kwargs: dict,
     ) -> List[Finding]:
         """
-        TODO FILL ME IN PLEASE
+        Make the conversion from unsaved Findings in memory to Findings that are saved in the 
+        database with and ID associated with them. This processor will also save any associated
+        objects such as endpoints, vulnerability IDs, and request/response pairs
         """
         self.check_child_implementation_exception()
 
@@ -538,3 +543,97 @@ class BaseImporter(ABC):
         """
         test.percent_complete = 100
         test.save()
+
+    def get_or_create_test_type(
+        self,
+        test_type_name: str,
+    ) -> Test_Type:
+        """
+        Ensures that a test type exists for a given test. This function can be called
+        in the following circumstances:
+        - Ensuring a test exists for import
+        - Ensuring a test exists for reimport with auto-create context
+        - Creating a new test for dynamic test types such as generic and sarif
+        """
+        test_type, created = Test_Type.objects.get_or_create(name=test_type_name)
+        if created:
+            logger.info(f"Created new Test_Type with name {test_type.name} because a report is being imported")
+        return test_type
+    
+    def add_timezone_scan_date_and_now(
+        self,
+        scan_date: datetime | None,
+        now: datetime = timezone.now(),
+    ) -> Tuple[datetime, datetime]:
+        """
+        Add timezone information the scan date set at import time. In the event the 
+        scan date is not supplied, fall back on the current time so that the test 
+        can have a time for the target start and end
+        """
+        # Add timezone information to the scan date if it is not already present
+        if scan_date is not None and not scan_date.tzinfo:
+            scan_date = timezone.make_aware(scan_date)
+        # Add timezone information to the current time if it is not already present
+        if now is not None and not now.tzinfo:
+            now = timezone.make_aware(now)
+
+        return scan_date, now
+    
+    def get_user_if_supplied(
+        self,
+        user: Dojo_User = None,
+    ) -> Dojo_User:
+        """
+        Determines whether the user supplied at import time should
+        be used or not. If the user supplied is not actually a user,
+        the current authorized user will be fetched instead
+        """
+        if user is None:
+            return get_current_user()
+        return user
+    
+    def verify_tool_configuration(
+        self,
+        api_scan_configuration: Tool_Configuration,
+        engagement: Engagement = None,
+        test: Test = None,
+    ) -> Test | Engagement:
+        """
+        Verify that the Tool_Configuration supplied along with the
+        engagement or test is found on the product. If not, then
+        raise a validation error that will bubble up back to the user
+
+        When a test is supplied, if there is a case where the 
+        Tool_Configuration supplied to this function does not match
+        the one saved on the test, then we will user the one
+        supplied rather than the one on the test.
+
+        If a test only is supplied, the 
+        If both objects are supplied, the test will take precedence and be returned
+        """
+        # Do not bother with any of the verification if a Tool_Configuration is not supplied
+        if api_scan_configuration is None:
+            # If both objects are supplied here, the test will be returned first
+            return test or engagement
+        # Ensure that at least an engagement or test was supplied
+        elif not isinstance(engagement, Engagement) and not isinstance(test, Test):
+            raise ValidationError("A test or engagement must be supplied to verify the Tool_Configuration against")
+        # Start with the test first
+        elif test is not None and isinstance(test, Test):
+            # Make sure the Tool_Configuration is connected to the product that the test is 
+            if api_scan_configuration.product != test.engagement.product:
+                raise ValidationError("API Scan Configuration has to be from same product as the Test")
+            # If the Tool_Configuration on the test is not the same as the one supplied, then lets
+            # use the one that is supplied
+            if test.api_scan_configuration != api_scan_configuration:
+                test.api_scan_configuration = api_scan_configuration
+                test.save()
+            # Return the test here for an early exit
+            return test
+        # Try the engagement now
+        elif engagement is not None and isinstance(engagement, Engagement):
+            # Make sure the Tool_Configuration is connected to the engagement that the test is 
+            if api_scan_configuration.product != engagement.product:
+                raise ValidationError('API Scan Configuration has to be from same product as the Engagement')
+            # Return the test here for an early exit
+            return engagement
