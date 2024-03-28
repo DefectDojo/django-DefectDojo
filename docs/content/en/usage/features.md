@@ -1,4 +1,4 @@
----
+f---
 title: "Features"
 description: "Various features help manage vulnerabilities."
 draft: false
@@ -414,7 +414,7 @@ Similar Findings
 DefectDojo allows you to maintain your security SLAs and automatically
 remind teams whenever a SLA is about to get breached, or is breached.
 
-To use SLAs, open the `System Settings` page and check 'Enable Finding SLAs'.
+To apply SLAs to Findings, open the `System Settings` page and check 'Enable Finding SLAs'.
 
 You will then need to create one or more SLA Configurations, from the SLA Configuration menu (your-defectdojo.com/sla_config).  
 
