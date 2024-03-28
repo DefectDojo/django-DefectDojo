@@ -6,6 +6,7 @@ services:
     volumes:
       - '.:/app:z'
     environment:
+      PYTHONWARNINGS: always  # We are strict during development so Warnings needs to be more verbose
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
       DD_EMAIL_URL: "smtp://mailhog:1025"
@@ -13,14 +14,18 @@ services:
     volumes:
       - '.:/app:z'
     environment:
+      PYTHONWARNINGS: always  # We are strict during development so Warnings needs to be more verbose
       DD_EMAIL_URL: "smtp://mailhog:1025"
   celerybeat:
     volumes:
       - '.:/app:z'
+    environment:
+      PYTHONWARNINGS: always  # We are strict during development so Warnings needs to be more verbose
   initializer:
     volumes:
       - '.:/app:z'
     environment:
+      PYTHONWARNINGS: always  # We are strict during development so Warnings needs to be more verbose
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
   nginx:

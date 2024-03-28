@@ -6,6 +6,7 @@ services:
     volumes:
       - '.:/app:z'
     environment:
+      PYTHONWARNINGS: error  # We are strict about Warnings during debugging
       DD_DEBUG: 'True'
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
@@ -19,14 +20,18 @@ services:
     volumes:
       - '.:/app:z'
     environment:
+      PYTHONWARNINGS: error  # We are strict about Warnings during debugging
       DD_EMAIL_URL: "smtp://mailhog:1025"
   celerybeat:
+    environment:
+      PYTHONWARNINGS: error  # We are strict about Warnings during debugging
     volumes:
       - '.:/app:z'
   initializer:
     volumes:
       - '.:/app:z'
     environment:
+      PYTHONWARNINGS: error  # We are strict about Warnings during debugging
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
   nginx:
