@@ -1,3 +1,4 @@
+from dojo.finding.queries import get_authorized_findings
 from dojo.group.utils import get_auth_group_name
 from django.contrib.auth.models import Group
 from typing import List
@@ -248,6 +249,8 @@ class TagListSerializerField(serializers.ListField):
         self.pretty_print = pretty_print
 
     def to_internal_value(self, data):
+        if isinstance(data, list) and data == [''] and self.allow_empty:
+            return []
         if isinstance(data, six.string_types):
             if not data:
                 data = []
@@ -1393,7 +1396,7 @@ class DevelopmentEnvironmentSerializer(serializers.ModelSerializer):
 
 
 class FindingGroupSerializer(serializers.ModelSerializer):
-    jira_issue = JIRAIssueSerializer(read_only=True)
+    jira_issue = JIRAIssueSerializer(read_only=True, allow_null=True)
 
     class Meta:
         model = Finding_Group
@@ -1531,13 +1534,27 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
+        findings = data.get('accepted_findings', [])
+        findings_ids = [x.id for x in findings]
+        finding_objects = Finding.objects.filter(id__in=findings_ids)
+        authed_findings = get_authorized_findings(Permissions.Finding_Edit).filter(id__in=findings_ids)
+        if len(findings) != len(authed_findings):
+            raise PermissionDenied(
+                "You are not permitted to add one or more selected findings to this risk acceptance"
+            )
         if self.context["request"].method == "POST":
-            findings = data['accepted_findings']
-            for finding in findings:
-                if not user_has_permission(self.context["request"].user, finding, Permissions.Finding_View):
-                    raise PermissionDenied(
-                        "You are not permitted to add one or more selected findings to this risk acceptance"
-                    )
+            engagements = finding_objects.values_list('test__engagement__id', flat=True).distinct().count()
+            if engagements > 1:
+                raise PermissionDenied(
+                    "You are not permitted to add findings to a distinct engagement"
+                )
+        elif self.context['request'].method in ['PATCH', 'PUT']:
+            engagement = Engagement.objects.filter(risk_acceptance=self.instance.id).first()
+            findings = finding_objects.exclude(test__engagement__id=engagement.id)
+            if len(findings) > 0:
+                raise PermissionDenied(
+                    "You are not permitted to add findings to a distinct engagement"
+                )
         return data
 
     class Meta:
@@ -1702,6 +1719,17 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     # Overriding this to push add Push to JIRA functionality
     def update(self, instance, validated_data):
+        # cvssv3 handling cvssv3 vector takes precedence,
+        # then cvssv3_score and finally severity
+        if validated_data.get("cvssv3"):
+            validated_data["cvssv3_score"] = None
+            validated_data["severity"] = ""
+        elif validated_data.get("cvssv3_score"):
+            validated_data["severity"] = ""
+        elif validated_data.get("severity"):
+            validated_data["cvssv3"] = None
+            validated_data["cvssv3_score"] = None
+
         # remove tags from validated data and store them seperately
         to_be_tagged, validated_data = self._pop_tags(validated_data)
 
@@ -2080,7 +2108,7 @@ class ImportScanSerializer(serializers.Serializer):
         allow_null=True, default=None, queryset=User.objects.all()
     )
     tags = TagListSerializerField(
-        required=False, help_text="Add tags that help describe this scan."
+        required=False, allow_empty=True, help_text="Add tags that help describe this scan."
     )
     close_old_findings = serializers.BooleanField(
         required=False,
@@ -2147,6 +2175,10 @@ class ImportScanSerializer(serializers.Serializer):
         help_text="If set to True, the tags will be applied to the findings",
         required=False,
     )
+    apply_tags_to_endpoints = serializers.BooleanField(
+        help_text="If set to True, the tags will be applied to the endpoints",
+        required=False,
+    )
 
     def save(self, push_to_jira=False):
         data = self.validated_data
@@ -2166,6 +2198,7 @@ class ImportScanSerializer(serializers.Serializer):
         api_scan_configuration = data.get("api_scan_configuration", None)
         service = data.get("service", None)
         apply_tags_to_findings = data.get("apply_tags_to_findings", False)
+        apply_tags_to_endpoints = data.get("apply_tags_to_endpoints", False)
         source_code_management_uri = data.get(
             "source_code_management_uri", None
         )
@@ -2205,7 +2238,7 @@ class ImportScanSerializer(serializers.Serializer):
             product_type_name,
             auto_create_context,
             deduplication_on_engagement,
-            do_not_reactivate,
+            _do_not_reactivate,
         ) = get_import_meta_data_from_dict(data)
         engagement = get_or_create_engagement(
             engagement_id,
@@ -2231,9 +2264,9 @@ class ImportScanSerializer(serializers.Serializer):
         try:
             (
                 test,
-                finding_count,
-                closed_finding_count,
-                test_import,
+                _finding_count,
+                _closed_finding_count,
+                _test_import,
             ) = importer.import_scan(
                 scan,
                 scan_type,
@@ -2259,6 +2292,7 @@ class ImportScanSerializer(serializers.Serializer):
                 title=test_title,
                 create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
                 apply_tags_to_findings=apply_tags_to_findings,
+                apply_tags_to_endpoints=apply_tags_to_endpoints,
             )
 
             if test:
@@ -2402,6 +2436,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     )
     tags = TagListSerializerField(
         required=False,
+        allow_empty=True,
         help_text="Modify existing tags that help describe this scan. (Existing test tags will be overwritten)",
     )
 
@@ -2431,6 +2466,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         help_text="If set to True, the tags will be applied to the findings",
         required=False
     )
+    apply_tags_to_endpoints = serializers.BooleanField(
+        help_text="If set to True, the tags will be applied to the endpoints",
+        required=False,
+    )
 
     def save(self, push_to_jira=False):
         logger.debug("push_to_jira: %s", push_to_jira)
@@ -2444,6 +2483,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             "close_old_findings_product_scope"
         )
         apply_tags_to_findings = data.get("apply_tags_to_findings", False)
+        apply_tags_to_endpoints = data.get("apply_tags_to_endpoints", False)
         do_not_reactivate = data.get("do_not_reactivate", False)
         version = data.get("version", None)
         build_id = data.get("build_id", None)
@@ -2517,11 +2557,11 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 reimporter = ReImporter()
                 (
                     test,
-                    finding_count,
-                    new_finding_count,
-                    closed_finding_count,
-                    reactivated_finding_count,
-                    untouched_finding_count,
+                    _finding_count,
+                    _new_finding_count,
+                    _closed_finding_count,
+                    _reactivated_finding_count,
+                    _untouched_finding_count,
                     test_import,
                 ) = reimporter.reimport_scan(
                     scan,
@@ -2545,6 +2585,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     do_not_reactivate=do_not_reactivate,
                     create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
                     apply_tags_to_findings=apply_tags_to_findings,
+                    apply_tags_to_endpoints=apply_tags_to_endpoints,
                 )
 
                 if test_import:
@@ -2567,8 +2608,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 importer = Importer()
                 (
                     test,
-                    finding_count,
-                    closed_finding_count,
+                    _finding_count,
+                    _closed_finding_count,
                     _,
                 ) = importer.import_scan(
                     scan,
@@ -2759,7 +2800,7 @@ class ImportLanguagesSerializer(serializers.Serializer):
                 try:
                     (
                         language_type,
-                        created,
+                        _created,
                     ) = Language_Type.objects.get_or_create(language=name)
                 except Language_Type.MultipleObjectsReturned:
                     language_type = Language_Type.objects.filter(

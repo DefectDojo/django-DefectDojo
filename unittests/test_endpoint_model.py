@@ -109,46 +109,46 @@ class TestEndpointModel(DojoTestCase):
         self.assertEqual(endpoint1, endpoint2)
 
     def test_get_or_create(self):
-        endpoint1, created1 = endpoint_get_or_create(
+        _endpoint1, created1 = endpoint_get_or_create(
             protocol='http',
             host='bar.foo'
         )
         self.assertTrue(created1)
 
-        endpoint2, created2 = endpoint_get_or_create(
+        _endpoint2, created2 = endpoint_get_or_create(
             protocol='http',
             host='bar.foo'
         )
         self.assertFalse(created2)
 
-        endpoint3, created3 = endpoint_get_or_create(
+        _endpoint3, created3 = endpoint_get_or_create(
             protocol='http',
             host='bar.foo',
             port=80
         )
         self.assertFalse(created3)
 
-        endpoint4, created4 = endpoint_get_or_create(
+        _endpoint4, created4 = endpoint_get_or_create(
             protocol='http',
             host='bar.foo',
             port=8080
         )
         self.assertTrue(created4)
 
-        endpoint5, created5 = endpoint_get_or_create(
+        _endpoint5, created5 = endpoint_get_or_create(
             protocol='https',
             host='bar.foo',
             port=443
         )
         self.assertTrue(created5)
 
-        endpoint6, created6 = endpoint_get_or_create(
+        _endpoint6, created6 = endpoint_get_or_create(
             protocol='https',
             host='bar.foo'
         )
         self.assertFalse(created6)
 
-        endpoint7, created7 = endpoint_get_or_create(
+        _endpoint7, created7 = endpoint_get_or_create(
             protocol='https',
             host='bar.foo',
             port=8443
@@ -329,8 +329,8 @@ class TestEndpointStatusModel(DojoTestCase):
         with self.subTest('Endpoint with vulnerabilities but all of them are mitigated because of different reasons'):
             self.assertEqual(ep2.findings_count, 4, ep2.findings.all())
             self.assertEqual(ep2.active_findings_count, 1, ep2.active_findings)
-            self.assertTrue(ep2.vulnerable, ep2.active_findings_count)
-            self.assertFalse(ep2.mitigated, ep2.active_findings_count)
+            self.assertFalse(ep2.vulnerable, ep2.active_findings_count)
+            self.assertTrue(ep2.mitigated, ep2.active_findings_count)
 
         with self.subTest('Host without vulnerabilities'):
             self.assertEqual(ep1.host_endpoints_count, 2, ep1.host_endpoints)
@@ -345,8 +345,8 @@ class TestEndpointStatusModel(DojoTestCase):
         with self.subTest('Endpoint with one vulnerabilitiy but EPS is mitigated'):
             self.assertEqual(ep3.findings_count, 1, ep3.findings.all())
             self.assertEqual(ep3.active_findings_count, 1, ep3.active_findings)
-            self.assertTrue(ep3.vulnerable, ep3.active_findings_count)
-            self.assertFalse(ep3.mitigated, ep3.active_findings_count)
+            self.assertFalse(ep3.vulnerable, ep3.active_findings_count)
+            self.assertTrue(ep3.mitigated, ep3.active_findings_count)
 
         with self.subTest('Endpoint with one vulnerability'):
             self.assertEqual(ep4.findings_count, 1, ep4.findings.all())
@@ -357,8 +357,8 @@ class TestEndpointStatusModel(DojoTestCase):
         with self.subTest('Endpoint with one vulnerability but finding is mitigated'):
             self.assertEqual(ep5.findings_count, 1, ep5.findings.all())
             self.assertEqual(ep5.active_findings_count, 0, ep5.active_findings)
-            self.assertFalse(ep5.vulnerable, ep5.active_findings_count)
-            self.assertTrue(ep5.mitigated, ep5.active_findings_count)
+            self.assertTrue(ep5.vulnerable, ep5.active_findings_count)
+            self.assertFalse(ep5.mitigated, ep5.active_findings_count)
 
         with self.subTest('Host with vulnerabilities'):
             self.assertEqual(ep3.host_endpoints_count, 3, ep3.host_endpoints)

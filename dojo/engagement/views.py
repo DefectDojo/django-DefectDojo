@@ -375,42 +375,117 @@ def copy_engagement(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
-def view_engagement(request, eid):
-    eng = get_object_or_404(Engagement, id=eid)
-    tests = eng.test_set.all().order_by('test_type__name', '-updated')
+class ViewEngagement(View):
 
-    default_page_num = 10
+    def get_template(self):
+        return 'dojo/view_eng.html'
 
-    tests_filter = EngagementTestFilter(request.GET, queryset=tests, engagement=eng)
-    paged_tests = get_page_items(request, tests_filter.qs, default_page_num)
-    # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
-    paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)
+    def get_risks_accepted(self, eng):
+        risks_accepted = eng.risk_acceptance.all().select_related('owner').annotate(accepted_findings_count=Count('accepted_findings__id'))
+        return risks_accepted
 
-    prod = eng.product
-    risks_accepted = eng.risk_acceptance.all().select_related('owner').annotate(accepted_findings_count=Count('accepted_findings__id'))
-    preset_test_type = None
-    network = None
-    if eng.preset:
-        preset_test_type = eng.preset.test_type.all()
-        network = eng.preset.network_locations.all()
-    system_settings = System_Settings.objects.get()
+    def get(self, request, eid, *args, **kwargs):
+        eng = get_object_or_404(Engagement, id=eid)
+        tests = eng.test_set.all().order_by('test_type__name', '-updated')
+        default_page_num = 10
+        tests_filter = EngagementTestFilter(request.GET, queryset=tests, engagement=eng)
+        paged_tests = get_page_items(request, tests_filter.qs, default_page_num)
+        paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)
+        prod = eng.product
+        risks_accepted = self.get_risks_accepted(eng)
+        preset_test_type = None
+        network = None
+        if eng.preset:
+            preset_test_type = eng.preset.test_type.all()
+            network = eng.preset.network_locations.all()
+        system_settings = System_Settings.objects.get()
 
-    jissue = jira_helper.get_jira_issue(eng)
-    jira_project = jira_helper.get_jira_project(eng)
+        jissue = jira_helper.get_jira_issue(eng)
+        jira_project = jira_helper.get_jira_project(eng)
 
-    try:
-        check = Check_List.objects.get(engagement=eng)
-    except:
-        check = None
-        pass
-    notes = eng.notes.all()
-    note_type_activation = Note_Type.objects.filter(is_active=True).count()
-    if note_type_activation:
-        available_note_types = find_available_notetypes(notes)
-    form = DoneForm()
-    files = eng.files.all()
-    if request.method == 'POST':
+        try:
+            check = Check_List.objects.get(engagement=eng)
+        except:
+            check = None
+            pass
+        notes = eng.notes.all()
+        note_type_activation = Note_Type.objects.filter(is_active=True).count()
+        if note_type_activation:
+            available_note_types = find_available_notetypes(notes)
+        form = DoneForm()
+        files = eng.files.all()
+        if note_type_activation:
+            form = TypedNoteForm(available_note_types=available_note_types)
+        else:
+            form = NoteForm()
+
+        creds = Cred_Mapping.objects.filter(
+            product=eng.product).select_related('cred_id').order_by('cred_id')
+        cred_eng = Cred_Mapping.objects.filter(
+            engagement=eng.id).select_related('cred_id').order_by('cred_id')
+
+        add_breadcrumb(parent=eng, top_level=False, request=request)
+
+        title = ""
+        if eng.engagement_type == "CI/CD":
+            title = " CI/CD"
+        product_tab = Product_Tab(prod, title="View" + title + " Engagement", tab="engagements")
+        product_tab.setEngagement(eng)
+        return render(
+            request, self.get_template(), {
+                'eng': eng,
+                'product_tab': product_tab,
+                'system_settings': system_settings,
+                'tests': paged_tests,
+                'filter': tests_filter,
+                'check': check,
+                'threat': eng.tmodel_path,
+                'form': form,
+                'notes': notes,
+                'files': files,
+                'risks_accepted': risks_accepted,
+                'jissue': jissue,
+                'jira_project': jira_project,
+                'creds': creds,
+                'cred_eng': cred_eng,
+                'network': network,
+                'preset_test_type': preset_test_type
+            })
+
+    def post(self, request, eid, *args, **kwargs):
+        eng = get_object_or_404(Engagement, id=eid)
+        tests = eng.test_set.all().order_by('test_type__name', '-updated')
+
+        default_page_num = 10
+
+        tests_filter = EngagementTestFilter(request.GET, queryset=tests, engagement=eng)
+        paged_tests = get_page_items(request, tests_filter.qs, default_page_num)
+        # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
+        paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)
+
+        prod = eng.product
+        risks_accepted = self.get_risks_accepted(eng)
+        preset_test_type = None
+        network = None
+        if eng.preset:
+            preset_test_type = eng.preset.test_type.all()
+            network = eng.preset.network_locations.all()
+        system_settings = System_Settings.objects.get()
+
+        jissue = jira_helper.get_jira_issue(eng)
+        jira_project = jira_helper.get_jira_project(eng)
+
+        try:
+            check = Check_List.objects.get(engagement=eng)
+        except:
+            check = None
+            pass
+        notes = eng.notes.all()
+        note_type_activation = Note_Type.objects.filter(is_active=True).count()
+        if note_type_activation:
+            available_note_types = find_available_notetypes(notes)
+        form = DoneForm()
+        files = eng.files.all()
         user_has_permission_or_403(request.user, eng, Permissions.Note_Add)
         eng.progress = 'check_list'
         eng.save()
@@ -434,44 +509,38 @@ def view_engagement(request, eid):
                                  messages.SUCCESS,
                                  'Note added successfully.',
                                  extra_tags='alert-success')
-    else:
-        if note_type_activation:
-            form = TypedNoteForm(available_note_types=available_note_types)
-        else:
-            form = NoteForm()
+        creds = Cred_Mapping.objects.filter(
+            product=eng.product).select_related('cred_id').order_by('cred_id')
+        cred_eng = Cred_Mapping.objects.filter(
+            engagement=eng.id).select_related('cred_id').order_by('cred_id')
 
-    creds = Cred_Mapping.objects.filter(
-        product=eng.product).select_related('cred_id').order_by('cred_id')
-    cred_eng = Cred_Mapping.objects.filter(
-        engagement=eng.id).select_related('cred_id').order_by('cred_id')
+        add_breadcrumb(parent=eng, top_level=False, request=request)
 
-    add_breadcrumb(parent=eng, top_level=False, request=request)
-
-    title = ""
-    if eng.engagement_type == "CI/CD":
-        title = " CI/CD"
-    product_tab = Product_Tab(prod, title="View" + title + " Engagement", tab="engagements")
-    product_tab.setEngagement(eng)
-    return render(
-        request, 'dojo/view_eng.html', {
-            'eng': eng,
-            'product_tab': product_tab,
-            'system_settings': system_settings,
-            'tests': paged_tests,
-            'filter': tests_filter,
-            'check': check,
-            'threat': eng.tmodel_path,
-            'form': form,
-            'notes': notes,
-            'files': files,
-            'risks_accepted': risks_accepted,
-            'jissue': jissue,
-            'jira_project': jira_project,
-            'creds': creds,
-            'cred_eng': cred_eng,
-            'network': network,
-            'preset_test_type': preset_test_type
-        })
+        title = ""
+        if eng.engagement_type == "CI/CD":
+            title = " CI/CD"
+        product_tab = Product_Tab(prod, title="View" + title + " Engagement", tab="engagements")
+        product_tab.setEngagement(eng)
+        return render(
+            request, self.get_template(), {
+                'eng': eng,
+                'product_tab': product_tab,
+                'system_settings': system_settings,
+                'tests': paged_tests,
+                'filter': tests_filter,
+                'check': check,
+                'threat': eng.tmodel_path,
+                'form': form,
+                'notes': notes,
+                'files': files,
+                'risks_accepted': risks_accepted,
+                'jissue': jissue,
+                'jira_project': jira_project,
+                'creds': creds,
+                'cred_eng': cred_eng,
+                'network': network,
+                'preset_test_type': preset_test_type
+            })
 
 
 def prefetch_for_view_tests(tests):
@@ -669,6 +738,7 @@ class ImportScanResultsView(View):
             service = form.cleaned_data.get('service', None)
             close_old_findings = form.cleaned_data.get('close_old_findings', None)
             apply_tags_to_findings = form.cleaned_data.get('apply_tags_to_findings', False)
+            apply_tags_to_endpoints = form.cleaned_data.get('apply_tags_to_endpoints', False)
             # close_old_findings_prodct_scope is a modifier of close_old_findings.
             # If it is selected, close_old_findings should also be selected.
             close_old_findings_product_scope = form.cleaned_data.get('close_old_findings_product_scope', None)
@@ -735,7 +805,7 @@ class ImportScanResultsView(View):
                             minimum_severity=minimum_severity, endpoints_to_add=list(form.cleaned_data['endpoints']) + added_endpoints, scan_date=scan_date,
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
                             close_old_findings=close_old_findings, close_old_findings_product_scope=close_old_findings_product_scope, group_by=group_by, api_scan_configuration=api_scan_configuration, service=service,
-                            create_finding_groups_for_all_findings=create_finding_groups_for_all_findings, apply_tags_to_findings=apply_tags_to_findings)
+                            create_finding_groups_for_all_findings=create_finding_groups_for_all_findings, apply_tags_to_findings=apply_tags_to_findings, apply_tags_to_endpoints=apply_tags_to_endpoints)
 
                 message = f'{scan_type} processed a total of {finding_count} findings'
 
@@ -1042,7 +1112,6 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         if 'add_findings' in request.POST:
             add_findings_form = AddFindingsRiskAcceptanceForm(
                 request.POST, request.FILES, instance=risk_acceptance)
-
             errors = errors or not add_findings_form.is_valid()
             if not errors:
                 findings = add_findings_form.cleaned_data['accepted_findings']
@@ -1055,7 +1124,6 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                     'Finding%s added successfully.' % ('s' if len(findings) > 1
                                                        else ''),
                     extra_tags='alert-success')
-
         if not errors:
             logger.debug('redirecting to return_url')
             return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
@@ -1075,10 +1143,15 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
 
     unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False) \
         .exclude(id__in=accepted_findings).order_by("title")
-    add_fpage = get_page_items(request, unaccepted_findings, 10, 'apage')
+    add_fpage = get_page_items(request, unaccepted_findings, 25, 'apage')
     # on this page we need to add unaccepted findings as possible findings to add as accepted
+
     add_findings_form.fields[
         "accepted_findings"].queryset = add_fpage.object_list
+
+    add_findings_form.fields["accepted_findings"].widget.request = request
+    add_findings_form.fields["accepted_findings"].widget.findings = unaccepted_findings
+    add_findings_form.fields["accepted_findings"].widget.page_number = add_fpage.number
 
     product_tab = Product_Tab(eng.product, title="Risk Acceptance", tab="engagements")
     product_tab.setEngagement(eng)
@@ -1154,7 +1227,7 @@ def download_risk_acceptance(request, eid, raid):
             open(settings.MEDIA_ROOT + "/" + risk_acceptance.path.name, mode='rb')))
     response['Content-Disposition'] = 'attachment; filename="%s"' \
                                       % risk_acceptance.filename()
-    mimetype, encoding = mimetypes.guess_type(risk_acceptance.path.name)
+    mimetype, _encoding = mimetypes.guess_type(risk_acceptance.path.name)
     response['Content-Type'] = mimetype
     return response
 

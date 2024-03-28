@@ -144,6 +144,10 @@ class SnykParser(object):
         if vulnerability.get("CVSSv3"):
             finding.cvssv3 = CVSS3(vulnerability["CVSSv3"]).clean_vector()
 
+        if vulnerability.get("epssDetails") is not None:
+            finding.epss_score = vulnerability["epssDetails"]["probability"]
+            finding.epss_percentile = vulnerability["epssDetails"]["percentile"]
+
         # manage CVE and CWE with idnitifiers
         cwe_references = ""
         if "identifiers" in vulnerability:
@@ -158,7 +162,7 @@ class SnykParser(object):
                     # Per the current json format, if several CWEs, take the
                     # first one.
                     finding.cwe = int(cwes[0].split("-")[1])
-                    if len(vulnerability["identifiers"]["CVE"]) > 1:
+                    if len(vulnerability["identifiers"]["CWE"]) > 1:
                         cwe_references = ", ".join(cwes)
                 else:
                     finding.cwe = 1035

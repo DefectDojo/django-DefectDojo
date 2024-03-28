@@ -87,7 +87,7 @@
                                 {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}    
                                 <th>{% dojo_sort request 'Product' 'product' 'asc' %}</th>
                             {% endif %}
-							<th class="text-center" nowrap="nowrap">Active Verified Findings</th>
+							<th class="text-center" nowrap="nowrap">Active (Verified) Findings</th>
 							<th>Status</th>
                         </tr>
 
@@ -102,10 +102,10 @@
                                 </td>
                                 {% endif %}
                                 {% if host_view %}
-                                  <td><a href="{% url 'view_endpoint_host' e.id %}">{{ e.host }}</a>
+                                  <td><a href="{% url 'view_endpoint_host' e.id %}" title="{{ e.host }}">{{ e.host|url_shortener }}</a>
                                 {% else %}
                                 <td>
-                                  <a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
+                                  <a href="{% url 'view_endpoint' e.id %}" title="{{ e }}">{{ e|url_shortener }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
                                 {% endif %}
                                   {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                 </td>
@@ -117,13 +117,10 @@
                                 {% endif %}
                                 <td class="text-center">
                                   {% if host_view %}
-                                      {{ e.host_active_verified_findings_count }}
+                                       {{ e.host_active_findings_count }} ({{ e.host_active_verified_findings_count }})
                                   {% else %}
-                                    {% if e.active_verified_findings_count > 0 %}
-                                      <a href="{% url 'verified_findings' %}?endpoints={{ e.id }}">{{ e.active_verified_findings_count }}</a>
-                                    {% else %}
-                                      0
-                                    {% endif %}
+                                      <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.active_findings_count }}</a>
+                                      <a href="{% url 'verified_findings' %}?endpoints={{ e.id }}">({{ e.active_verified_findings_count }})</a>
                                   {% endif %}
                                 </td>
                                 <td>
@@ -133,10 +130,10 @@
                                     {% if e.mitigated %}
                                       Mitigated
                                     {% else %}
-                                      {% if e.active_verified_findings_count > 0 %}
+                                      {% if e.active_findings_count > 0 %}
                                         Vulnerable
                                       {% else %}
-                                        No active verified findings
+                                        No active findings
                                       {% endif %}
                                     {% endif %}
                                   {% endif %}

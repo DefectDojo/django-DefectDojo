@@ -23,7 +23,7 @@ class TestSysdigParser(TestCase):
         self.assertEqual(1, len(findings))
         self.assertEqual("com.fasterxml.jackson.core:jackson-databind", findings[0].component_name)
         self.assertEqual("2.9.7", findings[0].component_version)
-        self.assertEqual("CVE-2018-19360", findings[0].cve)
+        self.assertEqual("CVE-2018-19360", findings[0].unsaved_vulnerability_ids[0])
 
     def test_sysdig_parser_with_many_vuln_has_many_findings(self):
         testfile = open("unittests/scans/sysdig_reports/sysdig_reports_many_vul.csv")

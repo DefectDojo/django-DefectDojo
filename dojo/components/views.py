@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.db.models import Count, Q
+from django.db.models.expressions import Value
 from dojo.utils import add_breadcrumb, get_page_items
 from dojo.filters import ComponentFilter
 from dojo.components.sql_group_concat import Sql_GroupConcat
@@ -23,7 +24,7 @@ def components(request):
             .order_by("component_name")
             .annotate(
                 component_version=StringAgg(
-                    "component_version", delimiter=separator, distinct=True
+                    "component_version", delimiter=separator, distinct=True, default=Value('')
                 )
             )
         )
