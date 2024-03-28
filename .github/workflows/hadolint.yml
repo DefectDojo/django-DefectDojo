@@ -1,0 +1,22 @@
+name: Hadolint
+on: pull_request
+
+jobs:
+  hadolint:
+    runs-on: ubuntu-latest
+    name: Hadolint-your-PR
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v42
+        with:
+          # Pass what names/filters you want to catch
+          files: |
+            **/Dockerfile.*
+          separator: " "
+      # Only run if expected files are changed and pass these as input
+      - uses: jbergstroem/hadolint-gh-action@v1
+        if: steps.changed-files.outputs.any_changed == 'true'
+        with:
+          dockerfile: "${{ steps.changed-files.outputs.other_changed_files }}"
