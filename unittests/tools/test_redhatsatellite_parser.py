@@ -22,3 +22,4 @@ class TestRedHatSatelliteParser(DojoTestCase):
         parser = RedHatSatelliteParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(3, len(findings))
+        self.assertEqual("RHSA-1966:12313", findings[0].unsaved_vulnerability_ids[0])
