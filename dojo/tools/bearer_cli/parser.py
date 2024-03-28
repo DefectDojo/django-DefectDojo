@@ -25,7 +25,6 @@ class BearerParser(object):
         for content in data:
             severity = content.capitalize()
             for bearerfinding in data[content]:
-                print(bearerfinding)
 
                 if bearerfinding["fingerprint"] in dupes:
                     continue
