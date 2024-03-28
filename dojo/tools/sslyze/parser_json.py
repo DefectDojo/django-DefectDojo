@@ -440,7 +440,7 @@ def get_strong_protocol(cipher, text, suites, node, test, endpoint):
             for cipher_node in strong_node["accepted_cipher_suites"]:
                 if "cipher_suite" in cipher_node:
                     cs_node = cipher_node["cipher_suite"]
-                    if "name" in cs_node and not cs_node["name"] in suites:
+                    if "name" in cs_node and cs_node["name"] not in suites:
                         unrecommended_cipher_found = True
                         description += "\n - " + cs_node["name"]
             if unrecommended_cipher_found:
@@ -467,7 +467,7 @@ def get_strong_protocol(cipher, text, suites, node, test, endpoint):
                 ]:
                     if "cipher_suite" in strong_node_result_cyphers:
                         cs_node = strong_node_result_cyphers["cipher_suite"]
-                        if "name" in cs_node and not cs_node["name"] in suites:
+                        if "name" in cs_node and cs_node["name"] not in suites:
                             unrecommended_cipher_found = True
                             description += "\n - " + cs_node["name"]
                 if unrecommended_cipher_found:

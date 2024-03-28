@@ -60,8 +60,8 @@ class ProductTest(BaseTestCase):
 
         # Assert ot the query to dtermine status of failure
         # Also confirm success even if Product is returned as already exists for test sake
-        self.assertTrue(self.is_success_message_present(text='Product added successfully') or
-            self.is_success_message_present(text='Product with this Name already exists.'))
+        self.assertTrue(self.is_success_message_present(text='Product added successfully')
+            or self.is_success_message_present(text='Product with this Name already exists.'))
         self.assertFalse(self.is_error_message_present())
 
     @on_exception_html_source_logger
@@ -103,8 +103,8 @@ class ProductTest(BaseTestCase):
         # Query the site to determine if the product has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='Product updated successfully') or
-            self.is_success_message_present(text='Product with this Name already exists.'))
+        self.assertTrue(self.is_success_message_present(text='Product updated successfully')
+            or self.is_success_message_present(text='Product with this Name already exists.'))
         self.assertFalse(self.is_error_message_present())
 
     # For product consistency sake, We won't be editting the product title
@@ -131,8 +131,8 @@ class ProductTest(BaseTestCase):
         # Query the site to determine if the product has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='Product updated successfully') or
-            self.is_success_message_present(text='Product with this Name already exists.'))
+        self.assertTrue(self.is_success_message_present(text='Product updated successfully')
+            or self.is_success_message_present(text='Product with this Name already exists.'))
         self.assertFalse(self.is_error_message_present())
 
     @on_exception_html_source_logger
@@ -351,8 +351,8 @@ class ProductTest(BaseTestCase):
 
         # Assert ot the query to dtermine status of failure
         # Also confirm success even if variable is returned as already exists for test sake
-        self.assertTrue(self.is_success_message_present(text='Metadata added successfully') or
-            self.is_success_message_present(text='A metadata entry with the same name exists already for this object.'))
+        self.assertTrue(self.is_success_message_present(text='Metadata added successfully')
+            or self.is_success_message_present(text='A metadata entry with the same name exists already for this object.'))
 
     @on_exception_html_source_logger
     def test_edit_product_custom_field(self):
@@ -376,8 +376,8 @@ class ProductTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine success or failure
-        self.assertTrue(self.is_success_message_present(text='Metadata edited successfully') or
-            self.is_success_message_present(text='A metadata entry with the same name exists already for this object.'))
+        self.assertTrue(self.is_success_message_present(text='Metadata edited successfully')
+            or self.is_success_message_present(text='A metadata entry with the same name exists already for this object.'))
 
     @on_exception_html_source_logger
     def test_add_product_tracking_files(self):

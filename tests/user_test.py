@@ -41,8 +41,8 @@ class UserTest(BaseTestCase):
         # Query the site to determine if the user has been created
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='User added successfully.') or
-            self.is_help_message_present(text='A user with that username already exists.'))
+        self.assertTrue(self.is_success_message_present(text='User added successfully.')
+            or self.is_help_message_present(text='A user with that username already exists.'))
 
     def test_create_user_with_writer_global_role(self):
         # Login to the site.
@@ -74,8 +74,8 @@ class UserTest(BaseTestCase):
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         # Query the site to determine if the user has been created
         # Assert ot the query to determine status of failure
-        self.assertTrue(self.is_success_message_present(text='User added successfully.') or
-            self.is_help_message_present(text='A user with that username already exists.'))
+        self.assertTrue(self.is_success_message_present(text='User added successfully.')
+            or self.is_help_message_present(text='A user with that username already exists.'))
 
     def enable_user_profile_writing(self):
         self.login_page()

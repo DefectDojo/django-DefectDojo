@@ -82,13 +82,7 @@ class MicrofocusWebinspectParser(object):
 
                 # make dupe hash key
                 dupe_key = hashlib.sha256(
-                    "|".join(
-                        [
-                            finding.description,
-                            finding.title,
-                            finding.severity,
-                        ]
-                    ).encode("utf-8")
+                    f"{finding.description}|{finding.title}|{finding.severity}".encode("utf-8")
                 ).hexdigest()
                 # check if dupes are present.
                 if dupe_key in dupes:

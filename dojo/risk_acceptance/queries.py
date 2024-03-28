@@ -40,7 +40,7 @@ def get_authorized_risk_acceptances(permission):
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups))
     risk_acceptances = risk_acceptances.filter(
-        Q(product__prod_type__member=True) | Q(product__member=True) |
-        Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
+        Q(product__prod_type__member=True) | Q(product__member=True)
+        | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
 
     return risk_acceptances

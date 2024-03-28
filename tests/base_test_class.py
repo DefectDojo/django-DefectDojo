@@ -20,13 +20,13 @@ def on_exception_html_source_logger(func):
         try:
             return func(self, *args, **kwargs)
 
-        except Exception as e:
+        except Exception:
             print("exception occured at url:", self.driver.current_url)
             print("page source:", self.driver.page_source)
             f = open("selenium_page_source.html", "w", encoding="utf-8")
             f.writelines(self.driver.page_source)
             # time.sleep(30)
-            raise (e)
+            raise
 
     return wrapper
 

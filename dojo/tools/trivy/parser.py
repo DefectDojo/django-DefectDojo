@@ -206,13 +206,7 @@ class TrivyParser:
                 else:
                     cwe = 0
                 type = target_data.get("Type", "")
-                title = " ".join(
-                    [
-                        vuln_id,
-                        package_name,
-                        package_version,
-                    ]
-                )
+                title = f"{vuln_id} {package_name} {package_version}"
                 description = DESCRIPTION_TEMPLATE.format(
                     title=vuln.get("Title", ""),
                     target=target,

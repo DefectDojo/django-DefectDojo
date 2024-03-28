@@ -1,3 +1,4 @@
+{% load display_tags %}
 {% if product_tab.tab == "endpoints" and not custom_breadcrumb %}
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
@@ -7,9 +8,9 @@
   {% endif %}
   {% if endpoint.id %}
     {% if host_view %}
-      <li><a data-toggle="tooltip" data-placement="top" title="Test" href="{% url 'view_endpoint_host' endpoint.id %}">{{endpoint.host}}</a></li>
+      <li><a data-toggle="tooltip" data-placement="top" title="{{endpoint.host}}" href="{% url 'view_endpoint_host' endpoint.id %}">{{endpoint.host|breadcrumb_shortener}}</a></li>
     {% else %}
-      <li><a data-toggle="tooltip" data-placement="top" title="Test" href="{% url 'view_endpoint' endpoint.id %}">{{endpoint}}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a></li>
+      <li><a data-toggle="tooltip" data-placement="top" title="{{endpoint}}" href="{% url 'view_endpoint' endpoint.id %}">{{endpoint|breadcrumb_shortener}}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a></li>
     {% endif %}
   {% endif %}
   {% if product_tab.title %}

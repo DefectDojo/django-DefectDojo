@@ -291,7 +291,7 @@ def validate_endpoints_to_add(endpoints_to_add):
 def save_endpoints_to_add(endpoint_list, product):
     processed_endpoints = []
     for e in endpoint_list:
-        endpoint, created = endpoint_get_or_create(
+        endpoint, _created = endpoint_get_or_create(
             protocol=e[0],
             userinfo=e[1],
             host=e[2],
@@ -347,7 +347,7 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
                 if item[1] is not None and len(item[1]) > 0:
                     if create_meta:
                         # check if meta exists first. Don't want to make duplicate endpoints
-                        dojo_meta, create = DojoMeta.objects.get_or_create(
+                        dojo_meta, _create = DojoMeta.objects.get_or_create(
                             endpoint=endpoint,
                             name=item[0])
                         dojo_meta.value = item[1]

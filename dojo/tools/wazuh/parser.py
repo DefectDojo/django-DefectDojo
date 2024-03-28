@@ -45,7 +45,7 @@ class WazuhParser(object):
                 publish_date = item.get("published")
                 agent_name = item.get("agent_name")
                 agent_ip = item.get("agent_ip")
-                detection_time = item.get("detection_time")
+                detection_time = item.get("detection_time").split("T")[0]
 
                 if links:
                     references = "\n".join(links)

@@ -2605,10 +2605,10 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             engagement_id,
             engagement_name,
             product_name,
-            product_type_name,
-            auto_create_context,
-            deduplication_on_engagement,
-            do_not_reactivate,
+            _product_type_name,
+            _auto_create_context,
+            _deduplication_on_engagement,
+            _do_not_reactivate,
         ) = serializers.get_import_meta_data_from_dict(
             serializer.validated_data
         )
@@ -2784,10 +2784,10 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             _,
             engagement_name,
             product_name,
-            product_type_name,
-            auto_create_context,
-            deduplication_on_engagement,
-            do_not_reactivate,
+            _product_type_name,
+            _auto_create_context,
+            _deduplication_on_engagement,
+            _do_not_reactivate,
         ) = serializers.get_import_meta_data_from_dict(
             serializer.validated_data
         )

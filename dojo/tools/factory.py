@@ -1,5 +1,10 @@
 import re
 import logging
+import os
+from inspect import isclass
+from pathlib import Path
+from importlib import import_module
+from importlib.util import find_spec
 from django.conf import settings
 from dojo.models import Test_Type, Tool_Type, Tool_Configuration
 
@@ -88,12 +93,6 @@ def requires_tool_type(scan_type):
         return parser.requires_tool_type(scan_type)
     return None
 
-
-import os
-from inspect import isclass
-from pathlib import Path
-from importlib import import_module
-from importlib.util import find_spec
 
 # iterate through the modules in the current package
 package_dir = str(Path(__file__).resolve().parent)

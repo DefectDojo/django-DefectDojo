@@ -70,7 +70,7 @@ def configure_announcement(request):
 
 def dismiss_announcement(request):
     if request.method == "POST":
-        deleted_count, objects_deleted = UserAnnouncement.objects.filter(
+        deleted_count, _objects_deleted = UserAnnouncement.objects.filter(
             user=request.user, announcement=1
         ).delete()
         if deleted_count > 0:

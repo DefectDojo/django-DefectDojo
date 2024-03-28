@@ -23,9 +23,14 @@ class NetsparkerParser(object):
         except Exception:
             data = json.loads(tree)
         dupes = dict()
-        scan_date = datetime.datetime.strptime(
-            data["Generated"], "%d/%m/%Y %H:%M %p"
-        ).date()
+        if "UTC" in data["Generated"]:
+            scan_date = datetime.datetime.strptime(
+                data["Generated"].split(" ")[0], "%d/%m/%Y"
+            ).date()
+        else:
+            scan_date = datetime.datetime.strptime(
+                data["Generated"], "%d/%m/%Y %H:%M %p"
+            ).date()
 
         for item in data["Vulnerabilities"]:
             title = item["Name"]
@@ -60,28 +65,29 @@ class NetsparkerParser(object):
                 cwe=cwe,
                 static_finding=True,
             )
-
-            if item["State"].find("FalsePositive") != -1:
+            state = item.get("State", None)
+            if state == "FalsePositive":
                 finding.active = False
                 finding.verified = False
                 finding.false_p = True
                 finding.mitigated = None
                 finding.is_mitigated = False
-
-            if item["State"].find("AcceptedRisk") != -1:
+            elif state == "AcceptedRisk":
                 finding.risk_accepted = True
 
-            if (
-                (item["Classification"] is not None)
-                and (item["Classification"]["Cvss"] is not None)
-                and (item["Classification"]["Cvss"]["Vector"] is not None)
-            ):
-                cvss_objects = cvss_parser.parse_cvss_from_text(
-                    item["Classification"]["Cvss"]["Vector"]
-                )
-                if len(cvss_objects) > 0:
-                    finding.cvssv3 = cvss_objects[0].clean_vector()
-
+            if item["Classification"] is not None:
+                if item["Classification"].get("Cvss") is not None and item["Classification"].get("Cvss").get("Vector") is not None:
+                    cvss_objects = cvss_parser.parse_cvss_from_text(
+                        item["Classification"]["Cvss"]["Vector"]
+                    )
+                    if len(cvss_objects) > 0:
+                        finding.cvssv3 = cvss_objects[0].clean_vector()
+                elif item["Classification"].get("Cvss31") is not None and item["Classification"].get("Cvss31").get("Vector") is not None:
+                    cvss_objects = cvss_parser.parse_cvss_from_text(
+                        item["Classification"]["Cvss31"]["Vector"]
+                    )
+                    if len(cvss_objects) > 0:
+                        finding.cvssv3 = cvss_objects[0].clean_vector()
             finding.unsaved_req_resp = [{"req": request, "resp": response}]
             finding.unsaved_endpoints = [Endpoint.from_uri(url)]
 

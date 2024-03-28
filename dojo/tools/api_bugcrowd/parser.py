@@ -116,8 +116,8 @@ class ApiBugcrowdParser(object):
                     entry["attributes"]["description"],
                     "",
                     "Bugcrowd details:",
-                    f"- Severity: P{ bugcrowd_severity }",
-                    f"- Bug Url: [{bug_url}]({ bug_url })",
+                    f"- Severity: P{bugcrowd_severity}",
+                    f"- Bug Url: [{bug_url}]({bug_url})",
                     "",
                     f"Bugcrowd link: [{links}]({links})",
                 ]

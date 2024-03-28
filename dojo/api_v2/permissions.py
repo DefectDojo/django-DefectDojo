@@ -438,8 +438,8 @@ class UserHasImportPermission(permissions.BasePermission):
             product_name,
             product_type_name,
             auto_create_context,
-            deduplication_on_engagement,
-            do_not_reactivate,
+            _deduplication_on_engagement,
+            _do_not_reactivate,
         ) = get_import_meta_data_from_dict(request.data)
         product_type = get_target_product_type_if_exists(product_type_name)
         product = get_target_product_if_exists(product_name, product_type_name)
@@ -645,8 +645,8 @@ class UserHasReimportPermission(permissions.BasePermission):
             product_name,
             product_type_name,
             auto_create_context,
-            deduplication_on_engagement,
-            do_not_reactivate,
+            _deduplication_on_engagement,
+            _do_not_reactivate,
         ) = get_import_meta_data_from_dict(request.data)
 
         product_type = get_target_product_type_if_exists(product_type_name)

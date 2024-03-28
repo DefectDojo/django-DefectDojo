@@ -101,7 +101,7 @@ def parse_finding(host, tree):
 
     # Scan details
     for vuln_details in host.iterfind("VULN_INFO_LIST/VULN_INFO"):
-        _temp = issue_row
+        _temp = issue_row.copy()
         # Port
         _gid = vuln_details.find("QID").attrib["id"]
         _port = vuln_details.findtext("PORT")

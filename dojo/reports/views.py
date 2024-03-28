@@ -14,6 +14,7 @@ from django.http import Http404, HttpResponse, QueryDict
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
+from django.views import View
 
 from dojo.filters import ReportFindingFilter, EndpointReportFilter, \
     EndpointFilter
@@ -31,6 +32,8 @@ from dojo.finding.queries import get_authorized_findings
 from dojo.finding.views import BaseListFindings
 
 logger = logging.getLogger(__name__)
+
+EXCEL_CHAR_LIMIT = 32767
 
 
 def down(request):
@@ -669,30 +672,6 @@ def prefetch_related_endpoints_for_report(endpoints):
                                      )
 
 
-def generate_quick_report(request, findings, obj=None):
-    product = engagement = test = None
-
-    if obj:
-        if type(obj).__name__ == "Product":
-            product = obj
-        elif type(obj).__name__ == "Engagement":
-            engagement = obj
-        elif type(obj).__name__ == "Test":
-            test = obj
-
-    return render(request, 'dojo/finding_pdf_report.html', {
-                    'report_name': 'Finding Report',
-                    'product': product,
-                    'engagement': engagement,
-                    'test': test,
-                    'findings': findings,
-                    'user': request.user,
-                    'team_name': settings.TEAM_NAME,
-                    'title': 'Finding Report',
-                    'user_id': request.user.id,
-                  })
-
-
 def get_list_index(list, index):
     try:
         element = list[index]
@@ -787,9 +766,41 @@ def get_findings(request):
     return findings, obj
 
 
-def quick_report(request):
-    findings, obj = get_findings(request)
-    return generate_quick_report(request, findings, obj)
+class QuickReportView(View):
+    def add_findings_data(self):
+        return self.findings
+
+    def get_template(self):
+        return 'dojo/finding_pdf_report.html'
+
+    def get(self, request):
+        findings, obj = get_findings(request)
+        self.findings = findings
+        findings = self.add_findings_data()
+        return self.generate_quick_report(request, findings, obj)
+
+    def generate_quick_report(self, request, findings, obj=None):
+        product = engagement = test = None
+
+        if obj:
+            if type(obj).__name__ == "Product":
+                product = obj
+            elif type(obj).__name__ == "Engagement":
+                engagement = obj
+            elif type(obj).__name__ == "Test":
+                test = obj
+
+        return render(request, self.get_template(), {
+                        'report_name': 'Finding Report',
+                        'product': product,
+                        'engagement': engagement,
+                        'test': test,
+                        'findings': findings,
+                        'user': request.user,
+                        'team_name': settings.TEAM_NAME,
+                        'title': 'Finding Report',
+                        'user_id': request.user.id,
+                  })
 
 
 def get_excludes():
@@ -809,219 +820,284 @@ def get_attributes():
     return ["sla_age", "sla_deadline", "sla_days_remaining"]
 
 
-def csv_export(request):
-    findings, obj = get_findings(request)
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=findings.csv'
-    writer = csv.writer(response)
-    allowed_attributes = get_attributes()
-    excludes_list = get_excludes()
-    allowed_foreign_keys = get_attributes()
-    first_row = True
+class CSVExportView(View):
+    def add_findings_data(self):
+        return self.findings
 
-    for finding in findings:
-        if first_row:
-            fields = []
-            for key in dir(finding):
-                try:
-                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
-                        if callable(getattr(finding, key)) and key not in allowed_attributes:
-                            continue
+    def add_extra_headers(self):
+        pass
+
+    def add_extra_values(self):
+        pass
+
+    def get(self, request):
+        findings, _obj = get_findings(request)
+        self.findings = findings
+        findings = self.add_findings_data()
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=findings.csv'
+        writer = csv.writer(response)
+        allowed_attributes = get_attributes()
+        excludes_list = get_excludes()
+        allowed_foreign_keys = get_attributes()
+        first_row = True
+
+        for finding in findings:
+            self.finding = finding
+            if first_row:
+                fields = []
+                self.fields = fields
+                for key in dir(finding):
+                    try:
+                        if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                            if callable(getattr(finding, key)) and key not in allowed_attributes:
+                                continue
+                            fields.append(key)
+                    except Exception as exc:
+                        logger.error('Error in attribute: ' + str(exc))
                         fields.append(key)
-                except Exception as exc:
-                    logger.error('Error in attribute: ' + str(exc))
-                    fields.append(key)
-                    continue
-            fields.append('test')
-            fields.append('found_by')
-            fields.append('engagement_id')
-            fields.append('engagement')
-            fields.append('product_id')
-            fields.append('product')
-            fields.append('endpoints')
-            fields.append('vulnerability_ids')
+                        continue
+                fields.append('test')
+                fields.append('found_by')
+                fields.append('engagement_id')
+                fields.append('engagement')
+                fields.append('product_id')
+                fields.append('product')
+                fields.append('endpoints')
+                fields.append('vulnerability_ids')
+                fields.append('tags')
+                self.fields = fields
+                self.add_extra_headers()
 
-            writer.writerow(fields)
+                writer.writerow(fields)
 
-            first_row = False
-        if not first_row:
-            fields = []
-            for key in dir(finding):
-                try:
-                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
-                        if not callable(getattr(finding, key)):
-                            value = finding.__dict__.get(key)
-                        if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
-                            if callable(getattr(finding, key)):
-                                func = getattr(finding, key)
-                                result = func()
-                                value = result
-                            else:
-                                value = str(getattr(finding, key))
-                        if value and isinstance(value, str):
-                            value = value.replace('\n', ' NEWLINE ').replace('\r', '')
-                        fields.append(value)
-                except Exception as exc:
-                    logger.error('Error in attribute: ' + str(exc))
-                    fields.append("Value not supported")
-                    continue
-            fields.append(finding.test.title)
-            fields.append(finding.test.test_type.name)
-            fields.append(finding.test.engagement.id)
-            fields.append(finding.test.engagement.name)
-            fields.append(finding.test.engagement.product.id)
-            fields.append(finding.test.engagement.product.name)
+                first_row = False
+            if not first_row:
+                fields = []
+                for key in dir(finding):
+                    try:
+                        if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                            if not callable(getattr(finding, key)):
+                                value = finding.__dict__.get(key)
+                            if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
+                                if callable(getattr(finding, key)):
+                                    func = getattr(finding, key)
+                                    result = func()
+                                    value = result
+                                else:
+                                    value = str(getattr(finding, key))
+                            if value and isinstance(value, str):
+                                value = value.replace('\n', ' NEWLINE ').replace('\r', '')
+                            fields.append(value)
+                    except Exception as exc:
+                        logger.error('Error in attribute: ' + str(exc))
+                        fields.append("Value not supported")
+                        continue
+                fields.append(finding.test.title)
+                fields.append(finding.test.test_type.name)
+                fields.append(finding.test.engagement.id)
+                fields.append(finding.test.engagement.name)
+                fields.append(finding.test.engagement.product.id)
+                fields.append(finding.test.engagement.product.name)
 
-            endpoint_value = ''
-            num_endpoints = 0
-            for endpoint in finding.endpoints.all():
-                num_endpoints += 1
-                if num_endpoints > 5:
-                    endpoint_value += '...'
-                    break
-                endpoint_value += f'{str(endpoint)}; '
-            if endpoint_value.endswith('; '):
-                endpoint_value = endpoint_value[:-2]
-            fields.append(endpoint_value)
+                endpoint_value = ''
+                num_endpoints = 0
+                for endpoint in finding.endpoints.all():
+                    num_endpoints += 1
+                    endpoint_value += f'{str(endpoint)}; '
+                if endpoint_value.endswith('; '):
+                    endpoint_value = endpoint_value[:-2]
+                if len(endpoint_value) > EXCEL_CHAR_LIMIT:
+                    endpoint_value = endpoint_value[:EXCEL_CHAR_LIMIT - 3] + '...'
+                fields.append(endpoint_value)
 
-            vulnerability_ids_value = ''
-            num_vulnerability_ids = 0
-            for vulnerability_id in finding.vulnerability_ids:
-                num_vulnerability_ids += 1
-                if num_vulnerability_ids > 5:
-                    vulnerability_ids_value += '...'
-                    break
-                vulnerability_ids_value += f'{str(vulnerability_id)}; '
-            if finding.cve and vulnerability_ids_value.find(finding.cve) < 0:
-                vulnerability_ids_value += finding.cve
-            if vulnerability_ids_value.endswith('; '):
-                vulnerability_ids_value = vulnerability_ids_value[:-2]
-            fields.append(vulnerability_ids_value)
+                vulnerability_ids_value = ''
+                num_vulnerability_ids = 0
+                for vulnerability_id in finding.vulnerability_ids:
+                    num_vulnerability_ids += 1
+                    if num_vulnerability_ids > 5:
+                        vulnerability_ids_value += '...'
+                        break
+                    vulnerability_ids_value += f'{str(vulnerability_id)}; '
+                if finding.cve and vulnerability_ids_value.find(finding.cve) < 0:
+                    vulnerability_ids_value += finding.cve
+                if vulnerability_ids_value.endswith('; '):
+                    vulnerability_ids_value = vulnerability_ids_value[:-2]
+                fields.append(vulnerability_ids_value)
+                # Tags
+                tags_value = ''
+                num_tags = 0
+                for tag in finding.tags.all():
+                    num_tags += 1
+                    if num_tags > 5:
+                        tags_value += '...'
+                        break
+                    tags_value += f'{str(tag)}; '
+                if tags_value.endswith('; '):
+                    tags_value = tags_value[:-2]
+                fields.append(tags_value)
 
-            writer.writerow(fields)
+                self.fields = fields
+                self.finding = finding
+                self.add_extra_values()
 
-    return response
+                writer.writerow(fields)
+
+        return response
 
 
-def excel_export(request):
-    findings, obj = get_findings(request)
-    workbook = Workbook()
-    workbook.iso_dates = True
-    worksheet = workbook.active
-    worksheet.title = 'Findings'
-    font_bold = Font(bold=True)
-    allowed_attributes = get_attributes()
-    excludes_list = get_excludes()
-    allowed_foreign_keys = get_attributes()
+class ExcelExportView(View):
 
-    row_num = 1
-    for finding in findings:
-        if row_num == 1:
-            col_num = 1
-            for key in dir(finding):
-                try:
-                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
-                        if callable(getattr(finding, key)) and key not in allowed_attributes:
-                            continue
+    def add_findings_data(self):
+        return self.findings
+
+    def add_extra_headers(self):
+        pass
+
+    def add_extra_values(self):
+        pass
+
+    def get(self, request):
+        findings, _obj = get_findings(request)
+        self.findings = findings
+        findings = self.add_findings_data()
+        workbook = Workbook()
+        workbook.iso_dates = True
+        worksheet = workbook.active
+        worksheet.title = 'Findings'
+        self.worksheet = worksheet
+        font_bold = Font(bold=True)
+        self.font_bold = font_bold
+        allowed_attributes = get_attributes()
+        excludes_list = get_excludes()
+        allowed_foreign_keys = get_attributes()
+
+        row_num = 1
+        for finding in findings:
+            if row_num == 1:
+                col_num = 1
+                for key in dir(finding):
+                    try:
+                        if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                            if callable(getattr(finding, key)) and key not in allowed_attributes:
+                                continue
+                            cell = worksheet.cell(row=row_num, column=col_num, value=key)
+                            cell.font = font_bold
+                            col_num += 1
+                    except Exception as exc:
+                        logger.error('Error in attribute: ' + str(exc))
                         cell = worksheet.cell(row=row_num, column=col_num, value=key)
-                        cell.font = font_bold
-                        col_num += 1
-                except Exception as exc:
-                    logger.error('Error in attribute: ' + str(exc))
-                    cell = worksheet.cell(row=row_num, column=col_num, value=key)
-                    continue
-            cell = worksheet.cell(row=row_num, column=col_num, value='found_by')
-            cell.font = font_bold
-            col_num += 1
-            worksheet.cell(row=row_num, column=col_num, value='engagement_id')
-            cell = cell.font = font_bold
-            col_num += 1
-            cell = worksheet.cell(row=row_num, column=col_num, value='engagement')
-            cell.font = font_bold
-            col_num += 1
-            cell = worksheet.cell(row=row_num, column=col_num, value='product_id')
-            cell.font = font_bold
-            col_num += 1
-            cell = worksheet.cell(row=row_num, column=col_num, value='product')
-            cell.font = font_bold
-            col_num += 1
-            cell = worksheet.cell(row=row_num, column=col_num, value='endpoints')
-            cell.font = font_bold
-            col_num += 1
-            cell = worksheet.cell(row=row_num, column=col_num, value='vulnerability_ids')
-            cell.font = font_bold
+                        continue
+                cell = worksheet.cell(row=row_num, column=col_num, value='found_by')
+                cell.font = font_bold
+                col_num += 1
+                worksheet.cell(row=row_num, column=col_num, value='engagement_id')
+                cell = cell.font = font_bold
+                col_num += 1
+                cell = worksheet.cell(row=row_num, column=col_num, value='engagement')
+                cell.font = font_bold
+                col_num += 1
+                cell = worksheet.cell(row=row_num, column=col_num, value='product_id')
+                cell.font = font_bold
+                col_num += 1
+                cell = worksheet.cell(row=row_num, column=col_num, value='product')
+                cell.font = font_bold
+                col_num += 1
+                cell = worksheet.cell(row=row_num, column=col_num, value='endpoints')
+                cell.font = font_bold
+                col_num += 1
+                cell = worksheet.cell(row=row_num, column=col_num, value='vulnerability_ids')
+                cell.font = font_bold
+                col_num += 1
+                cell = worksheet.cell(row=row_num, column=col_num, value='tags')
+                cell.font = font_bold
+                col_num += 1
+                self.row_num = row_num
+                self.col_num = col_num
+                self.add_extra_headers()
 
-            row_num = 2
-        if row_num > 1:
-            col_num = 1
-            for key in dir(finding):
-                try:
-                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
-                        if not callable(getattr(finding, key)):
-                            value = finding.__dict__.get(key)
-                        if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
-                            if callable(getattr(finding, key)):
-                                func = getattr(finding, key)
-                                result = func()
-                                value = result
-                            else:
-                                value = str(getattr(finding, key))
-                        if value and isinstance(value, datetime):
-                            value = value.replace(tzinfo=None)
-                        worksheet.cell(row=row_num, column=col_num, value=value)
-                        col_num += 1
-                except Exception as exc:
-                    logger.error('Error in attribute: ' + str(exc))
-                    worksheet.cell(row=row_num, column=col_num, value="Value not supported")
-                    continue
-            worksheet.cell(row=row_num, column=col_num, value=finding.test.test_type.name)
-            col_num += 1
-            worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.id)
-            col_num += 1
-            worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.name)
-            col_num += 1
-            worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.id)
-            col_num += 1
-            worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.name)
-            col_num += 1
+                row_num = 2
+            if row_num > 1:
+                col_num = 1
+                for key in dir(finding):
+                    try:
+                        if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                            if not callable(getattr(finding, key)):
+                                value = finding.__dict__.get(key)
+                            if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
+                                if callable(getattr(finding, key)):
+                                    func = getattr(finding, key)
+                                    result = func()
+                                    value = result
+                                else:
+                                    value = str(getattr(finding, key))
+                            if value and isinstance(value, datetime):
+                                value = value.replace(tzinfo=None)
+                            worksheet.cell(row=row_num, column=col_num, value=value)
+                            col_num += 1
+                    except Exception as exc:
+                        logger.error('Error in attribute: ' + str(exc))
+                        worksheet.cell(row=row_num, column=col_num, value="Value not supported")
+                        continue
+                worksheet.cell(row=row_num, column=col_num, value=finding.test.test_type.name)
+                col_num += 1
+                worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.id)
+                col_num += 1
+                worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.name)
+                col_num += 1
+                worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.id)
+                col_num += 1
+                worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.name)
+                col_num += 1
 
-            endpoint_value = ''
-            num_endpoints = 0
-            for endpoint in finding.endpoints.all():
-                num_endpoints += 1
-                if num_endpoints > 5:
-                    endpoint_value += '...'
-                    break
-                endpoint_value += f'{str(endpoint)}; \n'
-            if endpoint_value.endswith('; \n'):
-                endpoint_value = endpoint_value[:-3]
-            worksheet.cell(row=row_num, column=col_num, value=endpoint_value)
-            col_num += 1
+                endpoint_value = ''
+                num_endpoints = 0
+                for endpoint in finding.endpoints.all():
+                    num_endpoints += 1
+                    endpoint_value += f'{str(endpoint)}; \n'
+                if endpoint_value.endswith('; \n'):
+                    endpoint_value = endpoint_value[:-3]
+                if len(endpoint_value) > EXCEL_CHAR_LIMIT:
+                    endpoint_value = endpoint_value[:EXCEL_CHAR_LIMIT - 3] + '...'
+                worksheet.cell(row=row_num, column=col_num, value=endpoint_value)
+                col_num += 1
 
-            vulnerability_ids_value = ''
-            num_vulnerability_ids = 0
-            for vulnerability_id in finding.vulnerability_ids:
-                num_vulnerability_ids += 1
-                if num_vulnerability_ids > 5:
-                    vulnerability_ids_value += '...'
-                    break
-                vulnerability_ids_value += f'{str(vulnerability_id)}; \n'
-            if finding.cve and vulnerability_ids_value.find(finding.cve) < 0:
-                vulnerability_ids_value += finding.cve
-            if vulnerability_ids_value.endswith('; \n'):
-                vulnerability_ids_value = vulnerability_ids_value[:-3]
-            worksheet.cell(row=row_num, column=col_num, value=vulnerability_ids_value)
+                vulnerability_ids_value = ''
+                num_vulnerability_ids = 0
+                for vulnerability_id in finding.vulnerability_ids:
+                    num_vulnerability_ids += 1
+                    if num_vulnerability_ids > 5:
+                        vulnerability_ids_value += '...'
+                        break
+                    vulnerability_ids_value += f'{str(vulnerability_id)}; \n'
+                if finding.cve and vulnerability_ids_value.find(finding.cve) < 0:
+                    vulnerability_ids_value += finding.cve
+                if vulnerability_ids_value.endswith('; \n'):
+                    vulnerability_ids_value = vulnerability_ids_value[:-3]
+                worksheet.cell(row=row_num, column=col_num, value=vulnerability_ids_value)
+                col_num += 1
+                # tags
+                tags_value = ''
+                for tag in finding.tags.all():
+                    tags_value += f'{str(tag)}; \n'
+                if tags_value.endswith('; \n'):
+                    tags_value = tags_value[:-3]
+                worksheet.cell(row=row_num, column=col_num, value=tags_value)
+                col_num += 1
+                self.col_num = col_num
+                self.row_num = row_num
+                self.finding = finding
+                self.add_extra_values()
+            row_num += 1
 
-        row_num += 1
+        with NamedTemporaryFile() as tmp:
+            workbook.save(tmp.name)
+            tmp.seek(0)
+            stream = tmp.read()
 
-    with NamedTemporaryFile() as tmp:
-        workbook.save(tmp.name)
-        tmp.seek(0)
-        stream = tmp.read()
-
-    response = HttpResponse(
-        content=stream,
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
-    response['Content-Disposition'] = 'attachment; filename=findings.xlsx'
-    return response
+        response = HttpResponse(
+            content=stream,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename=findings.xlsx'
+        return response

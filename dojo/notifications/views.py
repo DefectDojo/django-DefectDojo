@@ -90,7 +90,7 @@ class SystemNotificationsView(View):
         # Set up the initial context
         context = self.get_initial_context(request, notifications, self.get_scope())
         # Determine the validity of the form
-        request, success = self.process_form(request, context)
+        request, _success = self.process_form(request, context)
         # Add any breadcrumbs
         request = self.set_breadcrumbs(request)
         # Render the page

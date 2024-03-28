@@ -14,7 +14,7 @@ class TestDojoCloseOld(DojoTestCase):
         scan_type = "Acunetix Scan"
 
         user, _ = User.objects.get_or_create(username="admin")
-        user_reporter, _ = User.objects.get_or_create(username="user_reporter")
+        _user_reporter, _ = User.objects.get_or_create(username="user_reporter")
 
         product_type, _ = Product_Type.objects.get_or_create(name="closeold")
         product, _ = Product.objects.get_or_create(
@@ -32,7 +32,7 @@ class TestDojoCloseOld(DojoTestCase):
         scan_date = None
         environment, _ = Development_Environment.objects.get_or_create(name="Development")
         # Import first test
-        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
+        _test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
                     active=True, verified=False, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None)
@@ -40,7 +40,7 @@ class TestDojoCloseOld(DojoTestCase):
         self.assertEqual(4, len_new_findings)
         self.assertEqual(0, len_closed_findings)
         # Import same test, should close no findings
-        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
+        _test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
                     active=True, verified=False, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, api_scan_configuration=None)
@@ -48,7 +48,7 @@ class TestDojoCloseOld(DojoTestCase):
         self.assertEqual(0, len_closed_findings)
         # Import test with only one finding. Remaining findings should close
         scan = open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml")
-        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
+        _test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
                     active=True, verified=False, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, api_scan_configuration=None)
@@ -62,7 +62,7 @@ class TestDojoCloseOld(DojoTestCase):
         scan_type = "Acunetix Scan"
 
         user, _ = User.objects.get_or_create(username="admin")
-        user_reporter, _ = User.objects.get_or_create(username="user_reporter")
+        _user_reporter, _ = User.objects.get_or_create(username="user_reporter")
 
         product_type, _ = Product_Type.objects.get_or_create(name="test2")
         product, _ = Product.objects.get_or_create(
@@ -92,7 +92,7 @@ class TestDojoCloseOld(DojoTestCase):
         scan_date = None
         environment, _ = Development_Environment.objects.get_or_create(name="Development")
         # Import first test
-        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement1, lead=None, environment=environment,
+        _test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement1, lead=None, environment=environment,
                     active=True, verified=False, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, close_old_findings_product_scope=True, group_by=None, api_scan_configuration=None)
@@ -100,7 +100,7 @@ class TestDojoCloseOld(DojoTestCase):
         self.assertEqual(4, len_new_findings)
         self.assertEqual(0, len_closed_findings)
         # Import same test, should close no findings
-        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement2, lead=None, environment=environment,
+        _test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement2, lead=None, environment=environment,
                     active=True, verified=False, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=True, close_old_findings_product_scope=True, group_by=None, api_scan_configuration=None)
@@ -108,7 +108,7 @@ class TestDojoCloseOld(DojoTestCase):
         self.assertEqual(0, len_closed_findings)
         # Import test with only one finding. Remaining findings should close
         scan = open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml")
-        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement3, lead=None, environment=environment,
+        _test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement3, lead=None, environment=environment,
                     active=True, verified=False, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=True, close_old_findings_product_scope=True, group_by=None, api_scan_configuration=None)

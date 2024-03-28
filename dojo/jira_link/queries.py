@@ -64,14 +64,14 @@ def get_authorized_jira_projects(permission, user=None):
         product__prod_type__authorized_group=Exists(product_authorized_product_type_groups),
         product__authorized_group=Exists(product_authorized_product_groups))
     jira_projects = jira_projects.filter(
-        Q(engagement__product__prod_type__member=True) |
-        Q(engagement__product__member=True) |
-        Q(engagement__product__prod_type__authorized_group=True) |
-        Q(engagement__product__authorized_group=True) |
-        Q(product__prod_type__member=True) |
-        Q(product__member=True) |
-        Q(product__prod_type__authorized_group=True) |
-        Q(product__authorized_group=True))
+        Q(engagement__product__prod_type__member=True)
+        | Q(engagement__product__member=True)
+        | Q(engagement__product__prod_type__authorized_group=True)
+        | Q(engagement__product__authorized_group=True)
+        | Q(product__prod_type__member=True)
+        | Q(product__member=True)
+        | Q(product__prod_type__authorized_group=True)
+        | Q(product__authorized_group=True))
 
     return jira_projects
 
@@ -153,17 +153,17 @@ def get_authorized_jira_issues(permission):
         finding__test__engagement__product__prod_type__authorized_group=Exists(finding_authorized_product_type_groups),
         finding__test__engagement__product__authorized_group=Exists(finding_authorized_product_groups))
     jira_issues = jira_issues.filter(
-        Q(engagement__product__prod_type__member=True) |
-        Q(engagement__product__member=True) |
-        Q(engagement__product__prod_type__authorized_group=True) |
-        Q(engagement__product__authorized_group=True) |
-        Q(finding_group__test__engagement__product__prod_type__member=True) |
-        Q(finding_group__test__engagement__product__member=True) |
-        Q(finding_group__test__engagement__product__prod_type__authorized_group=True) |
-        Q(finding_group__test__engagement__product__authorized_group=True) |
-        Q(finding__test__engagement__product__prod_type__member=True) |
-        Q(finding__test__engagement__product__member=True) |
-        Q(finding__test__engagement__product__prod_type__authorized_group=True) |
-        Q(finding__test__engagement__product__authorized_group=True))
+        Q(engagement__product__prod_type__member=True)
+        | Q(engagement__product__member=True)
+        | Q(engagement__product__prod_type__authorized_group=True)
+        | Q(engagement__product__authorized_group=True)
+        | Q(finding_group__test__engagement__product__prod_type__member=True)
+        | Q(finding_group__test__engagement__product__member=True)
+        | Q(finding_group__test__engagement__product__prod_type__authorized_group=True)
+        | Q(finding_group__test__engagement__product__authorized_group=True)
+        | Q(finding__test__engagement__product__prod_type__member=True)
+        | Q(finding__test__engagement__product__member=True)
+        | Q(finding__test__engagement__product__prod_type__authorized_group=True)
+        | Q(finding__test__engagement__product__authorized_group=True))
 
     return jira_issues

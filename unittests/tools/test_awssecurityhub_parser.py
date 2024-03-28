@@ -66,6 +66,8 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2022-3643", finding.unsaved_vulnerability_ids[0])
             self.assertEqual("- Update kernel-4.14.301\n\t- yum update kernel\n", finding.mitigation)
+            endpoint = finding.unsaved_endpoints[0]
+            self.assertEqual('AwsEc2Instance arn:aws:ec2:us-east-1:XXXXXXXXXXXX:i-11111111111111111', endpoint.host)
 
     def test_inspector_ec2_with_no_vulnerabilities(self):
         with open(get_unit_tests_path() + sample_path("inspector_ec2_cve_no_vulnerabilities.json")) as test_file:
@@ -87,6 +89,8 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertIn("GHSA-p98r-538v-jgw5", finding.title)
             self.assertSetEqual({"CVE-2023-34256", "GHSA-p98r-538v-jgw5"}, set(finding.unsaved_vulnerability_ids))
             self.assertEqual("https://github.com/bottlerocket-os/bottlerocket/security/advisories/GHSA-p98r-538v-jgw5", finding.references)
+            endpoint = finding.unsaved_endpoints[0]
+            self.assertEqual('AwsEc2Instance arn:aws:ec2:eu-central-1:012345678912:instance/i-07c11cc535d830123', endpoint.host)
 
     def test_inspector_ecr(self):
         with open(get_unit_tests_path() + sample_path("inspector_ecr.json")) as test_file:
@@ -102,6 +106,8 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertIn("repo-os/sha256:af965ef68c78374a5f987fce98c0ddfa45801df2395bf012c50b863e65978d74", finding.impact)
             self.assertIn("Repository: repo-os", finding.impact)
             self.assertEqual(0.0014, finding.epss_score)
+            endpoint = finding.unsaved_endpoints[0]
+            self.assertEqual('AwsEcrContainerImage arn:aws:ecr:eu-central-1:123456789012:repository/repo-os/sha256:af965ef68c78374a5f987fce98c0ddfa45801df2395bf012c50b863e65978d74', endpoint.host)
 
     def test_guardduty(self):
         with open(get_unit_tests_path() + sample_path("guardduty.json")) as test_file:
@@ -116,3 +122,5 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertTrue(finding.active)
             self.assertEqual("User AssumedRole : 123123123 is anomalously invoking APIs commonly used in Discovery tactics. - Resource: 123123123", finding.title)
             self.assertEqual("TTPs/Discovery/IAMUser-AnomalousBehavior\nhttps://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html", finding.mitigation)
+            endpoint = findings[0].unsaved_endpoints[0]
+            self.assertEqual('AwsEc2Instance arn:aws:ec2:us-east-1:123456789012:instance/i-1234567890', endpoint.host)

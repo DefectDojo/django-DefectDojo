@@ -162,7 +162,7 @@ class SnykParser(object):
                     # Per the current json format, if several CWEs, take the
                     # first one.
                     finding.cwe = int(cwes[0].split("-")[1])
-                    if len(vulnerability["identifiers"]["CVE"]) > 1:
+                    if len(vulnerability["identifiers"]["CWE"]) > 1:
                         cwe_references = ", ".join(cwes)
                 else:
                     finding.cwe = 1035

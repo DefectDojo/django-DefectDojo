@@ -232,13 +232,7 @@ class GenericParser(object):
 
             # manage internal de-duplication
             key = hashlib.sha256(
-                "|".join(
-                    [
-                        finding.severity,
-                        finding.title,
-                        finding.description,
-                    ]
-                ).encode("utf-8")
+                f"{finding.severity}|{finding.title}|{finding.description}".encode("utf-8")
             ).hexdigest()
             if key in dupes:
                 find = dupes[key]

@@ -136,3 +136,24 @@ class TestTrivyOperatorParser(DojoTestCase):
         self.assertEqual(5.9, finding.cvssv3_score)
         self.assertEqual("ubuntu:20.04 (ubuntu 20.04)", finding.file_path)
         self.assertEqual("os-pkgs, ubuntu", str(finding.tags))
+
+    def test_cis_benchmark(self):
+        test_file = open(sample_path("cis_benchmark.json"))
+        parser = TrivyOperatorParser()
+        findings = parser.get_findings(test_file, Test())
+        self.assertEqual(len(findings), 795)
+        finding = findings[0]
+        self.assertEqual("5.1.2 AVD-KSV-0041 /clusterrole-admin", finding.title)
+        self.assertEqual("High", finding.severity)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("AVD-KSV-0041", finding.unsaved_vulnerability_ids[0])
+        finding = findings[40]
+        self.assertEqual("5.2.2 AVD-KSV-0017 kube-system/daemonset-csi-azuredisk-node", finding.title)
+        self.assertEqual("High", finding.severity)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("AVD-KSV-0017", finding.unsaved_vulnerability_ids[0])
+        finding = findings[150]
+        self.assertEqual("5.2.7 AVD-KSV-0012 opentelemetry-demo/replicaset-opentelemetry-demo-frauddetectionservice-6c6c4b7994", finding.title)
+        self.assertEqual("Medium", finding.severity)
+        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+        self.assertEqual("AVD-KSV-0012", finding.unsaved_vulnerability_ids[0])

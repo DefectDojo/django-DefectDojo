@@ -2277,7 +2277,7 @@ def apply_cwe_mitigation(apply_to_findings, template, update=True):
                         "CWE remediation text applied to finding for CWE: %s using template: %s."
                         % (template.cwe, template.title)
                     )
-                    new_note.author, created = User.objects.get_or_create(
+                    new_note.author, _created = User.objects.get_or_create(
                         username="System"
                     )
                     new_note.save()
@@ -2477,7 +2477,7 @@ def download_finding_pic(request, token):
         image = size_map[size](source=file).generate()
         response = StreamingHttpResponse(FileIterWrapper(image))
         response["Content-Disposition"] = "inline"
-        mimetype, encoding = mimetypes.guess_type(file_name)
+        mimetype, _encoding = mimetypes.guess_type(file_name)
         response["Content-Type"] = mimetype
         return response
 
@@ -3019,7 +3019,7 @@ def finding_bulk_update_all(request, pid=None):
                         (
                             can_be_pushed_to_jira,
                             error_message,
-                            error_code,
+                            _error_code,
                         ) = jira_helper.can_be_pushed_to_jira(group)
                         if not can_be_pushed_to_jira:
                             error_counts[error_message] += 1
@@ -3071,7 +3071,7 @@ def finding_bulk_update_all(request, pid=None):
                         (
                             can_be_pushed_to_jira,
                             error_message,
-                            error_code,
+                            _error_code,
                         ) = jira_helper.can_be_pushed_to_jira(finding)
                         if finding.has_jira_group_issue and not finding.has_jira_issue:
                             error_message = (

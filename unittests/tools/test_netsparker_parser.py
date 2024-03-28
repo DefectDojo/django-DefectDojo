@@ -68,3 +68,17 @@ class TestNetsparkerParser(DojoTestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual(str(endpoint), "http://php.testsparker.com")
+
+    def test_parse_file_issue_9816(self):
+        testfile = open("unittests/scans/netsparker/issue_9816.json")
+        parser = NetsparkerParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(3, len(findings))
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("High", finding.severity)
+            self.assertEqual(614, finding.cwe)
+            self.assertEqual("03/02/2019", finding.date.strftime("%d/%m/%Y"))

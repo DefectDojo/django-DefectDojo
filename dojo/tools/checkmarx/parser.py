@@ -54,11 +54,11 @@ class CheckmarxParser(object):
         #  - value: a list of vuln_id_from_tool
         vuln_ids_from_tool = dict()
         for query in root.findall("Query"):
-            name, cwe, categories, queryId = self.getQueryElements(query)
+            _name, _cwe, categories, _queryId = self.getQueryElements(query)
             language = ""
             findingdetail = ""
             group = ""
-            find_date = parser.parse(root.get("ScanStart"))
+            find_date = parser.parse(root.get("ScanStart")).date()
 
             if query.get("Language") is not None:
                 language = query.get("Language")
@@ -142,7 +142,7 @@ class CheckmarxParser(object):
         Create the finding and add it into the dupes list
         If a vuln with the same file_path was found before, updates the description
         """
-        name, cwe, categories, queryId = self.getQueryElements(query)
+        _name, cwe, _categories, queryId = self.getQueryElements(query)
         titleStart = query.get("name").replace("_", " ")
         description, lastPathnode = self.get_description_file_name_aggregated(
             query, result
@@ -159,7 +159,7 @@ class CheckmarxParser(object):
         active = self.isActive(state)
         verified = self.isVerified(state)
 
-        if not (aggregateKeys in dupes):
+        if aggregateKeys not in dupes:
             find = Finding(
                 title=title,
                 cwe=int(cwe),
@@ -389,9 +389,9 @@ class CheckmarxParser(object):
 
     def _parse_date(self, value):
         if isinstance(value, str):
-            return parser.parse(value)
+            return parser.parse(value).date()
         elif isinstance(value, dict) and isinstance(value.get("seconds"), int):
-            return datetime.datetime.utcfromtimestamp(value.get("seconds"))
+            return datetime.datetime.utcfromtimestamp(value.get("seconds")).date()
         else:
             return None
 

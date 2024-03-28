@@ -1,3 +1,4 @@
+from dojo.models import System_Settings
 from django.core.exceptions import ValidationError
 from django.db.models.deletion import RestrictedError
 from rest_framework.response import Response
@@ -30,6 +31,10 @@ def custom_exception_handler(exc, context):
         response.data["message"] = str(exc)
     else:
         if response is None:
+            if System_Settings.objects.get().api_expose_error_details:
+                exception_message = str(exc.args[0])
+            else:
+                exception_message = "Internal server error, check logs for details"
             # There is no standard error response, so we assume an unexpected
             # exception. It is logged but no details are given to the user,
             # to avoid leaking internal technical information.
@@ -39,7 +44,7 @@ def custom_exception_handler(exc, context):
             response.data = {}
             response.data[
                 "message"
-            ] = "Internal server error, check logs for details"
+            ] = exception_message
         else:
             if response.status_code < 500:
                 # HTTP status codes lower than 500 are no technical errors.

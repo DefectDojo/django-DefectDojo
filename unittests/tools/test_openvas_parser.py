@@ -47,6 +47,40 @@ class TestOpenVASParser(DojoTestCase):
             self.assertEqual("LOGSRV", endpoint.host)
             self.assertEqual("tcp", endpoint.protocol)
             self.assertEqual(9200, endpoint.port)
+            finding = findings[2]
+            self.assertEqual(finding.unsaved_vulnerability_ids[0], "CVE-2011-3389")
+
+    def test_openvas_csv_report_usingCVE(self):
+        with open("unittests/scans/openvas/report_using_CVE.csv") as f:
+            test = Test()
+            test.engagement = Engagement()
+            test.engagement.product = Product()
+            parser = OpenVASParser()
+            findings = parser.get_findings(f, test)
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual(43, len(findings))
+            finding = findings[4]
+            self.assertEqual("CVE-2014-0117", finding.title)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual(finding.unsaved_vulnerability_ids[0], "CVE-2014-0117")
+
+    def test_openvas_csv_report_usingOpenVAS(self):
+        with open("unittests/scans/openvas/report_using_openVAS.csv") as f:
+            test = Test()
+            test.engagement = Engagement()
+            test.engagement.product = Product()
+            parser = OpenVASParser()
+            findings = parser.get_findings(f, test)
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual(13, len(findings))
+            finding = findings[2]
+            self.assertEqual("Apache HTTP Server Detection Consolidation", finding.title)
+            self.assertEqual("Info", finding.severity)
+            self.assertEqual(finding.unsaved_vulnerability_ids, list())
 
     def test_openvas_xml_no_vuln(self):
         with open("unittests/scans/openvas/no_vuln.xml") as f:

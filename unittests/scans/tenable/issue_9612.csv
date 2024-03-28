@@ -1,0 +1,28 @@
+"Plugin","Plugin Name","Family","Severity","IP Address","Protocol","Port","Exploit?","Repository","MAC Address","DNS Name","NetBIOS Name","Plugin Output","Synopsis","Description","Solution","See Also","Risk Factor","STIG Severity","Vulnerability Priority Rating","CVSS V2 Base Score","CVSS V3 Base Score","CVSS V2 Temporal Score","CVSS V3 Temporal Score","CVSS V2 Vector","CVSS V3 Vector","CPE","CVE","BID","Cross References","First Discovered","Last Observed","Vuln Publication Date","Patch Publication Date","Plugin Publication Date","Plugin Modification Date","Exploit Ease","Exploit Frameworks","Check Type","Version","Recast Risk Comment","Accept Risk Comment","Agent ID","Host ID"
+"73756","Microsoft SQL Server Unsupported Version Detection (remote check)","Databases","Critical","2.3.4.5","TCP","1433","No","Individual Scan","9c:8e:99:1b:8b:dc","","WORKGROUP\ECODARCHDB","Plugin Output: 
+The following unsupported installation of Microsoft SQL Server was
+detected :
+
+
+  Installed version : 10.50.6560.0
+  Fixed version     : This version is no longer supported.","An unsupported version of a database server is running on the remote host.","According to its self-reported version number, the installation of Microsoft SQL Server on the remote host is no longer supported.
+
+Lack of support implies that no new security patches for the product will be released by the vendor. As a result, it is likely to contain security vulnerabilities.","Upgrade to a version of Microsoft SQL Server that is currently supported.","http://www.nessus.org/u?d4418a57","Critical","","","10.0","10.0","","","AV:N/AC:L/Au:N/C:C/I:C/A:C","AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H","cpe:/a:microsoft:sql_server","","","IAVA #0001-A-0560","Feb 5, 2024 21:01:08 UTC","Feb 19, 2024 21:01:01 UTC","N/A","N/A","Apr 29, 2014 12:00:00 UTC","Dec 6, 2022 12:00:00 UTC","","","remote","1.26","","","",""
+"73756","Microsoft SQL Server Unsupported Version Detection (remote check)","Databases","Critical","2.3.4.5","TCP","5555","No","Individual Scan","9c:8e:99:1b:8b:dc","","WORKGROUP\ECODARCHDB","Plugin Output: 
+The following unsupported installation of Microsoft SQL Server was
+detected :
+
+
+  Installed version : 10.50.6560.0
+  Fixed version     : This version is no longer supported.","An unsupported version of a database server is running on the remote host.","According to its self-reported version number, the installation of Microsoft SQL Server on the remote host is no longer supported.
+
+Lack of support implies that no new security patches for the product will be released by the vendor. As a result, it is likely to contain security vulnerabilities.","Upgrade to a version of Microsoft SQL Server that is currently supported.","http://www.nessus.org/u?d4418a57","Critical","","","10.0","10.0","","","AV:N/AC:L/Au:N/C:C/I:C/A:C","AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H","cpe:/a:microsoft:sql_server","","","IAVA #0001-A-0560","Feb 5, 2024 21:01:08 UTC","Feb 19, 2024 21:01:01 UTC","N/A","N/A","Apr 29, 2014 12:00:00 UTC","Dec 6, 2022 12:00:00 UTC","","","remote","1.26","","","",""
+"73756","Microsoft SQL Server Unsupported Version Detection (remote check)","Databases","Critical","1.2.3.4","TCP","1433","No","Individual Scan","9c:8e:99:1b:8b:dc","","WORKGROUP\ECODARCHDB","Plugin Output: 
+The following unsupported installation of Microsoft SQL Server was
+detected :
+
+
+  Installed version : 10.50.6560.0
+  Fixed version     : This version is no longer supported.","An unsupported version of a database server is running on the remote host.","According to its self-reported version number, the installation of Microsoft SQL Server on the remote host is no longer supported.
+
+Lack of support implies that no new security patches for the product will be released by the vendor. As a result, it is likely to contain security vulnerabilities.","Upgrade to a version of Microsoft SQL Server that is currently supported.","http://www.nessus.org/u?d4418a57","Critical","","","10.0","10.0","","","AV:N/AC:L/Au:N/C:C/I:C/A:C","AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H","cpe:/a:microsoft:sql_server","","","IAVA #0001-A-0560","Feb 5, 2024 21:01:08 UTC","Feb 19, 2024 21:01:01 UTC","N/A","N/A","Apr 29, 2014 12:00:00 UTC","Dec 6, 2022 12:00:00 UTC","","","remote","1.26","","","",""

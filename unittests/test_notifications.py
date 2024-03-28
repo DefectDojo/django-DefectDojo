@@ -54,3 +54,4 @@ class TestNotifications(DojoTestCase):
         self.assertEqual('mail' in merged_notifications.other, True)
         self.assertEqual('slack' in merged_notifications.other, True)  # default alert from global
         self.assertEqual(len(merged_notifications.other), 3)
+        self.assertEqual(merged_notifications.other, {'alert', 'mail', 'slack'})
