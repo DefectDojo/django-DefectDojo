@@ -1,5 +1,6 @@
 import collections
 import warnings
+from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from drf_spectacular.types import OpenApiTypes
 
 from drf_spectacular.utils import extend_schema_field
@@ -1258,7 +1259,7 @@ class ApiFindingFilter(DojoFilter):
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Not Tag name contains', exclude='True')
     not_tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
                                  help_text='Comma separated list of exact tags not present on model', exclude='True')
-    not_test__tags = CharFieldInFilter(field_name='test__tags__name', lookup_expr='in', help_text='Comma separated list of exact tags present on test')
+    not_test__tags = CharFieldInFilter(field_name='test__tags__name', lookup_expr='in', exclude='True', help_text='Comma separated list of exact tags present on test')
     not_test__engagement__tags = CharFieldInFilter(field_name='test__engagement__tags__name', lookup_expr='in',
                                                    help_text='Comma separated list of exact tags not present on engagement',
                                                    exclude='True')
@@ -1538,9 +1539,15 @@ class AcceptedFindingFilter(FindingFilter):
             queryset=Dojo_User.objects.none(),
             label="Risk Acceptance Owner")
 
+    risk_acceptance = ModelMultipleChoiceFilter(
+        queryset=Risk_Acceptance.objects.none(),
+        label="Accepted By"
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.form.fields['risk_acceptance__owner'].queryset = get_authorized_users(Permissions.Finding_View)
+        self.form.fields['risk_acceptance'].queryset = get_authorized_risk_acceptances(Permissions.Risk_Acceptance)
 
 
 class SimilarFindingFilter(FindingFilter):

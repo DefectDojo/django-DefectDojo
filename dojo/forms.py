@@ -3,6 +3,7 @@ import re
 from datetime import datetime, date
 import pickle
 import warnings
+from dojo.widgets import TableCheckboxWidget
 from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
@@ -195,8 +196,8 @@ class Add_Product_Type_MemberForm(forms.ModelForm):
         super(Add_Product_Type_MemberForm, self).__init__(*args, **kwargs)
         current_members = Product_Type_Member.objects.filter(product_type=self.initial["product_type"]).values_list('user', flat=True)
         self.fields['users'].queryset = Dojo_User.objects.exclude(
-            Q(is_superuser=True) |
-            Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
+            Q(is_superuser=True)
+            | Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
         self.fields['product_type'].disabled = True
 
     class Meta:
@@ -342,8 +343,8 @@ class Add_Product_MemberForm(forms.ModelForm):
         self.fields['product'].disabled = True
         current_members = Product_Member.objects.filter(product=self.initial["product"]).values_list('user', flat=True)
         self.fields['users'].queryset = Dojo_User.objects.exclude(
-            Q(is_superuser=True) |
-            Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
+            Q(is_superuser=True)
+            | Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
 
     class Meta:
         model = Product_Member
@@ -786,15 +787,17 @@ class ReplaceRiskAcceptanceProofForm(forms.ModelForm):
 
 
 class AddFindingsRiskAcceptanceForm(forms.ModelForm):
+
     accepted_findings = forms.ModelMultipleChoiceField(
-        queryset=Finding.objects.none(), required=True,
-        widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
-        help_text=('Select to add findings.'), label="Add findings as accepted:")
+        queryset=Finding.objects.none(),
+        required=True,
+        label="",
+        widget=TableCheckboxWidget(attrs={'size': 25})
+    )
 
     class Meta:
         model = Risk_Acceptance
         fields = ['accepted_findings']
-        # exclude = ('name', 'owner', 'path', 'notes', 'accepted_by', 'expiration_date', 'compensating_control')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -836,8 +839,8 @@ class CheckForm(forms.ModelForm):
 class EngForm(forms.ModelForm):
     name = forms.CharField(
         max_length=300, required=False,
-        help_text="Add a descriptive name to identify this engagement. " +
-                  "Without a name the target start date will be set.")
+        help_text="Add a descriptive name to identify this engagement. "
+                  + "Without a name the target start date will be set.")
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False, help_text="Description of the engagement and details regarding the engagement.")
     product = forms.ModelChoiceField(label='Product',
@@ -1544,7 +1547,7 @@ class AddEndpointForm(forms.Form):
     def save(self):
         processed_endpoints = []
         for e in self.endpoints_to_process:
-            endpoint, created = endpoint_get_or_create(
+            endpoint, _created = endpoint_get_or_create(
                 protocol=e[0],
                 userinfo=e[1],
                 host=e[2],
@@ -1785,8 +1788,8 @@ class WeeklyMetricsForm(forms.Form):
                                                  hour=0, minute=0, second=0)
 
             wmf_options.append((end_of_period.strftime("%b %d %Y %H %M %S %Z"),
-                                start_of_period.strftime("%b %d") +
-                                " - " + end_of_period.strftime("%b %d")))
+                                start_of_period.strftime("%b %d")
+                                + " - " + end_of_period.strftime("%b %d")))
 
         wmf_options = tuple(wmf_options)
 
@@ -1872,8 +1875,8 @@ class Add_Group_MemberForm(forms.ModelForm):
         self.fields['group'].disabled = True
         current_members = Dojo_Group_Member.objects.filter(group=self.initial['group']).values_list('user', flat=True)
         self.fields['users'].queryset = Dojo_User.objects.exclude(
-            Q(is_superuser=True) |
-            Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
+            Q(is_superuser=True)
+            | Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
         self.fields['role'].queryset = get_group_member_roles()
 
     class Meta:
@@ -2762,7 +2765,7 @@ class JIRAProjectForm(forms.ModelForm):
                 # we have to check that we are not in a POST request where jira project config data is posted
                 # this is because initial values will overwrite the actual values entered by the user
                 # makes no sense, but seems to be accepted behaviour: https://code.djangoproject.com/ticket/30407
-                if jira_project_product and not (self.prefix + '-jira_instance') in self.data:
+                if jira_project_product and (self.prefix + '-jira_instance') not in self.data:
                     logger.debug('setting jira project fields from product2')
                     self.initial['jira_instance'] = jira_project_product.jira_instance.id if jira_project_product.jira_instance else None
                     self.initial['project_key'] = jira_project_product.project_key

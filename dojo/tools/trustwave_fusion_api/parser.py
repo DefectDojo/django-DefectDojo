@@ -30,9 +30,7 @@ class TrustwaveFusionAPIParser(object):
             item = get_item(node, test)
 
             item_key = hashlib.sha256(
-                "|".join(
-                    [item.severity, item.title, item.description]
-                ).encode()
+                f"{item.severity}|{item.title}|{item.description}".encode()
             ).hexdigest()
 
             if item_key in items:

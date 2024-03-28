@@ -76,7 +76,6 @@ class SysdigReportsParser(object):
             description += "k8sWorkloadType: " + k8sWorkloadType + "\n"
             description += "k8sWorkloadName: " + k8sWorkloadName + "\n"
             description += "k8sPodContainerName: " + k8sPodContainerName + "\n"
-            description += "vulnName: " + vulnName + "\n"
             description += "vulnCvssVersion: " + vulnCvssVersion + "\n"
             description += "vulnCvssScore: " + str(vulnCvssScore) + "\n"
             description += "vulnCvssVector: " + vulnCvssVector + "\n"
@@ -98,12 +97,14 @@ class SysdigReportsParser(object):
                 description=description,
                 severity=vulnSeverity,
                 mitigation=mitigation,
-                cve=vulnName,
                 static_finding=True,
                 references=vulnLink,
                 component_name=packageName,
                 component_version=packageVersion,
             )
+            if vulnName != '':
+                find.unsaved_vulnerability_ids = list()
+                find.unsaved_vulnerability_ids.append(vulnName)
             findings.append(find)
         return findings
 
@@ -119,7 +120,8 @@ class SysdigReportsParser(object):
             else:
                 finding.title = f"{row.vulnerability_id} - {row.package_name}"
             finding.vuln_id_from_tool = row.vulnerability_id
-            finding.cve = row.vulnerability_id
+            finding.unsaved_vulnerability_ids = list()
+            finding.unsaved_vulnerability_ids.append(row.vulnerability_id)
             finding.severity = row.severity
             # Set Component Version
             finding.component_name = row.package_name

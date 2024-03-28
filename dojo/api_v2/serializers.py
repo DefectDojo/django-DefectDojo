@@ -249,6 +249,8 @@ class TagListSerializerField(serializers.ListField):
         self.pretty_print = pretty_print
 
     def to_internal_value(self, data):
+        if isinstance(data, list) and data == [''] and self.allow_empty:
+            return []
         if isinstance(data, six.string_types):
             if not data:
                 data = []
@@ -2106,7 +2108,7 @@ class ImportScanSerializer(serializers.Serializer):
         allow_null=True, default=None, queryset=User.objects.all()
     )
     tags = TagListSerializerField(
-        required=False, help_text="Add tags that help describe this scan."
+        required=False, allow_empty=True, help_text="Add tags that help describe this scan."
     )
     close_old_findings = serializers.BooleanField(
         required=False,
@@ -2236,7 +2238,7 @@ class ImportScanSerializer(serializers.Serializer):
             product_type_name,
             auto_create_context,
             deduplication_on_engagement,
-            do_not_reactivate,
+            _do_not_reactivate,
         ) = get_import_meta_data_from_dict(data)
         engagement = get_or_create_engagement(
             engagement_id,
@@ -2262,9 +2264,9 @@ class ImportScanSerializer(serializers.Serializer):
         try:
             (
                 test,
-                finding_count,
-                closed_finding_count,
-                test_import,
+                _finding_count,
+                _closed_finding_count,
+                _test_import,
             ) = importer.import_scan(
                 scan,
                 scan_type,
@@ -2434,6 +2436,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     )
     tags = TagListSerializerField(
         required=False,
+        allow_empty=True,
         help_text="Modify existing tags that help describe this scan. (Existing test tags will be overwritten)",
     )
 
@@ -2554,11 +2557,11 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 reimporter = ReImporter()
                 (
                     test,
-                    finding_count,
-                    new_finding_count,
-                    closed_finding_count,
-                    reactivated_finding_count,
-                    untouched_finding_count,
+                    _finding_count,
+                    _new_finding_count,
+                    _closed_finding_count,
+                    _reactivated_finding_count,
+                    _untouched_finding_count,
                     test_import,
                 ) = reimporter.reimport_scan(
                     scan,
@@ -2605,8 +2608,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 importer = Importer()
                 (
                     test,
-                    finding_count,
-                    closed_finding_count,
+                    _finding_count,
+                    _closed_finding_count,
                     _,
                 ) = importer.import_scan(
                     scan,
@@ -2797,7 +2800,7 @@ class ImportLanguagesSerializer(serializers.Serializer):
                 try:
                     (
                         language_type,
-                        created,
+                        _created,
                     ) = Language_Type.objects.get_or_create(language=name)
                 except Language_Type.MultipleObjectsReturned:
                     language_type = Language_Type.objects.filter(
