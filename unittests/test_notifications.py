@@ -71,7 +71,7 @@ class TestNotifications(DojoTestCase):
             notif_system.user_mentioned = ()  # no alert
             notif_system.save()
             create_notification(event="user_mentioned", title="user_mentioned", recipients=['admin'])
-            self.assertEqual(mock.call_count, last_count + 0)
+            self.assertEqual(mock.call_count, last_count)
 
         last_count = mock.call_count
         with self.subTest('user off, system on'):
