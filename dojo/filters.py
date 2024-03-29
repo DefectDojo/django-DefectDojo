@@ -16,7 +16,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
-    BooleanFilter, NumberFilter, DateFilter
+    BooleanFilter, NumberFilter, DateFilter, RangeFilter
 from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate
 from django.db.models import JSONField
@@ -44,6 +44,7 @@ from dojo.finding_group.queries import get_authorized_finding_groups
 from dojo.user.queries import get_authorized_users
 from django.forms import HiddenInput
 from dojo.utils import is_finding_groups_enabled
+import decimal
 
 logger = logging.getLogger(__name__)
 
@@ -306,37 +307,43 @@ def get_finding_filterset_fields(metrics=False, similar=False):
         ])
 
     fields.extend([
-                'date',
-                'cwe',
-                'severity',
-                'last_reviewed',
-                'last_status_update',
-                'mitigated',
-                'reporter',
-                'reviewers',
-                'test__engagement__product__prod_type',
-                'test__engagement__product',
-                'test__engagement',
-                'test',
-                'test__test_type',
-                'test__engagement__version',
-                'test__version',
-                'endpoints',
-                'status',
-                'active',
-                'verified',
-                'duplicate',
-                'is_mitigated',
-                'out_of_scope',
-                'false_p',
-                'has_component',
-                'has_notes',
-                'file_path',
-                'unique_id_from_tool',
-                'vuln_id_from_tool',
-                'service',
-                'epss_score',
-                'epss_percentile'
+        'date',
+        'cwe',
+        'severity',
+        'last_reviewed',
+        'last_status_update',
+        'mitigated',
+        'reporter',
+        'reviewers',
+        'test__engagement__product__prod_type',
+        'test__engagement__product',
+        'test__engagement',
+        'test',
+        'test__test_type',
+        'test__engagement__version',
+        'test__version',
+        'endpoints',
+        'status',
+        'active',
+        'verified',
+        'duplicate',
+        'is_mitigated',
+        'out_of_scope',
+        'false_p',
+        'has_component',
+        'has_notes',
+        'file_path',
+        'unique_id_from_tool',
+        'vuln_id_from_tool',
+        'service',
+        'epss_score',
+        'epss_percentile',
+        'epss_score_lt',
+        'epss_score_gt',
+        'epss_percentile_lt',
+        'epss_percentile_gt',
+        'epss_score_range',
+        'epss_percentile_range',
     ])
 
     if similar:
@@ -1307,6 +1314,32 @@ class ApiFindingFilter(DojoFilter):
                    'line', 'cve']
 
 
+class PercentageFilter(NumberFilter):
+    def __init__(self, *args, **kwargs):
+        kwargs['method'] = self.filter_percentage
+        super().__init__(*args, **kwargs)
+
+    def filter_percentage(self, queryset, name, value):
+        value = value / decimal.Decimal('100.0')
+        if self.lookup_expr in ['lt', 'gt']:
+            lookup_kwargs = {'__'.join([name, self.lookup_expr]): value}
+        else:
+            max_val = value + decimal.Decimal(f"1E{value.as_tuple().exponent}")
+            lookup_kwargs = {
+                f"{name}__gte": value,
+                f"{name}__lt": max_val, }
+        return queryset.filter(**lookup_kwargs)
+
+
+class PercentageRangeFilter(RangeFilter):
+    def filter(self, qs, value):
+        if value is not None:
+            start = value.start / decimal.Decimal('100.0') if value.start else None
+            stop = value.stop / decimal.Decimal('100.0') if value.stop else None
+            value = slice(start, stop)
+        return super().filter(qs, value)
+
+
 class FindingFilter(FindingFilterWithTags):
     # tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
     title = CharFilter(lookup_expr='icontains')
@@ -1450,6 +1483,16 @@ class FindingFilter(FindingFilterWithTags):
 
     has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
 
+    epss_score = PercentageFilter(field_name='epss_score', label='EPSS score')
+    epss_score_lt = PercentageFilter(field_name='epss_score', lookup_expr='lt', label='EPSS Score less than')
+    epss_score_gt = PercentageFilter(field_name='epss_score', lookup_expr='gt', label='EPSS Score greater than')
+    epss_score_range = PercentageRangeFilter(field_name='epss_score')
+    epss_percentile_lt = PercentageFilter(field_name='epss_percentile', lookup_expr='lt',
+                                          label='EPSS Percentile less than')
+    epss_percentile_gt = PercentageFilter(field_name='epss_percentile', lookup_expr='gt',
+                                          label='EPSS Percentile greater than')
+    epss_percentile_range = PercentageRangeFilter(field_name='epss_percentile', help_text='TestTestTest')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -1488,8 +1531,7 @@ class FindingFilter(FindingFilterWithTags):
                    'numerical_severity', 'line', 'duplicate_finding',
                    'hash_code', 'reviewers', 'created', 'files',
                    'sla_start_date', 'sla_expiration_date', 'cvssv3',
-                   'severity_justification', 'steps_to_reproduce',
-                   'epss_score', 'epss_percentile']
+                   'severity_justification', 'steps_to_reproduce',]
 
     def __init__(self, *args, **kwargs):
         self.user = None
