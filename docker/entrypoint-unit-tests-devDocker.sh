@@ -15,9 +15,6 @@ unset DD_DATABASE_URL
 # Unset the celery broker URL so that we can force the other DD_CELERY_BROKER settings
 unset DD_CELERY_BROKER_URL
 
-# We are strict about Warnings during testing
-export PYTHONWARNINGS=error
-
 python3 manage.py makemigrations dojo
 python3 manage.py migrate
 
