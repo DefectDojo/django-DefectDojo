@@ -2333,6 +2333,11 @@ class JIRAForm(BaseJiraForm):
         if self.instance:
             self.fields['password'].required = False
 
+    def clean(self):
+        if self.instance and not self.cleaned_data['password']:
+            self.cleaned_data['password'] = self.instance.password
+        return super().clean()
+
     class Meta:
         model = JIRA_Instance
         exclude = ['']
