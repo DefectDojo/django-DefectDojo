@@ -337,12 +337,8 @@ def get_finding_filterset_fields(metrics=False, similar=False):
         'vuln_id_from_tool',
         'service',
         'epss_score',
-        'epss_percentile',
-        'epss_score_lt',
-        'epss_score_gt',
-        'epss_percentile_lt',
-        'epss_percentile_gt',
         'epss_score_range',
+        'epss_percentile',
         'epss_percentile_range',
     ])
 
@@ -1321,13 +1317,15 @@ class PercentageFilter(NumberFilter):
 
     def filter_percentage(self, queryset, name, value):
         value = value / decimal.Decimal('100.0')
-        if self.lookup_expr in ['lt', 'gt']:
-            lookup_kwargs = {'__'.join([name, self.lookup_expr]): value}
-        else:
-            max_val = value + decimal.Decimal(f"1E{value.as_tuple().exponent}")
-            lookup_kwargs = {
-                f"{name}__gte": value,
-                f"{name}__lt": max_val, }
+        # Provide some wiggle room for filtering since the UI rounds to two places (and because floats):
+        # a user may enter 0.15, but we'll return everything in [0.0015, 0.0016).
+        # To do this, add to our value 1^(whatever the exponent for our least significant digit place is), but ensure
+        # that the exponent is at MOST the ten thousandths place so we don't show a range of e.g. [0.2, 0.3).
+        exponent = min(value.normalize().as_tuple().exponent, -4)
+        max_val = value + decimal.Decimal(f"1E{exponent}")
+        lookup_kwargs = {
+            f"{name}__gte": value,
+            f"{name}__lt": max_val, }
         return queryset.filter(**lookup_kwargs)
 
 
@@ -1484,14 +1482,12 @@ class FindingFilter(FindingFilterWithTags):
     has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
 
     epss_score = PercentageFilter(field_name='epss_score', label='EPSS score')
-    epss_score_lt = PercentageFilter(field_name='epss_score', lookup_expr='lt', label='EPSS Score less than')
-    epss_score_gt = PercentageFilter(field_name='epss_score', lookup_expr='gt', label='EPSS Score greater than')
-    epss_score_range = PercentageRangeFilter(field_name='epss_score')
-    epss_percentile_lt = PercentageFilter(field_name='epss_percentile', lookup_expr='lt',
-                                          label='EPSS Percentile less than')
-    epss_percentile_gt = PercentageFilter(field_name='epss_percentile', lookup_expr='gt',
-                                          label='EPSS Percentile greater than')
-    epss_percentile_range = PercentageRangeFilter(field_name='epss_percentile', help_text='TestTestTest')
+    epss_score_range = PercentageRangeFilter(field_name='epss_score', label='EPSS score range',
+                                             help_text='The range of EPSS score percentages to filter on; the left input is a lower bound, the right is an upper bound. Leaving one empty will skip that bound (e.g., leaving the lower bound input empty will filter only on the upper bound -- filtering on "less than or equal").')
+
+    epss_percentile = PercentageFilter(field_name='epss_percentile', label='EPSS percentile')
+    epss_percentile_range = PercentageRangeFilter(field_name='epss_percentile', label='EPSS percentile range',
+                                                  help_text='The range of EPSS percentiles to filter on; the left input is a lower bound, the right is an upper bound. Leaving one empty will skip that bound (e.g., leaving the lower bound input empty will filter only on the upper bound -- filtering on "less than or equal").')
 
     o = OrderingFilter(
         # tuple-mapping retains order
