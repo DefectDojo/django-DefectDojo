@@ -263,6 +263,9 @@ class ExpressJiraView(View):
     def get_form_class(self):
         return ExpressJIRAForm
 
+    def get_fallback_form_class(self):
+        return JIRAForm
+
     def get(self, request):
         if not user_has_configuration_permission(request.user, 'dojo.add_jira_instance'):
             raise PermissionDenied
@@ -309,7 +312,8 @@ class ExpressJiraView(View):
                     messages.ERROR,
                     'Unable to find Open/Close ID\'s (invalid issue key specified?). They will need to be found manually',
                     extra_tags='alert-danger')
-                return render(request, self.get_fallback_template(), {'jform': jform})
+                fallback_form = self.get_fallback_form_class()(request.POST, instance=JIRA_Instance())
+                return render(request, self.get_fallback_template(), {'jform': fallback_form})
             # Get the epic id name
             try:
                 epic_name = get_custom_field(jira, 'Epic Name')
@@ -320,7 +324,8 @@ class ExpressJiraView(View):
                     messages.ERROR,
                     'Unable to find Epic Name. It will need to be found manually',
                     extra_tags='alert-danger')
-                return render(request, self.get_fallback_template(), {'jform': jform})
+                fallback_form = self.get_fallback_form_class()(request.POST, instance=JIRA_Instance())
+                return render(request, self.get_fallback_template(), {'jform': fallback_form})
 
             jira_instance = JIRA_Instance(
                 username=jira_username,
