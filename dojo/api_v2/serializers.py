@@ -1,3 +1,4 @@
+import re
 from dojo.finding.queries import get_authorized_findings
 from dojo.group.utils import get_auth_group_name
 from django.contrib.auth.models import Group
@@ -264,24 +265,19 @@ class TagListSerializerField(serializers.ListField):
         if not isinstance(data, list):
             self.fail("not_a_list", input_type=type(data).__name__)
 
-        # data_safe = []
+        data_safe = []
         for s in data:
+            # Ensure if the element in the list is  string
             if not isinstance(s, six.string_types):
                 self.fail("not_a_str")
-
+            # Run the children validation
             self.child.run_validation(s)
+            substrings = re.findall(r'(?:"[^"]*"|[^",]+)', s)
+            data_safe.extend(substrings)
 
-            # if ' ' in s or ',' in s:
-            #     s = '"%s"' % s
-
-            # data_safe.append(s)
-
-        # internal_value = ','.join(data_safe)
-
-        internal_value = tagulous.utils.render_tags(data)
+        internal_value = tagulous.utils.render_tags(data_safe)
 
         return internal_value
-        # return data
 
     def to_representation(self, value):
         if not isinstance(value, list):
@@ -2217,6 +2213,12 @@ class ImportScanSerializer(serializers.Serializer):
             name=environment_name
         )
         tags = data.get("tags", None)
+        # Convert the tags to a list if needed. At this point, the
+        # TaggitListSerializer has already removed commas supplied
+        # by the user, so this operation will consistently return
+        # a list to be used by the importer
+        if isinstance(tags, str):
+            tags = tags.split(", ")
         lead = data.get("lead")
 
         scan = data.get("file", None)
@@ -2493,6 +2495,12 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         service = data.get("service", None)
         lead = data.get("lead", None)
         tags = data.get("tags", None)
+        # Convert the tags to a list if needed. At this point, the
+        # TaggitListSerializer has already removed commas supplied
+        # by the user, so this operation will consistently return
+        # a list to be used by the importer
+        if isinstance(tags, str):
+            tags = tags.split(", ")
         environment_name = data.get("environment", "Development")
         environment = Development_Environment.objects.get(
             name=environment_name
@@ -2635,6 +2643,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     service=service,
                     title=test_title,
                     create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
+                    apply_tags_to_findings=apply_tags_to_findings,
+                    apply_tags_to_endpoints=apply_tags_to_endpoints,
                 )
 
             else:
