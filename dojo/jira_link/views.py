@@ -20,7 +20,8 @@ from dojo.utils import add_breadcrumb, add_error_message_to_response, get_system
 from dojo.notifications.helper import create_notification
 from django.views.decorators.http import require_POST
 import dojo.jira_link.helper as jira_helper
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+from django.views import View
+from dojo.authorization.authorization import user_has_configuration_permission
 
 logger = logging.getLogger(__name__)
 
@@ -252,10 +253,30 @@ def get_custom_field(jira, label):
     return field
 
 
-@user_is_configuration_authorized('dojo.add_jira_instance')
-def express_new_jira(request):
-    if request.method == 'POST':
-        jform = ExpressJIRAForm(request.POST, instance=JIRA_Instance())
+class ExpressJiraView(View):
+    def get_template(self):
+        return 'dojo/express_new_jira.html'
+
+    def get_fallback_template(self):
+        return 'dojo/new_jira.html'
+
+    def get_form_class(self):
+        return ExpressJIRAForm
+
+    def get_fallback_form_class(self):
+        return JIRAForm
+
+    def get(self, request):
+        if not user_has_configuration_permission(request.user, 'dojo.add_jira_instance'):
+            raise PermissionDenied
+        jform = self.get_form_class()()
+        add_breadcrumb(title="New Jira Configuration (Express)", top_level=False, request=request)
+        return render(request, self.get_template(), {'jform': jform})
+
+    def post(self, request):
+        if not user_has_configuration_permission(request.user, 'dojo.add_jira_instance'):
+            raise PermissionDenied
+        jform = self.get_form_class()(request.POST, instance=JIRA_Instance())
         if jform.is_valid():
             jira_server = jform.cleaned_data.get('url').rstrip('/')
             jira_username = jform.cleaned_data.get('username')
@@ -270,7 +291,7 @@ def express_new_jira(request):
                     messages.ERROR,
                     'Unable to authenticate. Please check credentials.',
                     extra_tags='alert-danger')
-                return render(request, 'dojo/express_new_jira.html', {'jform': jform})
+                return render(request, self.get_template(), {'jform': jform})
             # authentication successful
             # Get the open and close keys
             try:
@@ -291,7 +312,8 @@ def express_new_jira(request):
                     messages.ERROR,
                     'Unable to find Open/Close ID\'s (invalid issue key specified?). They will need to be found manually',
                     extra_tags='alert-danger')
-                return render(request, 'dojo/new_jira.html', {'jform': jform})
+                fallback_form = self.get_fallback_form_class()(request.POST, instance=JIRA_Instance())
+                return render(request, self.get_fallback_template(), {'jform': fallback_form})
             # Get the epic id name
             try:
                 epic_name = get_custom_field(jira, 'Epic Name')
@@ -302,7 +324,8 @@ def express_new_jira(request):
                     messages.ERROR,
                     'Unable to find Epic Name. It will need to be found manually',
                     extra_tags='alert-danger')
-                return render(request, 'dojo/new_jira.html', {'jform': jform})
+                fallback_form = self.get_fallback_form_class()(request.POST, instance=JIRA_Instance())
+                return render(request, self.get_fallback_template(), {'jform': fallback_form})
 
             jira_instance = JIRA_Instance(
                 username=jira_username,
@@ -333,16 +356,27 @@ def express_new_jira(request):
                 url=request.build_absolute_uri(reverse('jira')))
 
             return HttpResponseRedirect(reverse('jira', ))
-    else:
-        jform = ExpressJIRAForm()
-        add_breadcrumb(title="New Jira Configuration (Express)", top_level=False, request=request)
-    return render(request, 'dojo/express_new_jira.html', {'jform': jform})
+        return render(request, self.get_template(), {'jform': jform})
 
 
-@user_is_configuration_authorized('dojo.add_jira_instance')
-def new_jira(request):
-    if request.method == 'POST':
-        jform = JIRAForm(request.POST, instance=JIRA_Instance())
+class NewJiraView(View):
+    def get_template(self):
+        return 'dojo/new_jira.html'
+
+    def get_form_class(self):
+        return JIRAForm
+
+    def get(self, request):
+        if not user_has_configuration_permission(request.user, 'dojo.add_jira_instance'):
+            raise PermissionDenied
+        jform = self.get_form_class()()
+        add_breadcrumb(title="New Jira Configuration", top_level=False, request=request)
+        return render(request, self.get_template(), {'jform': jform})
+
+    def post(self, request):
+        if not user_has_configuration_permission(request.user, 'dojo.add_jira_instance'):
+            raise PermissionDenied
+        jform = self.get_form_class()(request.POST, instance=JIRA_Instance())
         if jform.is_valid():
             jira_server = jform.cleaned_data.get('url').rstrip('/')
             jira_username = jform.cleaned_data.get('username')
@@ -369,18 +403,30 @@ def new_jira(request):
             return HttpResponseRedirect(reverse('jira', ))
         else:
             logger.error('jform.errors: %s', jform.errors)
-    else:
-        jform = JIRAForm()
-        add_breadcrumb(title="New Jira Configuration", top_level=False, request=request)
-    return render(request, 'dojo/new_jira.html', {'jform': jform})
+        return render(request, self.get_template(), {'jform': jform})
 
 
-@user_is_configuration_authorized('dojo.change_jira_instance')
-def edit_jira(request, jid):
-    jira = JIRA_Instance.objects.get(pk=jid)
-    jira_password_from_db = jira.password
-    if request.method == 'POST':
-        jform = JIRAForm(request.POST, instance=jira)
+class EditJiraView(View):
+    def get_template(self):
+        return 'dojo/edit_jira.html'
+
+    def get_form_class(self):
+        return JIRAForm
+
+    def get(self, request, jid=None):
+        if not user_has_configuration_permission(request.user, 'dojo.change_jira_instance'):
+            raise PermissionDenied
+        jira = JIRA_Instance.objects.get(pk=jid)
+        jform = self.get_form_class()(instance=jira)
+        add_breadcrumb(title="Edit JIRA Configuration", top_level=False, request=request)
+        return render(request, self.get_template(), {'jform': jform})
+
+    def post(self, request, jid=None):
+        if not user_has_configuration_permission(request.user, 'dojo.change_jira_instance'):
+            raise PermissionDenied
+        jira = JIRA_Instance.objects.get(pk=jid)
+        jira_password_from_db = jira.password
+        jform = self.get_form_class()(request.POST, instance=jira)
         if jform.is_valid():
             jira_server = jform.cleaned_data.get('url').rstrip('/')
             jira_username = jform.cleaned_data.get('username')
@@ -391,7 +437,7 @@ def edit_jira(request, jid):
                 # on edit the password is optional
                 jira_password = jira_password_from_db
 
-            jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
+            jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
 
             new_j = jform.save(commit=False)
             new_j.url = jira_server
@@ -411,30 +457,52 @@ def edit_jira(request, jid):
 
             return HttpResponseRedirect(reverse('jira', ))
 
-    else:
-        jform = JIRAForm(instance=jira)
-        add_breadcrumb(title="Edit JIRA Configuration", top_level=False, request=request)
-
-    return render(request, 'dojo/edit_jira.html', {'jform': jform})
+        return render(request, self.get_template(), {'jform': jform})
 
 
-@user_is_configuration_authorized('dojo.view_jira_instance')
-def jira(request):
-    jira_instances = JIRA_Instance.objects.all()
-    add_breadcrumb(title="JIRA List", top_level=not len(request.GET), request=request)
-    return render(request, 'dojo/jira.html', {'jira_instances': jira_instances})
+class ListJiraView(View):
+    def get_template(self):
+        return 'dojo/jira.html'
+
+    def get(self, request):
+        if not user_has_configuration_permission(request.user, 'dojo.view_jira_instance'):
+            raise PermissionDenied
+        jira_instances = JIRA_Instance.objects.all()
+        context = {'jira_instances': jira_instances}
+        add_breadcrumb(title="JIRA List", top_level=not len(request.GET), request=request)
+        return render(request, self.get_template(), context)
 
 
-@user_is_configuration_authorized('dojo.delete_jira_instance')
-def delete_jira(request, tid):
-    jira_instance = get_object_or_404(JIRA_Instance, pk=tid)
-    # eng = test.engagement
-    # TODO Make Form
-    form = DeleteJIRAInstanceForm(instance=jira_instance)
+class DeleteJiraView(View):
+    def get_template(self):
+        return 'dojo/delete_jira.html'
 
-    if request.method == 'POST':
+    def get_form_class(self):
+        return DeleteJIRAInstanceForm
+
+    def get(self, request, tid=None):
+        if not user_has_configuration_permission(request.user, 'dojo.delete_jira_instance'):
+            raise PermissionDenied
+        jira_instance = get_object_or_404(JIRA_Instance, pk=tid)
+        form = self.get_form_class()(instance=jira_instance)
+        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+        collector.collect([jira_instance])
+        rels = collector.nested()
+
+        add_breadcrumb(title="Delete", top_level=False, request=request)
+        return render(request, self.get_template(), {
+            'inst': jira_instance,
+            'form': form,
+            'rels': rels,
+            'deletable_objects': rels,
+        })
+
+    def post(self, request, tid=None):
+        if not user_has_configuration_permission(request.user, 'dojo.delete_jira_instance'):
+            raise PermissionDenied
+        jira_instance = get_object_or_404(JIRA_Instance, pk=tid)
         if 'id' in request.POST and str(jira_instance.id) == request.POST['id']:
-            form = DeleteJIRAInstanceForm(request.POST, instance=jira_instance)
+            form = self.get_form_class()(request.POST, instance=jira_instance)
             if form.is_valid():
                 try:
                     jira_instance.delete()
@@ -451,15 +519,14 @@ def delete_jira(request, tid):
                     return HttpResponseRedirect(reverse('jira'))
                 except Exception as e:
                     add_error_message_to_response('Unable to delete JIRA Instance, probably because it is used by JIRA Issues: %s' % str(e))
+        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+        collector.collect([jira_instance])
+        rels = collector.nested()
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([jira_instance])
-    rels = collector.nested()
-
-    add_breadcrumb(title="Delete", top_level=False, request=request)
-    return render(request, 'dojo/delete_jira.html', {
-        'inst': jira_instance,
-        'form': form,
-        'rels': rels,
-        'deletable_objects': rels,
-    })
+        add_breadcrumb(title="Delete", top_level=False, request=request)
+        return render(request, self.get_template(), {
+            'inst': jira_instance,
+            'form': form,
+            'rels': rels,
+            'deletable_objects': rels,
+        })
