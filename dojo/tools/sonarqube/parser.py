@@ -27,25 +27,25 @@ class SonarQubeParser(object):
         else:
             return "Import all findings from sonarqube html report or JSON format. SonarQube output file can be imported in HTML format or JSON format. Generate with https://github.com/soprasteria/sonar-report version >= 1.1.0, recommend version >= 3.1.2"
 
-    def get_findings(self, filename, test):
-        if filename.name.endswith(".json"):
-            json_content = json.load(filename)
+    def get_findings(self, file, test):
+        if file.name.endswith(".json"):
+            json_content = json.load(file)
             if json_content.get("date") and json_content.get("projectName") and json_content.get("hotspotKeys"):
                 return SonarQubeSoprasteriaJSON().get_json_items(json_content, test, self.mode)
             elif json_content.get("paging") and json_content.get("components"):
                 return SonarQubeRESTAPIJSON().get_json_items(json_content, test, self.mode)
             else:
                 return []
-        if filename.name.endswith(".zip"):
-            if str(filename.__class__) == "<class '_io.TextIOWrapper'>":
-                input_zip = zipfile.ZipFile(filename.name, 'r')
+        if file.name.endswith(".zip"):
+            if str(file.__class__) == "<class '_io.TextIOWrapper'>":
+                input_zip = zipfile.ZipFile(file.name, 'r')
             else:
-                input_zip = zipfile.ZipFile(filename, 'r')
+                input_zip = zipfile.ZipFile(file, 'r')
             zipdata = {name: input_zip.read(name) for name in input_zip.namelist()}
             return SonarQubeRESTAPIZIP().get_items(zipdata, test, self.mode)
         else:
             parser = etree.HTMLParser()
-            tree = etree.parse(filename, parser)
+            tree = etree.parse(file, parser)
             if self.mode not in [None, "detailed"]:
                 raise ValueError(
                     "Internal error: Invalid mode "
