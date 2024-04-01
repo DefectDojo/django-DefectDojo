@@ -3004,32 +3004,17 @@ class Finding(models.Model):
         from titlecase import titlecase
         self.title = titlecase(self.title[:511])
 
-        # Synchronize cvssv3 score and severity using cvssv3 vector
-        # the vector trumps all if we get it
+        # Assign the numerical severity for correct sorting order
+        self.numerical_severity = Finding.get_numerical_severity(self.severity)
+
+        # Synchronize cvssv3 score using cvssv3 vector
         if self.cvssv3:
             try:
                 cvss_object = CVSS3(self.cvssv3)
                 # use the environmental score, which is the most refined score
-                self.severity = cvss_object.severities()[2]
-                if self.severity == "None":
-                    self.severity = "Info"
                 self.cvssv3_score = cvss_object.scores()[2]
             except Exception as ex:
                 logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
-        elif self.cvssv3_score:
-            if self.cvssv3_score < .1:
-                self.severity = "Info"
-            elif self.cvssv3_score <= 3.9:
-                self.severity = "Low"
-            elif self.cvssv3_score <= 6.9:
-                self.severity = "Medium"
-            elif self.cvssv3_score <= 8.9:
-                self.severity = "High"
-            else:
-                self.severity = "Critical"
-
-        # Assign the numerical severity for correct sorting order
-        self.numerical_severity = Finding.get_numerical_severity(self.severity)
 
         # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
         # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
