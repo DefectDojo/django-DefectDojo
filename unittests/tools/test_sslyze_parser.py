@@ -11,7 +11,7 @@ class TestSslyzeJSONParser(DojoTestCase):
         parser = SslyzeParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
-    
+
     def test_parse_json_file_issue_9848(self):
         testfile = open(path.join(path.dirname(__file__), "../scans/sslyze/issue_9848.json"))
         parser = SslyzeParser()
