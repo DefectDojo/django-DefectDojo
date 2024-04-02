@@ -282,6 +282,9 @@ env = environ.FileAwareEnv(
     DD_ENABLE_AUDITLOG=(bool, True),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
+    # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
+    # with the use of CVSS scores to potentially override the severity found in the report produced by the tool
+    DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
 )
 
 
@@ -1699,6 +1702,7 @@ CREATE_CLOUD_BANNER = env('DD_CREATE_CLOUD_BANNER')
 AUDITLOG_FLUSH_RETENTION_PERIOD = env('DD_AUDITLOG_FLUSH_RETENTION_PERIOD')
 ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
 USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
+USE_QUALYS_LEGACY_SEVERITY_PARSING = env('DD_QUALYS_LEGACY_SEVERITY_PARSING')
 
 
 # ------------------------------------------------------------------------------
