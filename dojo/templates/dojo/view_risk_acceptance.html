@@ -222,8 +222,9 @@
             </div>
             <br/>
             <form method="post" class="form-horizontal">{% csrf_token %}
-                <div class="show_add_findings_form">
-                    {% include "dojo/form_fields.html" with form=add_findings_form %}
+                <div class="show_add_findings_form" style="padding: 1em;">
+                    <div class="text-left"><b>Add findings as accepted:</b></div>
+                    {{ add_findings_form.as_p }}
                 </div>
                 <div class="panel-body">
                     {% include "dojo/paging_snippet.html" with page=add_findings prefix="apage" %}
@@ -383,5 +384,53 @@
 
 <script type="text/javascript">
      {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
+</script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        var observer = window.ResizeObserver ? new ResizeObserver(function (entries) {
+            entries.forEach(function (entry) {
+                $(entry.target).DataTable().columns.adjust();
+            });
+        }) : null;
+
+        resizeHandler = function ($table) {
+            if (observer)
+                observer.observe($table[0]);
+        };
+    
+        setTimeout(function() {
+            var table = $('#findings_table').DataTable({
+                "paging": false,
+                "searching": true,
+                "ordering": true,
+                "info": false,
+                scrollCollapse: true,
+                scrollY: '30vh',
+                columns: [
+                    { title: '' },
+                    { title: 'ID' },
+                    { title: 'Severity' },
+                    { title: 'Name' },
+                    { title: 'CWE' },
+                    { title: 'Vulnerability Id' },
+                    { title: 'EPSS Score' },
+                    { title: 'EPSS Precentile' },
+                    { 
+                        title: 'Date', 
+                        render: function(data) {
+                            var date = new Date(data);
+                            var year = date.getFullYear();
+                            var month = (1 + date.getMonth()).toString().padStart(2, '0');
+                            var day = date.getDate().toString().padStart(2, '0');
+
+                            return year + '-' + month + '-' + day;
+                        }
+                    },
+                    { title: 'Active' }
+                ]
+            });
+            resizeHandler($('#findings_table'));
+        }, 0);
+    });
 </script>
 {% endblock %}

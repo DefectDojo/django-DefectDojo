@@ -10,16 +10,8 @@ ignore =
     E127
     # Suppress - Function is too complex
     C901
-    # Multiple statements on one line
-    E704
     # Bare except
     E722
-    # Local variable
-    F841
-    # May be undefined
-    F405
-    # list comprehension redefines
-    F812
     E126
     E128
     # Line break occurred before a binary operator (conflicting with black)
@@ -27,14 +19,7 @@ ignore =
     # undefined file name excpetion
     F821
 
-
-exclude =
-    # No need to traverse our git directory
-    .git,
-    # Exclude unittests
-    dojo/unittests,
-    # There's no value in checking cache directories
-    __pycache__,
-    # This contains of branch that we don't want to check
-    # dev
-max-complexity = 10
+# We should not touch migrations that are already used, but check new migrations 
+per-file-ignores =
+    dojo/db_migrations/00*:F841
+    dojo/db_migrations/01*:F841

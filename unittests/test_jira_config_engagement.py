@@ -24,6 +24,7 @@ class JIRAConfigEngagementBase(object):
             # 'jira-project-form-inherit_from_product': 'on', # absence = False in html forms
             'jira-project-form-jira_instance': 2,
             'jira-project-form-project_key': 'IUNSEC',
+            'jira-project-form-epic_issue_type_name': 'Epic',
             'jira-project-form-product_jira_sla_notification': 'on',
             'jira-project-form-custom_fields': 'null',
         }
@@ -40,6 +41,7 @@ class JIRAConfigEngagementBase(object):
             # 'jira-project-form-inherit_from_product': 'on', # absence = False in html forms
             'jira-project-form-jira_instance': 2,
             'jira-project-form-project_key': 'IUNSEC',
+            'jira-project-form-epic_issue_type_name': 'Epic',
             'jira-project-form-product_jira_sla_notification': 'on',
             'jira-project-form-enable_engagement_epic_mapping': 'on',
             'jira-epic-form-push_to_jira': 'on',
@@ -56,6 +58,8 @@ class JIRAConfigEngagementBase(object):
             'target_end': '2070-12-04',
             'status': 'Not Started',
             'jira-project-form-inherit_from_product': 'on',
+            # A value is set by default by the model, so we need to add it here as well
+            'jira-project-form-epic_issue_type_name': 'Epic',
             # 'project_key': 'IFFF',
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
@@ -75,6 +79,7 @@ class JIRAConfigEngagementBase(object):
             # 'jira-project-form-inherit_from_product': 'on', # absence = False in html forms
             'jira-project-form-jira_instance': 2,
             'jira-project-form-project_key': 'ISEC',
+            'jira-project-form-epic_issue_type_name': 'Epic',
             'jira-project-form-product_jira_sla_notification': 'on',
             'jira-project-form-custom_fields': 'null',
         }
@@ -91,6 +96,7 @@ class JIRAConfigEngagementBase(object):
             # 'jira-project-form-inherit_from_product': 'on', # absence = False in html forms
             'jira-project-form-jira_instance': 2,
             'jira-project-form-project_key': 'ISEC2',
+            'jira-project-form-epic_issue_type_name': 'Epic',
             'jira-project-form-product_jira_sla_notification': 'on',
             'jira-project-form-custom_fields': 'null',
         }
@@ -105,6 +111,8 @@ class JIRAConfigEngagementBase(object):
             'target_end': '2070-12-04',
             'status': 'Not Started',
             'jira-project-form-inherit_from_product': 'on',
+            # A value is set by default by the model, so we need to add it here as well
+            'jira-project-form-epic_issue_type_name': 'Epic',
             # 'project_key': 'IFFF',
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',

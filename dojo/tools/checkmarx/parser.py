@@ -54,7 +54,7 @@ class CheckmarxParser(object):
         #  - value: a list of vuln_id_from_tool
         vuln_ids_from_tool = dict()
         for query in root.findall("Query"):
-            name, cwe, categories, queryId = self.getQueryElements(query)
+            _name, _cwe, categories, _queryId = self.getQueryElements(query)
             language = ""
             findingdetail = ""
             group = ""
@@ -142,7 +142,7 @@ class CheckmarxParser(object):
         Create the finding and add it into the dupes list
         If a vuln with the same file_path was found before, updates the description
         """
-        name, cwe, categories, queryId = self.getQueryElements(query)
+        _name, cwe, _categories, queryId = self.getQueryElements(query)
         titleStart = query.get("name").replace("_", " ")
         description, lastPathnode = self.get_description_file_name_aggregated(
             query, result

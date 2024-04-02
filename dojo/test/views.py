@@ -860,7 +860,7 @@ def re_import_scan_results(request, tid):
             finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = 0, 0, 0, 0, 0
             reimporter = ReImporter()
             try:
-                test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count, test_import = \
+                test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count, _test_import = \
                     reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
                                                 tags=tags, minimum_severity=minimum_severity,
                                                 endpoints_to_add=endpoints_to_add, scan_date=scan_date,
