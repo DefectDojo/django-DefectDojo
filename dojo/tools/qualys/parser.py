@@ -65,7 +65,7 @@ def get_severity(severity_value: int, cvss_value: float) -> str:
         5: "Critical",
     }
     # Severity mapping taken from
-    # https://qualysguard.qg2.apps.qualys.com/portal-help/en/malware/knowledgebase/
+    # https://qualysguard.qg2.apps.qualys.com/portal-help/en/malware/knowledgebase/severity_levels.htm
     qualys_severity_lookup = {
         1: "Low",
         2: "Low",
