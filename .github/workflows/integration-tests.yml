@@ -56,7 +56,7 @@ jobs:
              docker images
 
       - name: Set integration-test mode
-        run: ln -s docker compose.override.integration_tests.yml docker compose.override.yml
+        run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
 
       # phased startup with MySQL and RabbitMQ so we can use the exit code from integrationtest container
       - name: Start Dojo MySQL + RabbitMQ
