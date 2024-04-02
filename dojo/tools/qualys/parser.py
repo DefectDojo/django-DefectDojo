@@ -56,6 +56,42 @@ TYPE_MAP = {
 }
 
 
+def get_severity(severity_value: int, cvss_value: float) -> str:
+    legacy_severity_lookup = {
+        1: "Informational",
+        2: "Low",
+        3: "Medium",
+        4: "High",
+        5: "Critical",
+    }
+    # Severity mapping taken from
+    # https://qualysguard.qg2.apps.qualys.com/portal-help/en/malware/knowledgebase/severity_levels.htm
+    qualys_severity_lookup = {
+        1: "Low",
+        2: "Low",
+        3: "Medium",
+        4: "High",
+        5: "High",
+    }
+
+    if settings.USE_QUALYS_LEGACY_SEVERITY_PARSING:
+        sev = "Informational"
+        if cvss_value is not None and cvss_value > 0:
+            if 0.1 <= float(cvss_value) <= 3.9:
+                sev = "Low"
+            elif 4.0 <= float(cvss_value) <= 6.9:
+                sev = "Medium"
+            elif 7.0 <= float(cvss_value) <= 8.9:
+                sev = "High"
+            elif float(cvss_value) >= 9.0:
+                sev = "Critical"
+        elif severity_value is not None:
+            sev = legacy_severity_lookup.get(severity_value, "Informational")
+        return sev
+    else:
+        return qualys_severity_lookup.get(severity_value, "Informational")
+
+
 def htmltext(blob):
     h = html2text.HTML2Text()
     h.ignore_links = False
@@ -101,7 +137,7 @@ def parse_finding(host, tree):
 
     # Scan details
     for vuln_details in host.iterfind("VULN_INFO_LIST/VULN_INFO"):
-        _temp = issue_row
+        _temp = issue_row.copy()
         # Port
         _gid = vuln_details.find("QID").attrib["id"]
         _port = vuln_details.findtext("PORT")
@@ -211,30 +247,7 @@ def parse_finding(host, tree):
         # The CVE in Qualys report might not have a CVSS score, so findings are informational by default
         # unless we can find map to a Severity OR a CVSS score from the
         # findings detail.
-        sev = None
-        if _temp.get("CVSS_value") is not None and _temp["CVSS_value"] > 0:
-            if 0.1 <= float(_temp["CVSS_value"]) <= 3.9:
-                sev = "Low"
-            elif 4.0 <= float(_temp["CVSS_value"]) <= 6.9:
-                sev = "Medium"
-            elif 7.0 <= float(_temp["CVSS_value"]) <= 8.9:
-                sev = "High"
-            elif float(_temp["CVSS_value"]) >= 9.0:
-                sev = "Critical"
-        elif vuln_item.findtext("SEVERITY") is not None:
-            if int(vuln_item.findtext("SEVERITY")) == 1:
-                sev = "Informational"
-            elif int(vuln_item.findtext("SEVERITY")) == 2:
-                sev = "Low"
-            elif int(vuln_item.findtext("SEVERITY")) == 3:
-                sev = "Medium"
-            elif int(vuln_item.findtext("SEVERITY")) == 4:
-                sev = "High"
-            elif int(vuln_item.findtext("SEVERITY")) == 5:
-                sev = "Critical"
-        elif sev is None:
-            sev = "Informational"
-
+        sev = get_severity(vuln_item.findtext("SEVERITY"), _temp.get("CVSS_value", None))
         finding = None
         if _temp_cve_details:
             refs = "\n".join(list(_cl.values()))

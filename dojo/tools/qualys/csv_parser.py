@@ -109,6 +109,30 @@ def _clean_cve_data(cve_string: str) -> list:
     return cve_list
 
 
+def get_severity(value: str) -> str:
+    legacy_severity_lookup = {
+        "1": "Info",
+        "2": "Low",
+        "3": "Medium",
+        "4": "High",
+        "5": "Critical",
+    }
+    # Severity mapping taken from
+    # https://qualysguard.qg2.apps.qualys.com/portal-help/en/malware/knowledgebase/severity_levels.htm
+    qualys_severity_lookup = {
+        "1": "Low",
+        "2": "Low",
+        "3": "Medium",
+        "4": "High",
+        "5": "High",
+    }
+
+    if settings.USE_QUALYS_LEGACY_SEVERITY_PARSING:
+        return legacy_severity_lookup.get(value, "Info")
+    else:
+        return qualys_severity_lookup.get(value, "Info")
+
+
 def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
     """
     Takes a list of Dictionaries built from CSV and creates a Finding object
@@ -117,13 +141,6 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
     Returns:
 
     """
-    severity_lookup = {
-        "1": "Info",
-        "2": "Low",
-        "3": "Medium",
-        "4": "High",
-        "5": "Critical",
-    }
     dojo_findings = []
     for report_finding in report_findings:
         # Get endpoint meta
@@ -167,7 +184,7 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
                     title=f"QID-{report_finding['QID']} | {report_finding['Title']}",
                     mitigation=report_finding["Solution"],
                     description=f"{report_finding['Threat']}\nResult Evidence: \n{report_finding.get('Threat', 'Not available')}",
-                    severity=severity_lookup.get(report_finding["Severity"], "Info"),
+                    severity=get_severity(report_finding["Severity"]),
                     impact=report_finding["Impact"],
                     date=date,
                     vuln_id_from_tool=report_finding["QID"],

@@ -1,0 +1,776 @@
+IP,Hostname,Port,Port Protocol,CVSS,Severity,QoD,Solution Type,NVT Name,Summary,Specific Result,NVT OID,CVEs,Task ID,Task Name,Timestamp,Result ID,Impact,Solution,Affected Software/OS,Vulnerability Insight,Vulnerability Detection Method,Product Detection Result,BIDs,CERTs,Other References
+45.33.32.156,,,,7.5,High,75,"","CVE-2021-26690","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2021-26690.
+The product was found at: 80/tcp.
+
+Apache HTTP Server versions 2.4.0 to 2.4.46 A specially crafted Cookie header handled by mod_session can cause a NULL pointer dereference and crash, leading to a possible Denial Of Service","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2021-26690.
+The product was found at: 80/tcp.
+
+Apache HTTP Server versions 2.4.0 to 2.4.46 A specially crafted Cookie header handled by mod_session can cause a NULL pointer dereference and crash, leading to a possible Denial Of Service",CVE-2021-26690,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,fa492e13-5e42-4a27-8b11-d07ff5281b7f,"","","","","
+Details:
+CVE-2021-26690
+(OID: CVE-2021-26690)
+Version used: 2023-11-07T03:31:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2021-26690
+(OID: CVE-2021-26690)
+","","",""
+45.33.32.156,,,,9.8,High,75,"","CVE-2021-26691","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2021-26691.
+The product was found at: 80/tcp.
+
+In Apache HTTP Server versions 2.4.0 to 2.4.46 a specially crafted SessionHeader sent by an origin server could cause a heap overflow","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2021-26691.
+The product was found at: 80/tcp.
+
+In Apache HTTP Server versions 2.4.0 to 2.4.46 a specially crafted SessionHeader sent by an origin server could cause a heap overflow",CVE-2021-26691,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,e2dd85dc-7c75-46ff-87cf-0dbda94ac29d,"","","","","
+Details:
+CVE-2021-26691
+(OID: CVE-2021-26691)
+Version used: 2023-11-07T03:31:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2021-26691
+(OID: CVE-2021-26691)
+","","",""
+45.33.32.156,,,,5.0,Medium,75,"","CVE-2014-3523","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2014-3523.
+The product was found at: 80/tcp.
+
+Memory leak in the winnt_accept function in server/mpm/winnt/child.c in the WinNT MPM in the Apache HTTP Server 2.4.x before 2.4.10 on Windows, when the default AcceptFilter is enabled, allows remote attackers to cause a denial of service (memory consumption) via crafted requests.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2014-3523.
+The product was found at: 80/tcp.
+
+Memory leak in the winnt_accept function in server/mpm/winnt/child.c in the WinNT MPM in the Apache HTTP Server 2.4.x before 2.4.10 on Windows, when the default AcceptFilter is enabled, allows remote attackers to cause a denial of service (memory consumption) via crafted requests.",CVE-2014-3523,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,b0425448-bbfb-4bb0-ac86-78d3a832f231,"","","","","
+Details:
+CVE-2014-3523
+(OID: CVE-2014-3523)
+Version used: 2023-11-07T02:20:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2014-3523
+(OID: CVE-2014-3523)
+","","",""
+45.33.32.156,,,,5.0,Medium,75,"","CVE-2014-3581","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2014-3581.
+The product was found at: 80/tcp.
+
+The cache_merge_headers_out function in modules/cache/cache_util.c in the mod_cache module in the Apache HTTP Server before 2.4.11 allows remote attackers to cause a denial of service (NULL pointer dereference and application crash) via an empty HTTP Content-Type header.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2014-3581.
+The product was found at: 80/tcp.
+
+The cache_merge_headers_out function in modules/cache/cache_util.c in the mod_cache module in the Apache HTTP Server before 2.4.11 allows remote attackers to cause a denial of service (NULL pointer dereference and application crash) via an empty HTTP Content-Type header.",CVE-2014-3581,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,8ffa27d6-91bc-4365-8142-08f4d28d1bc2,"","","","","
+Details:
+CVE-2014-3581
+(OID: CVE-2014-3581)
+Version used: 2023-11-07T02:20:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2014-3581
+(OID: CVE-2014-3581)
+","","",""
+45.33.32.156,,,,4.3,Medium,75,"","CVE-2014-0117","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2014-0117.
+The product was found at: 80/tcp.
+
+The mod_proxy module in the Apache HTTP Server 2.4.x before 2.4.10, when a reverse proxy is enabled, allows remote attackers to cause a denial of service (child-process crash) via a crafted HTTP Connection header.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2014-0117.
+The product was found at: 80/tcp.
+
+The mod_proxy module in the Apache HTTP Server 2.4.x before 2.4.10, when a reverse proxy is enabled, allows remote attackers to cause a denial of service (child-process crash) via a crafted HTTP Connection header.",CVE-2014-0117,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,53b0ddf3-dd9e-4dcb-a7bd-ec7b1da7fd0b,"","","","","
+Details:
+CVE-2014-0117
+(OID: CVE-2014-0117)
+Version used: 2023-11-07T02:18:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2014-0117
+(OID: CVE-2014-0117)
+","","",""
+45.33.32.156,,,,5.0,Medium,75,"","CVE-2014-0098","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2014-0098.
+The product was found at: 80/tcp.
+
+The log_cookie function in mod_log_config.c in the mod_log_config module in the Apache HTTP Server before 2.4.8 allows remote attackers to cause a denial of service (segmentation fault and daemon crash) via a crafted cookie that is not properly handled during truncation.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2014-0098.
+The product was found at: 80/tcp.
+
+The log_cookie function in mod_log_config.c in the mod_log_config module in the Apache HTTP Server before 2.4.8 allows remote attackers to cause a denial of service (segmentation fault and daemon crash) via a crafted cookie that is not properly handled during truncation.",CVE-2014-0098,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,1a1077d7-6ff0-44df-b631-6cf766a2f298,"","","","","
+Details:
+CVE-2014-0098
+(OID: CVE-2014-0098)
+Version used: 2023-11-07T02:18:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2014-0098
+(OID: CVE-2014-0098)
+","","",""
+45.33.32.156,,,,4.3,Medium,75,"","CVE-2014-0118","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2014-0118.
+The product was found at: 80/tcp.
+
+The deflate_in_filter function in mod_deflate.c in the mod_deflate module in the Apache HTTP Server before 2.4.10, when request body decompression is enabled, allows remote attackers to cause a denial of service (resource consumption) via crafted request data that decompresses to a much larger size.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2014-0118.
+The product was found at: 80/tcp.
+
+The deflate_in_filter function in mod_deflate.c in the mod_deflate module in the Apache HTTP Server before 2.4.10, when request body decompression is enabled, allows remote attackers to cause a denial of service (resource consumption) via crafted request data that decompresses to a much larger size.",CVE-2014-0118,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,4b914f10-f16f-4f97-bd43-659e255b8d5b,"","","","","
+Details:
+CVE-2014-0118
+(OID: CVE-2014-0118)
+Version used: 2023-11-07T02:18:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2014-0118
+(OID: CVE-2014-0118)
+","","",""
+45.33.32.156,,,,6.8,Medium,75,"","CVE-2014-0226","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2014-0226.
+The product was found at: 80/tcp.
+
+Race condition in the mod_status module in the Apache HTTP Server before 2.4.10 allows remote attackers to cause a denial of service (heap-based buffer overflow), or possibly obtain sensitive credential information or execute arbitrary code, via a crafted request that triggers improper scoreboard handling within the status_handler function in modules/generators/mod_status.c and the lua_ap_scoreboard_worker function in modules/lua/lua_request.c.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2014-0226.
+The product was found at: 80/tcp.
+
+Race condition in the mod_status module in the Apache HTTP Server before 2.4.10 allows remote attackers to cause a denial of service (heap-based buffer overflow), or possibly obtain sensitive credential information or execute arbitrary code, via a crafted request that triggers improper scoreboard handling within the status_handler function in modules/generators/mod_status.c and the lua_ap_scoreboard_worker function in modules/lua/lua_request.c.",CVE-2014-0226,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,a9b34772-9fcd-4424-929c-63b6416f87e6,"","","","","
+Details:
+CVE-2014-0226
+(OID: CVE-2014-0226)
+Version used: 2023-11-07T02:18:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2014-0226
+(OID: CVE-2014-0226)
+","","",""
+45.33.32.156,,,,5.0,Medium,75,"","CVE-2014-0231","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2014-0231.
+The product was found at: 80/tcp.
+
+The mod_cgid module in the Apache HTTP Server before 2.4.10 does not have a timeout mechanism, which allows remote attackers to cause a denial of service (process hang) via a request to a CGI script that does not read from its stdin file descriptor.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2014-0231.
+The product was found at: 80/tcp.
+
+The mod_cgid module in the Apache HTTP Server before 2.4.10 does not have a timeout mechanism, which allows remote attackers to cause a denial of service (process hang) via a request to a CGI script that does not read from its stdin file descriptor.",CVE-2014-0231,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,c4d154a0-fb05-4292-beb3-044e98b4bab2,"","","","","
+Details:
+CVE-2014-0231
+(OID: CVE-2014-0231)
+Version used: 2023-11-07T02:18:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2014-0231
+(OID: CVE-2014-0231)
+","","",""
+45.33.32.156,,,,4.3,Medium,75,"","CVE-2014-8109","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2014-8109.
+The product was found at: 80/tcp.
+
+mod_lua.c in the mod_lua module in the Apache HTTP Server 2.3.x and 2.4.x through 2.4.10 does not support an httpd configuration in which the same Lua authorization provider is used with different arguments within different contexts, which allows remote attackers to bypass intended access restrictions in opportunistic circumstances by leveraging multiple Require directives, as demonstrated by a configuration that specifies authorization for one group to access a certain directory, and authorization for a second group to access a second directory.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2014-8109.
+The product was found at: 80/tcp.
+
+mod_lua.c in the mod_lua module in the Apache HTTP Server 2.3.x and 2.4.x through 2.4.10 does not support an httpd configuration in which the same Lua authorization provider is used with different arguments within different contexts, which allows remote attackers to bypass intended access restrictions in opportunistic circumstances by leveraging multiple Require directives, as demonstrated by a configuration that specifies authorization for one group to access a certain directory, and authorization for a second group to access a second directory.",CVE-2014-8109,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,368cfedc-cce5-478a-ae8f-af6819d3f2b2,"","","","","
+Details:
+CVE-2014-8109
+(OID: CVE-2014-8109)
+Version used: 2023-02-13T00:42:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2014-8109
+(OID: CVE-2014-8109)
+","","",""
+45.33.32.156,,,,9.8,High,75,"","CVE-2017-7679","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2017-7679.
+The product was found at: 80/tcp.
+
+In Apache httpd 2.2.x before 2.2.33 and 2.4.x before 2.4.26, mod_mime can read one byte past the end of a buffer when sending a malicious Content-Type response header.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2017-7679.
+The product was found at: 80/tcp.
+
+In Apache httpd 2.2.x before 2.2.33 and 2.4.x before 2.4.26, mod_mime can read one byte past the end of a buffer when sending a malicious Content-Type response header.",CVE-2017-7679,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,7f021953-9581-43ca-95ed-65468a09a548,"","","","","
+Details:
+CVE-2017-7679
+(OID: CVE-2017-7679)
+Version used: 2023-11-07T02:50:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2017-7679
+(OID: CVE-2017-7679)
+","","",""
+45.33.32.156,,,,9.1,High,75,"","CVE-2017-9788","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2017-9788.
+The product was found at: 80/tcp.
+
+In Apache httpd before 2.2.34 and 2.4.x before 2.4.27, the value placeholder in [Proxy-]Authorization headers of type 'Digest' was not initialized or reset before or between successive key=value assignments by mod_auth_digest. Providing an initial key with no '=' assignment could reflect the stale value of uninitialized pool memory used by the prior request, leading to leakage of potentially confidential information, and a segfault in other cases resulting in denial of service.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2017-9788.
+The product was found at: 80/tcp.
+
+In Apache httpd before 2.2.34 and 2.4.x before 2.4.27, the value placeholder in [Proxy-]Authorization headers of type 'Digest' was not initialized or reset before or between successive key=value assignments by mod_auth_digest. Providing an initial key with no '=' assignment could reflect the stale value of uninitialized pool memory used by the prior request, leading to leakage of potentially confidential information, and a segfault in other cases resulting in denial of service.",CVE-2017-9788,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,de67faac-6255-4d0c-b69a-0873cac63188,"","","","","
+Details:
+CVE-2017-9788
+(OID: CVE-2017-9788)
+Version used: 2023-11-07T02:50:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2017-9788
+(OID: CVE-2017-9788)
+","","",""
+45.33.32.156,,,,7.5,High,75,"","CVE-2017-9798","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2017-9798.
+The product was found at: 80/tcp.
+
+Apache httpd allows remote attackers to read secret data from process memory if the Limit directive can be set in a user's .htaccess file, or if httpd.conf has certain misconfigurations, aka Optionsbleed. This affects the Apache HTTP Server through 2.2.34 and 2.4.x through 2.4.27. The attacker sends an unauthenticated OPTIONS HTTP request when attempting to read secret data. This is a use-after-free issue and thus secret data is not always sent, and the specific data depends on many factors including configuration. Exploitation with .htaccess can be blocked with a patch to the ap_limit_section function in server/core.c.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2017-9798.
+The product was found at: 80/tcp.
+
+Apache httpd allows remote attackers to read secret data from process memory if the Limit directive can be set in a user's .htaccess file, or if httpd.conf has certain misconfigurations, aka Optionsbleed. This affects the Apache HTTP Server through 2.2.34 and 2.4.x through 2.4.27. The attacker sends an unauthenticated OPTIONS HTTP request when attempting to read secret data. This is a use-after-free issue and thus secret data is not always sent, and the specific data depends on many factors including configuration. Exploitation with .htaccess can be blocked with a patch to the ap_limit_section function in server/core.c.",CVE-2017-9798,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,330baf90-1914-4a2f-be91-f5eca924fab9,"","","","","
+Details:
+CVE-2017-9798
+(OID: CVE-2017-9798)
+Version used: 2023-11-07T02:50:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2017-9798
+(OID: CVE-2017-9798)
+","","",""
+45.33.32.156,,,,9.8,High,75,"","CVE-2017-3167","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2017-3167.
+The product was found at: 80/tcp.
+
+In Apache httpd 2.2.x before 2.2.33 and 2.4.x before 2.4.26, use of the ap_get_basic_auth_pw() by third-party modules outside of the authentication phase may lead to authentication requirements being bypassed.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2017-3167.
+The product was found at: 80/tcp.
+
+In Apache httpd 2.2.x before 2.2.33 and 2.4.x before 2.4.26, use of the ap_get_basic_auth_pw() by third-party modules outside of the authentication phase may lead to authentication requirements being bypassed.",CVE-2017-3167,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,c0cb8c46-1209-4a32-ac13-04220c0fc996,"","","","","
+Details:
+CVE-2017-3167
+(OID: CVE-2017-3167)
+Version used: 2023-11-07T02:44:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2017-3167
+(OID: CVE-2017-3167)
+","","",""
+45.33.32.156,,,,8.1,High,75,"","CVE-2017-15715","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2017-15715.
+The product was found at: 80/tcp.
+
+In Apache httpd 2.4.0 to 2.4.29, the expression specified in &amp;lt;FilesMatch&amp;gt; could match '$' to a newline character in a malicious filename, rather than matching only the end of the filename. This could be exploited in environments where uploads of some files are are externally blocked, but only by matching the trailing portion of the filename.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2017-15715.
+The product was found at: 80/tcp.
+
+In Apache httpd 2.4.0 to 2.4.29, the expression specified in &amp;lt;FilesMatch&amp;gt; could match '$' to a newline character in a malicious filename, rather than matching only the end of the filename. This could be exploited in environments where uploads of some files are are externally blocked, but only by matching the trailing portion of the filename.",CVE-2017-15715,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,39403c47-8321-4a61-9fb8-24bd2145b4cd,"","","","","
+Details:
+CVE-2017-15715
+(OID: CVE-2017-15715)
+Version used: 2023-11-07T02:40:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2017-15715
+(OID: CVE-2017-15715)
+","","",""
+45.33.32.156,,,,7.5,High,75,"","CVE-2016-8743","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2016-8743.
+The product was found at: 80/tcp.
+
+Apache HTTP Server, in all releases prior to 2.2.32 and 2.4.25, was liberal in the whitespace accepted from requests and sent in response lines and headers. Accepting these different behaviors represented a security concern when httpd participates in any chain of proxies or interacts with back-end application servers, either through mod_proxy or using conventional CGI mechanisms, and may result in request smuggling, response splitting and cache pollution.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2016-8743.
+The product was found at: 80/tcp.
+
+Apache HTTP Server, in all releases prior to 2.2.32 and 2.4.25, was liberal in the whitespace accepted from requests and sent in response lines and headers. Accepting these different behaviors represented a security concern when httpd participates in any chain of proxies or interacts with back-end application servers, either through mod_proxy or using conventional CGI mechanisms, and may result in request smuggling, response splitting and cache pollution.",CVE-2016-8743,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,ff5b339b-6170-403a-b71a-acae26f0226e,"","","","","
+Details:
+CVE-2016-8743
+(OID: CVE-2016-8743)
+Version used: 2023-11-07T02:36:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2016-8743
+(OID: CVE-2016-8743)
+","","",""
+45.33.32.156,,,,8.1,High,75,"","CVE-2016-5387","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2016-5387.
+The product was found at: 80/tcp.
+
+The Apache HTTP Server through 2.4.23 follows RFC 3875 section 4.1.18 and therefore does not protect applications from the presence of untrusted client data in the HTTP_PROXY environment variable, which might allow remote attackers to redirect an application's outbound HTTP traffic to an arbitrary proxy server via a crafted Proxy header in an HTTP request, aka an ""httpoxy"" issue.  NOTE: the vendor states ""This mitigation has been assigned the identifier CVE-2016-5387""; in other words, this is not a CVE ID for a vulnerability.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2016-5387.
+The product was found at: 80/tcp.
+
+The Apache HTTP Server through 2.4.23 follows RFC 3875 section 4.1.18 and therefore does not protect applications from the presence of untrusted client data in the HTTP_PROXY environment variable, which might allow remote attackers to redirect an application's outbound HTTP traffic to an arbitrary proxy server via a crafted Proxy header in an HTTP request, aka an ""httpoxy"" issue.  NOTE: the vendor states ""This mitigation has been assigned the identifier CVE-2016-5387""; in other words, this is not a CVE ID for a vulnerability.",CVE-2016-5387,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,0a1347e2-27b1-46d6-9c1a-9601c3459709,"","","","","
+Details:
+CVE-2016-5387
+(OID: CVE-2016-5387)
+Version used: 2023-11-07T02:33:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2016-5387
+(OID: CVE-2016-5387)
+","","",""
+45.33.32.156,,,,6.1,Medium,75,"","CVE-2016-4975","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2016-4975.
+The product was found at: 80/tcp.
+
+Possible CRLF injection allowing HTTP response splitting attacks for sites which use mod_userdir. This issue was mitigated by changes made in 2.4.25 and 2.2.32 which prohibit CR or LF injection into the ""Location"" or other outbound header key or value. Fixed in Apache HTTP Server 2.4.25 (Affected 2.4.1-2.4.23). Fixed in Apache HTTP Server 2.2.32 (Affected 2.2.0-2.2.31).","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2016-4975.
+The product was found at: 80/tcp.
+
+Possible CRLF injection allowing HTTP response splitting attacks for sites which use mod_userdir. This issue was mitigated by changes made in 2.4.25 and 2.2.32 which prohibit CR or LF injection into the ""Location"" or other outbound header key or value. Fixed in Apache HTTP Server 2.4.25 (Affected 2.4.1-2.4.23). Fixed in Apache HTTP Server 2.2.32 (Affected 2.2.0-2.2.31).",CVE-2016-4975,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,d2db2ae7-4e3b-4b06-8812-8ffce3687f54,"","","","","
+Details:
+CVE-2016-4975
+(OID: CVE-2016-4975)
+Version used: 2023-11-07T02:32:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2016-4975
+(OID: CVE-2016-4975)
+","","",""
+45.33.32.156,,,,7.5,High,75,"","CVE-2016-2161","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2016-2161.
+The product was found at: 80/tcp.
+
+In Apache HTTP Server versions 2.4.0 to 2.4.23, malicious input to mod_auth_digest can cause the server to crash, and each instance continues to crash even for subsequently valid requests.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2016-2161.
+The product was found at: 80/tcp.
+
+In Apache HTTP Server versions 2.4.0 to 2.4.23, malicious input to mod_auth_digest can cause the server to crash, and each instance continues to crash even for subsequently valid requests.",CVE-2016-2161,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,bf305963-c92b-47c0-a59d-c11a82fd7dae,"","","","","
+Details:
+CVE-2016-2161
+(OID: CVE-2016-2161)
+Version used: 2023-11-07T02:31:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2016-2161
+(OID: CVE-2016-2161)
+","","",""
+45.33.32.156,,,,7.5,High,75,"","CVE-2016-0736","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2016-0736.
+The product was found at: 80/tcp.
+
+In Apache HTTP Server versions 2.4.0 to 2.4.23, mod_session_crypto was encrypting its data/cookie using the configured ciphers with possibly either CBC or ECB modes of operation (AES256-CBC by default), hence no selectable or builtin authenticated encryption. This made it vulnerable to padding oracle attacks, particularly with CBC.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2016-0736.
+The product was found at: 80/tcp.
+
+In Apache HTTP Server versions 2.4.0 to 2.4.23, mod_session_crypto was encrypting its data/cookie using the configured ciphers with possibly either CBC or ECB modes of operation (AES256-CBC by default), hence no selectable or builtin authenticated encryption. This made it vulnerable to padding oracle attacks, particularly with CBC.",CVE-2016-0736,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,27d3b6bd-e3d1-4933-b185-5ad927c63fd7,"","","","","
+Details:
+CVE-2016-0736
+(OID: CVE-2016-0736)
+Version used: 2023-11-07T02:29:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2016-0736
+(OID: CVE-2016-0736)
+","","",""
+45.33.32.156,,,,7.3,High,75,"","CVE-2020-35452","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2020-35452.
+The product was found at: 80/tcp.
+
+Apache HTTP Server versions 2.4.0 to 2.4.46 A specially crafted Digest nonce can cause a stack overflow in mod_auth_digest. There is no report of this overflow being exploitable, nor the Apache HTTP Server team could create one, though some particular compiler and/or compilation option might make it possible, with limited consequences anyway due to the size (a single byte) and the value (zero byte) of the overflow","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2020-35452.
+The product was found at: 80/tcp.
+
+Apache HTTP Server versions 2.4.0 to 2.4.46 A specially crafted Digest nonce can cause a stack overflow in mod_auth_digest. There is no report of this overflow being exploitable, nor the Apache HTTP Server team could create one, though some particular compiler and/or compilation option might make it possible, with limited consequences anyway due to the size (a single byte) and the value (zero byte) of the overflow",CVE-2020-35452,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,d9d85f74-c41f-44b0-bf99-439051a15072,"","","","","
+Details:
+CVE-2020-35452
+(OID: CVE-2020-35452)
+Version used: 2023-11-07T03:21:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2020-35452
+(OID: CVE-2020-35452)
+","","",""
+45.33.32.156,,,,6.1,Medium,75,"","CVE-2020-1927","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2020-1927.
+The product was found at: 80/tcp.
+
+In Apache HTTP Server 2.4.0 to 2.4.41, redirects configured with mod_rewrite that were intended to be self-referential might be fooled by encoded newlines and redirect instead to an an unexpected URL within the request URL.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2020-1927.
+The product was found at: 80/tcp.
+
+In Apache HTTP Server 2.4.0 to 2.4.41, redirects configured with mod_rewrite that were intended to be self-referential might be fooled by encoded newlines and redirect instead to an an unexpected URL within the request URL.",CVE-2020-1927,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,0ed26d3d-56d1-4022-88ca-3dc576c3a14c,"","","","","
+Details:
+CVE-2020-1927
+(OID: CVE-2020-1927)
+Version used: 2023-11-07T03:19:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2020-1927
+(OID: CVE-2020-1927)
+","","",""
+45.33.32.156,,,,5.3,Medium,75,"","CVE-2020-1934","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2020-1934.
+The product was found at: 80/tcp.
+
+In Apache HTTP Server 2.4.0 to 2.4.41, mod_proxy_ftp may use uninitialized memory when proxying to a malicious FTP server.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2020-1934.
+The product was found at: 80/tcp.
+
+In Apache HTTP Server 2.4.0 to 2.4.41, mod_proxy_ftp may use uninitialized memory when proxying to a malicious FTP server.",CVE-2020-1934,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,e92ae00b-e24c-4068-8c91-49c6330488e1,"","","","","
+Details:
+CVE-2020-1934
+(OID: CVE-2020-1934)
+Version used: 2023-11-07T03:19:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2020-1934
+(OID: CVE-2020-1934)
+","","",""
+45.33.32.156,,,,7.5,High,75,"","CVE-2017-15710","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2017-15710.
+The product was found at: 80/tcp.
+
+In Apache httpd 2.0.23 to 2.0.65, 2.2.0 to 2.2.34, and 2.4.0 to 2.4.29, mod_authnz_ldap, if configured with AuthLDAPCharsetConfig, uses the Accept-Language header value to lookup the right charset encoding when verifying the user's credentials. If the header value is not present in the charset conversion table, a fallback mechanism is used to truncate it to a two characters value to allow a quick retry (for example, 'en-US' is truncated to 'en'). A header value of less than two characters forces an out of bound write of one NUL byte to a memory location that is not part of the string. In the worst case, quite unlikely, the process would crash which could be used as a Denial of Service attack. In the more likely case, this memory is already reserved for future use and the issue has no effect at all.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2017-15710.
+The product was found at: 80/tcp.
+
+In Apache httpd 2.0.23 to 2.0.65, 2.2.0 to 2.2.34, and 2.4.0 to 2.4.29, mod_authnz_ldap, if configured with AuthLDAPCharsetConfig, uses the Accept-Language header value to lookup the right charset encoding when verifying the user's credentials. If the header value is not present in the charset conversion table, a fallback mechanism is used to truncate it to a two characters value to allow a quick retry (for example, 'en-US' is truncated to 'en'). A header value of less than two characters forces an out of bound write of one NUL byte to a memory location that is not part of the string. In the worst case, quite unlikely, the process would crash which could be used as a Denial of Service attack. In the more likely case, this memory is already reserved for future use and the issue has no effect at all.",CVE-2017-15710,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,dbf54e5e-3bd4-4bf0-ba89-b12d87e8006c,"","","","","
+Details:
+CVE-2017-15710
+(OID: CVE-2017-15710)
+Version used: 2023-11-07T02:40:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2017-15710
+(OID: CVE-2017-15710)
+","","",""
+45.33.32.156,,,,5.3,Medium,75,"","CVE-2019-0220","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2019-0220.
+The product was found at: 80/tcp.
+
+A vulnerability was found in Apache HTTP Server 2.4.0 to 2.4.38. When the path component of a request URL contains multiple consecutive slashes ('/'), directives such as LocationMatch and RewriteRule must account for duplicates in regular expressions while other aspects of the servers processing will implicitly collapse them.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2019-0220.
+The product was found at: 80/tcp.
+
+A vulnerability was found in Apache HTTP Server 2.4.0 to 2.4.38. When the path component of a request URL contains multiple consecutive slashes ('/'), directives such as LocationMatch and RewriteRule must account for duplicates in regular expressions while other aspects of the servers processing will implicitly collapse them.",CVE-2019-0220,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,38fca909-4936-4d6a-a7c6-189c8b7b0ab4,"","","","","
+Details:
+CVE-2019-0220
+(OID: CVE-2019-0220)
+Version used: 2023-11-07T03:01:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2019-0220
+(OID: CVE-2019-0220)
+","","",""
+45.33.32.156,,,,9.8,High,75,"","CVE-2023-25690","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2023-25690.
+The product was found at: 80/tcp.
+
+Some mod_proxy configurations on Apache HTTP Server versions 2.4.0 through 2.4.55 allow a HTTP Request Smuggling attack.
+
+
+
+
+Configurations are affected when mod_proxy is enabled along with some form of RewriteRule
+ or ProxyPassMatch in which a non-specific pattern matches
+ some portion of the user-supplied request-target (URL) data and is then
+ re-inserted into the proxied request-target using variable 
+substitution. For example, something like:
+
+
+
+
+RewriteEngine on
+RewriteRule ""^/here/(.*)"" ""http://example.com:8080/elsewhere?$1""; [P]
+ProxyPassReverse /here/ http://example.com:8080/
+
+
+Request splitting/smuggling could result in bypass of access controls in the proxy server, proxying unintended URLs to existing origin servers, and cache poisoning. Users are recommended to update to at least version 2.4.56 of Apache HTTP Server.
+
+
+","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2023-25690.
+The product was found at: 80/tcp.
+
+Some mod_proxy configurations on Apache HTTP Server versions 2.4.0 through 2.4.55 allow a HTTP Request Smuggling attack.
+
+
+
+
+Configurations are affected when mod_proxy is enabled along with some form of RewriteRule
+ or ProxyPassMatch in which a non-specific pattern matches
+ some portion of the user-supplied request-target (URL) data and is then
+ re-inserted into the proxied request-target using variable 
+substitution. For example, something like:
+
+
+
+
+RewriteEngine on
+RewriteRule ""^/here/(.*)"" ""http://example.com:8080/elsewhere?$1""; [P]
+ProxyPassReverse /here/ http://example.com:8080/
+
+
+Request splitting/smuggling could result in bypass of access controls in the proxy server, proxying unintended URLs to existing origin servers, and cache poisoning. Users are recommended to update to at least version 2.4.56 of Apache HTTP Server.
+
+
+",CVE-2023-25690,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,ff539c15-0090-4c61-aca2-d13aa4ac6a24,"","","","","
+Details:
+CVE-2023-25690
+(OID: CVE-2023-25690)
+Version used: 2024-01-02T16:15:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2023-25690
+(OID: CVE-2023-25690)
+","","",""
+45.33.32.156,,,,9.8,High,75,"","CVE-2022-23943","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2022-23943.
+The product was found at: 80/tcp.
+
+Out-of-bounds Write vulnerability in mod_sed of Apache HTTP Server allows an attacker to overwrite heap memory with possibly attacker provided data. This issue affects Apache HTTP Server 2.4 version 2.4.52 and prior versions.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2022-23943.
+The product was found at: 80/tcp.
+
+Out-of-bounds Write vulnerability in mod_sed of Apache HTTP Server allows an attacker to overwrite heap memory with possibly attacker provided data. This issue affects Apache HTTP Server 2.4 version 2.4.52 and prior versions.",CVE-2022-23943,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,8c8f9613-21be-4086-ab65-0433d1b2f223,"","","","","
+Details:
+CVE-2022-23943
+(OID: CVE-2022-23943)
+Version used: 2023-11-07T03:44:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2022-23943
+(OID: CVE-2022-23943)
+","","",""
+45.33.32.156,,,,7.5,High,75,"","CVE-2022-26377","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2022-26377.
+The product was found at: 80/tcp.
+
+Inconsistent Interpretation of HTTP Requests ('HTTP Request Smuggling') vulnerability in mod_proxy_ajp of Apache HTTP Server allows an attacker to smuggle requests to the AJP server it forwards requests to. This issue affects Apache HTTP Server Apache HTTP Server 2.4 version 2.4.53 and prior versions.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2022-26377.
+The product was found at: 80/tcp.
+
+Inconsistent Interpretation of HTTP Requests ('HTTP Request Smuggling') vulnerability in mod_proxy_ajp of Apache HTTP Server allows an attacker to smuggle requests to the AJP server it forwards requests to. This issue affects Apache HTTP Server Apache HTTP Server 2.4 version 2.4.53 and prior versions.",CVE-2022-26377,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,0f63bfd8-d17b-4381-a2a7-9c5f2ecfd930,"","","","","
+Details:
+CVE-2022-26377
+(OID: CVE-2022-26377)
+Version used: 2023-11-07T03:44:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2022-26377
+(OID: CVE-2022-26377)
+","","",""
+45.33.32.156,,,,5.0,Medium,75,"","CVE-2015-3183","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2015-3183.
+The product was found at: 80/tcp.
+
+The chunked transfer coding implementation in the Apache HTTP Server before 2.4.14 does not properly parse chunk headers, which allows remote attackers to conduct HTTP request smuggling attacks via a crafted request, related to mishandling of large chunk-size values and invalid chunk-extension characters in modules/http/http_filters.c.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2015-3183.
+The product was found at: 80/tcp.
+
+The chunked transfer coding implementation in the Apache HTTP Server before 2.4.14 does not properly parse chunk headers, which allows remote attackers to conduct HTTP request smuggling attacks via a crafted request, related to mishandling of large chunk-size values and invalid chunk-extension characters in modules/http/http_filters.c.",CVE-2015-3183,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,127f4199-0845-49cb-98ef-d974467e37ab,"","","","","
+Details:
+CVE-2015-3183
+(OID: CVE-2015-3183)
+Version used: 2023-12-14T14:06:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2015-3183
+(OID: CVE-2015-3183)
+","","",""
+45.33.32.156,,,,4.3,Medium,75,"","CVE-2015-3185","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2015-3185.
+The product was found at: 80/tcp.
+
+The ap_some_auth_required function in server/request.c in the Apache HTTP Server 2.4.x before 2.4.14 does not consider that a Require directive may be associated with an authorization setting rather than an authentication setting, which allows remote attackers to bypass intended access restrictions in opportunistic circumstances by leveraging the presence of a module that relies on the 2.2 API behavior.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2015-3185.
+The product was found at: 80/tcp.
+
+The ap_some_auth_required function in server/request.c in the Apache HTTP Server 2.4.x before 2.4.14 does not consider that a Require directive may be associated with an authorization setting rather than an authentication setting, which allows remote attackers to bypass intended access restrictions in opportunistic circumstances by leveraging the presence of a module that relies on the 2.2 API behavior.",CVE-2015-3185,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,b4d4d61d-078b-44b4-8266-7f5cfc48d8c0,"","","","","
+Details:
+CVE-2015-3185
+(OID: CVE-2015-3185)
+Version used: 2023-11-07T02:25:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2015-3185
+(OID: CVE-2015-3185)
+","","",""
+45.33.32.156,,,,5.3,Medium,75,"","CVE-2018-1283","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2018-1283.
+The product was found at: 80/tcp.
+
+In Apache httpd 2.4.0 to 2.4.29, when mod_session is configured to forward its session data to CGI applications (SessionEnv on, not the default), a remote user may influence their content by using a ""Session"" header. This comes from the ""HTTP_SESSION"" variable name used by mod_session to forward its data to CGIs, since the prefix ""HTTP_"" is also used by the Apache HTTP Server to pass HTTP header fields, per CGI specifications.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2018-1283.
+The product was found at: 80/tcp.
+
+In Apache httpd 2.4.0 to 2.4.29, when mod_session is configured to forward its session data to CGI applications (SessionEnv on, not the default), a remote user may influence their content by using a ""Session"" header. This comes from the ""HTTP_SESSION"" variable name used by mod_session to forward its data to CGIs, since the prefix ""HTTP_"" is also used by the Apache HTTP Server to pass HTTP header fields, per CGI specifications.",CVE-2018-1283,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,4a82c07f-309d-4413-9998-7137ef844e4a,"","","","","
+Details:
+CVE-2018-1283
+(OID: CVE-2018-1283)
+Version used: 2023-11-07T02:55:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2018-1283
+(OID: CVE-2018-1283)
+","","",""
+45.33.32.156,,,,9.8,High,75,"","CVE-2018-1312","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2018-1312.
+The product was found at: 80/tcp.
+
+In Apache httpd 2.2.0 to 2.4.29, when generating an HTTP Digest authentication challenge, the nonce sent to prevent reply attacks was not correctly generated using a pseudo-random seed. In a cluster of servers using a common Digest authentication configuration, HTTP requests could be replayed across servers by an attacker without detection.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2018-1312.
+The product was found at: 80/tcp.
+
+In Apache httpd 2.2.0 to 2.4.29, when generating an HTTP Digest authentication challenge, the nonce sent to prevent reply attacks was not correctly generated using a pseudo-random seed. In a cluster of servers using a common Digest authentication configuration, HTTP requests could be replayed across servers by an attacker without detection.",CVE-2018-1312,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,80dbe19b-43d9-457d-817c-05a06d2b11e2,"","","","","
+Details:
+CVE-2018-1312
+(OID: CVE-2018-1312)
+Version used: 2023-11-07T02:55:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2018-1312
+(OID: CVE-2018-1312)
+","","",""
+45.33.32.156,,,,5.5,Medium,75,"","CVE-2020-13938","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2020-13938.
+The product was found at: 80/tcp.
+
+Apache HTTP Server versions 2.4.0 to 2.4.46 Unprivileged local users can stop httpd on Windows","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2020-13938.
+The product was found at: 80/tcp.
+
+Apache HTTP Server versions 2.4.0 to 2.4.46 Unprivileged local users can stop httpd on Windows",CVE-2020-13938,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,93c1cb31-ef09-4bf6-99c1-00af4543239c,"","","","","
+Details:
+CVE-2020-13938
+(OID: CVE-2020-13938)
+Version used: 2023-11-07T03:17:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2020-13938
+(OID: CVE-2020-13938)
+","","",""
+45.33.32.156,,,,5.3,Medium,75,"","CVE-2020-11985","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2020-11985.
+The product was found at: 80/tcp.
+
+IP address spoofing when proxying using mod_remoteip and mod_rewrite For configurations using proxying with mod_remoteip and certain mod_rewrite rules, an attacker could spoof their IP address for logging and PHP scripts. Note this issue was fixed in Apache HTTP Server 2.4.24 but was retrospectively allocated a low severity CVE in 2020.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2020-11985.
+The product was found at: 80/tcp.
+
+IP address spoofing when proxying using mod_remoteip and mod_rewrite For configurations using proxying with mod_remoteip and certain mod_rewrite rules, an attacker could spoof their IP address for logging and PHP scripts. Note this issue was fixed in Apache HTTP Server 2.4.24 but was retrospectively allocated a low severity CVE in 2020.",CVE-2020-11985,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,bf69a20d-17e3-4a56-bf16-e796476b9910,"","","","","
+Details:
+CVE-2020-11985
+(OID: CVE-2020-11985)
+Version used: 2023-11-07T03:15:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2020-11985
+(OID: CVE-2020-11985)
+","","",""
+45.33.32.156,,,,7.5,High,75,"","CVE-2018-17199","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2018-17199.
+The product was found at: 80/tcp.
+
+In Apache HTTP Server 2.4 release 2.4.37 and prior, mod_session checks the session expiry time before decoding the session. This causes session expiry time to be ignored for mod_session_cookie sessions since the expiry time is loaded when the session is decoded.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2018-17199.
+The product was found at: 80/tcp.
+
+In Apache HTTP Server 2.4 release 2.4.37 and prior, mod_session checks the session expiry time before decoding the session. This causes session expiry time to be ignored for mod_session_cookie sessions since the expiry time is loaded when the session is decoded.",CVE-2018-17199,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,9c841e3e-adb8-42d0-acbc-b78752fccfd9,"","","","","
+Details:
+CVE-2018-17199
+(OID: CVE-2018-17199)
+Version used: 2023-11-07T02:54:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2018-17199
+(OID: CVE-2018-17199)
+","","",""
+45.33.32.156,,,,5.0,Medium,75,"","CVE-2013-6438","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2013-6438.
+The product was found at: 80/tcp.
+
+The dav_xml_get_cdata function in main/util.c in the mod_dav module in the Apache HTTP Server before 2.4.8 does not properly remove whitespace characters from CDATA sections, which allows remote attackers to cause a denial of service (daemon crash) via a crafted DAV WRITE request.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2013-6438.
+The product was found at: 80/tcp.
+
+The dav_xml_get_cdata function in main/util.c in the mod_dav module in the Apache HTTP Server before 2.4.8 does not properly remove whitespace characters from CDATA sections, which allows remote attackers to cause a denial of service (daemon crash) via a crafted DAV WRITE request.",CVE-2013-6438,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,afb28b7a-282d-4ef2-a133-17af700b9acd,"","","","","
+Details:
+CVE-2013-6438
+(OID: CVE-2013-6438)
+Version used: 2023-11-07T02:17:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2013-6438
+(OID: CVE-2013-6438)
+","","",""
+45.33.32.156,,,,5.0,Medium,75,"","CVE-2013-5704","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2013-5704.
+The product was found at: 80/tcp.
+
+The mod_headers module in the Apache HTTP Server 2.2.22 allows remote attackers to bypass ""RequestHeader unset"" directives by placing a header in the trailer portion of data sent with chunked transfer coding.  NOTE: the vendor states ""this is not a security issue in httpd as such.""","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2013-5704.
+The product was found at: 80/tcp.
+
+The mod_headers module in the Apache HTTP Server 2.2.22 allows remote attackers to bypass ""RequestHeader unset"" directives by placing a header in the trailer portion of data sent with chunked transfer coding.  NOTE: the vendor states ""this is not a security issue in httpd as such.""",CVE-2013-5704,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,aa6b3fb9-f206-4c5b-a297-1705dd9e11d5,"","","","","
+Details:
+CVE-2013-5704
+(OID: CVE-2013-5704)
+Version used: 2023-11-07T02:16:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2013-5704
+(OID: CVE-2013-5704)
+","","",""
+45.33.32.156,,,,8.2,High,75,"","CVE-2021-44224","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2021-44224.
+The product was found at: 80/tcp.
+
+A crafted URI sent to httpd configured as a forward proxy (ProxyRequests on) can cause a crash (NULL pointer dereference) or, for configurations mixing forward and reverse proxy declarations, can allow for requests to be directed to a declared Unix Domain Socket endpoint (Server Side Request Forgery). This issue affects Apache HTTP Server 2.4.7 up to 2.4.51 (included).","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2021-44224.
+The product was found at: 80/tcp.
+
+A crafted URI sent to httpd configured as a forward proxy (ProxyRequests on) can cause a crash (NULL pointer dereference) or, for configurations mixing forward and reverse proxy declarations, can allow for requests to be directed to a declared Unix Domain Socket endpoint (Server Side Request Forgery). This issue affects Apache HTTP Server 2.4.7 up to 2.4.51 (included).",CVE-2021-44224,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,43f7d427-f272-4f7b-b6d4-3d2f84ea65d3,"","","","","
+Details:
+CVE-2021-44224
+(OID: CVE-2021-44224)
+Version used: 2023-11-07T03:39:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2021-44224
+(OID: CVE-2021-44224)
+","","",""
+45.33.32.156,,,,5.3,Medium,75,"","CVE-2019-17567","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2019-17567.
+The product was found at: 80/tcp.
+
+Apache HTTP Server versions 2.4.6 to 2.4.46 mod_proxy_wstunnel configured on an URL that is not necessarily Upgraded by the origin server was tunneling the whole connection regardless, thus allowing for subsequent requests on the same connection to pass through with no HTTP validation, authentication or authorization possibly configured.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2019-17567.
+The product was found at: 80/tcp.
+
+Apache HTTP Server versions 2.4.6 to 2.4.46 mod_proxy_wstunnel configured on an URL that is not necessarily Upgraded by the origin server was tunneling the whole connection regardless, thus allowing for subsequent requests on the same connection to pass through with no HTTP validation, authentication or authorization possibly configured.",CVE-2019-17567,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,d98ab50a-0d87-439e-9c88-29b75f81b2b4,"","","","","
+Details:
+CVE-2019-17567
+(OID: CVE-2019-17567)
+Version used: 2023-11-07T03:06:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2019-17567
+(OID: CVE-2019-17567)
+","","",""
+45.33.32.156,,,,6.1,Medium,75,"","CVE-2019-10092","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2019-10092.
+The product was found at: 80/tcp.
+
+In Apache HTTP Server 2.4.0-2.4.39, a limited cross-site scripting issue was reported affecting the mod_proxy error page. An attacker could cause the link on the error page to be malformed and instead point to a page of their choice. This would only be exploitable where a server was set up with proxying enabled but was misconfigured in such a way that the Proxy Error page was displayed.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2019-10092.
+The product was found at: 80/tcp.
+
+In Apache HTTP Server 2.4.0-2.4.39, a limited cross-site scripting issue was reported affecting the mod_proxy error page. An attacker could cause the link on the error page to be malformed and instead point to a page of their choice. This would only be exploitable where a server was set up with proxying enabled but was misconfigured in such a way that the Proxy Error page was displayed.",CVE-2019-10092,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,40457f8f-16fe-4dc7-98f7-5c5c95755aaf,"","","","","
+Details:
+CVE-2019-10092
+(OID: CVE-2019-10092)
+Version used: 2023-11-07T03:02:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2019-10092
+(OID: CVE-2019-10092)
+","","",""
+45.33.32.156,,,,6.1,Medium,75,"","CVE-2019-10098","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2019-10098.
+The product was found at: 80/tcp.
+
+In Apache HTTP server 2.4.0 to 2.4.39, Redirects configured with mod_rewrite that were intended to be self-referential might be fooled by encoded newlines and redirect instead to an unexpected URL within the request URL.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2019-10098.
+The product was found at: 80/tcp.
+
+In Apache HTTP server 2.4.0 to 2.4.39, Redirects configured with mod_rewrite that were intended to be self-referential might be fooled by encoded newlines and redirect instead to an unexpected URL within the request URL.",CVE-2019-10098,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,3ade9e0e-6e50-47b9-b3c6-af6c7e5ba07f,"","","","","
+Details:
+CVE-2019-10098
+(OID: CVE-2019-10098)
+Version used: 2023-11-07T03:02:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2019-10098
+(OID: CVE-2019-10098)
+","","",""
+45.33.32.156,,,,7.5,High,75,"","CVE-2019-0217","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2019-0217.
+The product was found at: 80/tcp.
+
+In Apache HTTP Server 2.4 release 2.4.38 and prior, a race condition in mod_auth_digest when running in a threaded server could allow a user with valid credentials to authenticate using another username, bypassing configured access control restrictions.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2019-0217.
+The product was found at: 80/tcp.
+
+In Apache HTTP Server 2.4 release 2.4.38 and prior, a race condition in mod_auth_digest when running in a threaded server could allow a user with valid credentials to authenticate using another username, bypassing configured access control restrictions.",CVE-2019-0217,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,e346e992-9db7-4dd0-aa9e-ad741020a102,"","","","","
+Details:
+CVE-2019-0217
+(OID: CVE-2019-0217)
+Version used: 2023-11-07T03:01:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2019-0217
+(OID: CVE-2019-0217)
+","","",""
+45.33.32.156,,,,9.0,High,75,"","CVE-2022-36760","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2022-36760.
+The product was found at: 80/tcp.
+
+Inconsistent Interpretation of HTTP Requests ('HTTP Request Smuggling') vulnerability in mod_proxy_ajp of Apache HTTP Server allows an attacker to smuggle requests to the AJP server it forwards requests to.  This issue affects Apache HTTP Server Apache HTTP Server 2.4 version 2.4.54 and prior versions.","The host carries the product: cpe:/a:apache:http_server:2.4.7
+It is vulnerable according to: CVE-2022-36760.
+The product was found at: 80/tcp.
+
+Inconsistent Interpretation of HTTP Requests ('HTTP Request Smuggling') vulnerability in mod_proxy_ajp of Apache HTTP Server allows an attacker to smuggle requests to the AJP server it forwards requests to.  This issue affects Apache HTTP Server Apache HTTP Server 2.4 version 2.4.54 and prior versions.",CVE-2022-36760,"",66a054bf-8424-41e2-be14-728528d3a626,"Scan Suspect Host 45.33.32.156",2024-03-18T21:29:42Z,e8e2cc70-d455-4e1e-894e-5571ad61633f,"","","","","
+Details:
+CVE-2022-36760
+(OID: CVE-2022-36760)
+Version used: 2023-09-08T22:15:00Z
+","Product: cpe:/a:apache:http_server:2.4.7
+Method: CVE-2022-36760
+(OID: CVE-2022-36760)
+","","",""

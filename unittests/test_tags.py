@@ -160,14 +160,7 @@ class TagTests(DojoAPITestCase):
         finding_id = self.create_finding_with_tags(tags)
         response = self.get_finding_tags_api(finding_id)
 
-        # the old django-tagging library was splitting this tag into 2 tags
-        # with djangotagulous the tag does no longer get split up and we cannot modify tagulous
-        # to keep doing the old behaviour. so this is a small incompatibility, but only for
-        # tags with commas, so should be minor trouble
-        #
-        # self.assertEqual(2, len(response.get('tags')))
-        self.assertEqual(1, len(response.get('tags')))
-        # print("response['tags']:" + str(response['tags']))
+        self.assertEqual(2, len(response.get('tags')))
         self.assertIn('one', str(response['tags']))
         self.assertIn('two', str(response['tags']))
 
