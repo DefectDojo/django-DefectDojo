@@ -69,9 +69,11 @@ class RedHatSatelliteParser(object):
                 description=description,
                 severity=self.severity_mapping(input=severity),
                 mitigation=solution,
-                cve=errata_id,
                 component_name=packages,
                 dynamic_finding=True,
             )
+            if errata_id is not None:
+                find.unsaved_vulnerability_ids = list()
+                find.unsaved_vulnerability_ids.append(errata_id)
             findings.append(find)
         return findings

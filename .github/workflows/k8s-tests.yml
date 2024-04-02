@@ -12,10 +12,10 @@ env:
     --set createRabbitMqSecret=true \
     "
   HELM_REDIS_BROKER_SETTINGS: " \
-    --set redis.enabled=false \
-    --set rabbitmq.enabled=true \
-    --set celery.broker=rabbitmq \
-    --set createRabbitMqSecret=true \
+    --set redis.enabled=true \
+    --set rabbitmq.enabled=false \
+    --set celery.broker=redis \
+    --set createRedisSecret=true \
     "
   HELM_MYSQL_DATABASE_SETTINGS: " \
     --set database=mysql \
@@ -42,23 +42,23 @@ jobs:
           # are tested (https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#available-versions)
           - databases: pgsql
             brokers: redis
-            k8s: 'v1.22.0'
+            k8s: 'v1.26.11'
             os: debian
           - databases: mysql
             brokers: rabbit
-            k8s: 'v1.22.0'
+            k8s: 'v1.26.11'
             os: debian
           - databases: pgsql
             brokers: rabbit
-            k8s: 'v1.23.9'
+            k8s: 'v1.29.2'
             os: debian
           - databases: mysql
             brokers: redis
-            k8s: 'v1.23.9'
+            k8s: 'v1.29.2'
             os: debian
           - databases: pgsql
             brokers: rabbit
-            k8s: 'v1.23.9'
+            k8s: 'v1.29.2'
             os: alpine
 
     steps:
@@ -68,7 +68,7 @@ jobs:
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@v2.10.0
         with:
-          minikube version: 'v1.24.0'
+          minikube version: 'v1.31.2'
           kubernetes version: ${{ matrix.k8s }}
           driver: docker
           start args: '--addons=ingress --cni calico'
@@ -98,7 +98,6 @@ jobs:
         id: set
         run: |-
               echo "pgsql=${{ env.HELM_PG_DATABASE_SETTINGS }}" >> $GITHUB_ENV
-              echo "pgsqlha=${{ env.HELM_PGHA_DATABASE_SETTINGS }}" >> $GITHUB_ENV
               echo "mysql=${{ env.HELM_MYSQL_DATABASE_SETTINGS }}" >> $GITHUB_ENV
               echo "redis=${{ env.HELM_REDIS_BROKER_SETTINGS }}" >> $GITHUB_ENV
               echo "rabbit=${{ env.HELM_RABBIT_BROKER_SETTINGS }}" >> $GITHUB_ENV

@@ -566,6 +566,11 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("Password must not be common"),
         help_text=_("Requires user passwords to not be part of list of common passwords."))
+    api_expose_error_details = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("API expose error details"),
+        help_text=_("When turned on, the API will expose error details in the response."))
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
@@ -1907,7 +1912,7 @@ class Endpoint(models.Model):
             if v is None:
                 query_parts.append(k)
             else:
-                query_parts.append(u"=".join([k, v]))
+                query_parts.append(f"{k}={v}")
         query_string = u"&".join(query_parts)
 
         protocol = url.scheme if url.scheme != '' else None
@@ -1950,7 +1955,7 @@ class Development_Environment(models.Model):
 
 
 class Sonarqube_Issue(models.Model):
-    key = models.CharField(max_length=30, unique=True, help_text=_("SonarQube issue key"))
+    key = models.CharField(max_length=60, unique=True, help_text=_("SonarQube issue key"))
     status = models.CharField(max_length=20, help_text=_("SonarQube issue status"))
     type = models.CharField(max_length=20, help_text=_("SonarQube issue type"))
 
@@ -2999,32 +3004,17 @@ class Finding(models.Model):
         from titlecase import titlecase
         self.title = titlecase(self.title[:511])
 
-        # Synchronize cvssv3 score and severity using cvssv3 vector
-        # the vector trumps all if we get it
+        # Assign the numerical severity for correct sorting order
+        self.numerical_severity = Finding.get_numerical_severity(self.severity)
+
+        # Synchronize cvssv3 score using cvssv3 vector
         if self.cvssv3:
             try:
                 cvss_object = CVSS3(self.cvssv3)
                 # use the environmental score, which is the most refined score
-                self.severity = cvss_object.severities()[2]
-                if self.severity == "None":
-                    self.severity = "Info"
                 self.cvssv3_score = cvss_object.scores()[2]
             except Exception as ex:
                 logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
-        elif self.cvssv3_score:
-            if self.cvssv3_score < .1:
-                self.severity = "Info"
-            elif self.cvssv3_score <= 3.9:
-                self.severity = "Low"
-            elif self.cvssv3_score <= 6.9:
-                self.severity = "Medium"
-            elif self.cvssv3_score <= 8.9:
-                self.severity = "High"
-            else:
-                self.severity = "Critical"
-
-        # Assign the numerical severity for correct sorting order
-        self.numerical_severity = Finding.get_numerical_severity(self.severity)
 
         # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
         # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
@@ -3912,6 +3902,7 @@ class JIRA_Project(models.Model):
          help_text=_("Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product."))
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
+    epic_issue_type_name = models.CharField(max_length=64, blank=True, default="Epic", help_text=_("The name of the of structure that represents an Epic"))
     push_notes = models.BooleanField(default=False, blank=True)
     product_jira_sla_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send SLA notifications as comment?"))
     risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send Risk Acceptance expiration notifications as comment?"))
@@ -3975,7 +3966,7 @@ class JIRA_Issue(models.Model):
         elif isinstance(obj, Engagement):
             self.engagement = obj
         else:
-            raise ValueError('unknown object type while creating JIRA_Issue: %s' % to_str_typed(obj))
+            raise TypeError('unknown object type while creating JIRA_Issue: %s' % to_str_typed(obj))
 
     def __str__(self):
         text = ""
@@ -4051,27 +4042,23 @@ class Notifications(models.Model):
                 result = notifications
                 # result.pk = None # detach from db
             else:
-                # TODO This concat looks  better, but requires Python 3.6+
-                # result.scan_added = [*result.scan_added, *notifications.scan_added]
-                from dojo.utils import merge_sets_safe
-                result.product_type_added = merge_sets_safe(result.product_type_added, notifications.product_type_added)
-                result.product_added = merge_sets_safe(result.product_added, notifications.product_added)
-                result.engagement_added = merge_sets_safe(result.engagement_added, notifications.engagement_added)
-                result.test_added = merge_sets_safe(result.test_added, notifications.test_added)
-                result.scan_added = merge_sets_safe(result.scan_added, notifications.scan_added)
-                result.jira_update = merge_sets_safe(result.jira_update, notifications.jira_update)
-                result.upcoming_engagement = merge_sets_safe(result.upcoming_engagement, notifications.upcoming_engagement)
-                result.stale_engagement = merge_sets_safe(result.stale_engagement, notifications.stale_engagement)
-                result.auto_close_engagement = merge_sets_safe(result.auto_close_engagement, notifications.auto_close_engagement)
-                result.close_engagement = merge_sets_safe(result.close_engagement, notifications.close_engagement)
-                result.user_mentioned = merge_sets_safe(result.user_mentioned, notifications.user_mentioned)
-                result.code_review = merge_sets_safe(result.code_review, notifications.code_review)
-                result.review_requested = merge_sets_safe(result.review_requested, notifications.review_requested)
-                result.other = merge_sets_safe(result.other, notifications.other)
-                result.sla_breach = merge_sets_safe(result.sla_breach, notifications.sla_breach)
-                result.sla_breach_combined = merge_sets_safe(result.sla_breach_combined, notifications.sla_breach_combined)
-                result.risk_acceptance_expiration = merge_sets_safe(result.risk_acceptance_expiration, notifications.risk_acceptance_expiration)
-
+                result.product_type_added = {*result.product_type_added, *notifications.product_type_added}
+                result.product_added = {*result.product_added, *notifications.product_added}
+                result.engagement_added = {*result.engagement_added, *notifications.engagement_added}
+                result.test_added = {*result.test_added, *notifications.test_added}
+                result.scan_added = {*result.scan_added, *notifications.scan_added}
+                result.jira_update = {*result.jira_update, *notifications.jira_update}
+                result.upcoming_engagement = {*result.upcoming_engagement, *notifications.upcoming_engagement}
+                result.stale_engagement = {*result.stale_engagement, *notifications.stale_engagement}
+                result.auto_close_engagement = {*result.auto_close_engagement, *notifications.auto_close_engagement}
+                result.close_engagement = {*result.close_engagement, *notifications.close_engagement}
+                result.user_mentioned = {*result.user_mentioned, *notifications.user_mentioned}
+                result.code_review = {*result.code_review, *notifications.code_review}
+                result.review_requested = {*result.review_requested, *notifications.review_requested}
+                result.other = {*result.other, *notifications.other}
+                result.sla_breach = {*result.sla_breach, *notifications.sla_breach}
+                result.sla_breach_combined = {*result.sla_breach_combined, *notifications.sla_breach_combined}
+                result.risk_acceptance_expiration = {*result.risk_acceptance_expiration, *notifications.risk_acceptance_expiration}
         return result
 
     def __str__(self):
