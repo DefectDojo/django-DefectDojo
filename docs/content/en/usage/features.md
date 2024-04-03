@@ -530,6 +530,12 @@ Custom reports, generated with the Report Builder, allow you to select specific 
 
 DefectDojo's reports can be generated in HTML and AsciiDoc.
 
+### Report style
+
+The default CSS report style is defined in the dojo/static/css/report_base.css file.
+To use a custom CSS report style, add the .css file to the dojo/static/css/ folder and update the value in the
+System Settings -> "Default report template style" field
+
 ## Metrics
 
 DefectDojo provides a number of metrics visualization in order to help
