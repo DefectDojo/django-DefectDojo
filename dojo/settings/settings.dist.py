@@ -1687,6 +1687,7 @@ VULNERABILITY_URLS = {
     'SNYK': 'https://snyk.io/vuln/',
     'RUSTSEC': 'https://rustsec.org/advisories/',
     'VNS': 'https://vulners.com/',
+    'RHSA': 'https://access.redhat.com/errata/',
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
