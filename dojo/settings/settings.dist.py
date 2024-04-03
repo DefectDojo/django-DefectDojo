@@ -285,6 +285,8 @@ env = environ.FileAwareEnv(
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
     # with the use of CVSS scores to potentially override the severity found in the report produced by the tool
     DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
+    # Use System notification settings to override user's notification settings
+    DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP=(list, ["user_mentioned", "review_requested"]),
 )
 
 
@@ -1705,6 +1707,10 @@ ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
 USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
 USE_QUALYS_LEGACY_SEVERITY_PARSING = env('DD_QUALYS_LEGACY_SEVERITY_PARSING')
 
+# ------------------------------------------------------------------------------
+# Notifications
+# ------------------------------------------------------------------------------
+NOTIFICATIONS_SYSTEM_LEVEL_TRUMP = env('DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP')
 
 # ------------------------------------------------------------------------------
 # Ignored Warnings
