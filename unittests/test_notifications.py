@@ -122,6 +122,23 @@ class TestNotifications(DojoTestCase):
         notif_system, _ = Notifications.objects.get_or_create(user=None, template=False)
 
         last_count = 0
+        with self.subTest('do not notify other'):
+            notif_user.other = ()  # no alert
+            notif_user.save()
+            create_notification(event="dummy_bar_event", recipients=['admin'])
+            self.assertEqual(mock.call_count, last_count)
+
+        last_count = mock.call_count
+        with self.subTest('notify other'):
+            notif_user.other = DEFAULT_NOTIFICATION  # alert only
+            notif_user.save()
+            create_notification(event="dummy_foo_event", title="title_for_dummy_foo_event", description="description_for_dummy_foo_event", recipients=['admin'])
+            self.assertEqual(mock.call_count, last_count + 1)
+            self.assertEqual(mock.call_args_list[0].args[0], 'dummy_foo_event')
+            alert = Alerts.objects.get(title='title_for_dummy_foo_event')
+            self.assertEqual(alert.source, "Dummy Foo Event")
+
+        last_count = mock.call_count
         with self.subTest('user off, system off'):
             notif_user.user_mentioned = ()  # no alert
             notif_user.save()
@@ -157,23 +174,6 @@ class TestNotifications(DojoTestCase):
             notif_system.save()
             create_notification(event="user_mentioned", title="user_mentioned", recipients=['admin'])
             self.assertEqual(mock.call_count, last_count + 1)
-        last_count = mock.call_count
-
-        with self.subTest('do not notify other'):
-            notif.other = ()  # no alert
-            notif.save()
-            create_notification(event="dummy_bar_event", recipients=['admin'])
-            self.assertEqual(mock.call_count, last_count)
-        last_count = mock.call_count
-
-        with self.subTest('notify other'):
-            notif.other = DEFAULT_NOTIFICATION  # alert only
-            notif.save()
-            create_notification(event="dummy_foo_event", title="title_for_dummy_foo_event", description="description_for_dummy_foo_event", recipients=['admin'])
-            self.assertEqual(last_count, 1)
-            self.assertEqual(mock.call_args_list[0].args[0], 'dummy_foo_event')
-            alert = Alerts.objects.get(title='title_for_dummy_foo_event')
-            self.assertEqual(alert.source, "Dummy Foo Event")
 
 
 class TestNotificationTriggers(DojoTestCase):
@@ -239,7 +239,7 @@ class TestNotificationTriggers(DojoTestCase):
         prod2, _ = Product.objects.get_or_create(prod_type=prod_type, name='prod name 2')
         eng2 = Engagement.objects.create(product=prod2, name="Testing engagement", target_start=timezone.now(), target_end=timezone.now(), lead=User.objects.get(username='admin'))
 
-        with self.subTest('engagement_deleted by product'):  # in case of product removal, we are not notifing about removal
+        with self.subTest('engagement_deleted by product'):  # in case of product removal, we are not notifying about removal
             prod1.delete()
             for call in mock.call_args_list:
                 self.assertNotEqual(call.args[0], 'engagement_deleted')
@@ -259,7 +259,7 @@ class TestNotificationTriggers(DojoTestCase):
         prod2, _ = Product.objects.get_or_create(prod_type=prod_type, name='prod name 2')
         endpoint2, _ = Endpoint.objects.get_or_create(product=prod2, host='host2')
 
-        with self.subTest('endpoint_deleted by product'):  # in case of product removal, we are not notifing about removal
+        with self.subTest('endpoint_deleted by product'):  # in case of product removal, we are not notifying about removal
             prod1.delete()
             for call in mock.call_args_list:
                 self.assertNotEqual(call.args[0], 'endpoint_deleted')
@@ -280,7 +280,7 @@ class TestNotificationTriggers(DojoTestCase):
         eng2 = Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now(), lead=User.objects.get(username='admin'))
         test2 = Test.objects.create(engagement=eng2, target_start=timezone.now(), target_end=timezone.now(), test_type_id=Test_Type.objects.first().id)
 
-        with self.subTest('test_deleted by engagement'):  # in case of engagement removal, we are not notifing about removal
+        with self.subTest('test_deleted by engagement'):  # in case of engagement removal, we are not notifying about removal
             eng1.delete()
             for call in mock.call_args_list:
                 self.assertNotEqual(call.args[0], 'test_deleted')
@@ -289,7 +289,7 @@ class TestNotificationTriggers(DojoTestCase):
             test2.delete()
             self.assertEqual(mock.call_count, 17)
             self.assertEqual(mock.call_args_list[-1].args[0], 'test_deleted')
-            self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The test "BURP Scan" was deleted by {get_current_user()}')
+            self.assertEqual(mock.call_args_list[-1].kwargs['description'], f'The test "Acunetix Scan" was deleted by {get_current_user()}')
             self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/engagement/{eng2.id}')
 
     @patch('dojo.notifications.helper.process_notifications')
@@ -302,7 +302,7 @@ class TestNotificationTriggers(DojoTestCase):
         test2, _ = Test.objects.get_or_create(engagement=eng, target_start=timezone.now(), target_end=timezone.now(), test_type_id=Test_Type.objects.first().id)
         fg2, _ = Finding_Group.objects.get_or_create(test=test2, name="fg test", creator=User.objects.get(username='admin'))
 
-        with self.subTest('test_deleted by engagement'):  # in case of engagement removal, we are not notifing about removal
+        with self.subTest('test_deleted by engagement'):  # in case of engagement removal, we are not notifying about removal
             test1.delete()
             for call in mock.call_args_list:
                 self.assertNotEqual(call.args[0], 'finding_group_deleted')
