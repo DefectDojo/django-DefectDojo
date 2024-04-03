@@ -517,10 +517,10 @@ class System_Settings(models.Model):
         verbose_name=_('Enable Calendar'),
         help_text=_("With this setting turned off, the Calendar will be disabled in the user interface."))
     default_report_template_style = models.CharField(
-        max_length=300, 
-        default='report_base.css', 
+        max_length=300,
+        default='report_base.css',
         null=True,
-        blank=True, 
+        blank=True,
         help_text=_("Default HTML report CSS style template. Add a .css file to static/dojo/css and change this value to apply a custom CSS style."))
     default_group = models.ForeignKey(
         Dojo_Group,
