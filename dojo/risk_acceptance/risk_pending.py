@@ -9,7 +9,7 @@ from dojo.utils import get_system_setting, get_product, is_finding_groups_enable
     get_password_requirements_string, sla_expiration_risk_acceptance
 from django.urls import reverse
 from dojo.models import Engagement, Risk_Acceptance, Finding, Product_Type_Member, Role, Product_Member, \
-    Product, Product_Type   
+    Product, Product_Type, TransferFindingFinding
 from dojo.risk_acceptance.helper import create_notification, expiration_message_creator, post_jira_comments
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.product.queries import get_authorized_members_for_product
@@ -65,6 +65,12 @@ def update_expiration_risk_accepted(finding: Finding):
     created_date = timezone.now().date()
     return expiration_date, created_date
 
+def risk_acceptd_findings_related(finding):
+    # obtener los findings relacionados con un queryset
+    transfer_findings_finding = TransferFindingFinding.objects.filter(finding_related=finding.id) 
+    for transfer_finding_finding in transfer_findings_finding:
+        origin_finding = transfer_finding_finding.findings 
+        
 
 def risk_accepted_succesfully(
     user,
