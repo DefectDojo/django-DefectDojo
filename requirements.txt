@@ -81,3 +81,4 @@ netaddr==0.10.1
 vulners==2.1.5
 fontawesomefree==6.5.1
 pysaml2==7.5.0
+six==1.16.0
