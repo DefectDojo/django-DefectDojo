@@ -80,3 +80,4 @@ boto3==1.34.35  # Required for Celery Broker AWS (SQS) support
 netaddr==0.10.1
 vulners==2.1.5
 fontawesomefree==6.5.1
+pysaml2==7.5.0
