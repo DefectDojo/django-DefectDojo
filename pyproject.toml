@@ -53,9 +53,36 @@
     "node_modules",
     "venv",
     #  Not for the dojo specific stuff
-    "dojo/db_migrations"
+    "dojo/db_migrations",
  ]
  lint.per-file-ignores = {}
 
  # Same as Black.
  line-length = 120
+
+[tool.deptry.per_rule_ignores]
+DEP002 = [
+   "argon2-cffi",
+   "boto3",
+   "django-dbbackup",
+   "django-debug-toolbar",
+   "django-debug-toolbar-request-history",
+   "django-prometheus",
+   "djangosaml2",
+   "django_celery_results",
+   "drf-spectacular-sidecar",
+   "fontawesomefree",
+   "gunicorn",
+   "humanize",
+   "JSON-log-formatter",
+   "mysqlclient",
+   "Pillow",
+   "pycurl",
+   "PyJWT",
+   "redis",
+   "social-auth-app-django",
+   "sqlalchemy",
+   "urllib3",
+   "uWSGI",
+   "whitenoise",
+]
