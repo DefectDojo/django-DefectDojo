@@ -53,7 +53,7 @@ from dojo.product.queries import get_authorized_products
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.user.queries import get_authorized_users
 from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.importers.importer.importer import DojoDefaultImporter as Importer
+from dojo.importers.default_importer import DefaultImporter
 import dojo.notifications.helper as notifications_helper
 from dojo.endpoint.utils import save_endpoints_to_add
 
@@ -723,42 +723,36 @@ class ImportScanResultsView(View):
             logger.debug('jform errors: %s', jform.errors)
 
         if form.is_valid() and (jform is None or jform.is_valid()):
-            scan = request.FILES.get('file', None)
-            scan_date = form.cleaned_data['scan_date']
-            minimum_severity = form.cleaned_data['minimum_severity']
-            activeChoice = form.cleaned_data.get('active', None)
-            verifiedChoice = form.cleaned_data.get('verified', None)
-            scan_type = request.POST['scan_type']
-            tags = form.cleaned_data['tags']
-            version = form.cleaned_data['version']
-            branch_tag = form.cleaned_data.get('branch_tag', None)
-            build_id = form.cleaned_data.get('build_id', None)
-            commit_hash = form.cleaned_data.get('commit_hash', None)
-            api_scan_configuration = form.cleaned_data.get('api_scan_configuration', None)
-            service = form.cleaned_data.get('service', None)
-            close_old_findings = form.cleaned_data.get('close_old_findings', None)
-            apply_tags_to_findings = form.cleaned_data.get('apply_tags_to_findings', False)
-            apply_tags_to_endpoints = form.cleaned_data.get('apply_tags_to_endpoints', False)
-            # close_old_findings_prodct_scope is a modifier of close_old_findings.
+            import_options ={
+                "scan": request.FILES.get('file', None),
+                "scan_date": form.cleaned_data['scan_date'],
+                "minimum_severity": form.cleaned_data['minimum_severity'],
+                "active": None,
+                "verified": None,
+                "scan_type": request.POST['scan_type'],
+                "tags": form.cleaned_data['tags'],
+                "version": form.cleaned_data['version'],
+                "branch_tag": form.cleaned_data.get('branch_tag', None),
+                "build_id": form.cleaned_data.get('build_id', None),
+                "commit_hash": form.cleaned_data.get('commit_hash', None),
+                "api_scan_configuration": form.cleaned_data.get('api_scan_configuration', None),
+                "service": form.cleaned_data.get('service', None),
+                "close_old_findings": form.cleaned_data.get('close_old_findings', None),
+                "apply_tags_to_findings": form.cleaned_data.get('apply_tags_to_findings', False),
+                "close_old_findings_product_scope": form.cleaned_data.get('close_old_findings_product_scope', None),
+                "group_by": form.cleaned_data.get('group_by', None),
+                "create_finding_groups_for_all_findings": form.cleaned_data['create_finding_groups_for_all_findings'],
+                "cred_user": cred_form.cleaned_data['cred_user'],
+            }
+            # close_old_findings_product_scope is a modifier of close_old_findings.
             # If it is selected, close_old_findings should also be selected.
-            close_old_findings_product_scope = form.cleaned_data.get('close_old_findings_product_scope', None)
-            if close_old_findings_product_scope:
-                close_old_findings = True
+            if close_old_findings_product_scope := form.cleaned_data.get('close_old_findings_product_scope', None):
+                import_options["close_old_findings_product_scope"] = close_old_findings_product_scope
+                import_options["close_old_findings"] = True
             # Will save in the provided environment or in the `Development` one if absent
             environment_id = request.POST.get('environment', 'Development')
             environment = Development_Environment.objects.get(id=environment_id)
-
-            group_by = form.cleaned_data.get('group_by', None)
-            create_finding_groups_for_all_findings = form.cleaned_data['create_finding_groups_for_all_findings']
-
-            # TODO move to form validation?
-            if scan and is_scan_file_too_large(scan):
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
-                                     extra_tags='alert-danger')
-                return HttpResponseRedirect(reverse('import_scan_results', args=(engagement,)))
-
+            import_options["environment"] = environment
             # Allows for a test to be imported with an engagement created on the fly
             if engagement is None:
                 engagement = Engagement()
@@ -772,46 +766,46 @@ class ImportScanResultsView(View):
                 engagement.product = product
                 engagement.active = True
                 engagement.status = 'In Progress'
-                engagement.version = version
-                engagement.branch_tag = branch_tag
-                engagement.build_id = build_id
-                engagement.commit_hash = commit_hash
+                engagement.version = import_options.get("version")
+                engagement.branch_tag = import_options.get("branch_tag")
+                engagement.build_id = import_options.get("build_id")
+                engagement.commit_hash = import_options.get("commit_hash")
                 engagement.save()
 
             # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
             # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
-            push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
+            import_options["push_to_jira"] = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
             error = False
-
             # Save newly added endpoints
             added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, engagement.product)
-
-            active = None
-            if activeChoice:
+            endpoints_from_form = list(form.cleaned_data['endpoints'])
+            import_options["endpoints_to_add"] = endpoints_from_form + added_endpoints
+            # Override the form values of active and verified
+            if activeChoice := form.cleaned_data.get('active', None):
                 if activeChoice == 'force_to_true':
-                    active = True
+                    import_options["active"] = True
                 elif activeChoice == 'force_to_false':
-                    active = False
-            verified = None
-            if verifiedChoice:
+                    import_options["active"] = False
+            if verifiedChoice := form.cleaned_data.get('verified', None):
                 if verifiedChoice == 'force_to_true':
-                    verified = True
+                    import_options["verified"] = True
                 elif verifiedChoice == 'force_to_false':
-                    verified = False
+                    import_options["verified"] = False
 
             try:
-                importer = Importer()
-                test, finding_count, closed_finding_count, _ = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
-                            minimum_severity=minimum_severity, endpoints_to_add=list(form.cleaned_data['endpoints']) + added_endpoints, scan_date=scan_date,
-                            version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
-                            close_old_findings=close_old_findings, close_old_findings_product_scope=close_old_findings_product_scope, group_by=group_by, api_scan_configuration=api_scan_configuration, service=service,
-                            create_finding_groups_for_all_findings=create_finding_groups_for_all_findings, apply_tags_to_findings=apply_tags_to_findings, apply_tags_to_endpoints=apply_tags_to_endpoints)
+                importer_client = DefaultImporter()
+                test, _, finding_count, closed_finding_count, _, _, _ = importer_client.process_scan(
+                    import_options.get("scan"),
+                    import_options.get("scan_type"),
+                    engagement=engagement,
+                    user=user,
+                    development_environment=environment,
+                    **import_options,
+                )
 
-                message = f'{scan_type} processed a total of {finding_count} findings'
-
-                if close_old_findings:
+                message = f'{import_options.get("scan_type")} processed a total of {finding_count} findings'
+                if import_options.get("close_old_findings"):
                     message = message + ' and closed %d findings' % (closed_finding_count)
-
                 message = message + "."
 
                 add_success_message_to_response(message)
