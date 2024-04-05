@@ -1,5 +1,6 @@
 import base64
-
+from typing import List
+from datetime import datetime
 from django.db.models.query_utils import Q
 from dojo.importers import utils as importer_utils
 from dojo.decorators import dojo_async_task
@@ -11,11 +12,27 @@ import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
 import dojo.notifications.helper as notifications_helper
 from django.conf import settings
+from django.core.files.uploadedfile import TemporaryUploadedFile
+
 from django.core.files.base import ContentFile
 from django.utils import timezone
-from dojo.models import (BurpRawRequestResponse, FileUpload,
-                         Finding, Test, Test_Import, Test_Type)
+from dojo.models import (
+    Product_Type,
+    Product,
+    Engagement,
+    Test_Type,
+    Test,
+    Test_Import,
+    Finding,
+    Endpoint,
+    Development_Environment,
+    Dojo_User,
+    Tool_Configuration,
+    BurpRawRequestResponse,
+    FileUpload,
+)
 from dojo.tools.factory import get_parser
+from dojo.importers.base_importer import BaseImporter
 import logging
 
 
@@ -23,25 +40,35 @@ logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
-class DojoDefaultImporter(object):
-
-    def create_test(self, scan_type, test_type_name, engagement, lead, environment, tags=None,
-                    scan_date=None, version=None, branch_tag=None, build_id=None, commit_hash=None, now=timezone.now(),
-                    api_scan_configuration=None, title=None):
-
-        test_type, created = Test_Type.objects.get_or_create(
-            name=test_type_name)
-
-        if created:
-            logger.info('Created new Test_Type with name %s because a report is being imported', test_type.name)
-
-        if scan_date and not scan_date.tzinfo:
-            scan_date = timezone.make_aware(scan_date)
-
-        if now and not now.tzinfo:
-            now = timezone.make_aware(now)
-
-        test = Test(
+class DojoDefaultImporter(BaseImporter):
+    def create_test(
+        self,
+        scan_type: str,
+        test_type_name: str,
+        engagement: Engagement,
+        lead: Dojo_User,
+        environment: Development_Environment,
+        tags: list = None,
+        scan_date: datetime = None,
+        version: str = None,
+        branch_tag: str = None,
+        build_id: str = None,
+        commit_hash: str = None,
+        now: datetime = timezone.now(),
+        api_scan_configuration: Tool_Configuration = None,
+        title: str = None,
+    ):
+        """
+        Create a fresh test object to be used by the importer. This
+        new test will be attached to the supplied engagement with the
+        supplied user being marked as the lead of the test
+        """
+        # Ensure a test type is available for use
+        test_type = self.get_or_create_test_type(test_type_name)
+        # Make sure timezone is applied to dates
+        scan_date, now = self.add_timezone_scan_date_and_now(scan_date, now=now)
+        # Create the test object
+        return Test.objects.create(
             title=title,
             engagement=engagement,
             lead=lead,
@@ -58,10 +85,6 @@ class DojoDefaultImporter(object):
             api_scan_configuration=api_scan_configuration,
             tags=tags,
         )
-
-        test.full_clean()
-        test.save()
-        return test
 
     @dojo_async_task
     @app.task(ignore_result=False)
@@ -262,26 +285,50 @@ class DojoDefaultImporter(object):
 
         return old_findings
 
-    def import_scan(self, scan, scan_type, engagement, lead, environment, active=None, verified=None, tags=None, minimum_severity=None,
-                    user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=False, close_old_findings_product_scope=False,
-                    group_by=None, api_scan_configuration=None, service=None, title=None, create_finding_groups_for_all_findings=True,
-                    apply_tags_to_findings=False, apply_tags_to_endpoints=False):
-
+    # def process_scan(
+    def import_scan(
+        self,
+        scan: TemporaryUploadedFile,
+        scan_type: str,
+        engagement: Engagement,
+        lead: Dojo_User,
+        environment: Development_Environment,
+        active: bool = None,
+        verified: bool = None,
+        tags: list = None,
+        minimum_severity: str = None,
+        user: Dojo_User = None,
+        endpoints_to_add: List[Endpoint] = None,
+        scan_date: datetime = None,
+        version: str = None,
+        branch_tag: str = None,
+        build_id: str = None,
+        commit_hash: str = None,
+        push_to_jira: bool = None,
+        close_old_findings: bool = False,
+        close_old_findings_product_scope: bool = False,
+        group_by: str = None,
+        api_scan_configuration: Tool_Configuration = None,
+        service: str = None,
+        title: str = None,
+        create_finding_groups_for_all_findings: bool = True,
+        apply_tags_to_findings: bool = False,
+        now: datetime = timezone.now(),
+    ):
+        """
+        TODO FILL ME IN
+        """
         logger.debug(f'IMPORT_SCAN: parameters: {locals()}')
-
-        user = user or get_current_user()
-
-        now = timezone.now()
-
-        if api_scan_configuration and api_scan_configuration.product != engagement.product:
-            raise ValidationError('API Scan Configuration has to be from same product as  the Engagement')
-
+        # Get a user in some point
+        user = self.get_user_if_supplied(user=user)
+        # Validate the Tool_Configuration
+        test = self.verify_tool_configuration(api_scan_configuration, test=test)
+        # Fetch the parser based upon the string version of the scan type
+        parser = self.get_parser(scan_type)
         # check if the parser that handle the scan_type manage tests
         # if yes, we parse the data first
         # after that we customize the Test_Type to reflect the data
         # This allow us to support some meta-formats like SARIF or the generic format
-        parser = get_parser(scan_type)
         if hasattr(parser, 'get_tests'):
             logger.debug('IMPORT_SCAN parser v2: Create Test and parse findings')
             try:

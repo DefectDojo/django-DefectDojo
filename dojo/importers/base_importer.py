@@ -595,7 +595,6 @@ class BaseImporter(ABC):
         if created:
             logger.info(f"Created new Test_Type with name {test_type.name} because a report is being imported")
         return test_type
-
     def add_timezone_scan_date_and_now(
         self,
         scan_date: datetime | None,
