@@ -2,7 +2,7 @@ from dojo.models import Finding
 import re
 
 
-class SonarQubeRESTAPIJSON(object):
+class SonarQubeRESTAPIJSON:
     def get_json_items(self, json_content, test, mode):
         items = []
         if json_content.get("issues"):

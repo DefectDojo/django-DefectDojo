@@ -9,7 +9,7 @@ import json
 logger = logging.getLogger(__name__)
 
 
-class SonarQubeParser(object):
+class SonarQubeParser:
     mode = None
 
     def set_mode(self, mode):

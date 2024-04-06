@@ -15,9 +15,7 @@ class CobaltAPI:
             self.org_token = tool_config.extras
         else:
             raise Exception(
-                "Cobalt.io Authentication type {} not supported".format(
-                    tool_config.authentication_type
-                )
+                f"Cobalt.io Authentication type {tool_config.authentication_type} not supported"
             )
 
     def get_asset(self, asset_id):
@@ -32,12 +30,12 @@ class CobaltAPI:
             if asset["resource"]["id"] == asset_id:
                 return asset
 
-        raise Exception("Asset {} not found in organisation".format(asset_id))
+        raise Exception(f"Asset {asset_id} not found in organisation")
 
     def get_assets(self):
         """Returns all org assets"""
         response = self.session.get(
-            url="{}/assets?limit=1000".format(self.cobalt_api_url),
+            url=f"{self.cobalt_api_url}/assets?limit=1000",
             headers=self.get_headers(),
         )
 
@@ -57,9 +55,7 @@ class CobaltAPI:
         :return:
         """
         response = self.session.get(
-            url="{}/findings?limit=1000&asset={}".format(
-                self.cobalt_api_url, asset_id
-            ),
+            url=f"{self.cobalt_api_url}/findings?limit=1000&asset={asset_id}",
             headers=self.get_headers(),
         )
 
@@ -75,13 +71,13 @@ class CobaltAPI:
     def test_connection(self):
         # Request orgs for the org name
         response_orgs = self.session.get(
-            url="{}/orgs".format(self.cobalt_api_url),
+            url=f"{self.cobalt_api_url}/orgs",
             headers=self.get_headers(),
         )
 
         # Request assets to validate the org token
         response_assets = self.session.get(
-            url="{}/assets".format(self.cobalt_api_url),
+            url=f"{self.cobalt_api_url}/assets",
             headers=self.get_headers(),
         )
 
@@ -111,7 +107,7 @@ class CobaltAPI:
     def get_headers(self):
         headers = {
             "accept": "application/vnd.cobalt.v1+json",
-            "Authorization": "Bearer {}".format(self.api_token),
+            "Authorization": f"Bearer {self.api_token}",
             "User-Agent": "DefectDojo",
         }
 

@@ -48,7 +48,7 @@ RISK_TO_CWE_MAP = {
 }
 
 
-class ThreagileParser(object):
+class ThreagileParser:
     """
     Import ThreaAgile threatmodel risk finding in JSON format
     """

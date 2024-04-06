@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class AnchoreCTLVulnsParser(object):
+class AnchoreCTLVulnsParser:
     def get_scan_types(self):
         return ["AnchoreCTL Vuln Report"]
 

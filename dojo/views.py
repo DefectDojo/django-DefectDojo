@@ -216,8 +216,6 @@ def access_file(request, fid, oid, obj_type, url=False):
         raise Http404()
     # If reaching this far, user must have permission to get file
     file = get_object_or_404(FileUpload, pk=fid)
-    redirect_url = '{media_root}/{file_name}'.format(
-        media_root=settings.MEDIA_ROOT,
-        file_name=file.file.url.lstrip(settings.MEDIA_URL))
+    redirect_url = f'{settings.MEDIA_ROOT}/{file.file.url.lstrip(settings.MEDIA_URL)}'
     print(redirect_url)
     return FileResponse(open(redirect_url, "rb"))

@@ -10,7 +10,7 @@ NEUVECTOR_IMAGE_SCAN_ENGAGEMENT_NAME = "NV image scan"
 NEUVECTOR_CONTAINER_SCAN_ENGAGEMENT_NAME = "NV container scan"
 
 
-class NeuVectorJsonParser(object):
+class NeuVectorJsonParser:
     def parse(self, json_output, test):
         tree = self.parse_json(json_output)
         items = []
@@ -102,9 +102,7 @@ def get_item(vulnerability, test):
         duplicate=False,
         out_of_scope=False,
         mitigated=None,
-        severity_justification="{} (CVSS v3 base score: {})\n".format(
-            vector, score_v3
-        ),
+        severity_justification=f"{vector} (CVSS v3 base score: {score_v3})\n",
         impact=severity,
     )
     finding.unsaved_vulnerability_ids = [vulnerability.get("name")]
@@ -129,7 +127,7 @@ def convert_severity(severity):
         return severity.title()
 
 
-class NeuVectorParser(object):
+class NeuVectorParser:
     def get_scan_types(self):
         return [NEUVECTOR_SCAN_NAME]
 

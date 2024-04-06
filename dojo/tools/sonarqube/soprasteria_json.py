@@ -4,7 +4,7 @@ from lxml import etree
 logger = logging.getLogger(__name__)
 
 
-class SonarQubeSoprasteriaJSON(object):
+class SonarQubeSoprasteriaJSON:
     def get_json_items(self, json_content, test, mode):
         dupes = dict()
         rules = json_content["rules"]
