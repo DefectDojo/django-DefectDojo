@@ -17,7 +17,7 @@ vulners_severity_mapping = {
 }
 
 
-class ApiVulnersParser(object):
+class ApiVulnersParser:
     """Parser that can load data from Vulners Scanner API"""
 
     def get_scan_types(self):

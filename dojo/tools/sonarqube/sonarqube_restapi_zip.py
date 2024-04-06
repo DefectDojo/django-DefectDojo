@@ -2,7 +2,7 @@ from dojo.tools.sonarqube.sonarqube_restapi_json import SonarQubeRESTAPIJSON
 import json
 
 
-class SonarQubeRESTAPIZIP(object):
+class SonarQubeRESTAPIZIP:
     def get_items(self, files, test, mode):
         total_findings_per_file = list()
         for dictkey in files.keys():

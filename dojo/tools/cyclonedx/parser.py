@@ -2,7 +2,7 @@ from dojo.tools.cyclonedx.json_parser import CycloneDXJSONParser
 from dojo.tools.cyclonedx.xml_parser import CycloneDXXMLParser
 
 
-class CycloneDXParser(object):
+class CycloneDXParser:
     """CycloneDX is a lightweight software bill of materials (SBOM) standard designed for use in application security
     contexts and supply chain component analysis.
     https://www.cyclonedx.org/

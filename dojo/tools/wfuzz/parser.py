@@ -5,7 +5,7 @@ import hyperlink
 from dojo.models import Finding, Endpoint
 
 
-class WFuzzParser(object):
+class WFuzzParser:
     """
     A class that can be used to parse the WFuzz JSON report files
     """

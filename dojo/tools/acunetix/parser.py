@@ -2,7 +2,7 @@ from dojo.tools.acunetix.parse_acunetix360_json import AcunetixJSONParser
 from dojo.tools.acunetix.parse_acunetix_xml import AcunetixXMLParser
 
 
-class AcunetixParser(object):
+class AcunetixParser:
     """Parser for Acunetix XML files and Acunetix 360 JSON files."""
 
     def get_scan_types(self):

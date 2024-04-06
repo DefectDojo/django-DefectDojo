@@ -47,11 +47,11 @@ class DeletePreviewModelMixin:
         return self.get_paginated_response(serializer.data)
 
 
-class QuestionSubClassFieldsMixin(object):
+class QuestionSubClassFieldsMixin:
     def get_queryset(self):
         return Question.objects.select_subclasses()
 
 
-class AnswerSubClassFieldsMixin(object):
+class AnswerSubClassFieldsMixin:
     def get_queryset(self):
         return Answer.objects.select_subclasses()

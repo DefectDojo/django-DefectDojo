@@ -3,7 +3,7 @@ from dojo.tools.sonarqube.soprasteria_helper import SonarQubeSoprasteriaHelper
 logger = logging.getLogger(__name__)
 
 
-class SonarQubeSoprasteriaHTML(object):
+class SonarQubeSoprasteriaHTML:
     def get_items(self, tree, test, mode):
         # Check that there is at least one vulnerability (the vulnerabilities
         # table is absent when no vuln are found)

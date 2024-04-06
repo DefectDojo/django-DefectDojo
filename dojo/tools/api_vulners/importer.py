@@ -6,7 +6,7 @@ from .api_client import VulnersAPI
 logger = logging.getLogger(__name__)
 
 
-class VulnersImporter(object):
+class VulnersImporter:
     """
     Import from Vulners API
     """
