@@ -149,120 +149,67 @@ class DefaultImporter(BaseImporter):
         **kwargs: dict,
     ) -> List[Finding]:
         new_findings = []
-        items = parsed_findings
-        logger.debug('starting import of %i items.', len(items) if items else 0)
+        logger.debug('starting import of %i parsed findings.', len(parsed_findings) if parsed_findings else 0)
         group_names_to_findings_dict = {}
 
-        for item in items:
-            # FIXME hack to remove when all parsers have unit tests for this attribute
-            # Importing the cvss module via:
-            # `from cvss import CVSS3`
-            # _and_ given a CVSS vector string such as:
-            # cvss_vector_str = 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N',
-            # the following severity calculation returns the
-            # string values of, "None" instead of the expected string values
-            # of "Info":
-            # ```
-            # cvss_obj = CVSS3(cvss_vector_str)
-            # severities = cvss_obj.severities()
-            # print(severities)
-            # ('None', 'None', 'None')
-            # print(severities[0])
-            # 'None'
-            # print(type(severities[0]))
-            # <class 'str'>
-            # ```
-            if (item.severity.lower().startswith('info') or item.severity.lower() == 'none') and item.severity != 'Info':
-                item.severity = 'Info'
-
-            item.numerical_severity = Finding.get_numerical_severity(item.severity)
-            if (minimum_severity := kwargs.get("minimum_severity")) and (Finding.SEVERITIES[item.severity] > Finding.SEVERITIES[minimum_severity]):
+        for unsaved_finding in parsed_findings:
+            # make sure the severity is something is digestible
+            unsaved_finding = self.sanitize_severity(unsaved_finding)
+            # Filter on minimum severity if applicable
+            if (minimum_severity := kwargs.get("minimum_severity")) and (Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[minimum_severity]):
                 # finding's severity is below the configured threshold : ignoring the finding
                 continue
 
             now = kwargs.get("now")
             # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
             # Finding.mitigated is DateTimeField and it requires timezone
-            if item.mitigated and not item.mitigated.tzinfo:
-                item.mitigated = item.mitigated.replace(tzinfo=now.tzinfo)
-
-            item.test = test
-            item.reporter = user
-            item.last_reviewed_by = user
-            item.last_reviewed = now
-
-            logger.debug('process_parsed_findings: active from report: %s, verified from report: %s', item.active, item.verified)
-            # indicates an override. Otherwise, do not change the value of item.active
+            if unsaved_finding.mitigated and not unsaved_finding.mitigated.tzinfo:
+                unsaved_finding.mitigated = unsaved_finding.mitigated.replace(tzinfo=now.tzinfo)
+            # Set some explicit fields on the finding
+            unsaved_finding.test = test
+            unsaved_finding.reporter = user
+            unsaved_finding.last_reviewed_by = user
+            unsaved_finding.last_reviewed = now
+            logger.debug('process_parsed_findings: active from report: %s, verified from report: %s', unsaved_finding.active, unsaved_finding.verified)
+            # indicates an override. Otherwise, do not change the value of unsaved_finding.active
             if active := kwargs.get("active") is not None:
-                item.active = active
+                unsaved_finding.active = active
             # indicates an override. Otherwise, do not change the value of verified
             if verified := kwargs.get("verified") is not None:
-                item.verified = verified
+                unsaved_finding.verified = verified
             # scan_date was provided, override value from parser
             if scan_date := kwargs.get("scan_date"):
-                item.date = scan_date.date()
+                unsaved_finding.date = scan_date.date()
             if service := kwargs.get("service"):
-                item.service = service
+                unsaved_finding.service = service
 
-            item.save(dedupe_option=False)
-
+            unsaved_finding.save(dedupe_option=False)
+            # Determine how the finding should be grouped
             group_by = kwargs.get("group_by")
-            if is_finding_groups_enabled() and group_by:
-                # If finding groups are enabled, group all findings by group name
-                name = finding_helper.get_group_by_group_name(item, group_by)
-                if name is not None:
-                    if name in group_names_to_findings_dict:
-                        group_names_to_findings_dict[name].append(item)
-                    else:
-                        group_names_to_findings_dict[name] = [item]
-
-            if (hasattr(item, 'unsaved_req_resp') and
-                    len(item.unsaved_req_resp) > 0):
-                for req_resp in item.unsaved_req_resp:
-                    burp_rr = BurpRawRequestResponse(
-                        finding=item,
-                        burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
-                        burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
-                    burp_rr.clean()
-                    burp_rr.save()
-
-            if (item.unsaved_request is not None and
-                    item.unsaved_response is not None):
-                burp_rr = BurpRawRequestResponse(
-                    finding=item,
-                    burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
-                    burpResponseBase64=base64.b64encode(item.unsaved_response.encode()))
-                burp_rr.clean()
-                burp_rr.save()
-
-            self.chunk_endpoints_and_disperse(item, test, item.unsaved_endpoints)
-            if len(endpoints_to_add := kwargs.get("endpoints_to_add")) > 0:
-                logger.debug('endpoints_to_add: %s', endpoints_to_add)
-                self.chunk_endpoints_and_disperse(item, test, endpoints_to_add)
-
-            if item.unsaved_tags:
-                item.tags = item.unsaved_tags
-
-            if item.unsaved_files:
-                for unsaved_file in item.unsaved_files:
-                    data = base64.b64decode(unsaved_file.get('data'))
-                    title = unsaved_file.get('title', '<No title>')
-                    file_upload, file_upload_created = FileUpload.objects.get_or_create(
-                        title=title,
-                    )
-                    file_upload.file.save(title, ContentFile(data))
-                    file_upload.save()
-                    item.files.add(file_upload)
-
-            self.handle_vulnerability_ids(item)
-
-            new_findings.append(item)
+            group_names_to_findings_dict = self.process_finding_groups(
+                unsaved_finding,
+                group_by,
+                group_names_to_findings_dict,
+            )
+            # Process any request/response pairs
+            self.process_request_response_pairs(unsaved_finding)
+            # Process any endpoints on the endpoint, or added on the form
+            self.process_endpoints(unsaved_finding, kwargs.get("endpoints_to_add", []))
+            # Process any tags
+            if unsaved_finding.unsaved_tags:
+                unsaved_finding.tags = unsaved_finding.unsaved_tags
+            # Process any files
+            self.process_files(unsaved_finding)
+            # Process vulnerability IDs
+            self.process_vulnerability_ids(unsaved_finding)
+            # Categorize this finding as a new one
+            new_findings.append(unsaved_finding)
             # to avoid pushing a finding group multiple times, we push those outside of the loop
             push_to_jira = kwargs.get("push_to_jira", False)
             if is_finding_groups_enabled() and group_by:
-                item.save()
+                unsaved_finding.save()
             else:
-                item.save(push_to_jira=push_to_jira)
+                unsaved_finding.save(push_to_jira=push_to_jira)
 
         for (group_name, findings) in group_names_to_findings_dict.items():
             finding_helper.add_findings_to_auto_group(

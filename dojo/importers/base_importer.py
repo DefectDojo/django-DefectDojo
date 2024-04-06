@@ -1,9 +1,11 @@
+import base64
 import logging
 from typing import List, Tuple
 from abc import ABC, abstractmethod
 from datetime import datetime
 
 from django.core.files.uploadedfile import TemporaryUploadedFile
+from django.core.files.base import ContentFile
 from django.utils.timezone import make_aware
 from django.utils import timezone
 from django.conf import settings
@@ -13,7 +15,8 @@ from django.urls import reverse
 
 from dojo.decorators import dojo_async_task
 from dojo.celery import app
-from dojo.utils import max_safe, get_current_user
+from dojo.utils import max_safe, get_current_user, is_finding_groups_enabled
+import dojo.finding.helper as finding_helper
 from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.tools.factory import get_parser
 from dojo.models import (
@@ -30,11 +33,15 @@ from dojo.models import (
     Test_Import_Finding_Action,
     Vulnerability_Id,
     Tool_Configuration,
+    BurpRawRequestResponse,
+    FileUpload,
     # Import History States
     IMPORT_CLOSED_FINDING,
     IMPORT_CREATED_FINDING,
     IMPORT_REACTIVATED_FINDING,
     IMPORT_UNTOUCHED_FINDING,
+    # Finding Severities
+    SEVERITIES,
 )
 
 
@@ -449,7 +456,7 @@ class BaseImporter(ABC):
 
         return message
 
-    def handle_vulnerability_ids(
+    def process_vulnerability_ids(
         self,
         finding: Finding
     ) -> None:
@@ -595,6 +602,7 @@ class BaseImporter(ABC):
         if created:
             logger.info(f"Created new Test_Type with name {test_type.name} because a report is being imported")
         return test_type
+
     def add_timezone_scan_date_and_now(
         self,
         scan_date: datetime | None,
@@ -692,3 +700,123 @@ class BaseImporter(ABC):
                 raise ValidationError('API Scan Configuration has to be from same product as the Engagement')
             # Return the test here for an early exit
             return engagement
+
+    def sanitize_severity(
+        self,
+        finding: Finding,
+    ) -> Finding:
+        """
+        Sanitization on the finding severity such that only the following
+        severities may be set on the finding:
+        - Critical, High, Medium, Low, Info
+        There is a simple conversion process to convert any of the following
+        to a value of Info
+        - info, informational, Informational, None, none
+        If not, raise a ValidationError explaining as such
+        """
+        # Checks around Informational/Info severitie
+        starts_with_info = finding.severity.lower().startswith('info')
+        lower_none = finding.severity.lower() == 'none'
+        not_info = finding.severity != 'Info'
+        # Make the comparisons
+        if not_info and (starts_with_info or lower_none):
+            # Correct the severity
+            finding.severity = 'Info'
+        # Ensure the final severity is one of the supported options
+        if finding.severity not in SEVERITIES:
+            raise ValidationError(
+                f"Finding severity \"{finding.severity}\" is not supported. "
+                f"Any of the following are supported: {SEVERITIES}."
+            )
+        # Set the numerical severity on the finding based on the cleaned severity
+        finding.numerical_severity = Finding.get_numerical_severity(finding.severity)
+        # Return the finding if all else is good
+        return finding
+
+    def process_finding_groups(
+        self,
+        finding: Finding,
+        group_by: str,
+        group_names_to_findings_dict: dict,
+    ) -> dict:
+        """
+        Determines how to handle an incoming finding with respect to grouping
+        if finding groups are enabled, use the supplied grouping mechanism to
+        store a reference of how the finding should be grouped
+        """
+        if is_finding_groups_enabled() and group_by:
+            # If finding groups are enabled, group all findings by group name
+            name = finding_helper.get_group_by_group_name(finding, group_by)
+            if name is not None:
+                if name in group_names_to_findings_dict:
+                    group_names_to_findings_dict[name].append(finding)
+                else:
+                    group_names_to_findings_dict[name] = [finding]
+        return group_names_to_findings_dict
+
+    def process_request_response_pairs(
+        self,
+        finding: Finding
+    ) -> None:
+        """
+        Search the unsaved finding for the following attributes to determine
+        if the data can be saved to the finding
+        - unsaved_req_resp
+        - unsaved_request
+        - unsaved_response
+        Create BurpRawRequestResponse objects linked to the finding without
+        returning the finding afterward
+        """
+        if len(unsaved_req_resp := getattr(finding, 'unsaved_req_resp', None)) > 0:
+            for req_resp in unsaved_req_resp:
+                burp_rr = BurpRawRequestResponse(
+                    finding=finding,
+                    burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                    burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
+                burp_rr.clean()
+                burp_rr.save()
+
+        if finding.unsaved_request is not None and finding.unsaved_response is not None:
+            burp_rr = BurpRawRequestResponse(
+                finding=finding,
+                burpRequestBase64=base64.b64encode(finding.unsaved_request.encode()),
+                burpResponseBase64=base64.b64encode(finding.unsaved_response.encode()))
+            burp_rr.clean()
+            burp_rr.save()
+
+    def process_endpoints(
+        self,
+        finding: Finding,
+        endpoints_to_add: List[Endpoint],
+    ) -> None:
+        """
+        Process any endpoints to add to the finding. Endpoints could come from two places
+        - Directly from the report
+        - Supplied by the user from the import form
+        These endpoints will be processed in to endpoints objects and associated with the
+        finding and and product
+        """
+        # Save the unsaved endpoints
+        self.chunk_endpoints_and_disperse(finding, finding.test, finding.unsaved_endpoints)
+        # Check for any that were added in the form
+        if len(endpoints_to_add) > 0:
+            logger.debug('endpoints_to_add: %s', endpoints_to_add)
+            self.chunk_endpoints_and_disperse(finding, finding.test, endpoints_to_add)
+
+    def process_files(
+        self,
+        finding: Finding,
+    ) -> None:
+        """
+        Some parsers may supply files in the form of base64 encoded blobs,
+        so lets save them in the form of an attached file on the finding
+        object
+        """
+        if finding.unsaved_files:
+            for unsaved_file in finding.unsaved_files:
+                data = base64.b64decode(unsaved_file.get('data'))
+                title = unsaved_file.get('title', '<No title>')
+                file_upload, _ = FileUpload.objects.get_or_create(title=title)
+                file_upload.file.save(title, ContentFile(data))
+                file_upload.save()
+                finding.files.add(file_upload)
