@@ -2025,6 +2025,14 @@ if os.getenv("DD_USE_CACHE_REDIS") == "true":
         }
     }
 
+# ------------------------------------------------------------------------------
+# Render Grafana in a <frame>, <iframe>, <embed> or <object>
+# ------------------------------------------------------------------------------
+CSP_FRAME_SRC = [
+    "'self'",
+    "http://localhost:3000",
+    "https://grafana-pdti-dev.apps.ambientesbc.com"
+]
 
 # ------------------------------------------------------------------------------
 # Ignored Warnings

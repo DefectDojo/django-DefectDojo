@@ -24,4 +24,6 @@ urlpatterns = [
         name='engineer_metrics'),
     re_path(r'^metrics/engineer/(?P<eid>\d+)$', views.view_engineer,
         name='view_engineer'),
+    re_path(r'^metrics/grafana$', views.grafana_metrics,
+        name='grafana_metrics'),
 ]

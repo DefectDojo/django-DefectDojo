@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load event_tags %}
+{% load i18n %}
+{% load display_tags %}
+{% block content %}
+    {{ block.super }}
+    
+    <div class="embed-responsive embed-responsive-16by9"> 
+        <iframe class="embed-responsive-item" src="https://grafana-pdti-dev.apps.ambientesbc.com/d/XrSGp11IzV1/panel-de-control-vultracker?orgId=1&from=now-30d&to=now&var-limit=1000&var-offset=1&var-product_types=&kiosk" frameborder="0" allowfullscreen></iframe>
+    </div>
+    <hr/>
+{% endblock %}
