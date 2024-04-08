@@ -201,8 +201,15 @@
     {% endif %}
 
     <div id="risk_acceptance" class="panel panel-default table-responsive">
-        <div class="panel-heading">
-            <h3>Findings Accepted</h3>
+        <div class="panel-heading tight">
+            <div class="clearfix">
+                <h3 class="pull-left">
+                    Accept all risks 
+                </h3>
+                <a class="accept-risk_acceptance pull-right btn btn-success pull-right" href="{% url 'accept_risk_acceptance' engagement.id risk_acceptance.id %}?return_url={{ request.get_full_path|urlencode }}">
+                    <i class="fa-solid fa-file-circle-check"></i>&nbspAccept all risks
+                </a>
+            </div>
         </div>
         {% if accepted_findings %}
             <table id="open_findings" class="table table-condensed table-striped">

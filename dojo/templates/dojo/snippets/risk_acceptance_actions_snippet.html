@@ -42,7 +42,7 @@
 <li role="separator" class="divider"></li>
 <li role="presentation">
     <a class="accept-risk_acceptance" href="{% url 'accept_risk_acceptance' engagement.id risk_acceptance.id %}?return_url={{ request.get_full_path|urlencode }}">
-        <i class="fa-solid fa-forward-fast"></i> Accept all risks
+        <i class="fa-solid fa-file-circle-check"></i> Accept all risks
     </a>
 </li>
 {% endif %}
