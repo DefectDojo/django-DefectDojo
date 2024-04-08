@@ -547,3 +547,87 @@ class TestSonarQubeParser(DojoTestCase):
         # common verifications
         # (there is no aggregation to be done here)
         self.assertEqual(6, len(findings))
+
+    def test_parse_json_file_from_api_with_multiple_findings_json(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/findings_over_api.json"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(5, len(findings))
+        item = findings[0]
+        self.assertEqual(str, type(item.description))
+        self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwoefijo", item.title)
+        self.assertEqual("Medium", item.severity)
+        self.assertEqual("CVE-2024-2529", item.cve)
+        self.assertEqual("120", item.cwe)
+        self.assertEqual("6.4", item.cvssv3_score)
+        self.assertEqual("package", item.component_name)
+        self.assertEqual("1.1.2", item.component_version)
+        item = findings[1]
+        self.assertEqual("Web:TableWithoutCaptionCheck_asdfwfewfwefewf", item.title)
+        self.assertEqual("Low", item.severity)
+        self.assertIsNone(item.cve)
+        self.assertEqual(0, item.cwe)
+        self.assertIsNone(item.cvssv3_score)
+        item = findings[2]
+        self.assertEqual("typescript:S1533_fjoiewfjoweifjoihugu-", item.title)
+        self.assertEqual("Low", item.severity)
+        item = findings[3]
+        self.assertEqual("GHSA-frr2-c345-p7c2", item.cve)
+        item = findings[4]
+        self.assertEqual("CVE-2023-52428", item.cve)
+        self.assertEqual("nimbus-jose-jwt-9.24.4.jar", item.component_name)
+        self.assertIsNone(item.component_version)
+
+    def test_parse_json_file_from_api_with_multiple_findings_hotspots_json(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/findings_over_api_hotspots.json"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(4, len(findings))
+        item = findings[0]
+        self.assertEqual(str, type(item.description))
+        self.assertEqual("typescript:7777_fwafewef", item.title)
+        self.assertEqual("High", item.severity)
+        item = findings[1]
+        self.assertEqual("Web:1222_cyxcvyxcvyxv", item.title)
+        self.assertEqual("Low", item.severity)
+        item = findings[2]
+        self.assertEqual("Web:9876_werrwerwerwer", item.title)
+        self.assertEqual("Low", item.severity)
+
+    def test_parse_json_file_from_api_with_empty_json(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/findings_over_api_empty.json"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(0, len(findings))
+
+    def test_parse_json_file_from_api_with_emppty_zip(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/empty_zip.zip"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(0, len(findings))
+
+    def test_parse_json_file_from_api_with_multiple_findings_zip(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/findings_over_api.zip"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(6, len(findings))
+        item = findings[0]
+        self.assertEqual(str, type(item.description))
+        self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwoefijo", item.title)
+        self.assertEqual("Medium", item.severity)
+        item = findings[3]
+        self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwo1123efijo", item.title)
+        self.assertEqual("Low", item.severity)
+        item = findings[5]
+        self.assertEqual("typescript:S112533_fjoiewfjo1235gweifjoihugu-", item.title)
+        self.assertEqual("Medium", item.severity)

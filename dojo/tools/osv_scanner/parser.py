@@ -2,7 +2,7 @@ import json
 from dojo.models import Finding
 
 
-class OSVScannerParser(object):
+class OSVScannerParser:
 
     def get_scan_types(self):
         return ["OSV Scan"]
