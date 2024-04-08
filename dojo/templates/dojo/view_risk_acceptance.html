@@ -32,15 +32,14 @@
       }
       #spinnerContainer {
         display: flex;
-        align-items: center; /* Centra verticalmente */
-        justify-content: center; /* Centra horizontalmente */
-        height: 100%; /* Ajusta la altura para ocupar el espacio disponible */
+        align-items: center;
+        justify-content: center;
+        height: 100%;
     }
 {% endblock %}
 {% block add_css %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'easymde/dist/easymde.min.css' %}">
-    <link rel="stylesheet" href="https://uiball.com/ldrs/ldrs.min.css">
 {% endblock %}
 {% block content %}
     {{ block.super }}
@@ -485,7 +484,6 @@
         });
     </script>
 {% endif %}
-<script src="https://uiball.com/ldrs/ldrs.min.js"></script>
 <script type="text/javascript">
      {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
 
