@@ -61,7 +61,8 @@ def edit_tool_product(request, pid, ttid):
     product = get_object_or_404(Product, id=pid)
     tool_product = Tool_Product_Settings.objects.get(pk=ttid)
     if tool_product.product != product:
-        raise BadRequest(f'Product {pid} does not fit to product of Tool_Product {tool_product.product.id}')
+        msg = f'Product {pid} does not fit to product of Tool_Product {tool_product.product.id}'
+        raise BadRequest(msg)
 
     if request.method == 'POST':
         tform = ToolProductSettingsForm(request.POST, instance=tool_product)
@@ -88,7 +89,8 @@ def delete_tool_product(request, pid, ttid):
     tool_product = Tool_Product_Settings.objects.get(pk=ttid)
     product = get_object_or_404(Product, id=pid)
     if tool_product.product != product:
-        raise BadRequest(f'Product {pid} does not fit to product of Tool_Product {tool_product.product.id}')
+        msg = f'Product {pid} does not fit to product of Tool_Product {tool_product.product.id}'
+        raise BadRequest(msg)
 
     if request.method == 'POST':
         DeleteToolProductSettingsForm(request.POST, instance=tool_product)

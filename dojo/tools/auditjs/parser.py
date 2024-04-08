@@ -36,9 +36,8 @@ class AuditJSParser:
         try:
             data = json.load(filename)
         except JSONDecodeError:
-            raise ValueError(
-                "Invalid JSON format. Are you sure you used --json option ?"
-            )
+            msg = "Invalid JSON format. Are you sure you used --json option ?"
+            raise ValueError(msg)
         dupes = {}
 
         for dependency in data:
@@ -84,10 +83,11 @@ class AuditJSParser:
                         if cwe_find:
                             cwe = int(cwe_find[0][4:])
                     else:
-                        raise ValueError(
+                        msg = (
                             "Missing mandatory attributes (id, title, description). Please check your report or ask "
                             "community."
                         )
+                        raise ValueError(msg)
                     if "cvssScore" in vulnerability:
                         cvss_score = vulnerability["cvssScore"]
                     if "cvssVector" in vulnerability:

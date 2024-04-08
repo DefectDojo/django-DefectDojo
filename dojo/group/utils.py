@@ -8,7 +8,8 @@ from django.conf import settings
 
 def get_auth_group_name(group, attempt=0):
     if attempt > 999:
-        raise Exception(f'Cannot find name for authorization group for Dojo_Group {group.name}, aborted after 999 attempts.')
+        msg = f'Cannot find name for authorization group for Dojo_Group {group.name}, aborted after 999 attempts.'
+        raise Exception(msg)
     if attempt == 0:
         auth_group_name = group.name
     else:

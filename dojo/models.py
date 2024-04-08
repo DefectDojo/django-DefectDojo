@@ -860,9 +860,11 @@ class DojoMeta(models.Model):
                 ids_count += 1
 
         if ids_count == 0:
-            raise ValidationError('Metadata entries need either a product, an endpoint or a finding')
+            msg = 'Metadata entries need either a product, an endpoint or a finding'
+            raise ValidationError(msg)
         if ids_count > 1:
-            raise ValidationError('Metadata entries may not have more than one relation, either a product, an endpoint either or a finding')
+            msg = 'Metadata entries may not have more than one relation, either a product, an endpoint either or a finding'
+            raise ValidationError(msg)
 
     def __str__(self):
         return f"{self.name}: {self.value}"
@@ -893,7 +895,8 @@ class SLA_Configuration(models.Model):
 
         for sla_day in sla_days:
             if sla_day < 1:
-                raise ValidationError('SLA Days must be at least 1')
+                msg = 'SLA Days must be at least 1'
+                raise ValidationError(msg)
 
     def save(self, *args, **kwargs):
         # get the initial sla config before saving (if this is an existing sla config)
@@ -947,7 +950,8 @@ class SLA_Configuration(models.Model):
         if self.id != 1:
             super().delete(*args, **kwargs)
         else:
-            raise ValidationError("Unable to delete default SLA Configuration")
+            msg = "Unable to delete default SLA Configuration"
+            raise ValidationError(msg)
 
     def get_summary(self):
         return f'{self.name} - Critical: {self.critical}, High: {self.high}, Medium: {self.medium}, Low: {self.low}'
@@ -1723,10 +1727,12 @@ class Endpoint(models.Model):
                     if clean_url[:len(dummy_scheme) + 3] == (dummy_scheme + '://'):
                         clean_url = clean_url[len(dummy_scheme) + 3:]
                     else:
-                        raise ValueError('hyperlink lib did not create URL as was expected')
+                        msg = 'hyperlink lib did not create URL as was expected'
+                        raise ValueError(msg)
                 return clean_url
             else:
-                raise ValueError('Missing host')
+                msg = 'Missing host'
+                raise ValueError(msg)
         except:
             url = ''
             if self.protocol:
@@ -1913,7 +1919,8 @@ class Endpoint(models.Model):
             from urllib.parse import urlparse
             url = hyperlink.parse(url="//" + urlparse(uri).netloc)
         except hyperlink.URLParseError as e:
-            raise ValidationError(f'Invalid URL format: {e}')
+            msg = f'Invalid URL format: {e}'
+            raise ValidationError(msg)
 
         query_parts = []  # inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1768
         for k, v in url.query:
@@ -3900,7 +3907,8 @@ class JIRA_Project(models.Model):
 
     def clean(self):
         if not self.jira_instance:
-            raise ValidationError('Cannot save JIRA Project Configuration without JIRA Instance')
+            msg = 'Cannot save JIRA Project Configuration without JIRA Instance'
+            raise ValidationError(msg)
 
     def __str__(self):
         return ('%s: ' + self.project_key + '(%s)') % (str(self.id), str(self.jira_instance.url) if self.jira_instance else 'None')

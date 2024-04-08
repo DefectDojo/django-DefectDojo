@@ -21,7 +21,8 @@ class Command(BaseCommand):
         try:
             deserialized = json.loads(requests.get('https://raw.githubusercontent.com/ozh/github-colors/master/colors.json').text)
         except:
-            raise Exception("Invalid format")
+            msg = "Invalid format"
+            raise Exception(msg)
 
         new_language_types = 0
 

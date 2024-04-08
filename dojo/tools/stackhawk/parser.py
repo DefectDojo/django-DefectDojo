@@ -123,12 +123,13 @@ class StackHawkParser:
             # Specifically, that the attributes accessed when parsing the finding will always exist.
             # See our documentation for more details on this data:
             # https://docs.stackhawk.com/workflow-integrations/webhook.html#scan-completed
-            raise ValueError(
+            msg = (
                 " Unexpected JSON format provided. "
                 "Need help? "
                 "Check out the StackHawk Docs at "
                 "https://docs.stackhawk.com/workflow-integrations/defect-dojo.html"
             )
+            raise ValueError(msg)
 
         return report["scanCompleted"]
 

@@ -322,7 +322,8 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
                 extra_tags='alert-danger')
             return HttpResponseRedirect(reverse('import_endpoint_meta', args=(product.id, )))
         elif origin == 'API':
-            raise ValidationError('The column "hostname" must be present to map host to Endpoint.')
+            msg = 'The column "hostname" must be present to map host to Endpoint.'
+            raise ValidationError(msg)
 
     keys = [key for key in reader.fieldnames if key != 'hostname']
 

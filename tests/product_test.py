@@ -26,9 +26,8 @@ class WaitForPageLoad:
                 return True
             else:
                 time.sleep(0.2)
-        raise Exception(
-            f'Timeout waiting for {self.timeout}s'
-        )
+        msg = f'Timeout waiting for {self.timeout}s'
+        raise Exception(msg)
 
 
 class ProductTest(BaseTestCase):

@@ -28,7 +28,8 @@ class TerrascanParser:
         data = json.load(filename)
         dupes = {}
         if "results" not in data and "violations" not in data.get("results"):
-            raise ValueError("missing mandatory attribute 'results'")
+            msg = "missing mandatory attribute 'results'"
+            raise ValueError(msg)
         if data.get("results").get("violations") is None:
             return []
         for item in data.get("results").get("violations"):

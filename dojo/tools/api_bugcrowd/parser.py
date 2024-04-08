@@ -198,11 +198,12 @@ class ApiBugcrowdParser:
         if entry["attributes"]["state"] in allowed_states:
             return True
         else:
-            raise ValueError(
+            msg = (
                 "{} not in allowed bugcrowd submission states".format(
                     entry["attributes"]["state"]
                 )
             )
+            raise ValueError(msg)
 
     def convert_log_timestamp(self, timestamp):
         """Convert a log entry's timestamp to a DefectDojo date"""

@@ -13,9 +13,8 @@ class CycloneDXXMLParser:
         root = nscan.getroot()
         namespace = self.get_namespace(root)
         if not namespace.startswith("{http://cyclonedx.org/schema/bom/"):
-            raise ValueError(
-                f"This doesn't seem to be a valid CycloneDX BOM XML file. Namespace={namespace}"
-            )
+            msg = f"This doesn't seem to be a valid CycloneDX BOM XML file. Namespace={namespace}"
+            raise ValueError(msg)
         ns = {
             "b": namespace.replace("{", "").replace(
                 "}", ""

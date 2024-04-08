@@ -209,7 +209,8 @@ def get_or_create_product(product_name=None, product_type_name=None, auto_create
 
     # not found .... create it
     if not auto_create_context:
-        raise ValueError('auto_create_context not True, unable to create non-existing product')
+        msg = 'auto_create_context not True, unable to create non-existing product'
+        raise ValueError(msg)
     else:
         product_type, created = Product_Type.objects.get_or_create(name=product_type_name)
         if created:
@@ -240,12 +241,14 @@ def get_or_create_engagement(engagement_id=None, engagement_name=None, product_n
 
     # not found .... create it
     if not auto_create_context:
-        raise ValueError('auto_create_context not True, unable to create non-existing engagement')
+        msg = 'auto_create_context not True, unable to create non-existing engagement'
+        raise ValueError(msg)
     else:
         product = get_or_create_product(product_name, product_type_name, auto_create_context)
 
         if not product:
-            raise ValueError('no product, unable to create engagement')
+            msg = 'no product, unable to create engagement'
+            raise ValueError(msg)
 
         target_start = timezone.now().date()
         if (target_end is None) or (target_start > target_end):

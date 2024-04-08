@@ -51,9 +51,8 @@ class IntSightsParser:
         elif file.name.lower().endswith(".csv"):
             alerts = IntSightsCSVParser()._parse_csv(file)
         else:
-            raise ValueError(
-                "Filename extension not recognized. Use .json or .csv"
-            )
+            msg = "Filename extension not recognized. Use .json or .csv"
+            raise ValueError(msg)
         for alert in alerts:
             dupe_key = alert["alert_id"]
             alert = Finding(

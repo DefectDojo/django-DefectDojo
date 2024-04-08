@@ -604,7 +604,8 @@ def jira_environment(obj):
 
 def push_to_jira(obj, *args, **kwargs):
     if obj is None:
-        raise ValueError('Cannot push None to JIRA')
+        msg = 'Cannot push None to JIRA'
+        raise ValueError(msg)
 
     if isinstance(obj, Finding):
         finding = obj
@@ -1082,12 +1083,14 @@ def get_issuetype_fields(
             try:
                 project = meta['projects'][0]
             except Exception:
-                raise JIRAError("Project misconfigured or no permissions in Jira ?")
+                msg = "Project misconfigured or no permissions in Jira ?"
+                raise JIRAError(msg)
 
             try:
                 issuetype_fields = project['issuetypes'][0]['fields'].keys()
             except Exception:
-                raise JIRAError("Misconfigured default issue type ?")
+                msg = "Misconfigured default issue type ?"
+                raise JIRAError(msg)
 
         else:
             try:
@@ -1103,7 +1106,8 @@ def get_issuetype_fields(
                     break
 
             if not issuetype_id:
-                raise JIRAError("Issue type ID can not be matched. Misconfigured default issue type ?")
+                msg = "Issue type ID can not be matched. Misconfigured default issue type ?"
+                raise JIRAError(msg)
 
             try:
                 issuetype_fields = jira.project_issue_fields(project_key, issuetype_id)
@@ -1114,7 +1118,8 @@ def get_issuetype_fields(
             try:
                 issuetype_fields = [f.fieldId for f in issuetype_fields]
             except Exception:
-                raise JIRAError("Misconfigured default issue type ?")
+                msg = "Misconfigured default issue type ?"
+                raise JIRAError(msg)
 
     except JIRAError as e:
         e.text = f"Failed retrieving field metadata from Jira version: {jira._version}, project: {project_key}, issue type: {issuetype_name}. {e.text}"
@@ -1468,7 +1473,8 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
                 logger.debug('inheriting but no existing JIRA Project for engagement, so nothing to do')
             else:
                 error = True
-                raise ValueError('Not allowed to remove existing JIRA Config for an engagement')
+                msg = 'Not allowed to remove existing JIRA Config for an engagement'
+                raise ValueError(msg)
         elif jform.is_valid():
             try:
                 jira_project = jform.save(commit=False)
@@ -1481,7 +1487,8 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
                     obj = product
 
                 if not jira_project.product_id and not jira_project.engagement_id:
-                    raise ValueError('encountered JIRA_Project without product_id and without engagement_id')
+                    msg = 'encountered JIRA_Project without product_id and without engagement_id'
+                    raise ValueError(msg)
 
                 # only check jira project if form is sufficiently populated
                 if jira_project.jira_instance and jira_project.project_key:

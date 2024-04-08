@@ -24,10 +24,11 @@ class AppSpiderParser:
         root = vscan.getroot()
 
         if "VulnSummary" not in str(root.tag):
-            raise ValueError(
+            msg = (
                 "Please ensure that you are uploading AppSpider's VulnerabilitiesSummary.xml file."
                 "At this time it is the only file that is consumable by DefectDojo."
             )
+            raise ValueError(msg)
 
         dupes = {}
 

@@ -39,8 +39,9 @@ class YarnAuditParser:
                 items[unique_key] = item
             elif element.get("type") == "error":
                 error = element.get("data")
+                msg = "yarn audit report contains errors: %s"
                 raise ValueError(
-                    "yarn audit report contains errors: %s", error
+                    msg, error
                 )
         return list(items.values())
 

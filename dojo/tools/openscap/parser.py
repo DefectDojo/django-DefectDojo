@@ -26,13 +26,11 @@ class OpenscapParser:
 
         # check if xml file hash correct root or not.
         if "Benchmark" not in root.tag:
-            raise ValueError(
-                "This doesn't seem to be a valid Openscap vulnerability scan xml file."
-            )
+            msg = "This doesn't seem to be a valid Openscap vulnerability scan xml file."
+            raise ValueError(msg)
         if "http://checklists.nist.gov/xccdf/" not in namespace:
-            raise ValueError(
-                "This doesn't seem to be a valid Openscap vulnerability scan xml file."
-            )
+            msg = "This doesn't seem to be a valid Openscap vulnerability scan xml file."
+            raise ValueError(msg)
 
         # read rules
         rules = {}

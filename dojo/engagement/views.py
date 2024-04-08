@@ -104,7 +104,8 @@ def engagement_calendar(request):
 def get_filtered_engagements(request, view):
 
     if view not in ['all', 'active']:
-        raise ValidationError(f'View {view} is not allowed')
+        msg = f'View {view} is not allowed'
+        raise ValidationError(msg)
 
     engagements = get_authorized_engagements(Permissions.Engagement_View).order_by('-target_start')
 
@@ -679,7 +680,8 @@ class ImportScanResultsView(View):
             product = get_object_or_404(Product, id=pid)
             engagement_or_product = product
         else:
-            raise Exception('Either Engagement or Product has to be provided')
+            msg = 'Either Engagement or Product has to be provided'
+            raise Exception(msg)
 
         user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
 
@@ -728,7 +730,8 @@ class ImportScanResultsView(View):
             product = get_object_or_404(Product, id=pid)
             engagement_or_product = product
         else:
-            raise Exception('Either Engagement or Product has to be provided')
+            msg = 'Either Engagement or Product has to be provided'
+            raise Exception(msg)
 
         user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
 
@@ -1331,7 +1334,8 @@ def get_list_index(list, index):
 def get_engagements(request):
     url = request.META.get('QUERY_STRING')
     if not url:
-        raise ValidationError('Please use the export button when exporting engagements')
+        msg = 'Please use the export button when exporting engagements'
+        raise ValidationError(msg)
     else:
         if url.startswith('url='):
             url = url[4:]
@@ -1339,7 +1343,8 @@ def get_engagements(request):
     path_items = list(filter(None, re.split(r'/|\?', url)))
 
     if not path_items or path_items[0] != 'engagement':
-        raise ValidationError('URL is not an engagement view')
+        msg = 'URL is not an engagement view'
+        raise ValidationError(msg)
 
     view = query = None
     if get_list_index(path_items, 1) in ['active', 'all']:
