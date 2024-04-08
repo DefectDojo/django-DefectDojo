@@ -419,7 +419,7 @@ def edit_group_member(request, mid):
                 if owners < 1:
                     messages.add_message(request,
                                         messages.WARNING,
-                                        'There must be at least one owner for group {}.'.format(member.group.name),
+                                        f'There must be at least one owner for group {member.group.name}.',
                                         extra_tags='alert-warning')
                     if is_title_in_breadcrumbs('View User'):
                         return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
@@ -461,7 +461,7 @@ def delete_group_member(request, mid):
             if owners <= 1:
                 messages.add_message(request,
                                     messages.WARNING,
-                                        'There must be at least one owner for group {}.'.format(member.group.name),
+                                        f'There must be at least one owner for group {member.group.name}.',
                                     extra_tags='alert-warning')
                 if is_title_in_breadcrumbs('View User'):
                     return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))

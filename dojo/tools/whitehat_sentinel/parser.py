@@ -7,7 +7,7 @@ from datetime import datetime
 from dojo.models import Finding, Endpoint
 
 
-class WhiteHatSentinelParser(object):
+class WhiteHatSentinelParser:
     """
     A class to parse WhiteHat Sentinel vulns from the WhiteHat Sentinel API vuln?query_site=[
     SITE_ID]&format=json&display_attack_vectors=all&display_custom_risk=1&display_risk=1&display_description=custom

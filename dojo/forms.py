@@ -75,7 +75,7 @@ EFFORT_FOR_FIXING_INVALID_CHOICE = _('Select valid choice: Low,Medium,High')
 
 class MultipleSelectWithPop(forms.SelectMultiple):
     def render(self, name, *args, **kwargs):
-        html = super(MultipleSelectWithPop, self).render(name, *args, **kwargs)
+        html = super().render(name, *args, **kwargs)
         popup_plus = '<div class="input-group dojo-input-group">' + html + '<span class="input-group-btn"><a href="/' + name + '/add" class="btn btn-primary" class="add-another" id="add_id_' + name + '" onclick="return showAddAnotherPopup(this);"><span class="glyphicon glyphicon-plus"></span></a></span></div>'
 
         return mark_safe(popup_plus)
@@ -154,7 +154,7 @@ class MonthYearWidget(Widget):
         if y == m == "0":
             return None
         if y and m:
-            return '%s-%s-%s' % (y, m, 1)
+            return f'{y}-{m}-{1}'
         return data.get(name, None)
 
 
@@ -179,7 +179,7 @@ class Delete_Product_TypeForm(forms.ModelForm):
 class Edit_Product_Type_MemberForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(Edit_Product_Type_MemberForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['product_type'].disabled = True
         self.fields['user'].queryset = Dojo_User.objects.order_by('first_name', 'last_name')
         self.fields['user'].disabled = True
@@ -193,7 +193,7 @@ class Add_Product_Type_MemberForm(forms.ModelForm):
     users = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.none(), required=True, label='Users')
 
     def __init__(self, *args, **kwargs):
-        super(Add_Product_Type_MemberForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         current_members = Product_Type_Member.objects.filter(product_type=self.initial["product_type"]).values_list('user', flat=True)
         self.fields['users'].queryset = Dojo_User.objects.exclude(
             Q(is_superuser=True)
@@ -209,7 +209,7 @@ class Add_Product_Type_Member_UserForm(forms.ModelForm):
     product_types = forms.ModelMultipleChoiceField(queryset=Product_Type.objects.none(), required=True, label='Product Types')
 
     def __init__(self, *args, **kwargs):
-        super(Add_Product_Type_Member_UserForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         current_members = Product_Type_Member.objects.filter(user=self.initial['user']).values_list('product_type', flat=True)
         self.fields['product_types'].queryset = get_authorized_product_types(Permissions.Product_Type_Member_Add_Owner) \
             .exclude(id__in=current_members)
@@ -222,7 +222,7 @@ class Add_Product_Type_Member_UserForm(forms.ModelForm):
 
 class Delete_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
     def __init__(self, *args, **kwargs):
-        super(Delete_Product_Type_MemberForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['role'].disabled = True
 
 
@@ -263,7 +263,7 @@ class ProductForm(forms.ModelForm):
     team_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
 
     def __init__(self, *args, **kwargs):
-        super(ProductForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_Add_Product)
 
         # if this product has findings being asynchronously updated, disable the sla config field
@@ -294,7 +294,7 @@ class EditFindingGroupForm(forms.ModelForm):
                                  help_text='Leave empty and check push to jira to create a new JIRA issue for this finding group.')
 
     def __init__(self, *args, **kwargs):
-        super(EditFindingGroupForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         import dojo.jira_link.helper as jira_helper
 
         self.fields['push_to_jira'] = forms.BooleanField()
@@ -325,7 +325,7 @@ class DeleteFindingGroupForm(forms.ModelForm):
 class Edit_Product_MemberForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(Edit_Product_MemberForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['product'].disabled = True
         self.fields['user'].queryset = Dojo_User.objects.order_by('first_name', 'last_name')
         self.fields['user'].disabled = True
@@ -339,7 +339,7 @@ class Add_Product_MemberForm(forms.ModelForm):
     users = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.none(), required=True, label='Users')
 
     def __init__(self, *args, **kwargs):
-        super(Add_Product_MemberForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['product'].disabled = True
         current_members = Product_Member.objects.filter(product=self.initial["product"]).values_list('user', flat=True)
         self.fields['users'].queryset = Dojo_User.objects.exclude(
@@ -355,7 +355,7 @@ class Add_Product_Member_UserForm(forms.ModelForm):
     products = forms.ModelMultipleChoiceField(queryset=Product.objects.none(), required=True, label='Products')
 
     def __init__(self, *args, **kwargs):
-        super(Add_Product_Member_UserForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         current_members = Product_Member.objects.filter(user=self.initial["user"]).values_list('product', flat=True)
         self.fields['products'].queryset = get_authorized_products(Permissions.Product_Member_Add_Owner) \
             .exclude(id__in=current_members)
@@ -368,7 +368,7 @@ class Add_Product_Member_UserForm(forms.ModelForm):
 
 class Delete_Product_MemberForm(Edit_Product_MemberForm):
     def __init__(self, *args, **kwargs):
-        super(Delete_Product_MemberForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['role'].disabled = True
 
 
@@ -385,14 +385,14 @@ class EditNoteTypeForm(NoteTypeForm):
 
     def __init__(self, *args, **kwargs):
         is_single = kwargs.pop('is_single')
-        super(EditNoteTypeForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if is_single is False:
             self.fields['is_single'].widget = forms.HiddenInput()
 
 
 class DisableOrEnableNoteTypeForm(NoteTypeForm):
     def __init__(self, *args, **kwargs):
-        super(DisableOrEnableNoteTypeForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['name'].disabled = True
         self.fields['description'].disabled = True
         self.fields['is_single'].disabled = True
@@ -409,7 +409,7 @@ class DojoMetaDataForm(forms.ModelForm):
                             required=True)
 
     def full_clean(self):
-        super(DojoMetaDataForm, self).full_clean()
+        super().full_clean()
         try:
             self.instance.validate_unique()
         except ValidationError:
@@ -498,7 +498,7 @@ class ImportScanForm(forms.Form):
         create_finding_groups_for_all_findings = forms.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, initial=True)
 
     def __init__(self, *args, **kwargs):
-        super(ImportScanForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['active'].initial = self.active_verified_choices[0]
         self.fields['verified'].initial = self.active_verified_choices[0]
 
@@ -515,7 +515,7 @@ class ImportScanForm(forms.Form):
         scan_type = cleaned_data.get("scan_type")
         file = cleaned_data.get("file")
         if requires_file(scan_type) and not file:
-            raise forms.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+            raise forms.ValidationError(f'Uploading a Report File is required for {scan_type}')
         tool_type = requires_tool_type(scan_type)
         if tool_type:
             api_scan_configuration = cleaned_data.get('api_scan_configuration')
@@ -596,7 +596,7 @@ class ReImportScanForm(forms.Form):
         create_finding_groups_for_all_findings = forms.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, initial=True)
 
     def __init__(self, *args, test=None, **kwargs):
-        super(ReImportScanForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['active'].initial = self.active_verified_choices[0]
         self.fields['verified'].initial = self.active_verified_choices[0]
         self.scan_type = None
@@ -653,7 +653,7 @@ class ImportEndpointMetaForm(forms.Form):
         help_text="Add data from file as Metadata. Metadata is used for displaying custom fields",)
 
     def __init__(self, *args, **kwargs):
-        super(ImportEndpointMetaForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class DoneForm(forms.Form):
@@ -696,7 +696,7 @@ class MergeFindings(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         _ = kwargs.pop('finding')
         findings = kwargs.pop('findings')
-        super(MergeFindings, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.fields['finding_to_merge_into'] = forms.ModelChoiceField(
             queryset=findings, initial=0, required="False", label="Finding to Merge Into", help_text="Findings selected below will be merged into this finding.")
@@ -817,7 +817,7 @@ class CheckForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         findings = kwargs.pop('findings')
-        super(CheckForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['session_issues'].queryset = findings
         self.fields['crypto_issues'].queryset = findings
         self.fields['config_issues'].queryset = findings
@@ -868,7 +868,7 @@ class EngForm(forms.ModelForm):
         if 'user' in kwargs:
             self.user = kwargs.pop('user')
 
-        super(EngForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if product:
             self.fields['preset'] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
@@ -892,7 +892,7 @@ class EngForm(forms.ModelForm):
             del self.fields['status']
 
     def is_valid(self):
-        valid = super(EngForm, self).is_valid()
+        valid = super().is_valid()
 
         # we're done now if not valid
         if not valid:
@@ -943,7 +943,7 @@ class TestForm(forms.ModelForm):
         if 'instance' in kwargs:
             obj = kwargs.get('instance')
 
-        super(TestForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if obj:
             product = get_product(obj)
@@ -976,7 +976,7 @@ class CopyTestForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         authorized_lists = kwargs.pop('engagements', None)
-        super(CopyTestForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['engagement'].queryset = authorized_lists
 
 
@@ -1024,7 +1024,7 @@ class AddFindingForm(forms.ModelForm):
         if 'product' in kwargs:
             product = kwargs.pop('product')
 
-        super(AddFindingForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if product:
             self.fields['endpoints'].queryset = Endpoint.objects.filter(product=product)
@@ -1036,7 +1036,7 @@ class AddFindingForm(forms.ModelForm):
         self.endpoints_to_add_list = []
 
     def clean(self):
-        cleaned_data = super(AddFindingForm, self).clean()
+        cleaned_data = super().clean()
         if ((cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']):
             raise forms.ValidationError('Duplicate findings cannot be'
                                         ' verified or active')
@@ -1105,7 +1105,7 @@ class AdHocFindingForm(forms.ModelForm):
         if 'product' in kwargs:
             product = kwargs.pop('product')
 
-        super(AdHocFindingForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if product:
             self.fields['endpoints'].queryset = Endpoint.objects.filter(product=product)
@@ -1117,7 +1117,7 @@ class AdHocFindingForm(forms.ModelForm):
         self.endpoints_to_add_list = []
 
     def clean(self):
-        cleaned_data = super(AdHocFindingForm, self).clean()
+        cleaned_data = super().clean()
         if ((cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']):
             raise forms.ValidationError('Duplicate findings cannot be'
                                         ' verified or active')
@@ -1173,7 +1173,7 @@ class PromoteFindingForm(forms.ModelForm):
         if 'product' in kwargs:
             product = kwargs.pop('product')
 
-        super(PromoteFindingForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if product:
             self.fields['endpoints'].queryset = Endpoint.objects.filter(product=product)
@@ -1181,7 +1181,7 @@ class PromoteFindingForm(forms.ModelForm):
         self.endpoints_to_add_list = []
 
     def clean(self):
-        cleaned_data = super(PromoteFindingForm, self).clean()
+        cleaned_data = super().clean()
 
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data['endpoints_to_add'])
         if errors:
@@ -1249,7 +1249,7 @@ class FindingForm(forms.ModelForm):
         self.can_edit_mitigated_data = kwargs.pop('can_edit_mitigated_data') if 'can_edit_mitigated_data' in kwargs \
             else False
 
-        super(FindingForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.fields['endpoints'].queryset = Endpoint.objects.filter(product=self.instance.test.engagement.product)
         self.fields['mitigated_by'].queryset = get_authorized_users(Permissions.Test_Edit)
@@ -1295,7 +1295,7 @@ class FindingForm(forms.ModelForm):
         self.endpoints_to_add_list = []
 
     def clean(self):
-        cleaned_data = super(FindingForm, self).clean()
+        cleaned_data = super().clean()
 
         if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
             raise forms.ValidationError('Duplicate findings cannot be'
@@ -1316,7 +1316,7 @@ class FindingForm(forms.ModelForm):
         return cleaned_data
 
     def _post_clean(self):
-        super(FindingForm, self)._post_clean()
+        super()._post_clean()
 
         if self.can_edit_mitigated_data:
             opts = self.instance._meta
@@ -1342,7 +1342,7 @@ class StubFindingForm(forms.ModelForm):
             'date', 'description', 'severity', 'reporter', 'test', 'is_mitigated')
 
     def clean(self):
-        cleaned_data = super(StubFindingForm, self).clean()
+        cleaned_data = super().clean()
         if 'title' in cleaned_data:
             if len(cleaned_data['title']) <= 0:
                 raise forms.ValidationError("The title is required.")
@@ -1370,14 +1370,14 @@ class ApplyFindingTemplateForm(forms.Form):
     tags = TagField(required=False, help_text="Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add.", initial=Finding.tags.tag_model.objects.all().order_by('name'))
 
     def __init__(self, template=None, *args, **kwargs):
-        super(ApplyFindingTemplateForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['tags'].autocomplete_tags = Finding.tags.tag_model.objects.all().order_by('name')
         self.template = template
         if template:
             self.template.vulnerability_ids = '\n'.join(template.vulnerability_ids)
 
     def clean(self):
-        cleaned_data = super(ApplyFindingTemplateForm, self).clean()
+        cleaned_data = super().clean()
 
         if 'title' in cleaned_data:
             if len(cleaned_data['title']) <= 0:
@@ -1409,7 +1409,7 @@ class FindingTemplateForm(forms.ModelForm):
     field_order = ['title', 'cwe', 'vulnerability_ids', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'references', 'tags', 'template_match', 'template_match_cwe', 'template_match_title', 'apply_to_findings']
 
     def __init__(self, *args, **kwargs):
-        super(FindingTemplateForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['tags'].autocomplete_tags = Finding.tags.tag_model.objects.all().order_by('name')
 
     class Meta:
@@ -1452,13 +1452,13 @@ class FindingBulkUpdateForm(forms.ModelForm):
     notes = forms.CharField(required=False, max_length=1024, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     def __init__(self, *args, **kwargs):
-        super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['severity'].required = False
         # we need to defer initialization to prevent multiple initializations if other forms are shown
         self.fields['tags'].widget.tag_options = tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px', 'defer': True})
 
     def clean(self):
-        cleaned_data = super(FindingBulkUpdateForm, self).clean()
+        cleaned_data = super().clean()
 
         if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
             raise forms.ValidationError('Duplicate findings cannot be'
@@ -1482,7 +1482,7 @@ class EditEndpointForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.product = None
         self.endpoint_instance = None
-        super(EditEndpointForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if 'instance' in kwargs:
             self.endpoint_instance = kwargs.pop('instance')
             self.product = self.endpoint_instance.product
@@ -1492,7 +1492,7 @@ class EditEndpointForm(forms.ModelForm):
 
     def clean(self):
 
-        cleaned_data = super(EditEndpointForm, self).clean()
+        cleaned_data = super().clean()
 
         protocol = cleaned_data['protocol']
         userinfo = cleaned_data['userinfo']
@@ -1536,7 +1536,7 @@ class AddEndpointForm(forms.Form):
         product = None
         if 'product' in kwargs:
             product = kwargs.pop('product')
-        super(AddEndpointForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['product'] = forms.ModelChoiceField(queryset=get_authorized_products(Permissions.Endpoint_Add))
         if product is not None:
             self.fields['product'].initial = product.id
@@ -1562,7 +1562,7 @@ class AddEndpointForm(forms.Form):
 
     def clean(self):
 
-        cleaned_data = super(AddEndpointForm, self).clean()
+        cleaned_data = super().clean()
 
         if 'endpoint' in cleaned_data and 'product' in cleaned_data:
             endpoint = cleaned_data['endpoint']
@@ -1606,10 +1606,10 @@ class TypedNoteForm(NoteForm):
 
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop('available_note_types')
-        super(TypedNoteForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['note_type'] = forms.ModelChoiceField(queryset=queryset, label='Note Type', required=True)
 
-    class Meta():
+    class Meta:
         model = Notes
         fields = ['note_type', 'entry', 'private']
 
@@ -1639,7 +1639,7 @@ class CloseFindingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop('missing_note_types')
-        super(CloseFindingForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if len(queryset) == 0:
             self.fields['note_type'].widget = forms.HiddenInput()
         else:
@@ -1654,7 +1654,7 @@ class CloseFindingForm(forms.ModelForm):
             self.fields['mitigated_by'].initial = self.instance.mitigated_by
 
     def _post_clean(self):
-        super(CloseFindingForm, self)._post_clean()
+        super()._post_clean()
 
         if self.can_edit_mitigated_data:
             opts = self.instance._meta
@@ -1676,7 +1676,7 @@ class EditPlannedRemediationDateFindingForm(forms.ModelForm):
         if 'finding' in kwargs:
             finding = kwargs.pop('finding')
 
-        super(EditPlannedRemediationDateFindingForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.fields['planned_remediation_date'].required = True
         self.fields['planned_remediation_date'].widget = forms.DateInput(attrs={'class': 'datepicker'})
@@ -1742,7 +1742,7 @@ class ReviewFindingForm(forms.Form):
     def __init__(self, *args, **kwargs):
         finding = kwargs.pop("finding", None)
         user = kwargs.pop("user", None)
-        super(ReviewFindingForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         # Get the list of users
         if finding is not None:
             users = get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, Permissions.Finding_Edit)
@@ -1776,7 +1776,7 @@ class WeeklyMetricsForm(forms.Form):
     dates = forms.ChoiceField()
 
     def __init__(self, *args, **kwargs):
-        super(WeeklyMetricsForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         wmf_options = []
 
         for i in range(6):
@@ -1842,7 +1842,7 @@ class MetricsFilterForm(forms.Form):
         exclude_product_types = kwargs.get('exclude_product_types', False)
         if 'exclude_product_types' in kwargs:
             del kwargs['exclude_product_types']
-        super(MetricsFilterForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if exclude_product_types:
             del self.fields['exclude_product_types']
 
@@ -1871,7 +1871,7 @@ class Add_Group_MemberForm(forms.ModelForm):
     users = forms.ModelMultipleChoiceField(queryset=Dojo_Group_Member.objects.none(), required=True, label='Users')
 
     def __init__(self, *args, **kwargs):
-        super(Add_Group_MemberForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['group'].disabled = True
         current_members = Dojo_Group_Member.objects.filter(group=self.initial['group']).values_list('user', flat=True)
         self.fields['users'].queryset = Dojo_User.objects.exclude(
@@ -1888,7 +1888,7 @@ class Add_Group_Member_UserForm(forms.ModelForm):
     groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
 
     def __init__(self, *args, **kwargs):
-        super(Add_Group_Member_UserForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['user'].disabled = True
         current_groups = Dojo_Group_Member.objects.filter(user=self.initial['user']).values_list('group', flat=True)
         self.fields['groups'].queryset = Dojo_Group.objects.exclude(id__in=current_groups)
@@ -1901,7 +1901,7 @@ class Add_Group_Member_UserForm(forms.ModelForm):
 
 class Edit_Group_MemberForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(Edit_Group_MemberForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['group'].disabled = True
         self.fields['user'].disabled = True
         self.fields['role'].queryset = get_group_member_roles()
@@ -1913,7 +1913,7 @@ class Edit_Group_MemberForm(forms.ModelForm):
 
 class Delete_Group_MemberForm(Edit_Group_MemberForm):
     def __init__(self, *args, **kwargs):
-        super(Delete_Group_MemberForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['role'].disabled = True
 
 
@@ -1921,7 +1921,7 @@ class Add_Product_GroupForm(forms.ModelForm):
     groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
 
     def __init__(self, *args, **kwargs):
-        super(Add_Product_GroupForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['product'].disabled = True
         current_groups = Product_Group.objects.filter(product=self.initial["product"]).values_list('group', flat=True)
         authorized_groups = get_authorized_groups(Permissions.Group_View)
@@ -1937,7 +1937,7 @@ class Add_Product_Group_GroupForm(forms.ModelForm):
     products = forms.ModelMultipleChoiceField(queryset=Product.objects.none(), required=True, label='Products')
 
     def __init__(self, *args, **kwargs):
-        super(Add_Product_Group_GroupForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         current_members = Product_Group.objects.filter(group=self.initial["group"]).values_list('product', flat=True)
         self.fields['products'].queryset = get_authorized_products(Permissions.Product_Member_Add_Owner) \
             .exclude(id__in=current_members)
@@ -1951,7 +1951,7 @@ class Add_Product_Group_GroupForm(forms.ModelForm):
 class Edit_Product_Group_Form(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(Edit_Product_Group_Form, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['product'].disabled = True
         self.fields['group'].disabled = True
 
@@ -1962,7 +1962,7 @@ class Edit_Product_Group_Form(forms.ModelForm):
 
 class Delete_Product_GroupForm(Edit_Product_Group_Form):
     def __init__(self, *args, **kwargs):
-        super(Delete_Product_GroupForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['role'].disabled = True
 
 
@@ -1970,7 +1970,7 @@ class Add_Product_Type_GroupForm(forms.ModelForm):
     groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
 
     def __init__(self, *args, **kwargs):
-        super(Add_Product_Type_GroupForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         current_groups = Product_Type_Group.objects.filter(product_type=self.initial["product_type"]).values_list('group', flat=True)
         authorized_groups = get_authorized_groups(Permissions.Group_View)
         authorized_groups = authorized_groups.exclude(id__in=current_groups)
@@ -1986,7 +1986,7 @@ class Add_Product_Type_Group_GroupForm(forms.ModelForm):
     product_types = forms.ModelMultipleChoiceField(queryset=Product_Type.objects.none(), required=True, label='Product Types')
 
     def __init__(self, *args, **kwargs):
-        super(Add_Product_Type_Group_GroupForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         current_members = Product_Type_Group.objects.filter(group=self.initial['group']).values_list('product_type', flat=True)
         self.fields['product_types'].queryset = get_authorized_product_types(Permissions.Product_Type_Member_Add_Owner) \
             .exclude(id__in=current_members)
@@ -2000,7 +2000,7 @@ class Add_Product_Type_Group_GroupForm(forms.ModelForm):
 class Edit_Product_Type_Group_Form(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(Edit_Product_Type_Group_Form, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['product_type'].disabled = True
         self.fields['group'].disabled = True
 
@@ -2011,13 +2011,13 @@ class Edit_Product_Type_Group_Form(forms.ModelForm):
 
 class Delete_Product_Type_GroupForm(Edit_Product_Type_Group_Form):
     def __init__(self, *args, **kwargs):
-        super(Delete_Product_Type_GroupForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['role'].disabled = True
 
 
 class DojoUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(DojoUserForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if not get_current_user().is_superuser and not get_system_setting('enable_user_profile_editable'):
             for field in self.fields:
                 self.fields[field].disabled = True
@@ -2045,7 +2045,7 @@ class ChangePasswordForm(forms.Form):
         self.user = None
         if 'user' in kwargs:
             self.user = kwargs.pop('user')
-        super(ChangePasswordForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['new_password'].help_text = get_password_requirements_string()
 
     def clean(self):
@@ -2214,7 +2214,7 @@ class CopyFindingForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         authorized_lists = kwargs.pop('tests', None)
-        super(CopyFindingForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['test'].queryset = authorized_lists
 
 
@@ -2329,7 +2329,7 @@ class JIRAForm(BaseJiraForm):
                                        help_text='Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.')
 
     def __init__(self, *args, **kwargs):
-        super(JIRAForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if self.instance:
             self.fields['password'].required = False
 
@@ -2380,7 +2380,7 @@ class DeleteBenchmarkForm(forms.ModelForm):
 class Product_API_Scan_ConfigurationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(Product_API_Scan_ConfigurationForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     tool_configuration = forms.ModelChoiceField(
         label='Tool Configuration',
@@ -2453,7 +2453,7 @@ class DeleteAppAnalysisForm(forms.ModelForm):
         exclude = ['product', 'tags']
 
     def __init__(self, *args, **kwargs):
-        super(DeleteAppAnalysisForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['name'].disabled = True
         self.fields['user'].disabled = True
         self.fields['confidence'].disabled = True
@@ -2489,7 +2489,7 @@ class ToolConfigForm(forms.ModelForm):
 
 class SLAConfigForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(SLAConfigForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # if this sla config has findings being asynchronously updated, disable the days by severity fields
         if self.instance.async_updating:
@@ -2574,7 +2574,7 @@ class ObjectSettingsForm(forms.ModelForm):
         exclude = ['product']
 
     def __init__(self, *args, **kwargs):
-        super(ObjectSettingsForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def clean(self):
         form_data = self.cleaned_data
@@ -2625,7 +2625,7 @@ class SystemSettingsForm(forms.ModelForm):
     jira_webhook_secret = forms.CharField(required=False)
 
     def __init__(self, *args, **kwargs):
-        super(SystemSettingsForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['default_group_role'].queryset = get_group_member_roles()
 
     def clean(self):
@@ -2667,7 +2667,7 @@ class NotificationsForm(forms.ModelForm):
 class ProductNotificationsForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(ProductNotificationsForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if not self.instance.id:
             self.initial['engagement_added'] = ''
             self.initial['close_engagement'] = ''
@@ -2837,7 +2837,7 @@ class JIRAProjectForm(forms.ModelForm):
 class GITHUBFindingForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.enabled = kwargs.pop('enabled')
-        super(GITHUBFindingForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['push_to_github'] = forms.BooleanField()
         self.fields['push_to_github'].required = False
         self.fields['push_to_github'].help_text = "Checking this will overwrite content of your Github issue, or create one."
@@ -2857,7 +2857,7 @@ class JIRAFindingForm(forms.Form):
         if self.instance is None and self.jira_project is None:
             raise ValueError('either and finding instance or jira_project is needed')
 
-        super(JIRAFindingForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['push_to_jira'] = forms.BooleanField()
         self.fields['push_to_jira'].required = False
         if is_finding_groups_enabled():
@@ -2892,7 +2892,7 @@ class JIRAFindingForm(forms.Form):
 
     def clean(self):
         logger.debug('jform clean')
-        super(JIRAFindingForm, self).clean()
+        super().clean()
         jira_issue_key_new = self.cleaned_data.get('jira_issue')
         finding = self.instance
         jira_project = self.jira_project
@@ -2968,7 +2968,7 @@ class JIRAImportScanForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.push_all = kwargs.pop('push_all', False)
 
-        super(JIRAImportScanForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if self.push_all:
             # This will show the checkbox as checked and greyed out, this way the user is aware
             # that issues will be pushed to JIRA, given their product-level settings.
@@ -2987,7 +2987,7 @@ class JIRAEngagementForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.instance = kwargs.pop('instance', None)
 
-        super(JIRAEngagementForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if self.instance:
             if self.instance.has_jira_issue:
@@ -3026,7 +3026,7 @@ class AnnouncementCreateForm(forms.ModelForm):
 
 class AnnouncementRemoveForm(AnnouncementCreateForm):
     def __init__(self, *args, **kwargs):
-        super(AnnouncementRemoveForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['dismissable'].disabled = True
         self.fields['message'].disabled = True
         self.fields['style'].disabled = True
@@ -3069,12 +3069,12 @@ class QuestionForm(forms.Form):
             raise ValueError('Need a question to render')
 
         del kwargs['question']
-        super(QuestionForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class TextQuestionForm(QuestionForm):
     def __init__(self, *args, **kwargs):
-        super(TextQuestionForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # work out initial data
 
@@ -3119,7 +3119,7 @@ class TextQuestionForm(QuestionForm):
 
 class ChoiceQuestionForm(QuestionForm):
     def __init__(self, *args, **kwargs):
-        super(ChoiceQuestionForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         choices = [(c.id, c.label) for c in self.question.choices.all()]
 
@@ -3326,7 +3326,7 @@ class MultiWidgetBasic(forms.widgets.MultiWidget):
                    forms.TextInput(attrs={'data-type': 'choice'}),
                    forms.TextInput(attrs={'data-type': 'choice'}),
                    forms.TextInput(attrs={'data-type': 'choice'})]
-        super(MultiWidgetBasic, self).__init__(widgets, attrs)
+        super().__init__(widgets, attrs)
 
     def decompress(self, value):
         if value:
@@ -3348,7 +3348,7 @@ class MultiExampleField(forms.fields.MultiValueField):
                        forms.fields.CharField(required=False),
                        forms.fields.CharField(required=False),
                        forms.fields.CharField(required=False)]
-        super(MultiExampleField, self).__init__(list_fields, *args, **kwargs)
+        super().__init__(list_fields, *args, **kwargs)
 
     def compress(self, values):
         return pickle.dumps(values)
@@ -3405,7 +3405,7 @@ class AssignUserForm(forms.ModelForm):
         assignee = None
         if 'assignee' in kwargs:
             assignee = kwargs.pop('asignees')
-        super(AssignUserForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if assignee is None:
             self.fields['assignee'] = forms.ModelChoiceField(queryset=get_authorized_users(Permissions.Engagement_View), empty_label='Not Assigned', required=False)
         else:
@@ -3424,7 +3424,7 @@ class AddEngagementForm(forms.Form):
         help_text='Select which product to attach Engagement')
 
     def __init__(self, *args, **kwargs):
-        super(AddEngagementForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['product'].queryset = get_authorized_products(Permissions.Engagement_Add)
 
 
@@ -3433,7 +3433,7 @@ class ConfigurationPermissionsForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         self.group = kwargs.pop('group', None)
-        super(ConfigurationPermissionsForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.permission_fields = get_configuration_permissions_fields()
 

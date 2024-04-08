@@ -4,7 +4,7 @@ import sys
 from dojo.models import Finding
 
 
-class WizParser(object):
+class WizParser:
     def get_scan_types(self):
         return ["Wiz Scan"]
 

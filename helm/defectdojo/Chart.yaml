@@ -14,7 +14,7 @@ dependencies:
     repository: "https://charts.bitnami.com/bitnami"
     condition: mysql.enabled
   - name: postgresql
-    version: ~15.1.0
+    version: ~15.2.0
     repository: "https://charts.bitnami.com/bitnami"
     condition: postgresql.enabled
   - name: postgresql-ha

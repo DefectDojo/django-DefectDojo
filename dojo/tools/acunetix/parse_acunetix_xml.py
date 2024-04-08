@@ -9,7 +9,7 @@ from dojo.models import Endpoint, Finding
 logger = logging.getLogger(__name__)
 
 
-class AcunetixXMLParser(object):
+class AcunetixXMLParser:
     """This parser is written for Acunetix XML reports"""
     def get_findings(self, filename, test):
         dupes = dict()
@@ -54,7 +54,7 @@ class AcunetixXMLParser(object):
                 for reference in item.findall("References/Reference"):
                     url = reference.findtext("URL")
                     db = reference.findtext("Database") or url
-                    references.append(" * [{}]({})".format(db, url))
+                    references.append(f" * [{db}]({url})")
                 if len(references) > 0:
                     finding.references = "\n".join(references)
                 if item.findtext("CVSS3/Descriptor"):
@@ -128,9 +128,7 @@ class AcunetixXMLParser(object):
                     find.unsaved_req_resp.extend(finding.unsaved_req_resp)
                     find.nb_occurences += finding.nb_occurences
                     logger.debug(
-                        "Duplicate finding : {defectdojo_title}".format(
-                            defectdojo_title=finding.title
-                        )
+                        f"Duplicate finding : {finding.title}"
                     )
                 else:
                     dupes[dupe_key] = finding
