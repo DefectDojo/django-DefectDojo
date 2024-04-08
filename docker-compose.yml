@@ -6,7 +6,6 @@
 # docker-compose.yml file is not intended for production use without first
 # customizing it to your particular situation.
 ---
-version: '3.8'
 services:
   nginx:
     build:
