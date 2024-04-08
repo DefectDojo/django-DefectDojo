@@ -63,7 +63,6 @@ class NancyParser:
                         static_finding=True,
                         dynamic_finding=False,
                         vuln_id_from_tool=associated_vuln["Id"],
-                        cve=associated_vuln['Cve'],
                         references="\n".join(references),
                     )
 
