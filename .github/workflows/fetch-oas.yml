@@ -33,7 +33,7 @@ jobs:
              docker images
 
       - name: Start Dojo
-        run: docker-compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env up --no-deps -d postgres nginx uwsgi
+        run: docker compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env up --no-deps -d postgres nginx uwsgi
         env:
           DJANGO_VERSION: ${{ env.release_version }}-alpine
           NGINX_VERSION: ${{ env.release_version }}-alpine
@@ -44,11 +44,11 @@ jobs:
 
       - name: Logs
         if: always()
-        run: docker-compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env logs --tail="2500"
+        run: docker compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env logs --tail="2500"
 
       - name: Shutdown
         if: always()
-        run: docker-compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env down
+        run: docker compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env down
 
       - name: Upload oas.${{ matrix.file-type }} as artifact
         uses:  actions/upload-artifact@v3
