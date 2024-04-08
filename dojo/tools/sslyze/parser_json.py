@@ -241,7 +241,7 @@ class SSLyzeJSONParser(object):
 
 
 def get_heartbleed(node, test, endpoint):
-    if "heartbleed" in node:
+    if "heartbleed" in node and node["heartbleed"] is not None:
         heartbleed = node["heartbleed"]
         if heartbleed.get("status") == "NOT_SCHEDULED":
             return None
