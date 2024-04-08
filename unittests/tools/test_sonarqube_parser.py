@@ -559,7 +559,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(str, type(item.description))
         self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwoefijo", item.title)
         self.assertEqual("Medium", item.severity)
-        self.assertEqual("CVE-2024-2529", item.cve)
+        self.assertEqual("CVE-2024-2529", item.unsaved_vulnerability_ids[0])
         self.assertEqual("120", item.cwe)
         self.assertEqual("6.4", item.cvssv3_score)
         self.assertEqual("package", item.component_name)
@@ -567,16 +567,15 @@ class TestSonarQubeParser(DojoTestCase):
         item = findings[1]
         self.assertEqual("Web:TableWithoutCaptionCheck_asdfwfewfwefewf", item.title)
         self.assertEqual("Low", item.severity)
-        self.assertIsNone(item.cve)
         self.assertEqual(0, item.cwe)
         self.assertIsNone(item.cvssv3_score)
         item = findings[2]
         self.assertEqual("typescript:S1533_fjoiewfjoweifjoihugu-", item.title)
         self.assertEqual("Low", item.severity)
         item = findings[3]
-        self.assertEqual("GHSA-frr2-c345-p7c2", item.cve)
+        self.assertEqual("GHSA-frr2-c345-p7c2", item.unsaved_vulnerability_ids[0])
         item = findings[4]
-        self.assertEqual("CVE-2023-52428", item.cve)
+        self.assertEqual("CVE-2023-52428", item.unsaved_vulnerability_ids[0])
         self.assertEqual("nimbus-jose-jwt-9.24.4.jar", item.component_name)
         self.assertIsNone(item.component_version)
 
