@@ -2056,3 +2056,4 @@ warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager
 # - https://docs.djangoproject.com/en/4.1/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
 # - https://docs.djangoproject.com/en/5.0/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
 FORM_RENDERER = "django.forms.renderers.DjangoDivFormRenderer"
+
