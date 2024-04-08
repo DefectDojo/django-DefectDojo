@@ -336,6 +336,9 @@ env = environ.FileAwareEnv(
     DD_CUSTOM_TAG_PARSER=(dict, {}),
     DD_INVALID_ESCAPE_STR=(dict, {}),
 
+    # --------------- Grafana Metrics ---------------
+    DD_GRAFANA_URL=(str, "http://localhost:3000"),
+    
     # ---------------RISK PENDING-------------------------
     # The variable that allows enabling pending risk acceptance.
     DD_RISK_PENDING=(bool, False),
@@ -2026,11 +2029,12 @@ if os.getenv("DD_USE_CACHE_REDIS") == "true":
     }
 
 # ------------------------------------------------------------------------------
-# Render Grafana in a <frame>, <iframe>, <embed> or <object>
+# Render Grafana Metricsin a <frame>, <iframe>, <embed> or <object>
 # ------------------------------------------------------------------------------
+DD_GRAFANA_URL = env('DD_GRAFANA_URL')
 CSP_FRAME_SRC = [
     "'self'",
-    "http://localhost:3000",
+    DD_GRAFANA_URL,
     "https://grafana-pdti-dev.apps.ambientesbc.com"
 ]
 
