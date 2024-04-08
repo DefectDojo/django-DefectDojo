@@ -3,7 +3,7 @@ import json
 import logging
 import re
 from typing import Union, List
-
+from datetime import datetime
 from dojo.models import Finding, Endpoint
 
 
@@ -203,6 +203,8 @@ class WhiteHatSentinelParser(object):
         for whitehat_vuln in whitehat_sentinel_vulns:
             date_created = whitehat_vuln["found"].split("T")[0]
             mitigated_ts = whitehat_vuln.get("closed".split("T")[0], None)
+            if mitigated_ts is not None:
+                mitigated_ts = datetime.strptime(mitigated_ts, "%Y-%m-%dT%H:%M:%SZ")
             cwe = self._parse_cwe_from_tags(
                 whitehat_vuln["attack_vectors"][0].get("scanner_tags", [])
             )
