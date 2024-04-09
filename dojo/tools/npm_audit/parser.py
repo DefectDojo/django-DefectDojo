@@ -44,9 +44,7 @@ class NpmAuditParser:
             code = error["code"]
             summary = error["summary"]
             msg = "npm audit report contains errors: %s, %s"
-            raise ValueError(
-                msg, code, summary
-            )
+            raise ValueError(msg, code, summary)
 
         subtree = tree.get("advisories")
 

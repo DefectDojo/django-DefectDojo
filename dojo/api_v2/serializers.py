@@ -1276,10 +1276,7 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
                 "It appears as though an endpoint with this data already "
                 "exists for this product."
             )
-            raise serializers.ValidationError(
-                msg,
-                code="invalid",
-            )
+            raise serializers.ValidationError(msg, code="invalid")
 
         # use clean data
         data["protocol"] = endpoint_ins.protocol

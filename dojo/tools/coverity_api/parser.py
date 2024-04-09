@@ -21,10 +21,7 @@ class CoverityApiParser:
 
         if "viewContentsV1" not in tree:
             msg = "Report file is not a well-formed Coverity REST view report"
-            raise ValueError(
-                msg,
-                file.name,
-            )
+            raise ValueError(msg, file.name)
 
         items = []
         for issue in tree["viewContentsV1"]["rows"]:
