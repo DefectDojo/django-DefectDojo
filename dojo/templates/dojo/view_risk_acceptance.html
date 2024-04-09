@@ -12,6 +12,30 @@
     .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
     width: 70% !important;
     }
+    .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border-left-color: #09f;
+      
+        animation: spin 1s ease infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+      
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      #spinnerContainer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
 {% endblock %}
 {% block add_css %}
     {{ block.super }}
@@ -19,7 +43,7 @@
 {% endblock %}
 {% block content %}
     {{ block.super }}
-
+    {% include 'dojo/modal/modal_loading.html' %}
     <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -201,8 +225,15 @@
     {% endif %}
 
     <div id="risk_acceptance" class="panel panel-default table-responsive">
-        <div class="panel-heading">
-            <h3>Findings Accepted</h3>
+        <div class="panel-heading tight">
+            <div class="clearfix">
+                <h3 class="pull-left">
+                    Accept all risks 
+                </h3>
+                <a class="accept-risk_acceptance pull-right btn btn-success pull-right" id="id_bullk_risk_accepted" data-eid={{engagement.id}} data-raid={{risk_acceptance.id}} >
+                    <i class="fa-solid fa-check-double"></i>&nbspAccept all risks
+                </a>
+            </div>
         </div>
         {% if accepted_findings %}
             <table id="open_findings" class="table table-condensed table-striped">
@@ -438,7 +469,6 @@
         });
     </script>
 {% endif %}
-
 <script type="text/javascript">
      {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
 </script>

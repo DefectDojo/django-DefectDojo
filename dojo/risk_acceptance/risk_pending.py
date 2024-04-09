@@ -436,6 +436,7 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
     url=reverse('view_risk_acceptance', args=(risk_pending.engagement.id, risk_pending.id, )))
     post_jira_comments(risk_pending, findings, ra_helper.accepted_message_creator)
 
+
 def risk_unaccept(finding):
     logger.debug('unaccepting finding %i:%s if it is currently risk accepted', finding.id, finding)
     if finding.risk_accepted:
@@ -448,3 +449,9 @@ def risk_unaccept(finding):
             finding.acceptances_confirmed = 0
             finding.save()
         ra_helper.post_jira_comment(finding, ra_helper.unaccepted_message_creator)
+
+
+def accept_risk_pending_bullk(eng, risk_acceptance, product, product_type):
+    for accepted_finding in risk_acceptance.accepted_findings.all():
+        logger.debug(f"Accepted risk accepted id: {accepted_finding.id}")
+        risk_acceptante_pending(eng, accepted_finding, risk_acceptance, product, product_type)
