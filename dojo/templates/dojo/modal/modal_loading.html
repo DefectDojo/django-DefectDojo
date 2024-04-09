@@ -17,11 +17,7 @@
 
    $(document).ready(function() {
        $(document).on("click", "#id_bullk_risk_accepted", function() {
-           console.log("ingreso")
            $('#id_loading_modal').modal('show') 
-           console.log("entro")
-           eid = 128
-           raid = 296
            $.ajax({
                url: raid + "/accept",
                type: "GET",
