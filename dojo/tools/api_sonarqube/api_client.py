@@ -38,7 +38,7 @@ class SonarQubeAPI:
                 entry in supported_issue_types for entry in split_issue_types
             )
             if not all_clean:
-                msg = f"Deteced unsupported issue type! Supported types are {', '.join(supported_issue_types)}"
+                msg = f"Detected unsupported issue type! Supported types are {', '.join(supported_issue_types)}"
                 raise Exception(msg)
 
         self.session = requests.Session()
