@@ -18,6 +18,8 @@
    $(document).ready(function() {
        $(document).on("click", "#id_bullk_risk_accepted", function() {
            $('#id_loading_modal').modal('show') 
+           eid = $(this).attr("data-eid")
+           raid =$(this).attr("data-raid")
            $.ajax({
                url: raid + "/accept",
                type: "GET",
