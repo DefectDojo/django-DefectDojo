@@ -223,18 +223,19 @@
             {% endif%}
         </div>
     {% endif %}
-
     <div id="risk_acceptance" class="panel panel-default table-responsive">
         <div class="panel-heading tight">
             <div class="clearfix">
                 <h3 class="pull-left">
                     Accept all risks 
                 </h3>
+                {% if engagement|has_object_permission:"Risk_Acceptance_Bullk" %}
                 <a class="accept-risk_acceptance pull-right btn btn-success pull-right" id="id_bullk_risk_accepted" data-eid={{engagement.id}} data-raid={{risk_acceptance.id}} >
                     <i class="fa-solid fa-check-double"></i>&nbspAccept all risks
                 </a>
+                {% endif %}
             </div>
-        </div>
+    </div>
         {% if accepted_findings %}
             <table id="open_findings" class="table table-condensed table-striped">
                 <thead>
