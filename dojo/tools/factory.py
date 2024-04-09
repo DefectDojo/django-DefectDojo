@@ -33,7 +33,7 @@ def register_parser(scan_type, parser):
 def get_parser(scan_type):
     """Return a parser by the scan type"""
     if scan_type not in PARSERS:
-        msg = f"Parser '{scan_type}' does not exists"
+        msg = f"Parser '{scan_type}' does not exist"
         raise ValueError(msg)
     rg = re.compile(settings.PARSER_EXCLUDE)
     if not rg.match(scan_type) or settings.PARSER_EXCLUDE.strip() == "":
