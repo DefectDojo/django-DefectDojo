@@ -1,7 +1,7 @@
 import json
 
 
-class IntSightsJSONParser(object):
+class IntSightsJSONParser:
     def _parse_json(self, json_file) -> [dict]:
         """
         Parses entries from the JSON object into a list of alerts
