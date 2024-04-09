@@ -16,7 +16,7 @@ class AwsSecurityHubParser:
 
     def get_description_for_scan_types(self, scan_type):
         return "AWS Security Hub exports in JSON format."
-    
+
     def get_tests(self, scan_type, scan):
         data = json.load(scan)
         findings = data.get("Findings", data.get("findings", None))
