@@ -53,27 +53,6 @@ class SonarQubeRESTAPIJSON:
                     flows = str(issue.get("flows"))
                     status = issue.get("status")
                     message = issue.get("message")
-                    cve = None
-                    if "Reference: CVE" in message:
-                        cve_pattern = r'Reference: CVE-\d{4}-\d{4,7}'
-                        cves = re.findall(cve_pattern, message)
-                        if cves:
-                            cve = cves[0].split("Reference: ")[1]
-                    elif "References: CVE" in message:
-                        cve_pattern = r'References: CVE-\d{4}-\d{4,7}'
-                        cves = re.findall(cve_pattern, message)
-                        if cves:
-                            cve = cves[0].split("References: ")[1]
-                    elif "Reference: GHSA" in message and cve is None:
-                        cve_pattern = r'Reference: GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}'
-                        cves = re.findall(cve_pattern, message)
-                        if cves:
-                            cve = cves[0].split("Reference: ")[1]
-                    elif "References: GHSA" in message and cve is None:
-                        cve_pattern = r'References: GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}'
-                        cves = re.findall(cve_pattern, message)
-                        if cves:
-                            cve = cves[0].split("References: ")[1]
                     cwe = None
                     if "Category: CWE-" in message:
                         cwe_pattern = r'Category: CWE-\d{1,5}'
@@ -124,11 +103,34 @@ class SonarQubeRESTAPIJSON:
                         dynamic_finding=False,
                         component_name=component_name,
                         component_version=component_version,
-                        cve=cve,
                         cwe=cwe,
                         cvssv3_score=cvss,
                         tags=["vulnerability"],
                     )
+                    vulnids = list()
+                    if "Reference: CVE" in message:
+                        cve_pattern = r'Reference: CVE-\d{4}-\d{4,7}'
+                        cves = re.findall(cve_pattern, message)
+                        for cve in cves:
+                            vulnids.append(cve.split("Reference: ")[1])
+                    if "References: CVE" in message:
+                        cve_pattern = r'References: CVE-\d{4}-\d{4,7}'
+                        cves = re.findall(cve_pattern, message)
+                        for cve in cves:
+                            vulnids.append(cve.split("References: ")[1])
+                    if "Reference: GHSA" in message:
+                        cve_pattern = r'Reference: GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}'
+                        cves = re.findall(cve_pattern, message)
+                        for cve in cves:
+                            vulnids.append(cve.split("Reference: ")[1])
+                    if "References: GHSA" in message:
+                        cve_pattern = r'References: GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}'
+                        cves = re.findall(cve_pattern, message)
+                        for cve in cves:
+                            vulnids.append(cve.split("References: ")[1])
+                    item.unsaved_vulnerability_ids = list()
+                    for vulnid in vulnids:
+                        item.unsaved_vulnerability_ids.append(vulnid)
                 elif issue.get("type") == "CODE_SMELL":
                     key = issue.get("key")
                     rule = issue.get("rule")
