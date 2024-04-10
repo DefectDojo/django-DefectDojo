@@ -50,7 +50,7 @@ class Compliance:
         result = Finding(
             title=f"{title}{title_suffix}",
             test=test,
-            description=description,
+            description=f"{finding_id} - {description}",
             mitigation=mitigation,
             references="\n".join(references),
             severity=severity,
