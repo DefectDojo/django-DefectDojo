@@ -104,7 +104,7 @@ def issue_r(raw_row, vuln, scan_date):
                 vuln_id_from_tool=_gid,
                 date=scan_date,
             )
-            finding.unsaved_endpoints = list()
+            finding.unsaved_endpoints = []
             finding.unsaved_endpoints.append(ep)
             ret_rows.append(finding)
     return ret_rows

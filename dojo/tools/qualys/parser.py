@@ -279,7 +279,7 @@ def parse_finding(host, tree):
         if _temp.get("CVSS_value") is not None:
             finding.cvssv3_score = _temp.get("CVSS_value")
         finding.verified = True
-        finding.unsaved_endpoints = list()
+        finding.unsaved_endpoints = []
         finding.unsaved_endpoints.append(ep)
         ret_rows.append(finding)
     return ret_rows

@@ -69,7 +69,7 @@ class ScoutSuiteParser:
                 ]
             )
 
-        tests = list()
+        tests = []
         test = ParserTest(
             name=self.ID,
             type=data["provider_name"],

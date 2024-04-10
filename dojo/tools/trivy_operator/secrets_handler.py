@@ -16,7 +16,7 @@ SECRET_DESCRIPTION_TEMPLATE = """{title}
 
 class TrivySecretsHandler:
     def handle_secrets(self, service, secrets, test):
-        findings = list()
+        findings = []
         for secret in secrets:
             secret_title = secret.get("title")
             secret_category = secret.get("category")

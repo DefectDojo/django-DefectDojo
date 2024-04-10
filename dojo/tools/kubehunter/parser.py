@@ -20,7 +20,7 @@ class KubeHunterParser:
     def get_findings(self, file, test):
         data = json.load(file)
 
-        dupes = dict()
+        dupes = {}
 
         # Find any missing attribute
         vulnerabilities = data['vulnerabilities']

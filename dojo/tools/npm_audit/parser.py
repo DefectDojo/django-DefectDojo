@@ -148,7 +148,7 @@ def get_item(item_node, test):
     )
 
     if len(item_node["cves"]) > 0:
-        dojo_finding.unsaved_vulnerability_ids = list()
+        dojo_finding.unsaved_vulnerability_ids = []
         for vulnerability_id in item_node["cves"]:
             dojo_finding.unsaved_vulnerability_ids.append(vulnerability_id)
 

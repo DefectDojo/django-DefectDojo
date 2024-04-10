@@ -27,7 +27,7 @@ class ZapParser:
 
     def get_findings(self, file, test):
         tree = ET.parse(file)
-        items = list()
+        items = []
         for node in tree.findall("site"):
             for item in node.findall("alerts/alertitem"):
                 finding = Finding(

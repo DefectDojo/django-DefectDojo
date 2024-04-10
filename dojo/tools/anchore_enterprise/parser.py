@@ -27,7 +27,7 @@ class AnchoreEnterpriseParser:
             data = json.loads(content)
 
         find_date = datetime.now()
-        items = list()
+        items = []
         try:
             for checks in data:
                 for policies in checks.values():

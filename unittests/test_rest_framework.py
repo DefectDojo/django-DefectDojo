@@ -301,10 +301,10 @@ class BaseClass:
         def get_endpoint_schema(self, path, method):
             paths = self.schema["paths"]
             methods = paths.get(path, None)
-            assert methods is not None, f"{path} not found in {[path for path in paths.keys()]}"
+            assert methods is not None, f"{path} not found in {list(paths.keys())}"
 
             endpoint = methods.get(method, None)
-            assert endpoint is not None, f"Method {method} not found in {[method for method in methods.keys()]}"
+            assert endpoint is not None, f"Method {method} not found in {list(methods.keys())}"
 
             return endpoint
 
@@ -1130,7 +1130,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
         assert result.status_code == status.HTTP_200_OK, "Could not check duplicate status"
         result_json = result.json()
         # Should return all duplicates for id=3
-        assert set(x["id"] for x in result_json) == {2, 4, 5, 6}
+        assert set(x["id"] for x in result_json) == {2, 4, 5, 6}  # noqa: C401
 
         # Reset duplicate
         result = self.client.post(self.url + "2/duplicate/reset/")

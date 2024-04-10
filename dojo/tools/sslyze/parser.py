@@ -18,7 +18,7 @@ class SslyzeParser:
 
     def get_findings(self, filename, test):
         if filename is None:
-            return list()
+            return []
 
         if filename.name.lower().endswith(".xml"):
             return SSLyzeXMLParser().get_findings(filename, test)

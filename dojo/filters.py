@@ -236,7 +236,7 @@ def get_earliest_finding(queryset=None):
 
 
 def cwe_options(queryset):
-    cwe = dict()
+    cwe = {}
     cwe = dict([cwe, cwe]
                 for cwe in queryset.order_by().values_list('cwe', flat=True).distinct()
                 if isinstance(cwe, int) and cwe is not None and cwe > 0)

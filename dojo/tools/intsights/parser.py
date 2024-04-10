@@ -43,7 +43,7 @@ class IntSightsParser:
         return description
 
     def get_findings(self, file, test):
-        duplicates = dict()
+        duplicates = {}
         if file.name.lower().endswith(".json"):
             alerts = IntSightsJSONParser()._parse_json(
                 file,

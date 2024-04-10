@@ -30,7 +30,7 @@ class CredScanParser:
             io.StringIO(content), delimiter=",", quotechar='"'
         )
 
-        dupes = dict()
+        dupes = {}
         for row in reader:
             # Create the description
             description = row.get("Description", "Description not provided")

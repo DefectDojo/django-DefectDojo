@@ -17,9 +17,9 @@ class SpotbugsParser:
         return "XML report of textui cli."
 
     def get_findings(self, filename, test):
-        mitigation_patterns = dict()
-        reference_patterns = dict()
-        dupes = dict()
+        mitigation_patterns = {}
+        reference_patterns = {}
+        dupes = {}
 
         SEVERITY = {"1": "High", "2": "Medium", "3": "Low"}
 

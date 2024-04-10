@@ -181,7 +181,7 @@ class TestVCGCsvParser(DojoTestCase):
         self.assertIsNone(finding)
 
     def test_parseissuerow_with_empty_row_has_no_finding(self):
-        row = dict()
+        row = {}
         finding = self.parser.parse_issue(row, Test())
         self.assertIsNone(finding)
 

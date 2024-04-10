@@ -31,7 +31,7 @@ def dummy_hotspot_rule(self, *args, **kwargs):
 
 
 def empty_list(self, *args, **kwargs):
-    return list()
+    return []
 
 
 class TestApiSonarQubeParser(DojoTestCase):

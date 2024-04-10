@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 class NiktoXMLParser:
     def process_xml(self, file, test):
-        dupes = dict()
+        dupes = {}
         tree = ET.parse(file)
         root = tree.getroot()
         scan = root.find("scandetails")

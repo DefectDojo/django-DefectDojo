@@ -333,7 +333,7 @@ class SslLabsParser:
                         dynamic_finding=True,
                     )
                     dupes[dupe_key] = find
-                    find.unsaved_endpoints = list()
+                    find.unsaved_endpoints = []
 
                 find.unsaved_endpoints.append(
                     Endpoint(host=hostName, port=port, protocol=protocol)

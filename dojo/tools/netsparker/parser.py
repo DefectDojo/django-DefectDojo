@@ -22,7 +22,7 @@ class NetsparkerParser:
             data = json.loads(str(tree, "utf-8-sig"))
         except Exception:
             data = json.loads(tree)
-        dupes = dict()
+        dupes = {}
         if "UTC" in data["Generated"]:
             scan_date = datetime.datetime.strptime(
                 data["Generated"].split(" ")[0], "%d/%m/%Y"

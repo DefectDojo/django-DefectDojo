@@ -33,7 +33,7 @@ class BurpApiParser:
 
         items = []
         # for each issue found
-        for issue_event in tree.get("issue_events", list()):
+        for issue_event in tree.get("issue_events", []):
             if (
                 "issue_found" == issue_event.get("type")
                 and "issue" in issue_event

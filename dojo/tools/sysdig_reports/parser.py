@@ -39,8 +39,8 @@ class SysdigReportsParser:
     def parse_json(self, data, test):
         vulnerability = data.get("data", None)
         if not vulnerability:
-            return list()
-        findings = list()
+            return []
+        findings = []
         for item in vulnerability:
             imageId = item.get('imageId', '')
             imagePullString = item.get('imagePullString', '')
@@ -103,7 +103,7 @@ class SysdigReportsParser:
                 component_version=packageVersion,
             )
             if vulnName != '':
-                find.unsaved_vulnerability_ids = list()
+                find.unsaved_vulnerability_ids = []
                 find.unsaved_vulnerability_ids.append(vulnName)
             findings.append(find)
         return findings
@@ -120,7 +120,7 @@ class SysdigReportsParser:
             else:
                 finding.title = f"{row.vulnerability_id} - {row.package_name}"
             finding.vuln_id_from_tool = row.vulnerability_id
-            finding.unsaved_vulnerability_ids = list()
+            finding.unsaved_vulnerability_ids = []
             finding.unsaved_vulnerability_ids.append(row.vulnerability_id)
             finding.severity = row.severity
             # Set Component Version

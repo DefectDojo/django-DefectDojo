@@ -2692,7 +2692,7 @@ def finding_bulk_update_all(request, pid=None):
         finding_to_update = request.POST.getlist("finding_to_update")
         finds = Finding.objects.filter(id__in=finding_to_update).order_by("id")
         total_find_count = finds.count()
-        prods = set([find.test.engagement.product for find in finds])
+        prods = set(find.test.engagement.product for find in finds)  # noqa: C401
         if request.POST.get("delete_bulk_findings"):
             if form.is_valid() and finding_to_update:
                 if pid is not None:
@@ -2996,9 +2996,9 @@ def finding_bulk_update_all(request, pid=None):
 
                 error_counts = defaultdict(lambda: 0)
                 success_count = 0
-                finding_groups = set(
-                    [find.finding_group for find in finds if find.has_finding_group]
-                )
+                finding_groups = {
+                    find.finding_group for find in finds if find.has_finding_group
+                }  # noqa: C403
                 logger.debug("finding_groups: %s", finding_groups)
                 groups_pushed_to_jira = False
                 for group in finding_groups:

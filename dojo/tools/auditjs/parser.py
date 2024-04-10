@@ -39,7 +39,7 @@ class AuditJSParser:
             raise ValueError(
                 "Invalid JSON format. Are you sure you used --json option ?"
             )
-        dupes = dict()
+        dupes = {}
 
         for dependency in data:
             # reading package name in format pkg:npm/PACKAGE_NAME@PACKAGE_VERSION

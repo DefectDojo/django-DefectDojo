@@ -91,7 +91,7 @@ class BugcrowdAPI:
 
             progs = list(filter(lambda prog: prog["type"] == "program", data))
             program_names = ", ".join(
-                list(map(lambda p: p["attributes"]["code"], progs))
+                [p["attributes"]["code"] for p in progs]
             )
             # Request targets to validate the org token
             response_targets = self.session.get(
@@ -104,7 +104,7 @@ class BugcrowdAPI:
                     filter(lambda prog: prog["type"] == "target", data_targets)
                 )
                 target_names = ", ".join(
-                    list(map(lambda p: p["attributes"]["name"], targets))
+                    [p["attributes"]["name"] for p in targets]
                 )
                 return (
                     f'With {total_subs} submissions, you have access to the "{program_names}" '

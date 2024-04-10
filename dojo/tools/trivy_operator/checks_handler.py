@@ -11,7 +11,7 @@ TRIVY_SEVERITIES = {
 
 class TrivyChecksHandler:
     def handle_checks(self, service, checks, test):
-        findings = list()
+        findings = []
         for check in checks:
             check_title = check.get("title")
             check_severity = TRIVY_SEVERITIES[check.get("severity")]

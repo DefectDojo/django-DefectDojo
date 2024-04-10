@@ -91,7 +91,7 @@ class FindingTemplateTestUtil:
         rf = RequestFactory()
         get_request = rf.get(path)
         get_request.user = user
-        get_request.session = dict()
+        get_request.session = {}
 
         return get_request
 
@@ -100,7 +100,7 @@ class FindingTemplateTestUtil:
         rf = RequestFactory()
         post_request = rf.post(path, data=data)
         post_request.user = user
-        post_request.session = dict()
+        post_request.session = {}
         messages = FallbackStorage(post_request)
         setattr(post_request, '_messages', messages)
 

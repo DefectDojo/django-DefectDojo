@@ -17,7 +17,7 @@ class BanditParser:
     def get_findings(self, filename, test):
         data = json.load(filename)
 
-        results = list()
+        results = []
         if "generated_at" in data:
             find_date = dateutil.parser.parse(data["generated_at"])
 

@@ -30,7 +30,7 @@ class TerrascanParser:
         if "results" not in data and "violations" not in data.get("results"):
             raise ValueError("missing mandatory attribute 'results'")
         if data.get("results").get("violations") is None:
-            return list()
+            return []
         for item in data.get("results").get("violations"):
             rule_name = item.get("rule_name")
             description = item.get("description")
