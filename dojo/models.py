@@ -3312,16 +3312,6 @@ class Finding(models.Model):
         for vulnerability_id in vulnerability_ids_model:
             vulnerability_ids.append(vulnerability_id.vulnerability_id)
 
-        # Synchronize the cve field with the unsaved_vulnerability_ids
-        # We do this to be as flexible as possible to handle the fields until
-        # the cve field is not needed anymore and can be removed.
-        if vulnerability_ids and self.cve:
-            # Make sure the first entry of the list is the value of the cve field
-            vulnerability_ids.insert(0, self.cve)
-        elif not vulnerability_ids and self.cve:
-            # If there is no list, make one with the value of the cve field
-            vulnerability_ids = [self.cve]
-
         # Remove duplicates
         vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
 
