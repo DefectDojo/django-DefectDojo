@@ -861,6 +861,7 @@ class EngagementFilter(DojoFilter):
         model = Product
         fields = ['name', 'prod_type']
 
+
 class ProductEngagementsFilter(DojoFilter):
     engagement__name = CharFilter(field_name='name', lookup_expr='icontains', label='Engagement name contains')
     engagement__lead = ModelChoiceFilter(field_name='lead', queryset=Dojo_User.objects.none(), label="Lead")
