@@ -472,6 +472,11 @@ class System_Settings(models.Model):
     risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text=_("Default expiry period for risk acceptance form."))
     risk_acceptance_notify_before_expiration = models.IntegerField(null=True, blank=True, default=10,
                     verbose_name=_('Risk acceptance expiration heads up days'), help_text=_("Notify X days before risk acceptance expires. Leave empty to disable."))
+    enable_transfer_finding = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_('Enable Transfer Finding'),
+        help_text=_("Enable transfer of findings between different product types"))
     orphan_findings = models.CharField(max_length=100, default='', blank=True, help_text=_("Name of the producttype that contains the orphan findings"))
     enable_credentials = models.BooleanField(
         default=True,

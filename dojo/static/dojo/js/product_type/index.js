@@ -61,7 +61,6 @@ function getEngagementOptions(idProduct, engagementElement){
         url: "/api/v2/engagements/?product=" + idProduct,
         type: "GET",
         success: function(response) {
-            console.log(response);
             clearSelect(engagementElement);
             addOption(engagementElement, '', 'Select Engagement Name...');
             response.results.forEach(function(engagement) {

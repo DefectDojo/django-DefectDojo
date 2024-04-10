@@ -3,7 +3,6 @@ var transferId = 0;
 var productId = 0;
 var productTypeId = 0;
 var host = window.location.host;
-console.log("host", host)
 // Obtener el valor de la cookie 'csrftoken'
 $(document).on('click', '#id_transfer_finding_show_modal', function(event) {
     event.preventDefault();
@@ -32,10 +31,6 @@ $(document).ready(function() {
             RemoveFinding(findingId)
         }
     });
-
-
-
-   
 });
 
 
@@ -86,7 +81,6 @@ function innerData(data){
     tableBody.innerHTML = ""
     data.results.forEach(function(transfer_finding_item){
         transfer_finding_item.transfer_findings.forEach(function(findings){
-            console.log(findings)
             let row = document.createElement("tr") 
             let cell_status = document.createElement("td")
             cell_status.className = "cls-finding-status"
@@ -174,7 +168,4 @@ function generateRequestTransferFindingUpdate(tranferFindingId, riskStatus){
 function deepCopy(objeto) {
     return JSON.parse(JSON.stringify(objeto));
 }
-
-//modal
-
 
