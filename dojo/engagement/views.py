@@ -23,7 +23,7 @@ from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 
 from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.filters import EngagementFilter, EngagementDirectFilter, EngagementTestFilter
+from dojo.filters import EngagementFilter, EngagementDirectFilter, EngagementTestFilter, ProductEngagementsFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, RiskAcceptanceForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
@@ -166,8 +166,9 @@ def engagements_all(request):
     products_with_engagements = products_with_engagements.filter(~Q(engagement=None)).distinct()
 
     # count using prefetch instead of just using 'engagement__set_test_test` to avoid loading all test in memory just to count them
+    engagement_query = Engagement.objects.annotate(test_count=Count('test__id'))
     filter_qs = products_with_engagements.prefetch_related(
-        Prefetch('engagement_set', queryset=Engagement.objects.all().annotate(test_count=Count('test__id')))
+        Prefetch('engagement_set', queryset=ProductEngagementsFilter(request.GET, engagement_query).qs)
     )
 
     filter_qs = filter_qs.prefetch_related(
@@ -188,7 +189,7 @@ def engagements_all(request):
     )
 
     prods = get_page_items(request, filtered.qs, 25)
-
+    prods.paginator.count = sum(len(prod.engagement_set.all()) for prod in prods)
     name_words = products_with_engagements.values_list('name', flat=True)
     eng_words = get_authorized_engagements(Permissions.Engagement_View).values_list('name', flat=True).distinct()
 
