@@ -257,6 +257,15 @@ class TestNotificationTriggers(DojoTestCase):
             self.assertEqual(mock.call_args_list[-1].args[0], 'engagement_reopened')
             self.assertEqual(mock.call_args_list[-1].kwargs['url'], f'/engagement/{eng.id}')
 
+        eng.status = "Not Started"
+        eng.save()
+        last_count = mock.call_count
+        with self.subTest('no reopen_engagement from not started'):
+            with set_actor(self.notification_tester):
+                eng.status = "In Progress"
+                eng.save()
+            self.assertEqual(mock.call_count, last_count)
+
         prod_type = Product_Type.objects.first()
         prod1, _ = Product.objects.get_or_create(prod_type=prod_type, name='prod name 1')
         _ = Engagement.objects.create(product=prod1, target_start=timezone.now(), target_end=timezone.now(), lead=User.objects.get(username='admin'))
