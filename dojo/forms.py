@@ -22,6 +22,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from polymorphic.base import ManagerInheritanceWarning
 import tagulous
+from django.core.files.utils import validate_file_name
+from django.core.exceptions import SuspiciousFileOperation
 
 from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
     validate_endpoints_to_add
@@ -2644,6 +2646,24 @@ class SystemSettingsForm(forms.ModelForm):
             self.add_error('jira_webhook_secret', 'This field is required when enable Jira Integration is True')
 
         return cleaned_data
+
+    def clean_default_report_template_style(self):
+        css_filename = self.cleaned_data.get('default_report_template_style')
+
+        if len(css_filename) > 255:
+            self.add_error('default_report_template_style', 'Invalid filename lenght: more than 255 characters are not allowed')
+        if not css_filename.lower().endswith('.css'):
+            self.add_error('default_report_template_style', "Invalid filename: only css extension is allowed")
+        # check for special chars, except .-_
+        if re.search(r'[^\w.-]', css_filename):
+            self.add_error('default_report_template_style', "Invalid filename: no special characters are allowed")
+
+        try:
+            css_filename = validate_file_name(css_filename)
+        except SuspiciousFileOperation as e:
+            self.add_error('default_report_template_style', e)
+
+        return css_filename
 
     class Meta:
         model = System_Settings
