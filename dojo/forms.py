@@ -2648,6 +2648,9 @@ class SystemSettingsForm(forms.ModelForm):
         return cleaned_data
 
     def clean_default_report_template_style(self):
+        if self.cleaned_data['default_report_template_style'] is None:
+            return "report_base.css"
+
         css_filename = self.cleaned_data.get('default_report_template_style')
 
         if len(css_filename) > 255:
