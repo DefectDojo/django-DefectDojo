@@ -741,6 +741,8 @@ class EngagementDirectFilter(DojoFilter):
     lead = ModelChoiceFilter(queryset=Dojo_User.objects.none(), label="Lead")
     version = CharFilter(field_name='version', lookup_expr='icontains', label='Engagement version')
     test__version = CharFilter(field_name='test__version', lookup_expr='icontains', label='Test version')
+    target_start = DateRangeFilter()
+    target_end = DateRangeFilter()
 
     product__name = CharFilter(lookup_expr='icontains', label='Product name contains')
     product__prod_type = ModelMultipleChoiceFilter(
