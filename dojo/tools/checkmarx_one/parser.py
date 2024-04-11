@@ -86,7 +86,7 @@ class CheckmarxOneParser(object):
                     findings.append(finding)
                 elif result_type == "kics":
                     description = vulnerability.get("description")
-                    file_path = vulnerability.get("data").get("fileName")
+                    file_path = vulnerability.get("data").get("filename", vulnerability.get("data").get("fileName"))
                     finding = Finding(
                         title=f'{description}',
                         description=description,
