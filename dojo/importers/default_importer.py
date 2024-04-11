@@ -99,6 +99,17 @@ class DefaultImporter(BaseImporter):
         parsed_findings: List[Finding] = None,
         **kwargs: dict,
     ) -> Tuple[Test, int, int, int, int, int, Test_Import]:
+        """
+        The full step process of taking a scan report, and converting it to
+        findings in the database. This entails the the following actions:
+        - Verify the API scan configuration (if supplied)
+        - Parser the findings
+        - Process the findings
+        - Update the timestamps on the test
+        - Update/Create import history objects
+        - Send out notifications
+        - Update the test progress
+        """
         logger.debug(f'IMPORT_SCAN: parameters: {locals()}')
         # Get a user in some point
         user = self.get_user_if_supplied(user=user)
@@ -148,6 +159,13 @@ class DefaultImporter(BaseImporter):
         user: Dojo_User,
         **kwargs: dict,
     ) -> List[Finding]:
+        """
+        Saves findings in memory that were parsed from the scan report into the database.
+        This process involves first saving associated objects such as endpoints, files,
+        vulnerability IDs, and request response pairs. Once all that has been completed,
+        the finding may be appended to a new or existing group based upon user selection
+        at import time
+        """
         new_findings = []
         logger.debug('starting import of %i parsed findings.', len(parsed_findings) if parsed_findings else 0)
         group_names_to_findings_dict = {}
@@ -237,6 +255,13 @@ class DefaultImporter(BaseImporter):
         user: Dojo_User,
         **kwargs: dict,
     ) -> List[Finding]:
+        """
+        Closes old findings based on a hash code match at either the product
+        or the engagement scope. Closing an old finding entails setting the
+        finding to mitigated status, setting all endpoint statuses to mitigated,
+        as well as leaving a not on the finding indicating that it was mitigated
+        because the vulnerability is no longer present in the submitted scan report.
+        """
         # Close old active findings that are not reported by this scan.
         # Refactoring this to only call test.finding_set.values() once.
         mitigated_hash_codes = []
@@ -248,35 +273,22 @@ class DefaultImporter(BaseImporter):
                 for hash_code in new_hash_codes:
                     if hash_code == finding["hash_code"]:
                         new_hash_codes.remove(hash_code)
-
-        # Close old findings of the same test type in the same product
+        # Get the initial filtered list of old findings to be closed without
+        # considering the scope of the product or engagement
+        old_findings = Finding.objects.exclude(
+                test=test
+            ).exclude(
+                hash_code__in=new_hash_codes
+            ).filter(
+                test__test_type=test.test_type,
+                active=True
+            )
+        # Accommodate for product scope or engagement scope
         if kwargs.get("close_old_findings_product_scope"):
-            old_findings = Finding.objects.exclude(
-                test=test
-            ).exclude(
-                hash_code__in=new_hash_codes
-            ).filter(
-                test__engagement__product=test.engagement.product,
-                test__test_type=test.test_type,
-                active=True
-            )
+            old_findings = old_findings.filter(test__engagement__product=test.engagement.product)
         else:
-            # Close old findings of the same test type in the same engagement
-            old_findings = Finding.objects.exclude(
-                test=test
-            ).exclude(
-                hash_code__in=new_hash_codes
-            ).filter(
-                test__engagement=test.engagement,
-                test__test_type=test.test_type,
-                active=True
-            )
-
-        if len(service := kwargs.get("service")) > 0:
-            old_findings = old_findings.filter(service=service)
-        else:
-            old_findings = old_findings.filter(Q(service__isnull=True) | Q(service__exact=''))
-
+            old_findings = old_findings.filter(test__engagement=test.engagement)
+        # Update the status of the findings and any endpoints
         for old_finding in old_findings:
             old_finding.active = False
             old_finding.is_mitigated = True
@@ -295,9 +307,8 @@ class DefaultImporter(BaseImporter):
                 status.mitigated = True
                 status.last_modified = timezone.now()
                 status.save()
-
+            # Add a stale tag to the findings
             old_finding.tags.add('stale')
-
             # to avoid pushing a finding group multiple times, we push those outside of the loop
             push_to_jira = kwargs.get("push_to_jira", False)
             if is_finding_groups_enabled() and old_finding.finding_group:
@@ -348,7 +359,9 @@ class DefaultImporter(BaseImporter):
         **kwargs: dict,
     ) -> Tuple[Test, List[Finding]]:
         """
-        TODO
+        Uses the parser to fetch any tests that may have been created
+        by the API based parser, aggregates all findings from each test
+        into a single test, and then renames the test is applicable
         """
         logger.debug('IMPORT_SCAN parser v2: Create Test and parse findings')
         parsed_findings = []
@@ -400,7 +413,11 @@ class DefaultImporter(BaseImporter):
         scan_type: str,
         user: Dojo_User,
         **kwargs: dict,
-    ) -> List[Finding]:    
+    ) -> List[Finding]:
+        """
+        Determines whether to process the scan iteratively, or in chunks,
+        based upon the ASYNC_FINDING_IMPORT setting
+        """ 
         if settings.ASYNC_FINDING_IMPORT:
             return self.async_process_findings(
                 test,
@@ -426,6 +443,10 @@ class DefaultImporter(BaseImporter):
         user: Dojo_User,
         **kwargs: dict,
     ) -> List[Finding]:
+        """
+        Processes findings in a synchronous manner such that all findings
+        will be processed in a worker/process/thread
+        """
         return self.process_findings(
             test,
             parsed_findings,
@@ -443,6 +464,11 @@ class DefaultImporter(BaseImporter):
         user: Dojo_User,
         **kwargs: dict,
     ) -> List[Finding]:
+        """
+        Processes findings in chunks within N number of processes. The
+        ASYNC_FINDING_IMPORT_CHUNK_SIZE setting will determine how many
+        findings will be processed in a given worker/process/thread
+        """
         chunk_list = self.chunk_objects(parsed_findings)
         results_list = []
         # First kick off all the workers

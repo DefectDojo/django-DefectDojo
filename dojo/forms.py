@@ -12,6 +12,7 @@ from django import forms
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import Permission
 from django.core import validators
+from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from django.forms.widgets import Widget, Select
@@ -497,10 +498,13 @@ class ImportScanForm(forms.Form):
         create_finding_groups_for_all_findings = forms.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, initial=True)
 
     def __init__(self, *args, **kwargs):
+        endpoints = kwargs.get("endpoints")
+        api_scan_configuration = kwargs.get("api_scan_configuration")
         super(ImportScanForm, self).__init__(*args, **kwargs)
         self.fields['active'].initial = self.active_verified_choices[0]
         self.fields['verified'].initial = self.active_verified_choices[0]
-
+        self.fields['endpoints'].queryset = endpoints
+        self.fields['api_scan_configuration'].queryset = api_scan_configuration
         # couldn't find a cleaner way to add empty default
         if 'group_by' in self.fields:
             choices = self.fields['group_by'].choices
@@ -2587,13 +2591,22 @@ class ObjectSettingsForm(forms.ModelForm):
 
 
 class CredMappingForm(forms.ModelForm):
-    cred_user = forms.ModelChoiceField(queryset=Cred_Mapping.objects.all().select_related('cred_id'), required=False,
-                                       label='Select a Credential')
+    cred_user = forms.ModelChoiceField(
+        queryset=Cred_Mapping.objects.all().select_related('cred_id'),
+        required=False,
+        label='Select a Credential',
+    )
 
     class Meta:
         model = Cred_Mapping
         fields = ['cred_user']
         exclude = ['product', 'finding', 'engagement', 'test', 'url', 'is_authn_provider']
+
+    def __init__(self, *args, **kwargs):
+        cred_user_queryset = kwargs.pop("cred_user_queryset")
+        super(CredMappingForm, self).__init__(*args, **kwargs)
+        if cred_user_queryset:
+            self.fields["cred_user"].queryset = cred_user_queryset
 
 
 class CredMappingFormProd(forms.ModelForm):

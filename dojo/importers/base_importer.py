@@ -27,7 +27,6 @@ from dojo.models import (
     Finding,
     Endpoint,
     Endpoint_Status,
-    Development_Environment,
     Dojo_User,
     Test_Import,
     Test_Import_Finding_Action,
@@ -132,7 +131,7 @@ class BaseImporter(ABC):
         **kwargs: dict,
     ) -> List[Finding]:
         """
-        Make the conversion from unsaved Findings in memory to Findings that are saved in the 
+        Make the conversion from unsaved Findings in memory to Findings that are saved in the
         database with and ID associated with them. This processor will also save any associated
         objects such as endpoints, vulnerability IDs, and request/response pairs
         """
@@ -610,8 +609,8 @@ class BaseImporter(ABC):
         **kwargs: dict,
     ) -> Tuple[datetime, datetime]:
         """
-        Add timezone information the scan date set at import time. In the event the 
-        scan date is not supplied, fall back on the current time so that the test 
+        Add timezone information the scan date set at import time. In the event the
+        scan date is not supplied, fall back on the current time so that the test
         can have a time for the target start and end
         """
         # Add timezone information to the scan date if it is not already present
@@ -645,7 +644,7 @@ class BaseImporter(ABC):
     ) -> Test:
         """
         Verify that the Tool_Configuration supplied along with the
-        test is found on the product. If not, then raise a validation 
+        test is found on the product. If not, then raise a validation
         error that will bubble up back to the user
 
         if f there is a case where the Tool_Configuration supplied to
@@ -679,7 +678,7 @@ class BaseImporter(ABC):
     ) -> Test | Engagement:
         """
         Verify that the Tool_Configuration supplied along with the
-        engagement is found on the product. If not, then raise a validation 
+        engagement is found on the product. If not, then raise a validation
         error that will bubble up back to the user
 
         if f there is a case where the Tool_Configuration supplied to
