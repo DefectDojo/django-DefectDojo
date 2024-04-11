@@ -2996,9 +2996,9 @@ def finding_bulk_update_all(request, pid=None):
 
                 error_counts = defaultdict(lambda: 0)
                 success_count = 0
-                finding_groups = {
+                finding_groups = set(  # noqa: C401
                     find.finding_group for find in finds if find.has_finding_group
-                }  # noqa: C403
+                )
                 logger.debug("finding_groups: %s", finding_groups)
                 groups_pushed_to_jira = False
                 for group in finding_groups:
