@@ -40,9 +40,9 @@ def engagement_post_delete(sender, instance, using, origin, **kwargs):
     if instance == origin:
         if settings.ENABLE_AUDITLOG:
             le = LogEntry.objects.get(
-                    action=LogEntry.Action.DELETE,
-                    content_type=ContentType.objects.get(app_label='dojo', model='engagement'),
-                    object_id=instance.id
+                action=LogEntry.Action.DELETE,
+                content_type=ContentType.objects.get(app_label='dojo', model='engagement'),
+                object_id=instance.id
             )
             description = _('The engagement "%(name)s" was deleted by %(user)s') % {
                                 'name': instance.name, 'user': le.actor}

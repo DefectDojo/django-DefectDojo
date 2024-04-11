@@ -15,9 +15,9 @@ def endpoint_post_delete(sender, instance, using, origin, **kwargs):
     if instance == origin:
         if settings.ENABLE_AUDITLOG:
             le = LogEntry.objects.get(
-                    action=LogEntry.Action.DELETE,
-                    content_type=ContentType.objects.get(app_label='dojo', model='endpoint'),
-                    object_id=instance.id
+                action=LogEntry.Action.DELETE,
+                content_type=ContentType.objects.get(app_label='dojo', model='endpoint'),
+                object_id=instance.id
             )
             description = _('The endpoint "%(name)s" was deleted by %(user)s') % {
                                 'name': str(instance), 'user': le.actor}

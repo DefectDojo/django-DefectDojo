@@ -23,9 +23,9 @@ def product_post_save(sender, instance, created, **kwargs):
 def product_post_delete(sender, instance, **kwargs):
     if settings.ENABLE_AUDITLOG:
         le = LogEntry.objects.get(
-                action=LogEntry.Action.DELETE,
-                content_type=ContentType.objects.get(app_label='dojo', model='product'),
-                object_id=instance.id
+            action=LogEntry.Action.DELETE,
+            content_type=ContentType.objects.get(app_label='dojo', model='product'),
+            object_id=instance.id
         )
         description = _('The product "%(name)s" was deleted by %(user)s') % {
                             'name': instance.name, 'user': le.actor}
