@@ -158,7 +158,7 @@ def view_product(request, pid):
     sla = SLA_Configuration.objects.filter(id=prod.sla_configuration_id).first()
     benchAndPercent = []
     for i in range(0, len(benchmarks)):
-        desired_level, total, total_pass, total_wait, total_fail, total_viewed = asvs_calc_level(benchmarks[i])
+        desired_level, total, total_pass, total_wait, total_fail, _total_viewed = asvs_calc_level(benchmarks[i])
 
         success_percent = round((float(total_pass) / float(total)) * 100, 2)
         waiting_percent = round((float(total_wait) / float(total)) * 100, 2)
@@ -1166,7 +1166,7 @@ class AdHocFindingView(View):
         return get_object_or_404(Product, id=product_id)
 
     def get_test_type(self):
-        test_type, nil = Test_Type.objects.get_or_create(name=_("Pen Test"))
+        test_type, _nil = Test_Type.objects.get_or_create(name=_("Pen Test"))
         return test_type
 
     def get_engagement(self, product: Product):
@@ -1259,9 +1259,9 @@ class AdHocFindingView(View):
         return None
 
     def validate_status_change(self, request: HttpRequest, context: dict):
-        if ((context["form"]['active'].value() is False or
-             context["form"]['false_p'].value()) and
-             context["form"]['duplicate'].value() is False):
+        if ((context["form"]['active'].value() is False
+             or context["form"]['false_p'].value())
+             and context["form"]['duplicate'].value() is False):
 
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:

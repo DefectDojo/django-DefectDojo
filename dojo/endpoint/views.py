@@ -78,7 +78,6 @@ def process_endpoints_view(request, host_view=False, vulnerable=False):
             "filtered": endpoints,
             "name": view_name,
             "host_view": host_view,
-            "product_tab": product_tab
         })
 
 

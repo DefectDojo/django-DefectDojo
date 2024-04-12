@@ -1,6 +1,4 @@
-import sys
 import datetime
-sys.path.append('..')
 from django.http import Http404
 from dojo.models import Product, Product_Type
 from dojo.models import Engagement
