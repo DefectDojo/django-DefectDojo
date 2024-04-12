@@ -40,6 +40,8 @@ urlpatterns = [
         views.edit_risk_acceptance, name='edit_risk_acceptance'),
     re_path(r'^engagement/(?P<eid>\d+)/risk_acceptance/(?P<raid>\d+)/expire$',
         views.expire_risk_acceptance, name='expire_risk_acceptance'),
+    re_path(r'^engagement/(?P<eid>\d+)/risk_acceptance/(?P<raid>\d+)/accept$',
+        views.accept_risk_acceptance, name='accept_risk_acceptance'),
     re_path(r'^engagement/(?P<eid>\d+)/risk_acceptance/(?P<raid>\d+)/reinstate$',
         views.reinstate_risk_acceptance, name='reinstate_risk_acceptance'),
     re_path(r'^engagement/(?P<eid>\d+)/risk_acceptance/(?P<raid>\d+)/delete$',

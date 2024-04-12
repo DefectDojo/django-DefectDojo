@@ -60,6 +60,7 @@ class Permissions(IntEnum):
     Risk_Acceptance_Expire = 1213
     Risk_Acceptance_Reinstance = 1214
     Risk_Unaccept = 1215
+    Risk_Acceptance_Bullk = 1216
 
     Test_View = 1302
     Test_Add = 1303
@@ -156,6 +157,7 @@ class Permissions(IntEnum):
             Permissions.Risk_Acceptance_Add,
             Permissions.Risk_Acceptance_Expire,
             Permissions.Risk_Acceptance_Reinstance,
+            Permissions.Risk_Acceptance_Bullk,
             Permissions.Risk_Unaccept,
             Permissions.Test_Add,
             Permissions.Import_Scan_Result,
@@ -535,6 +537,7 @@ def get_roles_with_permissions():
             Permissions.Product_Configure_Notifications,
             Permissions.Engagement_View,
             Permissions.Risk_Acceptance,
+            Permissions.Risk_Acceptance_Bullk,
             Permissions.Test_View,
             Permissions.Finding_View,
             Permissions.Finding_Group_View,

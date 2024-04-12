@@ -338,6 +338,7 @@ env = environ.FileAwareEnv(
     # with the use of CVSS scores to potentially override the severity found in the report produced by the tool
     DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
     DD_CUSTOM_TAG_PARSER=(dict, {}),
+    DD_INVALID_ESCAPE_STR=(dict, {}),
 
     # ---------------RISK PENDING-------------------------
     # The variable that allows enabling pending risk acceptance.
@@ -1991,6 +1992,7 @@ ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
 USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
 USE_QUALYS_LEGACY_SEVERITY_PARSING = env('DD_QUALYS_LEGACY_SEVERITY_PARSING')
 DD_CUSTOM_TAG_PARSER = env('DD_CUSTOM_TAG_PARSER')
+DD_INVALID_ESCAPE_STR = env('DD_INVALID_ESCAPE_STR')
 
 # Risk Pending
 RISK_PENDING = env("DD_RISK_PENDING")
