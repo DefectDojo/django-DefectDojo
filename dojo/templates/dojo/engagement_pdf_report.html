@@ -9,7 +9,7 @@
 {% block content %}
     {{ block.super }}
     <div class="container">
-      <div class="row">
+      <div id="product-container" class="row">
           <div class="col-lg-12">
               <h3 id="product">Engagement Security Report for {{ engagement.product.name }}</h3>
               <p>
@@ -19,7 +19,7 @@
           </div>
         </div>
         {% if include_table_of_contents%}
-			<div class="row">
+			<div id="table-of-contents-container" class="row">
 				<div class="col-lg-12" id="toc">
 					<h3 id="table_of_contents">Table of Contents for {{ engagement.name }}</h3>
 				</div>
@@ -28,7 +28,7 @@
 			<div id="contents">
 		{% endif %}
         {% if include_executive_summary %}
-            <div class="row">
+            <div id="executive-summary-container" class="row">
                 <div class="col-lg-12">
                     <h3 id="executive">Executive Summary</h3>
                     <p>
@@ -156,12 +156,12 @@
             </div>
         {% endif %}
         {% if include_disclaimer%}
-            <div style="background-color:#DADCE2; border:1px #003333; padding:.8em; ">
+            <div id="disclaimer-container" style="background-color:#DADCE2; border:1px #003333; padding:.8em; ">
                 <span style="font-size:16pt;  font-family: 'Cambria','times new roman','garamond',serif; color:#ff0000;">Disclaimer</span><br/>
                 <p style="font-size:11pt; line-height:10pt; font-family: 'Cambria','times roman',serif;">{{ disclaimer }}</p>
             </div>
 		{% endif %}
-        <div class="row">
+        <div id="testing-notes-container" class="row">
             <div class="col-lg-12">
                 {% if include_finding_notes %}
                 {% if engagement.test_set.all %}
@@ -216,7 +216,7 @@
                 {% endif %}
             </div>
         </div>
-        <div class="row">
+        <div id="findings-container" class="row">
             <div class="col-lg-12">
                 {% if findings %}
                     <h3 id="findings">Findings</h3>
