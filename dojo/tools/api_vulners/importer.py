@@ -12,12 +12,12 @@ class VulnersImporter(object):
     """
 
     def get_findings(self, test):
-        client, config = self.prepare_client(test)
+        client, _config = self.prepare_client(test)
         findings = client.get_findings()
         return findings
 
     def get_vulns_description(self, test, vulns_id):
-        client, config = self.prepare_client(test)
+        client, _config = self.prepare_client(test)
         description = client.get_vulns_description(vulns_id)
         return description
 

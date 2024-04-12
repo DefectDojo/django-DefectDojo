@@ -111,10 +111,10 @@ class BugcrowdAPI:
                     list(map(lambda p: p["attributes"]["name"], targets))
                 )
                 return (
-                    f'With {total_subs} submissions, you have access to the "{ program_names }" '
+                    f'With {total_subs} submissions, you have access to the "{program_names}" '
                     f"programs, "
                     f"you can use these as Service key 1 for filtering submissions "
-                    f'You also have targets "{ target_names }" that can be used in Service key 2'
+                    f'You also have targets "{target_names}" that can be used in Service key 2'
                 )
             else:
                 raise Exception(

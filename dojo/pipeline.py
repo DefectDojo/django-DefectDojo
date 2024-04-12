@@ -160,9 +160,8 @@ def assign_user_to_groups(user, group_names, social_provider):
         group, created_group = Dojo_Group.objects.get_or_create(name=group_name, social_provider=social_provider)
         if created_group:
             logger.debug("Group %s for social provider %s was created", str(group), social_provider)
-        group_member, is_member_created = Dojo_Group_Member.objects.get_or_create(
-            group=group, user=user, defaults={"role": Role.objects.get(id=Roles.Maintainer)}
-        )
+        _group_member, is_member_created = Dojo_Group_Member.objects.get_or_create(group=group, user=user, defaults={
+            'role': Role.objects.get(id=Roles.Maintainer)})
         if is_member_created:
             logger.debug("User %s become member of group %s (social provider: %s)", user, str(group), social_provider)
 
@@ -359,7 +358,7 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
         )
         project_names = [project.path_with_namespace for project in projects]
         # Create product_type if necessary
-        product_type, created = Product_Type.objects.get_or_create(name="Gitlab Import")
+        product_type, _created = Product_Type.objects.get_or_create(name='Gitlab Import')
         # For each project: create a new product or update product's authorized_users
         for project in projects:
             if project.path_with_namespace not in user_product_names:
@@ -370,9 +369,7 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
                     # If not, create a product with that name and the GitLab product type
                     product = Product(name=project.path_with_namespace, prod_type=product_type)
                     product.save()
-                product_member, created = Product_Member.objects.get_or_create(
-                    product=product, user=user, defaults={"role": Role.objects.get(id=Roles.Owner)}
-                )
+                _product_member, _created = Product_Member.objects.get_or_create(product=product, user=user, defaults={'role': Role.objects.get(id=Roles.Owner)})
                 # Import tags and/orl URL if necessary
                 if settings.GITLAB_PROJECT_IMPORT_TAGS:
                     if hasattr(project, "topics"):

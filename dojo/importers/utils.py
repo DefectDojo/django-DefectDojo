@@ -202,7 +202,7 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
             logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: " "{}".format(e))
         ep = None
         try:
-            ep, created = endpoint_get_or_create(
+            ep, _created = endpoint_get_or_create(
                 protocol=endpoint.protocol,
                 userinfo=endpoint.userinfo,
                 host=endpoint.host,
@@ -218,9 +218,10 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
                 "remove them.".format(reverse("endpoint_migrate"))
             )
 
-        eps, created = Endpoint_Status.objects.get_or_create(
-            finding=finding, endpoint=ep, defaults={"date": finding.date}
-        )
+        _eps, _created = Endpoint_Status.objects.get_or_create(
+            finding=finding,
+            endpoint=ep,
+            defaults={'date': finding.date})
 
     logger.debug("IMPORT_SCAN: " + str(len(endpoints)) + " imported")
 

@@ -60,10 +60,10 @@ def get_authorized_findings(permission, queryset=None, user=None):
         test__engagement__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         test__engagement__product__authorized_group=Exists(authorized_product_groups))
     findings = findings.filter(
-        Q(test__engagement__product__prod_type__member=True) |
-        Q(test__engagement__product__member=True) |
-        Q(test__engagement__product__prod_type__authorized_group=True) |
-        Q(test__engagement__product__authorized_group=True))
+        Q(test__engagement__product__prod_type__member=True)
+        | Q(test__engagement__product__member=True)
+        | Q(test__engagement__product__prod_type__authorized_group=True)
+        | Q(test__engagement__product__authorized_group=True))
 
     return findings
 
@@ -93,10 +93,10 @@ def get_authorized_stub_findings(permission):
         test__engagement__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         test__engagement__product__authorized_group=Exists(authorized_product_groups))
     findings = findings.filter(
-        Q(test__engagement__product__prod_type__member=True) |
-        Q(test__engagement__product__member=True) |
-        Q(test__engagement__product__prod_type__authorized_group=True) |
-        Q(test__engagement__product__authorized_group=True))
+        Q(test__engagement__product__prod_type__member=True)
+        | Q(test__engagement__product__member=True)
+        | Q(test__engagement__product__prod_type__authorized_group=True)
+        | Q(test__engagement__product__authorized_group=True))
 
     return findings
 
@@ -143,9 +143,9 @@ def get_authorized_vulnerability_ids(permission, queryset=None, user=None):
         finding__test__engagement__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         finding__test__engagement__product__authorized_group=Exists(authorized_product_groups))
     vulnerability_ids = vulnerability_ids.filter(
-        Q(finding__test__engagement__product__prod_type__member=True) |
-        Q(finding__test__engagement__product__member=True) |
-        Q(finding__test__engagement__product__prod_type__authorized_group=True) |
-        Q(finding__test__engagement__product__authorized_group=True))
+        Q(finding__test__engagement__product__prod_type__member=True)
+        | Q(finding__test__engagement__product__member=True)
+        | Q(finding__test__engagement__product__prod_type__authorized_group=True)
+        | Q(finding__test__engagement__product__authorized_group=True))
 
     return vulnerability_ids

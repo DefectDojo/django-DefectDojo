@@ -16,6 +16,17 @@ Here is an example with a product with two tags and four findings each with a si
 
 ![High level example of usage with tags](../../images/tags-high-level-example.png)
 
+#### Format of tag
+
+Tags can be formatted in any of the following ways:
+- StringWithNoSpaces
+- string-with-hyphens
+- string_with_underscores
+- colons:acceptable
+- "quoted string with spaces"
+- "quoted,comma,tag"
+- "quoted with spaces, and also commas!"
+
 ### Adding and Removing
 
 Tags can be managed in the following ways
@@ -414,14 +425,15 @@ Similar Findings
 DefectDojo allows you to maintain your security SLAs and automatically
 remind teams whenever a SLA is about to get breached, or is breached.
 
-Simply indicate in the `System Settings` for each severity, how many
-days teams have to remediate a finding.
+To apply SLAs to Findings, open the `System Settings` page and check 'Enable Finding SLAs'.
 
-![SLA configuration screen](../../images/sla_global_settings.png)
+You will then need to create one or more SLA Configurations, from the SLA Configuration menu (your-defectdojo.com/sla_config).  
+
+![SLA configuration screen](../../images/sla_settings.png)
 
 ### SLA notification configuration
 
-There are 3 variables in the system settings that can be set for notifcations of SLA breaches.
+There are 3 variables in the system settings that can be set for notifications of SLA breaches.
 By default notifications are disabled.
 You can either choose to notify about breaches for findings that are only in 'Active' or
 for any findings across the instance that are in `Active, Verified`.
