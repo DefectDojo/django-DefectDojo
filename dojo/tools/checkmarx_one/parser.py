@@ -110,8 +110,8 @@ class CheckmarxOneParser(object):
                 elif result_type in ["sca", "sca-container"]:
                     description = vulnerability.get("description")
                     finding = Finding(
-                        title=f"{description}",
-                        description=vulnerability.get("description"),
+                        title=description,
+                        description=description,
                         date=date,
                         severity=vulnerability.get("severity").title(),
                         verified=vulnerability.get("state") != "TO_VERIFY",
