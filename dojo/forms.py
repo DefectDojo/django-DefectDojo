@@ -498,13 +498,18 @@ class ImportScanForm(forms.Form):
         create_finding_groups_for_all_findings = forms.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, initial=True)
 
     def __init__(self, *args, **kwargs):
-        endpoints = kwargs.get("endpoints")
-        api_scan_configuration = kwargs.get("api_scan_configuration")
+        environment = kwargs.pop("environment", None)
+        endpoints = kwargs.pop("endpoints", None)
+        api_scan_configuration = kwargs.pop("api_scan_configuration", None)
         super(ImportScanForm, self).__init__(*args, **kwargs)
         self.fields['active'].initial = self.active_verified_choices[0]
         self.fields['verified'].initial = self.active_verified_choices[0]
-        self.fields['endpoints'].queryset = endpoints
-        self.fields['api_scan_configuration'].queryset = api_scan_configuration
+        if environment:
+            self.fields['environment'].initial = environment
+        if endpoints:
+            self.fields['endpoints'].queryset = endpoints
+        if api_scan_configuration:
+            self.fields['api_scan_configuration'].queryset = api_scan_configuration
         # couldn't find a cleaner way to add empty default
         if 'group_by' in self.fields:
             choices = self.fields['group_by'].choices
@@ -2603,9 +2608,9 @@ class CredMappingForm(forms.ModelForm):
         exclude = ['product', 'finding', 'engagement', 'test', 'url', 'is_authn_provider']
 
     def __init__(self, *args, **kwargs):
-        cred_user_queryset = kwargs.pop("cred_user_queryset")
+        cred_user_queryset = kwargs.pop("cred_user_queryset", None)
         super(CredMappingForm, self).__init__(*args, **kwargs)
-        if cred_user_queryset:
+        if cred_user_queryset is not None:
             self.fields["cred_user"].queryset = cred_user_queryset
 
 

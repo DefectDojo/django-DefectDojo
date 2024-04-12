@@ -652,17 +652,14 @@ class ImportScanResultsView(View):
 
     def get_development_environment(
         self,
-        request: HttpRequest,
+        environment_name: str = "Development",
     ) -> Development_Environment | None:
         """
         Get the development environment in two cases:
         - GET: Environment "Development" by default
         - POST: The label supplied by the user, with Development as a backup
         """
-        environment_name = "Development"
-        if request.method == "POST":
-            environment_name = request.POST.get('environment', environment_name)
-        return Development_Environment.objects.filter(id=environment_name).first()
+        return Development_Environment.objects.filter(name=environment_name).first()
 
     def get_engagement_or_product(
         self,
@@ -673,13 +670,13 @@ class ImportScanResultsView(View):
         """
         Using the path parameters, either fetch the product or engagement
         """
-        engagement, product, engagement_or_product = None
+        engagement = product = engagement_or_product = None
         # Get the product if supplied
         # Get the engagement if supplied
-        if engagement_id:
+        if engagement_id is not None:
             engagement = get_object_or_404(Engagement, id=engagement_id)
             engagement_or_product = engagement
-        elif product_id:
+        elif product_id is not None:
             product = get_object_or_404(Product, id=product_id)
             engagement_or_product = product
         else:
@@ -695,9 +692,9 @@ class ImportScanResultsView(View):
         initial_data: dict,
     ) -> ImportScanForm:
         if request.method == "POST":
-            return ImportScanForm(request.POST, request.FILES)
+            return ImportScanForm(request.POST, request.FILES, **initial_data)
         else:
-            return ImportScanForm(initial=initial_data)
+            return ImportScanForm(**initial_data)
 
     def get_credential_form(
         self,
@@ -733,6 +730,7 @@ class ImportScanResultsView(View):
         Returns a JiraImportScanForm if jira is enabled
         """
         jira_form = None
+        push_all_jira_issues = False
         # Determine if jira issues should be pushed automatically
         push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
         # Only return the form if the jira is enabled on this engagement or product
@@ -748,7 +746,7 @@ class ImportScanResultsView(View):
                     push_all=push_all_jira_issues,
                     prefix='jiraform'
                 )
-            return jira_form, push_all_jira_issues
+        return jira_form, push_all_jira_issues
 
     def get_product_tab(
         self,
@@ -780,13 +778,15 @@ class ImportScanResultsView(View):
         """
         user = request.user
         # Get the development environment
-        environment = self.get_development_environment(request)
+        environment = self.get_development_environment()
         # Get the product or engagement from the path parameters
-        product, engagement, engagement_or_product = self.get_engagement_or_product(
+        engagement, product, engagement_or_product = self.get_engagement_or_product(
             user,
-            engagement_id=product_id,
-            product_id=engagement_id,
+            engagement_id=engagement_id,
+            product_id=product_id,
         )
+        # Get the product tab and any additional custom breadcrumbs
+        product_tab, custom_breadcrumb = self.get_product_tab(product, engagement)
         # Get the import form with some initial data in place
         form = self.get_form(request, {
             "environment": environment,
@@ -797,11 +797,10 @@ class ImportScanResultsView(View):
         cred_form = self.get_credential_form(request, engagement)
         # Get the jira form
         jira_form, push_all_issues = self.get_jira_form(request, engagement_or_product)
-        # Get the product tab and any additional custom breadcrumbs
-        product_tab, custom_breadcrumb = self.get_product_tab(product, engagement)
         # Return the request and the context
         return request, {
             "user": user,
+            "lead": user,
             "form": form,
             "environment": environment,
             "product_tab": product_tab,
@@ -824,11 +823,14 @@ class ImportScanResultsView(View):
         Validates each of the forms to ensure all errors from the form
         level are bubbled up to the user first before we process too much
         """
-        return all([
-            context.get("form").is_valid(),
-            context.get("jform").is_valid(),
-            context.get("cred_form").is_valid(),
-        ])
+        form_validation_list = []
+        if (form := context.get("form")) is not None:
+            form_validation_list.append(form.is_valid())
+        if (form := context.get("jform")) is not None:
+            form_validation_list.append(form.is_valid())
+        if (form := context.get("cred_form")) is not None:
+            form_validation_list.append(form.is_valid())
+        return all(form_validation_list)
 
     def create_engagement(
         self,
@@ -872,8 +874,6 @@ class ImportScanResultsView(View):
         try:
             importer_client = DefaultImporter()
             context["test"], _, finding_count, closed_finding_count, _, _, _ = importer_client.process_scan(
-                context.get("scan"),
-                context.get("scan_type"),
                 **context,
             )
 
@@ -915,8 +915,10 @@ class ImportScanResultsView(View):
             "close_old_findings_product_scope": form.cleaned_data.get("close_old_findings_product_scope", None),
             "group_by": form.cleaned_data.get("group_by", None),
             "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings"),
-            "environment": self.get_development_environment(request),
+            "environment": self.get_development_environment(environment_name=form.cleaned_data.get("environment")),
         })
+        # Create the engagement if necessary
+        self.create_engagement(context)
         # close_old_findings_product_scope is a modifier of close_old_findings.
         # If it is selected, close_old_findings should also be selected.
         if close_old_findings_product_scope := form.cleaned_data.get('close_old_findings_product_scope', None):
@@ -957,7 +959,7 @@ class ImportScanResultsView(View):
         self,
         request: HttpRequest,
         form: CredMappingForm,
-        context: dict, 
+        context: dict,
     ) -> str | None:
         """
         Process the credentials form by creating
@@ -976,6 +978,27 @@ class ImportScanResultsView(View):
             # update the context
             context["cred_user"] = cred_user
 
+    def success_redirect(
+        self,
+        context: dict,
+    ) -> HttpResponseRedirect:
+        """
+        Redirect the user to a place that indicates a successful import
+        """
+        return HttpResponseRedirect(reverse("view_test", args=(context.get("test").id, )))
+
+    def failure_redirect(
+        self,
+        context: dict,
+    ) -> HttpResponseRedirect:
+        """
+        Redirect the user to a place that indicates a failed import
+        """
+        return HttpResponseRedirect(reverse(
+            "import_scan_results",
+            args=(context.get("engagement", context.get("product")).id, ),
+        ))
+
     def get(self, request, eid=None, pid=None):
         # process the request and path parameters
         request, context = self.handle_request(
@@ -993,35 +1016,27 @@ class ImportScanResultsView(View):
             engagement_id=eid,
             product_id=pid,
         )
-        # Overall request validity
-        error = False
         # ensure all three forms are valid first before moving forward
-        if error := not self.validate_forms(context):
-            add_error_message_to_response("All forms must be valid...")
+        if not self.validate_forms(context):
+            return self.failure_redirect(context)
         # Process the jira form if it is present
         if form_error := self.process_jira_form(request, context.get("jform"), context):
             add_error_message_to_response(form_error)
-            error = True
+            return self.failure_redirect(context)
         # Process the import form
         if form_error := self.process_form(request, context.get("form"), context):
             add_error_message_to_response(form_error)
-            error = True
+            return self.failure_redirect(context)
         # Kick off the import process
         if import_error := self.import_findings(context):
             add_error_message_to_response(import_error)
-            error = True
+            return self.failure_redirect(context)
         # Process the credential form
         if form_error := self.process_credentials_form(request, context.get("cred_form"), context):
             add_error_message_to_response(form_error)
-            error = True
-        # If everything was successful, redirect to the test
-        if not error:
-            return HttpResponseRedirect(reverse("view_test", args=(context.get("test").id, )))
+            return self.failure_redirect(context)
         # Otherwise return the user back to the engagement (if present) or the product
-        return HttpResponseRedirect(reverse(
-            "import_scan_results",
-            args=(context.get("engagement", context.get("product")).id, ),
-        ))
+        return self.success_redirect(context)
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')

@@ -142,8 +142,8 @@ class BaseImporter(ABC):
         self,
         test: Test,
         findings: List[Finding],
-        scan_date: datetime,
         user: Dojo_User,
+        scan_date: datetime = timezone.now(),
         **kwargs: dict,
     ) -> List[Finding]:
         """
@@ -299,7 +299,9 @@ class BaseImporter(ABC):
             end date should be updated as well
         """
         # Make sure there is at least something in the scan date field
-        scan_date = kwargs.get("scan_date", kwargs.get("now"))
+        scan_date = kwargs.get("scan_date")
+        if scan_date is None:
+            scan_date = kwargs.get("now")
         # Update the target end of the engagement if it is a CI/CD engagement
         # If the supplied scan date is greater than the current configured
         # target end date on the engagement
@@ -313,13 +315,13 @@ class BaseImporter(ABC):
             max_test_start_date = make_aware(max_test_start_date)
         test.target_end = max_test_start_date
         # Add the extra fields to the test if they are specified here
-        if version := kwargs.get("version") is not None and len(version) > 0:
+        if (version := kwargs.get("version")) is not None and len(version) > 0:
             test.version = version
-        if branch_tag := kwargs.get("branch_tag") is not None and len(branch_tag) > 0:
+        if (branch_tag := kwargs.get("branch_tag")) is not None and len(branch_tag) > 0:
             test.branch_tag = branch_tag
-        if build_id := kwargs.get("build_id") is not None and len(build_id) > 0:
+        if (build_id := kwargs.get("build_id")) is not None and len(build_id) > 0:
             test.build_id = build_id
-        if commit_hash := kwargs.get("commit_hash") is not None and len(commit_hash) > 0:
+        if (commit_hash := kwargs.get("commit_hash")) is not None and len(commit_hash) > 0:
             test.commit_hash = commit_hash
         # Save the test and engagement for changes to take affect
         test.save()
@@ -604,9 +606,8 @@ class BaseImporter(ABC):
 
     def add_timezone_scan_date_and_now(
         self,
-        scan_date: datetime | None,
+        scan_date: datetime = None,
         now: datetime = timezone.now(),
-        **kwargs: dict,
     ) -> Tuple[datetime, datetime]:
         """
         Add timezone information the scan date set at import time. In the event the
@@ -616,11 +617,11 @@ class BaseImporter(ABC):
         # Add timezone information to the scan date if it is not already present
         if scan_date is not None and not scan_date.tzinfo:
             scan_date = timezone.make_aware(scan_date)
-            kwargs["scan_date"] = scan_date
         # Add timezone information to the current time if it is not already present
-        if now is not None and not now.tzinfo:
+        if now is None:
+            now = timezone.now()
+        elif not now.tzinfo:
             now = timezone.make_aware(now)
-            kwargs["now"] = now
 
         return scan_date, now
 

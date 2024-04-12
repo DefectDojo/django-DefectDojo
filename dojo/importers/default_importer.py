@@ -74,8 +74,6 @@ class DefaultImporter(BaseImporter):
         environment = kwargs.get("environment")
         # Ensure a test type is available for use
         test_type = self.get_or_create_test_type(test_type_name)
-        # Make sure timezone is applied to dates
-        scan_date, now = self.add_timezone_scan_date_and_now(kwargs.get("scan_date"), now=kwargs.get("now"), **kwargs)
         # Create the test object
         return Test.objects.create(
             engagement=engagement,
@@ -83,10 +81,15 @@ class DefaultImporter(BaseImporter):
             environment=environment,
             test_type=test_type,
             scan_type=scan_type,
-            target_start=scan_date or now,
-            target_end=scan_date or now,
+            target_start=kwargs["scan_date"] or kwargs["now"],
+            target_end=kwargs["scan_date"] or kwargs["now"],
             percent_complete=100,
-            **kwargs,
+            version=kwargs.get("version"),
+            branch_tag=kwargs.get("branch_tag"),
+            build_id=kwargs.get("build_id"),
+            commit_hash=kwargs.get("commit_hash"),
+            api_scan_configuration=kwargs.get("api_scan_configuration"),
+            tags=kwargs.get("tags"),
         )
 
     def process_scan(
@@ -118,16 +121,21 @@ class DefaultImporter(BaseImporter):
             kwargs.get("api_scan_configuration", None),
             engagement
         )
+        # Make sure timezone is applied to dates
+        kwargs["scan_date"], kwargs["now"] = self.add_timezone_scan_date_and_now(
+            kwargs.get("scan_date"),
+            now=kwargs.get("now", timezone.now())
+        )
         # Fetch the parser based upon the string version of the scan type
         parser = self.get_parser(scan_type)
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
-        test, parsed_findings = self.parse_findings(parser, scan_type, scan, test=None)
+        test, parsed_findings = self.parse_findings(parser, scan_type, scan, test=None, engagement=engagement, **kwargs)
         # process the findings in the foreground or background
-        new_findings = self.determine_process_method(test, parsed_findings, scan_type, user)
+        new_findings = self.determine_process_method(test, parsed_findings, user, **kwargs)
         # Close any old findings in the processed list if the the user specified for that
         # to occur in the form that is then passed to the kwargs
-        closed_findings = self.close_old_findings(test, test.finding_set.values(), kwargs.ge("scan_date"), user)
+        closed_findings = self.close_old_findings(test, test.finding_set.values(), user, **kwargs)
         # Update the timestamps of the test object by looking at the findings imported
         self.update_timestamps(test, **kwargs)
         # Create a test import history object to record the flags sent to the importer
@@ -233,9 +241,8 @@ class DefaultImporter(BaseImporter):
             finding_helper.add_findings_to_auto_group(
                 group_name,
                 findings,
-                group_by,
-                kwargs.get("create_finding_groups_for_all_findings"),
-                **kwargs)
+                **kwargs
+            )
             if push_to_jira:
                 if findings[0].finding_group is not None:
                     jira_helper.push_to_jira(findings[0].finding_group)
@@ -251,8 +258,8 @@ class DefaultImporter(BaseImporter):
         self,
         test: Test,
         findings: List[Finding],
-        scan_date: datetime,
         user: Dojo_User,
+        scan_date: datetime = timezone.now(),
         **kwargs: dict,
     ) -> List[Finding]:
         """
@@ -268,7 +275,7 @@ class DefaultImporter(BaseImporter):
         new_hash_codes = []
         for finding in findings:
             new_hash_codes.append(finding["hash_code"])
-            if finding.is_mitigated or finding.mitigated is not None:
+            if getattr(finding, "is_mitigated", None):
                 mitigated_hash_codes.append(finding["hash_code"])
                 for hash_code in new_hash_codes:
                     if hash_code == finding["hash_code"]:
@@ -276,18 +283,21 @@ class DefaultImporter(BaseImporter):
         # Get the initial filtered list of old findings to be closed without
         # considering the scope of the product or engagement
         old_findings = Finding.objects.exclude(
-                test=test
-            ).exclude(
-                hash_code__in=new_hash_codes
-            ).filter(
-                test__test_type=test.test_type,
-                active=True
-            )
+            test=test
+        ).exclude(
+            hash_code__in=new_hash_codes
+        ).filter(
+            test__test_type=test.test_type,
+            active=True
+        )
         # Accommodate for product scope or engagement scope
         if kwargs.get("close_old_findings_product_scope"):
             old_findings = old_findings.filter(test__engagement__product=test.engagement.product)
         else:
             old_findings = old_findings.filter(test__engagement=test.engagement)
+        # Determine if pushing to jira or if the finding groups are enabled
+        push_to_jira = kwargs.get("push_to_jira", False)
+        finding_groups_enabled = is_finding_groups_enabled()
         # Update the status of the findings and any endpoints
         for old_finding in old_findings:
             old_finding.active = False
@@ -310,14 +320,13 @@ class DefaultImporter(BaseImporter):
             # Add a stale tag to the findings
             old_finding.tags.add('stale')
             # to avoid pushing a finding group multiple times, we push those outside of the loop
-            push_to_jira = kwargs.get("push_to_jira", False)
-            if is_finding_groups_enabled() and old_finding.finding_group:
+            if finding_groups_enabled and old_finding.finding_group:
                 # don't try to dedupe findings that we are closing
                 old_finding.save(dedupe_option=False)
             else:
                 old_finding.save(dedupe_option=False, push_to_jira=push_to_jira)
 
-        if is_finding_groups_enabled() and push_to_jira:
+        if finding_groups_enabled and push_to_jira:
             for finding_group in set([finding.finding_group for finding in old_findings if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
 
@@ -345,10 +354,12 @@ class DefaultImporter(BaseImporter):
         logger.debug('IMPORT_SCAN: Parse findings')
         # Use the parent method for the rest of this
         return test, BaseImporter.parse_findings_from_file(
+            self,
             parser,
             scan_type,
             scan,
-            test,
+            test=test,
+            **kwargs,
         )
 
     def parse_findings_from_api_configuration(
@@ -410,19 +421,17 @@ class DefaultImporter(BaseImporter):
         self,
         test: Test,
         parsed_findings: List[Finding],
-        scan_type: str,
         user: Dojo_User,
         **kwargs: dict,
     ) -> List[Finding]:
         """
         Determines whether to process the scan iteratively, or in chunks,
         based upon the ASYNC_FINDING_IMPORT setting
-        """ 
+        """
         if settings.ASYNC_FINDING_IMPORT:
             return self.async_process_findings(
                 test,
                 parsed_findings,
-                scan_type,
                 user,
                 **kwargs,
             )
@@ -430,7 +439,6 @@ class DefaultImporter(BaseImporter):
             return self.sync_process_findings(
                 test,
                 parsed_findings,
-                scan_type,
                 user,
                 **kwargs,
             )
@@ -439,7 +447,6 @@ class DefaultImporter(BaseImporter):
         self,
         test: Test,
         parsed_findings: List[Finding],
-        scan_type: str,
         user: Dojo_User,
         **kwargs: dict,
     ) -> List[Finding]:
@@ -450,7 +457,6 @@ class DefaultImporter(BaseImporter):
         return self.process_findings(
             test,
             parsed_findings,
-            scan_type,
             user,
             sync=True,
             **kwargs,
@@ -460,7 +466,6 @@ class DefaultImporter(BaseImporter):
         self,
         test: Test,
         parsed_findings: List[Finding],
-        scan_type: str,
         user: Dojo_User,
         **kwargs: dict,
     ) -> List[Finding]:
@@ -476,7 +481,6 @@ class DefaultImporter(BaseImporter):
             result = self.process_findings(
                 test,
                 parsed_findings,
-                scan_type,
                 user,
                 sync=False,
                 **kwargs,
