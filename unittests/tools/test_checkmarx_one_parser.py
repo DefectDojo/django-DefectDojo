@@ -45,3 +45,20 @@ class TestCheckmarxOneParser(DojoTestCase):
             parser = CheckmarxOneParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
+
+    def test_checkmarx_one_new_format(self):
+        with open("unittests/scans/checkmarx_one/api_export.json") as testfile:
+            parser = CheckmarxOneParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(8, len(findings))
+            with self.subTest(i=0):
+                for finding in findings:
+                    self.assertIsNotNone(finding.unique_id_from_tool)
+                    self.assertIsNotNone(finding.title)
+                    self.assertIsNotNone(finding.test)
+                    self.assertIsNotNone(finding.date)
+                    self.assertIsNotNone(finding.severity)
+                    self.assertIsNotNone(finding.description)
+                finding_test = findings[0]
+                self.assertEqual("Medium", finding_test.severity)
+                self.assertEqual("/.github/workflows/checkmarx.yaml", finding_test.file_path)
