@@ -1,5 +1,6 @@
 import collections
 import warnings
+from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from drf_spectacular.types import OpenApiTypes
 
 from drf_spectacular.utils import extend_schema_field
@@ -15,7 +16,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
-    BooleanFilter, NumberFilter, DateFilter
+    BooleanFilter, NumberFilter, DateFilter, RangeFilter
 from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate
 from django.db.models import JSONField
@@ -43,6 +44,7 @@ from dojo.finding_group.queries import get_authorized_finding_groups
 from dojo.user.queries import get_authorized_users
 from django.forms import HiddenInput
 from dojo.utils import is_finding_groups_enabled
+import decimal
 
 logger = logging.getLogger(__name__)
 
@@ -305,37 +307,39 @@ def get_finding_filterset_fields(metrics=False, similar=False):
         ])
 
     fields.extend([
-                'date',
-                'cwe',
-                'severity',
-                'last_reviewed',
-                'last_status_update',
-                'mitigated',
-                'reporter',
-                'reviewers',
-                'test__engagement__product__prod_type',
-                'test__engagement__product',
-                'test__engagement',
-                'test',
-                'test__test_type',
-                'test__engagement__version',
-                'test__version',
-                'endpoints',
-                'status',
-                'active',
-                'verified',
-                'duplicate',
-                'is_mitigated',
-                'out_of_scope',
-                'false_p',
-                'has_component',
-                'has_notes',
-                'file_path',
-                'unique_id_from_tool',
-                'vuln_id_from_tool',
-                'service',
-                'epss_score',
-                'epss_percentile'
+        'date',
+        'cwe',
+        'severity',
+        'last_reviewed',
+        'last_status_update',
+        'mitigated',
+        'reporter',
+        'reviewers',
+        'test__engagement__product__prod_type',
+        'test__engagement__product',
+        'test__engagement',
+        'test',
+        'test__test_type',
+        'test__engagement__version',
+        'test__version',
+        'endpoints',
+        'status',
+        'active',
+        'verified',
+        'duplicate',
+        'is_mitigated',
+        'out_of_scope',
+        'false_p',
+        'has_component',
+        'has_notes',
+        'file_path',
+        'unique_id_from_tool',
+        'vuln_id_from_tool',
+        'service',
+        'epss_score',
+        'epss_score_range',
+        'epss_percentile',
+        'epss_percentile_range',
     ])
 
     if similar:
@@ -1258,7 +1262,7 @@ class ApiFindingFilter(DojoFilter):
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Not Tag name contains', exclude='True')
     not_tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
                                  help_text='Comma separated list of exact tags not present on model', exclude='True')
-    not_test__tags = CharFieldInFilter(field_name='test__tags__name', lookup_expr='in', help_text='Comma separated list of exact tags present on test')
+    not_test__tags = CharFieldInFilter(field_name='test__tags__name', lookup_expr='in', exclude='True', help_text='Comma separated list of exact tags present on test')
     not_test__engagement__tags = CharFieldInFilter(field_name='test__engagement__tags__name', lookup_expr='in',
                                                    help_text='Comma separated list of exact tags not present on engagement',
                                                    exclude='True')
@@ -1304,6 +1308,34 @@ class ApiFindingFilter(DojoFilter):
         model = Finding
         exclude = ['url', 'thread_id', 'notes', 'files',
                    'line', 'cve']
+
+
+class PercentageFilter(NumberFilter):
+    def __init__(self, *args, **kwargs):
+        kwargs['method'] = self.filter_percentage
+        super().__init__(*args, **kwargs)
+
+    def filter_percentage(self, queryset, name, value):
+        value = value / decimal.Decimal('100.0')
+        # Provide some wiggle room for filtering since the UI rounds to two places (and because floats):
+        # a user may enter 0.15, but we'll return everything in [0.0015, 0.0016).
+        # To do this, add to our value 1^(whatever the exponent for our least significant digit place is), but ensure
+        # that the exponent is at MOST the ten thousandths place so we don't show a range of e.g. [0.2, 0.3).
+        exponent = min(value.normalize().as_tuple().exponent, -4)
+        max_val = value + decimal.Decimal(f"1E{exponent}")
+        lookup_kwargs = {
+            f"{name}__gte": value,
+            f"{name}__lt": max_val, }
+        return queryset.filter(**lookup_kwargs)
+
+
+class PercentageRangeFilter(RangeFilter):
+    def filter(self, qs, value):
+        if value is not None:
+            start = value.start / decimal.Decimal('100.0') if value.start else None
+            stop = value.stop / decimal.Decimal('100.0') if value.stop else None
+            value = slice(start, stop)
+        return super().filter(qs, value)
 
 
 class FindingFilter(FindingFilterWithTags):
@@ -1449,6 +1481,14 @@ class FindingFilter(FindingFilterWithTags):
 
     has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
 
+    epss_score = PercentageFilter(field_name='epss_score', label='EPSS score')
+    epss_score_range = PercentageRangeFilter(field_name='epss_score', label='EPSS score range',
+                                             help_text='The range of EPSS score percentages to filter on; the left input is a lower bound, the right is an upper bound. Leaving one empty will skip that bound (e.g., leaving the lower bound input empty will filter only on the upper bound -- filtering on "less than or equal").')
+
+    epss_percentile = PercentageFilter(field_name='epss_percentile', label='EPSS percentile')
+    epss_percentile_range = PercentageRangeFilter(field_name='epss_percentile', label='EPSS percentile range',
+                                                  help_text='The range of EPSS percentiles to filter on; the left input is a lower bound, the right is an upper bound. Leaving one empty will skip that bound (e.g., leaving the lower bound input empty will filter only on the upper bound -- filtering on "less than or equal").')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -1487,8 +1527,7 @@ class FindingFilter(FindingFilterWithTags):
                    'numerical_severity', 'line', 'duplicate_finding',
                    'hash_code', 'reviewers', 'created', 'files',
                    'sla_start_date', 'sla_expiration_date', 'cvssv3',
-                   'severity_justification', 'steps_to_reproduce',
-                   'epss_score', 'epss_percentile']
+                   'severity_justification', 'steps_to_reproduce',]
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -1538,9 +1577,15 @@ class AcceptedFindingFilter(FindingFilter):
             queryset=Dojo_User.objects.none(),
             label="Risk Acceptance Owner")
 
+    risk_acceptance = ModelMultipleChoiceFilter(
+        queryset=Risk_Acceptance.objects.none(),
+        label="Accepted By"
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.form.fields['risk_acceptance__owner'].queryset = get_authorized_users(Permissions.Finding_View)
+        self.form.fields['risk_acceptance'].queryset = get_authorized_risk_acceptances(Permissions.Risk_Acceptance)
 
 
 class SimilarFindingFilter(FindingFilter):

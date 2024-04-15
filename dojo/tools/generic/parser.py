@@ -173,7 +173,7 @@ class GenericParser(object):
                 title=row["Title"],
                 description=row["Description"],
                 date=parse(row["Date"]).date(),
-                severity=row["Severity"],
+                severity=self.get_severity(row["Severity"]),
                 duplicate=self._convert_bool(
                     row.get("Duplicate", "FALSE")
                 ),  # bool False by default
@@ -213,9 +213,6 @@ class GenericParser(object):
             # manage CWE
             if "CweId" in row:
                 finding.cwe = int(row["CweId"])
-            # FIXME remove this severity hack
-            if finding.severity == "Unknown":
-                finding.severity = "Info"
 
             if "CVSSV3" in row:
                 cvss_objects = cvss_parser.parse_cvss_from_text(row["CVSSV3"])
@@ -232,13 +229,7 @@ class GenericParser(object):
 
             # manage internal de-duplication
             key = hashlib.sha256(
-                "|".join(
-                    [
-                        finding.severity,
-                        finding.title,
-                        finding.description,
-                    ]
-                ).encode("utf-8")
+                f"{finding.severity}|{finding.title}|{finding.description}".encode("utf-8")
             ).hexdigest()
             if key in dupes:
                 find = dupes[key]
@@ -259,3 +250,9 @@ class GenericParser(object):
 
     def _convert_bool(self, val):
         return val.lower()[0:1] == "t"  # bool False by default
+
+    def get_severity(self, input):
+        if input in ["Info", "Low", "Medium", "High", "Critical"]:
+            return input
+        else:
+            return "Info"

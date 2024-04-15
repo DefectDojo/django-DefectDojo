@@ -144,9 +144,9 @@ class PageBreak(Widget):
     def get_option_form(self):
         return mark_safe(
             "<div data-multiple='true'  class='panel panel-available-widget'><div class='panel-heading' title='Click "
-            "and drag to move' data-toggle='tooltip'><div class='clearfix'><h5 style='width: 90%' class='pull-left'>" +
-            self.get_html() + "</h5><span class='fa-solid fa-up-down-left-right pull-right icon'></span></div></div>"
-                              "<form id='page-break'><input type='hidden' name='page-break'/></form></div>")
+            "and drag to move' data-toggle='tooltip'><div class='clearfix'><h5 style='width: 90%' class='pull-left'>"
+            + self.get_html() + "</h5><span class='fa-solid fa-up-down-left-right pull-right icon'></span></div></div>"
+            "<form id='page-break'><input type='hidden' name='page-break'/></form></div>")
 
 
 class ReportOptions(Widget):

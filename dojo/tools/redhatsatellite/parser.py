@@ -60,7 +60,6 @@ class RedHatSatelliteParser(object):
             description += "**hosts_available_count:** " + str(hosts_available_count) + "\n"
             description += "**hosts_applicable_count:** " + str(hosts_applicable_count) + "\n"
             description += "**installable:** " + str(installable) + "\n"
-            description += "**cves:** " + str(cves) + "\n"
             description += "**bugs:** " + str(bugs) + "\n"
             description += "**module_streams:** " + str(module_streams) + "\n"
             find = Finding(
@@ -69,9 +68,14 @@ class RedHatSatelliteParser(object):
                 description=description,
                 severity=self.severity_mapping(input=severity),
                 mitigation=solution,
-                cve=errata_id,
                 component_name=packages,
                 dynamic_finding=True,
             )
+            if errata_id is not None:
+                find.unsaved_vulnerability_ids = list()
+                find.unsaved_vulnerability_ids.append(errata_id)
+            if cves is not None:
+                for cve in cves:
+                    find.unsaved_vulnerability_ids.append(cve["cve_id"])
             findings.append(find)
         return findings
