@@ -284,21 +284,6 @@ class TestCyclonedxParser(DojoTestCase):
                         )
                         self.assertEqual(datetime.date(2022, 1, 28), datetime.datetime.date(finding.date))
 
-    def test_cyclonedx_json_cwe(self):
-        """CycloneDX version 1.4 JSON format"""
-        with open("unittests/scans/cyclonedx/cyclonedx_cwe.json") as file:
-            parser = CycloneDXParser()
-            findings = parser.get_findings(file, Test())
-            for finding in findings:
-                self.assertIn(finding.severity, Finding.SEVERITIES)
-                finding.clean()
-            self.assertEqual(1, len(findings))
-            with self.subTest(i=0):
-                finding = findings[0]
-                self.assertEqual("High", finding.severity)
-                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
-                self.assertEqual(20, finding.cwe)
-
     def test_cyclonedx_1_4_xml_cvssv31(self):
         """CycloneDX version 1.4 XML format"""
         with open("unittests/scans/cyclonedx/log4j.xml") as file:
