@@ -14,6 +14,7 @@ class Compliance:
         epss_score = None
         mitigation = finding.get("Remediation", {}).get("Recommendation", {}).get("Text", "")
         description = "This is a Security Hub Finding \n" + finding.get("Description", "")
+        description += f"\n**AWS Finding ARN:** {finding_id}\n"
         if finding.get("Compliance", {}).get("Status", "PASSED") == "PASSED":
             is_Mitigated = True
             active = False
@@ -50,7 +51,7 @@ class Compliance:
         result = Finding(
             title=f"{title}{title_suffix}",
             test=test,
-            description=f"{finding_id} - {description}",
+            description=description,
             mitigation=mitigation,
             references="\n".join(references),
             severity=severity,
