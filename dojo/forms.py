@@ -48,7 +48,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.product_type.queries import get_authorized_product_types, get_authorized_contacts_for_product_type, get_owner_user
 from dojo.product.queries import get_authorized_products
 from dojo.finding.queries import get_authorized_findings
-from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users
+from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users, get_all_user_by_role
 from dojo.user.utils import get_configuration_permissions_fields
 from dojo.group.queries import get_authorized_groups, get_group_member_roles
 import dojo.jira_link.helper as jira_helper
@@ -161,10 +161,51 @@ class MonthYearWidget(Widget):
 class Product_TypeForm(forms.ModelForm):
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False)
+    product_type_manager = forms.ModelChoiceField(label='product type manager',
+                                       queryset=Dojo_User.objects.none(),
+                                       required=False)
+    product_type_technical_contact = forms.ModelChoiceField(label='product type technical contact',
+                                       queryset=Dojo_User.objects.none(),
+                                       required=False)
+    environment_manager = forms.ModelChoiceField(label='environment manager',
+                                       queryset=Dojo_User.objects.none(),
+                                       required=False)
+    environment_technical_contact = forms.ModelChoiceField(label='environment technical contact',
+                                       queryset=Dojo_User.objects.none(),
+                                       required=False)
+    def __init__(self, *args, **kwargs):
+        super(Product_TypeForm, self).__init__(*args, **kwargs)
+        queryset_leader_user = get_all_user_by_role(role="Leader", user=get_current_user())
+        self.fields["product_type_manager"].queryset = queryset_leader_user
+        self.fields["product_type_technical_contact"].queryset = queryset_leader_user
+        self.fields["environment_manager"].queryset = queryset_leader_user
+        self.fields["environment_technical_contact"].queryset = queryset_leader_user
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        fields = [
+            'product_type_manager',
+            'product_type_technical_contact',
+            'environment_manager',
+            'environment_technical_contact'
+        ]
+        users = [cleaned_data.get(field) for field in fields]
+        if len(users) != len(set(users)):
+            raise ValidationError("The users assigned to the product type must be different for each field")
+
+        return cleaned_data
+
 
     class Meta:
         model = Product_Type
-        fields = ['name', 'description', 'product_type_manager', 'product_type_technical_contact', 'environment_manager', 'environment_technical_contact', 'critical_product', 'key_product']
+        fields = ['name',
+                  'description',
+                  'product_type_manager',
+                  'product_type_technical_contact',
+                  'environment_manager',
+                  'environment_technical_contact',
+                  'critical_product',
+                  'key_product']
 
 
 class Delete_Product_TypeForm(forms.ModelForm):

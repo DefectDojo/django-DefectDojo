@@ -534,6 +534,7 @@ def get_roles_with_permissions():
         Roles.Leader: {
             Permissions.Product_Type_View,
             Permissions.Product_View,
+            Permissions.Product_Type_Edit,
             Permissions.Product_Configure_Notifications,
             Permissions.Engagement_View,
             Permissions.Risk_Acceptance,
