@@ -3,7 +3,7 @@ import logging
 LOGGER = logging.getLogger(__name__)
 
 
-class Cyclonedxhelper(object):
+class Cyclonedxhelper:
     def _get_cvssv3(self, raw_vector):
         if raw_vector is None or "" == raw_vector:
             return None

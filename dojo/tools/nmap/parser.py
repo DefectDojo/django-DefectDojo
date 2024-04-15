@@ -5,7 +5,7 @@ from defusedxml.ElementTree import parse
 from dojo.models import Endpoint, Finding
 
 
-class NmapParser(object):
+class NmapParser:
     def get_scan_types(self):
         return ["Nmap Scan"]
 
@@ -54,7 +54,7 @@ class NmapParser(object):
                             "**Host OS:** %s\n" % os_match.attrib["name"]
                         )
                     if "accuracy" in os_match.attrib:
-                        host_info += "**Accuracy:** {0}%\n".format(
+                        host_info += "**Accuracy:** {}%\n".format(
                             os_match.attrib["accuracy"]
                         )
 
@@ -74,12 +74,9 @@ class NmapParser(object):
                 # filter on open ports
                 if "open" != port_element.find("state").attrib.get("state"):
                     continue
-                title = "Open port: %s/%s" % (endpoint.port, endpoint.protocol)
+                title = f"Open port: {endpoint.port}/{endpoint.protocol}"
                 description = host_info
-                description += "**Port/Protocol:** %s/%s\n" % (
-                    endpoint.port,
-                    endpoint.protocol,
-                )
+                description += f"**Port/Protocol:** {endpoint.port}/{endpoint.protocol}\n"
 
                 service_info = "\n\n"
                 if port_element.find("service") is not None:

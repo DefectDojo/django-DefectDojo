@@ -6,7 +6,7 @@ from datetime import datetime
 from dojo.models import Finding
 
 
-class BundlerAuditParser(object):
+class BundlerAuditParser:
     def get_scan_types(self):
         return ["Bundler-Audit Scan"]
 

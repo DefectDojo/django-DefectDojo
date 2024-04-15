@@ -15,7 +15,7 @@ DESCRIPTION_TEMPLATE = """**{title}**
 """
 
 
-class BurpApiParser(object):
+class BurpApiParser:
     """Parser that can load data from Burp API"""
 
     def get_scan_types(self):

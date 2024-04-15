@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding, Endpoint
 
 
-class WazuhParser(object):
+class WazuhParser:
     """
     The vulnerabilities with condition "Package unfixed" are skipped because there is no fix out yet.
     https://github.com/wazuh/wazuh/issues/14560
