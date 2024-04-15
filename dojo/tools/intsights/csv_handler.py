@@ -3,7 +3,7 @@ import csv
 import io
 
 
-class IntSightsCSVParser(object):
+class IntSightsCSVParser:
     def _parse_csv(self, csv_file) -> [dict]:
         """
 
