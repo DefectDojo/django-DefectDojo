@@ -3,7 +3,7 @@ import io
 from dojo.models import Finding
 
 
-class SolarAppscreenerParser(object):
+class SolarAppscreenerParser:
     """
     SAST scanner
     """

@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class GitlabAPIFuzzingParser(object):
+class GitlabAPIFuzzingParser:
     """
     GitLab API Fuzzing Report
 

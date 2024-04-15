@@ -17,9 +17,7 @@ class BlackduckAPI:
             )
         else:
             raise ValueError(
-                "Authentication type {} not supported".format(
-                    tool_config.authentication_type
-                )
+                f"Authentication type {tool_config.authentication_type} not supported"
             )
 
     # TODO
