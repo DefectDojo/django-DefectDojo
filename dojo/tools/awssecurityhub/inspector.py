@@ -14,6 +14,8 @@ class Inspector:
         epss_score = None
         description = f"This is an Inspector Finding\n{finding.get('Description', '')}"
         description += f"\n**AWS Finding ARN: ** {finding_id}\n"
+        description += f"AwsAccountId: {finding.get('AwsAccountId', '')}\n"
+        description += f"Region: {finding.get('Region', '')}\n"
         vulnerabilities = finding.get("Vulnerabilities", [])
         for vulnerability in vulnerabilities:
             # Save the CVE if it is present
