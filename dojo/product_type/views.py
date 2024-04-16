@@ -13,6 +13,7 @@ from dojo.forms import Product_TypeForm, Delete_Product_TypeForm, Add_Product_Ty
     Edit_Product_Type_Group_Form, Delete_Product_Type_GroupForm
 from dojo.models import Product_Type, Product_Type_Member, Role, Product_Type_Group
 from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs, get_setting, async_delete
+from dojo.product_type.utils import add_technical_contact_whit_member
 from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
@@ -169,6 +170,7 @@ def edit_product_type(request, ptid):
         pt_form = Product_TypeForm(request.POST, instance=pt)
         if pt_form.is_valid():
             pt = pt_form.save()
+            add_technical_contact_whit_member(pt)
             messages.add_message(
                 request,
                 messages.SUCCESS,

@@ -1,5 +1,6 @@
 from crum import get_current_user
 from django.db.models import Q
+from django.conf import settings
 from dojo.models import Dojo_Group_Member, Product_Member, Product_Type_Member, \
     Product_Group, Product_Type_Group, Dojo_User
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
@@ -92,3 +93,29 @@ def get_authorized_users(permission, user=None):
         | Q(id__in=[gm.user.id for gm in group_members])
         | Q(global_role__role__in=roles)
         | Q(is_superuser=True))
+
+
+def get_all_user_by_role(role=None, user=None):
+    if user is None:
+        return Dojo_User.objects.none()
+
+    if user.is_superuser:
+        return Dojo_User.objects.all()
+
+    if hasattr(user, "global_role"):
+        if user.global_role.role:
+            if user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
+                return Dojo_User.objects.all()
+
+    queryset_combined = Product_Type_Member.objects.select_related('role').filter(role__name=role).values(
+        'user_id',
+        'role__name',
+        'role_id').union(
+            Product_Member.objects.select_related('role').filter(role__name=role).values(
+                'user_id',
+                'role__name',
+                'role_id'))
+    user_ids = queryset_combined.values_list('user_id', flat=True) 
+    user_query = Dojo_User.objects.filter(id__in=list(user_ids))
+
+    return user_query
