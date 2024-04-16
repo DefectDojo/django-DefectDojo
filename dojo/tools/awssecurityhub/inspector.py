@@ -13,6 +13,7 @@ class Inspector:
         unsaved_vulnerability_ids = []
         epss_score = None
         description = f"This is an Inspector Finding\n{finding.get('Description', '')}"
+        description += f"\n**AWS Finding ARN: ** {finding_id}\n"
         vulnerabilities = finding.get("Vulnerabilities", [])
         for vulnerability in vulnerabilities:
             # Save the CVE if it is present
