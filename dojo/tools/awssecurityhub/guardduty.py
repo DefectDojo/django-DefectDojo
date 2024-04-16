@@ -34,6 +34,7 @@ class GuardDuty:
         description += f"SourceURL: {finding.get('SourceUrl', '')}\n"
         description += f"AwsAccountId: {finding.get('AwsAccountId', '')}\n"
         description += f"Region: {finding.get('Region', '')}\n"
+        description += f"Generator ID: {finding.get('GeneratorId', '')}\n"
         title_suffix = ""
         hosts = list()
         for resource in finding.get("Resources", []):
