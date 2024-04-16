@@ -2,7 +2,7 @@ import json
 from dojo.models import Finding
 
 
-class KubeAuditParser(object):
+class KubeAuditParser:
     def get_scan_types(self):
         return ["Kubeaudit Scan"]
 

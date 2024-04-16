@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
-class DojoDefaultReImporter(object):
+class DojoDefaultReImporter:
     @dojo_async_task
     @app.task(ignore_result=False)
     def process_parsed_findings(
@@ -106,7 +106,7 @@ class DojoDefaultReImporter(object):
                     except ValidationError as err:
                         logger.warning(
                             "DefectDojo is storing broken endpoint because cleaning wasn't successful: "
-                            "{}".format(err)
+                            f"{err}"
                         )
 
             item.hash_code = item.compute_hash_code()

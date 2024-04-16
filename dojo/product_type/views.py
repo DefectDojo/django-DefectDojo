@@ -139,7 +139,7 @@ def delete_product_type(request, ptid):
                 create_notification(event='other',
                                 title='Deletion of %s' % product_type.name,
                                 no_users=True,
-                                description='The product type "%s" was deleted by %s' % (product_type.name, request.user),
+                                description=f'The product type "{product_type.name}" was deleted by {request.user}',
                                 url=request.build_absolute_uri(reverse('product_type')),
                                 icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('product_type'))

@@ -4,7 +4,7 @@ import re
 from dojo.models import Finding
 
 
-class PopeyeParser(object):
+class PopeyeParser:
     """
     Popeye is a kubernetes cluster resource analyzer.
     """

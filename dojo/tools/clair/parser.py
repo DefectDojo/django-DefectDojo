@@ -3,7 +3,7 @@ from dojo.tools.clair.clair_parser import ClairScan
 from dojo.tools.clair.clairklar_parser import ClairKlarScan
 
 
-class ClairParser(object):
+class ClairParser:
     def get_scan_types(self):
         return ["Clair Scan"]
 

@@ -68,7 +68,7 @@ BSI_LINK = "https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/Tec
 REFERENCES = "TLS recommendations of German BSI: " + BSI_LINK
 
 
-class SSLyzeJSONParser(object):
+class SSLyzeJSONParser:
     def get_findings(self, json_output, test):
         if json_output is None:
             return

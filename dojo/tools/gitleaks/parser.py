@@ -4,7 +4,7 @@ import json
 from dojo.models import Finding
 
 
-class GitleaksParser(object):
+class GitleaksParser:
     """
     A class that can be used to parse the Gitleaks JSON report files
     """

@@ -187,9 +187,7 @@ def parse_finding(host, tree):
                 # DefectDojo does not support cvssv2
                 _temp["CVSS_vector"] = None
 
-        search = ".//GLOSSARY/VULN_DETAILS_LIST/VULN_DETAILS[@id='{}']".format(
-            _gid
-        )
+        search = f".//GLOSSARY/VULN_DETAILS_LIST/VULN_DETAILS[@id='{_gid}']"
         vuln_item = tree.find(search)
         if vuln_item is not None:
             finding = Finding()
@@ -298,7 +296,7 @@ def qualys_parser(qualys_xml_file):
     return finding_list
 
 
-class QualysParser(object):
+class QualysParser:
     def get_scan_types(self):
         return ["Qualys Scan"]
 
