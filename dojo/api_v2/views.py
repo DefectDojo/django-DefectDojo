@@ -1004,8 +1004,12 @@ class FindingViewSet(
                 return Response(
                     burps.errors, status=status.HTTP_400_BAD_REQUEST
                 )
-
+        #Not necessarily Burp scan specific - these are just any request/response pairs
         burp_req_resp = BurpRawRequestResponse.objects.filter(finding=finding)
+        var = settings.MAX_REQRESP_FROM_API
+        if var > -1:
+            burp_req_resp = burp_req_resp[:var]
+
         burp_list = []
         for burp in burp_req_resp:
             request = burp.get_request()
