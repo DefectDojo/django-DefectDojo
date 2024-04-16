@@ -25,7 +25,7 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import EngagementFilter, EngagementDirectFilter, EngagementTestFilter
 from dojo.forms import CheckForm, \
-    UploadThreatForm, RiskAcceptanceForm, RiskPendingForm, NoteForm, DoneForm, \
+    UploadThreatForm, RiskAcceptanceForm, TransferFindingForm, RiskPendingForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
     CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm, \
     EditRiskAcceptanceForm
@@ -34,7 +34,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Import, Notes, \
     Risk_Acceptance, Development_Environment, Endpoint, \
     Cred_Mapping, System_Settings, Note_Type, Product_API_Scan_Configuration, \
-    Product_Type
+    Product_Type, Dojo_User, Product_Type, TransferFinding, TransferFindingFinding
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, async_delete, \
@@ -58,9 +58,10 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 import dojo.notifications.helper as notifications_helper
 from dojo.endpoint.utils import save_endpoints_to_add
-
+from django.views import View
 
 logger = logging.getLogger(__name__)
+
 
 
 @cache_page(60 * 5)  # cache for 5 minutes
@@ -1159,6 +1160,82 @@ def add_risk_acceptance(request, eid, fid=None):
                   'product_tab': product_tab,
                   'form': form
                   })
+
+@user_is_authorized(Engagement, Permissions.Transfer_Finding_Add, 'eid')
+def add_transfer_finding(request, eid, fid=None):
+    eng = get_object_or_404(Engagement, id=eid)
+    product = eng.product
+    finding = None
+    if fid:
+        finding = get_object_or_404(Finding, id=fid)
+
+    if request.method == 'POST':
+        request.POST._mutable = True
+        data = request.POST
+        form = TransferFindingForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                # Save
+                transfer_findings: TransferFinding = form.save()
+                # Origin
+                transfer_findings.origin_product_type = eng.product.prod_type
+                transfer_findings.origin_product = eng.product
+                # Destination
+                id_destination_product = data.get("destination_product")
+                destination_product_obj: Product = Product.objects.get(id=id_destination_product) if id_destination_product else None
+                transfer_findings.destination_product_type = destination_product_obj.prod_type
+                transfer_findings.destination_product = destination_product_obj
+                transfer_findings.save()
+                findings = request.POST.getlist('findings')
+                for finding in findings:
+                    # create tansferFindigFinding
+                    obj_finding = Finding.objects.get(id=int(finding))
+                    transfer_finding_finding = TransferFindingFinding.objects.create(findings=obj_finding,
+                                                                                     transfer_findings=transfer_findings,
+                                                                                     finding_related=None,
+                                                                                     engagement_related=None)
+                    obj_finding.risk_status = "Transfer Pending"
+                    obj_finding.save()
+                    transfer_finding_finding.save()
+                    logger.debug("Risk Transfer created {transfer_finding_finding.name}")
+                    # Create notification
+                create_notification(event="transfer_finding",
+                                    title=f"{transfer_findings.title[:30]}",
+                                    icon="check-circle",
+                                    color_icon="#096C11",
+                                    recipients=[transfer_findings.accepted_by.get_username()],
+                                    engagement=eng, url=reverse('view_transfer_finding', args=(product.id, )))
+                logger.debug("Transfer Finding send notification {transfer_finding.title}")
+
+            except Exception as e:
+                logger.debug(vars(request.POST))
+                logger.error(vars(form))
+                logger.exception(e)
+                raise
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Transfer Finding saved.',
+                extra_tags='alert-success')
+
+            return redirect_to_return_url_or_else(request, reverse('view_transfer_finding', args=(product.id, )))
+        else:
+            logger.error(form.errors)
+    else:
+        form = TransferFindingForm(initial={"engagement_name":eng,
+                                            "title": f"transfer finding - {finding.title}",
+                                            "findings": finding,
+                                            "owner": request.user.username,
+                                            "status": "Transfer Pending",
+                                            "severity": finding.severity,
+                                            "owner": request.user})
+
+    return render(request, 'dojo/add_transfer_finding.html', {
+                  'eng': eng,
+                  'product_tab': "product_tab test",
+                  'form': form
+                  })
+
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
 def view_risk_acceptance(request, eid, raid):

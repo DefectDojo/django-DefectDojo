@@ -32,8 +32,13 @@ def custom_exception_handler(exc, context):
         response.data["message"] = str(exc)
     elif isinstance(exc, ApiError):
         response = Response()
-        response.status_code = exc.status_code
+        response.status_code = exc.code
         response.data = {}
+        response.data["error"] = {
+            "code": exc.code,
+            "detail": str(exc.detail),
+            "message": str(exc.message)
+        }
         response.data["message"] = str(exc.detail)
     else:
         if response is None:

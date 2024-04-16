@@ -1,10 +1,10 @@
 from django.urls import re_path
-
 from dojo.product_type import views
 from dojo.product import views as product_views
 
 urlpatterns = [
     #  product type
+    re_path(r'^product/type/description/(?P<pid>\d+)$', views.get_description_product, name='get_description'),
     re_path(r'^product/type$', views.product_type, name='product_type'),
     re_path(r'^product/type/(?P<ptid>\d+)$',
         views.view_product_type, name='view_product_type'),

@@ -1,4 +1,4 @@
-from django.urls import re_path
+from django.urls import re_path, path
 
 from dojo.engagement import views
 
@@ -34,6 +34,8 @@ urlpatterns = [
         views.add_risk_acceptance, name='add_risk_acceptance'),
     re_path(r'^engagement/(?P<eid>\d+)/risk_acceptance/add/(?P<fid>\d+)$',
         views.add_risk_acceptance, name='add_risk_acceptance'),
+    re_path(r'^engagement/(?P<eid>\d+)/add_transfer_finding/add/(?P<fid>\d+)$',
+            views.add_transfer_finding, name="add_transfer_finding"),
     re_path(r'^engagement/(?P<eid>\d+)/risk_acceptance/(?P<raid>\d+)$',
         views.view_risk_acceptance, name='view_risk_acceptance'),
     re_path(r'^engagement/(?P<eid>\d+)/risk_acceptance/(?P<raid>\d+)/edit$',
