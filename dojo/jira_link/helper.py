@@ -722,7 +722,7 @@ def add_jira_issue(obj, *args, **kwargs):
         return False
 
     if not is_jira_configured_and_enabled(obj):
-        message = 'Object %s cannot be pushed to JIRA as there is no JIRA configuration for %s.' % (obj.id, to_str_typed(obj))
+        message = f'Object {obj.id} cannot be pushed to JIRA as there is no JIRA configuration for {to_str_typed(obj)}.'
         return failure_to_add_message(message, None, obj)
 
     jira_project = get_jira_project(obj)
@@ -884,7 +884,7 @@ def update_jira_issue(obj, *args, **kwargs):
     jira_instance = get_jira_instance(obj)
 
     if not is_jira_configured_and_enabled(obj):
-        message = 'Object %s cannot be pushed to JIRA as there is no JIRA configuration for %s.' % (obj.id, to_str_typed(obj))
+        message = f'Object {obj.id} cannot be pushed to JIRA as there is no JIRA configuration for {to_str_typed(obj)}.'
         return failure_to_update_message(message, None, obj)
 
     j_issue = obj.jira_issue
@@ -985,7 +985,7 @@ def get_jira_issue_from_jira(find):
     j_issue = find.jira_issue
     if not jira_project:
         logger.error("Unable to retrieve latest status change from JIRA %s for finding %s as there is no JIRA_Project configured for this finding.", j_issue.jira_key, format(find.id))
-        log_jira_alert("Unable to retrieve latest status change from JIRA %s for finding %s as there is no JIRA_Project configured for this finding." % (j_issue.jira_key, find), find)
+        log_jira_alert(f"Unable to retrieve latest status change from JIRA {j_issue.jira_key} for finding {find} as there is no JIRA_Project configured for this finding.", find)
         return False
 
     meta = None
@@ -1203,7 +1203,7 @@ def close_epic(eng, push_to_jira, **kwargs):
                     auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
                     json=json_data)
                 if r.status_code != 204:
-                    logger.warning("JIRA close epic failed with error: {}".format(r.text))
+                    logger.warning(f"JIRA close epic failed with error: {r.text}")
                     return False
                 return True
             except JIRAError as e:
@@ -1349,7 +1349,7 @@ def add_comment(obj, note, force_push=False, **kwargs):
                 j_issue = obj.jira_issue
                 jira.add_comment(
                     j_issue.jira_id,
-                    '(%s): %s' % (note.author.get_full_name() if note.author.get_full_name() else note.author.username, note.entry))
+                    f'({note.author.get_full_name() if note.author.get_full_name() else note.author.username}): {note.entry}')
                 return True
             except JIRAError as e:
                 log_jira_generic_alert('Jira Add Comment Error', str(e))
@@ -1580,7 +1580,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
     if resolved:
         if jira_instance and resolution_name in jira_instance.accepted_resolutions:
             if not finding.risk_accepted:
-                logger.debug("Marking related finding of {} as accepted. Creating risk acceptance.".format(jira_issue.jira_key))
+                logger.debug(f"Marking related finding of {jira_issue.jira_key} as accepted. Creating risk acceptance.")
                 finding.active = False
                 finding.mitigated = None
                 finding.is_mitigated = False
@@ -1594,7 +1594,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 status_changed = True
         elif jira_instance and resolution_name in jira_instance.false_positive_resolutions:
             if not finding.false_p:
-                logger.debug("Marking related finding of {} as false-positive".format(jira_issue.jira_key))
+                logger.debug(f"Marking related finding of {jira_issue.jira_key} as false-positive")
                 finding.active = False
                 finding.verified = False
                 finding.mitigated = None
@@ -1605,7 +1605,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
         else:
             # Mitigated by default as before
             if not finding.is_mitigated:
-                logger.debug("Marking related finding of {} as mitigated (default)".format(jira_issue.jira_key))
+                logger.debug(f"Marking related finding of {jira_issue.jira_key} as mitigated (default)")
                 finding.active = False
                 finding.mitigated = jira_now
                 finding.is_mitigated = True
@@ -1617,7 +1617,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
     else:
         if not finding.active:
             # Reopen / Open Jira issue
-            logger.debug("Re-opening related finding of {}".format(jira_issue.jira_key))
+            logger.debug(f"Re-opening related finding of {jira_issue.jira_key}")
             finding.active = True
             finding.mitigated = None
             finding.is_mitigated = False
