@@ -6,6 +6,7 @@ from django.db.models import Q, Count, Prefetch
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.conf import settings
 from django.utils.translation import gettext as _
 
 from dojo.authorization.roles_permissions import Permissions
@@ -13,6 +14,7 @@ from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
 from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
+from dojo.aws import ses_email
 
 logger = logging.getLogger(__name__)
 
@@ -283,24 +285,29 @@ def send_mail_notification(event, user=None, *args, **kwargs):
 
     try:
         subject = f"{get_system_setting('team_name')} notification"
-        if 'title' in kwargs:
-            subject += f": {kwargs['title']}"
+        if settings.AWS_SES_EMAIL:
+            template = ses_email.get_template(**kwargs)
+            ses_email.aws_ses(address, email_from_address, template)
+        else:
+            if 'title' in kwargs:
+                subject += f": {kwargs['title']}"
 
-        email = EmailMessage(
-            subject,
-            create_notification_message(event, user, 'mail', *args, **kwargs),
-            email_from_address,
-            [address],
-            headers={"From": f"{email_from_address}"},
-        )
-        email.content_subtype = 'html'
-        logger.debug('sending email alert')
-        # logger.info(create_notification_message(event, user, 'mail', *args, **kwargs))
-        email.send(fail_silently=False)
+            email = EmailMessage(
+                subject,
+                create_notification_message(event, user, 'mail', *args, **kwargs),
+                email_from_address,
+                [address],
+                headers={"From": f"{email_from_address}"},
+            )
+            email.content_subtype = 'html'
+            logger.debug('sending email alert')
+            # logger.info(create_notification_message(event, user, 'mail', *args, **kwargs))
+            email.send(fail_silently=False)
 
     except Exception as e:
         logger.exception(e)
         log_alert(e, "Email Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
+
 
 
 def send_alert_notification(event, user=None, *args, **kwargs):
