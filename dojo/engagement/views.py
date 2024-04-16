@@ -1065,7 +1065,7 @@ def add_risk_acceptance_pending(request, eid, fid):
             return post_risk_acceptance_pending(request, finding, eng, eid, product, product_type)
         else:
             form = get_risk_acceptance_pending(request, finding, eng, product, product_type)
-        finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng, active=True, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
         form.fields['accepted_findings'].queryset = finding_choices
         if fid:
             form.fields['accepted_findings'].initial = {fid}
