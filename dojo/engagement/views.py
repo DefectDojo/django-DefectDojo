@@ -968,7 +968,7 @@ def get_risk_acceptance_pending(request,
     return form
 
 
-def post_risk_acceptance_pending_successfully(request, finding: Finding, eng, eid, product: Product, product_type: Product_Type, white_list):
+def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: Product, product_type: Product_Type):
     form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity,product_id=product.id, product_type_id=product_type.id)
 
     if form.is_valid():
@@ -983,6 +983,59 @@ def post_risk_acceptance_pending_successfully(request, finding: Finding, eng, ei
 
         del form.cleaned_data['notes']
 
+        findings = form.cleaned_data['accepted_findings']
+        white_list_final = None
+        len_white_list = 0
+        findings_not_on_white_list = []
+        conf_risk = ra_helper.get_config_risk()
+        for finding in findings:
+            if rp_helper.validate_list_findings(conf_risk, "black_list", finding, eng):
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    f"The finding {finding.id} is on the black list",
+                    extra_tags="alert-danger",
+                )
+                return render(request, 'dojo/add_risk_acceptance.html', {
+                        'form': form
+                })
+            white_list = rp_helper.validate_list_findings(
+                conf_risk, "white_list", finding, eng
+            )
+            if white_list:
+                white_list_final = white_list
+                len_white_list = len_white_list + 1
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    f"The finding {finding.id} is on the white list",
+                    extra_tags="alert-warning",
+                )
+            else:
+                findings_not_on_white_list.append(finding.id)
+
+            abuse_control_result = rp_helper.abuse_control(
+                request.user, finding, product, product_type
+            )
+            for abuse_control, result in abuse_control_result.items():
+                if not abuse_control_result[abuse_control]["status"]:
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        abuse_control_result[abuse_control]["message"],
+                        extra_tags="alert-danger",
+                    )
+                    return render(request, 'dojo/add_risk_acceptance.html', {
+                        'form': form
+                    })
+
+        if len_white_list != len(findings) and white_list_final:
+            messages.add_message(request,
+            messages.WARNING,
+            f'The findings {findings_not_on_white_list} are not on the white list, not is possible to continue with the risk acceptance',
+            extra_tags='alert-danger')
+            return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, ))) 
+
         try:
             risk_acceptance = form.save()
             id_risk_acceptance = risk_acceptance.id
@@ -994,28 +1047,26 @@ def post_risk_acceptance_pending_successfully(request, finding: Finding, eng, ei
 
         if notes:
             risk_acceptance.notes.add(notes)
-
-        if white_list:
+ 
+        if white_list_final:
             risk_acceptance.recommendation = Risk_Acceptance.TREATMENT_AVOID
             risk_acceptance.decision = Risk_Acceptance.TREATMENT_AVOID
             actual_date = timezone.now().date()
             expired_date = datetime.strptime(
-                white_list.get("expired_date", actual_date), "%d%m%Y"
+                white_list_final.get("expired_date", actual_date), "%d%m%Y"
             )
             difference_date = expired_date.date() - actual_date
             risk_acceptance.expiration_date = actual_date + relativedelta(
                 days=difference_date.days
             )
-            risk_acceptance.recommendation_details = f"{risk_acceptance.recommendation_details}\nHU: {white_list.get('hu', '')} - {white_list.get('reason', '')}"
+            risk_acceptance.recommendation_details = f"{risk_acceptance.recommendation_details}\nHU: {white_list_final.get('hu', '')} - {white_list_final.get('reason', '')}"
 
         eng.risk_acceptance.add(risk_acceptance)
-
-        findings = form.cleaned_data['accepted_findings']
 
         if settings.RISK_PENDING is True:
             if (request.user.is_superuser is True
                 or rp_helper.role_has_exclusive_permissions(request.user)
-                or white_list
+                or white_list_final
                 or rp_helper.get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
             elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
@@ -1032,35 +1083,6 @@ def post_risk_acceptance_pending_successfully(request, finding: Finding, eng, ei
         return redirect_to_return_url_or_else(request, reverse('view_risk_acceptance', args=(eid, id_risk_acceptance)))
 
     return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
-
-
-def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: Product, product_type: Product_Type):
-    conf_risk = ra_helper.get_config_risk()
-    if  rp_helper.validate_list_findings(conf_risk, "black_list", finding, eng):
-        messages.add_message(request,
-        messages.WARNING,
-        'This finding is on the black list',
-        extra_tags='alert-danger')
-        return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, ))) 
-    white_list = rp_helper.validate_list_findings(conf_risk, "white_list", finding, eng)
-    if white_list:
-        messages.add_message(request,
-        messages.WARNING,
-        'This finding is on the white list',
-        extra_tags='alert-warning')
-        return post_risk_acceptance_pending_successfully(request, finding, eng, eid, product, product_type, white_list)
-
-    abuse_control_result = rp_helper.abuse_control(request.user, finding, product, product_type)
-    for abuse_control, result in abuse_control_result.items():
-        if not abuse_control_result[abuse_control]["status"]:
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                abuse_control_result[abuse_control]["message"],
-                extra_tags='alert-danger')
-            return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
-
-    return post_risk_acceptance_pending_successfully(request, finding, eng, eid, product, product_type, None)
 
 
 def add_risk_acceptance_pending(request, eid, fid):
@@ -1315,6 +1337,18 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             if not errors:
                 findings = add_findings_form.cleaned_data['accepted_findings']
                 if settings.RISK_PENDING:
+                    conf_risk = ra_helper.get_config_risk()
+                    for finding in findings:
+                        if rp_helper.validate_list_findings(conf_risk, "black_list", finding, eng):
+                            messages.add_message(
+                                request,
+                                messages.WARNING,
+                                f"The finding with vulnerability id {finding.vulnerability_ids}-{finding.vuln_id_from_tool} is on the black list",
+                                extra_tags="alert-danger",
+                            )
+                            return redirect_to_return_url_or_else(
+                                request, reverse("view_risk_acceptance", args=(eid, raid))
+                            )
                     ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
                 else:
                     ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)

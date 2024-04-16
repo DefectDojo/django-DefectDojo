@@ -298,7 +298,7 @@ def limit_assumption_of_vulnerability(**kwargs):
         result["message"] = ""
     else:
         result["status"] = False
-        result["message"] = "The finding exceeds the maximum limit of acceptance times"
+        result["message"] = f"The finding {kwargs['finding_id']} exceeds the maximum limit of acceptance times"
     return result
 
 
