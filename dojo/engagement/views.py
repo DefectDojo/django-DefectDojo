@@ -7,6 +7,7 @@ from openpyxl.styles import Font
 from tempfile import NamedTemporaryFile
 
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import operator
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -967,7 +968,7 @@ def get_risk_acceptance_pending(request,
     return form
 
 
-def post_risk_acceptance_pending_successfully(request, finding: Finding, eng, eid, product: Product, product_type: Product_Type, white_list=False):
+def post_risk_acceptance_pending_successfully(request, finding: Finding, eng, eid, product: Product, product_type: Product_Type, white_list):
     form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity,product_id=product.id, product_type_id=product_type.id)
 
     if form.is_valid():
@@ -993,6 +994,19 @@ def post_risk_acceptance_pending_successfully(request, finding: Finding, eng, ei
 
         if notes:
             risk_acceptance.notes.add(notes)
+
+        if white_list:
+            risk_acceptance.recommendation = Risk_Acceptance.TREATMENT_AVOID
+            risk_acceptance.decision = Risk_Acceptance.TREATMENT_AVOID
+            actual_date = timezone.now().date()
+            expired_date = datetime.strptime(
+                white_list.get("expired_date", actual_date), "%d%m%Y"
+            )
+            difference_date = expired_date.date() - actual_date
+            risk_acceptance.expiration_date = actual_date + relativedelta(
+                days=difference_date.days
+            )
+            risk_acceptance.recommendation_details = f"{risk_acceptance.recommendation_details}\nHU: {white_list.get('hu', '')} - {white_list.get('reason', '')}"
 
         eng.risk_acceptance.add(risk_acceptance)
 
@@ -1021,19 +1035,20 @@ def post_risk_acceptance_pending_successfully(request, finding: Finding, eng, ei
 
 
 def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: Product, product_type: Product_Type):
-    if any(vulnerability_id in settings.BLACK_LIST_FINDING for vulnerability_id in finding.vulnerability_ids):
+    conf_risk = ra_helper.get_config_risk()
+    if  rp_helper.validate_list_findings(conf_risk, "black_list", finding, eng):
         messages.add_message(request,
         messages.WARNING,
-        'This risk is on the black list',
+        'This finding is on the black list',
         extra_tags='alert-danger')
         return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, ))) 
-
-    if any(vulnerability_id in settings.WHITE_LIST_FINDING for vulnerability_id in finding.vulnerability_ids):
+    white_list = rp_helper.validate_list_findings(conf_risk, "white_list", finding, eng)
+    if white_list:
         messages.add_message(request,
         messages.WARNING,
-        'This risk is on the white list',
+        'This finding is on the white list',
         extra_tags='alert-warning')
-        return post_risk_acceptance_pending_successfully(request, finding, eng, eid, product, product_type, white_list=True)
+        return post_risk_acceptance_pending_successfully(request, finding, eng, eid, product, product_type, white_list)
 
     abuse_control_result = rp_helper.abuse_control(request.user, finding, product, product_type)
     for abuse_control, result in abuse_control_result.items():
@@ -1045,7 +1060,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
                 extra_tags='alert-danger')
             return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
 
-    return post_risk_acceptance_pending_successfully(request, finding, eng, eid, product, product_type)
+    return post_risk_acceptance_pending_successfully(request, finding, eng, eid, product, product_type, None)
 
 
 def add_risk_acceptance_pending(request, eid, fid):
@@ -1084,7 +1099,6 @@ def add_risk_acceptance_pending(request, eid, fid):
         return render(request, 'dojo/add_risk_acceptance.html', {
             'form': form
         })
-
 
 
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
