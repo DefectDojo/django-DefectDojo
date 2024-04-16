@@ -57,11 +57,11 @@ class Permissions(IntEnum):
     Risk_Acceptance_Edit = 1209
     Risk_Acceptance_Add = 1210
     Risk_Acceptance_Delete = 1211
-    Risk_Acceptance_Expire = 1213
-    Risk_Acceptance_Reinstance = 1214
-    Risk_Unaccept = 1215
-    Risk_Acceptance_Bullk = 1216
-
+    Risk_Acceptance_Expire = 1212
+    Risk_Acceptance_Reinstance = 1213
+    Risk_Unaccept = 1214
+    Risk_Acceptance_Bullk = 1215
+    
     Transfer_Finding_View = 1216
     Transfer_Finding_Edit = 1217
     Transfer_Finding_Delete = 1218

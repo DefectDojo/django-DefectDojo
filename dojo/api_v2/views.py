@@ -3360,13 +3360,6 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
                         "origin_product",
                         "origin_engagement",
                         "owner"]
-    swagger_schema = prefetch.get_prefetch_schema(
-        [
-            "Transfer_finding_list",
-            "Transfer_findings_read",
-        ],
-        serializers.TransferFindingSerializer,
-    ).to_schema()
 
 
 class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
@@ -3377,21 +3370,9 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.TransferFindingFindingsSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id"]
-    swagger_schema = prefetch.get_prefetch_schema(
-        [
-            "Transfer_finding_findings_list",
-            "Transfer_findings_findings_read",
-        ],
-        serializers.TransferFindingFindingsSerializer,
-    ).to_schema()
-
 
     @extend_schema(
         request=serializers.TransferFindingFindingSerializer,
-        responses={status.HTTP_200_OK: serializers.TransferFindingFindingsUpdateSerializer},
-    )
-    @swagger_auto_schema(
-        request_body=serializers.TransferFindingFindingSerializer,
         responses={status.HTTP_200_OK: serializers.TransferFindingFindingsUpdateSerializer},
     )
     @action(detail=True, methods=['post'])
