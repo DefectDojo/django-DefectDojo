@@ -816,7 +816,6 @@ INSTALLED_APPS = (
     'polymorphic',  # provides admin templates
     'django.contrib.admin',
     'django.contrib.humanize',
-    'gunicorn',
     'auditlog',
     'dojo',
     'watson',
