@@ -354,10 +354,6 @@ env = environ.FileAwareEnv(
     DD_PROVIDER_TOKEN=(str, ""),
     # Role that allows risk acceptance bypassing restrictions.
     DD_ROLE_ALLOWED_TO_ACCEPT_RISKS=(list, ["Maintainer"]),
-    # Blacklist to define CVEs that will not be accepted for any reason.
-    DD_BLACK_LIST_FINDING=(list, [""]),
-    # Whitelist to define CVEs that can be accepted without any restrictions.
-    DD_WHITE_LIST_FINDING=(list, [""]),
     # Risk severity levels: Low, Medium, High, Critical
     # num_acceptors: number of acceptors required for risk acceptance
     # roles: roles with permission to accept the risk
@@ -1997,8 +1993,6 @@ DD_INVALID_ESCAPE_STR = env('DD_INVALID_ESCAPE_STR')
 # Risk Pending
 RISK_PENDING = env("DD_RISK_PENDING")
 ROLE_ALLOWED_TO_ACCEPT_RISKS = env("DD_ROLE_ALLOWED_TO_ACCEPT_RISKS")
-BLACK_LIST_FINDING = env("DD_BLACK_LIST_FINDING")
-WHITE_LIST_FINDING = env("DD_WHITE_LIST_FINDING")
 RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = env("DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY")
 # Engine Backend
 PROVIDER1 = env("DD_PROVIDER1")
