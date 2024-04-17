@@ -7,7 +7,7 @@ from dojo.tools.cyclonedx.helpers import Cyclonedxhelper
 LOGGER = logging.getLogger(__name__)
 
 
-class CycloneDXXMLParser(object):
+class CycloneDXXMLParser:
     def _get_findings_xml(self, file, test):
         nscan = ElementTree.parse(file)
         root = nscan.getroot()
@@ -294,9 +294,7 @@ class CycloneDXXMLParser(object):
                         if detail:
                             finding.mitigation = (
                                 finding.mitigation
-                                + "\n**This vulnerability is mitigated and/or suppressed:** {}\n".format(
-                                    detail
-                                )
+                                + f"\n**This vulnerability is mitigated and/or suppressed:** {detail}\n"
                             )
             findings.append(finding)
         return findings

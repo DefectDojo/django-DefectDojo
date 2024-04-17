@@ -10,7 +10,7 @@ from dojo.models import Finding
 logger = logging.getLogger(__name__)
 
 
-class TwistlockCSVParser(object):
+class TwistlockCSVParser:
     def parse_issue(self, row, test):
         if not row:
             return None
@@ -56,9 +56,7 @@ class TwistlockCSVParser(object):
             duplicate=False,
             out_of_scope=False,
             mitigated=None,
-            severity_justification="(CVSS v3 base score: {})".format(
-                data_cvss
-            ),
+            severity_justification=f"(CVSS v3 base score: {data_cvss})",
             impact=data_severity,
         )
         finding.description = finding.description.strip()
@@ -94,7 +92,7 @@ class TwistlockCSVParser(object):
         return list(dupes.values())
 
 
-class TwistlockJsonParser(object):
+class TwistlockJsonParser:
     def parse(self, json_output, test):
         tree = self.parse_json(json_output)
         items = []
@@ -179,9 +177,7 @@ def get_item(vulnerability, test):
         duplicate=False,
         out_of_scope=False,
         mitigated=None,
-        severity_justification="{} (CVSS v3 base score: {})\n\n{}".format(
-            vector, cvss, riskFactors
-        ),
+        severity_justification=f"{vector} (CVSS v3 base score: {cvss})\n\n{riskFactors}",
         impact=severity,
     )
     finding.unsaved_vulnerability_ids = [vulnerability["id"]]
@@ -205,7 +201,7 @@ def convert_severity(severity):
         return severity.title()
 
 
-class TwistlockParser(object):
+class TwistlockParser:
     def get_scan_types(self):
         return ["Twistlock Image Scan"]
 

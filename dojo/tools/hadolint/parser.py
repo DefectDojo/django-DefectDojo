@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class HadolintParser(object):
+class HadolintParser:
     def get_scan_types(self):
         return ["Hadolint Dockerfile check"]
 

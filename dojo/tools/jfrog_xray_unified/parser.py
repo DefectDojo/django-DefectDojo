@@ -4,7 +4,7 @@ from datetime import datetime
 from dojo.models import Finding
 
 
-class JFrogXrayUnifiedParser(object):
+class JFrogXrayUnifiedParser:
     """JFrog Xray JSON reports"""
 
     def get_scan_types(self):
@@ -131,9 +131,7 @@ def get_item(vulnerability, test):
         component_name=component_name,
         component_version=component_version,
         file_path=vulnerability["path"],
-        severity_justification="CVSS v3 base score: {}\nCVSS v2 base score: {}".format(
-            cvss_v3, cvss_v2
-        ),
+        severity_justification=f"CVSS v3 base score: {cvss_v3}\nCVSS v2 base score: {cvss_v2}",
         static_finding=True,
         dynamic_finding=False,
         references=references,
