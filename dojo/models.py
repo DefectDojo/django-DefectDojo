@@ -2248,7 +2248,7 @@ class Finding(models.Model):
                            help_text=_("External reference that provides more information about this flaw."))  # not displayed and pretty much the same as references. To remove?
     severity = models.CharField(max_length=200,
                                 verbose_name=_('Severity'),
-                                help_text=_('The severity level of this flaw (Critical, High, Medium, Low, Informational).'))
+                                help_text=_('The severity level of this flaw (Critical, High, Medium, Low, Info).'))
     description = models.TextField(verbose_name=_('Description'),
                                 help_text=_("Longer more descriptive information about the flaw."))
     mitigation = models.TextField(verbose_name=_('Mitigation'),
