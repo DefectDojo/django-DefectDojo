@@ -7,13 +7,6 @@ from rest_framework.exceptions import NotFound
 from rest_framework.fields import DictField, MultipleChoiceField
 from datetime import datetime
 from dojo.endpoint.utils import endpoint_filter
-from dojo.importers.reimporter.utils import (
-    get_or_create_engagement,
-    get_target_engagement_if_exists,
-    get_target_product_by_id_if_exists,
-    get_target_product_if_exists,
-    get_target_test_if_exists,
-)
 from dojo.models import (
     IMPORT_ACTIONS,
     SEVERITIES,
@@ -111,9 +104,8 @@ import logging
 import tagulous
 from dojo.endpoint.utils import endpoint_meta_import
 from dojo.importers.default_importer import DefaultImporter
-from dojo.importers.reimporter.reimporter import (
-    DojoDefaultReImporter as ReImporter,
-)
+from dojo.importers.default_reimporter import DefaultReImporter
+from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.helper import (
@@ -125,50 +117,6 @@ from dojo.user.utils import get_configuration_permissions_codenames
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
-
-
-def get_import_meta_data_from_dict(data):
-    test_id = data.get("test", None)
-    if test_id:
-        if isinstance(test_id, Test):
-            test_id = test_id.id
-        elif isinstance(test_id, str) and not test_id.isdigit():
-            raise serializers.ValidationError("test must be an integer")
-
-    scan_type = data.get("scan_type", None)
-
-    test_title = data.get("test_title", None)
-
-    engagement_id = data.get("engagement", None)
-    if engagement_id:
-        if isinstance(engagement_id, Engagement):
-            engagement_id = engagement_id.id
-        elif isinstance(engagement_id, str) and not engagement_id.isdigit():
-            raise serializers.ValidationError("engagement must be an integer")
-
-    engagement_name = data.get("engagement_name", None)
-
-    product_name = data.get("product_name", None)
-    product_type_name = data.get("product_type_name", None)
-
-    auto_create_context = data.get("auto_create_context", None)
-
-    deduplication_on_engagement = data.get(
-        "deduplication_on_engagement", False
-    )
-    do_not_reactivate = data.get("do_not_reactivate", False)
-    return (
-        test_id,
-        test_title,
-        scan_type,
-        engagement_id,
-        engagement_name,
-        product_name,
-        product_type_name,
-        auto_create_context,
-        deduplication_on_engagement,
-        do_not_reactivate,
-    )
 
 
 def get_product_id_from_dict(data):
@@ -2174,10 +2122,19 @@ class ImportScanSerializer(serializers.Serializer):
         required=False,
     )
 
-    def save(self, push_to_jira=False):
-        # Extract the data from the form
-        data = self.validated_data
+    def set_context(
+        self,
+        data: dict,
+    ) -> dict:
+        """
+        Process all of the user supplied inputs to massage them into the correct
+        format the importer is expecting to see
+        """
         context = {
+            "test": data.get("test"),
+            "engagement": data.get("engagement"),
+            "title": data.get("title"),
+            "scan_type": data.get("scan_type"),
             "close_old_findings": data.get("close_old_findings"),
             "close_old_findings_product_scope": data.get("close_old_findings_product_scope"),
             "minimum_severity": data.get("minimum_severity"),
@@ -2212,30 +2169,6 @@ class ImportScanSerializer(serializers.Serializer):
         # Change the way that endpoints are sent to the importer
         if endpoints_to_add := data.get("endpoint_to_add"):
             context["endpoints_to_add"] = [endpoints_to_add]
-        # Extract all the of the auto crate context data
-        (
-            _,
-            context["title"],
-            context["scan_type"],
-            engagement_id,
-            engagement_name,
-            product_name,
-            product_type_name,
-            auto_create_context,
-            deduplication_on_engagement,
-            _,
-        ) = get_import_meta_data_from_dict(data)
-        # Get an existing engagement, or create a new one
-        context["engagement"] = get_or_create_engagement(
-            engagement_id,
-            engagement_name,
-            product_name,
-            product_type_name,
-            auto_create_context,
-            deduplication_on_engagement,
-            source_code_management_uri=context.get("source_code_management_uri"),
-            target_end=context.get("engagement_end_date"),
-        )
         # have to make the scan_date_time timezone aware otherwise uploads via
         # the API would fail (but unit tests for api upload would pass...)
         context["scan_date"] = (
@@ -2245,7 +2178,41 @@ class ImportScanSerializer(serializers.Serializer):
             if context.get("scan_date")
             else None
         )
-        # Import the scan with all of the supplied data
+        # Process the auto create context inputs
+        self.process_auto_create_create_context(context)
+
+    def process_auto_create_create_context(
+        self,
+        context: dict,
+    ) -> None:
+        """
+        Extract all of the pertinent args used to auto create any product
+        types, products, or engagements. This function will also validate
+        those inputs for any required info that is not present. In the event
+        of an error, an exception will be raised and bubble up to the user
+        """
+        auto_create = AutoCreateContextManager()
+        # Process the context to make an conversions needed. Catch any exceptions
+        # in this case and wrap them in a DRF exception
+        try:
+            auto_create.process_import_meta_data_from_dict(context)
+            # Attempt to create an engagement 
+            context["engagement"] = AutoCreateContextManager.get_or_create_engagement(**context)
+        except (ValueError, TypeError) as e:
+            # Raise an explicit drf exception here
+            raise ValidationError(str(e))
+
+    def process_scan(
+        self,
+        data: dict,
+        context: dict
+    ) -> None:
+        """
+        Process the scan with all of the supplied data fully massaged
+        into the format we are expecting
+
+        Raises exceptions in the event of an error
+        """
         try:
             importer_client = DefaultImporter()
             context["test"], _, _, _, _, _, _ = importer_client.process_scan(
@@ -2264,9 +2231,17 @@ class ImportScanSerializer(serializers.Serializer):
         except SyntaxError as se:
             raise Exception(se)
         except ValueError as ve:
-            raise Exception(ve)
+            raise Exception(ve) 
 
-    def validate(self, data):
+    def save(self, push_to_jira=False):
+        # Go through the validate method
+        data = self.validated_data
+        # Extract the data from the form
+        context = self.set_context(data)
+        # Import the scan with all of the supplied data
+        self.process_scan(data, context)
+
+    def validate(self, data: dict) -> dict:
         scan_type = data.get("scan_type")
         file = data.get("file")
         if not file and requires_file(scan_type):
@@ -2292,7 +2267,7 @@ class ImportScanSerializer(serializers.Serializer):
                 )
         return data
 
-    def validate_scan_date(self, value):
+    def validate_scan_date(self, value: str) -> None:
         if value and value > timezone.localdate():
             raise serializers.ValidationError(
                 "The scan_date cannot be in the future!"
@@ -2426,177 +2401,116 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         required=False,
     )
 
-    def save(self, push_to_jira=False):
-        logger.debug("push_to_jira: %s", push_to_jira)
-        data = self.validated_data
-        scan_type = data.get("scan_type")
-        endpoint_to_add = data.get("endpoint_to_add")
-        minimum_severity = data.get("minimum_severity")
-        scan_date = data.get("scan_date", None)
-        close_old_findings = data.get("close_old_findings")
-        close_old_findings_product_scope = data.get(
-            "close_old_findings_product_scope"
-        )
-        apply_tags_to_findings = data.get("apply_tags_to_findings", False)
-        apply_tags_to_endpoints = data.get("apply_tags_to_endpoints", False)
-        do_not_reactivate = data.get("do_not_reactivate", False)
-        version = data.get("version", None)
-        build_id = data.get("build_id", None)
-        branch_tag = data.get("branch_tag", None)
-        commit_hash = data.get("commit_hash", None)
-        api_scan_configuration = data.get("api_scan_configuration", None)
-        service = data.get("service", None)
-        lead = data.get("lead", None)
-        tags = data.get("tags", None)
-        environment_name = data.get("environment", "Development")
-        environment = Development_Environment.objects.get(
-            name=environment_name
-        )
-        scan = data.get("file", None)
-        endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
-        source_code_management_uri = data.get(
-            "source_code_management_uri", None
-        )
-        engagement_end_date = data.get("engagement_end_date", None)
-
+    def set_context(
+        self,
+        data: dict,
+    ) -> dict:
+        """
+        Process all of the user supplied inputs to massage them into the correct
+        format the importer is expecting to see
+        """
+        context = {
+            "test": data.get("test"),
+            "engagement": data.get("engagement"),
+            "title": data.get("title"),
+            "scan_type": data.get("scan_type"),
+            "close_old_findings": data.get("close_old_findings"),
+            "close_old_findings_product_scope": data.get("close_old_findings_product_scope"),
+            "minimum_severity": data.get("minimum_severity"),
+            "endpoint_to_add": None,
+            "scan_date": data.get("scan_date", None),
+            "version": data.get("version", None),
+            "build_id": data.get("build_id", None),
+            "branch_tag": data.get("branch_tag", None),
+            "commit_hash": data.get("commit_hash", None),
+            "api_scan_configuration": data.get("api_scan_configuration", None),
+            "service": data.get("service", None),
+            "apply_tags_to_findings": data.get("apply_tags_to_findings", False),
+            "apply_tags_to_endpoints": data.get("apply_tags_to_endpoints", False),
+            "source_code_management_uri": data.get("source_code_management_uri", None),
+            "tags": data.get("tags", None),
+            "lead": data.get("lead"),
+            "scan": data.get("file", None),
+            "group_by": data.get("group_by", None),
+            "create_finding_groups_for_all_findings": data.get("create_finding_groups_for_all_findings", True),
+            "engagement_end_date": data.get("engagement_end_date", None),
+            "environment": Development_Environment.objects.get(name=data.get("environment", "Development")),
+            "do_not_reactivate": data.get("do_not_reactivate", False),
+        }
+        # Set the active/verified status based upon the overrides
         if "active" in self.initial_data:
-            active = data.get("active")
+            context["active"] = data.get("active")
         else:
-            active = None
+            context["active"] = None
         if "verified" in self.initial_data:
-            verified = data.get("verified")
+            context["verified"] = data.get("verified")
         else:
-            verified = None
-
-        group_by = data.get("group_by", None)
-        create_finding_groups_for_all_findings = data.get(
-            "create_finding_groups_for_all_findings", True
-        )
-
-        (
-            test_id,
-            test_title,
-            scan_type,
-            _,
-            engagement_name,
-            product_name,
-            product_type_name,
-            auto_create_context,
-            deduplication_on_engagement,
-            do_not_reactivate,
-        ) = get_import_meta_data_from_dict(data)
-        # we passed validation, so the test is present
-        product = get_target_product_if_exists(product_name)
-        engagement = get_target_engagement_if_exists(
-            None, engagement_name, product
-        )
-        test = get_target_test_if_exists(
-            test_id, test_title, scan_type, engagement
-        )
-
+            context["verified"] = None
+        # Change the way that endpoints are sent to the importer
+        if endpoints_to_add := data.get("endpoint_to_add"):
+            context["endpoints_to_add"] = [endpoints_to_add]
         # have to make the scan_date_time timezone aware otherwise uploads via
         # the API would fail (but unit tests for api upload would pass...)
-        scan_date_time = (
+        context["scan_date"] = (
             timezone.make_aware(
-                datetime.combine(scan_date, datetime.min.time())
+                datetime.combine(context.get("scan_date"), datetime.min.time())
             )
-            if scan_date
+            if context.get("scan_date")
             else None
         )
-        statistics_before, statistics_delta = None, None
 
+    def process_auto_create_create_context(
+        self,
+        auto_create_manager: AutoCreateContextManager,
+        context: dict,
+    ) -> None:
+        """
+        Extract all of the pertinent args used to auto create any product
+        types, products, or engagements. This function will also validate
+        those inputs for any required info that is not present. In the event
+        of an error, an exception will be raised and bubble up to the user
+        """
+        # Process the context to make an conversions needed. Catch any exceptions
+        # in this case and wrap them in a DRF exception
         try:
-            if test:
-                # reimport into provided / latest test
-                statistics_before = test.statistics
-                reimporter = ReImporter()
-                (
-                    test,
-                    finding_count,
-                    new_finding_count,
-                    closed_finding_count,
-                    reactivated_finding_count,
-                    untouched_finding_count,
-                    test_import,
-                ) = reimporter.reimport_scan(
-                    scan,
-                    scan_type,
-                    test,
-                    active=active,
-                    verified=verified,
-                    tags=tags,
-                    minimum_severity=minimum_severity,
-                    endpoints_to_add=endpoints_to_add,
-                    scan_date=scan_date_time,
-                    version=version,
-                    branch_tag=branch_tag,
-                    build_id=build_id,
-                    commit_hash=commit_hash,
-                    push_to_jira=push_to_jira,
-                    close_old_findings=close_old_findings,
-                    group_by=group_by,
-                    api_scan_configuration=api_scan_configuration,
-                    service=service,
-                    do_not_reactivate=do_not_reactivate,
-                    create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
-                    apply_tags_to_findings=apply_tags_to_findings,
-                    apply_tags_to_endpoints=apply_tags_to_endpoints,
-                )
+            auto_create_manager.process_import_meta_data_from_dict(context)
+            context["product"] = auto_create_manager.get_target_product_if_exists(**context)
+            context["engagement"] = auto_create_manager.get_target_engagement_if_exists(**context)
+            context["test"] = auto_create_manager.get_target_test_if_exists(**context)
+        except (ValueError, TypeError) as e:
+            # Raise an explicit drf exception here
+            raise ValidationError(str(e))
 
+    def process_scan(
+        self,
+        auto_create_manager: AutoCreateContextManager,
+        data: dict,
+        context: dict,
+    ) -> None:
+        """
+        Process the scan with all of the supplied data fully massaged
+        into the format we are expecting
+
+        Raises exceptions in the event of an error
+        """
+        statistics_before, statistics_delta = None, None
+        try:
+            if test := context.get("test"):
+                reimporter_client = DefaultReImporter()
+                statistics_before = test.statistics
+                context["test"], _, _, _, _, _, test_import = reimporter_client.process_scan(**context)
                 if test_import:
                     statistics_delta = test_import.statistics
-            elif auto_create_context:
-                # perform Import to create test
-                logger.debug(
-                    "reimport for non-existing test, using import to create new test"
-                )
-                engagement = get_or_create_engagement(
-                    None,
-                    engagement_name,
-                    product_name,
-                    product_type_name,
-                    auto_create_context,
-                    deduplication_on_engagement,
-                    source_code_management_uri=source_code_management_uri,
-                    target_end=engagement_end_date,
-                )
-                importer = Importer()
-                (
-                    test,
-                    finding_count,
-                    closed_finding_count,
-                    _,
-                ) = importer.import_scan(
-                    scan,
-                    scan_type,
-                    engagement,
-                    lead,
-                    environment,
-                    active=active,
-                    verified=verified,
-                    tags=tags,
-                    minimum_severity=minimum_severity,
-                    endpoints_to_add=endpoints_to_add,
-                    scan_date=scan_date_time,
-                    version=version,
-                    branch_tag=branch_tag,
-                    build_id=build_id,
-                    commit_hash=commit_hash,
-                    push_to_jira=push_to_jira,
-                    close_old_findings=close_old_findings,
-                    close_old_findings_product_scope=close_old_findings_product_scope,
-                    group_by=group_by,
-                    api_scan_configuration=api_scan_configuration,
-                    service=service,
-                    title=test_title,
-                    create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
-                )
-
+            elif context.get("auto_create_context"):
+                # Attempt to create an engagement
+                logger.debug("reimport for non-existing test, using import to create new test")
+                context["engagement"] = auto_create_manager.get_or_create_engagement(**context)
+                importer_client = DefaultImporter()
+                context["test"], _, _, _, _, _, _ = importer_client.process_scan(**context)
             else:
-                # should be captured by validation / permission check already
-                raise NotFound("test not found")
-
-            if test:
+                raise NotFound("A test could not be found!")
+            # Update the response body with some new data
+            if test := context.get("test"):
                 data["test"] = test
                 data["test_id"] = test.id
                 data["engagement_id"] = test.engagement.id
@@ -2608,13 +2522,23 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 if statistics_delta:
                     data["statistics"]["delta"] = statistics_delta
                 data["statistics"]["after"] = test.statistics
-
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
             raise Exception(se)
         except ValueError as ve:
             raise Exception(ve)
+
+    def save(self, push_to_jira=False):
+        # Go through the validate method
+        data = self.validated_data
+        # Extract the data from the form
+        context = self.set_context(data)
+        # Process the auto create context inputs
+        auto_create_manager = AutoCreateContextManager
+        self.process_auto_create_create_context(auto_create_manager, context)
+        # Import the scan with all of the supplied data
+        self.process_scan(auto_create_manager, data, context)
 
     def validate(self, data):
         scan_type = data.get("scan_type")
@@ -2678,27 +2602,22 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
     def save(self):
         data = self.validated_data
         file = data.get("file")
-
         create_endpoints = data.get("create_endpoints", True)
         create_tags = data.get("create_tags", True)
         create_dojo_meta = data.get("create_dojo_meta", False)
+        auto_create = AutoCreateContextManager()
+        # Process the context to make an conversions needed. Catch any exceptions
+        # in this case and wrap them in a DRF exception
+        try:
+            auto_create.process_import_meta_data_from_dict(data)
+            # Get an existing product
+            product = auto_create.get_target_product_if_exists(**data)
+            if not product:
+                product = auto_create.get_target_product_by_id_if_exists(**data)
+        except (ValueError, TypeError) as e:
+            # Raise an explicit drf exception here
+            raise ValidationError(str(e))
 
-        (
-            _,
-            _,
-            _,
-            _,
-            _,
-            product_name,
-            _,
-            _,
-            _,
-            _,
-        ) = get_import_meta_data_from_dict(data)
-        product = get_target_product_if_exists(product_name)
-        if not product:
-            product_id = get_product_id_from_dict(data)
-            product = get_target_product_by_id_if_exists(product_id)
         try:
             endpoint_meta_import(
                 file,

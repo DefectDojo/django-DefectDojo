@@ -1,0 +1,367 @@
+import logging
+from datetime import timedelta, datetime
+from crum import get_current_user
+
+from django.utils import timezone
+
+from dojo.models import (
+    Engagement,
+    Product,
+    Product_Member,
+    Product_Type,
+    Product_Type_Member,
+    Role,
+    Test,
+)
+from dojo.utils import get_last_object_or_none, get_object_or_none
+
+
+logger = logging.getLogger(__name__)
+deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
+
+
+class AutoCreateContextManager:
+    """
+    Management of safely fetching and creating resources used in the import
+    and reimport processes. Resources managed by this class are:
+    - Product Types
+    - Products
+    - Engagements
+    - Tests
+    """
+    """
+    ===================================
+    ----------- Validators ------------
+    ===================================
+    """
+    def common_string_validation(
+        self,
+        value: str,
+        parameter_name: str,
+        object_name: str,
+    ) -> None:
+        """
+        Raises validation error if the value violates any of
+        the following:
+        - Not supplied
+        - Not a string
+        - Empty string
+        """
+        if value is None:
+            raise ValueError(
+                f"{object_name}: {parameter_name} must be supplied"
+            )
+        if not isinstance(value, str):
+            raise TypeError(
+                f"{object_name}: {parameter_name} must be a string"
+            )
+        if len(value) == 0:
+            raise ValueError(
+                f"{object_name}: {parameter_name} must have a length "
+                "greater than zero"
+            )
+
+    def validate_product_type_inputs(
+        self,
+        product_type_name: str = None,
+        **kwargs: dict,
+    ) -> None:
+        """
+        Raises validation error if the product type name violates any of
+        the following:
+        - Not supplied
+        - Not a string
+        - Empty string
+        """
+        self.common_string_validation(product_type_name, "product_type_name", "Product Type")
+
+    def validate_product_inputs(
+        self,
+        product_name: str = None,
+        **kwargs: dict,
+    ) -> None:
+        """
+        Raises validation error if the product type name violates any of
+        the following:
+        - Not supplied
+        - Not a string
+        - Empty string
+        """
+        self.common_string_validation(product_name, "product_name", "Product")
+
+    def validate_engagement_inputs(
+        self,
+        engagement_name: str = None,
+        **kwargs: dict,
+    ) -> None:
+        """
+        Raises validation error if the engagement type name violates any of
+        the following:
+        - Not supplied
+        - Not a string
+        - Empty string
+        """
+        self.common_string_validation(engagement_name, "engagement_name", "Engagement")
+
+    def process_import_meta_data_from_dict(
+        self,
+        data: dict,
+        **kwargs: dict,
+    ) -> None:
+        """
+        Ensure that the inputs supplied for test and engagement can be
+        derive into am integer ID. This can happen if a full Test or
+        Engagement is supplied, or if the input is an integer ID to
+        start with
+        """
+        # Validate the test artifact
+        if test_id := data.get("test", None):
+            # Convert to just the ID if the whole object as passed
+            if isinstance(test_id, Test):
+                test_id = test_id.id
+            # Ensure the ID is an integer, not a string
+            elif isinstance(test_id, str) and not test_id.isdigit():
+                raise ValueError("test must be an integer")
+            # Update the "test" entry in the dict with the ID
+            data["test_id"] = test_id
+        # Validate the engagement artifact
+        if engagement_id := data.get("engagement", None):
+            # Convert to just the ID if the whole object as passed
+            if isinstance(engagement_id, Engagement):
+                engagement_id = engagement_id.id
+            # Ensure the ID is an integer, not a string
+            elif isinstance(engagement_id, str) and not engagement_id.isdigit():
+                raise ValueError("engagement must be an integer")
+            # Update the "engagement" entry in the dict with the ID
+            data["engagement_id"] = engagement_id
+        # Validate the product artifact
+        if product_id := data.get("product", None):
+            # Convert to just the ID if the whole object as passed
+            if isinstance(product_id, Product):
+                product_id = product_id.id
+            # Ensure the ID is an integer, not a string
+            elif isinstance(product_id, str) and not product_id.isdigit():
+                raise ValueError("product must be an integer")
+            # Update the "product" entry in the dict with the ID
+            data["product_id"] = product_id
+
+    """
+    ===================================
+    ------------ Fetchers -------------
+    ===================================
+    """
+    def get_target_product_type_if_exists(
+        self,
+        product_type_name: str = None,
+        **kwargs: dict,
+    ) -> Product_Type | None:
+        """
+        Query for a product type that matches the name `product_type_name`.
+
+        If a match is not found, return None
+        """
+        # Check if the name supplied is valid
+        self.validate_product_type_inputs(product_type_name=product_type_name)
+        # Look for an existing object
+        return get_object_or_none(Product_Type, name=product_type_name)
+
+    def get_target_product_if_exists(
+        self,
+        product_name: str = None,
+        product_type_name: str = None,
+        **kwargs: dict,
+    ) -> Product | None:
+        """
+        Query for a product that matches the name `product_name`. Some
+        extra verification is also administered to ensure the
+        `product_type_name` matches the one on the fetched product
+
+        If a match is not found, return None
+        """
+        # Check if the name supplied is valid
+        self.validate_product_inputs(product_name=product_name)
+        # Look for an existing object
+        if product := get_object_or_none(Product, name=product_name):
+            # product type name must match if provided
+            if product_type_name and product.prod_type.name != product_type_name:
+                raise ValueError(
+                    "The fetched product has a conflict with the supplied product type name: "
+                    f"existing product type name - {product.prod_type.name} vs "
+                    f"supplied product type name - {product_type_name}"
+                )
+            # Return the product
+            return product
+        return None
+
+    def get_target_product_by_id_if_exists(
+        self,
+        product_id: int = 0,
+        **kwargs: dict,
+    ) -> Product | None:
+        """
+        Query for a product matching by ID
+
+        If a match is not found, return None
+        """
+        return get_object_or_none(Product, pk=product_id)
+
+    def get_target_engagement_if_exists(
+        self,
+        engagement_id: int = 0,
+        engagement_name: str = None,
+        product: Product = None,
+        **kwargs: dict,
+    ) -> Engagement | None:
+        """
+        Query for an engagement matching by ID. If a match is not found,
+        and a product is supplied, return the last engagement created on
+        the product by name
+
+        If a match is not found, and a product is not supplied, return None
+        """
+        if engagement := get_object_or_none(Engagement, pk=engagement_id):
+            logger.debug('Using existing engagement by id: %s', engagement_id)
+            return engagement
+        # if there's no product, then for sure there's no engagement either
+        if product is None:
+            return None
+        # engagement name is not unique unfortunately
+        return get_last_object_or_none(Engagement, product=product, name=engagement_name)
+
+    def get_target_test_if_exists(
+        self,
+        test_id: int = 0,
+        test_title: str = None,
+        scan_type: str = None,
+        engagement: Engagement = None,
+        **kwargs: dict,
+    ) -> Test | None:
+        """
+        Retrieves the target test to reimport. This can be as simple as looking up the test via the `test_id` parameter.
+        If there is no `test_id` provided, we lookup the latest test inside the provided engagement that satisfies
+        the provided scan_type and test_title.
+        """
+        if test := get_object_or_none(Test, pk=test_id):
+            logger.debug('Using existing Test by id: %s', test_id)
+            return test
+        # If the engagement is not supplied, we cannot do anything
+        if not engagement:
+            return None
+        # Check for a custom test title
+        if test_title:
+            return get_last_object_or_none(Test, engagement=engagement, title=test_title, scan_type=scan_type)
+        # Otherwise use the last test by scan type
+        return get_last_object_or_none(Test, engagement=engagement, scan_type=scan_type)
+
+    """
+    ===================================
+    ------------ Creators -------------
+    ===================================
+    """
+    def get_or_create_product_type(
+        self,
+        product_type_name: str = None,
+        **kwargs: dict,
+    ) -> Product_Type:
+        """
+        Fetches a product type by name if one already exists. If not,
+        a new product type will be created with the current user being
+        added as product type member
+        """
+        # Look for an existing object
+        if product_type := self.get_target_product_type_if_exists(product_type_name=product_type_name):
+            return product_type
+        else:
+            product_type, created = Product_Type.objects.get_or_create(name=product_type_name)
+            if created:
+                Product_Type_Member.objects.create(
+                    user=get_current_user(),
+                    product_type=product_type,
+                    role=Role.objects.get(is_owner=True),
+                )
+            return product_type
+
+    def get_or_create_product(
+        self,
+        product_name: str = None,
+        product_type_name: str = None,
+        auto_create_context: bool = False,
+        **kwargs: dict,
+    ) -> Product:
+        """
+        Fetches a product by name if it exists. When `auto_create_context` is
+        enabled the product will be created with the current user being added
+        as product member
+        """
+        # try to find the product (within the provided product_type)
+        if product := self.get_target_product_if_exists(product_name, product_type_name):
+            return product
+        # not found .... create it
+        if not auto_create_context:
+            raise ValueError('auto_create_context not True, unable to create non-existing product')
+        # Look for a product type first
+        product_type = self.get_or_create_product_type(product_type_name=product_type_name)
+        # Create the product
+        product, created = Product.objects.get_or_create(name=product_name, prod_type=product_type, description=product_name)
+        if created:
+            Product_Member.objects.create(
+                user=get_current_user(),
+                product=product,
+                role=Role.objects.get(is_owner=True),
+            )
+
+        return product
+
+    def get_or_create_engagement(
+        self,
+        engagement_id: int = 0,
+        engagement_name: str = None,
+        product_name: str = None,
+        product_type_name: str = None,
+        auto_create_context: bool = False,
+        deduplication_on_engagement: bool = False,
+        source_code_management_uri: str = None,
+        target_end: datetime = None,
+        **kwargs: dict,
+    ) -> Engagement:
+        """
+        Fetches an engagement by name or ID if one already exists.
+        """
+        # try to find the engagement (and product)
+        product = self.get_target_product_if_exists(
+            product_name=product_name,
+            product_type_name=product_type_name,
+        )
+        engagement = self.get_target_engagement_if_exists(
+            engagement_id=engagement_id,
+            engagement_name=engagement_name,
+            product=product
+        )
+        # If we have an engagement, we cna just return it
+        if engagement:
+            return engagement
+        # not found .... create it
+        if not auto_create_context:
+            raise ValueError('auto_create_context not True, unable to create non-existing engagement')
+        # Get a product first
+        product = self.get_or_create_product(
+            product_name=product_name,
+            product_type_name=product_type_name,
+            auto_create_context=auto_create_context,
+        )
+        # Get the target start date in order
+        target_start = timezone.now().date()
+        if (target_end is None) or (target_start > target_end):
+            target_end = (timezone.now() + timedelta(days=365)).date()
+        # Create the engagement
+        return Engagement.objects.create(
+            engagement_type="CI/CD",
+            name=engagement_name,
+            product=product,
+            lead=get_current_user(),
+            target_start=target_start,
+            target_end=target_end,
+            status="In Progress",
+            deduplication_on_engagement=deduplication_on_engagement,
+            source_code_management_uri=source_code_management_uri,
+        )

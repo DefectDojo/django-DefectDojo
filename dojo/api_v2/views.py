@@ -16,11 +16,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 import base64
 import mimetypes
 from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.importers.reimporter.utils import (
-    get_target_engagement_if_exists,
-    get_target_product_if_exists,
-    get_target_test_if_exists,
-)
+from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.models import (
     Language_Type,
     Languages,
@@ -2598,24 +2594,17 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = (IsAuthenticated, permissions.UserHasImportPermission)
 
     def perform_create(self, serializer):
-        (
-            _,
-            _,
-            _,
-            engagement_id,
-            engagement_name,
-            product_name,
-            product_type_name,
-            auto_create_context,
-            deduplication_on_engagement,
-            do_not_reactivate,
-        ) = serializers.get_import_meta_data_from_dict(
-            serializer.validated_data
-        )
-        product = get_target_product_if_exists(product_name)
-        engagement = get_target_engagement_if_exists(
-            engagement_id, engagement_name, product
-        )
+        auto_create = AutoCreateContextManager()
+        # Process the context to make an conversions needed. Catch any exceptions
+        # in this case and wrap them in a DRF exception
+        try:
+            auto_create.process_import_meta_data_from_dict(serializer.validated_data)
+            # Get an existing product
+            product = auto_create.get_target_product_if_exists(**serializer.validated_data)
+            engagement = auto_create.get_target_engagement_if_exists(**serializer.validated_data)
+        except (ValueError, TypeError) as e:
+            # Raise an explicit drf exception here
+            raise ValidationError(str(e))
 
         # when using auto_create_context, the engagement or product may not
         # have been created yet
@@ -2777,27 +2766,18 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         return get_authorized_tests(Permissions.Import_Scan_Result)
 
     def perform_create(self, serializer):
-        (
-            test_id,
-            test_title,
-            scan_type,
-            _,
-            engagement_name,
-            product_name,
-            product_type_name,
-            auto_create_context,
-            deduplication_on_engagement,
-            do_not_reactivate,
-        ) = serializers.get_import_meta_data_from_dict(
-            serializer.validated_data
-        )
-        product = get_target_product_if_exists(product_name)
-        engagement = get_target_engagement_if_exists(
-            None, engagement_name, product
-        )
-        test = get_target_test_if_exists(
-            test_id, test_title, scan_type, engagement
-        )
+        auto_create = AutoCreateContextManager()
+        # Process the context to make an conversions needed. Catch any exceptions
+        # in this case and wrap them in a DRF exception
+        try:
+            auto_create.process_import_meta_data_from_dict(serializer.validated_data)
+            # Get an existing product
+            product = auto_create.get_target_product_if_exists(**serializer.validated_data)
+            engagement = auto_create.get_target_engagement_if_exists(**serializer.validated_data)
+            test = auto_create.get_target_test_if_exists(**serializer.validated_data)
+        except (ValueError, TypeError) as e:
+            # Raise an explicit drf exception here
+            raise ValidationError(str(e))
 
         # when using auto_create_context, the engagement or product may not
         # have been created yet

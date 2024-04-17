@@ -1706,7 +1706,7 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
@@ -1735,7 +1735,7 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.assert_not_called()
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
@@ -1765,7 +1765,7 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.assert_not_called()
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
@@ -1796,7 +1796,7 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.assert_not_called()
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_global_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
@@ -1826,7 +1826,7 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.assert_not_called()
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         """
@@ -1864,7 +1864,7 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.assert_not_called()
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
@@ -1895,7 +1895,7 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         reimporter_mock.assert_not_called()
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_global_permission')
     def test_create_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
@@ -1938,7 +1938,7 @@ class ReimportScanTest(DojoAPITestCase):
     # Specific tests for reimport
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     def test_reimport_zap_xml(self, importer_mock, reimporter_mock):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
@@ -1961,7 +1961,7 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.assert_called_once()
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
@@ -1990,7 +1990,7 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.assert_not_called()
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_authorized_product_name_engagement_name_scan_type_title_auto_create(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
@@ -2019,7 +2019,7 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.assert_not_called()
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         """
@@ -2057,7 +2057,7 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.assert_not_called()
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
@@ -2088,7 +2088,7 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.assert_not_called()
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_global_permission')
     def test_create_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
@@ -2118,7 +2118,7 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.assert_not_called()
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_test_id(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
@@ -2145,7 +2145,7 @@ class ReimportScanTest(DojoAPITestCase):
     # copied tests from import, unsure how to use inheritance/mixins with test_ methods
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
@@ -2175,7 +2175,7 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.assert_not_called()
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
@@ -2206,7 +2206,7 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.assert_not_called()
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_global_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
@@ -2236,7 +2236,7 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.assert_not_called()
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_scan_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
@@ -2263,7 +2263,7 @@ class ReimportScanTest(DojoAPITestCase):
         reimporter_mock.assert_not_called()
 
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_scan_type_title(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False

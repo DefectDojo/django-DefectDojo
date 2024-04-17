@@ -4,17 +4,7 @@ from rest_framework.exceptions import (
     PermissionDenied,
     ValidationError,
 )
-from dojo.api_v2.serializers import (
-    get_import_meta_data_from_dict,
-    get_product_id_from_dict,
-)
-from dojo.importers.reimporter.utils import (
-    get_target_engagement_if_exists,
-    get_target_product_by_id_if_exists,
-    get_target_product_if_exists,
-    get_target_test_if_exists,
-    get_target_product_type_if_exists,
-)
+from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.models import (
     Endpoint,
     Engagement,
@@ -428,43 +418,38 @@ class UserHasImportPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
-
-        (
-            _,
-            _,
-            _,
-            engagement_id,
-            engagement_name,
-            product_name,
-            product_type_name,
-            auto_create_context,
-            deduplication_on_engagement,
-            do_not_reactivate,
-        ) = get_import_meta_data_from_dict(request.data)
-        product_type = get_target_product_type_if_exists(product_type_name)
-        product = get_target_product_if_exists(product_name, product_type_name)
-        engagement = get_target_engagement_if_exists(
-            engagement_id, engagement_name, product
-        )
-
+        auto_create = AutoCreateContextManager()
+        # Process the context to make an conversions needed. Catch any exceptions
+        # in this case and wrap them in a DRF exception
+        try:
+            data = request.data
+            auto_create.process_import_meta_data_from_dict(data)
+            # Get an existing product
+            product_type = auto_create.get_target_product_type_if_exists(**data)
+            product = auto_create.get_target_product_if_exists(**data)
+            engagement = auto_create.get_target_engagement_if_exists(**data)
+        except (ValueError, TypeError) as e:
+            # Raise an explicit drf exception here
+            raise ValidationError(str(e))
+        
         if engagement:
             # existing engagement, nothing special to check
             return user_has_permission(
                 request.user, engagement, Permissions.Import_Scan_Result
             )
-        elif engagement_id:
+        elif engagement_id := data.get("engagement_id"):
             # engagement_id doesn't exist
             raise serializers.ValidationError(
-                "Engagement '%s' doesn''t exist" % engagement_id
+                f"Engagement \"{engagement_id}\" does not exist"
             )
 
-        if not auto_create_context:
+        if not data.get("auto_create_context"):
             raise_no_auto_create_import_validation_error(
                 None,
                 None,
-                engagement_name,
-                product_name,
-                product_type_name,
+                data.get("engagement_name"),
+                data.get("product_name"),
+                data.get("product_type_name"),
                 engagement,
                 product,
                 product_type,
@@ -476,11 +461,11 @@ class UserHasImportPermission(permissions.BasePermission):
             return check_auto_create_permission(
                 request.user,
                 product,
-                product_name,
+                data.get("product_name"),
                 engagement,
-                engagement_name,
+                data.get("engagement_name"),
                 product_type,
-                product_type_name,
+                data.get("product_type_name"),
                 "Need engagement_id or product_name + engagement_name to perform import",
             )
 
@@ -489,33 +474,29 @@ class UserHasMetaImportPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
-
-        (
-            _,
-            _,
-            _,
-            _,
-            _,
-            product_name,
-            _,
-            _,
-            _,
-            _,
-        ) = get_import_meta_data_from_dict(request.data)
-        product = get_target_product_if_exists(product_name)
-        if not product:
-            product_id = get_product_id_from_dict(request.data)
-            product = get_target_product_by_id_if_exists(product_id)
+        auto_create = AutoCreateContextManager()
+        # Process the context to make an conversions needed. Catch any exceptions
+        # in this case and wrap them in a DRF exception
+        try:
+            data = request.data
+            auto_create.process_import_meta_data_from_dict(data)
+            # Get an existing product
+            product = auto_create.get_target_product_if_exists(**data)
+            if not product:
+                product = auto_create.get_target_product_by_id_if_exists(**data)
+        except (ValueError, TypeError) as e:
+            # Raise an explicit drf exception here
+            raise ValidationError(str(e))
 
         if product:
             # existing product, nothing special to check
             return user_has_permission(
                 request.user, product, Permissions.Import_Scan_Result
             )
-        elif product_id:
+        elif product_id := data.get("product_id"):
             # product_id doesn't exist
             raise serializers.ValidationError(
-                "product '%s' doesn''t exist" % product_id
+                f"product \"{product_id}\" does not exist"
             )
         else:
             raise serializers.ValidationError(
@@ -635,47 +616,39 @@ class UserHasReimportPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
-
-        (
-            test_id,
-            test_title,
-            scan_type,
-            _,
-            engagement_name,
-            product_name,
-            product_type_name,
-            auto_create_context,
-            deduplication_on_engagement,
-            do_not_reactivate,
-        ) = get_import_meta_data_from_dict(request.data)
-
-        product_type = get_target_product_type_if_exists(product_type_name)
-        product = get_target_product_if_exists(product_name, product_type_name)
-        engagement = get_target_engagement_if_exists(
-            None, engagement_name, product
-        )
-        test = get_target_test_if_exists(
-            test_id, test_title, scan_type, engagement
-        )
+        auto_create = AutoCreateContextManager()
+        # Process the context to make an conversions needed. Catch any exceptions
+        # in this case and wrap them in a DRF exception
+        try:
+            data = request.data
+            auto_create.process_import_meta_data_from_dict(data)
+            # Get an existing product
+            product_type = auto_create.get_target_product_type_if_exists(**data)
+            product = auto_create.get_target_product_if_exists(**data)
+            engagement = auto_create.get_target_engagement_if_exists(**data)
+            test = auto_create.get_target_test_if_exists(**data)
+        except (ValueError, TypeError) as e:
+            # Raise an explicit drf exception here
+            raise ValidationError(str(e))
 
         if test:
             # existing test, nothing special to check
             return user_has_permission(
                 request.user, test, Permissions.Import_Scan_Result
             )
-        elif test_id:
+        elif test_id := data.get("test_id"):
             # test_id doesn't exist
             raise serializers.ValidationError(
-                "Test '%s' doesn't exist" % test_id
+                f"Test \"{test_id}\" doesn't exist"
             )
 
-        if not auto_create_context:
+        if not  data.get("auto_create_context"):
             raise_no_auto_create_import_validation_error(
-                test_title,
-                scan_type,
-                engagement_name,
-                product_name,
-                product_type_name,
+                data.get("test_title"),
+                data.get("scan_type"),
+                data.get("engagement_name"),
+                data.get("product_name"),
+                data.get("product_type_name"),
                 engagement,
                 product,
                 product_type,
@@ -687,11 +660,11 @@ class UserHasReimportPermission(permissions.BasePermission):
             return check_auto_create_permission(
                 request.user,
                 product,
-                product_name,
+                data.get("product_name"),
                 engagement,
-                engagement_name,
+                data.get("engagement_name"),
                 product_type,
-                product_type_name,
+                data.get("product_type_name"),
                 "Need test_id or product_name + engagement_name + scan_type to perform reimport",
             )
 

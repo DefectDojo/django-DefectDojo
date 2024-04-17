@@ -648,7 +648,7 @@ class ImportScanResultsView(View):
         """
         Returns the template that will be presented to the user
         """
-        return "dojo/import_scan_results.html" 
+        return "dojo/import_scan_results.html"
 
     def get_development_environment(
         self,

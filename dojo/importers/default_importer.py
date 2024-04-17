@@ -1,15 +1,10 @@
 import logging
-import base64
-from abc import ABC
 from datetime import datetime
 from typing import List, Tuple
 
 from django.utils import timezone
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.core.files.base import ContentFile
 from django.core.serializers import serialize, deserialize
-from django.conf import settings
-from django.db.models.query_utils import Q
 
 from dojo.importers.base_importer import BaseImporter, Parser
 import dojo.notifications.helper as notifications_helper
@@ -17,19 +12,11 @@ import dojo.finding.helper as finding_helper
 from dojo.utils import is_finding_groups_enabled
 import dojo.jira_link.helper as jira_helper
 from dojo.models import (
-    Product_Type,
-    Product,
     Engagement,
-    Test_Type,
     Test,
     Test_Import,
     Finding,
-    Endpoint,
-    Development_Environment,
     Dojo_User,
-    Tool_Configuration,
-    BurpRawRequestResponse,
-    FileUpload,
 )
 
 
@@ -38,18 +25,6 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 class DefaultImporter(BaseImporter):
-    def __init__(self, *args, **kwargs):
-        """
-        Create an instance of the Default Importer
-        """
-        return ABC.__init__(self, *args, **kwargs)
-
-    def __new__(self, *args, **kwargs):
-        """
-        Create an instance of the Default Importer
-        """
-        return ABC.__new__(self, *args, **kwargs)
-
     def create_test(
         self,
         scan_type: str,
@@ -209,33 +184,33 @@ class DefaultImporter(BaseImporter):
             if service := kwargs.get("service"):
                 unsaved_finding.service = service
 
-            unsaved_finding.save(dedupe_option=False)
+            finding = unsaved_finding.save(dedupe_option=False)
             # Determine how the finding should be grouped
             group_by = kwargs.get("group_by")
-            group_names_to_findings_dict = self.process_finding_groups(
-                unsaved_finding,
+            self.process_finding_groups(
+                finding,
                 group_by,
                 group_names_to_findings_dict,
             )
             # Process any request/response pairs
-            self.process_request_response_pairs(unsaved_finding)
+            self.process_request_response_pairs(finding)
             # Process any endpoints on the endpoint, or added on the form
-            self.process_endpoints(unsaved_finding, kwargs.get("endpoints_to_add", []))
+            self.process_endpoints(finding, kwargs.get("endpoints_to_add", []))
             # Process any tags
-            if unsaved_finding.unsaved_tags:
-                unsaved_finding.tags = unsaved_finding.unsaved_tags
+            if finding.unsaved_tags:
+                finding.tags = finding.unsaved_tags
             # Process any files
-            self.process_files(unsaved_finding)
+            self.process_files(finding)
             # Process vulnerability IDs
-            self.process_vulnerability_ids(unsaved_finding)
+            self.process_vulnerability_ids(finding)
             # Categorize this finding as a new one
-            new_findings.append(unsaved_finding)
+            new_findings.append(finding)
             # to avoid pushing a finding group multiple times, we push those outside of the loop
             push_to_jira = kwargs.get("push_to_jira", False)
             if is_finding_groups_enabled() and group_by:
-                unsaved_finding.save()
+                finding.save()
             else:
-                unsaved_finding.save(push_to_jira=push_to_jira)
+                finding.save(push_to_jira=push_to_jira)
 
         for (group_name, findings) in group_names_to_findings_dict.items():
             finding_helper.add_findings_to_auto_group(
@@ -269,6 +244,10 @@ class DefaultImporter(BaseImporter):
         as well as leaving a not on the finding indicating that it was mitigated
         because the vulnerability is no longer present in the submitted scan report.
         """
+        # First check if close old findings is desired
+        if kwargs.get("close_old_findings") is False:
+            return []
+        logger.debug("REIMPORT_SCAN: Closing findings no longer present in scan report")
         # Close old active findings that are not reported by this scan.
         # Refactoring this to only call test.finding_set.values() once.
         mitigated_hash_codes = []
@@ -300,32 +279,18 @@ class DefaultImporter(BaseImporter):
         finding_groups_enabled = is_finding_groups_enabled()
         # Update the status of the findings and any endpoints
         for old_finding in old_findings:
-            old_finding.active = False
-            old_finding.is_mitigated = True
-            old_finding.mitigated = scan_date
-            old_finding.notes.create(
-                author=user,
-                entry=(
+            self.mitigate_finding(
+                old_finding,
+                user,
+                scan_date,
+                (
                     "This finding has been automatically closed "
                     "as it is not present anymore in recent scans."
-                )
+                ),
+                finding_groups_enabled,
+                push_to_jira,
             )
-            endpoint_status = old_finding.status_finding.all()
-            for status in endpoint_status:
-                status.mitigated_by = user
-                status.mitigated_time = timezone.now()
-                status.mitigated = True
-                status.last_modified = timezone.now()
-                status.save()
-            # Add a stale tag to the findings
-            old_finding.tags.add('stale')
-            # to avoid pushing a finding group multiple times, we push those outside of the loop
-            if finding_groups_enabled and old_finding.finding_group:
-                # don't try to dedupe findings that we are closing
-                old_finding.save(dedupe_option=False)
-            else:
-                old_finding.save(dedupe_option=False, push_to_jira=push_to_jira)
-
+        # push finding groups to jira since we only only want to push whole groups
         if finding_groups_enabled and push_to_jira:
             for finding_group in set([finding.finding_group for finding in old_findings if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
@@ -417,32 +382,6 @@ class DefaultImporter(BaseImporter):
         # Aggregate all the findings and return them with the newly created test
         return test, self.api_configuration_get_findings_from_tests(tests)
 
-    def determine_process_method(
-        self,
-        test: Test,
-        parsed_findings: List[Finding],
-        user: Dojo_User,
-        **kwargs: dict,
-    ) -> List[Finding]:
-        """
-        Determines whether to process the scan iteratively, or in chunks,
-        based upon the ASYNC_FINDING_IMPORT setting
-        """
-        if settings.ASYNC_FINDING_IMPORT:
-            return self.async_process_findings(
-                test,
-                parsed_findings,
-                user,
-                **kwargs,
-            )
-        else:
-            return self.sync_process_findings(
-                test,
-                parsed_findings,
-                user,
-                **kwargs,
-            )
-
     def sync_process_findings(
         self,
         test: Test,
@@ -480,7 +419,7 @@ class DefaultImporter(BaseImporter):
         for findings_list in chunk_list:
             result = self.process_findings(
                 test,
-                parsed_findings,
+                findings_list,
                 user,
                 sync=False,
                 **kwargs,

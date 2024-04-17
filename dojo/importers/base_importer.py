@@ -19,6 +19,7 @@ from dojo.utils import max_safe, get_current_user, is_finding_groups_enabled
 import dojo.finding.helper as finding_helper
 from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.tools.factory import get_parser
+from dojo.importers.endpoint_manager import DefaultReImporterEndpointManager
 from dojo.models import (
     # models
     Engagement,
@@ -64,7 +65,7 @@ class Parser:
         pass
 
 
-class BaseImporter(ABC):
+class BaseImporter(ABC, DefaultReImporterEndpointManager):
     """
     A collection of utilities used by various importers within DefectDojo.
     Some of these commonalities may be fully used by children importers,
@@ -123,6 +124,8 @@ class BaseImporter(ABC):
         self.check_child_implementation_exception()
 
     @abstractmethod
+    @dojo_async_task
+    @app.task(ignore_result=False)
     def process_findings(
         self,
         test: Test,
@@ -281,6 +284,32 @@ class BaseImporter(ABC):
                 **kwargs,
             )
 
+    def determine_process_method(
+        self,
+        test: Test,
+        parsed_findings: List[Finding],
+        user: Dojo_User,
+        **kwargs: dict,
+    ) -> List[Finding]:
+        """
+        Determines whether to process the scan iteratively, or in chunks,
+        based upon the ASYNC_FINDING_IMPORT setting
+        """
+        if settings.ASYNC_FINDING_IMPORT:
+            return self.async_process_findings(
+                test,
+                parsed_findings,
+                user,
+                **kwargs,
+            )
+        else:
+            return self.sync_process_findings(
+                test,
+                parsed_findings,
+                user,
+                **kwargs,
+            )
+
     def update_timestamps(
         self,
         test: Test,
@@ -327,7 +356,7 @@ class BaseImporter(ABC):
         test.save()
         test.engagement.save()
 
-    def update_tags(
+    def update_test_tags(
         self,
         test: Test,
         tags: List[str],
@@ -531,6 +560,20 @@ class BaseImporter(ABC):
             # Do not run this asynchronously or chunk the endpoints
             self.add_endpoints_to_unsaved_finding(finding, test, endpoints, sync=True)
 
+    def clean_unsaved_endpoints(
+        self,
+        endpoints: List[Endpoint]
+    ) -> None:
+        """
+        Clean endpoints that are supplied. For any endpoints that fail this validation
+        process, raise a message that broken endpoints are being stored
+        """
+        for endpoint in endpoints:
+            try:
+                endpoint.clean()
+            except ValidationError as e:
+                logger.warning(f"DefectDojo is storing broken endpoint because cleaning wasn't successful: {e}")
+
     @dojo_async_task
     @app.task()
     def add_endpoints_to_unsaved_finding(
@@ -544,11 +587,8 @@ class BaseImporter(ABC):
         Creates Endpoint objects for a single finding and creates the link via the endpoint status
         """
         logger.debug(f"IMPORT_SCAN: Adding {len(endpoints)} endpoints to finding: {finding}")
+        self.clean_unsaved_endpoints(endpoints)
         for endpoint in endpoints:
-            try:
-                endpoint.clean()
-            except ValidationError as e:
-                logger.warning(f"DefectDojo is storing broken endpoint because cleaning wasn't successful: {e}")
             ep = None
             try:
                 ep, _ = endpoint_get_or_create(
@@ -738,7 +778,7 @@ class BaseImporter(ABC):
         finding: Finding,
         group_by: str,
         group_names_to_findings_dict: dict,
-    ) -> dict:
+    ) -> None:
         """
         Determines how to handle an incoming finding with respect to grouping
         if finding groups are enabled, use the supplied grouping mechanism to
@@ -752,7 +792,6 @@ class BaseImporter(ABC):
                     group_names_to_findings_dict[name].append(finding)
                 else:
                     group_names_to_findings_dict[name] = [finding]
-        return group_names_to_findings_dict
 
     def process_request_response_pairs(
         self,
@@ -820,3 +859,34 @@ class BaseImporter(ABC):
                 file_upload.file.save(title, ContentFile(data))
                 file_upload.save()
                 finding.files.add(file_upload)
+
+    def mitigate_finding(
+        self,
+        finding: Finding,
+        user: Dojo_User,
+        scan_date: datetime,
+        note_message: str,
+        finding_groups_enabled: bool,
+        push_to_jira: bool,
+    ) -> Finding:
+        """
+        Mitigates a finding, all endpoint statuses, leaves a note on the finding
+        with a record of what happened, and then saves the finding. Changes to
+        this finding will also be synced with some ticket tracking system as well
+        as groups
+        """
+        finding.active = False
+        finding.is_mitigated = True
+        finding.mitigated = scan_date
+        finding.notes.create(
+            author=user,
+            entry=note_message,
+        )
+        # Mitigate the endpoint statuses
+        self.mitigate_endpoint_status(finding.status_finding.all(), user)
+        # to avoid pushing a finding group multiple times, we push those outside of the loop
+        if finding_groups_enabled and finding.finding_group:
+            # don't try to dedupe findings that we are closing
+            finding.save(dedupe_option=False)
+        else:
+            finding.save(dedupe_option=False, push_to_jira=push_to_jira)
