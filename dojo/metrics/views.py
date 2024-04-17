@@ -314,15 +314,20 @@ def get_in_period_details(findings):
         elif obj.age > 90:
             age_detail[3] += 1
 
-        in_period_counts[obj.severity] += 1
-        in_period_counts['Total'] += 1
-
-        if obj.test.engagement.product.name not in in_period_details:
-            in_period_details[obj.test.engagement.product.name] = {
-                'path': reverse('product_open_findings', args=(obj.test.engagement.product.id,)),
-                'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
-        in_period_details[obj.test.engagement.product.name][obj.severity] += 1
-        in_period_details[obj.test.engagement.product.name]['Total'] += 1
+        # This condition should be true in nearly all cases,
+        # but there are some far edge cases
+        if obj.severity in in_period_counts:
+            in_period_counts[obj.severity] += 1
+            in_period_counts['Total'] += 1
+        # This condition should be true in nearly all cases,
+        # but there are some far edge cases
+        if obj.severity in in_period_details:
+            if obj.test.engagement.product.name not in in_period_details:
+                in_period_details[obj.test.engagement.product.name] = {
+                    'path': reverse('product_open_findings', args=(obj.test.engagement.product.id,)),
+                    'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
+            in_period_details[obj.test.engagement.product.name][obj.severity] += 1
+            in_period_details[obj.test.engagement.product.name]['Total'] += 1
 
     return in_period_counts, in_period_details, age_detail
 
