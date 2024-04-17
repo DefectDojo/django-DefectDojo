@@ -33,7 +33,7 @@ class BlackduckImporter(Importer):
         No file information then.
         """
         security_issues = dict()
-        with open(str(report), "r") as f:
+        with open(str(report)) as f:
             security_issues = self.__partition_by_key(f)
 
         project_ids = set(security_issues.keys())
@@ -80,7 +80,7 @@ class BlackduckImporter(Importer):
                     path = file_entry_dict.get("Path")
                     archive_context = file_entry_dict.get("Archive context")
                     if archive_context:
-                        full_path = "{}{}".format(archive_context, path[1:])
+                        full_path = f"{archive_context}{path[1:]}"
                     else:
                         full_path = path
 

@@ -50,7 +50,7 @@ PRODUCT_TYPE_NAME_DEFAULT = 'Type type'
 # 5 active sev medium
 
 # test methods to be used both by API Test and UI Test
-class ImportReimportMixin(object):
+class ImportReimportMixin:
     def __init__(self, *args, **kwargs):
         self.scans_path = '/scans/'
 

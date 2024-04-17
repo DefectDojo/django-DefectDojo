@@ -6,7 +6,7 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 
-class CheckmarxOsaParser(object):
+class CheckmarxOsaParser:
     def get_scan_types(self):
         return ["Checkmarx OSA"]
 
@@ -51,7 +51,7 @@ class CheckmarxOsaParser(object):
             status = item["state"]["name"]
             vulnerability_id = item.get("cveName", "NC")
             finding_item = Finding(
-                title="{0} {1} | {2}".format(
+                title="{} {} | {}".format(
                     library["name"], library["version"], vulnerability_id
                 ),
                 severity=item["severity"]["name"],

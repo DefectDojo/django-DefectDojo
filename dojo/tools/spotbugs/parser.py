@@ -4,7 +4,7 @@ from defusedxml import ElementTree as ET
 from dojo.models import Finding
 
 
-class SpotbugsParser(object):
+class SpotbugsParser:
     """Parser for XML ouput file from Spotbugs (https://github.com/spotbugs/spotbugs)"""
 
     def get_scan_types(self):

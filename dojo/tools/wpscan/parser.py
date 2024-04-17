@@ -5,7 +5,7 @@ from datetime import datetime
 from dojo.models import Endpoint, Finding
 
 
-class WpscanParser(object):
+class WpscanParser:
     """WPScan - WordPress Security Scanner"""
 
     def get_scan_types(self):

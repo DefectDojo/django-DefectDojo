@@ -297,7 +297,7 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             Product_Type.objects.create(name=another_product_type_name)
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=None, product_type_name=another_product_type_name, product_name=PRODUCT_NAME_DEFAULT, engagement_name='valentijn', expected_http_status_code=400)
-            self.assertEqual(import0, ["Product '%s' doesn't exist in Product_Type '%s'" % (PRODUCT_NAME_DEFAULT, another_product_type_name)])
+            self.assertEqual(import0, [f"Product '{PRODUCT_NAME_DEFAULT}' doesn't exist in Product_Type '{another_product_type_name}'"])
 
         with self.subTest('invalid engagement'):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
@@ -505,7 +505,7 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
 
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=None, product_type_name=another_product_type_name, product_name=PRODUCT_NAME_DEFAULT, engagement_name='valentijn', expected_http_status_code=400)
-            self.assertEqual(import0, ["Product '%s' doesn't exist in Product_Type '%s'" % (PRODUCT_NAME_DEFAULT, another_product_type_name)])
+            self.assertEqual(import0, [f"Product '{PRODUCT_NAME_DEFAULT}' doesn't exist in Product_Type '{another_product_type_name}'"])
 
         with self.subTest('invalid engagement'):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,

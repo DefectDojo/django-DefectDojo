@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import Select
 class AnnouncementBannerTest(BaseTestCase):
 
     def __init__(self, method_name, type):
-        super(AnnouncementBannerTest, self).__init__(method_name)
+        super().__init__(method_name)
         self.type = type
 
     def test_setup(self):
