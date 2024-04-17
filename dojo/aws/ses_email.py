@@ -126,13 +126,13 @@ def send_email(ses_mail_sender, email):
     logger.debug("send email succesfully")
 
 
-def send_email_template(ses_client, ses_mail_sender, email, template):
+def send_email_template(ses_client, ses_mail_sender, email, email_from_address, template):
     logger.debug("send email for template")
     ses_template = SesTemplate(ses_client)
     ses_template.create_template(**template)
     template_data = {"name": email.split("@")[0], "action": "read"}
     ses_mail_sender.send_templated_email(
-        email, SesDestination([email]), ses_template.name(), template_data
+        email_from_address, SesDestination([email]), ses_template.name(), template_data
     )
     if ses_template.template is not None:
         logger.debug("Deleting demo template.")
@@ -264,7 +264,29 @@ def get_template(file_path, *args, **kwargs):
 
 def aws_ses(email, email_from_address, template):
     try:
+        ses_client = get_ses_client()
+        logger.info("get ses client")
+    except Exception as e:
+        logger.error(f"Error get cliente: {e}")
+
+    try:
+        ses_mail_sender = SesMailSender(ses_client)
+        logger.info("Send SesMailSender")
+    except Exception as e:
+        logger.error(f"Error SesMailSender: {e}")
+        # send_email(ses_mail_sender=ses_mail_sender, email=email)
+    try:
+        send_email_template(ses_client=ses_client,
+                            ses_mail_sender=ses_mail_sender,
+                            email=email,
+                            email_from_address=email_from_address,
+                            template=template)
+        logger.info("Send Email tempalte")
+    except Exception as e:
+        logger.error(f"Error Sen email template: {e}")
+
+    try:
         logger.info("Send Email SES")
         send_email_smtp(email, email_from_address, template)
     except Exception as e:
-        logger.info(f"Error SES: {e}")
+        logger.error(f"Error SES smtp: {e}")
