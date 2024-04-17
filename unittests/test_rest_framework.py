@@ -1084,7 +1084,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "title": "DUMMY FINDING123",
             "date": "2020-05-20",
             "cwe": 1,
-            "severity": "HIGH",
+            "severity": "High",
             "description": "TEST finding",
             "mitigation": "MITIGATION",
             "impact": "HIGH",
@@ -1171,6 +1171,11 @@ class FindingsTest(BaseClass.RESTEndpointTest):
         result = self.client.patch(self.url + "3/", data={"steps_to_reproduce": ""})
         self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
         assert result.json()["steps_to_reproduce"] == ""
+
+    def test_severity_validation(self):
+        result = self.client.patch(self.url + "2/", data={"severity": "Not a valid choice"})
+        self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST, "Severity just got set to something invalid")
+        assert result.json()["severity"] == ["Severity must be one of the following: ['Info', 'Low', 'Medium', 'High', 'Critical']"]
 
 
 class FindingMetadataTest(BaseClass.RESTEndpointTest):
@@ -1437,12 +1442,12 @@ class StubFindingsTest(BaseClass.RESTEndpointTest):
         self.payload = {
             "title": "Stub Finding 1",
             "date": "2017-12-31",
-            "severity": "HIGH",
+            "severity": "High",
             "description": "test stub finding",
             "reporter": 3,
             "test": 3,
         }
-        self.update_fields = {'severity': 'LOW'}
+        self.update_fields = {'severity': 'Low'}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Stub_Finding
         self.permission_create = Permissions.Finding_Add
@@ -1450,6 +1455,11 @@ class StubFindingsTest(BaseClass.RESTEndpointTest):
         self.permission_delete = Permissions.Finding_Delete
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_severity_validation(self):
+        result = self.client.patch(self.url + "2/", data={"severity": "Not a valid choice"})
+        self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST, "Severity just got set to something invalid")
+        assert result.json()["severity"] == ["Severity must be one of the following: ['Info', 'Low', 'Medium', 'High', 'Critical']"]
 
 
 class TestsTest(BaseClass.RESTEndpointTest):
