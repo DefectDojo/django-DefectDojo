@@ -152,7 +152,7 @@ def send_email_smtp(email, email_from_address, template):
     email_template["From"] = email_from_address
     email_template["To"] = email
     email_template["Subject"] = "¡Enviado desde Vultracker!"
-    email_template.set_content(template, subtype="html")
+    email_template.set_content(template.get("html"), subtype="html")
     context = ssl.create_default_context()
     with smtplib.SMTP(smtp_server, port) as server:
         server.starttls(context=context)
@@ -167,26 +167,104 @@ def get_ses_client():
     return ses_client
 
 
-def get_template(*args, **kwargs):
-    template = {
-        "name": "1",
-        "subject": kwargs.get("subject", "Vultracker notification"),
-        "text": kwargs.get("text", "Vultracker SES"),
-        "html": kwargs.get("title", ""),
-    }
+def get_template(file_path, *args, **kwargs):
+    with open(file_path, 'r') as file:
+        html_content = file.read()
+
+        template = {
+            "name": "1",
+            "subject": kwargs.get("subject", "Vultracker notification"),
+            "text": kwargs.get("text", "Vultracker SES"),
+            "html": """<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Vultracker</title>
+        <style>
+            /* Estilos generales */
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f0f4f7;
+            }
+            .container {
+                width: 100%;
+                max-width: 600px;
+                margin: 0 auto;
+                background-color: #ffffff;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            /* Estilos del encabezado */
+            .header {
+                background-color: #3498db;
+                color: #ffffff;
+                padding: 30px;
+                text-align: center;
+            }
+            /* Estilos del cuerpo del correo */
+            .content {
+                padding: 30px;
+                color: #555555;
+            }
+            /* Estilos del pie de página */
+            .footer {
+                background-color: #2980b9;
+                color: #ffffff;
+                text-align: center;
+                padding: 20px;
+            }
+            /* Estilos del cupón */
+            .coupon {
+                background-color: #f9f9f9;
+                border: 1px solid #cccccc;
+                border-radius: 8px;
+                padding: 20px;
+                text-align: center;
+                margin-top: 30px;
+            }
+            .coupon h2 {
+                color: #3498db;
+            }
+            .coupon p {
+                margin-top: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <!-- Encabezado -->
+            <div class="header">
+                <h1>¡Notification Vultracker!</h1>
+            </div>
+
+            <!-- Contenido del correo -->
+            <div class="content">
+                <p>Hola,</p>
+                <p>Se ha generado un evento en tu porduct_type: My proyecto:</p>
+                <div class="coupon">
+                    <h2><span style="color: green;">Risk Acceptance: 12452cod</span></h2>
+                    <p>Developer solicito la aceptacon de la vulnerabilidades "link a vultracker" el dias 12/12/2024: 12:03 pm </p>
+                </div>
+            </div>
+
+            <!-- Pie de página -->
+            <div class="footer">
+                <p>© 2024 Devsecops Engine.</p>
+            </div>
+        </div>
+    </body>
+    </html>,
+        """}
     return template
 
 
 def aws_ses(email, email_from_address, template):
     try:
         logger.info("Send Email SES")
-        send_email_smtp(email, email_from_address, "message the test")
-        # ses_client = get_ses_client()
-        # ses_mail_sender = SesMailSender(ses_client)
-        # send_email(ses_mail_sender=ses_mail_sender, email=email)
-        # send_email_template(ses_client=ses_client,
-        #                     ses_mail_sender=ses_mail_sender,
-        #                     email=email,
-        #                     template=template)
+        send_email_smtp(email, email_from_address, template)
     except Exception as e:
         logger.info(f"Error SES: {e}")
