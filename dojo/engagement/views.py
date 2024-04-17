@@ -984,21 +984,27 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
         del form.cleaned_data['notes']
 
         findings = form.cleaned_data['accepted_findings']
+        form.fields["accepted_findings"].queryset = form.fields["accepted_findings"].queryset.filter(duplicate=False, test__engagement=eng, active=True, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
         white_list_final = None
         len_white_list = 0
         findings_not_on_white_list = []
         conf_risk = ra_helper.get_config_risk()
         for finding in findings:
-            if rp_helper.validate_list_findings(conf_risk, "black_list", finding, eng):
+            if (
+                rp_helper.validate_list_findings(conf_risk, "black_list", finding, eng)
+                and (
+                    request.user.is_superuser
+                    or rp_helper.role_has_exclusive_permissions(request.user)
+                )
+                is False
+            ):
                 messages.add_message(
                     request,
                     messages.WARNING,
-                    f"The finding {finding.id} is on the black list",
+                    f"The finding {finding.id} with vulnerability id {finding.vulnerability_ids}-{finding.vuln_id_from_tool} is on the black list",
                     extra_tags="alert-danger",
                 )
-                return render(request, 'dojo/add_risk_acceptance.html', {
-                        'form': form
-                })
+                return render(request, "dojo/add_risk_acceptance.html", {"form": form})
             white_list = rp_helper.validate_list_findings(
                 conf_risk, "white_list", finding, eng
             )
@@ -1025,16 +1031,16 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
                         abuse_control_result[abuse_control]["message"],
                         extra_tags="alert-danger",
                     )
-                    return render(request, 'dojo/add_risk_acceptance.html', {
-                        'form': form
-                    })
+                    return render(
+                        request, "dojo/add_risk_acceptance.html", {"form": form}
+                    )
 
         if len_white_list != len(findings) and white_list_final:
             messages.add_message(request,
             messages.WARNING,
             f'The findings {findings_not_on_white_list} are not on the white list, not is possible to continue with the risk acceptance',
             extra_tags='alert-danger')
-            return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, ))) 
+            return render(request, "dojo/add_risk_acceptance.html", {"form": form})
 
         try:
             risk_acceptance = form.save()
@@ -1047,7 +1053,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
 
         if notes:
             risk_acceptance.notes.add(notes)
- 
+
         if white_list_final:
             risk_acceptance.recommendation = Risk_Acceptance.TREATMENT_AVOID
             risk_acceptance.decision = Risk_Acceptance.TREATMENT_AVOID
@@ -1343,7 +1349,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                             messages.add_message(
                                 request,
                                 messages.WARNING,
-                                f"The finding with vulnerability id {finding.vulnerability_ids}-{finding.vuln_id_from_tool} is on the black list",
+                                f"The finding {finding.id} with vulnerability id {finding.vulnerability_ids}-{finding.vuln_id_from_tool} is on the black list",
                                 extra_tags="alert-danger",
                             )
                             return redirect_to_return_url_or_else(
@@ -1376,7 +1382,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     accepted_findings = risk_acceptance.accepted_findings.order_by('id')
     fpage = get_page_items(request, accepted_findings, 15)
     if settings.RISK_PENDING:
-        unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False, severity=risk_acceptance.severity, duplicate=False) \
+        unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), active=True, risk_accepted=False, severity=risk_acceptance.severity, duplicate=False) \
             .exclude(id__in=accepted_findings).order_by("title")
     else:
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False) \

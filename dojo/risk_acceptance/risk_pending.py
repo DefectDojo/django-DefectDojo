@@ -470,8 +470,8 @@ def validate_list_findings(conf_risk, type, finding, eng):
                 item
                 for item in conf_risk.get("WHITE_LIST_FINDING", [])
                 if (
-                    item.get("id") in finding.vulnerability_ids
-                    or item.get("id") == finding.vuln_id_from_tool
+                    set(item.get("id")) & set(finding.vulnerability_ids)
+                    or finding.vuln_id_from_tool in item.get("id")
                 )
                 and item.get("where", eng.name) == eng.name
             ),
