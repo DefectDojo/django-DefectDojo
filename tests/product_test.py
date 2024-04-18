@@ -536,12 +536,12 @@ class ProductTest(BaseTestCase):
         # Navigate to the product page
         driver.get(self.base_url + "metrics?date=5&view=dashboard")
         
-    def test_grafana_metrics(self):
+    def test_metrics_panel(self):
         # Test To Edit Product Tracking Files
         # login to site, password set to fetch from environ
         driver = self.driver
         # Navigate to the product page
-        driver.get(self.base_url + "metrics/grafana")
+        driver.get(self.base_url + "metrics/panel")
 
 
 def add_product_tests_to_suite(suite, jira=False, github=False, block_execution=False):
@@ -574,7 +574,7 @@ def add_product_tests_to_suite(suite, jira=False, github=False, block_execution=
     suite.addTest(ProductTest('test_simple_metrics'))
     suite.addTest(ProductTest('test_engineer_metrics'))
     suite.addTest(ProductTest('test_metrics_dashboard'))
-    suite.addTest(ProductTest('test_grafana_metrics'))
+    suite.addTest(ProductTest('test_metrics_panel'))
     
     suite.addTest(ProductTest('test_delete_product'))
     return suite

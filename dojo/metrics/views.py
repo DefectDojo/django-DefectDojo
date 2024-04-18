@@ -21,7 +21,7 @@ from django.views.decorators.cache import cache_page
 from django.utils import timezone
 
 from dojo.filters import MetricsFindingFilter, UserFilter, MetricsEndpointFilter
-from dojo.forms import SimpleMetricsForm, ProductTypeCountsForm, ProductTagCountsForm, GrafanaMetricsForm
+from dojo.forms import SimpleMetricsForm, ProductTypeCountsForm, ProductTagCountsForm, MetricsPanelForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Risk_Acceptance, Dojo_User, Endpoint_Status, Role
 from dojo.utils import get_page_items, add_breadcrumb, findings_this_period, opened_in_period, count_findings, \
@@ -534,13 +534,13 @@ def simple_metrics(request):
 
 # @cache_page(60 * 15)  # cache for 15 minutes
 # @vary_on_cookie
-def grafana_metrics(request):
-    page_name = _('Grafana Metrics')
+def metrics_panel(request):
+    page_name = _('Metrics Panel')
     now = timezone.now()
     grafana_url = settings.GRAFANA_URL
     role = Role.objects.get(id=Roles.Maintainer)
     user = request.user.id
-    return render(request, 'dojo/grafana_metrics.html', {
+    return render(request, 'dojo/metrics_panel.html', {
        'name': page_name,
        'grafana_url': grafana_url,
        'role': role,

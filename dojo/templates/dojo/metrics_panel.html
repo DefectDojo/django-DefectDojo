@@ -1,10 +1,10 @@
+
 {% extends "base.html" %}
 {% load event_tags %}
 {% load i18n %}
 {% load display_tags %}
 {% block content %}
     {{ block.super }}
-
     <div class="embed-responsive embed-responsive-16by9"> 
         <iframe class="embed-responsive-item" src="{{ grafana_url }}/d/edig6ul0oqzuod/panel-de-control-vultracker?orgId=1&from=now-30d&to=now&var-limit=1000&var-offset=1&kiosk" frameborder="0" allowfullscreen></iframe>
     </div>
