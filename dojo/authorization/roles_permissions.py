@@ -601,7 +601,7 @@ def get_roles_with_permissions():
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
-            Permissions.Risk_Acceptance
+            Permissions.Risk_Acceptance,
         },
     }
 
