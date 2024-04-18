@@ -83,6 +83,10 @@ def get_item(vuln, test, check_type):
     severity = "Medium"
     if "severity" in vuln and vuln["severity"] is not None:
         severity = vuln["severity"].capitalize()
+    
+    impact= None
+    if "bc_category" in vuln:
+        impact = vuln['bc_category']
 
     mitigation = ""
 
@@ -91,6 +95,7 @@ def get_item(vuln, test, check_type):
         title=title,
         test=test,
         description=description,
+        impact=impact,
         severity=severity,
         mitigation=mitigation,
         references=references,

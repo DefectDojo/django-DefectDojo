@@ -123,7 +123,8 @@ class DojoDefaultImporter(object):
 
             item.numerical_severity = Finding.get_numerical_severity(item.severity)
 
-            if minimum_severity and (Finding.SEVERITIES[item.severity] > Finding.SEVERITIES[minimum_severity]):
+            if minimum_severity and (Finding.SEVERITIES[item.severity]
+                    > Finding.SEVERITIES[minimum_severity]):
                 # finding's severity is below the configured threshold : ignoring the finding
                 continue
 
@@ -166,7 +167,8 @@ class DojoDefaultImporter(object):
                     else:
                         group_names_to_findings_dict[name] = [item]
 
-            if hasattr(item, "unsaved_req_resp") and len(item.unsaved_req_resp) > 0:
+            if (hasattr(item, 'unsaved_req_resp')
+                    and len(item.unsaved_req_resp) > 0):
                 for req_resp in item.unsaved_req_resp:
                     burp_rr = BurpRawRequestResponse(
                         finding=item,
@@ -176,7 +178,8 @@ class DojoDefaultImporter(object):
                     burp_rr.clean()
                     burp_rr.save()
 
-            if item.unsaved_request is not None and item.unsaved_response is not None:
+            if (item.unsaved_request is not None
+                    and item.unsaved_response is not None):
                 burp_rr = BurpRawRequestResponse(
                     finding=item,
                     burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
@@ -194,9 +197,9 @@ class DojoDefaultImporter(object):
 
             if item.unsaved_files:
                 for unsaved_file in item.unsaved_files:
-                    data = base64.b64decode(unsaved_file.get("data"))
-                    title = unsaved_file.get("title", "<No title>")
-                    file_upload, file_upload_created = FileUpload.objects.get_or_create(
+                    data = base64.b64decode(unsaved_file.get('data'))
+                    title = unsaved_file.get('title', '<No title>')
+                    file_upload, _file_upload_created = FileUpload.objects.get_or_create(
                         title=title,
                     )
                     file_upload.file.save(title, ContentFile(data))

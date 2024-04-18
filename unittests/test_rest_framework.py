@@ -1414,7 +1414,7 @@ class ProductTest(BaseClass.RESTEndpointTest):
             "prod_type": 1,
             "name": "Test Product",
             "description": "test product",
-            "tags": ["mytag, yourtag"]
+            "tags": ["mytag", "yourtag"]
         }
         self.update_fields = {'prod_type': 2}
         self.test_type = TestType.OBJECT_PERMISSIONS

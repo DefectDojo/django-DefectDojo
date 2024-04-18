@@ -1,3 +1,4 @@
+import re
 from dojo.finding.queries import get_authorized_findings
 from dojo.group.utils import get_auth_group_name
 import os
@@ -250,6 +251,8 @@ class TagListSerializerField(serializers.ListField):
         self.pretty_print = pretty_print
 
     def to_internal_value(self, data):
+        if isinstance(data, list) and data == [''] and self.allow_empty:
+            return []
         if isinstance(data, six.string_types):
             if not data:
                 data = []
@@ -263,24 +266,19 @@ class TagListSerializerField(serializers.ListField):
         if not isinstance(data, list):
             self.fail("not_a_list", input_type=type(data).__name__)
 
-        # data_safe = []
+        data_safe = []
         for s in data:
+            # Ensure if the element in the list is  string
             if not isinstance(s, six.string_types):
                 self.fail("not_a_str")
-
+            # Run the children validation
             self.child.run_validation(s)
+            substrings = re.findall(r'(?:"[^"]*"|[^",]+)', s)
+            data_safe.extend(substrings)
 
-            # if ' ' in s or ',' in s:
-            #     s = '"%s"' % s
-
-            # data_safe.append(s)
-
-        # internal_value = ','.join(data_safe)
-
-        internal_value = tagulous.utils.render_tags(data)
+        internal_value = tagulous.utils.render_tags(data_safe)
 
         return internal_value
-        # return data
 
     def to_representation(self, value):
         if not isinstance(value, list):
@@ -1718,17 +1716,6 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     # Overriding this to push add Push to JIRA functionality
     def update(self, instance, validated_data):
-        # cvssv3 handling cvssv3 vector takes precedence,
-        # then cvssv3_score and finally severity
-        if validated_data.get("cvssv3"):
-            validated_data["cvssv3_score"] = None
-            validated_data["severity"] = ""
-        elif validated_data.get("cvssv3_score"):
-            validated_data["severity"] = ""
-        elif validated_data.get("severity"):
-            validated_data["cvssv3"] = None
-            validated_data["cvssv3_score"] = None
-
         # remove tags from validated data and store them seperately
         to_be_tagged, validated_data = self._pop_tags(validated_data)
 
@@ -2107,7 +2094,7 @@ class ImportScanSerializer(serializers.Serializer):
         allow_null=True, default=None, queryset=User.objects.all()
     )
     tags = TagListSerializerField(
-        required=False, help_text="Add tags that help describe this scan."
+        required=False, allow_empty=True, help_text="Add tags that help describe this scan."
     )
     close_old_findings = serializers.BooleanField(
         required=False,
@@ -2229,6 +2216,12 @@ class ImportScanSerializer(serializers.Serializer):
             name=environment_name
         )
         tags = data.get("tags", None)
+        # Convert the tags to a list if needed. At this point, the
+        # TaggitListSerializer has already removed commas supplied
+        # by the user, so this operation will consistently return
+        # a list to be used by the importer
+        if isinstance(tags, str):
+            tags = tags.split(", ")
         lead = data.get("lead")
 
         scan = data.get("file", None)
@@ -2250,7 +2243,7 @@ class ImportScanSerializer(serializers.Serializer):
             product_type_name,
             auto_create_context,
             deduplication_on_engagement,
-            do_not_reactivate,
+            _do_not_reactivate,
         ) = get_import_meta_data_from_dict(data)
         engagement = get_or_create_engagement(
             engagement_id,
@@ -2276,9 +2269,9 @@ class ImportScanSerializer(serializers.Serializer):
         try:
             (
                 test,
-                finding_count,
-                closed_finding_count,
-                test_import,
+                _finding_count,
+                _closed_finding_count,
+                _test_import,
             ) = importer.import_scan(
                 scan,
                 scan_type,
@@ -2448,6 +2441,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     )
     tags = TagListSerializerField(
         required=False,
+        allow_empty=True,
         help_text="Modify existing tags that help describe this scan. (Existing test tags will be overwritten)",
     )
 
@@ -2504,6 +2498,12 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         service = data.get("service", None)
         lead = data.get("lead", None)
         tags = data.get("tags", None)
+        # Convert the tags to a list if needed. At this point, the
+        # TaggitListSerializer has already removed commas supplied
+        # by the user, so this operation will consistently return
+        # a list to be used by the importer
+        if isinstance(tags, str):
+            tags = tags.split(", ")
         environment_name = data.get("environment", "Development")
         environment = Development_Environment.objects.get(
             name=environment_name
@@ -2568,11 +2568,11 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 reimporter = ReImporter()
                 (
                     test,
-                    finding_count,
-                    new_finding_count,
-                    closed_finding_count,
-                    reactivated_finding_count,
-                    untouched_finding_count,
+                    _finding_count,
+                    _new_finding_count,
+                    _closed_finding_count,
+                    _reactivated_finding_count,
+                    _untouched_finding_count,
                     test_import,
                 ) = reimporter.reimport_scan(
                     scan,
@@ -2619,8 +2619,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 importer = Importer()
                 (
                     test,
-                    finding_count,
-                    closed_finding_count,
+                    _finding_count,
+                    _closed_finding_count,
                     _,
                 ) = importer.import_scan(
                     scan,
@@ -2646,6 +2646,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     service=service,
                     title=test_title,
                     create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
+                    apply_tags_to_findings=apply_tags_to_findings,
+                    apply_tags_to_endpoints=apply_tags_to_endpoints,
                 )
 
             else:
@@ -2811,7 +2813,7 @@ class ImportLanguagesSerializer(serializers.Serializer):
                 try:
                     (
                         language_type,
-                        created,
+                        _created,
                     ) = Language_Type.objects.get_or_create(language=name)
                 except Language_Type.MultipleObjectsReturned:
                     language_type = Language_Type.objects.filter(

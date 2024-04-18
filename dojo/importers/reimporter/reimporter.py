@@ -403,7 +403,7 @@ class DojoDefaultReImporter(object):
                         title = unsaved_file.get("title", "<No title>")
                         (
                             file_upload,
-                            file_upload_created,
+                            _file_upload_created,
                         ) = FileUpload.objects.get_or_create(
                             title=title,
                         )

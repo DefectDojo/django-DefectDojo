@@ -342,16 +342,33 @@ def has_jira_configured(obj):
     return get_jira_project(obj) is not None
 
 
+def connect_to_jira(jira_server, jira_username, jira_password):
+    return JIRA(
+        server=jira_server,
+        basic_auth=(jira_username, jira_password),
+        max_retries=0,
+        options={
+            "verify": settings.JIRA_SSL_VERIFY,
+            "headers": settings.ADDITIONAL_HEADERS,
+        })
+
+
+def get_jira_connect_method():
+    if hasattr(settings, 'JIRA_CONNECT_METHOD'):
+        try:
+            import importlib
+            mn, _, fn = settings.JIRA_CONNECT_METHOD.rpartition('.')
+            m = importlib.import_module(mn)
+            return getattr(m, fn)
+        except ModuleNotFoundError:
+            pass
+    return connect_to_jira
+
+
 def get_jira_connection_raw(jira_server, jira_username, jira_password):
     try:
-        jira = JIRA(
-            server=jira_server,
-            basic_auth=(jira_username, jira_password),
-            max_retries=0,
-            options={
-                "verify": settings.JIRA_SSL_VERIFY,
-                "headers": settings.ADDITIONAL_HEADERS,
-            })
+        connect_method = get_jira_connect_method()
+        jira = connect_method(jira_server, jira_username, jira_password)
 
         logger.debug('logged in to JIRA ''%s'' successfully', jira_server)
 
@@ -367,7 +384,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
             log_jira_generic_alert('Unknown JIRA Connection Error', error_message)
 
         add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(error_message))
-        raise e
+        raise
 
     except requests.exceptions.RequestException as re:
         logger.exception(re)
@@ -375,11 +392,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
         log_jira_generic_alert('Unknown JIRA Connection Error', re)
 
         add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(error_message))
-
-        raise re
-
-    # except RequestException as re:
-    #     logger.exception(re)
+        raise
 
 
 # Gets a connection to a Jira server based on the finding
@@ -715,7 +728,7 @@ def add_jira_issue(obj, *args, **kwargs):
     jira_project = get_jira_project(obj)
     jira_instance = get_jira_instance(obj)
 
-    obj_can_be_pushed_to_jira, error_message, error_code = can_be_pushed_to_jira(obj)
+    obj_can_be_pushed_to_jira, error_message, _error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
         if isinstance(obj, Finding) and obj.duplicate and not obj.active:
             logger.warning("%s will not be pushed to JIRA as it's a duplicate finding", to_str_typed(obj))
@@ -1063,7 +1076,7 @@ def get_issuetype_fields(
                         expand="projects.issuetypes.fields")
             except JIRAError as e:
                 e.text = f"Jira API call 'createmeta' failed with status: {e.status_code} and message: {e.text}"
-                raise e
+                raise
 
             project = None
             try:
@@ -1081,7 +1094,7 @@ def get_issuetype_fields(
                 issuetypes = jira.project_issue_types(project_key)
             except JIRAError as e:
                 e.text = f"Jira API call 'createmeta/issuetypes' failed with status: {e.status_code} and message: {e.text}. Project misconfigured or no permissions in Jira ?"
-                raise e
+                raise
 
             issuetype_id = None
             for it in issuetypes:
@@ -1096,7 +1109,7 @@ def get_issuetype_fields(
                 issuetype_fields = jira.project_issue_fields(project_key, issuetype_id)
             except JIRAError as e:
                 e.text = f"Jira API call 'createmeta/fieldtypes' failed with status: {e.status_code} and message: {e.text}. Misconfigured project or default issue type ?"
-                raise e
+                raise
 
             try:
                 issuetype_fields = [f.fieldId for f in issuetype_fields]
@@ -1108,7 +1121,7 @@ def get_issuetype_fields(
         logger.warning(e.text)
         add_error_message_to_response(e.text)
 
-        raise e
+        raise
 
     return issuetype_fields
 
@@ -1263,7 +1276,7 @@ def add_epic(engagement, **kwargs):
             'summary': epic_name,
             'description': epic_name,
             'issuetype': {
-                'name': 'Epic'
+                'name': getattr(jira_project, "epic_issue_type_name", "Epic"),
             },
             get_epic_name_field_name(jira_instance): epic_name,
         }
@@ -1596,7 +1609,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 finding.active = False
                 finding.mitigated = jira_now
                 finding.is_mitigated = True
-                finding.mitigated_by, created = User.objects.get_or_create(username='JIRA')
+                finding.mitigated_by, _created = User.objects.get_or_create(username='JIRA')
                 finding.endpoints.clear()
                 finding.false_p = False
                 ra_helper.risk_unaccept(finding)

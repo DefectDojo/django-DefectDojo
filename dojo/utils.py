@@ -52,14 +52,14 @@ from dojo.models import (
 from asteval import Interpreter
 from dojo.notifications.helper import create_notification
 import logging
-import itertools
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 import crum
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
-
+from azure.devops.connection import Connection
+import json
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -94,8 +94,8 @@ def do_false_positive_history(finding, *args, **kwargs):
 
     existing_fp_findings = existing_findings.filter(false_p=True)
     deduplicationLogger.debug(
-        "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product " +
-        "that were previously marked as false positive",
+        "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product "
+        + "that were previously marked as false positive",
         len(existing_fp_findings)
     )
 
@@ -190,8 +190,8 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         query = Finding.objects.filter(
             Q(**custom_filter),
             (
-                (Q(hash_code__isnull=False) & Q(hash_code=finding.hash_code)) |
-                (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=finding.unique_id_from_tool))
+                (Q(hash_code__isnull=False) & Q(hash_code=finding.hash_code))
+                | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=finding.unique_id_from_tool))
             )
         ).exclude(id=finding.id).order_by('id')
         deduplicationLogger.debug(query.query)
@@ -306,7 +306,8 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
         logger.warning("system settings not found")
         enabled = False
     if enabled:
-        deduplicationLogger.debug("dedupe for: " + str(new_finding.id) + ":" + str(new_finding.title))
+        deduplicationLogger.debug('dedupe for: ' + str(new_finding.id)
+                    + ":" + str(new_finding.title))
         deduplicationAlgorithm = new_finding.test.deduplication_algorithm
         deduplicationLogger.debug("deduplication algorithm: " + deduplicationAlgorithm)
         if deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL:
@@ -361,18 +362,11 @@ def deduplicate_legacy(new_finding):
             .values("id")
         )
 
-    total_findings = Finding.objects.filter(Q(id__in=eng_findings_cwe) | Q(id__in=eng_findings_title)).prefetch_related(
-        "endpoints", "test", "test__engagement", "found_by", "original_finding", "test__test_type"
-    )
-    deduplicationLogger.debug(
-        "Found "
-        + str(len(eng_findings_cwe))
-        + " findings with same cwe, "
-        + str(len(eng_findings_title))
-        + " findings with same title: "
-        + str(len(total_findings))
-        + " findings with either same title or same cwe"
-    )
+    total_findings = Finding.objects.filter(Q(id__in=eng_findings_cwe) | Q(id__in=eng_findings_title)).prefetch_related('endpoints', 'test', 'test__engagement', 'found_by', 'original_finding', 'test__test_type')
+    deduplicationLogger.debug("Found "
+        + str(len(eng_findings_cwe)) + " findings with same cwe, "
+        + str(len(eng_findings_title)) + " findings with same title: "
+        + str(len(total_findings)) + " findings with either same title or same cwe")
 
     # total_findings = total_findings.order_by('date')
     for find in total_findings.order_by("id"):
@@ -420,19 +414,8 @@ def deduplicate_legacy(new_finding):
             flag_hash = True
 
         deduplicationLogger.debug(
-            "deduplication flags for new finding ("
-            + ("dynamic" if new_finding.dynamic_finding else "static")
-            + ") "
-            + str(new_finding.id)
-            + " and existing finding "
-            + str(find.id)
-            + " flag_endpoints: "
-            + str(flag_endpoints)
-            + " flag_line_path:"
-            + str(flag_line_path)
-            + " flag_hash:"
-            + str(flag_hash)
-        )
+            'deduplication flags for new finding (' + ('dynamic' if new_finding.dynamic_finding else 'static') + ') ' + str(new_finding.id) + ' and existing finding ' + str(find.id)
+            + ' flag_endpoints: ' + str(flag_endpoints) + ' flag_line_path:' + str(flag_line_path) + ' flag_hash:' + str(flag_hash))
 
         # ---------------------------------------------------------
         # 3) Findings are duplicate if (cond1 is true) and they have the same:
@@ -474,7 +457,8 @@ def deduplicate_unique_id_from_tool(new_finding):
             .order_by("id")
         )
 
-    deduplicationLogger.debug("Found " + str(len(existing_findings)) + " findings with same unique_id_from_tool")
+    deduplicationLogger.debug("Found "
+        + str(len(existing_findings)) + " findings with same unique_id_from_tool")
     for find in existing_findings:
         if is_deduplication_on_engagement_mismatch(new_finding, find):
             deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
@@ -507,7 +491,8 @@ def deduplicate_hash_code(new_finding):
             .order_by("id")
         )
 
-    deduplicationLogger.debug("Found " + str(len(existing_findings)) + " findings with same hash_code")
+    deduplicationLogger.debug("Found "
+        + str(len(existing_findings)) + " findings with same hash_code")
     for find in existing_findings:
         if is_deduplication_on_engagement_mismatch(new_finding, find):
             deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
@@ -523,40 +508,23 @@ def deduplicate_hash_code(new_finding):
 
 def deduplicate_uid_or_hash_code(new_finding):
     if new_finding.test.engagement.deduplication_on_engagement:
-        existing_findings = (
-            Finding.objects.filter(
-                (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code)) |
-                # unique_id_from_tool can only apply to the same test_type because it is parser dependent
-                (
-                    Q(unique_id_from_tool__isnull=False)
-                    & Q(unique_id_from_tool=new_finding.unique_id_from_tool)
-                    & Q(test__test_type=new_finding.test.test_type)
-                ),
-                test__engagement=new_finding.test.engagement,
-            )
-            .exclude(id=new_finding.id)
-            .exclude(duplicate=True)
-            .order_by("id")
-        )
+        existing_findings = Finding.objects.filter(
+            (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code))
+            # unique_id_from_tool can only apply to the same test_type because it is parser dependent
+            | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
+            test__engagement=new_finding.test.engagement).exclude(
+                id=new_finding.id).exclude(
+                        duplicate=True).order_by('id')
     else:
         # same without "test__engagement=new_finding.test.engagement" condition
-        existing_findings = (
-            Finding.objects.filter(
-                (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code))
-                | (
-                    Q(unique_id_from_tool__isnull=False)
-                    & Q(unique_id_from_tool=new_finding.unique_id_from_tool)
-                    & Q(test__test_type=new_finding.test.test_type)
-                ),
-                test__engagement__product=new_finding.test.engagement.product,
-            )
-            .exclude(id=new_finding.id)
-            .exclude(duplicate=True)
-            .order_by("id")
-        )
-    deduplicationLogger.debug(
-        "Found " + str(len(existing_findings)) + " findings with either the same unique_id_from_tool or hash_code"
-    )
+        existing_findings = Finding.objects.filter(
+            (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code))
+            | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
+            test__engagement__product=new_finding.test.engagement.product).exclude(
+                id=new_finding.id).exclude(
+                        duplicate=True).order_by('id')
+    deduplicationLogger.debug("Found "
+        + str(len(existing_findings)) + " findings with either the same unique_id_from_tool or hash_code")
     for find in existing_findings:
         if is_deduplication_on_engagement_mismatch(new_finding, find):
             deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
@@ -711,7 +679,9 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
 
         total = sum(o_count.values()) - o_count["closed"]
         if period_type == 0:
-            counts.append(start_of_period.strftime("%b %d") + " - " + end_of_period.strftime("%b %d"))
+            counts.append(
+                start_of_period.strftime("%b %d") + " - "
+                + end_of_period.strftime("%b %d"))
         else:
             counts.append(start_of_period.strftime("%b %Y"))
         counts.append(o_count["zero"])
@@ -727,7 +697,9 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
         a_counts = []
         a_total = sum(a_count.values())
         if period_type == 0:
-            a_counts.append(start_of_period.strftime("%b %d") + " - " + end_of_period.strftime("%b %d"))
+            a_counts.append(
+                start_of_period.strftime("%b %d") + " - "
+                + end_of_period.strftime("%b %d"))
         else:
             a_counts.append(start_of_period.strftime("%b %Y"))
         a_counts.append(a_count["zero"])
@@ -1354,7 +1326,7 @@ def get_page_items_and_count(request, items, page_size, prefix="", do_count=True
 
 
 def handle_uploaded_threat(f, eng):
-    name, extension = os.path.splitext(f.name)
+    _name, extension = os.path.splitext(f.name)
     # Check if threat folder exist.
     if not os.path.isdir(settings.MEDIA_ROOT + "/threat/"):
         # Create the folder
@@ -1367,8 +1339,9 @@ def handle_uploaded_threat(f, eng):
 
 
 def handle_uploaded_selenium(f, cred):
-    name, extension = os.path.splitext(f.name)
-    with open(settings.MEDIA_ROOT + "/selenium/%s%s" % (cred.id, extension), "wb+") as destination:
+    _name, extension = os.path.splitext(f.name)
+    with open(settings.MEDIA_ROOT + '/selenium/%s%s' % (cred.id, extension),
+              'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
     cred.selenium_script = settings.MEDIA_ROOT + "/selenium/%s%s" % (cred.id, extension)
@@ -1833,20 +1806,9 @@ def user_post_save(sender, instance, created, **kwargs):
 def engagement_post_Save(sender, instance, created, **kwargs):
     if created:
         engagement = instance
-        title = "Engagement created for " + str(engagement.product) + ": " + str(engagement.name)
-        create_notification(
-            event="engagement_added",
-            title=title,
-            engagement=engagement,
-            product=engagement.product,
-            url=reverse("view_engagement", args=(engagement.id,)),
-        )
-
-
-def merge_sets_safe(set1, set2):
-    return set(itertools.chain(set1 or [], set2 or []))
-    # This concat looks  better, but requires Python 3.6+
-    # return {*set1, *set2}
+        title = 'Engagement created for ' + str(engagement.product) + ': ' + str(engagement.name)
+        create_notification(event='engagement_added', title=title, engagement=engagement, product=engagement.product,
+                            url=reverse('view_engagement', args=(engagement.id,)))
 
 
 def is_safe_url(url):
@@ -2678,6 +2640,19 @@ def get_open_findings_burndown(product):
 
     return past_90_days
 
+
+def get_remote_json_config(connection: Connection, path_file: str):
+    try:
+        git_client = connection.clients.get_git_client()
+        file_content = git_client.get_item_text(
+            repository_id=settings.AZURE_DEVOPS_REPOSITORY_ID,
+            path=path_file,
+            project=settings.AZURE_DEVOPS_OFFICES_LOCATION.split(",")[0]
+        )
+        data = json.loads(b"".join(file_content).decode("utf-8"))
+        return data
+    except Exception as e:
+        logger.error("Error getting remote configuration file: " + str(e))
 
 class Response:
 

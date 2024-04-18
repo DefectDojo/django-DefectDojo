@@ -18,6 +18,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 import logging
 import warnings
+from email.utils import getaddresses
 
 
 logger = logging.getLogger(__name__)
@@ -333,6 +334,9 @@ env = environ.FileAwareEnv(
     DD_ENABLE_AUDITLOG=(bool, True),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
+    # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
+    # with the use of CVSS scores to potentially override the severity found in the report produced by the tool
+    DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
     DD_CUSTOM_TAG_PARSER=(dict, {}),
     DD_INVALID_ESCAPE_STR=(dict, {}),
 
@@ -353,10 +357,6 @@ env = environ.FileAwareEnv(
     DD_PROVIDER_TOKEN=(str, ""),
     # Role that allows risk acceptance bypassing restrictions.
     DD_ROLE_ALLOWED_TO_ACCEPT_RISKS=(list, ["Maintainer"]),
-    # Blacklist to define CVEs that will not be accepted for any reason.
-    DD_BLACK_LIST_FINDING=(list, [""]),
-    # Whitelist to define CVEs that can be accepted without any restrictions.
-    DD_WHITE_LIST_FINDING=(list, [""]),
     # Risk severity levels: Low, Medium, High, Critical
     # num_acceptors: number of acceptors required for risk acceptance
     # roles: roles with permission to accept the risk
@@ -983,7 +983,7 @@ MAX_TAG_LENGTH = env("DD_MAX_TAG_LENGTH")
 # ------------------------------------------------------------------------------
 # ADMIN
 # ------------------------------------------------------------------------------
-ADMINS = getaddresses([env("DD_ADMINS")])
+ADMINS = getaddresses([env('DD_ADMINS')])
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#managers
 MANAGERS = ADMINS
@@ -1095,7 +1095,8 @@ INSTALLED_APPS = (
     'drf_spectacular',
     'drf_spectacular_sidecar',  # required for Django collectstatic discovery
     'tagulous',
-    'fontawesomefree'
+    'fontawesomefree',
+    'django_filters',
 )
 
 # ------------------------------------------------------------------------------
@@ -1467,10 +1468,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'vulnerability_ids'],
     'Mobsfscan Scan': ['title', 'severity', 'cwe'],
-    'Tenable Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
+    'Tenable Scan': ['title', 'severity', 'vulnerability_ids', 'cwe', 'description'],
     'Nexpose Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
-    "NPM Audit Scan": ["title", "severity", "file_path", "vulnerability_ids", "cwe"],
+    'NPM Audit Scan': ['title', 'severity', 'file_path', 'vulnerability_ids', 'cwe'],
+    'NPM Audit v7+ Scan': ['title', 'severity', 'cwe', 'vuln_id_from_tool'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     "Yarn Audit Scan": ["title", "severity", "file_path", "vulnerability_ids", "cwe"],
     # possible improvement: in the scanner put the library name into file_path, then dedup on vulnerability_ids + file_path + severity
@@ -1478,14 +1480,12 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'ZAP Scan': ['title', 'cwe', 'severity'],
     'Qualys Scan': ['title', 'severity', 'endpoints'],
     # 'Qualys Webapp Scan': ['title', 'unique_id_from_tool'],
-    "PHP Symfony Security Check": ["title", "vulnerability_ids"],
-    "Clair Scan": ["title", "vulnerability_ids", "description", "severity"],
-    "Clair Klar Scan": ["title", "description", "severity"],
+    'PHP Symfony Security Check': ['title', 'vulnerability_ids'],
+    'Clair Scan': ['title', 'vulnerability_ids', 'description', 'severity'],
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': ['title', 'vulnerability_ids'],
     'DSOP Scan': ['vulnerability_ids'],
     'Acunetix Scan': ['title', 'description'],
-    'Acunetix360 Scan': ['title', 'description'],
     'Terrascan Scan': ['vuln_id_from_tool', 'title', 'severity', 'file_path', 'line', 'component_name'],
     'Trivy Operator Scan': ['title', 'severity', 'vulnerability_ids'],
     'Trivy Scan': ['title', 'severity', 'vulnerability_ids', 'cwe', 'description'],
@@ -1529,7 +1529,10 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'KICS Scan': ['file_path', 'line', 'severity', 'description', 'title'],
     'MobSF Scan': ['title', 'description', 'severity'],
     'OSV Scan': ['title', 'description', 'severity'],
-    'Snyk Code Scan': ['vuln_id_from_tool', 'file_path']
+    'Snyk Code Scan': ['vuln_id_from_tool', 'file_path'],
+    'Bearer CLI': ['title', 'severity'],
+    'Nancy Scan': ['title', 'vuln_id_from_tool'],
+    'Wiz Scan': ['title', 'description', 'severity']
 }
 
 # Override the hardcoded settings here via the env var
@@ -1564,13 +1567,13 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Tenable Scan': True,
     'Nexpose Scan': True,
     'NPM Audit Scan': True,
+    'NPM Audit v7+ Scan': True,
     'Yarn Audit Scan': True,
     'Mend Scan': True,
     'ZAP Scan': False,
     'Qualys Scan': True,
     'DSOP Scan': True,
     'Acunetix Scan': True,
-    'Acunetix360 Scan': True,
     'Trivy Operator Scan': True,
     'Trivy Scan': True,
     'SpotBugs Scan': False,
@@ -1678,15 +1681,14 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Tenable Scan': DEDUPE_ALGO_HASH_CODE,
     'Nexpose Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
+    'NPM Audit v7+ Scan': DEDUPE_ALGO_HASH_CODE,
     'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Mend Scan': DEDUPE_ALGO_HASH_CODE,
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
     'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
     'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'Acunetix Scan': DEDUPE_ALGO_HASH_CODE,
-    'Acunetix360 Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Scan': DEDUPE_ALGO_HASH_CODE,
-    'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
     # 'Qualys Webapp Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,  # Must also uncomment qualys webapp line in hashcode fields per scanner
     "Veracode Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Veracode SourceClear Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1724,6 +1726,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Solar Appscreener Scan': DEDUPE_ALGO_HASH_CODE,
     'Gitleaks Scan': DEDUPE_ALGO_HASH_CODE,
     'pip-audit Scan': DEDUPE_ALGO_HASH_CODE,
+    'Nancy Scan': DEDUPE_ALGO_HASH_CODE,
     'Edgescan Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Bugcrowd API Import': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Rubocop Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1759,6 +1762,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'MobSF Scan': DEDUPE_ALGO_HASH_CODE,
     'OSV Scan': DEDUPE_ALGO_HASH_CODE,
     'Nosey Parker Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    'Bearer CLI': DEDUPE_ALGO_HASH_CODE,
+    'Wiz Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1984,15 +1989,13 @@ CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 AUDITLOG_FLUSH_RETENTION_PERIOD = env('DD_AUDITLOG_FLUSH_RETENTION_PERIOD')
 ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
 USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
-
+USE_QUALYS_LEGACY_SEVERITY_PARSING = env('DD_QUALYS_LEGACY_SEVERITY_PARSING')
 DD_CUSTOM_TAG_PARSER = env('DD_CUSTOM_TAG_PARSER')
 DD_INVALID_ESCAPE_STR = env('DD_INVALID_ESCAPE_STR')
 
 # Risk Pending
 RISK_PENDING = env("DD_RISK_PENDING")
 ROLE_ALLOWED_TO_ACCEPT_RISKS = env("DD_ROLE_ALLOWED_TO_ACCEPT_RISKS")
-BLACK_LIST_FINDING = env("DD_BLACK_LIST_FINDING")
-WHITE_LIST_FINDING = env("DD_WHITE_LIST_FINDING")
 RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = env("DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY")
 # Engine Backend
 PROVIDER1 = env("DD_PROVIDER1")

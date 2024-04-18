@@ -6,7 +6,7 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("dojo", "0205_alter_finding_cvssv3_score"),
+        ("dojo", "0209_merge_acunetix"),
     ]
 
     operations = [
