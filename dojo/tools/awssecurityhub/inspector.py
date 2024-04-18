@@ -13,7 +13,7 @@ class Inspector:
         unsaved_vulnerability_ids = []
         epss_score = None
         description = f"This is an Inspector Finding\n{finding.get('Description', '')}"
-        description += f"\n Resource ID: " + finding.get("Resources", {}).get("Id", "")
+        description += f"\n Resource ID: {finding.get("Resources", {}).get("Id", "")}\n"
         description += f"\n**AWS Finding ARN: ** {finding_id}\n"
         description += f"AwsAccountId: {finding.get('AwsAccountId', '')}\n"
         description += f"Region: {finding.get('Region', '')}\n"
