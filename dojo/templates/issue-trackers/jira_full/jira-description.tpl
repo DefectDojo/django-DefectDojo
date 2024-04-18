@@ -71,6 +71,7 @@
 {% endif %}
 {% endif %}
 
+{% autoescape on %}
 *Description*:
 {{ finding.get_redacted_description }}
 
@@ -93,5 +94,6 @@
 *References*:
 {{ finding.references }}
 {% endif %}
+{% endautoescape %}
 
 *Reporter:* [{{ finding.reporter|full_name}} ({{ finding.reporter.email }})|mailto:{{ finding.reporter.email }}]
