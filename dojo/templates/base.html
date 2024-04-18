@@ -422,11 +422,13 @@
                                                         {% trans "Engineer Metrics" %}
                                                     </a>
                                                 </li> -->
-                                                <li>
-                                                    <a rel="noopener noreferrer" href="{% url 'grafana_metrics' %}">
-                                                        {% trans "Grafana Metrics" %}
-                                                    </a>
-                                                </li>
+                                                {% if "Metrics_Panel"|has_global_permission %}
+                                                    <li>
+                                                        <a rel="noopener noreferrer" href="{% url 'grafana_metrics' %}">
+                                                            {% trans "Grafana Metrics" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>

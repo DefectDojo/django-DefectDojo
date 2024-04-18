@@ -135,6 +135,8 @@ class Permissions(IntEnum):
     Credential_Add = 2703
     Credential_Edit = 2706
     Credential_Delete = 2707
+    
+    Metrics_Panel = 2708
 
     @classmethod
     def has_value(cls, value):
@@ -427,6 +429,7 @@ def get_roles_with_permissions():
             Permissions.Credential_Add,
             Permissions.Credential_Edit,
             Permissions.Credential_Delete,
+            Permissions.Metrics_Panel,
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -594,7 +597,7 @@ def get_roles_with_permissions():
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
-            Permissions.Risk_Acceptance,
+            Permissions.Risk_Acceptance
         },
     }
 
