@@ -21,7 +21,7 @@ from django.views.decorators.cache import cache_page
 from django.utils import timezone
 
 from dojo.filters import MetricsFindingFilter, UserFilter, MetricsEndpointFilter
-from dojo.forms import SimpleMetricsForm, ProductTypeCountsForm, ProductTagCountsForm, MetricsPanelForm
+from dojo.forms import SimpleMetricsForm, ProductTypeCountsForm, ProductTagCountsForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Risk_Acceptance, Dojo_User, Endpoint_Status, Role
 from dojo.utils import get_page_items, add_breadcrumb, findings_this_period, opened_in_period, count_findings, \
