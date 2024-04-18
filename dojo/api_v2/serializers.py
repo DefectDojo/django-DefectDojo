@@ -1792,6 +1792,13 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         return data
 
+    def validate_severity(self, value: str) -> str:
+        if value not in SEVERITIES:
+            raise serializers.ValidationError(
+                f"Severity must be one of the following: {SEVERITIES}"
+            )
+        return value
+
     def build_relational_field(self, field_name, relation_info):
         if field_name == "notes":
             return NoteSerializer, {"many": True, "read_only": True}
@@ -1919,6 +1926,13 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         return data
 
+    def validate_severity(self, value: str) -> str:
+        if value not in SEVERITIES:
+            raise serializers.ValidationError(
+                f"Severity must be one of the following: {SEVERITIES}"
+            )
+        return value
+
 
 class VulnerabilityIdTemplateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -1995,6 +2009,13 @@ class StubFindingSerializer(serializers.ModelSerializer):
         model = Stub_Finding
         fields = "__all__"
 
+    def validate_severity(self, value: str) -> str:
+        if value not in SEVERITIES:
+            raise serializers.ValidationError(
+                f"Severity must be one of the following: {SEVERITIES}"
+            )
+        return value
+
 
 class StubFindingCreateSerializer(serializers.ModelSerializer):
     test = serializers.PrimaryKeyRelatedField(queryset=Test.objects.all())
@@ -2005,6 +2026,13 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "reporter": {"default": serializers.CurrentUserDefault()},
         }
+
+    def validate_severity(self, value: str) -> str:
+        if value not in SEVERITIES:
+            raise serializers.ValidationError(
+                f"Severity must be one of the following: {SEVERITIES}"
+            )
+        return value
 
 
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
