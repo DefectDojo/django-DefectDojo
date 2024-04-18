@@ -7,7 +7,7 @@ class Compliance:
         finding_id = finding.get("Id", "")
         title = finding.get("Title", "")
         severity = finding.get("Severity", {}).get("Label", "INFORMATIONAL").title()
-        for resource_id_arn in finding.get("Resources", []): # adding a generic resource_id implementation separate from the below AwsEcrContainerImage one
+        for resource_id_arn in finding.get("Resources", []):  # adding a generic resource_id implementation separate from the below AwsEcrContainerImage one
             resource_id = resource_id_arn.get("Id")
         mitigation = ""
         impact = []
