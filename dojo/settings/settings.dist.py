@@ -2031,11 +2031,11 @@ if os.getenv("DD_USE_CACHE_REDIS") == "true":
 # ------------------------------------------------------------------------------
 # Render Grafana Metricsin a <frame>, <iframe>, <embed> or <object>
 # ------------------------------------------------------------------------------
-DD_GRAFANA_URL = env('DD_GRAFANA_URL')
+GRAFANA_URL = env('DD_GRAFANA_URL')
 CSP_FRAME_SRC = [
     "'self'",
-    DD_GRAFANA_URL,
-    "https://grafana-pdti-dev.apps.ambientesbc.com"
+    GRAFANA_URL,
+    "https://login.microsoftonline.com"
 ]
 
 # ------------------------------------------------------------------------------
