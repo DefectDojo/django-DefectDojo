@@ -1,14 +1,11 @@
 import logging
-from typing import List
 from django.conf import settings
-from dataclasses import dataclass
 from dojo.utils import Response
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
-from dojo.utils import get_system_setting, get_product, is_finding_groups_enabled, \
-    get_password_requirements_string, sla_expiration_risk_acceptance
+from dojo.utils import sla_expiration_risk_acceptance
 from django.urls import reverse
-from dojo.models import Engagement, Risk_Acceptance, Finding, Product_Type_Member, Role, Product_Member, \
+from dojo.models import Engagement, Risk_Acceptance, Finding, Product_Type_Member, Product_Member, \
     Product, Product_Type
 from dojo.risk_acceptance.helper import create_notification, expiration_message_creator, post_jira_comments
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
@@ -294,14 +291,14 @@ def rule_risk_acceptance_according_to_critical(severity, user, product: Product,
 
 def limit_assumption_of_vulnerability(**kwargs):
     # "LAV"  - (Limit Assumption of Vulnerability).
-    number_of_acceptances_by_finding = Risk_Acceptance.objects.filter(accepted_findings=kwargs["finding_id"]).count()
+    number_of_acceptances_by_finding = Risk_Acceptance.objects.filter(accepted_findings=kwargs["finding_id"], decision=Risk_Acceptance.TREATMENT_ACCEPT).count()
     result = {}
     if number_of_acceptances_by_finding < settings.LIMIT_ASSUMPTION_OF_VULNERABILITY:
         result["status"] = True
         result["message"] = ""
     else:
         result["status"] = False
-        result["message"] = "The finding exceeds the maximum limit of acceptance times"
+        result["message"] = f"The finding {kwargs['finding_id']} exceeds the maximum limit of acceptance times"
     return result
 
 
@@ -420,7 +417,7 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
 
 def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
     for finding in findings:
-        add_severity_to_risk_acceptance(risk_pending, finding.severity)
+        ra_helper.add_severity_to_risk_acceptance(risk_pending, finding.severity)
         if not finding.duplicate:
             finding.risk_status = "Risk Pending"
             finding.save(dedupe_option=False)
@@ -455,3 +452,28 @@ def accept_risk_pending_bullk(eng, risk_acceptance, product, product_type):
     for accepted_finding in risk_acceptance.accepted_findings.all():
         logger.debug(f"Accepted risk accepted id: {accepted_finding.id}")
         risk_acceptante_pending(eng, accepted_finding, risk_acceptance, product, product_type)
+
+def validate_list_findings(conf_risk, type, finding, eng):
+    if type == "black_list":
+        return next(
+            (
+                item
+                for item in conf_risk.get("BLACK_LIST_FINDING", [])
+                if item in finding.vulnerability_ids
+                or item == finding.vuln_id_from_tool
+            ),
+            None,
+        )
+    elif type == "white_list":
+        return next(
+            (
+                item
+                for item in conf_risk.get("WHITE_LIST_FINDING", [])
+                if (
+                    set(item.get("id")) & set(finding.vulnerability_ids)
+                    or finding.vuln_id_from_tool in item.get("id")
+                )
+                and item.get("where", eng.name) == eng.name
+            ),
+            None,
+        )
