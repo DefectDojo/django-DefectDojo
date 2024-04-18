@@ -1108,7 +1108,7 @@ def add_risk_acceptance_pending(request, eid, fid):
             return post_risk_acceptance_pending(request, finding, eng, eid, product, product_type)
         else:
             form = get_risk_acceptance_pending(request, finding, eng, product, product_type)
-        finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng, active=True, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng, active=True, risk_status = "Risk Active" , severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
         form.fields['accepted_findings'].queryset = finding_choices
         if fid:
             form.fields['accepted_findings'].initial = {fid}
@@ -1344,6 +1344,16 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                 findings = add_findings_form.cleaned_data['accepted_findings']
                 if settings.RISK_PENDING:
                     conf_risk = ra_helper.get_config_risk()
+                    if risk_acceptance.decision == Risk_Acceptance.TREATMENT_AVOID:
+                        messages.add_message(
+                            request,
+                            messages.WARNING,
+                            f"Risk acceptance is of Avoid Type, it is not possible to add findings.",
+                            extra_tags="alert-danger",
+                        )
+                        return redirect_to_return_url_or_else(
+                            request, reverse("view_risk_acceptance", args=(eid, raid))
+                        )
                     for finding in findings:
                         if rp_helper.validate_list_findings(conf_risk, "black_list", finding, eng):
                             messages.add_message(
@@ -1382,7 +1392,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     accepted_findings = risk_acceptance.accepted_findings.order_by('id')
     fpage = get_page_items(request, accepted_findings, 15)
     if settings.RISK_PENDING:
-        unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), active=True, risk_accepted=False, severity=risk_acceptance.severity, duplicate=False) \
+        unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), active=True, risk_status = "Risk Active", risk_accepted=False, severity=risk_acceptance.severity, duplicate=False) \
             .exclude(id__in=accepted_findings).order_by("title")
     else:
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False) \
