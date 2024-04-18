@@ -21,14 +21,14 @@ from django.views.decorators.cache import cache_page
 from django.utils import timezone
 
 from dojo.filters import MetricsFindingFilter, UserFilter, MetricsEndpointFilter
-from dojo.forms import SimpleMetricsForm, ProductTypeCountsForm, ProductTagCountsForm
+from dojo.forms import SimpleMetricsForm, ProductTypeCountsForm, ProductTagCountsForm, GrafanaMetricsForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
-    Risk_Acceptance, Dojo_User, Endpoint_Status
+    Risk_Acceptance, Dojo_User, Endpoint_Status, Role
 from dojo.utils import get_page_items, add_breadcrumb, findings_this_period, opened_in_period, count_findings, \
     get_period_counts, get_system_setting, get_punchcard_data, queryset_check
 from functools import reduce
 from django.views.decorators.vary import vary_on_cookie
-from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.finding.queries import get_authorized_findings
@@ -36,6 +36,7 @@ from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY
 from dojo.endpoint.queries import get_authorized_endpoint_status
 from dojo.authorization.authorization import user_has_permission_or_403
 from django.utils.translation import gettext as _
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -535,9 +536,15 @@ def simple_metrics(request):
 # @vary_on_cookie
 def grafana_metrics(request):
     page_name = _('Grafana Metrics')
-
+    now = timezone.now()
+    grafana_url = settings.GRAFANA_URL
+    role = Role.objects.get(id=Roles.Maintainer)
+    user = request.user.id
     return render(request, 'dojo/grafana_metrics.html', {
-       'name': page_name, 
+       'name': page_name,
+       'grafana_url': grafana_url,
+       'role': role,
+       'user': user,
     })
 
 
