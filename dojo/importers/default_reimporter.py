@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from typing import List, Tuple
+from abc import ABC
 
 from django.utils import timezone
 from django.core.files.uploadedfile import TemporaryUploadedFile
@@ -27,6 +28,20 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 class DefaultReImporter(BaseImporter):
+    def __init__(self, *args: list, **kwargs: dict):
+        """
+        Bypass the __init__ method of the BaseImporter class
+        as it will raise a `NotImplemented` exception
+        """
+        ABC.__init__(self, *args, **kwargs)
+
+    def __new__(self, *args: list, **kwargs: dict):
+        """
+        Bypass the __new__ method of the BaseImporter class
+        as it will raise a `NotImplemented` exception
+        """
+        return ABC.__new__(self, *args, **kwargs)
+
     def process_scan(
         self,
         scan: TemporaryUploadedFile,
@@ -108,7 +123,7 @@ class DefaultReImporter(BaseImporter):
         )
         # Update the test progress to reflect that the import has completed
         logger.debug('REIMPORT_SCAN: Updating Test progress')
-        self.update_test_progress(test, **kwargs)
+        self.update_test_progress(test)
         logger.debug('REIMPORT_SCAN: Done')
         return (
             test,
@@ -213,6 +228,7 @@ class DefaultReImporter(BaseImporter):
                 # Process the rest of the items on the finding
                 finding = self.finding_post_processing(
                     finding,
+                    test,
                     new_items,
                     reactivated_items,
                     unchanged_items,
@@ -235,9 +251,7 @@ class DefaultReImporter(BaseImporter):
         untouched = set(unchanged_items) - set(to_mitigate) - set(new_items)
         # Process groups
         self.process_groups_for_all_findings(
-            group_by,
             group_names_to_findings_dict,
-            push_to_jira,
             reactivated_items,
             unchanged_items,
             **kwargs,
@@ -410,11 +424,12 @@ class DefaultReImporter(BaseImporter):
             # Indicate that the test is not complete yet as endpoints will still be rolling in.
             test.percent_complete = 50
             test.save()
-            self.update_test_progress(test, **kwargs)
+            self.update_test_progress(test, sync=False)
 
         return new_findings, reactivated_findings, findings_to_mitigate, untouched_findings
 
     def match_new_finding_to_existing_finding(
+        self,
         unsaved_finding: Finding,
         test: Test,
         deduplication_algorithm: str,
@@ -734,7 +749,8 @@ class DefaultReImporter(BaseImporter):
         if scan_date := kwargs.get("scan_date"):
             unsaved_finding.date = scan_date.date()
         # Save it. Don't dedupe before endpoints are added.
-        finding = unsaved_finding.save(dedupe_option=False)
+        unsaved_finding.save(dedupe_option=False)
+        finding = unsaved_finding
         logger.debug(
             "Reimport created new finding as no existing finding match: "
             f"{finding.id}: {finding.title} "
@@ -776,11 +792,11 @@ class DefaultReImporter(BaseImporter):
         # Process vulnerability IDs
         self.process_vulnerability_ids(finding)
 
+        return finding
+
     def process_groups_for_all_findings(
         self,
-        group_by: str,
         group_names_to_findings_dict: dict,
-        push_to_jira: bool,
         reactivated_items: List[Finding],
         unchanged_items: List[Finding],
         **kwargs: dict,
@@ -789,6 +805,8 @@ class DefaultReImporter(BaseImporter):
         Add findings to a group that may or may not exist, based upon the users
         selection at import time
         """
+        group_by = kwargs.get("group_by")
+        push_to_jira = kwargs.get("push_to_jira", False)
         for (group_name, findings) in group_names_to_findings_dict.items():
             finding_helper.add_findings_to_auto_group(
                 group_name,

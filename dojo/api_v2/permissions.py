@@ -422,34 +422,34 @@ class UserHasImportPermission(permissions.BasePermission):
         # Process the context to make an conversions needed. Catch any exceptions
         # in this case and wrap them in a DRF exception
         try:
-            data = request.data
-            auto_create.process_import_meta_data_from_dict(data)
+            converted_dict = auto_create.convert_querydict_to_dict(request.data)
+            auto_create.process_import_meta_data_from_dict(converted_dict)
             # Get an existing product
-            product_type = auto_create.get_target_product_type_if_exists(**data)
-            product = auto_create.get_target_product_if_exists(**data)
-            engagement = auto_create.get_target_engagement_if_exists(**data)
+            product_type = auto_create.get_target_product_type_if_exists(**converted_dict)
+            product = auto_create.get_target_product_if_exists(**converted_dict)
+            engagement = auto_create.get_target_engagement_if_exists(**converted_dict)
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
             raise ValidationError(str(e))
-        
+
         if engagement:
             # existing engagement, nothing special to check
             return user_has_permission(
                 request.user, engagement, Permissions.Import_Scan_Result
             )
-        elif engagement_id := data.get("engagement_id"):
+        elif engagement_id := converted_dict.get("engagement_id"):
             # engagement_id doesn't exist
             raise serializers.ValidationError(
                 f"Engagement \"{engagement_id}\" does not exist"
             )
 
-        if not data.get("auto_create_context"):
+        if not converted_dict.get("auto_create_context"):
             raise_no_auto_create_import_validation_error(
                 None,
                 None,
-                data.get("engagement_name"),
-                data.get("product_name"),
-                data.get("product_type_name"),
+                converted_dict.get("engagement_name"),
+                converted_dict.get("product_name"),
+                converted_dict.get("product_type_name"),
                 engagement,
                 product,
                 product_type,
@@ -461,11 +461,11 @@ class UserHasImportPermission(permissions.BasePermission):
             return check_auto_create_permission(
                 request.user,
                 product,
-                data.get("product_name"),
+                converted_dict.get("product_name"),
                 engagement,
-                data.get("engagement_name"),
+                converted_dict.get("engagement_name"),
                 product_type,
-                data.get("product_type_name"),
+                converted_dict.get("product_type_name"),
                 "Need engagement_id or product_name + engagement_name to perform import",
             )
 
@@ -478,12 +478,12 @@ class UserHasMetaImportPermission(permissions.BasePermission):
         # Process the context to make an conversions needed. Catch any exceptions
         # in this case and wrap them in a DRF exception
         try:
-            data = request.data
-            auto_create.process_import_meta_data_from_dict(data)
+            converted_dict = auto_create.convert_querydict_to_dict(request.data)
+            auto_create.process_import_meta_data_from_dict(converted_dict)
             # Get an existing product
-            product = auto_create.get_target_product_if_exists(**data)
+            product = auto_create.get_target_product_if_exists(**converted_dict)
             if not product:
-                product = auto_create.get_target_product_by_id_if_exists(**data)
+                product = auto_create.get_target_product_by_id_if_exists(**converted_dict)
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
             raise ValidationError(str(e))
@@ -493,7 +493,7 @@ class UserHasMetaImportPermission(permissions.BasePermission):
             return user_has_permission(
                 request.user, product, Permissions.Import_Scan_Result
             )
-        elif product_id := data.get("product_id"):
+        elif product_id := converted_dict.get("product_id"):
             # product_id doesn't exist
             raise serializers.ValidationError(
                 f"product \"{product_id}\" does not exist"
@@ -620,13 +620,13 @@ class UserHasReimportPermission(permissions.BasePermission):
         # Process the context to make an conversions needed. Catch any exceptions
         # in this case and wrap them in a DRF exception
         try:
-            data = request.data
-            auto_create.process_import_meta_data_from_dict(data)
+            converted_dict = auto_create.convert_querydict_to_dict(request.data)
+            auto_create.process_import_meta_data_from_dict(converted_dict)
             # Get an existing product
-            product_type = auto_create.get_target_product_type_if_exists(**data)
-            product = auto_create.get_target_product_if_exists(**data)
-            engagement = auto_create.get_target_engagement_if_exists(**data)
-            test = auto_create.get_target_test_if_exists(**data)
+            product_type = auto_create.get_target_product_type_if_exists(**converted_dict)
+            product = auto_create.get_target_product_if_exists(**converted_dict)
+            engagement = auto_create.get_target_engagement_if_exists(**converted_dict)
+            test = auto_create.get_target_test_if_exists(**converted_dict)
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
             raise ValidationError(str(e))
@@ -636,19 +636,19 @@ class UserHasReimportPermission(permissions.BasePermission):
             return user_has_permission(
                 request.user, test, Permissions.Import_Scan_Result
             )
-        elif test_id := data.get("test_id"):
+        elif test_id := converted_dict.get("test_id"):
             # test_id doesn't exist
             raise serializers.ValidationError(
                 f"Test \"{test_id}\" doesn't exist"
             )
 
-        if not  data.get("auto_create_context"):
+        if not converted_dict.get("auto_create_context"):
             raise_no_auto_create_import_validation_error(
-                data.get("test_title"),
-                data.get("scan_type"),
-                data.get("engagement_name"),
-                data.get("product_name"),
-                data.get("product_type_name"),
+                converted_dict.get("test_title"),
+                converted_dict.get("scan_type"),
+                converted_dict.get("engagement_name"),
+                converted_dict.get("product_name"),
+                converted_dict.get("product_type_name"),
                 engagement,
                 product,
                 product_type,
@@ -660,11 +660,11 @@ class UserHasReimportPermission(permissions.BasePermission):
             return check_auto_create_permission(
                 request.user,
                 product,
-                data.get("product_name"),
+                converted_dict.get("product_name"),
                 engagement,
-                data.get("engagement_name"),
+                converted_dict.get("engagement_name"),
                 product_type,
-                data.get("product_type_name"),
+                converted_dict.get("product_type_name"),
                 "Need test_id or product_name + engagement_name + scan_type to perform reimport",
             )
 

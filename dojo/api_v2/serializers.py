@@ -2130,33 +2130,12 @@ class ImportScanSerializer(serializers.Serializer):
         Process all of the user supplied inputs to massage them into the correct
         format the importer is expecting to see
         """
-        context = {
-            "test": data.get("test"),
-            "engagement": data.get("engagement"),
-            "title": data.get("title"),
-            "scan_type": data.get("scan_type"),
-            "close_old_findings": data.get("close_old_findings"),
-            "close_old_findings_product_scope": data.get("close_old_findings_product_scope"),
-            "minimum_severity": data.get("minimum_severity"),
-            "endpoint_to_add": None,
-            "scan_date": data.get("scan_date", None),
-            "version": data.get("version", None),
-            "build_id": data.get("build_id", None),
-            "branch_tag": data.get("branch_tag", None),
-            "commit_hash": data.get("commit_hash", None),
-            "api_scan_configuration": data.get("api_scan_configuration", None),
-            "service": data.get("service", None),
-            "apply_tags_to_findings": data.get("apply_tags_to_findings", False),
-            "apply_tags_to_endpoints": data.get("apply_tags_to_endpoints", False),
-            "source_code_management_uri": data.get("source_code_management_uri", None),
-            "tags": data.get("tags", None),
-            "lead": data.get("lead"),
-            "scan": data.get("file", None),
-            "group_by": data.get("group_by", None),
-            "create_finding_groups_for_all_findings": data.get("create_finding_groups_for_all_findings", True),
-            "engagement_end_date": data.get("engagement_end_date", None),
-            "environment": Development_Environment.objects.get(name=data.get("environment", "Development")),
-        }
+        context = {k: v for k, v in data.items()}
+        # update some vars
+        context["scan"] = data.get("file", None)
+        context["environment"] = Development_Environment.objects.get(
+            name=data.get("environment", "Development")
+        )
         # Set the active/verified status based upon the overrides
         if "active" in self.initial_data:
             context["active"] = data.get("active")
@@ -2169,6 +2148,8 @@ class ImportScanSerializer(serializers.Serializer):
         # Change the way that endpoints are sent to the importer
         if endpoints_to_add := data.get("endpoint_to_add"):
             context["endpoints_to_add"] = [endpoints_to_add]
+        else:
+            context["endpoint_to_add"] = None
         # have to make the scan_date_time timezone aware otherwise uploads via
         # the API would fail (but unit tests for api upload would pass...)
         context["scan_date"] = (
@@ -2180,6 +2161,8 @@ class ImportScanSerializer(serializers.Serializer):
         )
         # Process the auto create context inputs
         self.process_auto_create_create_context(context)
+
+        return context
 
     def process_auto_create_create_context(
         self,
@@ -2196,7 +2179,7 @@ class ImportScanSerializer(serializers.Serializer):
         # in this case and wrap them in a DRF exception
         try:
             auto_create.process_import_meta_data_from_dict(context)
-            # Attempt to create an engagement 
+            # Attempt to create an engagement
             context["engagement"] = AutoCreateContextManager.get_or_create_engagement(**context)
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
@@ -2231,7 +2214,7 @@ class ImportScanSerializer(serializers.Serializer):
         except SyntaxError as se:
             raise Exception(se)
         except ValueError as ve:
-            raise Exception(ve) 
+            raise Exception(ve)
 
     def save(self, push_to_jira=False):
         # Go through the validate method
@@ -2409,34 +2392,12 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         Process all of the user supplied inputs to massage them into the correct
         format the importer is expecting to see
         """
-        context = {
-            "test": data.get("test"),
-            "engagement": data.get("engagement"),
-            "title": data.get("title"),
-            "scan_type": data.get("scan_type"),
-            "close_old_findings": data.get("close_old_findings"),
-            "close_old_findings_product_scope": data.get("close_old_findings_product_scope"),
-            "minimum_severity": data.get("minimum_severity"),
-            "endpoint_to_add": None,
-            "scan_date": data.get("scan_date", None),
-            "version": data.get("version", None),
-            "build_id": data.get("build_id", None),
-            "branch_tag": data.get("branch_tag", None),
-            "commit_hash": data.get("commit_hash", None),
-            "api_scan_configuration": data.get("api_scan_configuration", None),
-            "service": data.get("service", None),
-            "apply_tags_to_findings": data.get("apply_tags_to_findings", False),
-            "apply_tags_to_endpoints": data.get("apply_tags_to_endpoints", False),
-            "source_code_management_uri": data.get("source_code_management_uri", None),
-            "tags": data.get("tags", None),
-            "lead": data.get("lead"),
-            "scan": data.get("file", None),
-            "group_by": data.get("group_by", None),
-            "create_finding_groups_for_all_findings": data.get("create_finding_groups_for_all_findings", True),
-            "engagement_end_date": data.get("engagement_end_date", None),
-            "environment": Development_Environment.objects.get(name=data.get("environment", "Development")),
-            "do_not_reactivate": data.get("do_not_reactivate", False),
-        }
+        context = {k: v for k, v in data.items()}
+        # update some vars
+        context["scan"] = data.get("file", None)
+        context["environment"] = Development_Environment.objects.get(
+            name=data.get("environment", "Development")
+        )
         # Set the active/verified status based upon the overrides
         if "active" in self.initial_data:
             context["active"] = data.get("active")
@@ -2449,6 +2410,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         # Change the way that endpoints are sent to the importer
         if endpoints_to_add := data.get("endpoint_to_add"):
             context["endpoints_to_add"] = [endpoints_to_add]
+        else:
+            context["endpoint_to_add"] = None
         # have to make the scan_date_time timezone aware otherwise uploads via
         # the API would fail (but unit tests for api upload would pass...)
         context["scan_date"] = (
@@ -2458,6 +2421,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             if context.get("scan_date")
             else None
         )
+
+        return context
 
     def process_auto_create_create_context(
         self,
@@ -2535,7 +2500,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         # Extract the data from the form
         context = self.set_context(data)
         # Process the auto create context inputs
-        auto_create_manager = AutoCreateContextManager
+        auto_create_manager = AutoCreateContextManager()
         self.process_auto_create_create_context(auto_create_manager, context)
         # Import the scan with all of the supplied data
         self.process_scan(auto_create_manager, data, context)

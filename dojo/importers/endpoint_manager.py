@@ -20,6 +20,7 @@ class DefaultReImporterEndpointManager:
     @dojo_async_task
     @app.task()
     def mitigate_endpoint_status(
+        self,
         endpoint_status_list: List[Endpoint_Status],
         user: Dojo_User,
         **kwargs: dict,
@@ -83,6 +84,7 @@ class DefaultReImporterEndpointManager:
     def chunk_endpoints_and_mitigate(
         self,
         endpoint_status_list: List[Endpoint_Status],
+        user: Dojo_User,
         **kwargs: dict,
     ) -> None:
         """
@@ -95,13 +97,13 @@ class DefaultReImporterEndpointManager:
             chunked_list = self.chunk_objects(endpoint_status_list)
             # If there is only one chunk, then do not bother with async
             if len(chunked_list) < 2:
-                self.mitigate_endpoint_status(endpoint_status_list, sync=True)
+                self.mitigate_endpoint_status(endpoint_status_list, user, sync=True)
             logger.debug(f"Split endpoints into {len(chunked_list)} chunks of {chunked_list[0]}")
             # First kick off all the workers
             for endpoint_status_list in chunked_list:
-                self.mitigate_endpoint_status(endpoint_status_list, sync=False)
+                self.mitigate_endpoint_status(endpoint_status_list, user, sync=False)
         else:
-            self.mitigate_endpoint_status(endpoint_status_list, sync=True)
+            self.mitigate_endpoint_status(endpoint_status_list, user, sync=True)
 
     def update_endpoint_status(
         self,
@@ -135,4 +137,4 @@ class DefaultReImporterEndpointManager:
                     existing_finding_endpoint_status_list)
             )
             self.chunk_endpoints_and_reactivate(endpoint_status_to_reactivate)
-        self.chunk_endpoints_and_mitigate(endpoint_status_to_mitigate)
+        self.chunk_endpoints_and_mitigate(endpoint_status_to_mitigate, user)

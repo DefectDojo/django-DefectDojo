@@ -1,8 +1,10 @@
 import logging
 from datetime import timedelta, datetime
 from crum import get_current_user
+from typing import Any
 
 from django.utils import timezone
+from django.http.request import QueryDict
 
 from dojo.models import (
     Engagement,
@@ -53,7 +55,7 @@ class AutoCreateContextManager:
             )
         if not isinstance(value, str):
             raise TypeError(
-                f"{object_name}: {parameter_name} must be a string"
+                f"{object_name}: {parameter_name} must be a string, not a {type(value)}"
             )
         if len(value) == 0:
             raise ValueError(
@@ -103,6 +105,47 @@ class AutoCreateContextManager:
         """
         self.common_string_validation(engagement_name, "engagement_name", "Engagement")
 
+    def process_object_fields(
+        self,
+        key: str,
+        label: str,
+        object_type: Any,
+        data: dict,
+        **kwargs: dict,
+    ) -> None:
+        """
+        Process the object fields such as product, engagement, and
+        test such that passing the whole object, or just the ID
+        will suffice
+        """
+        if object_id := data.get(key, None):
+            # Convert to just the ID if the whole object as passed
+            if isinstance(object_id, object_type):
+                object_id = object_id.id
+            # Convert to a string if needed
+            if isinstance(object_id, list) and len(object_id) > 0:
+                object_id = object_id[0]
+            # Ensure the ID is an integer, not a string
+            elif isinstance(object_id, str) and not object_id.isdigit():
+                raise ValueError(f"{key} must be an integer")
+            # Update the "test" entry in the dict with the ID
+            data[label] = object_id
+
+    def process_object_name(
+        self,
+        key: str,
+        data: dict,
+        **kwargs: dict,
+    ) -> None:
+        """
+        Process the object names by ensuring that the inputs
+        are a string and not a list of strings
+        """
+        if object_name := data.get(key):
+            # Convert to a string if needed
+            if isinstance(object_name, list) and len(object_name) > 0:
+                data[key] = object_name[0]
+
     def process_import_meta_data_from_dict(
         self,
         data: dict,
@@ -115,35 +158,19 @@ class AutoCreateContextManager:
         start with
         """
         # Validate the test artifact
-        if test_id := data.get("test", None):
-            # Convert to just the ID if the whole object as passed
-            if isinstance(test_id, Test):
-                test_id = test_id.id
-            # Ensure the ID is an integer, not a string
-            elif isinstance(test_id, str) and not test_id.isdigit():
-                raise ValueError("test must be an integer")
-            # Update the "test" entry in the dict with the ID
-            data["test_id"] = test_id
+        self.process_object_fields("test", "test_id", Test, data)
         # Validate the engagement artifact
-        if engagement_id := data.get("engagement", None):
-            # Convert to just the ID if the whole object as passed
-            if isinstance(engagement_id, Engagement):
-                engagement_id = engagement_id.id
-            # Ensure the ID is an integer, not a string
-            elif isinstance(engagement_id, str) and not engagement_id.isdigit():
-                raise ValueError("engagement must be an integer")
-            # Update the "engagement" entry in the dict with the ID
-            data["engagement_id"] = engagement_id
+        self.process_object_fields("engagement", "engagement_id", Engagement, data)
         # Validate the product artifact
-        if product_id := data.get("product", None):
-            # Convert to just the ID if the whole object as passed
-            if isinstance(product_id, Product):
-                product_id = product_id.id
-            # Ensure the ID is an integer, not a string
-            elif isinstance(product_id, str) and not product_id.isdigit():
-                raise ValueError("product must be an integer")
-            # Update the "product" entry in the dict with the ID
-            data["product_id"] = product_id
+        self.process_object_fields("product", "product_id", Product, data)
+        # Validate the product_type_name
+        self.process_object_name("product_type_name", data)
+        # Validate the product_name
+        self.process_object_name("product_name", data)
+        # Validate the engagement_name
+        self.process_object_name("engagement_name", data)
+        # Validate the test_title
+        self.process_object_name("test_title", data)
 
     """
     ===================================
@@ -365,3 +392,29 @@ class AutoCreateContextManager:
             deduplication_on_engagement=deduplication_on_engagement,
             source_code_management_uri=source_code_management_uri,
         )
+
+    """
+    ===================================
+    ------------ Utilities ------------
+    ===================================
+    """
+    def convert_querydict_to_dict(
+        self,
+        query_dict_data: QueryDict,
+    ) -> dict:
+        """
+        Creates a copy of a query dict, and then converts it
+        to a dict
+        """
+        # First copy the query dict
+        copy = {}
+        # Iterate ovr the dict and extract the elements based
+        # on whether they are a single item, or a list
+        for key, value in query_dict_data.items():
+            # Accommodate lists
+            if isinstance(value, list):
+                copy[key] = value if len(value) > 1 else value[0]
+            else:
+                copy[key] = value
+        # Convert to a regular dict
+        return copy

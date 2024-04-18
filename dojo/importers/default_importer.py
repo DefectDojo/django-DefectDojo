@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from typing import List, Tuple
+from abc import ABC
 
 from django.utils import timezone
 from django.core.files.uploadedfile import TemporaryUploadedFile
@@ -25,6 +26,20 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 class DefaultImporter(BaseImporter):
+    def __init__(self, *args: list, **kwargs: dict):
+        """
+        Bypass the __init__ method of the BaseImporter class
+        as it will raise a `NotImplemented` exception
+        """
+        ABC.__init__(self, *args, **kwargs)
+
+    def __new__(self, *args: list, **kwargs: dict):
+        """
+        Bypass the __new__ method of the BaseImporter class
+        as it will raise a `NotImplemented` exception
+        """
+        return ABC.__new__(self, *args, **kwargs)
+
     def create_test(
         self,
         scan_type: str,
@@ -51,6 +66,7 @@ class DefaultImporter(BaseImporter):
         test_type = self.get_or_create_test_type(test_type_name)
         # Create the test object
         return Test.objects.create(
+            title=kwargs.get("test_title"),
             engagement=engagement,
             lead=lead,
             environment=environment,
@@ -130,7 +146,7 @@ class DefaultImporter(BaseImporter):
         notifications_helper.notify_scan_added(test, updated_count, new_findings=new_findings, findings_mitigated=closed_findings)
         # Update the test progress to reflect that the import has completed
         logger.debug('IMPORT_SCAN: Updating Test progress')
-        self.update_test_progress(test, **kwargs)
+        self.update_test_progress(test)
 
         logger.debug('IMPORT_SCAN: Done')
         return test, 0, len(new_findings), len(closed_findings), 0, 0, test_import_history
@@ -184,7 +200,8 @@ class DefaultImporter(BaseImporter):
             if service := kwargs.get("service"):
                 unsaved_finding.service = service
 
-            finding = unsaved_finding.save(dedupe_option=False)
+            unsaved_finding.save(dedupe_option=False)
+            finding = unsaved_finding
             # Determine how the finding should be grouped
             group_by = kwargs.get("group_by")
             self.process_finding_groups(

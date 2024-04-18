@@ -101,8 +101,8 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         """
         if isinstance(self, BaseImporter):
             raise NotImplementedError((
-                "The Import class must not be used directly. "
-                "Please use a class that extends the Import class. "
+                "The BaseImporter class must not be used directly. "
+                "Please use a class that extends the BaseImporter class."
             ))
 
     @abstractmethod
