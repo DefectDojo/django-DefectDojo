@@ -312,7 +312,7 @@ def delete_engagement(request, eid):
                 create_notification(event='other',
                                     title='Deletion of %s' % engagement.name,
                                     product=product,
-                                    description='The engagement "%s" was deleted by %s' % (engagement.name, request.user),
+                                    description=f'The engagement "{engagement.name}" was deleted by {request.user}',
                                     url=request.build_absolute_uri(reverse('view_engagements', args=(product.id, ))),
                                     recipients=[engagement.lead],
                                     icon="exclamation-triangle")
@@ -354,7 +354,7 @@ def copy_engagement(request, eid):
                 extra_tags='alert-success')
             create_notification(event='other',
                                 title='Copying of %s' % engagement.name,
-                                description='The engagement "%s" was copied by %s' % (engagement.name, request.user),
+                                description=f'The engagement "{engagement.name}" was copied by {request.user}',
                                 product=product,
                                 url=request.build_absolute_uri(reverse('view_engagement', args=(engagement_copy.id, ))),
                                 recipients=[engagement.lead],
@@ -506,7 +506,7 @@ class ViewEngagement(View):
                 form = TypedNoteForm(available_note_types=available_note_types)
             else:
                 form = NoteForm()
-            title = "Engagement: %s on %s" % (eng.name, eng.product.name)
+            title = f"Engagement: {eng.name} on {eng.product.name}"
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Note added successfully.',
@@ -1310,7 +1310,6 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         if 'add_findings' in request.POST:
             add_findings_form = AddFindingsRiskAcceptanceForm(
                 request.POST, request.FILES, instance=risk_acceptance)
-
             errors = errors or not add_findings_form.is_valid()
             if not errors:
                 findings = add_findings_form.cleaned_data['accepted_findings']
@@ -1323,7 +1322,6 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                     'Finding%s added successfully.' % ('s' if len(findings) > 1
                                                        else ''),
                     extra_tags='alert-success')
-
         if not errors:
             logger.debug('redirecting to return_url')
             return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
@@ -1343,10 +1341,15 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
 
     unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False) \
         .exclude(id__in=accepted_findings).order_by("title")
-    add_fpage = get_page_items(request, unaccepted_findings, 10, 'apage')
+    add_fpage = get_page_items(request, unaccepted_findings, 25, 'apage')
     # on this page we need to add unaccepted findings as possible findings to add as accepted
+
     add_findings_form.fields[
         "accepted_findings"].queryset = add_fpage.object_list
+
+    add_findings_form.fields["accepted_findings"].widget.request = request
+    add_findings_form.fields["accepted_findings"].widget.findings = unaccepted_findings
+    add_findings_form.fields["accepted_findings"].widget.page_number = add_fpage.number
 
     product_tab = Product_Tab(eng.product, title="Risk Acceptance", tab="engagements")
     product_tab.setEngagement(eng)
@@ -1422,7 +1425,7 @@ def download_risk_acceptance(request, eid, raid):
             open(settings.MEDIA_ROOT + "/" + risk_acceptance.path.name, mode='rb')))
     response['Content-Disposition'] = 'attachment; filename="%s"' \
                                       % risk_acceptance.filename()
-    mimetype, encoding = mimetypes.guess_type(risk_acceptance.path.name)
+    mimetype, _encoding = mimetypes.guess_type(risk_acceptance.path.name)
     response['Content-Type'] = mimetype
     return response
 
@@ -1483,11 +1486,10 @@ def engagement_ics(request, eid):
     uid = "dojo_eng_%d_%d" % (eng.id, eng.product.id)
     cal = get_cal_event(
         start_date, end_date,
-        "Engagement: %s (%s)" % (eng.name, eng.product.name),
-        "Set aside for engagement %s, on product %s.  Additional detail can be found at %s"
-        % (eng.name, eng.product.name,
+        f"Engagement: {eng.name} ({eng.product.name})",
+        "Set aside for engagement {}, on product {}.  Additional detail can be found at {}".format(eng.name, eng.product.name,
            request.build_absolute_uri(
-               (reverse("view_engagement", args=(eng.id, ))))), uid)
+               reverse("view_engagement", args=(eng.id, )))), uid)
     output = cal.serialize()
     response = HttpResponse(content=output)
     response['Content-Type'] = 'text/calendar'

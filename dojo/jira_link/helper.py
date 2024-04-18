@@ -342,16 +342,33 @@ def has_jira_configured(obj):
     return get_jira_project(obj) is not None
 
 
+def connect_to_jira(jira_server, jira_username, jira_password):
+    return JIRA(
+        server=jira_server,
+        basic_auth=(jira_username, jira_password),
+        max_retries=0,
+        options={
+            "verify": settings.JIRA_SSL_VERIFY,
+            "headers": settings.ADDITIONAL_HEADERS,
+        })
+
+
+def get_jira_connect_method():
+    if hasattr(settings, 'JIRA_CONNECT_METHOD'):
+        try:
+            import importlib
+            mn, _, fn = settings.JIRA_CONNECT_METHOD.rpartition('.')
+            m = importlib.import_module(mn)
+            return getattr(m, fn)
+        except ModuleNotFoundError:
+            pass
+    return connect_to_jira
+
+
 def get_jira_connection_raw(jira_server, jira_username, jira_password):
     try:
-        jira = JIRA(
-            server=jira_server,
-            basic_auth=(jira_username, jira_password),
-            max_retries=0,
-            options={
-                "verify": settings.JIRA_SSL_VERIFY,
-                "headers": settings.ADDITIONAL_HEADERS,
-            })
+        connect_method = get_jira_connect_method()
+        jira = connect_method(jira_server, jira_username, jira_password)
 
         logger.debug('logged in to JIRA ''%s'' successfully', jira_server)
 
@@ -367,7 +384,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
             log_jira_generic_alert('Unknown JIRA Connection Error', error_message)
 
         add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(error_message))
-        raise e
+        raise
 
     except requests.exceptions.RequestException as re:
         logger.exception(re)
@@ -375,11 +392,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
         log_jira_generic_alert('Unknown JIRA Connection Error', re)
 
         add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(error_message))
-
-        raise re
-
-    # except RequestException as re:
-    #     logger.exception(re)
+        raise
 
 
 # Gets a connection to a Jira server based on the finding
@@ -709,13 +722,13 @@ def add_jira_issue(obj, *args, **kwargs):
         return False
 
     if not is_jira_configured_and_enabled(obj):
-        message = 'Object %s cannot be pushed to JIRA as there is no JIRA configuration for %s.' % (obj.id, to_str_typed(obj))
+        message = f'Object {obj.id} cannot be pushed to JIRA as there is no JIRA configuration for {to_str_typed(obj)}.'
         return failure_to_add_message(message, None, obj)
 
     jira_project = get_jira_project(obj)
     jira_instance = get_jira_instance(obj)
 
-    obj_can_be_pushed_to_jira, error_message, error_code = can_be_pushed_to_jira(obj)
+    obj_can_be_pushed_to_jira, error_message, _error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
         if isinstance(obj, Finding) and obj.duplicate and not obj.active:
             logger.warning("%s will not be pushed to JIRA as it's a duplicate finding", to_str_typed(obj))
@@ -871,7 +884,7 @@ def update_jira_issue(obj, *args, **kwargs):
     jira_instance = get_jira_instance(obj)
 
     if not is_jira_configured_and_enabled(obj):
-        message = 'Object %s cannot be pushed to JIRA as there is no JIRA configuration for %s.' % (obj.id, to_str_typed(obj))
+        message = f'Object {obj.id} cannot be pushed to JIRA as there is no JIRA configuration for {to_str_typed(obj)}.'
         return failure_to_update_message(message, None, obj)
 
     j_issue = obj.jira_issue
@@ -972,7 +985,7 @@ def get_jira_issue_from_jira(find):
     j_issue = find.jira_issue
     if not jira_project:
         logger.error("Unable to retrieve latest status change from JIRA %s for finding %s as there is no JIRA_Project configured for this finding.", j_issue.jira_key, format(find.id))
-        log_jira_alert("Unable to retrieve latest status change from JIRA %s for finding %s as there is no JIRA_Project configured for this finding." % (j_issue.jira_key, find), find)
+        log_jira_alert(f"Unable to retrieve latest status change from JIRA {j_issue.jira_key} for finding {find} as there is no JIRA_Project configured for this finding.", find)
         return False
 
     meta = None
@@ -1063,7 +1076,7 @@ def get_issuetype_fields(
                         expand="projects.issuetypes.fields")
             except JIRAError as e:
                 e.text = f"Jira API call 'createmeta' failed with status: {e.status_code} and message: {e.text}"
-                raise e
+                raise
 
             project = None
             try:
@@ -1081,7 +1094,7 @@ def get_issuetype_fields(
                 issuetypes = jira.project_issue_types(project_key)
             except JIRAError as e:
                 e.text = f"Jira API call 'createmeta/issuetypes' failed with status: {e.status_code} and message: {e.text}. Project misconfigured or no permissions in Jira ?"
-                raise e
+                raise
 
             issuetype_id = None
             for it in issuetypes:
@@ -1096,7 +1109,7 @@ def get_issuetype_fields(
                 issuetype_fields = jira.project_issue_fields(project_key, issuetype_id)
             except JIRAError as e:
                 e.text = f"Jira API call 'createmeta/fieldtypes' failed with status: {e.status_code} and message: {e.text}. Misconfigured project or default issue type ?"
-                raise e
+                raise
 
             try:
                 issuetype_fields = [f.fieldId for f in issuetype_fields]
@@ -1108,7 +1121,7 @@ def get_issuetype_fields(
         logger.warning(e.text)
         add_error_message_to_response(e.text)
 
-        raise e
+        raise
 
     return issuetype_fields
 
@@ -1190,7 +1203,7 @@ def close_epic(eng, push_to_jira, **kwargs):
                     auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
                     json=json_data)
                 if r.status_code != 204:
-                    logger.warning("JIRA close epic failed with error: {}".format(r.text))
+                    logger.warning(f"JIRA close epic failed with error: {r.text}")
                     return False
                 return True
             except JIRAError as e:
@@ -1336,7 +1349,7 @@ def add_comment(obj, note, force_push=False, **kwargs):
                 j_issue = obj.jira_issue
                 jira.add_comment(
                     j_issue.jira_id,
-                    '(%s): %s' % (note.author.get_full_name() if note.author.get_full_name() else note.author.username, note.entry))
+                    f'({note.author.get_full_name() if note.author.get_full_name() else note.author.username}): {note.entry}')
                 return True
             except JIRAError as e:
                 log_jira_generic_alert('Jira Add Comment Error', str(e))
@@ -1567,7 +1580,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
     if resolved:
         if jira_instance and resolution_name in jira_instance.accepted_resolutions:
             if not finding.risk_accepted:
-                logger.debug("Marking related finding of {} as accepted. Creating risk acceptance.".format(jira_issue.jira_key))
+                logger.debug(f"Marking related finding of {jira_issue.jira_key} as accepted. Creating risk acceptance.")
                 finding.active = False
                 finding.mitigated = None
                 finding.is_mitigated = False
@@ -1581,7 +1594,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 status_changed = True
         elif jira_instance and resolution_name in jira_instance.false_positive_resolutions:
             if not finding.false_p:
-                logger.debug("Marking related finding of {} as false-positive".format(jira_issue.jira_key))
+                logger.debug(f"Marking related finding of {jira_issue.jira_key} as false-positive")
                 finding.active = False
                 finding.verified = False
                 finding.mitigated = None
@@ -1592,11 +1605,11 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
         else:
             # Mitigated by default as before
             if not finding.is_mitigated:
-                logger.debug("Marking related finding of {} as mitigated (default)".format(jira_issue.jira_key))
+                logger.debug(f"Marking related finding of {jira_issue.jira_key} as mitigated (default)")
                 finding.active = False
                 finding.mitigated = jira_now
                 finding.is_mitigated = True
-                finding.mitigated_by, created = User.objects.get_or_create(username='JIRA')
+                finding.mitigated_by, _created = User.objects.get_or_create(username='JIRA')
                 finding.endpoints.clear()
                 finding.false_p = False
                 ra_helper.risk_unaccept(finding)
@@ -1604,7 +1617,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
     else:
         if not finding.active:
             # Reopen / Open Jira issue
-            logger.debug("Re-opening related finding of {}".format(jira_issue.jira_key))
+            logger.debug(f"Re-opening related finding of {jira_issue.jira_key}")
             finding.active = True
             finding.mitigated = None
             finding.is_mitigated = False

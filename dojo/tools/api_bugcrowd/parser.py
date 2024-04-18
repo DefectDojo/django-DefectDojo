@@ -16,7 +16,7 @@ pattern_title_authorized = re.compile(r"^[a-zA-Z0-9_\s+-.]*$")
 logger = logging.getLogger(__name__)
 
 
-class ApiBugcrowdParser(object):
+class ApiBugcrowdParser:
     """
     Import from Bugcrowd API /submissions
     """
@@ -116,8 +116,8 @@ class ApiBugcrowdParser(object):
                     entry["attributes"]["description"],
                     "",
                     "Bugcrowd details:",
-                    f"- Severity: P{ bugcrowd_severity }",
-                    f"- Bug Url: [{bug_url}]({ bug_url })",
+                    f"- Severity: P{bugcrowd_severity}",
+                    f"- Bug Url: [{bug_url}]({bug_url})",
                     "",
                     f"Bugcrowd link: [{links}]({links})",
                 ]
@@ -158,15 +158,11 @@ class ApiBugcrowdParser(object):
                         finding.unsaved_endpoints = [bug_endpoint]
                     except Exception as e:
                         logger.error(
-                            "{} bug url from bugcrowd failed to parse to endpoint, error= {}".format(
-                                str(bug_endpoint), e
-                            )
+                            f"{str(bug_endpoint)} bug url from bugcrowd failed to parse to endpoint, error= {e}"
                         )
                 except ValidationError:
                     logger.error(
-                        "Broken Bugcrowd endpoint {} was skipped.".format(
-                            bug_endpoint.host
-                        )
+                        f"Broken Bugcrowd endpoint {bug_endpoint.host} was skipped."
                     )
 
             findings.append(finding)

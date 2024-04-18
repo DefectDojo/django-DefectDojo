@@ -15,7 +15,7 @@ DESCRIPTION_TEMPLATE = """**{title}**
 """
 
 
-class BurpApiParser(object):
+class BurpApiParser:
     """Parser that can load data from Burp API"""
 
     def get_scan_types(self):
@@ -83,7 +83,7 @@ class BurpApiParser(object):
                     ]
                 finding.unsaved_req_resp = []
                 for evidence in issue.get("evidence", []):
-                    if not evidence.get("type") in [
+                    if evidence.get("type") not in [
                         "InformationListEvidence",
                         "FirstOrderEvidence",
                     ]:

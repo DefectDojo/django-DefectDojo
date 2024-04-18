@@ -1,5 +1,4 @@
 ---
-version: '3.8'
 services:
   integration-tests:
     build:
@@ -19,6 +18,7 @@ services:
       - '.:/app:z'
       - "defectdojo_media_integration_tests:${DD_MEDIA_ROOT:-/app/media}"
     environment:
+      PYTHONWARNINGS: error  # We are strict about Warnings during testing
       DD_BASE_URL: 'http://nginx:8080/'
       DD_SECURE_CROSS_ORIGIN_OPENER_POLICY: 'None'
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
@@ -33,6 +33,7 @@ services:
       - '.:/app:z'
       - defectdojo_media_integration_tests:${DD_MEDIA_ROOT:-/app/media}
     environment:
+      PYTHONWARNINGS: error  # We are strict about Warnings during testing
       DD_DEBUG: 'True'
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL}
       DD_SECURE_CROSS_ORIGIN_OPENER_POLICY: 'None'
@@ -46,6 +47,7 @@ services:
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL}
   initializer:
     environment:
+      PYTHONWARNINGS: error  # We are strict about Warnings during testing
       DD_INITIALIZE: 'true'
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL}
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-AdminsLoveIntegrationtests!}"

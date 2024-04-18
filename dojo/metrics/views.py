@@ -314,15 +314,20 @@ def get_in_period_details(findings):
         elif obj.age > 90:
             age_detail[3] += 1
 
-        in_period_counts[obj.severity] += 1
-        in_period_counts['Total'] += 1
-
-        if obj.test.engagement.product.name not in in_period_details:
-            in_period_details[obj.test.engagement.product.name] = {
-                'path': reverse('product_open_findings', args=(obj.test.engagement.product.id,)),
-                'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
-        in_period_details[obj.test.engagement.product.name][obj.severity] += 1
-        in_period_details[obj.test.engagement.product.name]['Total'] += 1
+        # This condition should be true in nearly all cases,
+        # but there are some far edge cases
+        if obj.severity in in_period_counts:
+            in_period_counts[obj.severity] += 1
+            in_period_counts['Total'] += 1
+        # This condition should be true in nearly all cases,
+        # but there are some far edge cases
+        if obj.severity in in_period_details:
+            if obj.test.engagement.product.name not in in_period_details:
+                in_period_details[obj.test.engagement.product.name] = {
+                    'path': reverse('product_open_findings', args=(obj.test.engagement.product.id,)),
+                    'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
+            in_period_details[obj.test.engagement.product.name][obj.severity] += 1
+            in_period_details[obj.test.engagement.product.name]['Total'] += 1
 
     return in_period_counts, in_period_details, age_detail
 
@@ -874,8 +879,8 @@ and root can view others metrics
 @vary_on_cookie
 def view_engineer(request, eid):
     user = get_object_or_404(Dojo_User, pk=eid)
-    if not (request.user.is_superuser or
-            request.user.username == user.username):
+    if not (request.user.is_superuser
+            or request.user.username == user.username):
         raise PermissionDenied()
     now = timezone.now()
 
@@ -1033,7 +1038,7 @@ def view_engineer(request, eid):
                     severity='Low'
                 ).count()
         prod = Product.objects.get(id=product)
-        all_findings_link = "<a href='%s'>%s</a>" % (
+        all_findings_link = "<a href='{}'>{}</a>".format(
             reverse('product_open_findings', args=(prod.id,)), escape(prod.name))
         update.append([all_findings_link, z_count, o_count, t_count, h_count,
                        z_count + o_count + t_count + h_count])
@@ -1066,7 +1071,7 @@ def view_engineer(request, eid):
                     mitigated__isnull=True,
                     severity='Low').count()
         prod = Product.objects.get(id=product)
-        all_findings_link = "<a href='%s'>%s</a>" % (
+        all_findings_link = "<a href='{}'>{}</a>".format(
             reverse('product_open_findings', args=(prod.id,)), escape(prod.name))
         total_update.append([all_findings_link, z_count, o_count, t_count,
                              h_count, z_count + o_count + t_count + h_count])

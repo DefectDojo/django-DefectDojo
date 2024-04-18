@@ -49,7 +49,7 @@ WEAK_CIPHER_LIST = [
 PROTOCOLS = ["sslv2", "sslv3", "tlsv1", "tlsv1_1", "tlsv1_2", "tlsv1_3"]
 
 
-class SSLyzeXMLParser(object):
+class SSLyzeXMLParser:
     def get_findings(self, file, test):
         tree = ET.parse(file)
         # get root of tree.
@@ -119,10 +119,7 @@ class SSLyzeXMLParser(object):
                         ):
                             for cipher in ciphers:
                                 if cipher.attrib["name"] in WEAK_CIPHER_LIST:
-                                    if (
-                                        not cipher.attrib["name"]
-                                        in weak_cipher[element.tag]
-                                    ):
+                                    if cipher.attrib["name"] not in weak_cipher[element.tag]:
                                         weak_cipher[element.tag].append(
                                             cipher.attrib["name"]
                                         )

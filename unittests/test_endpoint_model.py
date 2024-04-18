@@ -37,7 +37,7 @@ class TestEndpointModel(DojoTestCase):
         path = "foo" * 1000
         query = "bar" * 1000
         fragment = "baz" * 1000
-        endpoint = Endpoint.from_uri('http://alice@foo.bar:8080/{}?{}#{}'.format(path, query, fragment))
+        endpoint = Endpoint.from_uri(f'http://alice@foo.bar:8080/{path}?{query}#{fragment}')
         self.assertEqual(len(endpoint.path), 500)
         self.assertEqual(len(endpoint.query), 1000)
         self.assertEqual(len(endpoint.fragment), 500)
@@ -109,46 +109,46 @@ class TestEndpointModel(DojoTestCase):
         self.assertEqual(endpoint1, endpoint2)
 
     def test_get_or_create(self):
-        endpoint1, created1 = endpoint_get_or_create(
+        _endpoint1, created1 = endpoint_get_or_create(
             protocol='http',
             host='bar.foo'
         )
         self.assertTrue(created1)
 
-        endpoint2, created2 = endpoint_get_or_create(
+        _endpoint2, created2 = endpoint_get_or_create(
             protocol='http',
             host='bar.foo'
         )
         self.assertFalse(created2)
 
-        endpoint3, created3 = endpoint_get_or_create(
+        _endpoint3, created3 = endpoint_get_or_create(
             protocol='http',
             host='bar.foo',
             port=80
         )
         self.assertFalse(created3)
 
-        endpoint4, created4 = endpoint_get_or_create(
+        _endpoint4, created4 = endpoint_get_or_create(
             protocol='http',
             host='bar.foo',
             port=8080
         )
         self.assertTrue(created4)
 
-        endpoint5, created5 = endpoint_get_or_create(
+        _endpoint5, created5 = endpoint_get_or_create(
             protocol='https',
             host='bar.foo',
             port=443
         )
         self.assertTrue(created5)
 
-        endpoint6, created6 = endpoint_get_or_create(
+        _endpoint6, created6 = endpoint_get_or_create(
             protocol='https',
             host='bar.foo'
         )
         self.assertFalse(created6)
 
-        endpoint7, created7 = endpoint_get_or_create(
+        _endpoint7, created7 = endpoint_get_or_create(
             protocol='https',
             host='bar.foo',
             port=8443

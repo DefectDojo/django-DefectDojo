@@ -3,7 +3,7 @@ import hashlib
 from dojo.models import Finding
 
 
-class KICSParser(object):
+class KICSParser:
     """
     A class that can be used to parse the KICS JSON report file
     """
@@ -44,7 +44,7 @@ class KICSParser(object):
                 expected_value = item.get("expected_value")
                 actual_value = item.get("actual_value")
 
-                description = f"{query.get('description','')}\n"
+                description = f"{query.get('description', '')}\n"
                 if platform:
                     description += f"**Platform:** {platform}\n"
                 if category:

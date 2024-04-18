@@ -44,16 +44,16 @@ class TestDojoDefaultImporter(DojoTestCase):
         scan_type = "Acunetix Scan"
         scan = open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml")
 
-        user, created = User.objects.get_or_create(username="admin")
+        user, _created = User.objects.get_or_create(username="admin")
 
-        product_type, created = Product_Type.objects.get_or_create(name="test")
-        product, created = Product.objects.get_or_create(
+        product_type, _created = Product_Type.objects.get_or_create(name="test")
+        product, _created = Product.objects.get_or_create(
             name="TestDojoDefaultImporter",
             prod_type=product_type,
         )
 
         engagement_name = "Test Create Engagement"
-        engagement, created = Engagement.objects.get_or_create(
+        engagement, _created = Engagement.objects.get_or_create(
             name=engagement_name,
             product=product,
             target_start=timezone.now(),
@@ -98,7 +98,7 @@ class TestDojoDefaultImporter(DojoTestCase):
         scan_type = SarifParser().get_scan_types()[0]  # SARIF format implement the new method
 
         user, _ = User.objects.get_or_create(username="admin")
-        user_reporter, _ = User.objects.get_or_create(username="user_reporter")
+        _user_reporter, _ = User.objects.get_or_create(username="user_reporter")
 
         product_type, _ = Product_Type.objects.get_or_create(name="test2")
         product, _ = Product.objects.get_or_create(
@@ -130,7 +130,7 @@ class TestDojoDefaultImporter(DojoTestCase):
         scan_type = GitlabSastParser().get_scan_types()[0]
 
         user, _ = User.objects.get_or_create(username="admin")
-        user_reporter, _ = User.objects.get_or_create(username="user_reporter")
+        _user_reporter, _ = User.objects.get_or_create(username="user_reporter")
 
         product_type, _ = Product_Type.objects.get_or_create(name="test2")
         product, _ = Product.objects.get_or_create(
@@ -297,7 +297,7 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             Product_Type.objects.create(name=another_product_type_name)
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=None, product_type_name=another_product_type_name, product_name=PRODUCT_NAME_DEFAULT, engagement_name='valentijn', expected_http_status_code=400)
-            self.assertEqual(import0, ["Product '%s' doesn't exist in Product_Type '%s'" % (PRODUCT_NAME_DEFAULT, another_product_type_name)])
+            self.assertEqual(import0, [f"Product '{PRODUCT_NAME_DEFAULT}' doesn't exist in Product_Type '{another_product_type_name}'"])
 
         with self.subTest('invalid engagement'):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
@@ -505,7 +505,7 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
 
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=None, product_type_name=another_product_type_name, product_name=PRODUCT_NAME_DEFAULT, engagement_name='valentijn', expected_http_status_code=400)
-            self.assertEqual(import0, ["Product '%s' doesn't exist in Product_Type '%s'" % (PRODUCT_NAME_DEFAULT, another_product_type_name)])
+            self.assertEqual(import0, [f"Product '{PRODUCT_NAME_DEFAULT}' doesn't exist in Product_Type '{another_product_type_name}'"])
 
         with self.subTest('invalid engagement'):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,

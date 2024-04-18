@@ -7,7 +7,7 @@ from defusedxml.ElementTree import parse
 from dojo.models import Endpoint, Finding
 
 
-class MicrofocusWebinspectParser(object):
+class MicrofocusWebinspectParser:
     """Micro Focus Webinspect XML report parser"""
 
     def get_scan_types(self):
@@ -82,13 +82,7 @@ class MicrofocusWebinspectParser(object):
 
                 # make dupe hash key
                 dupe_key = hashlib.sha256(
-                    "|".join(
-                        [
-                            finding.description,
-                            finding.title,
-                            finding.severity,
-                        ]
-                    ).encode("utf-8")
+                    f"{finding.description}|{finding.title}|{finding.severity}".encode()
                 ).hexdigest()
                 # check if dupes are present.
                 if dupe_key in dupes:

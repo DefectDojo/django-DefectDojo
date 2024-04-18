@@ -227,7 +227,7 @@ class TestDuplicationLogic(DojoTestCase):
         # both test 3 and 4 are ZAP scans (cross scanner dedupe is still not working very well)
         finding_new, finding_22 = self.copy_and_reset_finding(id=22)
         # create new engagment + test in same product
-        test_new, eng_new = self.create_new_test_and_engagment_from_finding(finding_22)
+        test_new, _eng_new = self.create_new_test_and_engagment_from_finding(finding_22)
 
         finding_new.test = test_new
         finding_new.save(dedupe_option=True)
@@ -244,7 +244,7 @@ class TestDuplicationLogic(DojoTestCase):
         # dedupe_inside_engagment must be false before cloning engagement
         self.set_dedupe_inside_engagement(False)
         # create new engagment + test in same product
-        test_new, eng_new = self.create_new_test_and_engagment_from_finding(finding_22)
+        test_new, _eng_new = self.create_new_test_and_engagment_from_finding(finding_22)
 
         finding_new.test = test_new
         finding_new.save(dedupe_option=True)
@@ -253,7 +253,7 @@ class TestDuplicationLogic(DojoTestCase):
 
     # legacy: if file_path and line or both empty and there are no endpoints, no dedupe will happen. Is this desirable or a BUG?
     def test_identical_no_filepath_no_line_no_endpoints_legacy(self):
-        finding_new, finding_22 = self.copy_and_reset_finding(id=22)
+        finding_new, _finding_22 = self.copy_and_reset_finding(id=22)
         finding_new.file_path = None
         finding_new.line = None
         finding_new.save(dedupe_option=True)
@@ -350,7 +350,7 @@ class TestDuplicationLogic(DojoTestCase):
         self.assert_finding(finding_new2, not_pk=finding_new.pk, duplicate=True, duplicate_finding_id=finding_new.id, hash_code=finding_new.hash_code, not_hash_code=finding_24.hash_code)
 
     def test_identical_legacy_extra_endpoints_dynamic(self):
-        finding_new, finding_24 = self.copy_and_reset_finding_add_endpoints(id=24)
+        finding_new, _finding_24 = self.copy_and_reset_finding_add_endpoints(id=24)
         finding_new.save()
 
         # create an identical copy of the new finding, but with 1 extra endpoint.
@@ -378,7 +378,7 @@ class TestDuplicationLogic(DojoTestCase):
         # create a new finding with 3 endpoints (so 1 extra)
         # expect: not marked as duplicate as endpoints need to be 100% equal for dynamic findings (host+port)
         #         hash_code not affected by endpoints
-        finding_new, finding_24 = self.copy_and_reset_finding_add_endpoints(id=24)
+        finding_new, _finding_24 = self.copy_and_reset_finding_add_endpoints(id=24)
         finding_new.save()
 
         # create an identical copy of the new finding, but with 1 extra endpoint. should not be marked as duplicate
@@ -397,7 +397,7 @@ class TestDuplicationLogic(DojoTestCase):
         self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=False, hash_code=finding_new.hash_code)
 
     def test_identical_legacy_no_endpoints_dynamic(self):
-        finding_new, finding_24 = self.copy_and_reset_finding_add_endpoints(id=24)
+        finding_new, _finding_24 = self.copy_and_reset_finding_add_endpoints(id=24)
         finding_new.save()
 
         # create an identical copy of the new finding, but with no endpoints
@@ -823,7 +823,7 @@ class TestDuplicationLogic(DojoTestCase):
     def test_identical_unique_id_or_hash_code_bug(self):
         # create identical copy
         finding_124 = Finding.objects.get(id=124)
-        finding_new, finding_224 = self.copy_and_reset_finding(id=224)
+        finding_new, _finding_224 = self.copy_and_reset_finding(id=224)
         finding_new.title = finding_124.title  # use title from 124 to get matching hashcode
         finding_new.save()
 
@@ -1040,7 +1040,7 @@ class TestDuplicationLogic(DojoTestCase):
 
     # # hash_code currently is only created on finding creation and after that never changed. feature or BUG?
     def test_hash_code_onetime(self):
-        finding_new, finding_2 = self.copy_and_reset_finding(id=2)
+        finding_new, _finding_2 = self.copy_and_reset_finding(id=2)
         self.assertEqual(finding_new.hash_code, None)
 
         finding_new.save()
@@ -1099,7 +1099,7 @@ class TestDuplicationLogic(DojoTestCase):
         # it will fail if someone removes title casing and force them to think about the implications
         # ideally we will switch to case-in-sensitive hash_code computation.
         # this could be a relatively small impact change as saving findings (currently) doesn't recompute the hash_code
-        finding_new, finding_24 = self.copy_and_reset_finding(id=24)
+        finding_new, _finding_24 = self.copy_and_reset_finding(id=24)
         finding_new.title = 'the quick brown fox jumps over the lazy dog'
         finding_new.save(dedupe_option=True)
         self.assertEqual(finding_new.title, 'The Quick Brown Fox Jumps Over the Lazy Dog')
@@ -1107,7 +1107,7 @@ class TestDuplicationLogic(DojoTestCase):
     def test_hash_code_without_dedupe(self):
         # if dedupe is disabled, hash_code should still be calculated
         self.enable_dedupe(enable=False)
-        finding_new, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_new, _finding_124 = self.copy_and_reset_finding(id=124)
         finding_new.save(dedupe_option=False)
 
         # save skips hash_code generation if dedupe_option==False
@@ -1117,7 +1117,7 @@ class TestDuplicationLogic(DojoTestCase):
 
         self.assertTrue(finding_new.hash_code)
 
-        finding_new, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_new, _finding_124 = self.copy_and_reset_finding(id=124)
         finding_new.save()
 
         # by default hash_code should be generated
@@ -1158,12 +1158,12 @@ class TestDuplicationLogic(DojoTestCase):
         else:
             logger.debug('\t\t' + 'findings:')
             for finding in findings:
-                logger.debug('\t\t\t{:4.4}'.format(str(finding.id)) + ': "' + '{:20.20}'.format(finding.title) + '": ' + '{:5.5}'.format(finding.severity) + ': act: ' + '{:5.5}'.format(str(finding.active)) +
-                        ': ver: ' + '{:5.5}'.format(str(finding.verified)) + ': mit: ' + '{:5.5}'.format(str(finding.is_mitigated)) +
-                        ': dup: ' + '{:5.5}'.format(str(finding.duplicate)) + ': dup_id: ' +
-                        ('{:4.4}'.format(str(finding.duplicate_finding.id)) if finding.duplicate_finding else 'None') + ': hash_code: ' + str(finding.hash_code) +
-                        ': eps: ' + str(finding.endpoints.count()) + ": notes: " + str([n.id for n in finding.notes.all()]) +
-                        ': uid: ' + '{:5.5}'.format(str(finding.unique_id_from_tool)) + (' fp' if finding.false_p else '')
+                logger.debug(f'\t\t\t{str(finding.id):4.4}' + ': "' + f'{finding.title:20.20}' + '": ' + f'{finding.severity:5.5}' + ': act: ' + f'{str(finding.active):5.5}'
+                        + ': ver: ' + f'{str(finding.verified):5.5}' + ': mit: ' + f'{str(finding.is_mitigated):5.5}'
+                        + ': dup: ' + f'{str(finding.duplicate):5.5}' + ': dup_id: '
+                        + (f'{str(finding.duplicate_finding.id):4.4}' if finding.duplicate_finding else 'None') + ': hash_code: ' + str(finding.hash_code)
+                        + ': eps: ' + str(finding.endpoints.count()) + ": notes: " + str([n.id for n in finding.notes.all()])
+                        + ': uid: ' + f'{str(finding.unique_id_from_tool):5.5}' + (' fp' if finding.false_p else '')
                         )
 
         logger.debug('\t\tendpoints')
@@ -1265,9 +1265,9 @@ class TestDuplicationLogic(DojoTestCase):
             eng.save()
 
     def create_new_test_and_engagment_from_finding(self, finding):
-        eng_new, eng = self.copy_and_reset_engagement(id=finding.test.engagement.id)
+        eng_new, _eng = self.copy_and_reset_engagement(id=finding.test.engagement.id)
         eng_new.save()
-        test_new, test = self.copy_and_reset_test(id=finding.test.id)
+        test_new, _test = self.copy_and_reset_test(id=finding.test.id)
         test_new.engagement = eng_new
         test_new.save()
         return test_new, eng_new

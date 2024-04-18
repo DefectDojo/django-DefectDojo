@@ -48,7 +48,7 @@ RISK_TO_CWE_MAP = {
 }
 
 
-class ThreagileParser(object):
+class ThreagileParser:
     """
     Import ThreaAgile threatmodel risk finding in JSON format
     """
@@ -73,7 +73,7 @@ class ThreagileParser(object):
 
     def get_items(self, tree, test):
         if not isinstance(tree, list):
-            raise ValueError("Invalid ThreAgile risks file")
+            raise TypeError("Invalid ThreAgile risks file")
         if not tree:
             return list()
         findings = []

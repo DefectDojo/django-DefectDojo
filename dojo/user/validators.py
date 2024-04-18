@@ -6,7 +6,7 @@ from django.contrib.auth.password_validation import CommonPasswordValidator
 from dojo.utils import get_system_setting
 
 
-class MinLengthValidator(object):
+class MinLengthValidator:
     def validate(self, password, user=None):
         if len(password) < get_system_setting('minimum_password_length'):
             raise ValidationError(
@@ -20,7 +20,7 @@ class MinLengthValidator(object):
             minimum_length=get_system_setting('minimum_password_length')))
 
 
-class MaxLengthValidator(object):
+class MaxLengthValidator:
     def validate(self, password, user=None):
         if len(password) > get_system_setting('maximum_password_length'):
             raise ValidationError(
@@ -34,7 +34,7 @@ class MaxLengthValidator(object):
             maximum_length=get_system_setting('maximum_password_length')))
 
 
-class NumberValidator(object):
+class NumberValidator:
     def validate(self, password, user=None):
         if not re.findall(r'\d', password) and get_system_setting('number_character_required'):
             raise ValidationError(
@@ -47,7 +47,7 @@ class NumberValidator(object):
         return gettext('Password must contain at least 1 digit, 0-9.')
 
 
-class UppercaseValidator(object):
+class UppercaseValidator:
     def validate(self, password, user=None):
         if not re.findall('[A-Z]', password) and get_system_setting('uppercase_character_required'):
             raise ValidationError(
@@ -60,7 +60,7 @@ class UppercaseValidator(object):
         return gettext('Password must contain at least 1 uppercase letter, A-Z.')
 
 
-class LowercaseValidator(object):
+class LowercaseValidator:
     def validate(self, password, user=None):
         if not re.findall('[a-z]', password) and get_system_setting('lowercase_character_required'):
             raise ValidationError(
@@ -73,7 +73,7 @@ class LowercaseValidator(object):
         return gettext('Password must contain at least 1 lowercase letter, a-z.')
 
 
-class SymbolValidator(object):
+class SymbolValidator:
     def validate(self, password, user=None):
         contains_special_character = re.findall(r'[(){}\[\]|~!@#$%^&*_\-+=;:\'",\`<>\./?]', password)
         if not contains_special_character and get_system_setting('special_character_required'):
@@ -84,8 +84,8 @@ class SymbolValidator(object):
             return None
 
     def get_help_text(self):
-        return gettext('The password must contain at least 1 special character, ' +
-            '''()[]{}|`~!@#$%^&*_-+=;:'",<>./?.''')
+        return gettext('The password must contain at least 1 special character, '
+            + '''()[]{}|`~!@#$%^&*_-+=;:'",<>./?.''')
 
 
 class DojoCommonPasswordValidator(CommonPasswordValidator):

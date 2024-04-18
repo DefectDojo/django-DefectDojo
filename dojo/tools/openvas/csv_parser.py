@@ -1,11 +1,12 @@
 import csv
 import hashlib
 import io
+import re
 from dateutil.parser import parse
 from dojo.models import Finding, Endpoint
 
 
-class ColumnMappingStrategy(object):
+class ColumnMappingStrategy:
     mapped_column = None
 
     def __init__(self):
@@ -36,7 +37,7 @@ class ColumnMappingStrategy(object):
 class DateColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "timestamp"
-        super(DateColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         finding.date = parse(column_value).date()
@@ -45,7 +46,7 @@ class DateColumnMappingStrategy(ColumnMappingStrategy):
 class TitleColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "nvt name"
-        super(TitleColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         finding.title = column_value
@@ -54,7 +55,7 @@ class TitleColumnMappingStrategy(ColumnMappingStrategy):
 class CweColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "cweid"
-        super(CweColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         if column_value.isdigit():
@@ -64,17 +65,44 @@ class CweColumnMappingStrategy(ColumnMappingStrategy):
 class PortColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "port"
-        super(PortColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         if column_value.isdigit():
             finding.unsaved_endpoints[0].port = int(column_value)
 
 
+class CveColumnMappingStrategy(ColumnMappingStrategy):
+    def __init__(self):
+        self.mapped_column = "cves"
+        super().__init__()
+
+    def map_column_value(self, finding, column_value):
+        if column_value != "":
+            if "," in column_value:
+                finding.description += "\n**All CVEs:** " + str(column_value)
+                for value in column_value.split(","):
+                    finding.unsaved_vulnerability_ids.append(value)
+            else:
+                finding.unsaved_vulnerability_ids.append(column_value)
+
+
+class NVDCVEColumnMappingStrategy(ColumnMappingStrategy):
+    def __init__(self):
+        self.mapped_column = "nvt oid"
+        super().__init__()
+
+    def map_column_value(self, finding, column_value):
+        cve_pattern = r'CVE-\d{4}-\d{4,7}'
+        cves = re.findall(cve_pattern, column_value)
+        for cve in cves:
+            finding.unsaved_vulnerability_ids.append(cve)
+
+
 class ProtocolColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "port protocol"
-        super(ProtocolColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         if column_value:  # do not store empty protocol
@@ -84,7 +112,7 @@ class ProtocolColumnMappingStrategy(ColumnMappingStrategy):
 class IpColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "ip"
-        super(IpColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         if not finding.unsaved_endpoints[
@@ -96,7 +124,7 @@ class IpColumnMappingStrategy(ColumnMappingStrategy):
 class HostnameColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "hostname"
-        super(HostnameColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         if column_value:  # do not override IP if hostname is empty
@@ -111,7 +139,7 @@ class SeverityColumnMappingStrategy(ColumnMappingStrategy):
 
     def __init__(self):
         self.mapped_column = "severity"
-        super(SeverityColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         if self.is_valid_severity(column_value):
@@ -123,7 +151,7 @@ class SeverityColumnMappingStrategy(ColumnMappingStrategy):
 class DescriptionColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "summary"
-        super(DescriptionColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         finding.description = column_value
@@ -132,7 +160,7 @@ class DescriptionColumnMappingStrategy(ColumnMappingStrategy):
 class MitigationColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "solution"
-        super(MitigationColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         finding.mitigation = column_value
@@ -141,7 +169,7 @@ class MitigationColumnMappingStrategy(ColumnMappingStrategy):
 class ImpactColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "vulnerability insight"
-        super(ImpactColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         finding.impact = column_value
@@ -150,7 +178,7 @@ class ImpactColumnMappingStrategy(ColumnMappingStrategy):
 class ReferencesColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "specific result"
-        super(ReferencesColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         finding.references = column_value
@@ -159,7 +187,7 @@ class ReferencesColumnMappingStrategy(ColumnMappingStrategy):
 class ActiveColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "active"
-        super(ActiveColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         finding.active = self.evaluate_bool_value(column_value)
@@ -168,7 +196,7 @@ class ActiveColumnMappingStrategy(ColumnMappingStrategy):
 class VerifiedColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "verified"
-        super(VerifiedColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         finding.verified = self.evaluate_bool_value(column_value)
@@ -177,7 +205,7 @@ class VerifiedColumnMappingStrategy(ColumnMappingStrategy):
 class FalsePositiveColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "falsepositive"
-        super(FalsePositiveColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         finding.false_p = self.evaluate_bool_value(column_value)
@@ -186,13 +214,13 @@ class FalsePositiveColumnMappingStrategy(ColumnMappingStrategy):
 class DuplicateColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "duplicate"
-        super(DuplicateColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         finding.duplicate = self.evaluate_bool_value(column_value)
 
 
-class OpenVASCSVParser(object):
+class OpenVASCSVParser:
     def create_chain(self):
         date_column_strategy = DateColumnMappingStrategy()
         title_column_strategy = TitleColumnMappingStrategy()
@@ -210,6 +238,8 @@ class OpenVASCSVParser(object):
         duplicate_strategy = DuplicateColumnMappingStrategy()
         port_strategy = PortColumnMappingStrategy()
         protocol_strategy = ProtocolColumnMappingStrategy()
+        cve_column_strategy = CveColumnMappingStrategy()
+        nvd_cve_column_strategy = NVDCVEColumnMappingStrategy()
         port_strategy.successor = protocol_strategy
         duplicate_strategy.successor = port_strategy
         false_positive_strategy.successor = duplicate_strategy
@@ -224,7 +254,9 @@ class OpenVASCSVParser(object):
         hostname_column_strategy.successor = ip_column_strategy
         cwe_column_strategy.successor = hostname_column_strategy
         title_column_strategy.successor = cwe_column_strategy
-        date_column_strategy.successor = title_column_strategy
+        cve_column_strategy.successor = title_column_strategy
+        nvd_cve_column_strategy.successor = cve_column_strategy
+        date_column_strategy.successor = nvd_cve_column_strategy
         return date_column_strategy
 
     def read_column_names(self, row):
@@ -246,6 +278,7 @@ class OpenVASCSVParser(object):
         row_number = 0
         for row in reader:
             finding = Finding(test=test)
+            finding.unsaved_vulnerability_ids = list()
             finding.unsaved_endpoints = [Endpoint()]
             if row_number == 0:
                 column_names = self.read_column_names(row)

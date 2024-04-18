@@ -346,7 +346,7 @@ def copy_test(request, tid):
                 extra_tags='alert-success')
             create_notification(event='other',
                                 title='Copying of %s' % test.title,
-                                description='The test "%s" was copied by %s to %s' % (test.title, request.user, engagement.name),
+                                description=f'The test "{test.title}" was copied by {request.user} to {engagement.name}',
                                 product=product,
                                 url=request.build_absolute_uri(reverse('view_test', args=(test_copy.id,))),
                                 recipients=[test.engagement.lead],
@@ -412,7 +412,7 @@ def test_ics(request, tid):
                         _("Set aside for test %(test_type_name)s, on product %(product_name)s. Additional detail can be found at %(detail_url)s") % {
                             'test_type_name': test.test_type.name,
                             'product_name': test.engagement.product.name,
-                            'detail_url': request.build_absolute_uri((reverse("view_test", args=(test.id,))))
+                            'detail_url': request.build_absolute_uri(reverse("view_test", args=(test.id,)))
                         },
                         uid)
     output = cal.serialize()
@@ -447,7 +447,7 @@ class AddFindingView(View):
         args = [request.POST] if request.method == "POST" else []
         # Set the initial form args
         kwargs = {
-            "initial": {'date': timezone.now().date(), 'verified': True},
+            "initial": {'date': timezone.now().date(), 'verified': True, 'dynamic_finding': False},
             "req_resp": None,
             "product": test.engagement.product,
         }
@@ -474,9 +474,9 @@ class AddFindingView(View):
         return None
 
     def validate_status_change(self, request: HttpRequest, context: dict):
-        if ((context["form"]['active'].value() is False or
-             context["form"]['false_p'].value()) and
-             context["form"]['duplicate'].value() is False):
+        if ((context["form"]['active'].value() is False
+             or context["form"]['false_p'].value())
+             and context["form"]['duplicate'].value() is False):
 
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
@@ -860,7 +860,7 @@ def re_import_scan_results(request, tid):
             finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = 0, 0, 0, 0, 0
             reimporter = ReImporter()
             try:
-                test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count, test_import = \
+                test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count, _test_import = \
                     reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
                                                 tags=tags, minimum_severity=minimum_severity,
                                                 endpoints_to_add=endpoints_to_add, scan_date=scan_date,

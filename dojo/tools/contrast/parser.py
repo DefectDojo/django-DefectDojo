@@ -7,7 +7,7 @@ import datetime
 from dojo.models import Endpoint, Finding
 
 
-class ContrastParser(object):
+class ContrastParser:
     """Contrast Scanner CSV Report"""
 
     def get_scan_types(self):
@@ -80,11 +80,7 @@ class ContrastParser(object):
                 )
 
             dupe_key = hashlib.sha256(
-                "|".join(
-                    [
-                        finding.vuln_id_from_tool,
-                    ]
-                ).encode("utf-8")
+                f"{finding.vuln_id_from_tool}".encode()
             ).digest()
 
             if dupe_key in dupes:

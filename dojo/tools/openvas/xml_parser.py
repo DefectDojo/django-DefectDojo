@@ -3,7 +3,7 @@ from defusedxml import ElementTree as ET
 from dojo.models import Finding
 
 
-class OpenVASXMLParser(object):
+class OpenVASXMLParser:
     def get_findings(self, filename, test):
         findings = []
         tree = ET.parse(filename)

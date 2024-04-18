@@ -21,7 +21,7 @@ class TestSonarQubeParser(DojoTestCase):
     def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_no_findings(
             self,
     ):
-        my_file_handle, product, engagement, test = self.init(
+        my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-no-finding.html"
         )
         parser = SonarQubeParser()
@@ -30,7 +30,7 @@ class TestSonarQubeParser(DojoTestCase):
 
     # SonarQube Scan detailed - no finding
     def test_detailed_parse_file_with_no_vulnerabilities_has_no_findings(self):
-        my_file_handle, product, engagement, test = self.init(
+        my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-no-finding.html"
         )
         parser = SonarQubeParser()
@@ -42,7 +42,7 @@ class TestSonarQubeParser(DojoTestCase):
     def test_file_name_aggregated_parse_file_with_single_vulnerability_has_single_finding(
             self,
     ):
-        my_file_handle, product, engagement, test = self.init(
+        my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-single-finding.html"
         )
         parser = SonarQubeParser()
@@ -90,7 +90,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(1, item.nb_occurences)
 
     def test_detailed_parse_file_with_single_vulnerability_has_single_finding(self):
-        my_file_handle, product, engagement, test = self.init(
+        my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-single-finding.html"
         )
         parser = SonarQubeParser()
@@ -137,7 +137,7 @@ class TestSonarQubeParser(DojoTestCase):
     def test_detailed_parse_file_with_multiple_vulnerabilities_has_multiple_findings(
             self,
     ):
-        my_file_handle, product, engagement, test = self.init(
+        my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-6-findings.html"
         )
         parser = SonarQubeParser()
@@ -149,7 +149,7 @@ class TestSonarQubeParser(DojoTestCase):
     def test_file_name_aggregated_parse_file_with_multiple_vulnerabilities_has_multiple_findings(
             self,
     ):
-        my_file_handle, product, engagement, test = self.init(
+        my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-6-findings.html"
         )
         parser = SonarQubeParser()
@@ -161,7 +161,7 @@ class TestSonarQubeParser(DojoTestCase):
 
     def test_detailed_parse_file_with_table_in_table(self):
         """Test parsing when the vulnerability details include a table, with tr and td that should be ignored when looking for list of rules"""
-        my_file_handle, product, engagement, test = self.init(
+        my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-table-in-table.html"
         )
         parser = SonarQubeParser()
@@ -240,7 +240,7 @@ class TestSonarQubeParser(DojoTestCase):
 
     def test_detailed_parse_file_with_rule_undefined(self):
         """the vulnerability's rule is not in the list of rules"""
-        my_file_handle, product, engagement, test = self.init(
+        my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-rule-undefined.html"
         )
         parser = SonarQubeParser()
@@ -285,7 +285,7 @@ class TestSonarQubeParser(DojoTestCase):
 
     # SonarQube Scan - report with aggregations to be made
     def test_file_name_aggregated_parse_file_with_vuln_on_same_filename(self):
-        my_file_handle, product, engagement, test = self.init(
+        my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-4-findings-3-to-aggregate.html"
         )
         parser = SonarQubeParser()
@@ -347,7 +347,7 @@ class TestSonarQubeParser(DojoTestCase):
 
     # SonarQube Scan detailed - report with aggregations to be made
     def test_detailed_parse_file_with_vuln_on_same_filename(self):
-        my_file_handle, product, engagement, test = self.init(
+        my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-4-findings-3-to-aggregate.html"
         )
         parser = SonarQubeParser()
@@ -360,7 +360,7 @@ class TestSonarQubeParser(DojoTestCase):
         """SonarQube Scan detailed - report that crash
         see: https://github.com/DefectDojo/django-DefectDojo/issues/3725
         """
-        my_file_handle, product, engagement, test = self.init(get_unit_tests_path() + "/scans/sonarqube/sonar.html")
+        my_file_handle, _product, _engagement, test = self.init(get_unit_tests_path() + "/scans/sonarqube/sonar.html")
         parser = SonarQubeParser()
         parser.set_mode('detailed')
         findings = parser.get_findings(my_file_handle, test)
@@ -373,7 +373,7 @@ class TestSonarQubeParser(DojoTestCase):
         see: https://github.com/soprasteria/sonar-report/commit/7dab559e7ecf9ed319345e9262a8b160bd3af94f
         Data table will have some whitespaces, parser should strip it before compare or use these properties.
         """
-        my_file_handle, product, engagement, test = self.init(
+        my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-table-in-table-with-whitespace.html"
         )
         parser = SonarQubeParser()
@@ -451,7 +451,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(False, item.dynamic_finding)
 
     def test_detailed_parse_json_file_with_no_vulnerabilities_has_no_findings(self):
-        my_file_handle, product, engagement, test = self.init(
+        my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-no-finding.json"
         )
         parser = SonarQubeParser()
@@ -460,7 +460,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(0, len(findings))
 
     def test_detailed_parse_json_file_with_single_vulnerability_has_single_finding(self):
-        my_file_handle, product, engagement, test = self.init(
+        my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-single-finding.json"
         )
         parser = SonarQubeParser()
@@ -538,7 +538,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual("AYvNd32RyD1npIoQXyT1", item.unique_id_from_tool)
 
     def test_detailed_parse_json_file_with_multiple_vulnerabilities_has_multiple_findings(self):
-        my_file_handle, product, engagement, test = self.init(
+        my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-6-findings.json"
         )
         parser = SonarQubeParser()
@@ -547,3 +547,86 @@ class TestSonarQubeParser(DojoTestCase):
         # common verifications
         # (there is no aggregation to be done here)
         self.assertEqual(6, len(findings))
+
+    def test_parse_json_file_from_api_with_multiple_findings_json(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/findings_over_api.json"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(5, len(findings))
+        item = findings[0]
+        self.assertEqual(str, type(item.description))
+        self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwoefijo", item.title)
+        self.assertEqual("Medium", item.severity)
+        self.assertEqual("CVE-2024-2529", item.unsaved_vulnerability_ids[0])
+        self.assertEqual("120", item.cwe)
+        self.assertEqual("6.4", item.cvssv3_score)
+        self.assertEqual("package", item.component_name)
+        self.assertEqual("1.1.2", item.component_version)
+        item = findings[1]
+        self.assertEqual("Web:TableWithoutCaptionCheck_asdfwfewfwefewf", item.title)
+        self.assertEqual("Low", item.severity)
+        self.assertEqual(0, item.cwe)
+        self.assertIsNone(item.cvssv3_score)
+        item = findings[2]
+        self.assertEqual("typescript:S1533_fjoiewfjoweifjoihugu-", item.title)
+        self.assertEqual("Low", item.severity)
+        item = findings[3]
+        self.assertEqual("GHSA-frr2-c345-p7c2", item.unsaved_vulnerability_ids[0])
+        item = findings[4]
+        self.assertEqual("CVE-2023-52428", item.unsaved_vulnerability_ids[0])
+        self.assertEqual("nimbus-jose-jwt-9.24.4.jar", item.component_name)
+        self.assertIsNone(item.component_version)
+
+    def test_parse_json_file_from_api_with_multiple_findings_hotspots_json(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/findings_over_api_hotspots.json"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(4, len(findings))
+        item = findings[0]
+        self.assertEqual(str, type(item.description))
+        self.assertEqual("typescript:7777_fwafewef", item.title)
+        self.assertEqual("High", item.severity)
+        item = findings[1]
+        self.assertEqual("Web:1222_cyxcvyxcvyxv", item.title)
+        self.assertEqual("Low", item.severity)
+        item = findings[2]
+        self.assertEqual("Web:9876_werrwerwerwer", item.title)
+        self.assertEqual("Low", item.severity)
+
+    def test_parse_json_file_from_api_with_empty_json(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/findings_over_api_empty.json"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(0, len(findings))
+
+    def test_parse_json_file_from_api_with_emppty_zip(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/empty_zip.zip"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(0, len(findings))
+
+    def test_parse_json_file_from_api_with_multiple_findings_zip(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/findings_over_api.zip"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(6, len(findings))
+        item = findings[0]
+        self.assertEqual(str, type(item.description))
+        self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwoefijo", item.title)
+        self.assertEqual("Medium", item.severity)
+        item = findings[3]
+        self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwo1123efijo", item.title)
+        self.assertEqual("Low", item.severity)
+        item = findings[5]
+        self.assertEqual("typescript:S112533_fjoiewfjo1235gweifjoihugu-", item.title)
+        self.assertEqual("Medium", item.severity)

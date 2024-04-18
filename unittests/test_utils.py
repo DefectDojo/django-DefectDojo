@@ -162,7 +162,7 @@ class TestUtils(DojoTestCase):
         save_mock_member.save.assert_not_called()
 
 
-class assertNumOfModelsCreated():
+class assertNumOfModelsCreated:
     def __init__(self, test_case, queryset, num):
         self.test_case = test_case
         self.queryset = queryset

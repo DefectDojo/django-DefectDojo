@@ -153,13 +153,13 @@ def on_exception_log_kwarg(func):
         try:
             return func(self, *args, **kwargs)
 
-        except Exception as e:
+        except Exception:
             print("exception occured at url:", self.driver.current_url)
             print("page source:", self.driver.page_source)
             f = open("/tmp/selenium_page_source.html", "w", encoding='utf-8')
             f.writelines(self.driver.page_source)
             # time.sleep(30)
-            raise e
+            raise
 
     return wrapper
 

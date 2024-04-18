@@ -78,7 +78,6 @@ def process_endpoints_view(request, host_view=False, vulnerable=False):
             "filtered": endpoints,
             "name": view_name,
             "host_view": host_view,
-            "product_tab": product_tab
         })
 
 
@@ -217,7 +216,7 @@ def delete_endpoint(request, eid):
                 create_notification(event='other',
                                     title='Deletion of %s' % endpoint,
                                     product=product,
-                                    description='The endpoint "%s" was deleted by %s' % (endpoint, request.user),
+                                    description=f'The endpoint "{endpoint}" was deleted by {request.user}',
                                     url=reverse('endpoint'),
                                     icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
@@ -373,12 +372,12 @@ def endpoint_bulk_update_all(request, pid=None):
                 calculate_grade(prod)
 
             if skipped_endpoint_count > 0:
-                add_error_message_to_response('Skipped deletion of {} endpoints because you are not authorized.'.format(skipped_endpoint_count))
+                add_error_message_to_response(f'Skipped deletion of {skipped_endpoint_count} endpoints because you are not authorized.')
 
             if deleted_endpoint_count > 0:
                 messages.add_message(request,
                     messages.SUCCESS,
-                    'Bulk delete of {} endpoints was successful.'.format(deleted_endpoint_count),
+                    f'Bulk delete of {deleted_endpoint_count} endpoints was successful.',
                     extra_tags='alert-success')
         else:
             if endpoints_to_update:
@@ -393,7 +392,7 @@ def endpoint_bulk_update_all(request, pid=None):
                 updated_endpoint_count = endpoints.count()
 
                 if skipped_endpoint_count > 0:
-                    add_error_message_to_response('Skipped mitigation of {} endpoints because you are not authorized.'.format(skipped_endpoint_count))
+                    add_error_message_to_response(f'Skipped mitigation of {skipped_endpoint_count} endpoints because you are not authorized.')
 
                 eps_count = Endpoint_Status.objects.filter(endpoint__in=endpoints).update(
                     mitigated=True,
@@ -405,8 +404,7 @@ def endpoint_bulk_update_all(request, pid=None):
                 if updated_endpoint_count > 0:
                     messages.add_message(request,
                                         messages.SUCCESS,
-                                        'Bulk mitigation of {} endpoints ({} endpoint statuses) was successful.'.format(
-                                            updated_endpoint_count, eps_count),
+                                        f'Bulk mitigation of {updated_endpoint_count} endpoints ({eps_count} endpoint statuses) was successful.',
                                         extra_tags='alert-success')
             else:
                 messages.add_message(request,
@@ -489,7 +487,7 @@ def import_endpoint_meta(request, pid):
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
+                    f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB",
                     extra_tags='alert-danger')
 
             create_endpoints = form.cleaned_data['create_endpoints']

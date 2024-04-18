@@ -4,7 +4,7 @@ from cvss.cvss3 import CVSS3
 from dojo.models import Finding
 
 
-class SnykParser(object):
+class SnykParser:
     def get_scan_types(self):
         return ["Snyk Scan"]
 
@@ -162,7 +162,7 @@ class SnykParser(object):
                     # Per the current json format, if several CWEs, take the
                     # first one.
                     finding.cwe = int(cwes[0].split("-")[1])
-                    if len(vulnerability["identifiers"]["CVE"]) > 1:
+                    if len(vulnerability["identifiers"]["CWE"]) > 1:
                         cwe_references = ", ".join(cwes)
                 else:
                     finding.cwe = 1035
@@ -174,9 +174,7 @@ class SnykParser(object):
             )
 
         if cwe_references:
-            references += "Several CWEs were reported: \n\n{}\n".format(
-                cwe_references
-            )
+            references += f"Several CWEs were reported: \n\n{cwe_references}\n"
 
         # Append vuln references to references section
         for item in vulnerability.get("references", []):
@@ -198,8 +196,8 @@ class SnykParser(object):
 
         # Add Target file if supplied
         if target_file:
-            finding.unsaved_tags.append("target_file:{}".format(target_file))
-            finding.mitigation += "\nUpgrade Location: {}".format(target_file)
+            finding.unsaved_tags.append(f"target_file:{target_file}")
+            finding.mitigation += f"\nUpgrade Location: {target_file}"
 
         # Add the upgrade libs list to the mitigation section
         if upgrades:
@@ -211,11 +209,9 @@ class SnykParser(object):
                     for lib in tertiary_upgrade_list
                 ):
                     finding.unsaved_tags.append(
-                        "upgrade_to:{}".format(upgraded_pack)
+                        f"upgrade_to:{upgraded_pack}"
                     )
-                    finding.mitigation += "\nUpgrade from {} to {} to fix this issue, as well as updating the following:\n - ".format(
-                        current_pack_version, upgraded_pack
-                    )
+                    finding.mitigation += f"\nUpgrade from {current_pack_version} to {upgraded_pack} to fix this issue, as well as updating the following:\n - "
                     finding.mitigation += "\n - ".join(tertiary_upgrade_list)
         return finding
 

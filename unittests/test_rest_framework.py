@@ -111,7 +111,7 @@ def format_url(path):
     return f"{BASE_API_URL}{path}"
 
 
-class SchemaChecker():
+class SchemaChecker:
     def __init__(self, components):
         self._prefix = []
         self._has_failed = False
@@ -272,7 +272,7 @@ class TestType(Enum):
     CONFIGURATION_PERMISSIONS = 3
 
 
-class BaseClass():
+class BaseClass:
     class RESTEndpointTest(DojoAPITestCase):
         def __init__(self, *args, **kwargs):
             DojoAPITestCase.__init__(self, *args, **kwargs)
@@ -1043,7 +1043,7 @@ class FilesTest(DojoAPITestCase):
             length = FileUpload.objects.count()
             payload = {
                 "title": level,
-                "file": open(f'{str(self.path)}/scans/acunetix/one_finding.xml', 'r')
+                "file": open(f'{str(self.path)}/scans/acunetix/one_finding.xml')
             }
             response = self.client.post(f'/api/v2/{level}/files/', payload)
             self.assertEqual(201, response.status_code, response.data)
@@ -1051,7 +1051,7 @@ class FilesTest(DojoAPITestCase):
             # Save the ID of the newly created file object
             self.url_levels[level] = response.data.get('id')
         #  Test the download
-        with open(f'{str(self.path)}/scans/acunetix/one_finding.xml', 'r') as file:
+        with open(f'{str(self.path)}/scans/acunetix/one_finding.xml') as file:
             file_data = file.read()
         for level, file_id in self.url_levels.items():
             response = self.client.get(f'/api/v2/{level}/files/download/{file_id}/')
@@ -1084,7 +1084,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "title": "DUMMY FINDING123",
             "date": "2020-05-20",
             "cwe": 1,
-            "severity": "HIGH",
+            "severity": "High",
             "description": "TEST finding",
             "mitigation": "MITIGATION",
             "impact": "HIGH",
@@ -1171,6 +1171,11 @@ class FindingsTest(BaseClass.RESTEndpointTest):
         result = self.client.patch(self.url + "3/", data={"steps_to_reproduce": ""})
         self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
         assert result.json()["steps_to_reproduce"] == ""
+
+    def test_severity_validation(self):
+        result = self.client.patch(self.url + "2/", data={"severity": "Not a valid choice"})
+        self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST, "Severity just got set to something invalid")
+        assert result.json()["severity"] == ["Severity must be one of the following: ['Info', 'Low', 'Medium', 'High', 'Critical']"]
 
 
 class FindingMetadataTest(BaseClass.RESTEndpointTest):
@@ -1414,7 +1419,7 @@ class ProductTest(BaseClass.RESTEndpointTest):
             "prod_type": 1,
             "name": "Test Product",
             "description": "test product",
-            "tags": ["mytag, yourtag"]
+            "tags": ["mytag", "yourtag"]
         }
         self.update_fields = {'prod_type': 2}
         self.test_type = TestType.OBJECT_PERMISSIONS
@@ -1437,12 +1442,12 @@ class StubFindingsTest(BaseClass.RESTEndpointTest):
         self.payload = {
             "title": "Stub Finding 1",
             "date": "2017-12-31",
-            "severity": "HIGH",
+            "severity": "High",
             "description": "test stub finding",
             "reporter": 3,
             "test": 3,
         }
-        self.update_fields = {'severity': 'LOW'}
+        self.update_fields = {'severity': 'Low'}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Stub_Finding
         self.permission_create = Permissions.Finding_Add
@@ -1450,6 +1455,11 @@ class StubFindingsTest(BaseClass.RESTEndpointTest):
         self.permission_delete = Permissions.Finding_Delete
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_severity_validation(self):
+        result = self.client.patch(self.url + "2/", data={"severity": "Not a valid choice"})
+        self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST, "Severity just got set to something invalid")
+        assert result.json()["severity"] == ["Severity must be one of the following: ['Info', 'Low', 'Medium', 'High', 'Critical']"]
 
 
 class TestsTest(BaseClass.RESTEndpointTest):

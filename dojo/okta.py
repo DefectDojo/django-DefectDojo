@@ -12,7 +12,7 @@ from social_core.backends.oauth import BaseOAuth2
 from social_core.backends.open_id_connect import OpenIdConnectAuth
 
 
-class OktaMixin(object):
+class OktaMixin:
     def api_url(self):
         return append_slash(self.setting('API_URL'))
 
@@ -73,7 +73,7 @@ class OktaOpenIdConnect(OktaOAuth2, OpenIdConnectAuth):
         """
         Validates the id_token using Okta.
         """
-        client_id, client_secret = self.get_key_and_secret()
+        client_id, _client_secret = self.get_key_and_secret()
         claims = None
         k = None
 

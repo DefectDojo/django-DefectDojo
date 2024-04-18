@@ -4,7 +4,7 @@ import json
 from dojo.models import Finding
 
 
-class TalismanParser(object):
+class TalismanParser:
     """
     A class that can be used to parse the Talisman JSON report files
     """

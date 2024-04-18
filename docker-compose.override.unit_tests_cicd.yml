@@ -1,5 +1,4 @@
 ---
-version: '3.8'
 services:
   nginx:
     image: busybox:1.36.1-musl
@@ -14,6 +13,7 @@ services:
       - '.:/app:z'
       - "defectdojo_media_unit_tests:${DD_MEDIA_ROOT:-/app/media}"
     environment:
+      PYTHONWARNINGS: error  # We are strict about Warnings during testing
       DD_DEBUG: 'True'
       DD_TEST_DATABASE_NAME: ${DD_TEST_DATABASE_NAME}
       DD_DATABASE_NAME: ${DD_TEST_DATABASE_NAME}

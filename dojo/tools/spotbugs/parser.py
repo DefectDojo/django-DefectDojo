@@ -4,7 +4,7 @@ from defusedxml import ElementTree as ET
 from dojo.models import Finding
 
 
-class SpotbugsParser(object):
+class SpotbugsParser:
     """Parser for XML ouput file from Spotbugs (https://github.com/spotbugs/spotbugs)"""
 
     def get_scan_types(self):
@@ -123,13 +123,7 @@ class SpotbugsParser(object):
             if "instanceHash" in bug.attrib:
                 dupe_key = bug.get("instanceHash")
             else:
-                dupe_key = "|".join(
-                    [
-                        "no_instance_hash",
-                        title,
-                        description,
-                    ]
-                )
+                dupe_key = f"no_instance_hash|{title}|{description}"
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]

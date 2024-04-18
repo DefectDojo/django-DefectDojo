@@ -5,7 +5,7 @@ from datetime import datetime
 from dojo.models import Finding
 
 
-class AzureSecurityCenterRecommendationsParser(object):
+class AzureSecurityCenterRecommendationsParser:
     def get_scan_types(self):
         return ["Azure Security Center Recommendations Scan"]
 

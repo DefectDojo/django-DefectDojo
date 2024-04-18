@@ -16,6 +16,7 @@ framework.
 import os
 import socket
 import logging
+from django.core.wsgi import get_wsgi_application
 
 
 logger = logging.getLogger(__name__)
@@ -37,7 +38,7 @@ debugpy_port = os.environ.get("DD_DEBUG_PORT") if os.environ.get("DD_DEBUG_PORT"
 
 # Checking for RUN_MAIN for those that want to run the app locally with the python interpreter instead of uwsgi
 if os.environ.get("DD_DEBUG") == "True" and not os.getenv("RUN_MAIN") and is_debugger_listening(debugpy_port) != 0:
-    logger.info("DD_DEBUG is set to True, setting remote debugging on port {}".format(debugpy_port))
+    logger.info(f"DD_DEBUG is set to True, setting remote debugging on port {debugpy_port}")
     try:
         import debugpy
 
@@ -48,7 +49,7 @@ if os.environ.get("DD_DEBUG") == "True" and not os.getenv("RUN_MAIN") and is_deb
                         })
         debugpy.listen(("0.0.0.0", debugpy_port))
         if os.environ.get("DD_DEBUG_WAIT_FOR_CLIENT") == "True":
-            logger.info("Waiting for the debugging client to connect on port {}".format(debugpy_port))
+            logger.info(f"Waiting for the debugging client to connect on port {debugpy_port}")
             debugpy.wait_for_client()
             print("Debugging client connected, resuming execution")
     except RuntimeError as e:
@@ -60,6 +61,4 @@ if os.environ.get("DD_DEBUG") == "True" and not os.getenv("RUN_MAIN") and is_deb
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
-from django.core.wsgi import get_wsgi_application
-
 application = get_wsgi_application()

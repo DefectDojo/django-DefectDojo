@@ -4,7 +4,7 @@ import hashlib
 from dojo.models import Finding
 
 
-class PmdParser(object):
+class PmdParser:
     def get_scan_types(self):
         return ["PMD Scan"]
 
@@ -54,14 +54,7 @@ class PmdParser(object):
             finding.mitigation = "No mitigation provided"
 
             key = hashlib.sha256(
-                "|".join(
-                    [
-                        finding.title,
-                        finding.description,
-                        finding.file_path,
-                        finding.line,
-                    ]
-                ).encode("utf-8")
+                f"{finding.title}|{finding.description}|{finding.file_path}|{finding.line}".encode()
             ).hexdigest()
 
             if key not in dupes:
