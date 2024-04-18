@@ -2162,6 +2162,13 @@ class ImportScanSerializer(serializers.Serializer):
             context["endpoints_to_add"] = [endpoints_to_add]
         else:
             context["endpoint_to_add"] = None
+        # Convert the tags to a list if needed. At this point, the
+        # TaggitListSerializer has already removed commas supplied
+        # by the user, so this operation will consistently return
+        # a list to be used by the importer
+        if tags := context.get("tags"):
+            if isinstance(tags, str):
+                context["tags"] = tags.split(", ")
         # have to make the scan_date_time timezone aware otherwise uploads via
         # the API would fail (but unit tests for api upload would pass...)
         context["scan_date"] = (
@@ -2423,6 +2430,13 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             context["endpoints_to_add"] = [endpoints_to_add]
         else:
             context["endpoint_to_add"] = None
+        # Convert the tags to a list if needed. At this point, the
+        # TaggitListSerializer has already removed commas supplied
+        # by the user, so this operation will consistently return
+        # a list to be used by the importer
+        if tags := context.get("tags"):
+            if isinstance(tags, str):
+                context["tags"] = tags.split(", ")
         # have to make the scan_date_time timezone aware otherwise uploads via
         # the API would fail (but unit tests for api upload would pass...)
         context["scan_date"] = (
