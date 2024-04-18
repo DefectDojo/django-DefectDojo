@@ -7,7 +7,8 @@ class Compliance:
         finding_id = finding.get("Id", "")
         title = finding.get("Title", "")
         severity = finding.get("Severity", {}).get("Label", "INFORMATIONAL").title()
-        resource_id_arn = finding.get("Resources", []).get("Id", "")
+        for resource_id_arn in finding.get("Resources", []): # adding a generic resource_id implementation separate from the below AwsEcrContainerImage one
+            resource_id = resource_id_arn.get("Id")
         mitigation = ""
         impact = []
         references = []
@@ -17,7 +18,7 @@ class Compliance:
         mitigation += finding.get("Remediation", {}).get("Recommendation", {}).get("Url", "")
         description = "This is a Security Hub Finding \n" + finding.get("Description", "")
         description += f"\n**AWS Finding ARN:** {finding_id}\n"
-        description += f"\n**Resource Id: {resource_id_arn}\n"
+        description += f"\n**Resource Id: {resource_id}\n"
         description += f"AwsAccountId: {finding.get('AwsAccountId', '')}\n"
         description += f"Region: {finding.get('Region', '')}\n"
         description += f"Generator ID: {finding.get('GeneratorId', '')}\n"
