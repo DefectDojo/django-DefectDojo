@@ -7,6 +7,7 @@ class GuardDuty:
         finding_id = finding.get("Id", "")
         title = finding.get("Title", "")
         severity = finding.get("Severity", {}).get("Label", "INFORMATIONAL").title()
+        resource_id_arn = finding.get("Resources", {}).get("Id", "")
         mitigation = ""
         impact = []
         references = []
@@ -30,7 +31,7 @@ class GuardDuty:
             else:
                 mitigated = datetime.utcnow()
         description = f"This is a GuardDuty Finding\n{finding.get('Description', '')}"
-        description += f"\n Resource ID: {finding.get('Resources', {}).get('Id', '')}\n"
+        description += f"\n Resource ID: {resource_id_arn}\n"
         description += f"\n**AWS Finding ARN: ** {finding_id}\n"
         description += f"SourceURL: {finding.get('SourceUrl', '')}\n"
         description += f"AwsAccountId: {finding.get('AwsAccountId', '')}\n"
