@@ -9,7 +9,7 @@ class APILimitReqRespPairsTest(APITestCase):
     Test the MAX_REQRESP_FROM_API setting for /api/v2/findings/{id}/request_response/
     """
 
-    fixtures = ['dojo_testdata.json']
+    fixtures = ['unit_limit_reqresp.json']
 
     def setUp(self: object):
         token = Token.objects.get(user__username='admin')
