@@ -341,10 +341,10 @@ env = environ.FileAwareEnv(
     DD_INVALID_ESCAPE_STR=(dict, {}),
 
     # --------------- Grafana Metrics ---------------
-    DD_GRAFANA_URL=(str, "http://localhost:3000"),
-    DD_GRAFANA_PATH=(str, "/d/edig6ul0oqzuod/panel-de-control-vultracker"),
-    DD_GRAFANA_PARAMS=(str, "?orgId=1"),
-    DD_MICROSOFT_LOGIN_URL=(str, "https://login.microsoftonline.com"),
+    DD_GRAFANA_URL=(str, ""),
+    DD_GRAFANA_PATH=(str, ""),
+    DD_GRAFANA_PARAMS=(str, ""),
+    DD_MICROSOFT_LOGIN_URL=(str, ""),
     
     # ---------------RISK PENDING-------------------------
     # The variable that allows enabling pending risk acceptance.
