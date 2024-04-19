@@ -10,10 +10,10 @@ pool:
   demands: java
 
 steps:
-  # - task: connect-agent@2
-  #   displayName: "Hosted agent"
-  #   inputs:
-  #     hostedAgentService: $(hostedAgentService)
+  - task: connect-agent@2
+    displayName: "Hosted agent"
+    inputs:
+      hostedAgentService: $(hostedAgentService)
 
   # - bash: |
   #     echo "docker volume"
@@ -64,34 +64,34 @@ steps:
   #     coverage xml
   #   displayName: "Unit test"
 
-  # - task: SonarQubePrepare@5
-  #   displayName: "Prepare analysis on SonarQube"
-  #   inputs:
-  #     SonarQube: SonarQube
-  #     scannerMode: CLI
-  #     configMode: manual
-  #     cliProjectKey: "$(DefinitionName)"
-  #     cliProjectName: "$(DefinitionName)"
-  #     cliProjectVersion: "$(Build.BuildNumber)"
-  #     extraProperties: |
-  #       sonar.sourceEncoding=UTF-8
-  #       sonar.sources=dojo
-  #       sonar.tests=unittests
-  #       sonar.python.coverage.reportPaths=*coverage.xml
-  #       sonar.exclusions=**/dojo/db_migrations/**,**/dojo/management/**,**/dojo/static/dojo/js/**,/dojo/settings/unittest.py,**/dojo/templates/notifications/**
-  #       sonar.language=py
-  #       sonar.python.version=3.10
+  - task: SonarQubePrepare@5
+    displayName: "Prepare analysis on SonarQube"
+    inputs:
+      SonarQube: SonarQube
+      scannerMode: CLI
+      configMode: manual
+      cliProjectKey: "$(DefinitionName)"
+      cliProjectName: "$(DefinitionName)"
+      cliProjectVersion: "$(Build.BuildNumber)"
+      extraProperties: |
+        sonar.sourceEncoding=UTF-8
+        sonar.sources=dojo
+        sonar.tests=unittests
+        sonar.python.coverage.reportPaths=*coverage.xml
+        sonar.exclusions=**/dojo/db_migrations/**,**/dojo/management/**,**/dojo/static/dojo/js/**,/dojo/settings/unittest.py,**/dojo/templates/notifications/**
+        sonar.language=py
+        sonar.python.version=3.10
 
-  # - task: SonarQubeAnalyze@5
-  #   displayName: "Run Code Analysis"
+  - task: SonarQubeAnalyze@5
+    displayName: "Run Code Analysis"
 
-  # - task: sonar-buildbreaker@8
-  #   displayName: "Break build on quality gate failure"
-  #   inputs:
-  #     SonarQube: SonarQube
+  - task: sonar-buildbreaker@8
+    displayName: "Break build on quality gate failure"
+    inputs:
+      SonarQube: SonarQube
 
-  # - bash: "cp -r dojo/ requirements.txt docker/ wsgi.py manage.py tests/ unittests/ components/ wsgi_params nginx/ Dockerfile.django-debian Dockerfile.integration-tests-debian Dockerfile.nginx-debian $(Build.ArtifactStagingDirectory)"
-  #   displayName: "Copy Files"
+  - bash: "cp -r dojo/ requirements.txt docker/ wsgi.py manage.py tests/ unittests/ components/ wsgi_params nginx/ Dockerfile.django-debian Dockerfile.integration-tests-debian Dockerfile.nginx-debian $(Build.ArtifactStagingDirectory)"
+    displayName: "Copy Files"
     # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
 
   - task: ArchiveFiles@2
