@@ -340,6 +340,12 @@ env = environ.FileAwareEnv(
     DD_CUSTOM_TAG_PARSER=(dict, {}),
     DD_INVALID_ESCAPE_STR=(dict, {}),
 
+    # --------------- Grafana Metrics ---------------
+    DD_GRAFANA_URL=(str, ""),
+    DD_GRAFANA_PATH=(str, ""),
+    DD_GRAFANA_PARAMS=(str, ""),
+    DD_MICROSOFT_LOGIN_URL=(str, ""),
+    
     # ---------------RISK PENDING-------------------------
     # The variable that allows enabling pending risk acceptance.
     DD_RISK_PENDING=(bool, False),
@@ -2028,6 +2034,20 @@ if os.getenv("DD_USE_CACHE_REDIS") == "true":
         }
     }
 
+# ------------------------------------------------------------------------------
+# Render Grafana Metricsin a <frame>, <iframe>, <embed> or <object>
+# ------------------------------------------------------------------------------
+
+GRAFANA_URL = env('DD_GRAFANA_URL')
+GRAFANA_PATH = env('DD_GRAFANA_PATH')
+GRAFANA_PARAMS = env('DD_GRAFANA_PARAMS')
+MICROSOFT_LOGIN_URL = env('DD_MICROSOFT_LOGIN_URL')
+
+CSP_FRAME_SRC = [
+    "'self'",
+    GRAFANA_URL,
+    MICROSOFT_LOGIN_URL
+]
 
 # ------------------------------------------------------------------------------
 # Ignored Warnings
@@ -2047,3 +2067,4 @@ warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager
 # - https://docs.djangoproject.com/en/4.1/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
 # - https://docs.djangoproject.com/en/5.0/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
 FORM_RENDERER = "django.forms.renderers.DjangoDivFormRenderer"
+
