@@ -26,6 +26,12 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 class DefaultImporter(BaseImporter):
+    """
+    The classic importer process used by DefectDojo
+
+    This Importer is intended to be used when auditing the history
+    of findings at a given point in time is required
+    """
     def __init__(self, *args: list, **kwargs: dict):
         """
         Bypass the __init__ method of the BaseImporter class
@@ -55,7 +61,7 @@ class DefaultImporter(BaseImporter):
         required_fields = ["engagement", "lead", "environment"]
         if not all(field in kwargs for field in required_fields):
             raise ValueError(
-                "(Importer) parse_findings_from_file - "
+                "(Importer) parse_findings_static_test_type - "
                 f"The following fields must be supplied: {required_fields}"
             )
         # Grab the fields from the kwargs
@@ -64,16 +70,17 @@ class DefaultImporter(BaseImporter):
         environment = kwargs.get("environment")
         # Ensure a test type is available for use
         test_type = self.get_or_create_test_type(test_type_name)
+        target_date = (kwargs.get("scan_date") or kwargs.get("now")) or timezone.now()
         # Create the test object
-        return Test.objects.create(
+        test = Test.objects.create(
             title=kwargs.get("test_title"),
             engagement=engagement,
             lead=lead,
             environment=environment,
             test_type=test_type,
             scan_type=scan_type,
-            target_start=kwargs["scan_date"] or kwargs["now"],
-            target_end=kwargs["scan_date"] or kwargs["now"],
+            target_start=target_date,
+            target_end=target_date,
             percent_complete=100,
             version=kwargs.get("version"),
             branch_tag=kwargs.get("branch_tag"),
@@ -82,6 +89,10 @@ class DefaultImporter(BaseImporter):
             api_scan_configuration=kwargs.get("api_scan_configuration"),
             tags=kwargs.get("tags"),
         )
+        print("\n\n")
+        print(f"\t Test created with ID {test.id}")
+        print("\n\n")
+        return test
 
     def process_scan(
         self,
@@ -147,7 +158,6 @@ class DefaultImporter(BaseImporter):
         # Update the test progress to reflect that the import has completed
         logger.debug('IMPORT_SCAN: Updating Test progress')
         self.update_test_progress(test)
-
         logger.debug('IMPORT_SCAN: Done')
         return test, 0, len(new_findings), len(closed_findings), 0, 0, test_import_history
 
@@ -219,7 +229,7 @@ class DefaultImporter(BaseImporter):
             # Process any files
             self.process_files(finding)
             # Process vulnerability IDs
-            self.process_vulnerability_ids(finding)
+            finding = self.process_vulnerability_ids(finding)
             # Categorize this finding as a new one
             new_findings.append(finding)
             # to avoid pushing a finding group multiple times, we push those outside of the loop
@@ -314,7 +324,7 @@ class DefaultImporter(BaseImporter):
 
         return old_findings
 
-    def parse_findings_from_file(
+    def parse_findings_static_test_type(
         self,
         parser: Parser,
         scan_type: str,
@@ -335,7 +345,7 @@ class DefaultImporter(BaseImporter):
         )
         logger.debug('IMPORT_SCAN: Parse findings')
         # Use the parent method for the rest of this
-        return test, BaseImporter.parse_findings_from_file(
+        return test, BaseImporter.parse_findings_static_test_type(
             self,
             parser,
             scan_type,
@@ -344,7 +354,7 @@ class DefaultImporter(BaseImporter):
             **kwargs,
         )
 
-    def parse_findings_from_api_configuration(
+    def parse_findings_dynamic_test_type(
         self,
         parser: Parser,
         scan_type: str,
@@ -358,7 +368,7 @@ class DefaultImporter(BaseImporter):
         """
         logger.debug('IMPORT_SCAN parser v2: Create Test and parse findings')
         parsed_findings = []
-        tests = self.api_configuration_get_tests_from_from_parser(
+        tests = self.parse_dynamic_test_type_tests(
             parser,
             scan_type,
             scan,
@@ -384,7 +394,7 @@ class DefaultImporter(BaseImporter):
         # Create a new test
         test = self.create_test(
             scan_type,
-            scan_type,
+            test_type_name,
             **kwargs,
         )
         # This part change the name of the Test
@@ -397,7 +407,7 @@ class DefaultImporter(BaseImporter):
         test.save()
         logger.debug('IMPORT_SCAN parser v2: Parse findings (aggregate)')
         # Aggregate all the findings and return them with the newly created test
-        return test, self.api_configuration_get_findings_from_tests(tests)
+        return test, self.parse_dynamic_test_type_findings_from_tests(tests)
 
     def sync_process_findings(
         self,

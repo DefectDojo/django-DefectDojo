@@ -36,75 +36,6 @@ class AutoCreateContextManager:
     ----------- Validators ------------
     ===================================
     """
-    def common_string_validation(
-        self,
-        value: str,
-        parameter_name: str,
-        object_name: str,
-    ) -> None:
-        """
-        Raises validation error if the value violates any of
-        the following:
-        - Not supplied
-        - Not a string
-        - Empty string
-        """
-        if value is None:
-            raise ValueError(
-                f"{object_name}: {parameter_name} must be supplied"
-            )
-        if not isinstance(value, str):
-            raise TypeError(
-                f"{object_name}: {parameter_name} must be a string, not a {type(value)}"
-            )
-        if len(value) == 0:
-            raise ValueError(
-                f"{object_name}: {parameter_name} must have a length "
-                "greater than zero"
-            )
-
-    def validate_product_type_inputs(
-        self,
-        product_type_name: str = None,
-        **kwargs: dict,
-    ) -> None:
-        """
-        Raises validation error if the product type name violates any of
-        the following:
-        - Not supplied
-        - Not a string
-        - Empty string
-        """
-        self.common_string_validation(product_type_name, "product_type_name", "Product Type")
-
-    def validate_product_inputs(
-        self,
-        product_name: str = None,
-        **kwargs: dict,
-    ) -> None:
-        """
-        Raises validation error if the product type name violates any of
-        the following:
-        - Not supplied
-        - Not a string
-        - Empty string
-        """
-        self.common_string_validation(product_name, "product_name", "Product")
-
-    def validate_engagement_inputs(
-        self,
-        engagement_name: str = None,
-        **kwargs: dict,
-    ) -> None:
-        """
-        Raises validation error if the engagement type name violates any of
-        the following:
-        - Not supplied
-        - Not a string
-        - Empty string
-        """
-        self.common_string_validation(engagement_name, "engagement_name", "Engagement")
-
     def process_object_fields(
         self,
         key: str,
@@ -187,10 +118,10 @@ class AutoCreateContextManager:
 
         If a match is not found, return None
         """
-        # Check if the name supplied is valid
-        self.validate_product_type_inputs(product_type_name=product_type_name)
         # Look for an existing object
-        return get_object_or_none(Product_Type, name=product_type_name)
+        if product_type_name:
+            return get_object_or_none(Product_Type, name=product_type_name)
+        return None
 
     def get_target_product_if_exists(
         self,
@@ -205,10 +136,8 @@ class AutoCreateContextManager:
 
         If a match is not found, return None
         """
-        # Check if the name supplied is valid
-        self.validate_product_inputs(product_name=product_name)
         # Look for an existing object
-        if product := get_object_or_none(Product, name=product_name):
+        if product_name and (product := get_object_or_none(Product, name=product_name)):
             # product type name must match if provided
             if product_type_name and product.prod_type.name != product_type_name:
                 raise ValueError(

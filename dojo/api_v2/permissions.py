@@ -423,14 +423,13 @@ class UserHasImportPermission(permissions.BasePermission):
             converted_dict = auto_create.convert_querydict_to_dict(request.data)
             auto_create.process_import_meta_data_from_dict(converted_dict)
             # Get an existing product
-            product_type = auto_create.get_target_product_type_if_exists(**converted_dict)
-            product = auto_create.get_target_product_if_exists(**converted_dict)
-            engagement = auto_create.get_target_engagement_if_exists(**converted_dict)
+            converted_dict["product_type"] = auto_create.get_target_product_type_if_exists(**converted_dict)
+            converted_dict["product"] = auto_create.get_target_product_if_exists(**converted_dict)
+            converted_dict["engagement"] = auto_create.get_target_engagement_if_exists(**converted_dict)
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
-            raise ValidationError(str(e))
-
-        if engagement:
+            raise ValidationError(e)
+        if engagement := converted_dict.get("engagement"):
             # existing engagement, nothing special to check
             return user_has_permission(
                 request.user, engagement, Permissions.Import_Scan_Result
@@ -448,9 +447,9 @@ class UserHasImportPermission(permissions.BasePermission):
                 converted_dict.get("engagement_name"),
                 converted_dict.get("product_name"),
                 converted_dict.get("product_type_name"),
-                engagement,
-                product,
-                product_type,
+                converted_dict.get("engagement"),
+                converted_dict.get("product"),
+                converted_dict.get("product_type"),
                 "Need engagement_id or product_name + engagement_name to perform import",
             )
         else:
@@ -458,11 +457,11 @@ class UserHasImportPermission(permissions.BasePermission):
             # requested and is allowed to use auto_create
             return check_auto_create_permission(
                 request.user,
-                product,
+                converted_dict.get("product"),
                 converted_dict.get("product_name"),
-                engagement,
+                converted_dict.get("engagement"),
                 converted_dict.get("engagement_name"),
-                product_type,
+                converted_dict.get("product_type"),
                 converted_dict.get("product_type_name"),
                 "Need engagement_id or product_name + engagement_name to perform import",
             )
@@ -484,7 +483,7 @@ class UserHasMetaImportPermission(permissions.BasePermission):
                 product = auto_create.get_target_product_by_id_if_exists(**converted_dict)
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
-            raise ValidationError(str(e))
+            raise ValidationError(e)
 
         if product:
             # existing product, nothing special to check
@@ -494,7 +493,7 @@ class UserHasMetaImportPermission(permissions.BasePermission):
         elif product_id := converted_dict.get("product_id"):
             # product_id doesn't exist
             raise serializers.ValidationError(
-                f"product \"{product_id}\" does not exist"
+                f"Product \"{product_id}\" does not exist"
             )
         else:
             raise serializers.ValidationError(
@@ -621,15 +620,15 @@ class UserHasReimportPermission(permissions.BasePermission):
             converted_dict = auto_create.convert_querydict_to_dict(request.data)
             auto_create.process_import_meta_data_from_dict(converted_dict)
             # Get an existing product
-            product_type = auto_create.get_target_product_type_if_exists(**converted_dict)
-            product = auto_create.get_target_product_if_exists(**converted_dict)
-            engagement = auto_create.get_target_engagement_if_exists(**converted_dict)
-            test = auto_create.get_target_test_if_exists(**converted_dict)
+            converted_dict["product_type"] = auto_create.get_target_product_type_if_exists(**converted_dict)
+            converted_dict["product"] = auto_create.get_target_product_if_exists(**converted_dict)
+            converted_dict["engagement"] = auto_create.get_target_engagement_if_exists(**converted_dict)
+            converted_dict["test"] = auto_create.get_target_test_if_exists(**converted_dict)
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
-            raise ValidationError(str(e))
+            raise ValidationError(e)
 
-        if test:
+        if test := converted_dict.get("test"):
             # existing test, nothing special to check
             return user_has_permission(
                 request.user, test, Permissions.Import_Scan_Result
@@ -637,7 +636,7 @@ class UserHasReimportPermission(permissions.BasePermission):
         elif test_id := converted_dict.get("test_id"):
             # test_id doesn't exist
             raise serializers.ValidationError(
-                f"Test \"{test_id}\" doesn't exist"
+                f"Test \"{test_id}\" does not exist"
             )
 
         if not converted_dict.get("auto_create_context"):
@@ -647,9 +646,9 @@ class UserHasReimportPermission(permissions.BasePermission):
                 converted_dict.get("engagement_name"),
                 converted_dict.get("product_name"),
                 converted_dict.get("product_type_name"),
-                engagement,
-                product,
-                product_type,
+                converted_dict.get("engagement"),
+                converted_dict.get("product"),
+                converted_dict.get("product_type"),
                 "Need test_id or product_name + engagement_name + scan_type to perform reimport",
             )
         else:
@@ -657,11 +656,11 @@ class UserHasReimportPermission(permissions.BasePermission):
             # requested and is allowed to use auto_create
             return check_auto_create_permission(
                 request.user,
-                product,
+                converted_dict.get("product"),
                 converted_dict.get("product_name"),
-                engagement,
+                converted_dict.get("engagement"),
                 converted_dict.get("engagement_name"),
-                product_type,
+                converted_dict.get("product_type"),
                 converted_dict.get("product_type_name"),
                 "Need test_id or product_name + engagement_name + scan_type to perform reimport",
             )
@@ -930,33 +929,33 @@ def raise_no_auto_create_import_validation_error(
 
     if product_type_name and not product_type:
         raise serializers.ValidationError(
-            "Product Type '%s' doesn't exist" % (product_type_name)
+            "Product Type '%s' does not exist" % (product_type_name)
         )
 
     if product_name and not product:
         if product_type_name:
             raise serializers.ValidationError(
-                f"Product '{product_name}' doesn't exist in Product_Type '{product_type_name}'"
+                f"Product '{product_name}' does not exist in Product_Type '{product_type_name}'"
             )
         else:
             raise serializers.ValidationError(
-                "Product '%s' doesn't exist" % product_name
+                "Product '%s' does not exist" % product_name
             )
 
     if engagement_name and not engagement:
         raise serializers.ValidationError(
-            f"Engagement '{engagement_name}' doesn't exist in Product '{product_name}'"
+            f"Engagement '{engagement_name}' does not exist in Product '{product_name}'"
         )
 
     # these are only set for reimport
     if test_title:
         raise serializers.ValidationError(
-            f"Test '{test_title}' with scan_type '{scan_type}' doesn't exist in Engagement '{engagement_name}'"
+            f"Test '{test_title}' with scan_type '{scan_type}' does not exist in Engagement '{engagement_name}'"
         )
 
     if scan_type:
         raise serializers.ValidationError(
-            f"Test with scan_type '{scan_type}' doesn't exist in Engagement '{engagement_name}'"
+            f"Test with scan_type '{scan_type}' does not exist in Engagement '{engagement_name}'"
         )
 
     raise ValidationError(error_message)
@@ -1020,7 +1019,7 @@ def check_auto_create_permission(
     if not product and product_name:
         if not product_type_name:
             raise serializers.ValidationError(
-                "Product '%s' doesn't exist and no product_type_name provided to create the new product in"
+                "Product '%s' does not exist and no product_type_name provided to create the new product in"
                 % product_name
             )
 

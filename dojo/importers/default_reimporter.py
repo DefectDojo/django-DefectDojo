@@ -28,6 +28,13 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 class DefaultReImporter(BaseImporter):
+    """
+    The classic reimporter process used by DefectDojo
+
+    This importer is intended to be used when mitigation of
+    vulnerabilities is the ultimate tool for getting a current
+    point time view of security of a given product
+    """
     def __init__(self, *args: list, **kwargs: dict):
         """
         Bypass the __init__ method of the BaseImporter class
@@ -303,7 +310,7 @@ class DefaultReImporter(BaseImporter):
 
         return mitigated_findings
 
-    def parse_findings_from_file(
+    def parse_findings_static_test_type(
         self,
         parser: Parser,
         scan_type: str,
@@ -317,7 +324,7 @@ class DefaultReImporter(BaseImporter):
         """
         logger.debug("REIMPORT_SCAN: Parse findings")
         # Use the parent method for the rest of this
-        return BaseImporter.parse_findings_from_file(
+        return BaseImporter.parse_findings_static_test_type(
             self,
             parser,
             scan_type,
@@ -326,7 +333,7 @@ class DefaultReImporter(BaseImporter):
             **kwargs,
         )
 
-    def parse_findings_from_api_configuration(
+    def parse_findings_dynamic_test_type(
         self,
         parser: Parser,
         scan_type: str,
@@ -339,7 +346,7 @@ class DefaultReImporter(BaseImporter):
         into a single test, and then renames the test is applicable
         """
         logger.debug("REIMPORT_SCAN parser v2: Create parse findings")
-        return BaseImporter.parse_findings_from_api_configuration(
+        return BaseImporter.parse_findings_dynamic_test_type(
             self,
             parser,
             scan_type,
@@ -790,7 +797,7 @@ class DefaultReImporter(BaseImporter):
         # Process any files
         self.process_files(finding)
         # Process vulnerability IDs
-        self.process_vulnerability_ids(finding)
+        finding = self.process_vulnerability_ids(finding)
 
         return finding
 

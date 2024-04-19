@@ -100,10 +100,10 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         BaseImporter are not being used directly
         """
         if isinstance(self, BaseImporter):
-            raise NotImplementedError((
+            raise NotImplementedError(
                 "The BaseImporter class must not be used directly. "
                 "Please use a class that extends the BaseImporter class."
-            ))
+            )
 
     @abstractmethod
     def process_scan(
@@ -181,7 +181,7 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         """
         return scan
 
-    def parse_findings_from_file(
+    def parse_findings_static_test_type(
         self,
         parser: Parser,
         scan_type: str,
@@ -204,7 +204,7 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
             logger.warning(e)
             raise ValidationError(e)
 
-    def api_configuration_get_tests_from_from_parser(
+    def parse_dynamic_test_type_tests(
         self,
         parser: Parser,
         scan_type: str,
@@ -220,7 +220,7 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
             logger.warning(e)
             raise ValidationError(e)
 
-    def api_configuration_get_findings_from_tests(
+    def parse_dynamic_test_type_findings_from_tests(
         self,
         tests: List[Test],
         **kwargs: dict,
@@ -235,7 +235,7 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
             parsed_findings.extend(test_raw.findings)
         return parsed_findings
 
-    def parse_findings_from_api_configuration(
+    def parse_findings_dynamic_test_type(
         self,
         parser: Parser,
         scan_type: str,
@@ -248,13 +248,13 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
 
         This version of this function is intended to be extended by children classes
         """
-        tests = self.api_configuration_get_tests_from_from_parser(
+        tests = self.parse_dynamic_test_type_tests(
             parser,
             scan_type,
             scan,
             **kwargs,
         )
-        return self.api_configuration_get_findings_from_tests(tests, **kwargs)
+        return self.parse_dynamic_test_type_findings_from_tests(tests, **kwargs)
 
     def parse_findings(
         self,
@@ -269,14 +269,14 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         `get_tests` function on the parser object
         """
         if hasattr(parser, 'get_tests'):
-            return self.parse_findings_from_api_configuration(
+            return self.parse_findings_dynamic_test_type(
                 parser,
                 scan_type,
                 scan,
                 **kwargs,
             )
         else:
-            return self.parse_findings_from_file(
+            return self.parse_findings_static_test_type(
                 parser,
                 scan_type,
                 scan,
@@ -391,12 +391,12 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
             return None
         # Log the current state of what has occurred in case there could be
         # deviation from what is displayed in the view
-        logger.debug((
+        logger.debug(
             f"new: {len(new_findings)} "
             f"closed: {len(closed_findings)} "
             f"reactivated: {len(reactivated_findings)} "
             f"untouched: {len(untouched_findings)} "
-        ))
+        )
         # Create a dictionary to stuff into the test import object
         import_settings = {}
         import_settings['active'] = kwargs.get("active")
@@ -486,37 +486,6 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
 
         return message
 
-    def process_vulnerability_ids(
-        self,
-        finding: Finding
-    ) -> None:
-        """
-        Parse the `unsaved_vulnerability_ids` field from findings after they are parsed
-        to create `Vulnerability_Id` objects with the finding associated correctly
-        """
-        # Synchronize the cve field with the unsaved_vulnerability_ids
-        # We do this to be as flexible as possible to handle the fields until
-        # the cve field is not needed anymore and can be removed.
-        if finding.unsaved_vulnerability_ids and finding.cve:
-            # Make sure the first entry of the list is the value of the cve field
-            finding.unsaved_vulnerability_ids.insert(0, finding.cve)
-        elif finding.unsaved_vulnerability_ids and not finding.cve:
-            # If the cve field is not set, use the first entry of the list to set it
-            finding.cve = finding.unsaved_vulnerability_ids[0]
-        elif not finding.unsaved_vulnerability_ids and finding.cve:
-            # If there is no list, make one with the value of the cve field
-            finding.unsaved_vulnerability_ids = [finding.cve]
-
-        if finding.unsaved_vulnerability_ids:
-            # Remove duplicates
-            finding.unsaved_vulnerability_ids = list(dict.fromkeys(finding.unsaved_vulnerability_ids))
-            # Add all vulnerability ids to the database
-            for vulnerability_id in finding.unsaved_vulnerability_ids:
-                Vulnerability_Id.objects.create(
-                    vulnerability_id=vulnerability_id,
-                    finding=finding,
-                )
-
     def chunk_objects(
         self,
         object_list: List[Finding | Endpoint],
@@ -601,10 +570,10 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
                     fragment=endpoint.fragment,
                     product=test.engagement.product)
             except (MultipleObjectsReturned):
-                raise Exception((
+                raise Exception(
                     f"Endpoints in your database are broken. "
                     f"Please access {reverse('endpoint_migrate')} and migrate them to new format or remove them."
-                ))
+                )
 
             Endpoint_Status.objects.get_or_create(
                 finding=finding,
@@ -754,7 +723,7 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         - info, informational, Informational, None, none
         If not, raise a ValidationError explaining as such
         """
-        # Checks around Informational/Info severitie
+        # Checks around Informational/Info severity
         starts_with_info = finding.severity.lower().startswith('info')
         lower_none = finding.severity.lower() == 'none'
         not_info = finding.severity != 'Info'
@@ -806,7 +775,7 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         Create BurpRawRequestResponse objects linked to the finding without
         returning the finding afterward
         """
-        if len(unsaved_req_resp := getattr(finding, 'unsaved_req_resp', None)) > 0:
+        if len(unsaved_req_resp := getattr(finding, 'unsaved_req_resp', [])) > 0:
             for req_resp in unsaved_req_resp:
                 burp_rr = BurpRawRequestResponse(
                     finding=finding,
@@ -815,11 +784,13 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
                 burp_rr.clean()
                 burp_rr.save()
 
-        if finding.unsaved_request is not None and finding.unsaved_response is not None:
+        unsaved_request = getattr(finding, "unsaved_request", None)
+        unsaved_response = getattr(finding, "unsaved_response", None)
+        if unsaved_request is not None and unsaved_response is not None:
             burp_rr = BurpRawRequestResponse(
                 finding=finding,
-                burpRequestBase64=base64.b64encode(finding.unsaved_request.encode()),
-                burpResponseBase64=base64.b64encode(finding.unsaved_response.encode()))
+                burpRequestBase64=base64.b64encode(unsaved_request.encode()),
+                burpResponseBase64=base64.b64encode(unsaved_response.encode()))
             burp_rr.clean()
             burp_rr.save()
 
@@ -841,6 +812,39 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         if len(endpoints_to_add) > 0:
             logger.debug('endpoints_to_add: %s', endpoints_to_add)
             self.chunk_endpoints_and_disperse(finding, finding.test, endpoints_to_add)
+
+    def process_vulnerability_ids(
+        self,
+        finding: Finding
+    ) -> Finding:
+        """
+        Parse the `unsaved_vulnerability_ids` field from findings after they are parsed
+        to create `Vulnerability_Id` objects with the finding associated correctly
+        """
+        # Synchronize the cve field with the unsaved_vulnerability_ids
+        # We do this to be as flexible as possible to handle the fields until
+        # the cve field is not needed anymore and can be removed.
+        if finding.unsaved_vulnerability_ids and finding.cve:
+            # Make sure the first entry of the list is the value of the cve field
+            finding.unsaved_vulnerability_ids.insert(0, finding.cve)
+        elif finding.unsaved_vulnerability_ids and not finding.cve:
+            # If the cve field is not set, use the first entry of the list to set it
+            finding.cve = finding.unsaved_vulnerability_ids[0]
+        elif not finding.unsaved_vulnerability_ids and finding.cve:
+            # If there is no list, make one with the value of the cve field
+            finding.unsaved_vulnerability_ids = [finding.cve]
+
+        if finding.unsaved_vulnerability_ids:
+            # Remove duplicates
+            finding.unsaved_vulnerability_ids = list(dict.fromkeys(finding.unsaved_vulnerability_ids))
+            # Add all vulnerability ids to the database
+            for vulnerability_id in finding.unsaved_vulnerability_ids:
+                Vulnerability_Id(
+                    vulnerability_id=vulnerability_id,
+                    finding=finding,
+                ).save()
+
+        return finding
 
     def process_files(
         self,

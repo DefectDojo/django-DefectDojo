@@ -104,6 +104,7 @@ import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
 from dojo.endpoint.utils import endpoint_meta_import
+from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.importers.auto_create_context import AutoCreateContextManager
@@ -2199,10 +2200,17 @@ class ImportScanSerializer(serializers.Serializer):
         try:
             auto_create.process_import_meta_data_from_dict(context)
             # Attempt to create an engagement
-            context["engagement"] = AutoCreateContextManager.get_or_create_engagement(**context)
+            context["engagement"] = auto_create.get_or_create_engagement(**context)
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
             raise ValidationError(str(e))
+
+    def get_importer(self) -> BaseImporter:
+        """
+        Returns a new instance of an importer that extends
+        the BaseImporter class
+        """
+        return DefaultImporter()
 
     def process_scan(
         self,
@@ -2216,8 +2224,7 @@ class ImportScanSerializer(serializers.Serializer):
         Raises exceptions in the event of an error
         """
         try:
-            importer_client = DefaultImporter()
-            context["test"], _, _, _, _, _, _ = importer_client.process_scan(
+            context["test"], _, _, _, _, _, _ = self.get_importer().process_scan(
                 **context,
             )
             # Update the response body with some new data
@@ -2471,6 +2478,20 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             # Raise an explicit drf exception here
             raise ValidationError(str(e))
 
+    def get_importer(self) -> BaseImporter:
+        """
+        Returns a new instance of an importer that extends
+        the BaseImporter class
+        """
+        return DefaultImporter()
+
+    def get_reimporter(self) -> BaseImporter:
+        """
+        Returns a new instance of a reimporter that extends
+        the BaseImporter class
+        """
+        return DefaultReImporter()
+
     def process_scan(
         self,
         auto_create_manager: AutoCreateContextManager,
@@ -2486,17 +2507,15 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         statistics_before, statistics_delta = None, None
         try:
             if test := context.get("test"):
-                reimporter_client = DefaultReImporter()
                 statistics_before = test.statistics
-                context["test"], _, _, _, _, _, test_import = reimporter_client.process_scan(**context)
+                context["test"], _, _, _, _, _, test_import = self.get_reimporter().process_scan(**context)
                 if test_import:
                     statistics_delta = test_import.statistics
             elif context.get("auto_create_context"):
                 # Attempt to create an engagement
                 logger.debug("reimport for non-existing test, using import to create new test")
                 context["engagement"] = auto_create_manager.get_or_create_engagement(**context)
-                importer_client = DefaultImporter()
-                context["test"], _, _, _, _, _, _ = importer_client.process_scan(**context)
+                context["test"], _, _, _, _, _, _ = self.get_importer().process_scan(**context)
             else:
                 raise NotFound("A test could not be found!")
             # Update the response body with some new data
