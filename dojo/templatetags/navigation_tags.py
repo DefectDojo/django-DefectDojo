@@ -64,7 +64,7 @@ def dojo_sort(request, display='Name', value='title', default=None):
     icon += ' dd-sort"></i>'
     dict_ = request.GET.copy()
     dict_[field] = value
-    # QueryDict.urlencode() should be used here properly handle multiple values for a single key
+    # QueryDict.urlencode() used here to properly handle cases when keys have multiple values
     link = f'<a title="{title}" href="?{escape(dict_.urlencode())}">{_(display)}&nbsp;{icon}</a>'
     return safe(link)
 
