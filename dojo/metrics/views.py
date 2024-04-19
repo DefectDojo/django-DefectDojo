@@ -537,12 +537,13 @@ def simple_metrics(request):
 def metrics_panel(request):
     page_name = _('Metrics Panel')
     now = timezone.now()
-    grafana_url = settings.GRAFANA_URL
     role = Role.objects.get(id=Roles.Maintainer)
     user = request.user.id
     return render(request, 'dojo/metrics_panel.html', {
        'name': page_name,
-       'grafana_url': grafana_url,
+       'grafana_url': settings.GRAFANA_URL,
+       'grafana_path': settings.GRAFANA_PATH,
+       'grafana_params': settings.GRAFANA_PARAMS,
        'role': role,
        'user': user,
     })

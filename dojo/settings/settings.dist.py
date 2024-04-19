@@ -342,6 +342,9 @@ env = environ.FileAwareEnv(
 
     # --------------- Grafana Metrics ---------------
     DD_GRAFANA_URL=(str, "http://localhost:3000"),
+    DD_GRAFANA_PATH=(str, "/d/edig6ul0oqzuod/panel-de-control-vultracker"),
+    DD_GRAFANA_PARAMS=(str, "?orgId=1"),
+    DD_MICROSOFT_LOGIN_URL=(str, "https://login.microsoftonline.com"),
     
     # ---------------RISK PENDING-------------------------
     # The variable that allows enabling pending risk acceptance.
@@ -2034,11 +2037,16 @@ if os.getenv("DD_USE_CACHE_REDIS") == "true":
 # ------------------------------------------------------------------------------
 # Render Grafana Metricsin a <frame>, <iframe>, <embed> or <object>
 # ------------------------------------------------------------------------------
+
 GRAFANA_URL = env('DD_GRAFANA_URL')
+GRAFANA_PATH = env('DD_GRAFANA_PATH')
+GRAFANA_PARAMS = env('DD_GRAFANA_PARAMS')
+MICROSOFT_LOGIN_URL = env('DD_MICROSOFT_LOGIN_URL')
+
 CSP_FRAME_SRC = [
     "'self'",
     GRAFANA_URL,
-    "https://login.microsoftonline.com"
+    MICROSOFT_LOGIN_URL
 ]
 
 # ------------------------------------------------------------------------------
