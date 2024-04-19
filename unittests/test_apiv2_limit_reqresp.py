@@ -18,7 +18,7 @@ class APILimitReqRespPairsTest(APITestCase):
 
     def assertReqrespValue(self: object, value: int, expect_notequal: bool = False) -> None:
         settings.MAX_REQRESP_FROM_API = value
-        r = self.client.get(reverse('findings-list'), format='json')
+        r = self.client.get(reverse('finding-list'), format='json')
         results = r.json()['results']
         # get finding with id 7
         finding = self.getFinding(7, results)
