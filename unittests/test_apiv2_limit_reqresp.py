@@ -5,7 +5,7 @@ from django.conf import settings
 
 
 class APILimitReqRespPairsTest(APITestCase):
-    """    
+    """
     Test the MAX_REQRESP_FROM_API setting for /api/v2/findings/{id}/request_response/
     """
 
