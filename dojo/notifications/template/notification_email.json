@@ -18,12 +18,12 @@
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
-            border-radius: 8px;
+            border-radius: 1px;
             overflow: hidden;
         }
         /* Estilos del encabezado */
         .header {
-            background-color: #3498db;
+            background-color: #208ed9;
             color: #ffffff;
             padding: 30px;
             text-align: center;
@@ -32,10 +32,11 @@
         .content {
             padding: 30px;
             color: #555555;
+            border: 1px solid #cccccc;
         }
         /* Estilos del pie de página */
         .footer {
-            background-color: #2980b9;
+            background-color: #208ed9;
             color: #ffffff;
             text-align: center;
             padding: 20px;
@@ -44,10 +45,10 @@
         .coupon {
             background-color: #f9f9f9;
             border: 1px solid #cccccc;
-            border-radius: 8px;
+            border-radius: 1px;
             padding: 20px;
             text-align: center;
-            margin-top: 30px;
+            margin-top: 0px;
         }
         .coupon h2 {
             color: #3498db;
@@ -55,26 +56,35 @@
         .coupon p {
             margin-top: 10px;
         }
+      /* Estilos del Title */
+        .title {
+            background-color: #171818;
+            border-radius: 1px;
+            padding: 1px;
+            text-align: center;
+            margin-top: 0px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Encabezado -->
         <div class="header">
-            <h1>¡Notification Vultracker!</h1>
+            <h1>¡Vultracker Notification!</h1>
         </div>
 
-        <!-- Contenido del correo -->
         <div class="content">
-            <p>Hola,</p>
-            <p>Se ha generado un evento en tu porduct_type: My proyecto:</p>
+            <p><strong>Hello, {{name}}</strong></p>
+            <p>An event has been generated in your producto {{product}}</p>
+            <div class="title">
+                <h2><span style="color: green;">{{action}}</span></h3>
+            </div>
             <div class="coupon">
-                <h2><span style="color: green;">Risk Acceptance: 12452cod</span></h2>
-                <p>Developer solicito la aceptacon de la vulnerabilidades "link a vultracker" el dias 12/12/2024: 12:03 pm </p>
+                <p><strong>{{title}}</strong></p>
+                <p>{{description}} {{link}} {{date}}</p>
             </div>
         </div>
 
-        <!-- Pie de página -->
         <div class="footer">
             <p>© 2024 Devsecops Engine.</p>
         </div>

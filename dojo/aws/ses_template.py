@@ -80,7 +80,7 @@ class SesTemplate:
                 "TemplateName": name,
                 "SubjectPart": subject,
                 "TextPart": text,
-                "HtmlPart": html,
+                "HtmlPart": html
             }
             self.ses_client.create_template(Template=template)
             logger.info("Created template %s.", name)
@@ -172,45 +172,35 @@ class SesTemplate:
             raise
 
 
-# snippet-end:[python.example_code.ses.UpdateTemplate]
+def usage_demo():
+    print("-" * 88)
+    print(
+        "Welcome to the Amazon Simple Email Service (Amazon SES) email template "
+        "demo!"
+    )
+    print("-" * 88)
 
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
-# snippet-start:[python.example_code.ses.Scenario_Templates]
-# def usage_demo():
-#     print("-" * 88)
-#     print(
-#         "Welcome to the Amazon Simple Email Service (Amazon SES) email template "
-#         "demo!"
-#     )
-#     print("-" * 88)
+    ses_template = SesTemplate(boto3.client("ses"))
+    template = {
+        "name": "doc-example-template",
+        "subject": "Example of an email template.",
+        "text": "This is what {{name}} will {{action}} if {{name}} can't display HTML.",
+        "html": "<p><i>This</i> is what {{name}} will {{action}} if {{name}} "
+        "<b>can</b> display HTML.</p>",
+    }
+    print("Creating an email template.")
+    ses_template.create_template(**template)
+    print("Getting the list of template metadata.")
+    template_metas = ses_template.list_templates()
+    for temp_meta in template_metas:
+        print(f"Got template {temp_meta['Name']}:")
+        temp_data = ses_template.get_template(temp_meta["Name"])
+        pprint(temp_data)
+    print(f"Deleting template {template['name']}.")
+    ses_template.delete_template()
 
-#     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+    print("Thanks for watching!")
+    print("-" * 88)
 
-#     ses_template = SesTemplate(boto3.client("ses"))
-#     template = {
-#         "name": "doc-example-template",
-#         "subject": "Example of an email template.",
-#         "text": "This is what {{name}} will {{action}} if {{name}} can't display HTML.",
-#         "html": "<p><i>This</i> is what {{name}} will {{action}} if {{name}} "
-#         "<b>can</b> display HTML.</p>",
-#     }
-#     print("Creating an email template.")
-#     ses_template.create_template(**template)
-#     print("Getting the list of template metadata.")
-#     template_metas = ses_template.list_templates()
-#     for temp_meta in template_metas:
-#         print(f"Got template {temp_meta['Name']}:")
-#         temp_data = ses_template.get_template(temp_meta["Name"])
-#         pprint(temp_data)
-#     print(f"Deleting template {template['name']}.")
-#     ses_template.delete_template()
-
-#     print("Thanks for watching!")
-#     print("-" * 88)
-
-
-# # snippet-end:[python.example_code.ses.Scenario_Templates]
-
-
-# if __name__ == "__main__":
-#     usage_demo()

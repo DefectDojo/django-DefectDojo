@@ -286,8 +286,13 @@ def send_mail_notification(event, user=None, *args, **kwargs):
     try:
         subject = f"{get_system_setting('team_name')} notification"
         if settings.AWS_SES_EMAIL:
-            template = ses_email.get_template(file_path="dojo/aws/template/notification_email.html", **kwargs)
-            ses_email.aws_ses(address, email_from_address, template)
+            ses_email.aws_ses(email=address,
+                              email_from_address=email_from_address,
+                              html_contect=create_notification_message(event, user, "mail", *args, **kwargs),
+                              template_name=event,
+                              subject=event,
+                              text=event
+                              )
         else:
             if 'title' in kwargs:
                 subject += f": {kwargs['title']}"
