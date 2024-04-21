@@ -239,7 +239,7 @@
                                 </td>
                                 {% endif %}
 
-                                <td class="text-center" data-order="{{ prod.findings_count }}">
+                                <td class="text-center">
                                     {% if prod.findings_count %}
                                         <a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>
                                         &nbsp;(<a href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}">{{ prod.findings_active_verified_count }}</a>)
@@ -247,8 +247,7 @@
                                         0
                                     {% endif %}
                                 </td>
-                                <td class="text-center" data-order="{{ prod.endpoint_count }}">
-                                  {% if prod.endpoint_count %}
+                                <td class="text-center">
                                     <a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><b>{{ prod.endpoint_host_count }}</b></a> /
                                     <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
                                 </td>
@@ -372,8 +371,8 @@
                             return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
                     {% endif %}
-                    null, //findings
-                    null, //endpoints
+                    { "data": "findings" },
+                    { "data": "endpoints" },
                     { "data": "contacts" },
                     { "data": "product_type" },
                 ],
