@@ -189,6 +189,7 @@ django:
   annotations: {}
   service:
     annotations: {}
+    type: ""
   affinity: {}
   ingress:
     enabled: true
