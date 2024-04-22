@@ -200,7 +200,7 @@ env = environ.FileAwareEnv(
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
     DD_SIMILAR_FINDINGS_MAX_RESULTS=(int, 25),
-    # maximum number of request response pairs from the API
+    # The maximum number of request/response pairs to return from the API. Values <0 return all pairs.
     DD_MAX_REQRESP_FROM_API=(int, -1),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
     DD_JIRA_SSL_VERIFY=(bool, True),
