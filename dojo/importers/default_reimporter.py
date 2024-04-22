@@ -235,6 +235,7 @@ class DefaultReImporter(BaseImporter):
                 # Process the rest of the items on the finding
                 finding = self.finding_post_processing(
                     finding,
+                    unsaved_finding,
                     test,
                     new_items,
                     reactivated_items,
@@ -303,6 +304,7 @@ class DefaultReImporter(BaseImporter):
                     finding_groups_enabled,
                     push_to_jira,
                 )
+                mitigated_findings.append(finding)
         # push finding groups to jira since we only only want to push whole groups
         if finding_groups_enabled and push_to_jira:
             for finding_group in set([finding.finding_group for finding in findings if finding.finding_group is not None]):
@@ -747,13 +749,13 @@ class DefaultReImporter(BaseImporter):
         unsaved_finding.last_reviewed = timezone.now()
         unsaved_finding.last_reviewed_by = user
         # indicates an override. Otherwise, do not change the value of unsaved_finding.active
-        if active := kwargs.get("active") is not None:
+        if (active := kwargs.get("active")) is not None:
             unsaved_finding.active = active
         # indicates an override. Otherwise, do not change the value of verified
-        if verified := kwargs.get("verified") is not None:
+        if (verified := kwargs.get("verified")) is not None:
             unsaved_finding.verified = verified
         # scan_date was provided, override value from parser
-        if scan_date := kwargs.get("scan_date"):
+        if (scan_date := kwargs.get("scan_date")) is not None:
             unsaved_finding.date = scan_date.date()
         # Save it. Don't dedupe before endpoints are added.
         unsaved_finding.save(dedupe_option=False)
@@ -764,20 +766,21 @@ class DefaultReImporter(BaseImporter):
             f"({finding.component_name} - {finding.component_version})"
         )
         # Manage the finding grouping selection
-        group_by = kwargs.get("group_by")
         self.process_finding_groups(
-            finding,
-            group_by,
+            unsaved_finding,
+            kwargs.get("group_by"),
             group_names_to_findings_dict,
         )
         # Add the new finding to the list
-        new_items.append(finding)
+        new_items.append(unsaved_finding)
         # Process any request/response pairs
-        self.process_request_response_pairs(finding)
+        self.process_request_response_pairs(unsaved_finding)
+        return unsaved_finding
 
     def finding_post_processing(
         self,
         finding: Finding,
+        finding_from_report: Finding,
         test: Test,
         new_items: List[Finding],
         reactivated_items: List[Finding],
@@ -788,13 +791,15 @@ class DefaultReImporter(BaseImporter):
         Save all associated objects to the finding after it has been saved
         for the purpose of foreign key restrictions
         """
-        self.chunk_endpoints_and_disperse(finding, test, finding.unsaved_endpoints)
+        self.chunk_endpoints_and_disperse(finding, test, finding_from_report.unsaved_endpoints)
         if endpoints_to_add := kwargs.get("endpoints_to_add"):
             self.chunk_endpoints_and_disperse(finding, test, endpoints_to_add)
         # Update finding tags
-        if finding.unsaved_tags:
-            finding.tags = finding.unsaved_tags
+        if finding_from_report.unsaved_tags:
+            finding.tags = finding_from_report.unsaved_tags
         # Process any files
+        if finding_from_report.unsaved_files:
+            finding.unsaved_files = finding_from_report.unsaved_files
         self.process_files(finding)
         # Process vulnerability IDs
         finding = self.process_vulnerability_ids(finding)
@@ -812,14 +817,11 @@ class DefaultReImporter(BaseImporter):
         Add findings to a group that may or may not exist, based upon the users
         selection at import time
         """
-        group_by = kwargs.get("group_by")
         push_to_jira = kwargs.get("push_to_jira", False)
         for (group_name, findings) in group_names_to_findings_dict.items():
             finding_helper.add_findings_to_auto_group(
                 group_name,
                 findings,
-                group_by,
-                kwargs.get("create_finding_groups_for_all_findings"),
                 **kwargs
             )
             if push_to_jira:

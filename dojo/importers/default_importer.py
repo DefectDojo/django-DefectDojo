@@ -6,6 +6,7 @@ from abc import ABC
 from django.utils import timezone
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.serializers import serialize, deserialize
+from django.db.models.query_utils import Q
 
 from dojo.importers.base_importer import BaseImporter, Parser
 import dojo.notifications.helper as notifications_helper
@@ -72,7 +73,7 @@ class DefaultImporter(BaseImporter):
         test_type = self.get_or_create_test_type(test_type_name)
         target_date = (kwargs.get("scan_date") or kwargs.get("now")) or timezone.now()
         # Create the test object
-        test = Test.objects.create(
+        return Test.objects.create(
             title=kwargs.get("test_title"),
             engagement=engagement,
             lead=lead,
@@ -89,10 +90,6 @@ class DefaultImporter(BaseImporter):
             api_scan_configuration=kwargs.get("api_scan_configuration"),
             tags=kwargs.get("tags"),
         )
-        print("\n\n")
-        print(f"\t Test created with ID {test.id}")
-        print("\n\n")
-        return test
 
     def process_scan(
         self,
@@ -199,17 +196,16 @@ class DefaultImporter(BaseImporter):
             unsaved_finding.last_reviewed = now
             logger.debug('process_parsed_findings: active from report: %s, verified from report: %s', unsaved_finding.active, unsaved_finding.verified)
             # indicates an override. Otherwise, do not change the value of unsaved_finding.active
-            if active := kwargs.get("active") is not None:
+            if (active := kwargs.get("active")) is not None:
                 unsaved_finding.active = active
             # indicates an override. Otherwise, do not change the value of verified
-            if verified := kwargs.get("verified") is not None:
+            if (verified := kwargs.get("verified")) is not None:
                 unsaved_finding.verified = verified
             # scan_date was provided, override value from parser
-            if scan_date := kwargs.get("scan_date"):
+            if (scan_date := kwargs.get("scan_date")) is not None:
                 unsaved_finding.date = scan_date.date()
-            if service := kwargs.get("service"):
+            if (service := kwargs.get("service")) is not None:
                 unsaved_finding.service = service
-
             unsaved_finding.save(dedupe_option=False)
             finding = unsaved_finding
             # Determine how the finding should be grouped
@@ -301,6 +297,11 @@ class DefaultImporter(BaseImporter):
             old_findings = old_findings.filter(test__engagement__product=test.engagement.product)
         else:
             old_findings = old_findings.filter(test__engagement=test.engagement)
+        # Use the service to differentiate further
+        if service := kwargs.get("service"):
+            old_findings = old_findings.filter(service=service)
+        else:
+            old_findings = old_findings.filter(Q(service__isnull=True) | Q(service__exact=''))
         # Determine if pushing to jira or if the finding groups are enabled
         push_to_jira = kwargs.get("push_to_jira", False)
         finding_groups_enabled = is_finding_groups_enabled()

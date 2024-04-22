@@ -387,7 +387,7 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         Creates a record of the import or reimport operation that has occurred.
         """
         # Quick fail check to determine if we even wanted this
-        if not settings.TRACK_IMPORT_HISTORY:
+        if settings.TRACK_IMPORT_HISTORY is False:
             return None
         # Log the current state of what has occurred in case there could be
         # deviation from what is displayed in the view
@@ -422,16 +422,32 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         test_import_finding_action_list = []
         for finding in closed_findings:
             logger.debug(f"preparing Test_Import_Finding_Action for closed finding: {finding.id}")
-            test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING))
+            test_import_finding_action_list.append(Test_Import_Finding_Action(
+                test_import=test_import,
+                finding=finding,
+                action=IMPORT_CLOSED_FINDING,
+            ))
         for finding in new_findings:
             logger.debug(f"preparing Test_Import_Finding_Action for created finding: {finding.id}")
-            test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CREATED_FINDING))
+            test_import_finding_action_list.append(Test_Import_Finding_Action(
+                test_import=test_import,
+                finding=finding,
+                action=IMPORT_CREATED_FINDING,
+            ))
         for finding in reactivated_findings:
             logger.debug(f"preparing Test_Import_Finding_Action for reactivated finding: {finding.id}")
-            test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_REACTIVATED_FINDING))
+            test_import_finding_action_list.append(Test_Import_Finding_Action(
+                test_import=test_import,
+                finding=finding,
+                action=IMPORT_REACTIVATED_FINDING,
+            ))
         for finding in untouched_findings:
             logger.debug(f"preparing Test_Import_Finding_Action for untouched finding: {finding.id}")
-            test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_UNTOUCHED_FINDING))
+            test_import_finding_action_list.append(Test_Import_Finding_Action(
+                test_import=test_import,
+                finding=finding,
+                action=IMPORT_UNTOUCHED_FINDING,
+            ))
         # Bulk create all the defined objects
         Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
         # Add any tags to the findings imported if necessary
@@ -872,7 +888,7 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         note_message: str,
         finding_groups_enabled: bool,
         push_to_jira: bool,
-    ) -> Finding:
+    ) -> None:
         """
         Mitigates a finding, all endpoint statuses, leaves a note on the finding
         with a record of what happened, and then saves the finding. Changes to
@@ -882,12 +898,13 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         finding.active = False
         finding.is_mitigated = True
         finding.mitigated = scan_date
+        finding.mitigated_by = user
         finding.notes.create(
             author=user,
             entry=note_message,
         )
         # Mitigate the endpoint statuses
-        self.mitigate_endpoint_status(finding.status_finding.all(), user)
+        self.mitigate_endpoint_status(finding.status_finding.all(), user, kwuser=user, sync=True)
         # to avoid pushing a finding group multiple times, we push those outside of the loop
         if finding_groups_enabled and finding.finding_group:
             # don't try to dedupe findings that we are closing

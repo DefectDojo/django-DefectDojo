@@ -31,7 +31,7 @@ class DefaultReImporterEndpointManager:
         now = timezone.now()
         for endpoint_status in endpoint_status_list:
             # Only mitigate endpoints that are actually active
-            if not endpoint_status.mitigated:
+            if endpoint_status.mitigated is False:
                 endpoint_status.mitigated_time = now
                 endpoint_status.last_modified = now
                 endpoint_status.mitigated_by = user
