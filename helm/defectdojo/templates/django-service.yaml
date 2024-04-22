@@ -35,8 +35,8 @@ spec:
     port: 9113
     targetPort: http-metrics
     {{- end }}
-{{- if .Values.django.serviceType }}
-  type: {{ .Values.django.serviceType }}
+{{- if .Values.django.service.type }}
+  type: {{ .Values.django.service.type }}
 {{- end }}
 {{- if .Values.gke.useGKEIngress }}
   type: NodePort
