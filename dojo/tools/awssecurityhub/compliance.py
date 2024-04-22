@@ -10,7 +10,7 @@ class Compliance:
         resource_arns = []
         for resource in finding.get("Resources", []):
             if arn := resource.get("Id"):
-               resource_arns.append(arn)
+                resource_arns.append(arn)
         mitigation = ""
         impact = []
         references = []
