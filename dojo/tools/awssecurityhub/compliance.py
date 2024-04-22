@@ -20,7 +20,7 @@ class Compliance:
         mitigation += "\n" + finding.get("Remediation", {}).get("Recommendation", {}).get("Url", "")
         description = "This is a Security Hub Finding \n" + finding.get("Description", "")
         description += f"\nAWS Finding ARN: {finding_id}\n"
-        description += f"\nResource IDs:\n{'\n'.join(resource_arns)}\n"
+        description += f"\nResource IDs:\n{join(resource_arns)}\n"
         description += f"AwsAccountId: {finding.get('AwsAccountId', '')}\n"
         description += f"Region: {finding.get('Region', '')}\n"
         description += f"Generator ID: {finding.get('GeneratorId', '')}\n"
