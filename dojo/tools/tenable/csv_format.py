@@ -104,12 +104,25 @@ class TenableCSVParser(object):
             mitigation = str(row.get("Solution", row.get("definition.solution", "N/A")))
             impact = row.get("Description", row.get("definition.description", "N/A"))
             references = row.get("See Also", row.get("definition.see_also", "N/A"))
+            # Endpoint related fields
+            host = row.get("Host", row.get("asset.host_name", ""))
+            if host == "":
+                host = row.get("DNS Name", "")
+            if host == "":
+                host = row.get("IP Address", "localhost")
+
+            protocol = row.get("Protocol", row.get("protocol", ""))
+            protocol = protocol.lower() if protocol != "" else None
+            port = str(row.get("Port", row.get("asset.port", "")))
+            if isinstance(port, str) and port in ["", "0"]:
+                port = None
+            
             # Determine if the current row has already been processed
             dupe_key = (
                 severity
                 + title
-                + row.get("Host", row.get("asset.host_name", "No host"))
-                + str(row.get("Port", row.get("asset.port", "No port")))
+                + host
+                + port
                 + row.get("Synopsis", row.get("definition.synopsis", "No synopsis"))
             )
             # Finding has not been detected in the current report. Proceed with
@@ -177,18 +190,7 @@ class TenableCSVParser(object):
                     find.unsaved_vulnerability_ids += detected_cve
                 else:
                     find.unsaved_vulnerability_ids.append(detected_cve)
-            # Endpoint related fields
-            host = row.get("Host", row.get("asset.host_name", ""))
-            if host == "":
-                host = row.get("DNS Name", "")
-            if host == "":
-                host = row.get("IP Address", "localhost")
 
-            protocol = row.get("Protocol", row.get("protocol", ""))
-            protocol = protocol.lower() if protocol != "" else None
-            port = str(row.get("Port", row.get("asset.port", "")))
-            if isinstance(port, str) and port in ["", "0"]:
-                port = None
             # Update the endpoints
             if "://" in host:
                 endpoint = Endpoint.from_uri(host)
