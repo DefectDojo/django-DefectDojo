@@ -284,16 +284,16 @@ def send_mail_notification(event, user=None, *args, **kwargs):
     logger.debug('notification email for user %s to %s', user, address)
 
     try:
-        subject = f"{get_system_setting('team_name')} notification"
         if settings.AWS_SES_EMAIL:
             ses_email.aws_ses(email=address,
-                              email_from_address=email_from_address,
+                              email_from_address=f"{get_system_setting('team_name')} <{email_from_address}>",
                               html_contect=create_notification_message(event, user, "mail", *args, **kwargs),
                               template_name=event,
-                              subject=event,
+                              subject=kwargs.get("subject", event),
                               text=event
                               )
         else:
+            subject = f"{get_system_setting('team_name')} notification"
             if 'title' in kwargs:
                 subject += f": {kwargs['title']}"
 

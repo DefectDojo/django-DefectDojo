@@ -4114,6 +4114,7 @@ class Notifications(models.Model):
                 result.sla_breach = {*result.sla_breach, *notifications.sla_breach}
                 result.sla_breach_combined = {*result.sla_breach_combined, *notifications.sla_breach_combined}
                 result.risk_acceptance_expiration = {*result.risk_acceptance_expiration, *notifications.risk_acceptance_expiration}
+                result.risk_acceptance_request = {*result.risk_acceptance_request, *notifications.risk_acceptance_request}
         return result
 
     def __str__(self):
