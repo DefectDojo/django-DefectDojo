@@ -1891,8 +1891,7 @@ class WeeklyMetricsForm(forms.Form):
 class SimpleMetricsForm(forms.Form):
     date = forms.DateField(
         label="",
-        widget=MonthYearWidget())
-
+        widget=MonthYearWidget())  
 
 class SimpleSearchForm(forms.Form):
     query = forms.CharField(required=False)

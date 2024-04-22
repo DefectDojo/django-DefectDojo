@@ -422,6 +422,13 @@
                                                         {% trans "Engineer Metrics" %}
                                                     </a>
                                                 </li> -->
+                                                {% if "Metrics_Panel"|has_global_permission %}
+                                                    <li>
+                                                        <a rel="noopener noreferrer" href="{% url 'metrics_panel' %}">
+                                                            {% trans "Metrics Panel" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>

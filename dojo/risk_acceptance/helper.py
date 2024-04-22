@@ -1,6 +1,6 @@
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
-from dojo.utils import get_system_setting, get_full_url
+from dojo.utils import get_system_setting, get_full_url, get_remote_json_config
 from dateutil.relativedelta import relativedelta
 import dojo.jira_link.helper as jira_helper
 from dojo.jira_link.helper import escape_for_jira
@@ -11,6 +11,9 @@ from dojo.models import System_Settings, Risk_Acceptance, Finding
 import logging
 import crum
 import requests
+from azure.devops.connection import Connection
+from msrest.authentication import BasicAuthentication
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -377,3 +380,8 @@ def risk_accept_provider(
 def get_matching_value(list_a, list_b):
     matches = [item for item in list_a if item in list_b]
     return matches[0] if matches else None
+
+def get_config_risk():
+    credentials = BasicAuthentication("", settings.AZURE_DEVOPS_TOKEN)
+    connection = Connection(base_url=settings.AZURE_DEVOPS_ORGANIZATION_URL, creds=credentials)
+    return get_remote_json_config(connection, settings.AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH.split(",")[1])

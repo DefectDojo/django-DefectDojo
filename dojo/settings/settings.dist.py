@@ -339,10 +339,14 @@ env = environ.FileAwareEnv(
     DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
     DD_CUSTOM_TAG_PARSER=(dict, {}),
     DD_INVALID_ESCAPE_STR=(dict, {}),
-
     # SES Email
     DD_AWS_SES_EMAIL=(bool, True),
-
+    # --------------- Grafana Metrics ---------------
+    DD_GRAFANA_URL=(str, ""),
+    DD_GRAFANA_PATH=(str, ""),
+    DD_GRAFANA_PARAMS=(str, ""),
+    DD_MICROSOFT_LOGIN_URL=(str, ""),
+    
     # ---------------RISK PENDING-------------------------
     # The variable that allows enabling pending risk acceptance.
     DD_RISK_PENDING=(bool, False),
@@ -357,10 +361,6 @@ env = environ.FileAwareEnv(
     DD_PROVIDER_TOKEN=(str, ""),
     # Role that allows risk acceptance bypassing restrictions.
     DD_ROLE_ALLOWED_TO_ACCEPT_RISKS=(list, ["Maintainer"]),
-    # Blacklist to define CVEs that will not be accepted for any reason.
-    DD_BLACK_LIST_FINDING=(list, [""]),
-    # Whitelist to define CVEs that can be accepted without any restrictions.
-    DD_WHITE_LIST_FINDING=(list, [""]),
     # Risk severity levels: Low, Medium, High, Critical
     # num_acceptors: number of acceptors required for risk acceptance
     # roles: roles with permission to accept the risk
@@ -2005,8 +2005,6 @@ AWS_SES_EMAIL = env('DD_AWS_SES_EMAIL')
 # Risk Pending
 RISK_PENDING = env("DD_RISK_PENDING")
 ROLE_ALLOWED_TO_ACCEPT_RISKS = env("DD_ROLE_ALLOWED_TO_ACCEPT_RISKS")
-BLACK_LIST_FINDING = env("DD_BLACK_LIST_FINDING")
-WHITE_LIST_FINDING = env("DD_WHITE_LIST_FINDING")
 RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = env("DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY")
 # Engine Backend
 PROVIDER1 = env("DD_PROVIDER1")
@@ -2042,6 +2040,20 @@ if os.getenv("DD_USE_CACHE_REDIS") == "true":
         }
     }
 
+# ------------------------------------------------------------------------------
+# Render Grafana Metricsin a <frame>, <iframe>, <embed> or <object>
+# ------------------------------------------------------------------------------
+
+GRAFANA_URL = env('DD_GRAFANA_URL')
+GRAFANA_PATH = env('DD_GRAFANA_PATH')
+GRAFANA_PARAMS = env('DD_GRAFANA_PARAMS')
+MICROSOFT_LOGIN_URL = env('DD_MICROSOFT_LOGIN_URL')
+
+CSP_FRAME_SRC = [
+    "'self'",
+    GRAFANA_URL,
+    MICROSOFT_LOGIN_URL
+]
 
 # ------------------------------------------------------------------------------
 # Ignored Warnings
@@ -2061,3 +2073,4 @@ warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager
 # - https://docs.djangoproject.com/en/4.1/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
 # - https://docs.djangoproject.com/en/5.0/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
 FORM_RENDERER = "django.forms.renderers.DjangoDivFormRenderer"
+
