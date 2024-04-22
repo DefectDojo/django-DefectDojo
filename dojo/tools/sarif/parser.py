@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 CWE_REGEX = r"cwe-\d+"
 
 
-class SarifParser(object):
+class SarifParser:
     """OASIS Static Analysis Results Interchange Format (SARIF) for version 2.1.0 only.
 
     https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif
@@ -267,9 +267,9 @@ def get_description(result, rule):
         message = get_message_from_multiformatMessageString(
             result["message"], rule
         )
-        description += "**Result message:** {}\n".format(message)
+        description += f"**Result message:** {message}\n"
     if get_snippet(result) is not None:
-        description += "**Snippet:**\n```{}```\n".format(get_snippet(result))
+        description += f"**Snippet:**\n```{get_snippet(result)}```\n"
     if rule is not None:
         if "name" in rule:
             description += f"**{_('Rule name')}:** {rule.get('name')}\n"

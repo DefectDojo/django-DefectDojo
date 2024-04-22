@@ -4,7 +4,7 @@ import json
 from dojo.models import Finding
 
 
-class TruffleHog3Parser(object):
+class TruffleHog3Parser:
     def get_scan_types(self):
         return ["Trufflehog3 Scan"]
 

@@ -4,7 +4,7 @@ import json
 from dojo.models import Finding
 
 
-class HuskyCIParser(object):
+class HuskyCIParser:
     """
     Read JSON data from huskyCI compatible format and import it to DefectDojo
     """

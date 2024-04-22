@@ -2,7 +2,7 @@ import json
 from dojo.models import Finding
 
 
-class Crunch42Parser(object):
+class Crunch42Parser:
 
     def get_scan_types(self):
         return ["Crunch42 Scan"]

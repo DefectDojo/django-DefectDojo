@@ -8,7 +8,7 @@ from dojo.models import Endpoint, Finding
 LOGGER = logging.getLogger(__name__)
 
 
-class IbmAppParser(object):
+class IbmAppParser:
     def get_scan_types(self):
         return ["IBM AppScan DAST"]
 
