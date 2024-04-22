@@ -142,7 +142,7 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
             endpoint.clean()
         except ValidationError as e:
             logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
-                            "{}".format(e))
+                            f"{e}")
         ep = None
         try:
             ep, _created = endpoint_get_or_create(

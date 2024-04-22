@@ -4,7 +4,7 @@ from datetime import datetime
 from dojo.models import Finding, Endpoint
 
 
-class GitlabDastParser(object):
+class GitlabDastParser:
     """
     Import GitLab DAST Report in JSON format
     """

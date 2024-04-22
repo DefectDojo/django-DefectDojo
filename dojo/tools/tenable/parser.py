@@ -2,7 +2,7 @@ from dojo.tools.tenable.csv_format import TenableCSVParser
 from dojo.tools.tenable.xml_format import TenableXMLParser
 
 
-class TenableParser(object):
+class TenableParser:
     def get_scan_types(self):
         return ["Tenable Scan"]
 

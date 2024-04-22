@@ -8,7 +8,7 @@ from django.conf import settings
 from dojo.models import Finding, Endpoint
 
 
-class NexposeParser(object):
+class NexposeParser:
     """
     The objective of this class is to parse Nexpose's XML 2.0 Report.
 
