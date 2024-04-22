@@ -87,3 +87,12 @@ class TestYarnAuditParser(DojoTestCase):
         self.assertEqual(findings[0].cwe, "1321")
         self.assertEqual(findings[1].unsaved_vulnerability_ids[0], "CVE-2022-25851")
         self.assertEqual(findings[1].cve, None)
+
+    def test_yarn_audit_parser_yarn2_audit_issue9911(self):
+        testfile = open("unittests/scans/yarn_audit/yarn2_audit_issue9911.json")
+        parser = YarnAuditParser()
+        findings = parser.get_findings(testfile, self.get_test())
+        testfile.close()
+        self.assertEqual(4, len(findings))
+        self.assertEqual(findings[0].title, "@babel/plugin-proposal-class-properties (deprecation)")
+        self.assertEqual(findings[1].severity, "Medium")
