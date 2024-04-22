@@ -351,9 +351,9 @@ env = environ.FileAwareEnv(
     # The variable that allows enabling pending risk acceptance.
     DD_RISK_PENDING=(bool, False),
     # These variables are the params of providers name
-     DD_PROVIDER1=(str, ""),
-     DD_PROVIDER2=(str, ""),
-     DD_PROVIDER3=(str, ""),
+    DD_PROVIDER1=(str, ""),
+    DD_PROVIDER2=(str, ""),
+    DD_PROVIDER3=(str, ""),
     # The variable that sets the provider risk accept api and credentials
     DD_PROVIDER_URL=(str, ""),
     DD_PROVIDER_HEADER=(str, ""),

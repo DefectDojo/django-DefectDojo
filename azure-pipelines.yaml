@@ -15,37 +15,37 @@ steps:
     inputs:
       hostedAgentService: $(hostedAgentService)
 
-  # - bash: |
-  #     echo "docker volume"
-  #     docker volume create defectdojo_data_unit_tests
+  - bash: |
+      echo "docker volume"
+      docker volume create defectdojo_data_unit_tests
 
-  #     echo "docker run"
-  #     docker run -d -p 3306:3306/tcp -e MYSQL_RANDOM_ROOT_PASSWORD=yes -e MYSQL_DATABASE=test_defectdojo -e MYSQL_USER=defectdojo -e MYSQL_PASSWORD=defectdojo -v defectdojo_data_unit_tests:/var/lib/mysql $(image)
-  #     docker ps
-  #   displayName: "Start MySQL"
+      echo "docker run"
+      docker run -d -p 3306:3306/tcp -e MYSQL_RANDOM_ROOT_PASSWORD=yes -e MYSQL_DATABASE=test_defectdojo -e MYSQL_USER=defectdojo -e MYSQL_PASSWORD=defectdojo -v defectdojo_data_unit_tests:/var/lib/mysql $(image)
+      docker ps
+    displayName: "Start MySQL"
 
-  # - bash: |
-  #     set -e
+  - bash: |
+      set -e
 
-  #     echo -e "\033[94m--------python virutalenv-----------\033[0m"
-  #     sudo apt-get update
-  #     sudo apt update
-  #     sudo apt install software-properties-common
-  #     sudo add-apt-repository ppa:deadsnakes/ppa
-  #     sudo apt update
-  #     sudo apt install python3.11 python3.11-venv
-  #     python3.11 -m venv dojodev
-  #     source dojodev/bin/activate
+      echo -e "\033[94m--------python virutalenv-----------\033[0m"
+      sudo apt-get update
+      sudo apt update
+      sudo apt install software-properties-common
+      sudo add-apt-repository ppa:deadsnakes/ppa
+      sudo apt update
+      sudo apt install python3.11 python3.11-venv
+      python3.11 -m venv dojodev
+      source dojodev/bin/activate
 
-  #     echo -e "\033[94m--------python install-----------\033[0m"
-  #     python -m pip install --upgrade pip
-  #     sudo apt-get install libmysqlclient-dev 
-  #     sudo apt-get install libmariadb-dev-compat 
-  #     sudo apt-get install libcurl4-gnutls-dev
-  #     sudo apt-get install python3.11-dev
-  #     sudo apt-get install libgnutls28-dev
-  #     sudo apt-get install libgnutls28-dev
-  #     pip install -r requirements.txt -i $(registry) --trusted-host $(trusted-host)
+      echo -e "\033[94m--------python install-----------\033[0m"
+      python -m pip install --upgrade pip
+      sudo apt-get install libmysqlclient-dev 
+      sudo apt-get install libmariadb-dev-compat 
+      sudo apt-get install libcurl4-gnutls-dev
+      sudo apt-get install python3.11-dev
+      sudo apt-get install libgnutls28-dev
+      sudo apt-get install libgnutls28-dev
+      pip install -r requirements.txt -i $(registry) --trusted-host $(trusted-host)
 
       echo -e "\033[94m--------defectdojo unit test--------\033[0m"
       unset DD_DATABASE_URL
@@ -57,13 +57,13 @@ steps:
       export DD_PROVIDER_TOKEN='.'
       export DD_CUSTOM_TAG_PARSER="asff_regex=."
 
-  #     python manage.py makemigrations dojo
-  #     python manage.py migrate
+      python manage.py makemigrations dojo
+      python manage.py migrate
 
-  #     python manage.py test unittests -v 3 --keepdb --no-input --tag broken && true
-  #     coverage run --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --exclude-tag broken
-  #     coverage xml
-  #   displayName: "Unit test"
+      python manage.py test unittests -v 3 --keepdb --no-input --tag broken && true
+      coverage run --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --exclude-tag broken
+      coverage xml
+    displayName: "Unit test"
 
   - task: SonarQubePrepare@5
     displayName: "Prepare analysis on SonarQube"
@@ -93,7 +93,7 @@ steps:
 
   - bash: "cp -r dojo/ requirements.txt docker/ wsgi.py manage.py tests/ unittests/ components/ wsgi_params nginx/ Dockerfile.django-debian Dockerfile.integration-tests-debian Dockerfile.nginx-debian $(Build.ArtifactStagingDirectory)"
     displayName: "Copy Files"
-    # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
 
   - task: ArchiveFiles@2
     displayName: "Archive Artifact"
@@ -101,14 +101,14 @@ steps:
       rootFolderOrFile: "$(Build.ArtifactStagingDirectory)"
       includeRootFolder: false
       archiveFile: "$(Build.ArtifactStagingDirectory)/$(DefinitionName).zip"
-    # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
 
   - task: PublishBuildArtifacts@1
     displayName: "Publish Artifact: $(DefinitionName)_artifact"
     inputs:
       PathtoPublish: "$(Build.ArtifactStagingDirectory)/$(DefinitionName).zip"
       ArtifactName: "$(DefinitionName)_artifact"
-    # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
 
   - task: ArtifactoryGenericUpload@2
     displayName: "Artifactory Generic Upload"
@@ -123,4 +123,4 @@ steps:
             }
           ]
         }
-    #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))

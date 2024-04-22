@@ -437,7 +437,7 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
                         reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
                         product=risk_pending.engagement.product,
                         recipients=eval(risk_pending.accepted_by),
-                        description="requested acceptance of risk",
+                        description=f"requested acceptance of risk for finding {finding.title} with id {finding.id}",
                         owner=risk_pending.owner,
                         icon="bell",
                         color_icon="#1B30DE",

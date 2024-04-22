@@ -131,10 +131,11 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
     title = f"{risk_pending.TREATMENT_TRANSLATIONS.get(risk_pending.recommendation)} is requested:  {str(risk_pending.engagement.name)}"
     create_notification(event='risk_acceptance_request',
                         title=title, risk_acceptance=risk_pending,
-                        accepted_findings=risk_pending.accepted_findings,
+                        subject=f"🙋‍♂️Request of aceptance of risk {risk_pending.id}🙏",
+                        accepted_findings=risk_pending.accepted_findings.all(),
                         reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
                         product=risk_pending.engagement.product,
-                        description="requested acceptance of the risks",
+                        description=f"requested acceptance of the risks <b>{risk_pending.name}</b> for the findings",
                         recipients=eval(risk_pending.accepted_by),
                         icon="bell",
                         owner=risk_pending.owner,
@@ -361,6 +362,7 @@ def update_endpoint_statuses(finding: Finding, accept_risk: bool) -> None:
         status.last_modified = timezone.now()
         status.save()
 
+
 def risk_accept_provider(
         finding_id: str,
         provider: str,
@@ -377,9 +379,11 @@ def risk_accept_provider(
         logger.info(f"Risk accept response from provider: {provider}, response: {response.text}")
     logger.error(f"Error for provider: {provider}, response: {response.text}")
 
+
 def get_matching_value(list_a, list_b):
     matches = [item for item in list_a if item in list_b]
     return matches[0] if matches else None
+
 
 def get_config_risk():
     credentials = BasicAuthentication("", settings.AZURE_DEVOPS_TOKEN)

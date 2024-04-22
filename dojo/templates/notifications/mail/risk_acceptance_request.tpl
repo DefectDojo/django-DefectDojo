@@ -211,6 +211,14 @@
 								<h2>{% trans "Hello, " %}{{user.first_name}}</h2>
 								<p>
 									<b>{{ owner }}</b> {{ description|safe }}
+									<br>
+                                    <br>
+									{% if accepted_findings %}
+										{% for finding in accepted_findings%}
+											<b>{{finding.id}}</b> - {{finding.title}}
+											<br>
+										{% endfor %}
+									{% endif%}
 								</p>
 								</p>
 								{% if url is not None %}
@@ -241,20 +249,6 @@
 							<center>
 								<span style="color: #00000"> © 2024 Devsecops Engine </span>
 							</center>
-							<div class="proton-flex">
-								<a href="#" class="proton-link">
-									<img src="https://img.icons8.com/?size=64&id=LPcVDft9Isqt&format=png" alt="Image" />
-								</a>
-								<a href="#" class="proton-link">
-									<img src="https://img.icons8.com/?size=64&id=LPcVDft9Isqt&format=png" alt="Image" />
-								</a>
-								<a href="#" class="proton-link">
-									<img src="https://img.icons8.com/?size=64&id=LPcVDft9Isqt&format=png" alt="Image" />
-								</a>
-								<a href="#" class="proton-link">
-									<img src="https://img.icons8.com/?size=64&id=LPcVDft9Isqt&format=png" alt="Image" />
-								</a>
-							</div>
 							<div class="proton-margin-bottom"></div>
 						</td>
 					</tr>

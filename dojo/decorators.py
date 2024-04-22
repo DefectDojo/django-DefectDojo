@@ -42,10 +42,10 @@ def dojo_async_task(func):
         user = get_current_user()
         kwargs['async_user'] = user
         countdown = kwargs.pop("countdown", 0)
-        # if we_want_async(*args, func=func, **kwargs):
-        #     return func.apply_async(args=args, kwargs=kwargs, countdown=countdown)
-        # else:
-        return func(*args, **kwargs)
+        if we_want_async(*args, func=func, **kwargs):
+            return func.apply_async(args=args, kwargs=kwargs, countdown=countdown)
+        else:
+            return func(*args, **kwargs)
 
     return __wrapper__
 
