@@ -41,7 +41,7 @@ python-dateutil==2.9.0.post0
 pytz==2024.1
 redis==5.0.3
 requests==2.31.0
-sqlalchemy==2.0.25  # Required by Celery broker transport
+sqlalchemy==2.0.29  # Required by Celery broker transport
 urllib3==1.26.18
 uWSGI==2.0.23
 vobject==0.9.7
@@ -51,10 +51,10 @@ social-auth-app-django==5.4.0
 social-auth-core==4.5.3
 Python-jose==3.3.0
 gitpython==3.1.41
-debugpy==1.8.0
+debugpy==1.8.1
 python-gitlab==4.4.0
 cpe==1.2.1
-packageurl-python==0.13.4
+packageurl-python==0.15.0
 django-crum==0.7.9
 JSON-log-formatter==1.0
 django-split-settings==1.2.0
@@ -75,7 +75,7 @@ django-ratelimit==4.1.0
 argon2-cffi==23.1.0
 blackduck==1.1.0
 pycurl==7.45.2  # Required for Celery Broker AWS (SQS) support
-boto3==1.34.35  # Required for Celery Broker AWS (SQS) support
-netaddr==0.10.1
+boto3==1.34.89  # Required for Celery Broker AWS (SQS) support
+netaddr==1.2.1
 vulners==2.1.5
 fontawesomefree==6.5.1
