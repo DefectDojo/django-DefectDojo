@@ -76,6 +76,6 @@ argon2-cffi==23.1.0
 blackduck==1.1.0
 pycurl==7.45.2  # Required for Celery Broker AWS (SQS) support
 boto3==1.34.89  # Required for Celery Broker AWS (SQS) support
-netaddr==0.10.1
+netaddr==1.2.1
 vulners==2.1.5
 fontawesomefree==6.5.1
