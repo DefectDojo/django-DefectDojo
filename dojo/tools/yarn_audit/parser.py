@@ -51,7 +51,7 @@ class YarnAuditParser:
     def get_items_yarn2(self, tree, test):
         items = []
         for element in tree:
-            value = "**value:** " + str(element.get("value"))
+            value = element.get("value", None)
             child = element.get("children")
             description = ""
             childid = child.get("ID")
@@ -68,7 +68,6 @@ class YarnAuditParser:
                 test=test,
                 severity=self.severitytranslator(severity=childseverity),
                 description=description,
-                component_name=value,
                 component_version=str(child_tree_versions),
                 false_p=False,
                 duplicate=False,
@@ -78,6 +77,8 @@ class YarnAuditParser:
                 dynamic_finding=False,
             )
             items.append(dojo_finding)
+            if value is not None:
+                dojo_finding.component_name = value
         return items
 
     def get_items_auditci(self, tree, test):  # https://github.com/DefectDojo/django-DefectDojo/issues/6495
