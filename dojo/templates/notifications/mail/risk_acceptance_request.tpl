@@ -203,9 +203,6 @@
 						<td class="proton-td" colspan="10" style="">
 							<div class="proton-margin-header">
                                 <h1>{{ system_settings.team_name }}</h1>
-							<div class="proton-line" style="red">
-								rene
-							</div>
                             </div>
 							<div class="body-margin">
 								<h2>{% trans "Hello, " %}{{user.first_name}}</h2>
