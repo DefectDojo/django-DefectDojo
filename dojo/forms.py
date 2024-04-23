@@ -13,7 +13,6 @@ from django import forms
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import Permission
 from django.core import validators
-from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from django.forms.widgets import Widget, Select
@@ -502,7 +501,7 @@ class ImportScanForm(forms.Form):
         environment = kwargs.pop("environment", None)
         endpoints = kwargs.pop("endpoints", None)
         api_scan_configuration = kwargs.pop("api_scan_configuration", None)
-        super(ImportScanForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['active'].initial = self.active_verified_choices[0]
         self.fields['verified'].initial = self.active_verified_choices[0]
         if environment:
@@ -610,7 +609,7 @@ class ReImportScanForm(forms.Form):
         endpoints = kwargs.pop("endpoints", None)
         api_scan_configuration = kwargs.pop("api_scan_configuration", None)
         api_scan_configuration_queryset = kwargs.pop("api_scan_configuration_queryset", None)
-        super(ReImportScanForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['active'].initial = self.active_verified_choices[0]
         self.fields['verified'].initial = self.active_verified_choices[0]
         self.scan_type = None
@@ -2617,7 +2616,7 @@ class CredMappingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         cred_user_queryset = kwargs.pop("cred_user_queryset", None)
-        super(CredMappingForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if cred_user_queryset is not None:
             self.fields["cred_user"].queryset = cred_user_queryset
 

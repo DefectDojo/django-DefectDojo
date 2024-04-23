@@ -6,7 +6,6 @@ from typing import Tuple
 from functools import reduce
 
 from django.db.models.query import Prefetch
-from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.urls import reverse, Resolver404
@@ -31,7 +30,7 @@ from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Test, 
     Finding_Template, Cred_Mapping, Test_Import, Product_API_Scan_Configuration, Test_Import_Finding_Action
 from dojo.tools.factory import get_choices_sorted, get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
-    Product_Tab, is_scan_file_too_large, get_words_for_field, get_setting, async_delete, redirect_to_return_url_or_else, calculate_grade
+    Product_Tab, get_words_for_field, get_setting, async_delete, redirect_to_return_url_or_else, calculate_grade
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 import dojo.jira_link.helper as jira_helper

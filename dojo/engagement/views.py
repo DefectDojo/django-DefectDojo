@@ -13,7 +13,6 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError, PermissionDenied
-from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.urls import reverse, Resolver404
 from django.db.models import Q, Count
 from django.http import HttpRequest, HttpResponseRedirect, StreamingHttpResponse, HttpResponse, FileResponse, QueryDict
@@ -38,7 +37,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
     Cred_Mapping, System_Settings, Note_Type, Product_API_Scan_Configuration
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, async_delete, \
+    FileIterWrapper, get_cal_event, Product_Tab, async_delete, \
     get_system_setting, get_setting, redirect_to_return_url_or_else, get_return_url, calculate_grade
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
