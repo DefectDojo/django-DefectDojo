@@ -2993,11 +2993,12 @@ class Finding(models.Model):
         if not user:
             from dojo.utils import get_current_user
             user = get_current_user()
-
         # Title Casing
         from titlecase import titlecase
         self.title = titlecase(self.title[:511])
-
+        # Set the date of the finding if nothing is supplied
+        if self.date is None:
+            self.date = timezone.now()
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
 
