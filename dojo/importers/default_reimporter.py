@@ -462,8 +462,8 @@ class DefaultReImporter(BaseImporter):
         elif deduplication_algorithm == 'unique_id_from_tool_or_hash_code':
             query = Finding.objects.filter(
                 Q(test=test),
-                (Q(hash_code__isnull=False) & Q(hash_code=unsaved_finding.hash_code)) |
-                (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=unsaved_finding.unique_id_from_tool))
+                (Q(hash_code__isnull=False) & Q(hash_code=unsaved_finding.hash_code))
+                | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=unsaved_finding.unique_id_from_tool))
             ).order_by('id')
             deduplicationLogger.debug(query.query)
             return query
