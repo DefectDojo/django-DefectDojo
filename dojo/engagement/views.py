@@ -689,12 +689,15 @@ class ImportScanResultsView(View):
     def get_form(
         self,
         request: HttpRequest,
-        initial_data: dict,
+        **kwargs: dict,
     ) -> ImportScanForm:
+        """
+        Returns the default import form for importing findings
+        """
         if request.method == "POST":
-            return ImportScanForm(request.POST, request.FILES, **initial_data)
+            return ImportScanForm(request.POST, request.FILES, **kwargs)
         else:
-            return ImportScanForm(**initial_data)
+            return ImportScanForm(**kwargs)
 
     def get_credential_form(
         self,
@@ -788,11 +791,12 @@ class ImportScanResultsView(View):
         # Get the product tab and any additional custom breadcrumbs
         product_tab, custom_breadcrumb = self.get_product_tab(product, engagement)
         # Get the import form with some initial data in place
-        form = self.get_form(request, {
-            "environment": environment,
-            "endpoints": Endpoint.objects.filter(product__id=product_tab.product.id),
-            "api_scan_configuration": Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id),
-        })
+        form = self.get_form(
+            request,
+            environment=environment,
+            endpoints=Endpoint.objects.filter(product__id=product_tab.product.id),
+            api_scan_configuration=Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id),
+        )
         # Get the credential mapping form
         cred_form = self.get_credential_form(request, engagement)
         # Get the jira form
@@ -876,12 +880,14 @@ class ImportScanResultsView(View):
             context["test"], _, finding_count, closed_finding_count, _, _, _ = importer_client.process_scan(
                 **context,
             )
-
-            message = f'{context.get("scan_type")} processed a total of {finding_count} findings'
-            if context.get("close_old_findings"):
-                message = message + ' and closed %d findings' % (closed_finding_count)
-            message = message + "."
-            add_success_message_to_response(message)
+            # Add a message to the view for the user to see the results
+            add_success_message_to_response(importer_client.construct_imported_message(
+                context.get("scan_type"),
+                Test_Import.IMPORT_TYPE,
+                finding_count=finding_count,
+                closed_finding_count=closed_finding_count,
+                close_old_findings=context.get("close_old_findings"),
+            ))
         except Exception as e:
             logger.exception(e)
             return f"An exception error occurred during the report import: {e}"
@@ -912,6 +918,7 @@ class ImportScanResultsView(View):
             "service": form.cleaned_data.get("service", None),
             "close_old_findings": form.cleaned_data.get("close_old_findings", None),
             "apply_tags_to_findings": form.cleaned_data.get("apply_tags_to_findings", False),
+            "apply_tags_to_endpoints": form.cleaned_data.get("apply_tags_to_endpoints", False),
             "close_old_findings_product_scope": form.cleaned_data.get("close_old_findings_product_scope", None),
             "group_by": form.cleaned_data.get("group_by", None),
             "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings"),
@@ -999,22 +1006,38 @@ class ImportScanResultsView(View):
             args=(context.get("engagement", context.get("product")).id, ),
         ))
 
-    def get(self, request, eid=None, pid=None):
+    def get(
+        self,
+        request: HttpRequest,
+        engagement_id: int = None,
+        product_id: int = None,
+    ) -> HttpResponse:
+        """
+        Process GET requests for the Import View
+        """
         # process the request and path parameters
         request, context = self.handle_request(
             request,
-            engagement_id=eid,
-            product_id=pid,
+            engagement_id=engagement_id,
+            product_id=product_id,
         )
         # Render the form
         return render(request, self.get_template(), context)
 
-    def post(self, request, eid=None, pid=None):
+    def post(
+        self,
+        request: HttpRequest,
+        engagement_id: int = None,
+        product_id: int = None,
+    ) -> HttpResponse:
+        """
+        Process POST requests for the Import View
+        """
         # process the request and path parameters
         request, context = self.handle_request(
             request,
-            engagement_id=eid,
-            product_id=pid,
+            engagement_id=engagement_id,
+            product_id=product_id,
         )
         # ensure all three forms are valid first before moving forward
         if not self.validate_forms(context):

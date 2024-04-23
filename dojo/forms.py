@@ -44,7 +44,7 @@ from tagulous.forms import TagField
 import logging
 from crum import get_current_user
 from dojo.utils import get_system_setting, get_product, is_finding_groups_enabled, \
-    get_password_requirements_string
+    get_password_requirements_string, is_scan_file_too_large
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions
 from dojo.product_type.queries import get_authorized_product_types
@@ -525,6 +525,8 @@ class ImportScanForm(forms.Form):
         file = cleaned_data.get("file")
         if requires_file(scan_type) and not file:
             raise forms.ValidationError(f'Uploading a Report File is required for {scan_type}')
+        if file and is_scan_file_too_large(file):
+            raise forms.ValidationError(_(f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB"))
         tool_type = requires_tool_type(scan_type)
         if tool_type:
             api_scan_configuration = cleaned_data.get('api_scan_configuration')
@@ -605,14 +607,22 @@ class ReImportScanForm(forms.Form):
         create_finding_groups_for_all_findings = forms.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, initial=True)
 
     def __init__(self, *args, test=None, **kwargs):
-        super().__init__(*args, **kwargs)
+        endpoints = kwargs.pop("endpoints", None)
+        api_scan_configuration = kwargs.pop("api_scan_configuration", None)
+        api_scan_configuration_queryset = kwargs.pop("api_scan_configuration_queryset", None)
+        super(ReImportScanForm, self).__init__(*args, **kwargs)
         self.fields['active'].initial = self.active_verified_choices[0]
         self.fields['verified'].initial = self.active_verified_choices[0]
         self.scan_type = None
         if test:
             self.scan_type = test.test_type.name
             self.fields['tags'].initial = test.tags.all()
-
+        if endpoints:
+            self.fields["endpoints"].queryset = endpoints
+        if api_scan_configuration:
+            self.initial["api_scan_configuration"] = api_scan_configuration
+        if api_scan_configuration_queryset:
+            self.fields["api_scan_configuration"].queryset = api_scan_configuration_queryset
         # couldn't find a cleaner way to add empty default
         if 'group_by' in self.fields:
             choices = self.fields['group_by'].choices
@@ -624,6 +634,8 @@ class ReImportScanForm(forms.Form):
         file = cleaned_data.get("file")
         if requires_file(self.scan_type) and not file:
             raise forms.ValidationError("Uploading a report file is required for re-uploading findings.")
+        if file and is_scan_file_too_large(file):
+            raise forms.ValidationError(_(f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB"))
         tool_type = requires_tool_type(self.scan_type)
         if tool_type:
             api_scan_configuration = cleaned_data.get('api_scan_configuration')

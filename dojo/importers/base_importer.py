@@ -467,11 +467,13 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
     def construct_imported_message(
         self,
         scan_type: str,
+        import_type: str,
         finding_count: int = 0,
         new_finding_count: int = 0,
         closed_finding_count: int = 0,
         reactivated_finding_count: int = 0,
         untouched_finding_count: int = 0,
+        **kwargs: dict,
     ) -> str:
         """
         Constructs a success message to be displayed on screen in the UI as a digest for the user.
@@ -485,16 +487,21 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         if finding_count > 0:
             # Set the base message to indicate how many findings were parsed from the report
             message = f"{scan_type} processed a total of {finding_count} findings"
-            # Add more details for any status changes recorded
-            if new_finding_count:
-                message += f" created {new_finding_count} findings"
-            if closed_finding_count:
-                message += f" closed {closed_finding_count} findings"
-            if reactivated_finding_count:
-                message += f" reactivated {reactivated_finding_count} findings"
-            if untouched_finding_count:
-                message += f" did not touch {untouched_finding_count} findings"
-
+            if import_type == Test_Import.IMPORT_TYPE:
+                # Check for close old findings context to determine if more detail should be added
+                if kwargs.get("close_old_findings", False):
+                    message += f" and closed {closed_finding_count} findings"
+            if import_type == Test_Import.REIMPORT_TYPE:
+                # Add more details for any status changes recorded
+                if new_finding_count:
+                    message += f" created {new_finding_count} findings"
+                if closed_finding_count:
+                    message += f" closed {closed_finding_count} findings"
+                if reactivated_finding_count:
+                    message += f" reactivated {reactivated_finding_count} findings"
+                if untouched_finding_count:
+                    message += f" did not touch {untouched_finding_count} findings"
+            # Drop a period at the end
             message += "."
         else:
             # Set the message to convey that all findings processed are identical to the last time an import/reimport occurred
