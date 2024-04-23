@@ -224,7 +224,7 @@ class TenableXMLParser(object):
 
                     # Determine the current entry has already been parsed in
                     # this report
-                    dupe_key = severity + title + ip + port
+                    dupe_key = severity + title + ip + str(port)
                     if dupe_key not in dupes:
                         find = Finding(
                             title=title,
