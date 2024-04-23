@@ -123,4 +123,4 @@ steps:
             }
           ]
         }
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
+    # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))

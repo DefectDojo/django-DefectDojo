@@ -104,14 +104,13 @@ def risk_accepted_succesfully(
         title = f"Request is accepted:  {str(risk_acceptance.engagement.product)} : {str(risk_acceptance.engagement.name)}"
         create_notification(
             event="risk_acceptance_request",
-            subject=f"✅Acceptance request accepted in Risk_Accepted: {risk_acceptance.id}👌",
+            subject=f"✅Acceptance request confirmed in Risk_Accepted: {risk_acceptance.id}👌",
             title=title,
             risk_acceptance=risk_acceptance,
-            accepted_findings=risk_acceptance.accepted_findings,
             reactivated_findings=risk_acceptance.accepted_findings,
             engagement=risk_acceptance.engagement,
             product=risk_acceptance.engagement.product,
-            description=f"accepted the request for acceptance of finding {finding.title} with id {finding.id}",
+            description=f"accepted the request of finding <b>{finding.title}</b> with id <b>{finding.id}</b>",
             owner=risk_acceptance.accepted_by.replace("[", "").replace("]", "").replace("'", "").replace(",", " and"),
             icon="check-circle",
             color_icon="#096C11",
