@@ -39,7 +39,7 @@ psycopg2-binary==2.9.9
 cryptography==42.0.5
 python-dateutil==2.9.0.post0
 pytz==2024.1
-redis==5.0.3
+redis==5.0.4
 requests==2.31.0
 sqlalchemy==2.0.29  # Required by Celery broker transport
 urllib3==1.26.18
