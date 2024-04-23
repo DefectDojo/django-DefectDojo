@@ -116,7 +116,7 @@ class TenableCSVParser(object):
             port = str(row.get("Port", row.get("asset.port", "")))
             if isinstance(port, str) and port in ["", "0"]:
                 port = None
-            
+
             # Determine if the current row has already been processed
             dupe_key = (
                 severity
