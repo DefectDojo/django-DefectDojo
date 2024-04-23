@@ -266,7 +266,7 @@ Follow along below.
 5. Restart DefectDojo, and you should now see a **Login with Gitlab**
     button on the login page.
 
-## Keycloak
+## Keycloak !!Needs to be updated!!
 There is also an option to use Keycloak as OAuth2 provider in order to authenticate users to Defect Dojo, also by using
 the social-auth plugin.
 
