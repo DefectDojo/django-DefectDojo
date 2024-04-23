@@ -6,7 +6,7 @@ from dojo.tools.parser_test import ParserTest
 
 
 class AwsSecurityHubParser:
-    ID = "AWS SecurityHub"
+    ID = "AWS Security Hub"
 
     def get_scan_types(self):
         return ["AWS Security Hub Scan"]
