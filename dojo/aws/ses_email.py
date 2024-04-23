@@ -1,6 +1,7 @@
 import logging
 import boto3
 from botocore.exceptions import ClientError
+from dojo.decorators import dojo_async_task, we_want_async
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +91,6 @@ def get_template(html_content, *args, **kwargs):
         "text": kwargs.get("text"),
         "html": html_content}
     return template
-
 
 def aws_ses(email, email_from_address, html_contect, template_name, subject, text):
     template = get_template(html_contect, name=template_name, subject=subject, text=text)
