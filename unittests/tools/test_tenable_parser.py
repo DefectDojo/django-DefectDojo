@@ -296,5 +296,5 @@ class TestTenableParser(DojoTestCase):
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        self.assertEqual(2, len(findings))
+        self.assertEqual(3, len(findings))
         self.assertEqual("Critical", findings[0].severity)
