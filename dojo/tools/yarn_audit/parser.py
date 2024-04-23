@@ -68,7 +68,7 @@ class YarnAuditParser:
                 test=test,
                 severity=self.severitytranslator(severity=childseverity),
                 description=description,
-                component_name=str(value),
+                component_name=value,
                 component_version=str(child_tree_versions),
                 false_p=False,
                 duplicate=False,
