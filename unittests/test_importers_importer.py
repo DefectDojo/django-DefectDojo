@@ -12,7 +12,6 @@ from dojo.tools.gitlab_sast.parser import GitlabSastParser
 from .dojo_test_case import DojoAPITestCase
 from .test_utils import assertImportModelsCreated
 import logging
-from dojo.importers.utils import handle_vulnerability_ids
 
 from dojo.utils import get_object_or_none
 
@@ -539,7 +538,6 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
 
 class TestImporterUtils(DojoAPITestCase):
     @patch('dojo.importers.base_importer.Vulnerability_Id', autospec=True)
-    def test_handle_vulnerability_ids_references_and_cve(self, mock):
         finding = Finding()
         finding.cve = 'CVE'
         finding.unsaved_vulnerability_ids = ['REF-1', 'REF-2']
@@ -574,7 +572,6 @@ class TestImporterUtils(DojoAPITestCase):
         self.assertEqual(vulnerability_ids, mock.mock_calls[0].kwargs['finding'].unsaved_vulnerability_ids)
 
     @patch('dojo.importers.base_importer.Vulnerability_Id', autospec=True)
-    def test_handle_vulnerability_ids_references_and_no_cve(self, mock):
         finding = Finding()
         finding.unsaved_vulnerability_ids = ['REF-1', 'REF-2']
 
@@ -591,7 +588,6 @@ class TestImporterUtils(DojoAPITestCase):
         self.assertEqual(vulnerability_ids, mock.mock_calls[2].kwargs['finding'].unsaved_vulnerability_ids)
 
     @patch('dojo.importers.base_importer.Vulnerability_Id', autospec=True)
-    def test_no_handle_vulnerability_ids_references_and_no_cve(self, mock):
         finding = Finding()
 
         DefaultImporter().process_vulnerability_ids(finding)
