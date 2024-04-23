@@ -5,7 +5,7 @@ width: 70% !important;
 }
 {% endblock %}
 {% block content %}
-<h3> Add Some Group Members </h3>
+<h3> Add Group Members </h3>
 <form class="form-horizontal" action="{%  url 'add_group_member' group.id %}" method="post">{% csrf_token %}
   {% include "dojo/form_fields.html" with form=form %}
   <div class="form-group">
