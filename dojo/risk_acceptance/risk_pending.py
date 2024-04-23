@@ -40,7 +40,6 @@ def risk_acceptance_decline(
             subject=f"❌Acceptance request rejected in Risk_accepted: {risk_acceptance.id}🔥",
             title=title,
             risk_acceptance=risk_acceptance,
-            accepted_findings=risk_acceptance.accepted_findings,
             reactivated_findings=risk_acceptance.accepted_findings,
             engagement=risk_acceptance.engagement,
             product=risk_acceptance.engagement.product,
