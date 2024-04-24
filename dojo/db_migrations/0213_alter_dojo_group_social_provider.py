@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0209_alter_finding_severity'),
+        ('dojo', '0212_sla_configuration_enforce_critical_and_more'),
     ]
 
     operations = [

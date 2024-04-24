@@ -6,8 +6,8 @@ import requests
 import social_core.pipeline.user
 from django.conf import settings
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
-from social_core.backends.open_id_connect import OpenIdConnectAuth
 from social_core.backends.google import GoogleOAuth2
+from social_core.backends.open_id_connect import OpenIdConnectAuth
 
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.models import Dojo_Group, Dojo_Group_Member, Product, Product_Member, Product_Type, Role

@@ -266,8 +266,8 @@ Follow along below.
 5. Restart DefectDojo, and you should now see a **Login with Gitlab**
     button on the login page.
 
-## Keycloak !!Needs to be updated!!
-There is also an option to use Keycloak as OAuth2 provider in order to authenticate users to Defect Dojo, also by using
+## Keycloak
+There is also an option to use Keycloak as OAuth2/OIDC provider in order to authenticate users to Defect Dojo, also by using
 the social-auth plugin.
 
 Here are suggestion on how to configure Keycloak and DefectDojo: 
@@ -279,52 +279,43 @@ Here are suggestion on how to configure Keycloak and DefectDojo:
    * Set `access type` to `confidential`
    * Under `valid Redirect URIs`, add the URI to your defect dojo installation, e.g. 'https://<YOUR_DD_HOST>/*'
    * Under `web origins`, add the same (or '+')
-   * Under `Fine grained openID connect configuration` -> `user info signed response algorithm`: set to `RS256`
-   * Under `Fine grained openID connect configuration` -> `request object signature algorithm`: set to `RS256`
    * -> save these settings in keycloak (hit save button)
-3. Under `Scope` -> `Full Scope Allowed` set to `off`
-4. Under `mappers` -> add a custom mapper here: 
-   * Name: `aud`
-   * Mapper type: `audience`
-   * Included audience: select your client/client-id here
-   * Add ID to token: `off`
-   * Add access to token: `on`
-5. Under `credentials`: copy the secret (and use as DD_SOCIAL_AUTH_KEYCLOAK_SECRET below)
-6. In your realm settings -> keys: copy the "Public key" (signing key) (use for DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY below)
-7. In your realm settings -> general -> endpoints: look into openId endpoint configuration
-   and look up your authorization and token endpoint (use them below)
+3. In your realm settings -> general -> endpoints: look into openId endpoint configuration
+   and use the url below for the `DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT` property (you can remove the `/.well-known/openid-configuration` part as its standard and the python library adds it) 
 
 ### Configure Defect Dojo
 Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
    information:
 
    {{< highlight python >}}
-   DD_SESSION_COOKIE_SECURE=True,
-   DD_CSRF_COOKIE_SECURE=True,
-   DD_SECURE_SSL_REDIRECT=True,
    DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED=True,
-   DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY=(str, '<your realm public key>'),
+   DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT="<https://yourkeycloakinstance.com/realms/your-realm>"
    DD_SOCIAL_AUTH_KEYCLOAK_KEY=(str, '<your client id>'), 
-   DD_SOCIAL_AUTH_KEYCLOAK_SECRET=(str, '<your keycloak client credentials secret>'), 
-   DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL=(str, '<your authorization endpoint>'),
-   DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL=(str, '<your token endpoint>')         
+   DD_SOCIAL_AUTH_KEYCLOAK_SECRET=(str, '<your keycloak client credentials secret>'),  
    {{< /highlight >}}
  
 or, alternatively, for helm configuration, add this to the `extraConfig` section: 
 
 ```
-DD_SESSION_COOKIE_SECURE: 'True'
-DD_CSRF_COOKIE_SECURE: 'True'
-DD_SECURE_SSL_REDIRECT: 'True'
 DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED: 'True'
-DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY: '<your realm public key>'
+DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT="<https://yourkeycloakinstance.com/realms/your-realm>"
 DD_SOCIAL_AUTH_KEYCLOAK_KEY: '<your client id>'
 DD_SOCIAL_AUTH_KEYCLOAK_SECRET: '<your keycloak client credentials secret>'
-DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL: '<your authorization endpoint>'
-DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL: '<your token endpoint>'
 ```
 
 Optionally, you *can* set `DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT` in order to customize the login button's text caption. 
+
+### Syncing groups from Keycloak to Defectdojo
+It is also possible to sync groups from Keycloak into Defectdojo, for this you will first need to configure a `client scope` which enables the groups of your users to be included
+into the authentication tokens of your users. Keycloak provides a `Groups` mapper specifically for this purpose.
+
+After enabling the `Groups` mapper you can configure Defectdojo to sync these groups with the following properties:
+ 
+```
+DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_GET_GROUPS: "True"
+DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_CLEANUP_GROUPS: "True"
+DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_GROUPS_FILTER: "<your regex here>"
+```
 
 ## GitHub Enterprise
 1.  Navigate to your GitHub Enterprise Server and follow instructions to create a new OAuth App [https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app](https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app)
@@ -448,6 +439,7 @@ Some Identity Providers are able to send list of groups to which should user bel
 
 - [Azure](#automatic-import-of-user-groups): Check `DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS` and `DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS`
 - [RemoteUser](#remoteuser): Check `DD_AUTH_REMOTEUSER_GROUPS_HEADER` and `DD_AUTH_REMOTEUSER_GROUPS_CLEANUP`
+- [Keycloak](#Syncing-groups-from-Keycloak-to-Defectdojo) Check `DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_GET_GROUPS` and `DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_CLEANUP_GROUPS`
 
 ## Login speed-up
 
