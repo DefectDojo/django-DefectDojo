@@ -52,7 +52,7 @@ DefectDojo Inc. hosts a commercial edition of this software, which includes:
 
 For more information, please visit [defectdojo.com](https://www.defectdojo.com/).
 
-DefectDojo Inc. also maintains an updated Knowledge Base at [https://support.defectdojo.com](https://support.defectdojo.com/en/). The Knowledge Base is written to support DefectDojo's Pro and Enterprise releases, but the tutorials and guides can also be applied to the open-source edition.
+DefectDojo Inc. also maintains an updated Knowledge Base at [https://support.defectdojo.com](https://support.defectdojo.com/en/). The Knowledge Base is written to support DefectDojo's Pro and Enterprise releases, but the tutorials and guides may also be applied to the open-source edition.
 
 Follow DefectDojo Inc. on [LinkedIn](https://www.linkedin.com/company/33245534) for updates.
 To get in touch with us, please reach out to info@defectdojo.com
