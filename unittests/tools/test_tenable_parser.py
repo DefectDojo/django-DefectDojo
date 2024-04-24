@@ -18,7 +18,7 @@ class TestTenableParser(DojoTestCase):
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        self.assertEqual(6, len(findings))
+        self.assertEqual(7, len(findings))
         finding = findings[5]
         self.assertEqual("Info", finding.severity)
         self.assertIsNone(finding.cwe)
@@ -130,7 +130,7 @@ class TestTenableParser(DojoTestCase):
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        self.assertEqual(32, len(findings))
+        self.assertEqual(296, len(findings))
 
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
