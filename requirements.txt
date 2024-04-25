@@ -48,7 +48,7 @@ vobject==0.9.7
 whitenoise==5.2.0
 titlecase==2.4.1
 social-auth-app-django==5.4.1
-social-auth-core==4.5.3
+social-auth-core==4.5.4
 Python-jose==3.3.0
 gitpython==3.1.43
 debugpy==1.8.1
