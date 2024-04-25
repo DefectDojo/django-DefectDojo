@@ -31,11 +31,11 @@ class TestKiuwanSCAParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         print(findings)
         finding1 = findings[0]
-        self.assertEqual(finding1.title, "Kiuwan Insights finding: CVE-2021-30468")
+        self.assertEqual(finding1.title, "CVE-2021-30468")
+        self.assertEqual(finding1.cve, "CVE-2021-30468")
         self.assertEqual(finding1.severity, "High")
         self.assertEqual(finding1.component_name, "org.apache.cxf:cxf-rt-ws-policy")
         self.assertEqual(finding1.component_version, "3.3.5")
-        self.assertEqual(finding1.cve, "CVE-2021-30468")
         self.assertEqual(finding1.cwe, 835)
         self.assertEqual(finding1.unique_id_from_tool, 158713)
         self.assertEqual(finding1.cvssv3_score, 7.5)
