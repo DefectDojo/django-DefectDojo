@@ -43,7 +43,7 @@ def risk_acceptance_decline(
             reactivated_findings=risk_acceptance.accepted_findings,
             engagement=risk_acceptance.engagement,
             product=risk_acceptance.engagement.product,
-            description=f"rejected the request for acceptance of finding {finding.title} with id {finding.id}",
+            description=f"rejected the request for acceptance of finding <b>{finding.title}</b> with id <b>{finding.id}</b>",
             owner=crum.get_current_user(),
             icon="times-circle",
             color_icon="#B90C0C",
