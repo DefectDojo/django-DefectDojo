@@ -14,10 +14,10 @@ appName = "Test"
 analysisCode = "A-111-1111111111"
 
 URL = "https://api.kiuwan.com/insights/analysis/security?analysisCode=" + analysisCode + "&application=" + appName
-r = requests.get(url = URL, headers = headers)
-res = r.json()
-data = res["data"] # save this data to a json file and upload to defect dojo
-print(json.dumps(data, indent=2))
+response = requests.get(url = URL, headers = headers)
+jsonResponse = r.json()
+data = jsonResponse["data"]
+saveFile("result.json", json.dumps(data, indent=2))
 ```
 
 ### Sample Scan Data
