@@ -200,26 +200,6 @@
 				max-width: 15%;
 				width: 40px;
 			}
-			.cls-img img {
-				position: absolute;
-				bottom: 10px;
-				left: 10px;
-			}
-			
-			.cls-img {
-				position: relative;
-				display: inline-block; /* Para que el div tenga solo el ancho necesario */
-			}
-			.cls-img span {
-				position: absolute;
-				bottom: 10px;
-				left: 40px;
-				margin-left: 10px;
-				color: #d4e8e9;
-				font-size: x-large;
-				font-style: inherit;
-				font-weight: bold;
-			  }
         {% endblock styles_email %}
 		</style>
 	</head>
@@ -231,11 +211,10 @@
 						<td class="proton-td" colspan="10" style="">
 							<div class="proton-margin-header">
 								<div class="cls-img">
-									<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAeCAMAAAB61OwbAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAH5QTFRFDU12DU12DU12AAAADU12DU12DU12DU12DU12DU12DU12DU12DU12DU12DU12DU12DU12HqjZHqjZHqjZHqjZHqjZHqjZHqjZHqjZHqjZHqjZHqjZDU12DU12DU12DU12DU12DU12HqjZHqjZHqjZDU12DU12DU12DU12DU120UyVOAAAACp0Uk5TZY1fALj/rZrW1+4HCg6YBJQABAET7eQ5FP/1PRsmGq/ypS4sC9yTldKSCBqz4AAAAHlJREFUeJxjZGBkwA0YGRkYWfAq+EsXBezYFTAy/oYq4Mal4DtUATN2w3kYv9JAAR/MNYwfsCsQZIS57w12BaJwBS+QFciAhBmf4lYgD1bwCLcCcFADGYNDAb8ATMF97ApwBDW9FChgJCtGxrvICnCBgc0XEKB4iwEAa/5GeTVeWKUAAAAASUVORK5CYII=" atl="logo">
 									{% if system_settings.team_name %}
-										<span>{{ system_settings.team_name }}</span>
+									<h1>{{ system_settings.team_name }}</h1>
 									{% else %}
-										<span>Defect Dojo</span>
+										<h1>Defect Dojo</h1>
 									{% endif %}
 								</div>
 							</div>
