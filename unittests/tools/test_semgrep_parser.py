@@ -2,6 +2,7 @@ from ..dojo_test_case import DojoTestCase
 from dojo.tools.semgrep.parser import SemgrepParser
 from dojo.models import Test
 
+
 # Test of semgrep parser
 class TestSemgrepParser(DojoTestCase):
 

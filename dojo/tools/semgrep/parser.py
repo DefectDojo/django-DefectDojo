@@ -2,6 +2,7 @@ import json
 
 from dojo.models import Finding
 
+
 # Parser for semgrep
 class SemgrepParser(object):
     def get_scan_types(self):
