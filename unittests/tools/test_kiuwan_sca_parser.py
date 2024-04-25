@@ -15,6 +15,7 @@ class TestKiuwanSCAParser(DojoTestCase):
         testfile = open("unittests/scans/kiuwan-sca/kiuwan_sca_two_vuln.json")
         parser = KiuwanSCAParser()
         findings = parser.get_findings(testfile, Test())
+        # file contains 3, but we only get 2 as "muted" ones are ignored:
         self.assertEqual(2, len(findings))
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
