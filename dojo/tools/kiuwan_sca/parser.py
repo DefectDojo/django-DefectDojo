@@ -38,6 +38,7 @@ class KiuwanSCAParser(object):
                 continue
 
             finding = Finding(test=test)
+            finding.unique_id_from_tool = row["id"]
             finding.title = "Kiuwan Insights finding: " + row["cve"]
             finding.description = row["description"]
             finding.severity = self.SEVERITY[row["securityRisk"]]
@@ -54,6 +55,9 @@ class KiuwanSCAParser(object):
                     finding.cwe = int(row["cwe"].replace("CWE-", ""))
                 except Exception:
                     pass
+
+            if "cVSSv3BaseScore" in row:
+                finding.cvssv3_score = float(row["cVSSv3BaseScore"])
 
             finding.references = "See Kiuwan Web UI"
             finding.mitigation = "See Kiuwan Web UI"
