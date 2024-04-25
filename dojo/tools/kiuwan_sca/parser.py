@@ -5,7 +5,6 @@ import io
 from dojo.models import Finding
 
 __author__ = "mwager"
-
 class KiuwanSCAParser(object):
     SEVERITY = {
         "-" : "Low",
@@ -30,8 +29,8 @@ class KiuwanSCAParser(object):
 
     def get_findings(self, filename, test):
         data = json.load(filename)
-
         dupes = dict()
+
         for row in data:
             # if a finding was "muted" in the Kiuwan UI, we ignore it (e.g. marked as false positive)
             if row["muted"] == True:

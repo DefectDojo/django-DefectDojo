@@ -29,7 +29,7 @@ class TestKiuwanSCAParser(DojoTestCase):
         testfile = open("unittests/scans/kiuwan-sca/kiuwan_sca_two_vuln.json")
         parser = KiuwanSCAParser()
         findings = parser.get_findings(testfile, Test())
-        print(findings)
+
         finding1 = findings[0]
         self.assertEqual(finding1.title, "CVE-2021-30468")
         self.assertEqual(finding1.cve, "CVE-2021-30468")
