@@ -9,14 +9,14 @@ __author__ = "mwager"
 class KiuwanSCAParser(object):
     SEVERITY = {
         "-" : "Low",
-				"LOW" : "Low",
-				"MEDIUM" : "Medium",
-				"HIGH" : "High",
-				"CRITICAL" : "Critical",
-				"Low" : "Low",
-				"Medium" : "Medium",
-				"High" : "High",
-				"Critical" : "Critical"
+        "LOW" : "Low",
+        "MEDIUM" : "Medium",
+        "HIGH" : "High",
+        "CRITICAL" : "Critical",
+        "Low" : "Low",
+        "Medium" : "Medium",
+        "High" : "High",
+        "Critical" : "Critical"
     }
 
     def get_scan_types(self):

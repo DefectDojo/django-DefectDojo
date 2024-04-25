@@ -2,9 +2,11 @@
 title: "Kiuwan Scanner (SCA i.e. \"Insights\")"
 toc_hide: true
 ---
-Import Kiuwan Insights Scan in JSON format. Export via API endpoint as json and create a file for importing to DefectDojo.
+Import Kiuwan Insights Scan in JSON format. Export via API endpoint `insights/analysis/security` as json and create a file for importing to DefectDojo.
 
-Data will be feched from the [Kiuwan REST API](https://static.kiuwan.com/rest-api/kiuwan-rest-api.html) like this:
+### Example Code
+
+Data can be fetched from the [Kiuwan REST API](https://static.kiuwan.com/rest-api/kiuwan-rest-api.html) like this:
 
 ```
 import requests, json
