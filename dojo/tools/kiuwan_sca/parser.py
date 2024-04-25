@@ -67,6 +67,10 @@ class KiuwanSCAParser(object):
                     + "|"
                     + finding.severity
                     + "|"
+                    + finding.component_name
+                    + "|"
+                    + finding.component_version
+                    + "|"
                     + str(finding.cwe)
                 ).encode("utf-8")
             ).hexdigest()
