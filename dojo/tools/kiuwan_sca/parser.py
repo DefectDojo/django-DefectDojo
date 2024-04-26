@@ -67,7 +67,7 @@ class KiuwanSCAParser(object):
 
             key = hashlib.sha256(
                 (
-                    finding.cve
+                    finding.description
                     + "|"
                     + finding.severity
                     + "|"

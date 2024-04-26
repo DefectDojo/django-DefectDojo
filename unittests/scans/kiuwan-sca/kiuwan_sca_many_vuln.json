@@ -707,7 +707,7 @@
     "impactSubscore": "1.4",
     "cVSSv3BaseScore": "4.3",
     "securityRisk": "MEDIUM",
-    "description": "Jetty is a Java based web server and ...",
+    "description": "Same",
     "privateVulnerability": false,
     "components": [
       {
@@ -729,7 +729,7 @@
     "impactSubscore": "1.4",
     "cVSSv3BaseScore": "4.3",
     "securityRisk": "MEDIUM",
-    "description": "Duplicate of the finding before",
+    "description": "Same",
     "privateVulnerability": false,
     "components": [
       {
