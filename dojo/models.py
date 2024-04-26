@@ -468,7 +468,6 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("Enable an exponential backoff strategy for SLA breach notifications."),
         help_text=_("Enable an exponential backoff strategy for SLA breach notifications, e.g. 1, 2, 4, 8, etc. Otherwise it alerts every day"))
-    
 
     allow_anonymous_survey_repsonse = models.BooleanField(
         default=False,
