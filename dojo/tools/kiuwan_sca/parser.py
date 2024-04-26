@@ -53,6 +53,11 @@ class KiuwanSCAParser(object):
                 except Exception:
                     pass
 
+            if "epss_score" in row:
+                    finding.epss_score = row["epss_score"]
+            if "epss_percentile" in row:
+                    finding.epss_percentile = row["epss_percentile"]
+
             if "cVSSv3BaseScore" in row:
                 finding.cvssv3_score = float(row["cVSSv3BaseScore"])
 
