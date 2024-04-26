@@ -47,15 +47,16 @@ class TestDojoCloseOld(DojoTestCase):
         self.assertEqual(4, len_new_findings)
         self.assertEqual(0, len_closed_findings)
         # Import test with only one finding. Remaining findings should close
-        scan = open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml")
-        _test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
-                    active=True, verified=False, tags=None, minimum_severity=None,
-                    user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, api_scan_configuration=None)
-        self.assertEqual(1, len_new_findings)
-        # Dedupe is off and close old findings does not close old findings if they are the same finding.
-        # If this behaviour changes, or dedupe is on, the number of closed findings will be 4
-        self.assertEqual(8, len_closed_findings)
+        with open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml") as scan:
+            _test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
+                        active=True, verified=False, tags=None, minimum_severity=None,
+                        user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
+                        commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, api_scan_configuration=None)
+            self.assertEqual(1, len_new_findings)
+            # Dedupe is off and close old findings does not close old findings if they are the same finding.
+            # If this behaviour changes, or dedupe is on, the number of closed findings will be 4
+            self.assertEqual(8, len_closed_findings)
+        
 
     def test_close_old_same_product_scan(self):
         scan = get_unit_tests_path() + "/scans/acunetix/many_findings.xml"
@@ -107,12 +108,12 @@ class TestDojoCloseOld(DojoTestCase):
         self.assertEqual(4, len_new_findings)
         self.assertEqual(0, len_closed_findings)
         # Import test with only one finding. Remaining findings should close
-        scan = open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml")
-        _test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement3, lead=None, environment=environment,
-                    active=True, verified=False, tags=None, minimum_severity=None,
-                    user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=True, close_old_findings_product_scope=True, group_by=None, api_scan_configuration=None)
-        self.assertEqual(1, len_new_findings)
-        # Dedupe is off, and close old findings does not close old findings if they are the same finding.
-        # If this behaviour changes, or dedupe is on, the number of closed findings will be 4
-        self.assertEqual(8, len_closed_findings)
+        with open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml") as scan:
+            _test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement3, lead=None, environment=environment,
+                        active=True, verified=False, tags=None, minimum_severity=None,
+                        user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
+                        commit_hash=None, push_to_jira=None, close_old_findings=True, close_old_findings_product_scope=True, group_by=None, api_scan_configuration=None)
+            self.assertEqual(1, len_new_findings)
+            # Dedupe is off, and close old findings does not close old findings if they are the same finding.
+            # If this behaviour changes, or dedupe is on, the number of closed findings will be 4
+            self.assertEqual(8, len_closed_findings)

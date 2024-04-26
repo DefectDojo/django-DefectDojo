@@ -204,11 +204,12 @@ class EndpointMetaImportTestUI(DojoAPITestCase, EndpointMetaImportMixin):
 
     def endpoint_meta_import_scan_with_params_ui(self, filename, product=1, create_endpoints=True,
                                                  create_tags=True, create_dojo_meta=True, expected_http_status_code=201):
-        payload = {
-            "create_endpoints": create_endpoints,
-            "create_tags": create_tags,
-            "create_dojo_meta": create_dojo_meta,
-            "file": open(get_unit_tests_path() + '/' + filename),
-        }
+        with open(get_unit_tests_path() + '/' + filename) as testfile:
+            payload = {
+                "create_endpoints": create_endpoints,
+                "create_tags": create_tags,
+                "create_dojo_meta": create_dojo_meta,
+                "file": testfile,
+            }
 
-        return self.endpoint_meta_import_ui(product, payload)
+            return self.endpoint_meta_import_ui(product, payload)
