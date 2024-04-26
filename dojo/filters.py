@@ -1789,7 +1789,10 @@ class AcceptedFindingFilterWithoutObjectLookups(FindingFilterWithoutObjectLookup
         help_text="Search for Risk Acceptance name contain a given pattern")
 
 
-class SimilarFindingHelper:
+class SimilarFindingHelper(FilterSet):
+    hash_code = MultipleChoiceFilter()
+    vulnerability_ids = CharFilter(method=custom_vulnerability_id_filter, label='Vulnerability Ids')
+
     def update_data(self, data: dict, *args: list, **kwargs: dict):
         # if filterset is bound, use initial values as defaults
         # because of this, we can't rely on the self.form.has_changed
@@ -1821,9 +1824,6 @@ class SimilarFindingHelper:
 
 
 class SimilarFindingFilter(FindingFilter, SimilarFindingHelper):
-    hash_code = MultipleChoiceFilter()
-    vulnerability_ids = CharFilter(method=custom_vulnerability_id_filter, label='Vulnerability Ids')
-
     class Meta(FindingFilter.Meta):
         model = Finding
         # slightly different fields from FindingFilter, but keep the same ordering for UI consistency
@@ -1840,21 +1840,12 @@ class SimilarFindingFilter(FindingFilter, SimilarFindingHelper):
         super().__init__(data, *args, **kwargs)
         self.set_hash_codes(*args, **kwargs)
 
-    def filter_queryset(self, *args, **kwargs):
-        queryset = super().filter_queryset(*args, **kwargs)
-        queryset = get_authorized_findings(Permissions.Finding_View, queryset, self.user)
-        queryset = queryset.exclude(pk=self.finding.pk)
-        return queryset
-
 
 class SimilarFindingFilterWithoutObjectLookups(FindingFilterWithoutObjectLookups, SimilarFindingHelper):
-    hash_code = MultipleChoiceFilter()
-    vulnerability_ids = CharFilter(method=custom_vulnerability_id_filter, label='Vulnerability Ids')
-
     class Meta(FindingFilterWithoutObjectLookups.Meta):
         model = Finding
         # slightly different fields from FindingFilter, but keep the same ordering for UI consistency
-        fields = get_finding_filterset_fields(similar=True)
+        fields = get_finding_filterset_fields(similar=True, filter_string_matching=True)
 
     def __init__(self, data=None, *args, **kwargs):
         self.user = None
@@ -1866,12 +1857,6 @@ class SimilarFindingFilterWithoutObjectLookups(FindingFilterWithoutObjectLookups
         self.update_data(data, *args, **kwargs)
         super().__init__(data, *args, **kwargs)
         self.set_hash_codes(*args, **kwargs)
-
-    def filter_queryset(self, *args, **kwargs):
-        queryset = super().filter_queryset(*args, **kwargs)
-        queryset = get_authorized_findings(Permissions.Finding_View, queryset, self.user)
-        queryset = queryset.exclude(pk=self.finding.pk)
-        return queryset
 
 
 class TemplateFindingFilter(DojoFilter):
