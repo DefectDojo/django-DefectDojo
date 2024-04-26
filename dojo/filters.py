@@ -1182,6 +1182,7 @@ class ProductFilter(DojoFilter):
             ('origin', 'origin'),
             ('external_audience', 'external_audience'),
             ('internet_accessible', 'internet_accessible'),
+            ('findings_count', 'findings_count')
         ),
         field_labels={
             'name': 'Product Name',
@@ -1193,6 +1194,7 @@ class ProductFilter(DojoFilter):
             'origin': 'Origin ',
             'external_audience': 'External Audience ',
             'internet_accessible': 'Internet Accessible ',
+            'findings_count': 'Findings Count ',
         }
 
     )
