@@ -339,7 +339,8 @@ env = environ.FileAwareEnv(
     DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
     DD_CUSTOM_TAG_PARSER=(dict, {}),
     DD_INVALID_ESCAPE_STR=(dict, {}),
-
+    # SES Email
+    DD_AWS_SES_EMAIL=(bool, True),
     # --------------- Grafana Metrics ---------------
     DD_GRAFANA_URL=(str, ""),
     DD_GRAFANA_PATH=(str, ""),
@@ -350,9 +351,9 @@ env = environ.FileAwareEnv(
     # The variable that allows enabling pending risk acceptance.
     DD_RISK_PENDING=(bool, False),
     # These variables are the params of providers name
-     DD_PROVIDER1=(str, ""),
-     DD_PROVIDER2=(str, ""),
-     DD_PROVIDER3=(str, ""),
+    DD_PROVIDER1=(str, ""),
+    DD_PROVIDER2=(str, ""),
+    DD_PROVIDER3=(str, ""),
     # The variable that sets the provider risk accept api and credentials
     DD_PROVIDER_URL=(str, ""),
     DD_PROVIDER_HEADER=(str, ""),
@@ -1139,7 +1140,8 @@ if env("DD_WHITENOISE"):
     ]
     MIDDLEWARE = MIDDLEWARE + WHITE_NOISE
 
-EMAIL_CONFIG = env.email_url("DD_EMAIL_URL", default="smtp://user@:password@localhost:25")
+EMAIL_CONFIG = env.email_url(
+    'DD_EMAIL_URL', default='smtp://user@:password@localhost:25')
 
 vars().update(EMAIL_CONFIG)
 
@@ -1995,6 +1997,10 @@ USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
 USE_QUALYS_LEGACY_SEVERITY_PARSING = env('DD_QUALYS_LEGACY_SEVERITY_PARSING')
 DD_CUSTOM_TAG_PARSER = env('DD_CUSTOM_TAG_PARSER')
 DD_INVALID_ESCAPE_STR = env('DD_INVALID_ESCAPE_STR')
+# SES Email
+AWS_SES_EMAIL = env('DD_AWS_SES_EMAIL')
+
+
 
 # Risk Pending
 RISK_PENDING = env("DD_RISK_PENDING")

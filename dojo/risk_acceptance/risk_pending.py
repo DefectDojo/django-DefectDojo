@@ -37,12 +37,14 @@ def risk_acceptance_decline(
         title = f"Rejected request:  {str(risk_acceptance.engagement.product)} : {str(risk_acceptance.engagement.name)}"
         create_notification(
             event="risk_acceptance_request",
+            subject=f"❌Acceptance request rejected in Risk_accepted: {risk_acceptance.id}🔥",
             title=title,
             risk_acceptance=risk_acceptance,
-            accepted_findings=risk_acceptance.accepted_findings,
             reactivated_findings=risk_acceptance.accepted_findings,
             engagement=risk_acceptance.engagement,
             product=risk_acceptance.engagement.product,
+            description=f"rejected the request for acceptance of finding <b>{finding.title}</b> with id <b>{finding.id}</b>",
+            owner=crum.get_current_user(),
             icon="times-circle",
             color_icon="#B90C0C",
             recipients=[risk_acceptance.owner.get_username()],
@@ -101,12 +103,14 @@ def risk_accepted_succesfully(
         title = f"Request is accepted:  {str(risk_acceptance.engagement.product)} : {str(risk_acceptance.engagement.name)}"
         create_notification(
             event="risk_acceptance_request",
+            subject=f"✅Acceptance request confirmed in Risk_Accepted: {risk_acceptance.id}👌",
             title=title,
             risk_acceptance=risk_acceptance,
-            accepted_findings=risk_acceptance.accepted_findings,
             reactivated_findings=risk_acceptance.accepted_findings,
             engagement=risk_acceptance.engagement,
             product=risk_acceptance.engagement.product,
+            description=f"accepted the request of finding <b>{finding.title}</b> with id <b>{finding.id}</b>",
+            owner=risk_acceptance.accepted_by.replace("[", "").replace("]", "").replace("'", "").replace(",", " and"),
             icon="check-circle",
             color_icon="#096C11",
             recipients=[risk_acceptance.owner.get_username()],
@@ -424,13 +428,18 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
             risk_pending.accepted_findings.add(finding)
     risk_pending.save()
     title = f"{risk_pending.TREATMENT_TRANSLATIONS.get(risk_pending.recommendation)} is requested:  {str(risk_pending.engagement.name)}"
-    create_notification(event='risk_acceptance_request', title=title, risk_acceptance=risk_pending, accepted_findings=risk_pending.accepted_findings,
-    reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
-    product=risk_pending.engagement.product,
-    recipients=eval(risk_pending.accepted_by),
-    icon="bell",
-    color_icon="#1B30DE",
-    url=reverse('view_risk_acceptance', args=(risk_pending.engagement.id, risk_pending.id, )))
+    create_notification(event='risk_acceptance_request',
+                        subject=f"🙋‍♂️Request of aceptance of risk {risk_pending.id}🙏",
+                        title=title, risk_acceptance=risk_pending,
+                        accepted_findings=risk_pending.accepted_findings,
+                        reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
+                        product=risk_pending.engagement.product,
+                        recipients=eval(risk_pending.accepted_by),
+                        description=f"requested acceptance of risk for finding {finding.title} with id {finding.id}",
+                        owner=risk_pending.owner,
+                        icon="bell",
+                        color_icon="#1B30DE",
+                        url=reverse('view_risk_acceptance', args=(risk_pending.engagement.id, risk_pending.id, )))
     post_jira_comments(risk_pending, findings, ra_helper.accepted_message_creator)
 
 
