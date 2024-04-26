@@ -26,7 +26,7 @@ from django.views import View
 
 from dojo.templatetags.display_tags import asvs_calc_level
 from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, MetricsEndpointFilter, \
-    MetricsFindingFilter, ProductComponentFilter
+    MetricsFindingFilter, MetricsFindingFilterWithoutObjectLookups, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, \
     AdHocFindingForm, \
     EngagementPresetsForm, DeleteEngagementPresetsForm, ProductNotificationsForm, \
@@ -304,7 +304,9 @@ def finding_querys(request, prod):
         # 'test__test_type',
         # 'risk_acceptance_set',
         'reporter')
-    findings = MetricsFindingFilter(request.GET, queryset=findings_query, pid=prod)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    finding_filter_class = MetricsFindingFilterWithoutObjectLookups if filter_string_matching else MetricsFindingFilter
+    findings = finding_filter_class(request.GET, queryset=findings_query, pid=prod)
     findings_qs = queryset_check(findings)
     filters['form'] = findings.form
 

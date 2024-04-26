@@ -20,7 +20,7 @@ from django.utils.html import escape
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
 
-from dojo.filters import MetricsFindingFilter, UserFilter, MetricsEndpointFilter
+from dojo.filters import MetricsFindingFilter, UserFilter, MetricsEndpointFilter, MetricsFindingFilterWithoutObjectLookups
 from dojo.forms import SimpleMetricsForm, ProductTypeCountsForm, ProductTagCountsForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Risk_Acceptance, Dojo_User, Endpoint_Status
@@ -141,7 +141,9 @@ def finding_querys(prod_type, request):
         'test__engagement__risk_acceptance',
         'test__test_type',
     )
-    findings = MetricsFindingFilter(request.GET, queryset=findings_query)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    finding_filter_class = MetricsFindingFilterWithoutObjectLookups if filter_string_matching else MetricsFindingFilter
+    findings = finding_filter_class(request.GET, queryset=findings_query)
     findings_qs = queryset_check(findings)
     # Quick check to determine if the filters were too tight and filtered everything away
     if not findings_qs and not findings_query:

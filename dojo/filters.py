@@ -289,7 +289,7 @@ def get_tags_label_from_model(model):
         return 'Tags (Unknown)'
 
 
-def get_finding_filterset_fields(metrics=False, similar=False):
+def get_finding_filterset_fields(metrics=False, similar=False, filter_string_matching=False):
     fields = []
 
     if similar:
@@ -315,10 +315,28 @@ def get_finding_filterset_fields(metrics=False, similar=False):
         'mitigated',
         'reporter',
         'reviewers',
-        'test__engagement__product__prod_type',
-        'test__engagement__product',
-        'test__engagement',
-        'test',
+    ])
+
+    if filter_string_matching:
+        fields.extend([
+            'reporter',
+            'reviewers',
+            'test__engagement__product__prod_type__name',
+            'test__engagement__product__name',
+            'test__engagement__name',
+            'test__title',
+        ])
+    else:
+        fields.extend([
+            'reporter',
+            'reviewers',
+            'test__engagement__product__prod_type',
+            'test__engagement__product',
+            'test__engagement',
+            'test',
+        ])
+
+    fields.extend([
         'test__test_type',
         'test__engagement__version',
         'test__version',
@@ -348,9 +366,9 @@ def get_finding_filterset_fields(metrics=False, similar=False):
         ])
 
     fields.extend([
-                'param',
-                'payload',
-                'risk_acceptance',
+        'param',
+        'payload',
+        'risk_acceptance',
     ])
 
     if get_system_setting('enable_jira'):
@@ -362,10 +380,16 @@ def get_finding_filterset_fields(metrics=False, similar=False):
         ])
 
     if is_finding_groups_enabled():
-        fields.extend([
-            'has_finding_group',
-            'finding_group',
-        ])
+        if filter_string_matching:
+            fields.extend([
+                'has_finding_group',
+                'finding_group__name',
+            ])
+        else:
+            fields.extend([
+                'has_finding_group',
+                'finding_group',
+            ])
 
         if get_system_setting('enable_jira'):
             fields.extend([
@@ -375,73 +399,155 @@ def get_finding_filterset_fields(metrics=False, similar=False):
     return fields
 
 
-class FindingFilterWithTags(DojoFilter):
+class FindingTagFilter(DojoFilter):
+    tag = CharFilter(
+        field_name="tags__name",
+        lookup_expr="icontains",
+        label="Tag name contains",
+        help_text="Search for tags on a Finding that contain a given pattern")
     tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
+        field_name="tags__name",
+        to_field_name="name",
+        queryset=Finding.tags.tag_model.objects.all().order_by("name"),
+        help_text="Filter Findings by the selected tags")
     test__tags = ModelMultipleChoiceFilter(
-        field_name='test__tags__name',
-        to_field_name='name',
-        queryset=Test.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
+        field_name="test__tags__name",
+        to_field_name="name",
+        queryset=Test.tags.tag_model.objects.all().order_by("name"),
+        help_text="Filter Tests by the selected tags")
     test__engagement__tags = ModelMultipleChoiceFilter(
-        field_name='test__engagement__tags__name',
-        to_field_name='name',
-        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
+        field_name="test__engagement__tags__name",
+        to_field_name="name",
+        queryset=Engagement.tags.tag_model.objects.all().order_by("name"),
+        help_text="Filter Engagements by the selected tags")
     test__engagement__product__tags = ModelMultipleChoiceFilter(
-        field_name='test__engagement__product__tags__name',
-        to_field_name='name',
-        queryset=Product.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+        field_name="test__engagement__product__tags__name",
+        to_field_name="name",
+        queryset=Product.tags.tag_model.objects.all().order_by("name"),
+        help_text="Filter Products by the selected tags")
 
     not_tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        exclude=True,
-        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
+        field_name="tags__name",
+        to_field_name="name",
+        queryset=Finding.tags.tag_model.objects.all().order_by("name"),
+        help_text="Search for tags on a Finding that contain a given pattern, and exclude them",
+        exclude=True)
     not_test__tags = ModelMultipleChoiceFilter(
-        field_name='test__tags__name',
-        to_field_name='name',
-        exclude=True,
-        label='Test without tags',
-        queryset=Test.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
+        field_name="test__tags__name",
+        to_field_name="name",
+        label="Test without tags",
+        queryset=Test.tags.tag_model.objects.all().order_by("name"),
+        help_text="Search for tags on a Test that contain a given pattern, and exclude them",
+        exclude=True)
     not_test__engagement__tags = ModelMultipleChoiceFilter(
-        field_name='test__engagement__tags__name',
-        to_field_name='name',
-        exclude=True,
-        label='Engagement without tags',
-        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
+        field_name="test__engagement__tags__name",
+        to_field_name="name",
+        label="Engagement without tags",
+        queryset=Engagement.tags.tag_model.objects.all().order_by("name"),
+        help_text="Search for tags on a Engagement that contain a given pattern, and exclude them",
+        exclude=True)
     not_test__engagement__product__tags = ModelMultipleChoiceFilter(
-        field_name='test__engagement__product__tags__name',
-        to_field_name='name',
-        exclude=True,
-        label='Product without tags',
-        queryset=Product.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
+        field_name="test__engagement__product__tags__name",
+        to_field_name="name",
+        label="Product without tags",
+        queryset=Product.tags.tag_model.objects.all().order_by("name"),
+        help_text="Search for tags on a Product that contain a given pattern, and exclude them",
+        exclude=True)
 
-    not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class FindingTagStringFilter(FilterSet):
+    tags_contains = CharFilter(
+        label="Finding Tag Contains",
+        field_name="tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Finding that contain a given pattern")
+    tags = CharFilter(
+        label="Finding Tag",
+        field_name="tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Finding that are an exact match")
+    test__tags_contains = CharFilter(
+        label="Test Tag Contains",
+        field_name="test__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Finding that contain a given pattern")
+    test__tags = CharFilter(
+        label="Test Tag",
+        field_name="test__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Finding that are an exact match")
+    test__engagement__tags_contains = CharFilter(
+        label="Engagement Tag Contains",
+        field_name="test__engagement__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Finding that contain a given pattern")
+    test__engagement__tags = CharFilter(
+        label="Engagement Tag",
+        field_name="test__engagement__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Finding that are an exact match")
+    test__engagement__product__tags_contains = CharFilter(
+        label="Product Tag Contains",
+        field_name="test__engagement__product__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Finding that contain a given pattern")
+    test__engagement__product__tags = CharFilter(
+        label="Product Tag",
+        field_name="test__engagement__product__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Finding that are an exact match")
+
+    not_tags_contains = CharFilter(
+        label="Finding Tag Does Not Contain",
+        field_name="tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Finding that contain a given pattern, and exclude them",
+        exclude=True)
+    not_tags = CharFilter(
+        label="Not Finding Tag",
+        field_name="tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Finding that are an exact match, and exclude them",
+        exclude=True)
+    not_test__tags_contains = CharFilter(
+        label="Test Tag Does Not Contain",
+        field_name="test__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Test that contain a given pattern, and exclude them",
+        exclude=True)
+    not_test__tags = CharFilter(
+        label="Not Test Tag",
+        field_name="test__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Test that are an exact match, and exclude them",
+        exclude=True)
+    not_test__engagement__tags_contains = CharFilter(
+        label="Engagement Tag Does Not Contain",
+        field_name="test__engagement__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Engagement that contain a given pattern, and exclude them",
+        exclude=True)
+    not_test__engagement__tags = CharFilter(
+        label="Not Engagement Tag",
+        field_name="test__engagement__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Engagement that are an exact match, and exclude them",
+        exclude=True)
+    not_test__engagement__product__tags_contains = CharFilter(
+        label="Product Tag Does Not Contain",
+        field_name="test__engagement__product__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Product that contain a given pattern, and exclude them",
+        exclude=True)
+    not_test__engagement__product__tags = CharFilter(
+        label="Not Product Tag",
+        field_name="test__engagement__product__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Product that are an exact match, and exclude them",
+        exclude=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1338,156 +1444,91 @@ class PercentageRangeFilter(RangeFilter):
         return super().filter(qs, value)
 
 
-class FindingFilter(FindingFilterWithTags):
-    # tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
-    title = CharFilter(lookup_expr='icontains')
+class FindingFilterNonModelFilters(FilterSet):
+    title = CharFilter(lookup_expr="icontains")
     date = DateRangeFilter()
-    on = DateFilter(field_name='date', lookup_expr='exact', label='On')
-    before = DateFilter(field_name='date', lookup_expr='lt', label='Before')
-    after = DateFilter(field_name='date', lookup_expr='gt', label='After')
+    on = DateFilter(field_name="date", lookup_expr="exact", label="On")
+    before = DateFilter(field_name="date", lookup_expr="lt", label="Before")
+    after = DateFilter(field_name="date", lookup_expr="gt", label="After")
     last_reviewed = DateRangeFilter()
     last_status_update = DateRangeFilter()
     cwe = MultipleChoiceFilter(choices=[])
-    vulnerability_id = CharFilter(method=vulnerability_id_filter, label='Vulnerability Id')
+    vulnerability_id = CharFilter(method=vulnerability_id_filter, label="Vulnerability Id")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
-    test__test_type = ModelMultipleChoiceFilter(
-        queryset=Test_Type.objects.all(), label='Test Type')
-
     duplicate = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
     mitigated = DateRangeFilter(label="Mitigated Date")
-
     planned_remediation_date = DateRangeOmniFilter()
-    planned_remediation_version = CharFilter(lookup_expr='icontains', label=_('Planned remediation version'))
-
-    file_path = CharFilter(lookup_expr='icontains')
-    param = CharFilter(lookup_expr='icontains')
-    payload = CharFilter(lookup_expr='icontains')
-
-    reporter = ModelMultipleChoiceFilter(
-        queryset=Dojo_User.objects.none())
-
-    reviewers = ModelMultipleChoiceFilter(
-        queryset=Dojo_User.objects.none())
-
-    test__engagement__product__prod_type = ModelMultipleChoiceFilter(
-        queryset=Product_Type.objects.none(),
-        label="Product Type")
-
-    test__engagement__product__lifecycle = MultipleChoiceFilter(
-        choices=Product.LIFECYCLE_CHOICES, label='Product lifecycle')
-
-    test__engagement__product = ModelMultipleChoiceFilter(
-        queryset=Product.objects.none(),
-        label="Product")
-    test__engagement = ModelMultipleChoiceFilter(
-        queryset=Engagement.objects.none(),
-        label="Engagement")
-
-    endpoints__host = CharFilter(lookup_expr='icontains', label="Endpoint Host")
-
-    service = CharFilter(lookup_expr='icontains')
-
-    test = ModelMultipleChoiceFilter(
-        queryset=Test.objects.none(),
-        label="Test")
-
-    test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
-    test__version = CharFilter(lookup_expr='icontains', label="Test Version")
-
-    status = FindingStatusFilter(label='Status')
-
-    if is_finding_groups_enabled():
-        finding_group = ModelMultipleChoiceFilter(
-            queryset=Finding_Group.objects.none(),
-            label="Finding Group")
-
-        has_finding_group = BooleanFilter(field_name='finding_group',
-                                    lookup_expr='isnull',
-                                    exclude=True,
-                                    label='Is Grouped')
-
-    risk_acceptance = ReportRiskAcceptanceFilter(
-        label="Risk Accepted")
-
+    planned_remediation_version = CharFilter(lookup_expr="icontains", label=_("Planned remediation version"))
+    file_path = CharFilter(lookup_expr="icontains")
+    param = CharFilter(lookup_expr="icontains")
+    payload = CharFilter(lookup_expr="icontains")
+    test__test_type = ModelMultipleChoiceFilter(queryset=Test_Type.objects.all(), label='Test Type')
+    endpoints__host = CharFilter(lookup_expr="icontains", label="Endpoint Host")
+    service = CharFilter(lookup_expr="icontains")
+    test__engagement__version = CharFilter(lookup_expr="icontains", label="Engagement Version")
+    test__version = CharFilter(lookup_expr="icontains", label="Test Version")
+    risk_acceptance = ReportRiskAcceptanceFilter(label="Risk Accepted")
     effort_for_fixing = MultipleChoiceFilter(choices=EFFORT_FOR_FIXING_CHOICES)
-
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
     endpoints = NumberFilter(widget=HiddenInput())
+    status = FindingStatusFilter(label="Status")
+    has_component = BooleanFilter(
+        field_name="component_name",
+        lookup_expr="isnull",
+        exclude=True,
+        label="Has Component")
+    has_notes = BooleanFilter(
+        field_name="notes",
+        lookup_expr="isnull",
+        exclude=True,
+        label="Has notes")
 
-    if get_system_setting('enable_jira'):
-        has_jira_issue = BooleanFilter(field_name='jira_issue',
-                                    lookup_expr='isnull',
-                                    exclude=True,
-                                    label='Has JIRA')
-        jira_creation = DateRangeFilter(field_name='jira_issue__jira_creation', label='JIRA Creation')
-        jira_change = DateRangeFilter(field_name='jira_issue__jira_change', label='JIRA Updated')
-        jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
+    if is_finding_groups_enabled():
+        has_finding_group = BooleanFilter(
+            field_name='finding_group',
+            lookup_expr='isnull',
+            exclude=True,
+            label='Is Grouped')
+
+    if get_system_setting("enable_jira"):
+        has_jira_issue = BooleanFilter(
+            field_name="jira_issue",
+            lookup_expr="isnull",
+            exclude=True,
+            label="Has JIRA")
+        jira_creation = DateRangeFilter(field_name="jira_issue__jira_creation", label="JIRA Creation")
+        jira_change = DateRangeFilter(field_name="jira_issue__jira_change", label="JIRA Updated")
+        jira_issue__jira_key = CharFilter(field_name="jira_issue__jira_key", lookup_expr="icontains", label="JIRA issue")
 
         if is_finding_groups_enabled():
-            has_jira_group_issue = BooleanFilter(field_name='finding_group__jira_issue',
-                                        lookup_expr='isnull',
-                                        exclude=True,
-                                        label='Has Group JIRA')
-
-    has_component = BooleanFilter(field_name='component_name',
-                                lookup_expr='isnull',
-                                exclude=True,
-                                label='Has Component')
-
-    has_notes = BooleanFilter(field_name='notes',
-                                lookup_expr='isnull',
-                                exclude=True,
-                                label='Has notes')
-
-    not_tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        exclude=True,
-        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    not_test__tags = ModelMultipleChoiceFilter(
-        field_name='test__tags__name',
-        to_field_name='name',
-        exclude=True,
-        label='Test without tags',
-        queryset=Test.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    not_test__engagement__tags = ModelMultipleChoiceFilter(
-        field_name='test__engagement__tags__name',
-        to_field_name='name',
-        exclude=True,
-        label='Engagement without tags',
-        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    not_test__engagement__product__tags = ModelMultipleChoiceFilter(
-        field_name='test__engagement__product__tags__name',
-        to_field_name='name',
-        exclude=True,
-        label='Product without tags',
-        queryset=Product.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
+            has_jira_group_issue = BooleanFilter(
+                field_name="finding_group__jira_issue",
+                lookup_expr="isnull",
+                exclude=True,
+                label="Has Group JIRA")
 
     outside_of_sla = FindingSLAFilter(label="Outside of SLA")
-
-    has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
-
-    epss_score = PercentageFilter(field_name='epss_score', label='EPSS score')
-    epss_score_range = PercentageRangeFilter(field_name='epss_score', label='EPSS score range',
-                                             help_text='The range of EPSS score percentages to filter on; the left input is a lower bound, the right is an upper bound. Leaving one empty will skip that bound (e.g., leaving the lower bound input empty will filter only on the upper bound -- filtering on "less than or equal").')
-
-    epss_percentile = PercentageFilter(field_name='epss_percentile', label='EPSS percentile')
-    epss_percentile_range = PercentageRangeFilter(field_name='epss_percentile', label='EPSS percentile range',
-                                                  help_text='The range of EPSS percentiles to filter on; the left input is a lower bound, the right is an upper bound. Leaving one empty will skip that bound (e.g., leaving the lower bound input empty will filter only on the upper bound -- filtering on "less than or equal").')
+    has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
+    epss_score = PercentageFilter(field_name="epss_score", label="EPSS score")
+    epss_score_range = PercentageRangeFilter(
+        field_name="epss_score",
+        label="EPSS score range",
+        help_text=(
+            "The range of EPSS score percentages to filter on; the left input is a lower bound, "
+            "the right is an upper bound. Leaving one empty will skip that bound (e.g., leaving "
+            "the lower bound input empty will filter only on the upper bound -- filtering on "
+            "\"less than or equal\")."
+        ))
+    epss_percentile = PercentageFilter(field_name="epss_percentile", label="EPSS percentile")
+    epss_percentile_range = PercentageRangeFilter(
+        field_name="epss_percentile",
+        label="EPSS percentile range",
+        help_text=(
+            "The range of EPSS percentiles to filter on; the left input is a lower bound, the right "
+            "is an upper bound. Leaving one empty will skip that bound (e.g., leaving the lower bound "
+            "input empty will filter only on the upper bound -- filtering on \"less than or equal\")."
+        ))
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1517,6 +1558,149 @@ class FindingFilter(FindingFilterWithTags):
         }
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def set_date_fields(self, *args: list, **kwargs: dict):
+        date_input_widget = forms.DateInput(attrs={'class': 'datepicker', 'placeholder': 'YYYY-MM-DD'}, format="%Y-%m-%d")
+        self.form.fields['on'].widget = date_input_widget
+        self.form.fields['before'].widget = date_input_widget
+        self.form.fields['after'].widget = date_input_widget
+        self.form.fields['cwe'].choices = cwe_options(self.queryset)
+
+
+class FindingFilterWithoutObjectLookups(FindingFilterNonModelFilters, FindingTagStringFilter):
+    reporter = CharFilter(
+        field_name="reporter__username",
+        lookup_expr="iexact",
+        label="Reporter Username",
+        help_text="Search for Reporter names that are an exact match")
+    reporter_contains = CharFilter(
+        field_name="reporter__username",
+        lookup_expr="icontains",
+        label="Reporter Username Contains",
+        help_text="Search for Reporter names that contain a given pattern")
+    reviewer = CharFilter(
+        field_name="reviewer__username",
+        lookup_expr="iexact",
+        label="Reviewer Username",
+        help_text="Search for Reviewer names that are an exact match")
+    reviewer_contains = CharFilter(
+        field_name="reviewer__username",
+        lookup_expr="icontains",
+        label="Reviewer Username Contains",
+        help_text="Search for Reviewer usernames that contain a given pattern")
+    test__engagement__product__prod_type__name = CharFilter(
+        field_name="test__engagement__product__prod_type__name",
+        lookup_expr="iexact",
+        label="Product Type Name",
+        help_text="Search for Product Type names that are an exact match")
+    test__engagement__product__prod_type__name_contains = CharFilter(
+        field_name="test__engagement__product__prod_type__name",
+        lookup_expr="icontains",
+        label="Product Type Name Contains",
+        help_text="Search for Product Type names that contain a given pattern")
+    test__engagement__product__name = CharFilter(
+        field_name="test__engagement__product__name",
+        lookup_expr="iexact",
+        label="Product Name",
+        help_text="Search for Product names that are an exact match")
+    test__engagement__product__name_contains = CharFilter(
+        field_name="test__engagement__product__name",
+        lookup_expr="icontains",
+        label="Product name Contains",
+        help_text="Search for Product Typ names that contain a given pattern")
+    test__engagement__name = CharFilter(
+        field_name="test__engagement__name",
+        lookup_expr="iexact",
+        label="Engagement Name",
+        help_text="Search for Engagement names that are an exact match")
+    test__engagement__name_contains = CharFilter(
+        field_name="test__engagement__name",
+        lookup_expr="icontains",
+        label="Engagement name Contains",
+        help_text="Search for Engagement names that contain a given pattern")
+    test__name = CharFilter(
+        field_name="test__engagement__name",
+        lookup_expr="iexact",
+        label="Test Name",
+        help_text="Search for Test names that are an exact match")
+    test__name_contains = CharFilter(
+        field_name="test__engagement__name",
+        lookup_expr="icontains",
+        label="Test name Contains",
+        help_text="Search for Test names that contain a given pattern")
+
+    if is_finding_groups_enabled():
+        finding_group__name = CharFilter(
+            field_name="finding_group__name",
+            lookup_expr="iexact",
+            label="Finding Group Name",
+            help_text="Search for Finding Group names that are an exact match")
+        finding_group__name_contains = CharFilter(
+            field_name="finding_group__name",
+            lookup_expr="icontains",
+            label="Finding Group Name Contains",
+            help_text="Search for Finding Group names that contain a given pattern")
+
+    class Meta:
+        model = Finding
+        fields = get_finding_filterset_fields(filter_string_matching=True)
+
+        exclude = ['url', 'description', 'mitigation', 'impact',
+                   'endpoints', 'references',
+                   'thread_id', 'notes', 'scanner_confidence',
+                   'numerical_severity', 'line', 'duplicate_finding',
+                   'hash_code', 'reviewers', 'created', 'files',
+                   'sla_start_date', 'sla_expiration_date', 'cvssv3',
+                   'severity_justification', 'steps_to_reproduce',]
+
+    def __init__(self, *args, **kwargs):
+        self.user = None
+        self.pid = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+
+        if 'pid' in kwargs:
+            self.pid = kwargs.pop('pid')
+        super().__init__(*args, **kwargs)
+        # Set some date fields
+        self.set_date_fields(*args, **kwargs)
+        # Don't show the product filter on the product finding view
+        if self.pid:
+            del self.form.fields['test__engagement__product__name']
+            del self.form.fields['test__engagement__product__name_contains']
+            del self.form.fields['test__engagement__product__prod_type__name']
+            del self.form.fields['test__engagement__product__prod_type__name_contains']
+        else:
+            del self.form.fields['test__name']
+            del self.form.fields['test__name_contains']
+
+
+class FindingFilter(FindingFilterNonModelFilters, FindingTagFilter):
+    reporter = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.none())
+    reviewers = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.none())
+    test__engagement__product__prod_type = ModelMultipleChoiceFilter(
+        queryset=Product_Type.objects.none(),
+        label="Product Type")
+    test__engagement__product__lifecycle = MultipleChoiceFilter(
+        choices=Product.LIFECYCLE_CHOICES,
+        label='Product lifecycle')
+    test__engagement__product = ModelMultipleChoiceFilter(
+        queryset=Product.objects.none(),
+        label="Product")
+    test__engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.none(),
+        label="Engagement")
+    test = ModelMultipleChoiceFilter(
+        queryset=Test.objects.none(),
+        label="Test")
+
+    if is_finding_groups_enabled():
+        finding_group = ModelMultipleChoiceFilter(
+            queryset=Finding_Group.objects.none(),
+            label="Finding Group")
+
     class Meta:
         model = Finding
         fields = get_finding_filterset_fields()
@@ -1538,15 +1722,13 @@ class FindingFilter(FindingFilterWithTags):
         if 'pid' in kwargs:
             self.pid = kwargs.pop('pid')
         super().__init__(*args, **kwargs)
-
-        self.form.fields['cwe'].choices = cwe_options(self.queryset)
-        date_input_widget = forms.DateInput(attrs={'class': 'datepicker', 'placeholder': 'YYYY-MM-DD'}, format="%Y-%m-%d")
-        self.form.fields['on'].widget = date_input_widget
-        self.form.fields['before'].widget = date_input_widget
-        self.form.fields['after'].widget = date_input_widget
-
+        # Set some date fields
+        self.set_date_fields(*args, **kwargs)
         # Don't show the product filter on the product finding view
-        if self.pid:
+        self.set_related_object_fields(*args, **kwargs)
+
+    def set_related_object_fields(self, *args: list, **kwargs: dict):
+        if self.pid is not None:
             del self.form.fields['test__engagement__product']
             del self.form.fields['test__engagement__product__prod_type']
             # TODO add authorized check to be sure
@@ -1569,18 +1751,13 @@ class FindingFilter(FindingFilterWithTags):
 
 
 class AcceptedFindingFilter(FindingFilter):
-    risk_acceptance__created__date = \
-        DateRangeFilter(label="Acceptance Date")
-
-    risk_acceptance__owner = \
-        ModelMultipleChoiceFilter(
+    risk_acceptance__created__date = DateRangeFilter(label="Acceptance Date")
+    risk_acceptance__owner = ModelMultipleChoiceFilter(
             queryset=Dojo_User.objects.none(),
             label="Risk Acceptance Owner")
-
     risk_acceptance = ModelMultipleChoiceFilter(
         queryset=Risk_Acceptance.objects.none(),
-        label="Accepted By"
-    )
+        label="Accepted By")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1588,24 +1765,35 @@ class AcceptedFindingFilter(FindingFilter):
         self.form.fields['risk_acceptance'].queryset = get_authorized_risk_acceptances(Permissions.Risk_Acceptance)
 
 
-class SimilarFindingFilter(FindingFilter):
+class AcceptedFindingFilterWithoutObjectLookups(FindingFilterWithoutObjectLookups):
+    risk_acceptance__created__date = DateRangeFilter(label="Acceptance Date")
+    risk_acceptance__owner = CharFilter(
+        field_name="risk_acceptance__owner__username",
+        lookup_expr="iexact",
+        label="Risk Acceptance Owner Username",
+        help_text="Search for Risk Acceptance Owners username that are an exact match")
+    risk_acceptance__owner_contains = CharFilter(
+        field_name="risk_acceptance__owner__username",
+        lookup_expr="icontains",
+        label="Risk Acceptance Owner Username Contains",
+        help_text="Search for Risk Acceptance Owners username that contain a given pattern")
+    risk_acceptance__name = CharFilter(
+        field_name="risk_acceptance__name",
+        lookup_expr="iexact",
+        label="Risk Acceptance Name",
+        help_text="Search for Risk Acceptance name that are an exact match")
+    risk_acceptance__name_contains = CharFilter(
+        field_name="risk_acceptance__name",
+        lookup_expr="icontains",
+        label="Risk Acceptance Name",
+        help_text="Search for Risk Acceptance name contain a given pattern")
+
+
+class SimilarFindingHelper(FilterSet):
     hash_code = MultipleChoiceFilter()
     vulnerability_ids = CharFilter(method=custom_vulnerability_id_filter, label='Vulnerability Ids')
 
-    class Meta(FindingFilter.Meta):
-        model = Finding
-        # slightly different fields from FindingFilter, but keep the same ordering for UI consistency
-        fields = get_finding_filterset_fields(similar=True)
-
-    def __init__(self, data=None, *args, **kwargs):
-        self.user = None
-        if 'user' in kwargs:
-            self.user = kwargs.pop('user')
-
-        self.finding = None
-        if 'finding' in kwargs:
-            self.finding = kwargs.pop('finding')
-
+    def update_data(self, data: dict, *args: list, **kwargs: dict):
         # if filterset is bound, use initial values as defaults
         # because of this, we can't rely on the self.form.has_changed
         self.has_changed = True
@@ -1624,16 +1812,51 @@ class SimilarFindingFilter(FindingFilter):
 
             self.has_changed = False
 
-        super().__init__(data, *args, **kwargs)
-
+    def set_hash_codes(self, *args: list, **kwargs: dict):
         if self.finding and self.finding.hash_code:
             self.form.fields['hash_code'] = forms.MultipleChoiceField(choices=[(self.finding.hash_code, self.finding.hash_code[:24] + '...')], required=False, initial=[])
 
-    def filter_queryset(self, *args, **kwargs):
+    def filter_queryset(self, *args: list, **kwargs: dict):
         queryset = super().filter_queryset(*args, **kwargs)
         queryset = get_authorized_findings(Permissions.Finding_View, queryset, self.user)
         queryset = queryset.exclude(pk=self.finding.pk)
         return queryset
+
+
+class SimilarFindingFilter(FindingFilter, SimilarFindingHelper):
+    class Meta(FindingFilter.Meta):
+        model = Finding
+        # slightly different fields from FindingFilter, but keep the same ordering for UI consistency
+        fields = get_finding_filterset_fields(similar=True)
+
+    def __init__(self, data=None, *args, **kwargs):
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+        self.finding = None
+        if 'finding' in kwargs:
+            self.finding = kwargs.pop('finding')
+        self.update_data(data, *args, **kwargs)
+        super().__init__(data, *args, **kwargs)
+        self.set_hash_codes(*args, **kwargs)
+
+
+class SimilarFindingFilterWithoutObjectLookups(FindingFilterWithoutObjectLookups, SimilarFindingHelper):
+    class Meta(FindingFilterWithoutObjectLookups.Meta):
+        model = Finding
+        # slightly different fields from FindingFilter, but keep the same ordering for UI consistency
+        fields = get_finding_filterset_fields(similar=True, filter_string_matching=True)
+
+    def __init__(self, data=None, *args, **kwargs):
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+        self.finding = None
+        if 'finding' in kwargs:
+            self.finding = kwargs.pop('finding')
+        self.update_data(data, *args, **kwargs)
+        super().__init__(data, *args, **kwargs)
+        self.set_hash_codes(*args, **kwargs)
 
 
 class TemplateFindingFilter(DojoFilter):
@@ -1770,6 +1993,36 @@ class MetricsFindingFilter(FindingFilter):
     class Meta(FindingFilter.Meta):
         model = Finding
         fields = get_finding_filterset_fields(metrics=True)
+
+
+class MetricsFindingFilterWithoutObjectLookups(FindingFilterWithoutObjectLookups):
+    start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
+    end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
+    date = MetricsDateRangeFilter()
+    vulnerability_id = CharFilter(method=vulnerability_id_filter, label='Vulnerability Id')
+
+    not_tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        exclude=True,
+        queryset=Endpoint.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
+
+    def __init__(self, *args, **kwargs):
+        if args[0]:
+            if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
+                args[0]._mutable = True
+                args[0]['date'] = 8
+                args[0]._mutable = False
+
+        super().__init__(*args, **kwargs)
+
+    class Meta(FindingFilterWithoutObjectLookups.Meta):
+        model = Finding
+        fields = get_finding_filterset_fields(metrics=True, filter_string_matching=True)
 
 
 class MetricsEndpointFilter(FilterSet):
@@ -2175,7 +2428,7 @@ class EndpointReportFilter(DojoFilter):
         exclude = ['product']
 
 
-class ReportFindingFilter(FindingFilterWithTags):
+class ReportFindingFilter(FindingTagFilter):
     title = CharFilter(lookup_expr='icontains', label='Name')
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.none(), label="Product")
