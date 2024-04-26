@@ -1040,7 +1040,7 @@ def view_engineer(request, eid):
                     severity='Low'
                 ).count()
         prod = Product.objects.get(id=product)
-        all_findings_link = "<a href='%s'>%s</a>" % (
+        all_findings_link = "<a href='{}'>{}</a>".format(
             reverse('product_open_findings', args=(prod.id,)), escape(prod.name))
         update.append([all_findings_link, z_count, o_count, t_count, h_count,
                        z_count + o_count + t_count + h_count])
@@ -1073,7 +1073,7 @@ def view_engineer(request, eid):
                     mitigated__isnull=True,
                     severity='Low').count()
         prod = Product.objects.get(id=product)
-        all_findings_link = "<a href='%s'>%s</a>" % (
+        all_findings_link = "<a href='{}'>{}</a>".format(
             reverse('product_open_findings', args=(prod.id,)), escape(prod.name))
         total_update.append([all_findings_link, z_count, o_count, t_count,
                              h_count, z_count + o_count + t_count + h_count])

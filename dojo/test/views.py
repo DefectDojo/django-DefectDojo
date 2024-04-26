@@ -348,7 +348,7 @@ def copy_test(request, tid):
                 extra_tags='alert-success')
             create_notification(event='other',
                                 title='Copying of %s' % test.title,
-                                description='The test "%s" was copied by %s to %s' % (test.title, request.user, engagement.name),
+                                description=f'The test "{test.title}" was copied by {request.user} to {engagement.name}',
                                 product=product,
                                 url=request.build_absolute_uri(reverse('view_test', args=(test_copy.id,))),
                                 recipients=[test.engagement.lead],
@@ -414,7 +414,7 @@ def test_ics(request, tid):
                         _("Set aside for test %(test_type_name)s, on product %(product_name)s. Additional detail can be found at %(detail_url)s") % {
                             'test_type_name': test.test_type.name,
                             'product_name': test.engagement.product.name,
-                            'detail_url': request.build_absolute_uri((reverse("view_test", args=(test.id,))))
+                            'detail_url': request.build_absolute_uri(reverse("view_test", args=(test.id,)))
                         },
                         uid)
     output = cal.serialize()

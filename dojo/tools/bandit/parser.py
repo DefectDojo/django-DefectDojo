@@ -4,7 +4,7 @@ import dateutil.parser
 from dojo.models import Finding
 
 
-class BanditParser(object):
+class BanditParser:
     def get_scan_types(self):
         return ["Bandit Scan"]
 

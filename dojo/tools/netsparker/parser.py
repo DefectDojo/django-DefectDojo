@@ -6,7 +6,7 @@ from cvss import parser as cvss_parser
 from dojo.models import Finding, Endpoint
 
 
-class NetsparkerParser(object):
+class NetsparkerParser:
     def get_scan_types(self):
         return ["Netsparker Scan"]
 

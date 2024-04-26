@@ -4,7 +4,7 @@ from dojo.models import Finding
 from dojo.tools.parser_test import ParserTest
 
 
-class GitlabSastParser(object):
+class GitlabSastParser:
 
     def get_scan_types(self):
         return ["GitLab SAST Report"]
