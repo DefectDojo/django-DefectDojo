@@ -571,6 +571,14 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("API expose error details"),
         help_text=_("When turned on, the API will expose error details in the response."))
+    filter_string_matching = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Filter String Matching Optimization"),
+        help_text=_(
+            "When turned on, all filter operations in the UI will require string matches rather than ID. "
+            "This is a performance enhancement to avoid fetching objects unnecessarily."
+        ))
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
