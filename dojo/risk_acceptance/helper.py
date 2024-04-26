@@ -208,8 +208,7 @@ def accepted_message_creator(risk_acceptance, heads_up_days=0):
 
 def unaccepted_message_creator(risk_acceptance, heads_up_days=0):
     if risk_acceptance:
-        return 'finding was unaccepted/deleted from risk acceptance [(%s)|%s]' % \
-            (escape_for_jira(risk_acceptance.name),
+        return 'finding was unaccepted/deleted from risk acceptance [({})|{}]'.format(escape_for_jira(risk_acceptance.name),
             get_full_url(reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id))))
     else:
         return 'Finding is no longer risk accepted'

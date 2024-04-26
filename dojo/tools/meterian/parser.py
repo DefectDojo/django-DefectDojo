@@ -4,7 +4,7 @@ from datetime import datetime
 from dojo.models import Finding
 
 
-class MeterianParser(object):
+class MeterianParser:
     def get_scan_types(self):
         return ["Meterian Scan"]
 

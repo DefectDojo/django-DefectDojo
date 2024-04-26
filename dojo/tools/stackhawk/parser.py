@@ -14,7 +14,7 @@ class StackHawkScanMetadata:
         self.service = completed_scan["scan"]["application"]
 
 
-class StackHawkParser(object):
+class StackHawkParser:
     """
     DAST findings from StackHawk
     """

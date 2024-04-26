@@ -6,7 +6,7 @@ from cvss import CVSS3, CVSS2
 import cvss.parser
 
 
-class AuditJSParser(object):
+class AuditJSParser:
     """Parser for AuditJS Scan tool"""
 
     def get_scan_types(self):
