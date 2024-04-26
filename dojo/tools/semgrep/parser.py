@@ -4,7 +4,7 @@ from dojo.models import Finding
 
 
 # Parser for semgrep
-class SemgrepParser(object):
+class SemgrepParser:
     def get_scan_types(self):
         return ["Semgrep JSON Report"]
 
