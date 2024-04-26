@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from dojo.models import Engagement, Product, Test
 from dojo.tools.microfocus_webinspect.parser import MicrofocusWebinspectParser
-from dojo.models import Test, Engagement, Product
+
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestMicrofocusWebinspectParser(DojoTestCase):

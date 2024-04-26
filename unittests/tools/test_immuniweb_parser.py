@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.immuniweb.parser import ImmuniwebParser
 from dojo.models import Test
+from dojo.tools.immuniweb.parser import ImmuniwebParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestImmuniwebParser(DojoTestCase):

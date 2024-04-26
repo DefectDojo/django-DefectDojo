@@ -1,7 +1,9 @@
 import datetime
-from ..dojo_test_case import DojoTestCase
-from dojo.models import Test, Engagement, Product, Finding
+
+from dojo.models import Engagement, Finding, Product, Test
 from dojo.tools.generic.parser import GenericParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestFile:

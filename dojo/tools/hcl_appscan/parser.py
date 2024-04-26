@@ -1,6 +1,8 @@
 from xml.dom import NamespaceErr
+
 from defusedxml import ElementTree as ET
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
 class HCLAppScanParser:

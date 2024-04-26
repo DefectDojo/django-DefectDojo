@@ -1,5 +1,5 @@
 from django.core.exceptions import PermissionDenied
-from dojo.request_cache import cache_for_request
+
 from dojo.authorization.roles_permissions import (
     Permissions,
     Roles,
@@ -7,25 +7,26 @@ from dojo.authorization.roles_permissions import (
     get_roles_with_permissions,
 )
 from dojo.models import (
-    Product_Type,
-    Product_Type_Member,
-    Product,
-    Product_Member,
-    Engagement,
-    Test,
-    Finding,
-    Endpoint,
-    Finding_Group,
-    Product_Group,
-    Product_Type_Group,
+    App_Analysis,
+    Cred_Mapping,
     Dojo_Group,
     Dojo_Group_Member,
+    Endpoint,
+    Engagement,
+    Finding,
+    Finding_Group,
     Languages,
-    App_Analysis,
-    Stub_Finding,
+    Product,
     Product_API_Scan_Configuration,
-    Cred_Mapping,
+    Product_Group,
+    Product_Member,
+    Product_Type,
+    Product_Type_Group,
+    Product_Type_Member,
+    Stub_Finding,
+    Test,
 )
+from dojo.request_cache import cache_for_request
 
 
 def user_has_configuration_permission(user, permission):

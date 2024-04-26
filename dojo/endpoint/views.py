@@ -1,30 +1,38 @@
 import logging
 from datetime import datetime
+
 from dateutil.relativedelta import relativedelta
-from django.contrib import messages
+from django.apps import apps
 from django.conf import settings
-from django.urls import reverse
-from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
-from django.utils import timezone
+from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
-from django.db.models import Q, QuerySet, Count
+from django.db.models import Count, Q, QuerySet
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.utils import timezone
 
-from dojo.endpoint.utils import clean_hosts_run, endpoint_meta_import
-from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups
-from dojo.forms import EditEndpointForm, \
-    DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm, ImportEndpointMetaForm
-from dojo.models import Product, Endpoint, Finding, DojoMeta, Endpoint_Status
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, Product_Tab, calculate_grade, redirect, \
-    add_error_message_to_response, is_scan_file_too_large, get_system_setting
-from dojo.notifications.helper import create_notification
+from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.endpoint.queries import get_authorized_endpoints
-from django.apps import apps
-
+from dojo.endpoint.utils import clean_hosts_run, endpoint_meta_import
+from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups
+from dojo.forms import AddEndpointForm, DeleteEndpointForm, DojoMetaDataForm, EditEndpointForm, ImportEndpointMetaForm
+from dojo.models import DojoMeta, Endpoint, Endpoint_Status, Finding, Product
+from dojo.notifications.helper import create_notification
+from dojo.utils import (
+    Product_Tab,
+    add_breadcrumb,
+    add_error_message_to_response,
+    calculate_grade,
+    get_page_items,
+    get_period_counts,
+    get_system_setting,
+    is_scan_file_too_large,
+    redirect,
+)
 
 logger = logging.getLogger(__name__)
 

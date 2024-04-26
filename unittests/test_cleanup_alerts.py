@@ -1,8 +1,12 @@
-from dojo.tasks import cleanup_alerts
-from .dojo_test_case import DojoTestCase
-from django.conf import settings
-from dojo.models import User, Alerts
 import logging
+
+from django.conf import settings
+
+from dojo.models import Alerts, User
+from dojo.tasks import cleanup_alerts
+
+from .dojo_test_case import DojoTestCase
+
 logger = logging.getLogger(__name__)
 
 

@@ -1,8 +1,10 @@
-from .test_jira_config_engagement import JIRAConfigEngagementBase
-from vcr import VCR
-from .dojo_test_case import DojoVCRTestCase, get_unit_tests_path
 # from unittest import skip
 import logging
+
+from vcr import VCR
+
+from .dojo_test_case import DojoVCRTestCase, get_unit_tests_path
+from .test_jira_config_engagement import JIRAConfigEngagementBase
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,7 @@
 from django.test import TestCase
-from dojo.tools.sysdig_reports.parser import SysdigReportsParser
+
 from dojo.models import Test
+from dojo.tools.sysdig_reports.parser import SysdigReportsParser
 
 
 class TestSysdigParser(TestCase):

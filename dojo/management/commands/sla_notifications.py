@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+
 from dojo.utils import sla_compute_and_notify
 
 """

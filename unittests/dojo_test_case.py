@@ -15,10 +15,24 @@ from vcr_unittest import VCRTestCase
 
 from dojo.jira_link import helper as jira_helper
 from dojo.jira_link.views import get_custom_field
-from dojo.models import (SEVERITIES, DojoMeta, Endpoint, Endpoint_Status,
-                         Engagement, Finding, JIRA_Issue, JIRA_Project, Notes,
-                         Product, Product_Type, System_Settings, Test,
-                         SLA_Configuration, Test_Type, User)
+from dojo.models import (
+    SEVERITIES,
+    DojoMeta,
+    Endpoint,
+    Endpoint_Status,
+    Engagement,
+    Finding,
+    JIRA_Issue,
+    JIRA_Project,
+    Notes,
+    Product,
+    Product_Type,
+    SLA_Configuration,
+    System_Settings,
+    Test,
+    Test_Type,
+    User,
+)
 
 logger = logging.getLogger(__name__)
 

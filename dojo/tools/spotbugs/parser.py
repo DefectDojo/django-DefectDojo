@@ -1,6 +1,8 @@
 import re
+
 import html2text
 from defusedxml import ElementTree as ET
+
 from dojo.models import Finding
 
 

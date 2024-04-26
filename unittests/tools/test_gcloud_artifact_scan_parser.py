@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-from dojo.tools.gcloud_artifact_scan.parser import GCloudArtifactScanParser
 from dojo.models import Test
+from dojo.tools.gcloud_artifact_scan.parser import GCloudArtifactScanParser
+
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestGCloudArtifactScanParser(DojoTestCase):

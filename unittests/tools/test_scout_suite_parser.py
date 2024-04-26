@@ -1,8 +1,9 @@
 import datetime
 
-from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.scout_suite.parser import ScoutSuiteParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestScoutSuiteParser(DojoTestCase):

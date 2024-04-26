@@ -1,5 +1,6 @@
-from .dojo_test_case import DojoTestCase
 from dojo.models import System_Settings
+
+from .dojo_test_case import DojoTestCase
 
 
 class TestSystemSettings(DojoTestCase):

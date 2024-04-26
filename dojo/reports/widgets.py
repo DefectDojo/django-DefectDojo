@@ -14,7 +14,7 @@ from django.utils.safestring import mark_safe
 from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups, ReportFindingFilter
 from dojo.forms import CustomReportOptionsForm
 from dojo.models import Endpoint, Finding
-from dojo.utils import get_page_items, get_words_for_field, get_system_setting
+from dojo.utils import get_page_items, get_system_setting, get_words_for_field
 
 """
 Widgets are content sections that can be included on reports.  The report builder will allow any number of widgets

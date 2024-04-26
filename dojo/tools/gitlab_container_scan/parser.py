@@ -2,6 +2,7 @@ import json
 import textwrap
 
 from dateutil.parser import parse
+
 from dojo.models import Finding
 
 

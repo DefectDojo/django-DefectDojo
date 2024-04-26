@@ -1,14 +1,15 @@
-import gitlab
-import re
 import logging
-import requests
+import re
 
+import gitlab
+import requests
 import social_core.pipeline.user
 from django.conf import settings
-from dojo.models import Product, Product_Member, Product_Type, Role, Dojo_Group, Dojo_Group_Member
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.google import GoogleOAuth2
+
 from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.models import Dojo_Group, Dojo_Group_Member, Product, Product_Member, Product_Type, Role
 from dojo.product.queries import get_authorized_products
 
 logger = logging.getLogger(__name__)

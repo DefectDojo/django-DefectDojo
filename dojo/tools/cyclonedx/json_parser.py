@@ -1,8 +1,11 @@
 import json
 import logging
+
 import dateutil
+
 from dojo.models import Finding
 from dojo.tools.cyclonedx.helpers import Cyclonedxhelper
+
 LOGGER = logging.getLogger(__name__)
 
 

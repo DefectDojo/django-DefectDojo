@@ -1,30 +1,30 @@
 import logging
-from django.contrib import messages
-from django.urls import reverse
-from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import render, get_object_or_404
-from django.db.models import Count, Q
-from django.utils.translation import gettext as _
-
-from dojo.forms import Benchmark_Product_SummaryForm, DeleteBenchmarkForm
-from dojo.models import (
-    Benchmark_Type,
-    Benchmark_Category,
-    Benchmark_Requirement,
-    Benchmark_Product,
-    Product,
-    Benchmark_Product_Summary,
-)
-from dojo.utils import (
-    add_breadcrumb,
-    Product_Tab,
-    redirect_to_return_url_or_else,
-)
-from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.authorization.roles_permissions import Permissions
-from dojo.templatetags.display_tags import asvs_level
 
 from crum import get_current_user
+from django.contrib import messages
+from django.db.models import Count, Q
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.utils.translation import gettext as _
+
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.roles_permissions import Permissions
+from dojo.forms import Benchmark_Product_SummaryForm, DeleteBenchmarkForm
+from dojo.models import (
+    Benchmark_Category,
+    Benchmark_Product,
+    Benchmark_Product_Summary,
+    Benchmark_Requirement,
+    Benchmark_Type,
+    Product,
+)
+from dojo.templatetags.display_tags import asvs_level
+from dojo.utils import (
+    Product_Tab,
+    add_breadcrumb,
+    redirect_to_return_url_or_else,
+)
 
 logger = logging.getLogger(__name__)
 

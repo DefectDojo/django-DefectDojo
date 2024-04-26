@@ -1,10 +1,11 @@
-import json
 import hashlib
+import json
 import logging
+
 from cvss import parser as cvss_parser
 from dateutil import parser as date_parser
-from dojo.models import Finding, Endpoint
 
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 

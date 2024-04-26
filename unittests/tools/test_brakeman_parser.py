@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.brakeman.parser import BrakemanParser
 from dojo.models import Test
+from dojo.tools.brakeman.parser import BrakemanParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestBrakemanParser(DojoTestCase):

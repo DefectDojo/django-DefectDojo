@@ -1,5 +1,6 @@
-import unittest
 import sys
+import unittest
+
 from base_test_class import BaseTestCase, on_exception_html_source_logger
 from selenium.webdriver.common.by import By
 

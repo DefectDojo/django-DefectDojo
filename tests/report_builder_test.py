@@ -1,13 +1,13 @@
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-import unittest
-import sys
 import os
+import sys
+import unittest
+
 from base_test_class import BaseTestCase
 from product_test import ProductTest
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 

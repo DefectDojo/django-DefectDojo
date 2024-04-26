@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.rusty_hog.parser import RustyhogParser
 from dojo.models import Test
+from dojo.tools.rusty_hog.parser import RustyhogParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestRustyhogParser(DojoTestCase):

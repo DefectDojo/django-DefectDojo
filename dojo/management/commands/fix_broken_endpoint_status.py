@@ -1,8 +1,9 @@
-from django.core.management.base import BaseCommand
-from django.apps import apps
-from dojo.endpoint.utils import remove_broken_endpoint_statuses
-
 import logging
+
+from django.apps import apps
+from django.core.management.base import BaseCommand
+
+from dojo.endpoint.utils import remove_broken_endpoint_statuses
 
 logger = logging.getLogger(__name__)
 

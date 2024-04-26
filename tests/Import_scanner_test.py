@@ -1,13 +1,14 @@
-from selenium.webdriver.support.ui import Select
-import unittest
-import re
-import sys
 import os
-import git
+import re
 import shutil
+import sys
+import unittest
+
+import git
 from base_test_class import BaseTestCase
 from product_test import ProductTest
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
 
 
 class ScannerTest(BaseTestCase):

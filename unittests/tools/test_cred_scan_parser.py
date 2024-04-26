@@ -1,7 +1,9 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.cred_scan.parser import CredScanParser
-from dojo.models import Test
 import datetime
+
+from dojo.models import Test
+from dojo.tools.cred_scan.parser import CredScanParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestCredScanParser(DojoTestCase):

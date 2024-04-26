@@ -1,8 +1,11 @@
 import logging
 import re
+
 from django.utils.html import strip_tags
 from lxml import etree
+
 from dojo.models import Finding
+
 logger = logging.getLogger(__name__)
 
 

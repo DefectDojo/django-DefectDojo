@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.yarn_audit.parser import YarnAuditParser
 from dojo.models import Engagement, Product, Test
+from dojo.tools.yarn_audit.parser import YarnAuditParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestYarnAuditParser(DojoTestCase):

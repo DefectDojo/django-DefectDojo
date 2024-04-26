@@ -1,5 +1,6 @@
-from .dojo_test_case import DojoTestCase
 from dojo.search.views import parse_search_query
+
+from .dojo_test_case import DojoTestCase
 
 
 class TestSearch(DojoTestCase):

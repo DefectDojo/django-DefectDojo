@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.sslscan.parser import SslscanParser
 from dojo.models import Test
+from dojo.tools.sslscan.parser import SslscanParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestSslscanParser(DojoTestCase):

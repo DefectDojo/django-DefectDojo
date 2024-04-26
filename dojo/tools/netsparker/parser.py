@@ -1,9 +1,10 @@
-import json
-import html2text
 import datetime
+import json
 
+import html2text
 from cvss import parser as cvss_parser
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
 class NetsparkerParser:

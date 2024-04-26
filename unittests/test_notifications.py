@@ -1,8 +1,9 @@
-from .dojo_test_case import DojoTestCase
-from dojo.models import Product, User, Notifications
-from dojo.models import DEFAULT_NOTIFICATION
-from dojo.notifications.helper import create_notification, send_alert_notification
 from unittest.mock import patch
+
+from dojo.models import DEFAULT_NOTIFICATION, Notifications, Product, User
+from dojo.notifications.helper import create_notification, send_alert_notification
+
+from .dojo_test_case import DojoTestCase
 
 
 class TestNotifications(DojoTestCase):

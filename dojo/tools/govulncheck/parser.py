@@ -1,7 +1,7 @@
 import json
-from itertools import groupby
-from itertools import islice
 import logging
+from itertools import groupby, islice
+
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)

@@ -1,5 +1,6 @@
 from dojo.models import Test
 from dojo.tools.fortify.parser import FortifyParser
+
 from ..dojo_test_case import DojoTestCase
 
 

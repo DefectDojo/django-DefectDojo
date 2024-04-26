@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.pmd.parser import PmdParser
 from dojo.models import Test
+from dojo.tools.pmd.parser import PmdParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestPMDParser(DojoTestCase):

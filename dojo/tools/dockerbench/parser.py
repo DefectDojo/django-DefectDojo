@@ -1,7 +1,7 @@
 import json
+from datetime import datetime
 
 from dojo.models import Finding
-from datetime import datetime
 
 
 class DockerBenchParser:

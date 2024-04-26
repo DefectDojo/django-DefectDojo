@@ -1,6 +1,7 @@
 # Author: apipia, wheelsvt
-from .importer import BlackduckCRImporter
 from dojo.models import Finding
+
+from .importer import BlackduckCRImporter
 
 
 class BlackduckComponentRiskParser:

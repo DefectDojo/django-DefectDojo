@@ -1,8 +1,9 @@
 import datetime
 import logging
+
 import html2text
-from defusedxml import ElementTree as etree
 from cvss import CVSS3
+from defusedxml import ElementTree as etree
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding

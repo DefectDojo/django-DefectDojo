@@ -13,11 +13,11 @@ middleware here, or combine a Django application with an application of another
 framework.
 
 """
+import logging
 import os
 import socket
-import logging
-from django.core.wsgi import get_wsgi_application
 
+from django.core.wsgi import get_wsgi_application
 
 logger = logging.getLogger(__name__)
 

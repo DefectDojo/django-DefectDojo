@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from dojo.tools.api_edgescan.parser import ApiEdgescanParser
 from dojo.models import Test
+from dojo.tools.api_edgescan.parser import ApiEdgescanParser
 
 
 class TestApiEdgescanParser(TestCase):

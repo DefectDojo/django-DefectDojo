@@ -1,13 +1,16 @@
-from django.urls import reverse
-from .dojo_test_case import DojoTestCase
-from dojo.models import JIRA_Instance, Product
-from django.utils.http import urlencode
-from unittest.mock import patch, call
-from jira.exceptions import JIRAError
-import requests
-import dojo.jira_link.helper as jira_helper
 # from unittest import skip
 import logging
+from unittest.mock import call, patch
+
+import requests
+from django.urls import reverse
+from django.utils.http import urlencode
+from jira.exceptions import JIRAError
+
+import dojo.jira_link.helper as jira_helper
+from dojo.models import JIRA_Instance, Product
+
+from .dojo_test_case import DojoTestCase
 
 logger = logging.getLogger(__name__)
 

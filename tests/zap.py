@@ -1,11 +1,12 @@
 #!/usr/bin/python3
-import time
 import collections
-import socket
-from zapv2 import ZAPv2
-from urllib.parse import urlparse
-from prettytable import PrettyTable
 import re
+import socket
+import time
+from urllib.parse import urlparse
+
+from prettytable import PrettyTable
+from zapv2 import ZAPv2
 
 
 class Main:

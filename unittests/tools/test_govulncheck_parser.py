@@ -1,6 +1,6 @@
-from unittests.dojo_test_case import DojoTestCase
-from dojo.tools.govulncheck.parser import GovulncheckParser
 from dojo.models import Test
+from dojo.tools.govulncheck.parser import GovulncheckParser
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestGovulncheckParser(DojoTestCase):

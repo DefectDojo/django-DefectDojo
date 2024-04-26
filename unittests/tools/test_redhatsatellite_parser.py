@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.redhatsatellite.parser import RedHatSatelliteParser
 from dojo.models import Test
+from dojo.tools.redhatsatellite.parser import RedHatSatelliteParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestRedHatSatelliteParser(DojoTestCase):

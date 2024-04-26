@@ -1,25 +1,26 @@
-import logging
-
-from django.utils.translation import gettext as _
-from django.shortcuts import render
-from watson import search as watson
-from django.db.models import Q
-from dojo.forms import SimpleSearchForm
-from dojo.models import Finding, Finding_Template, Product, Test, Engagement, Languages
-from dojo.utils import add_breadcrumb, get_page_items, get_words_for_field, get_system_setting
-import re
-from dojo.finding.views import prefetch_for_findings
-from dojo.endpoint.views import prefetch_for_endpoints
-from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups
-from django.conf import settings
-import shlex
 import itertools
-from dojo.product.queries import get_authorized_products, get_authorized_app_analysis
-from dojo.engagement.queries import get_authorized_engagements
-from dojo.test.queries import get_authorized_tests
-from dojo.finding.queries import get_authorized_findings, get_authorized_vulnerability_ids
-from dojo.endpoint.queries import get_authorized_endpoints
+import logging
+import re
+import shlex
+
+from django.conf import settings
+from django.db.models import Q
+from django.shortcuts import render
+from django.utils.translation import gettext as _
+from watson import search as watson
+
 from dojo.authorization.roles_permissions import Permissions
+from dojo.endpoint.queries import get_authorized_endpoints
+from dojo.endpoint.views import prefetch_for_endpoints
+from dojo.engagement.queries import get_authorized_engagements
+from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups
+from dojo.finding.queries import get_authorized_findings, get_authorized_vulnerability_ids
+from dojo.finding.views import prefetch_for_findings
+from dojo.forms import SimpleSearchForm
+from dojo.models import Engagement, Finding, Finding_Template, Languages, Product, Test
+from dojo.product.queries import get_authorized_app_analysis, get_authorized_products
+from dojo.test.queries import get_authorized_tests
+from dojo.utils import add_breadcrumb, get_page_items, get_system_setting, get_words_for_field
 
 logger = logging.getLogger(__name__)
 

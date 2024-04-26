@@ -1,6 +1,7 @@
 from django.test import TestCase
-from dojo.tools.kubehunter.parser import KubeHunterParser
+
 from dojo.models import Test
+from dojo.tools.kubehunter.parser import KubeHunterParser
 
 
 class TestKubeHunterParser(TestCase):

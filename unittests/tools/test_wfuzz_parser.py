@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.wfuzz.parser import WFuzzParser
 from dojo.models import Test
+from dojo.tools.wfuzz.parser import WFuzzParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestWFuzzParser(DojoTestCase):

@@ -1,7 +1,9 @@
-from django.core.management.base import BaseCommand
-from dojo.models import JIRA_Issue, JIRA_Instance
-import dojo.jira_link.helper as jira_helper
 import logging
+
+from django.core.management.base import BaseCommand
+
+import dojo.jira_link.helper as jira_helper
+from dojo.models import JIRA_Instance, JIRA_Issue
 
 logger = logging.getLogger(__name__)
 

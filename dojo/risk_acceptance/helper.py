@@ -1,14 +1,16 @@
-from django.core.exceptions import PermissionDenied
-from django.utils import timezone
-from dojo.utils import get_system_setting, get_full_url
-from dateutil.relativedelta import relativedelta
-import dojo.jira_link.helper as jira_helper
-from dojo.jira_link.helper import escape_for_jira
-from dojo.notifications.helper import create_notification
-from django.urls import reverse
-from dojo.celery import app
-from dojo.models import System_Settings, Risk_Acceptance, Finding
 import logging
+
+from dateutil.relativedelta import relativedelta
+from django.core.exceptions import PermissionDenied
+from django.urls import reverse
+from django.utils import timezone
+
+import dojo.jira_link.helper as jira_helper
+from dojo.celery import app
+from dojo.jira_link.helper import escape_for_jira
+from dojo.models import Finding, Risk_Acceptance, System_Settings
+from dojo.notifications.helper import create_notification
+from dojo.utils import get_full_url, get_system_setting
 
 logger = logging.getLogger(__name__)
 

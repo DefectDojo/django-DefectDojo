@@ -1,4 +1,5 @@
 import json
+
 from dojo.tools.clair.clair_parser import ClairScan
 from dojo.tools.clair.clairklar_parser import ClairKlarScan
 

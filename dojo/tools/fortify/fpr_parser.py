@@ -1,6 +1,8 @@
 import re
 import zipfile
+
 from defusedxml import ElementTree
+
 from dojo.models import Finding
 
 

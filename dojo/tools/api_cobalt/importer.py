@@ -1,6 +1,9 @@
 import logging
+
 from django.core.exceptions import ValidationError
+
 from dojo.models import Product_API_Scan_Configuration
+
 from .api_client import CobaltAPI
 
 logger = logging.getLogger(__name__)

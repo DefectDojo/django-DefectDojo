@@ -1,8 +1,10 @@
 import datetime
-from ..dojo_test_case import DojoTestCase
+from datetime import datetime as date
+
 from dojo.models import Test
 from dojo.tools.acunetix.parser import AcunetixParser
-from datetime import datetime as date
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestAcunetixParser(DojoTestCase):

@@ -1,18 +1,18 @@
 import logging
 
-from django.shortcuts import render
 from django.contrib import messages
-from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import gettext
 from django.http import HttpResponseRedirect
-from dojo.utils import add_breadcrumb
+from django.shortcuts import render
+from django.urls import reverse
+from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 
-from dojo.forms import AnnouncementCreateForm, AnnouncementRemoveForm
-from dojo.models import Announcement, UserAnnouncement
 from dojo.authorization.authorization_decorators import (
     user_is_configuration_authorized,
 )
+from dojo.forms import AnnouncementCreateForm, AnnouncementRemoveForm
+from dojo.models import Announcement, UserAnnouncement
+from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
 

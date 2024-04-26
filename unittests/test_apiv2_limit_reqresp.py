@@ -1,7 +1,7 @@
-from rest_framework.test import APITestCase, APIClient
+from django.conf import settings
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
-from django.conf import settings
+from rest_framework.test import APIClient, APITestCase
 
 
 class APILimitReqRespPairsTest(APITestCase):

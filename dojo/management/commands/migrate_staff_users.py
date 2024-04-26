@@ -1,10 +1,10 @@
 import logging
 import sys
-from django.core.management.base import BaseCommand
+
 from django.contrib.auth.models import Permission
+from django.core.management.base import BaseCommand
 
 from dojo.models import Dojo_Group, Dojo_Group_Member, Dojo_User, Role
-
 
 logger = logging.getLogger(__name__)
 

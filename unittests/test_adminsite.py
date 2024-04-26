@@ -1,6 +1,7 @@
-from .dojo_test_case import DojoTestCase
-from django.contrib import admin
 import django.apps
+from django.contrib import admin
+
+from .dojo_test_case import DojoTestCase
 
 
 class AdminSite(DojoTestCase):

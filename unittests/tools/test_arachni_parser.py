@@ -1,7 +1,9 @@
 import datetime
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.arachni.parser import ArachniParser
+
 from dojo.models import Test
+from dojo.tools.arachni.parser import ArachniParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestArachniParser(DojoTestCase):

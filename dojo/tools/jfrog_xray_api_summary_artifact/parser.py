@@ -1,9 +1,9 @@
+import hashlib
 import json
 import re
-import hashlib
 
 from cvss import CVSS3
-from cvss.exceptions import CVSS3RHScoreDoesNotMatch, CVSS3RHMalformedError
+from cvss.exceptions import CVSS3RHMalformedError, CVSS3RHScoreDoesNotMatch
 
 from dojo.models import Finding
 

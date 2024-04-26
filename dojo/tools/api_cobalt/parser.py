@@ -1,9 +1,10 @@
 import json
 import textwrap
 from datetime import datetime
-from dojo.models import Endpoint, Finding
-from .importer import CobaltApiImporter
 
+from dojo.models import Endpoint, Finding
+
+from .importer import CobaltApiImporter
 
 SCAN_COBALTIO_API = "Cobalt.io API Import"
 

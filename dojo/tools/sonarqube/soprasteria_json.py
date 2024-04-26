@@ -1,6 +1,9 @@
 import logging
-from dojo.tools.sonarqube.soprasteria_helper import SonarQubeSoprasteriaHelper
+
 from lxml import etree
+
+from dojo.tools.sonarqube.soprasteria_helper import SonarQubeSoprasteriaHelper
+
 logger = logging.getLogger(__name__)
 
 

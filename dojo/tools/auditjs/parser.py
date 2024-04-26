@@ -1,9 +1,11 @@
 import json
-from json.decoder import JSONDecodeError
 import re
-from dojo.models import Finding
-from cvss import CVSS3, CVSS2
+from json.decoder import JSONDecodeError
+
 import cvss.parser
+from cvss import CVSS2, CVSS3
+
+from dojo.models import Finding
 
 
 class AuditJSParser:

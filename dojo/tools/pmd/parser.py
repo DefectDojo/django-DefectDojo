@@ -1,6 +1,7 @@
-import io
 import csv
 import hashlib
+import io
+
 from dojo.models import Finding
 
 

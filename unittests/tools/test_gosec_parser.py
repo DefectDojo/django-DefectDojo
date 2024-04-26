@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.gosec.parser import GosecParser
 from dojo.models import Test
+from dojo.tools.gosec.parser import GosecParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestGosecParser(DojoTestCase):

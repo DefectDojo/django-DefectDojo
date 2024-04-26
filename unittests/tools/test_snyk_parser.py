@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.snyk.parser import SnykParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestSnykParser(DojoTestCase):

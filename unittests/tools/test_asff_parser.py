@@ -1,8 +1,10 @@
-import os.path
 import json
+import os.path
 from datetime import datetime
-from dojo.models import Test, Endpoint
+
+from dojo.models import Endpoint, Test
 from dojo.tools.asff.parser import AsffParser
+
 from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 

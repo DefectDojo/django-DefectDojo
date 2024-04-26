@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.mozilla_observatory.parser import MozillaObservatoryParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestMozillaObservatoryParser(DojoTestCase):

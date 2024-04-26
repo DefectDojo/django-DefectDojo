@@ -1,8 +1,9 @@
 import datetime
 
 from django.test import TestCase
+
+from dojo.models import Product_API_Scan_Configuration, Test
 from dojo.tools.api_bugcrowd.parser import ApiBugcrowdParser
-from dojo.models import Test, Product_API_Scan_Configuration
 
 
 class TestApiBugcrowdParser(TestCase):

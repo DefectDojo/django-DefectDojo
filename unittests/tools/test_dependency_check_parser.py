@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
 from os import path
 
-from dateutil.tz import tzoffset, tzlocal
+from dateutil.tz import tzlocal, tzoffset
+
 from dojo.models import Test
 from dojo.tools.dependency_check.parser import DependencyCheckParser
 

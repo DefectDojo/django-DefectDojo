@@ -1,8 +1,9 @@
 from os import path
 
-from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.burp_dastardly.parser import BurpDastardlyParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestBurpParser(DojoTestCase):

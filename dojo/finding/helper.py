@@ -1,19 +1,29 @@
+import logging
+from time import strftime
+
+from django.conf import settings
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, pre_delete
 from django.dispatch.dispatcher import receiver
+from django.utils import timezone
+from fieldsignals import pre_save_changed
+
+import dojo.jira_link.helper as jira_helper
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
-import dojo.jira_link.helper as jira_helper
-import logging
-from time import strftime
-from django.utils import timezone
-from django.conf import settings
-from fieldsignals import pre_save_changed
-from dojo.utils import get_current_user, mass_model_updater, to_str_typed
-from dojo.models import Engagement, Finding, Finding_Group, System_Settings, Test, Endpoint, Endpoint_Status, \
-    Vulnerability_Id, Vulnerability_Id_Template
 from dojo.endpoint.utils import save_endpoints_to_add
-
+from dojo.models import (
+    Endpoint,
+    Endpoint_Status,
+    Engagement,
+    Finding,
+    Finding_Group,
+    System_Settings,
+    Test,
+    Vulnerability_Id,
+    Vulnerability_Id_Template,
+)
+from dojo.utils import get_current_user, mass_model_updater, to_str_typed
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")

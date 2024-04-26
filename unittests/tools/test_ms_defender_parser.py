@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.ms_defender.parser import MSDefenderParser
 from dojo.models import Test
+from dojo.tools.ms_defender.parser import MSDefenderParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestSDefenderParser(DojoTestCase):

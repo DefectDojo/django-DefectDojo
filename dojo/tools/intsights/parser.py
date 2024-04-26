@@ -1,4 +1,5 @@
 import logging
+
 from dojo.models import Finding
 from dojo.tools.intsights.csv_handler import IntSightsCSVParser
 from dojo.tools.intsights.json_handler import IntSightsJSONParser

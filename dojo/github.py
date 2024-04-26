@@ -2,12 +2,13 @@
 import logging
 import sys
 
+from django.template.loader import render_to_string
+
 # External libs
 from github import Github
 
 # Dojo related imports
-from dojo.models import Engagement, Product, GITHUB_PKey, GITHUB_Issue
-from django.template.loader import render_to_string
+from dojo.models import Engagement, GITHUB_Issue, GITHUB_PKey, Product
 
 # Create global
 logger = logging.getLogger(__name__)

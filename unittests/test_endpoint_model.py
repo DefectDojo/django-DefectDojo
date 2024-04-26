@@ -1,13 +1,14 @@
 import datetime
-from .dojo_test_case import DojoTestCase
 from unittest import skip
 
-from dojo.endpoint.utils import endpoint_get_or_create
-from dojo.models import Product_Type, Product, Engagement, Test, Finding, Endpoint, Endpoint_Status
-from django.core.exceptions import ValidationError
 from django.apps import apps
+from django.core.exceptions import ValidationError
 from django.utils import timezone
-from dojo.endpoint.utils import remove_broken_endpoint_statuses
+
+from dojo.endpoint.utils import endpoint_get_or_create, remove_broken_endpoint_statuses
+from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, Product_Type, Test
+
+from .dojo_test_case import DojoTestCase
 
 
 class TestEndpointModel(DojoTestCase):

@@ -1,12 +1,14 @@
-from django.urls import reverse
-from dojo.models import User
-from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient
-from django.test.client import Client
-from .dojo_test_case import DojoAPITestCase, get_unit_tests_path
-from .test_utils import assertImportModelsCreated
 import logging
 
+from django.test.client import Client
+from django.urls import reverse
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient
+
+from dojo.models import User
+
+from .dojo_test_case import DojoAPITestCase, get_unit_tests_path
+from .test_utils import assertImportModelsCreated
 
 logger = logging.getLogger(__name__)
 

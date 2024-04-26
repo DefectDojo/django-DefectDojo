@@ -1,7 +1,9 @@
-import json
 import hashlib
-from dojo.models import Finding
+import json
+
 from dateutil import parser
+
+from dojo.models import Finding
 
 
 class GgshieldParser:

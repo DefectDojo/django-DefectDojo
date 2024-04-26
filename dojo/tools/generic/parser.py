@@ -5,6 +5,7 @@ import json
 
 from cvss import parser as cvss_parser
 from dateutil.parser import parse
+
 from dojo.models import Endpoint, Finding
 from dojo.tools.parser_test import ParserTest
 

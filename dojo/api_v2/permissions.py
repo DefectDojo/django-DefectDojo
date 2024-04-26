@@ -1,39 +1,41 @@
 import re
+
+from django.shortcuts import get_object_or_404
+from rest_framework import permissions, serializers
 from rest_framework.exceptions import (
     ParseError,
     PermissionDenied,
     ValidationError,
 )
+
 from dojo.api_v2.serializers import (
     get_import_meta_data_from_dict,
     get_product_id_from_dict,
 )
+from dojo.authorization.authorization import (
+    user_has_configuration_permission,
+    user_has_global_permission,
+    user_has_permission,
+)
+from dojo.authorization.roles_permissions import Permissions
 from dojo.importers.reimporter.utils import (
     get_target_engagement_if_exists,
     get_target_product_by_id_if_exists,
     get_target_product_if_exists,
-    get_target_test_if_exists,
     get_target_product_type_if_exists,
+    get_target_test_if_exists,
 )
 from dojo.models import (
+    Cred_Mapping,
+    Dojo_Group,
     Endpoint,
     Engagement,
     Finding,
     Finding_Group,
-    Product_Type,
     Product,
+    Product_Type,
     Test,
-    Dojo_Group,
-    Cred_Mapping,
 )
-from django.shortcuts import get_object_or_404
-from rest_framework import permissions, serializers
-from dojo.authorization.authorization import (
-    user_has_global_permission,
-    user_has_permission,
-    user_has_configuration_permission,
-)
-from dojo.authorization.roles_permissions import Permissions
 
 
 def check_post_permission(request, post_model, post_pk, post_permission):

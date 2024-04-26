@@ -2,6 +2,7 @@ import datetime
 
 from cpe import CPE
 from defusedxml.ElementTree import parse
+
 from dojo.models import Endpoint, Finding
 
 

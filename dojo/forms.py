@@ -1,58 +1,108 @@
+import logging
 import os
-import re
-from datetime import datetime, date
 import pickle
+import re
 import warnings
-from dojo.widgets import TableCheckboxWidget
-from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
+from datetime import date, datetime
+
+import tagulous
+from crispy_forms.bootstrap import InlineCheckboxes, InlineRadios
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
-from django.db.models import Count, Q
+from crum import get_current_user
 from dateutil.relativedelta import relativedelta
 from django import forms
-from django.contrib.auth.password_validation import validate_password
+from django.conf import settings
 from django.contrib.auth.models import Permission
+from django.contrib.auth.password_validation import validate_password
 from django.core import validators
 from django.core.exceptions import ValidationError
+from django.db.models import Count, Q
 from django.forms import modelformset_factory
-from django.forms.widgets import Widget, Select
+from django.forms.widgets import Select, Widget
+from django.urls import reverse
+from django.utils import timezone
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from polymorphic.base import ManagerInheritanceWarning
-import tagulous
-
-from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
-    validate_endpoints_to_add
-from dojo.models import Announcement, Finding, Finding_Group, Product_Type, Product, Note_Type, \
-    Check_List, SLA_Configuration, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
-    Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, \
-    JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
-    Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
-    App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
-    Benchmark_Product_Summary, Engagement_Presets, DojoMeta, \
-    Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
-    ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, EFFORT_FOR_FIXING_CHOICES, Product_Type_Member, \
-    Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, \
-    Product_API_Scan_Configuration
-
-from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
-from django.urls import reverse
 from tagulous.forms import TagField
-import logging
-from crum import get_current_user
-from dojo.utils import get_system_setting, get_product, is_finding_groups_enabled, \
-    get_password_requirements_string
-from django.conf import settings
-from dojo.authorization.roles_permissions import Permissions
-from dojo.product_type.queries import get_authorized_product_types
-from dojo.product.queries import get_authorized_products
-from dojo.finding.queries import get_authorized_findings
-from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users
-from dojo.user.utils import get_configuration_permissions_fields
-from dojo.group.queries import get_authorized_groups, get_group_member_roles
+
 import dojo.jira_link.helper as jira_helper
+from dojo.authorization.roles_permissions import Permissions
+from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
+from dojo.finding.queries import get_authorized_findings
+from dojo.group.queries import get_authorized_groups, get_group_member_roles
+from dojo.models import (
+    EFFORT_FOR_FIXING_CHOICES,
+    SEVERITY_CHOICES,
+    Announcement,
+    Answered_Survey,
+    App_Analysis,
+    Benchmark_Product,
+    Benchmark_Product_Summary,
+    Benchmark_Requirement,
+    Check_List,
+    Choice,
+    ChoiceAnswer,
+    ChoiceQuestion,
+    Cred_Mapping,
+    Cred_User,
+    Development_Environment,
+    Dojo_Group,
+    Dojo_Group_Member,
+    Dojo_User,
+    DojoMeta,
+    Endpoint,
+    Engagement,
+    Engagement_Presets,
+    Engagement_Survey,
+    FileUpload,
+    Finding,
+    Finding_Group,
+    Finding_Template,
+    General_Survey,
+    GITHUB_Conf,
+    GITHUB_Issue,
+    GITHUB_PKey,
+    Global_Role,
+    JIRA_Instance,
+    JIRA_Issue,
+    JIRA_Project,
+    Note_Type,
+    Notes,
+    Notifications,
+    Objects_Product,
+    Product,
+    Product_API_Scan_Configuration,
+    Product_Group,
+    Product_Member,
+    Product_Type,
+    Product_Type_Group,
+    Product_Type_Member,
+    Question,
+    Regulation,
+    Risk_Acceptance,
+    SLA_Configuration,
+    Stub_Finding,
+    System_Settings,
+    Test,
+    Test_Type,
+    TextAnswer,
+    TextQuestion,
+    Tool_Configuration,
+    Tool_Product_Settings,
+    Tool_Type,
+    User,
+    UserContactInfo,
+)
+from dojo.product.queries import get_authorized_products
+from dojo.product_type.queries import get_authorized_product_types
+from dojo.tools.factory import get_choices_sorted, requires_file, requires_tool_type
+from dojo.user.queries import get_authorized_users, get_authorized_users_for_product_and_product_type
+from dojo.user.utils import get_configuration_permissions_fields
+from dojo.utils import get_password_requirements_string, get_product, get_system_setting, is_finding_groups_enabled
+from dojo.widgets import TableCheckboxWidget
 
 logger = logging.getLogger(__name__)
 

@@ -1,12 +1,12 @@
 import hashlib
 import logging
 import re
-import dateutil
+from datetime import datetime
 
+import dateutil
 from cpe import CPE
 from defusedxml import ElementTree
 from packageurl import PackageURL
-from datetime import datetime
 
 from dojo.models import Finding
 

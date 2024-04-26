@@ -1,5 +1,7 @@
 import logging
+
 from dojo.tools.sonarqube.soprasteria_helper import SonarQubeSoprasteriaHelper
+
 logger = logging.getLogger(__name__)
 
 

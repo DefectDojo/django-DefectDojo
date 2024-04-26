@@ -2,8 +2,10 @@ import csv
 import hashlib
 import io
 import re
+
 from dateutil.parser import parse
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
 class ColumnMappingStrategy:

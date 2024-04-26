@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from pytz import timezone
+
 from dojo.celery import app
 
 locale = timezone(get_system_setting('time_zone'))

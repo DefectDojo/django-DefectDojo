@@ -1,17 +1,17 @@
 # #  product
 import logging
 
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from dojo.utils import add_breadcrumb
+from django.urls import reverse
+
+from dojo.authorization.authorization import user_has_configuration_permission_or_403
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.forms import RegulationForm
 from dojo.models import Regulation
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
-from dojo.authorization.authorization import user_has_configuration_permission_or_403
-
+from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
 

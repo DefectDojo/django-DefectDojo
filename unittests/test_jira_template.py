@@ -1,8 +1,10 @@
-from .dojo_test_case import DojoTestCase
-from dojo.models import Product
-from dojo.jira_link import helper as jira_helper
 # from unittest import skip
 import logging
+
+from dojo.jira_link import helper as jira_helper
+from dojo.models import Product
+
+from .dojo_test_case import DojoTestCase
 
 logger = logging.getLogger(__name__)
 

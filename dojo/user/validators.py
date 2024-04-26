@@ -1,8 +1,9 @@
 import re
 
+from django.contrib.auth.password_validation import CommonPasswordValidator
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext
-from django.contrib.auth.password_validation import CommonPasswordValidator
+
 from dojo.utils import get_system_setting
 
 

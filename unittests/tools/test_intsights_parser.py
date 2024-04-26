@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.intsights.parser import IntSightsParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestIntSightsParser(DojoTestCase):

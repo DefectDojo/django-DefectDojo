@@ -1,5 +1,5 @@
 
-from dojo.models import Test, SEVERITIES
+from dojo.models import SEVERITIES, Test
 from dojo.tools.api_blackduck.parser import ApiBlackduckParser
 
 from ..dojo_test_case import DojoTestCase

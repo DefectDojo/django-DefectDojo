@@ -1,7 +1,9 @@
 from datetime import date
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.azure_security_center_recommendations.parser import AzureSecurityCenterRecommendationsParser
+
 from dojo.models import Test
+from dojo.tools.azure_security_center_recommendations.parser import AzureSecurityCenterRecommendationsParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestAzureSecurityCenterRecommendationsParser(DojoTestCase):

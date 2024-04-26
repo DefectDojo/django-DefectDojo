@@ -5,21 +5,27 @@ import operator
 from calendar import monthrange
 from collections import OrderedDict
 from datetime import date, datetime, timedelta
+from functools import reduce
 from math import ceil
 from operator import itemgetter
 
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from django.urls import reverse
-from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
+from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
-from django.utils.html import escape
-from django.views.decorators.cache import cache_page
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.html import escape
+from django.utils.translation import gettext as _
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.roles_permissions import Permissions
+from dojo.endpoint.queries import get_authorized_endpoint_status
 from dojo.filters import (
     MetricsEndpointFilter,
     MetricsEndpointFilterWithoutObjectLookups,
@@ -27,21 +33,23 @@ from dojo.filters import (
     MetricsFindingFilterWithoutObjectLookups,
     UserFilter,
 )
-from dojo.forms import SimpleMetricsForm, ProductTypeCountsForm, ProductTagCountsForm
-from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
-    Risk_Acceptance, Dojo_User, Endpoint_Status
-from dojo.utils import get_page_items, add_breadcrumb, findings_this_period, opened_in_period, count_findings, \
-    get_period_counts, get_system_setting, get_punchcard_data, queryset_check
-from functools import reduce
-from django.views.decorators.vary import vary_on_cookie
-from dojo.authorization.roles_permissions import Permissions
+from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY
+from dojo.finding.queries import get_authorized_findings
+from dojo.forms import ProductTagCountsForm, ProductTypeCountsForm, SimpleMetricsForm
+from dojo.models import Dojo_User, Endpoint_Status, Engagement, Finding, Product, Product_Type, Risk_Acceptance, Test
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
-from dojo.finding.queries import get_authorized_findings
-from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY
-from dojo.endpoint.queries import get_authorized_endpoint_status
-from dojo.authorization.authorization import user_has_permission_or_403
-from django.utils.translation import gettext as _
+from dojo.utils import (
+    add_breadcrumb,
+    count_findings,
+    findings_this_period,
+    get_page_items,
+    get_period_counts,
+    get_punchcard_data,
+    get_system_setting,
+    opened_in_period,
+    queryset_check,
+)
 
 logger = logging.getLogger(__name__)
 

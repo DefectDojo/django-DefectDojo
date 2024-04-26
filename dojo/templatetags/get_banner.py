@@ -1,7 +1,8 @@
-from django.utils.safestring import mark_safe
 import bleach
 from bleach.css_sanitizer import CSSSanitizer
 from django import template
+from django.utils.safestring import mark_safe
+
 from dojo.models import BannerConf
 
 register = template.Library()

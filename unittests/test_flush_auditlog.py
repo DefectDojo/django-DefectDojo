@@ -1,11 +1,15 @@
-from dojo.tasks import flush_auditlog
-from .dojo_test_case import DojoTestCase
-from django.test import override_settings
-from auditlog.models import LogEntry
-from datetime import date, datetime, timezone
-from dojo.models import Finding
-from dateutil.relativedelta import relativedelta
 import logging
+from datetime import date, datetime, timezone
+
+from auditlog.models import LogEntry
+from dateutil.relativedelta import relativedelta
+from django.test import override_settings
+
+from dojo.models import Finding
+from dojo.tasks import flush_auditlog
+
+from .dojo_test_case import DojoTestCase
+
 logger = logging.getLogger(__name__)
 
 

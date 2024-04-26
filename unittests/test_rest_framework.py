@@ -1,53 +1,135 @@
-from collections import OrderedDict
-from drf_spectacular.drainage import GENERATOR_STATS
-# from drf_spectacular.renderers import OpenApiJsonRenderer
-from unittest.mock import MagicMock, call, patch, ANY
-from dojo.models import Development_Environment, Product, Engagement, Test, Finding, \
-    JIRA_Issue, Test_Type, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    User, Stub_Finding, Endpoint, JIRA_Project, JIRA_Instance, \
-    Finding_Template, Note_Type, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Product_API_Scan_Configuration, Notes, \
-    BurpRawRequestResponse, DojoMeta, FileUpload, Product_Type, Dojo_Group, \
-    Role, Product_Type_Member, Product_Member, Product_Type_Group, Risk_Acceptance, \
-    Product_Group, Global_Role, Dojo_Group_Member, Language_Type, Languages, \
-    Notifications, UserContactInfo, Cred_Mapping, Cred_User, \
-    TextQuestion, ChoiceQuestion, TextAnswer, ChoiceAnswer, Engagement_Survey, \
-    Answered_Survey, General_Survey, Announcement
-from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, EngagementViewSet, \
-    FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
-    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
-    StubFindingsViewSet, TestTypesViewSet, TestsViewSet, \
-    ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
-    UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet, \
-    EndpointStatusViewSet, SonarqubeIssueViewSet, NotesViewSet, ProductTypeViewSet, \
-    DojoGroupViewSet, RoleViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
-    ProductTypeGroupViewSet, ProductGroupViewSet, GlobalRoleViewSet, RiskAcceptanceViewSet, \
-    DojoGroupMemberViewSet, LanguageTypeViewSet, LanguageViewSet, ImportLanguagesView, \
-    NotificationsViewSet, UserContactInfoViewSet, ProductAPIScanConfigurationViewSet, \
-    ConfigurationPermissionViewSet, CredentialsMappingViewSet, \
-    CredentialsViewSet, QuestionnaireQuestionViewSet, QuestionnaireAnswerViewSet, \
-    QuestionnaireGeneralSurveyViewSet, QuestionnaireEngagementSurveyViewSet, QuestionnaireAnsweredSurveyViewSet, \
-    AnnouncementViewSet
-from json import dumps
-from enum import Enum
-from django.urls import reverse
-from django.contrib.auth.models import Permission
-from rest_framework import status
-from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient
-from .dojo_test_case import DojoAPITestCase
-from dojo.api_v2.prefetch.utils import _get_prefetchable_fields
-from rest_framework.mixins import \
-    ListModelMixin, RetrieveModelMixin, CreateModelMixin, \
-    DestroyModelMixin, UpdateModelMixin
-from dojo.api_v2.mixins import DeletePreviewModelMixin
-from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
-from drf_spectacular.settings import spectacular_settings
+import json
 import logging
 import pathlib
-import json
-from dojo.authorization.roles_permissions import Permissions
+from collections import OrderedDict
+from enum import Enum
+from json import dumps
 
+# from drf_spectacular.renderers import OpenApiJsonRenderer
+from unittest.mock import ANY, MagicMock, call, patch
+
+from django.contrib.auth.models import Permission
+from django.urls import reverse
+from drf_spectacular.drainage import GENERATOR_STATS
+from drf_spectacular.settings import spectacular_settings
+from rest_framework import status
+from rest_framework.authtoken.models import Token
+from rest_framework.mixins import (
+    CreateModelMixin,
+    DestroyModelMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+)
+from rest_framework.test import APIClient
+
+from dojo.api_v2.mixins import DeletePreviewModelMixin
+from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
+from dojo.api_v2.prefetch.utils import _get_prefetchable_fields
+from dojo.api_v2.views import (
+    AnnouncementViewSet,
+    AppAnalysisViewSet,
+    ConfigurationPermissionViewSet,
+    CredentialsMappingViewSet,
+    CredentialsViewSet,
+    DevelopmentEnvironmentViewSet,
+    DojoGroupMemberViewSet,
+    DojoGroupViewSet,
+    EndpointStatusViewSet,
+    EndPointViewSet,
+    EngagementViewSet,
+    FindingTemplatesViewSet,
+    FindingViewSet,
+    GlobalRoleViewSet,
+    ImportLanguagesView,
+    ImportScanView,
+    JiraInstanceViewSet,
+    JiraIssuesViewSet,
+    JiraProjectViewSet,
+    LanguageTypeViewSet,
+    LanguageViewSet,
+    NotesViewSet,
+    NoteTypeViewSet,
+    NotificationsViewSet,
+    ProductAPIScanConfigurationViewSet,
+    ProductGroupViewSet,
+    ProductMemberViewSet,
+    ProductTypeGroupViewSet,
+    ProductTypeMemberViewSet,
+    ProductTypeViewSet,
+    ProductViewSet,
+    QuestionnaireAnsweredSurveyViewSet,
+    QuestionnaireAnswerViewSet,
+    QuestionnaireEngagementSurveyViewSet,
+    QuestionnaireGeneralSurveyViewSet,
+    QuestionnaireQuestionViewSet,
+    RiskAcceptanceViewSet,
+    RoleViewSet,
+    SonarqubeIssueViewSet,
+    StubFindingsViewSet,
+    TestsViewSet,
+    TestTypesViewSet,
+    ToolConfigurationsViewSet,
+    ToolProductSettingsViewSet,
+    ToolTypesViewSet,
+    UserContactInfoViewSet,
+    UsersViewSet,
+)
+from dojo.authorization.roles_permissions import Permissions
+from dojo.models import (
+    Announcement,
+    Answered_Survey,
+    App_Analysis,
+    BurpRawRequestResponse,
+    ChoiceAnswer,
+    ChoiceQuestion,
+    Cred_Mapping,
+    Cred_User,
+    Development_Environment,
+    Dojo_Group,
+    Dojo_Group_Member,
+    DojoMeta,
+    Endpoint,
+    Endpoint_Status,
+    Engagement,
+    Engagement_Survey,
+    FileUpload,
+    Finding,
+    Finding_Template,
+    General_Survey,
+    Global_Role,
+    JIRA_Instance,
+    JIRA_Issue,
+    JIRA_Project,
+    Language_Type,
+    Languages,
+    Note_Type,
+    Notes,
+    Notifications,
+    Product,
+    Product_API_Scan_Configuration,
+    Product_Group,
+    Product_Member,
+    Product_Type,
+    Product_Type_Group,
+    Product_Type_Member,
+    Risk_Acceptance,
+    Role,
+    Sonarqube_Issue,
+    Sonarqube_Issue_Transition,
+    Stub_Finding,
+    Test,
+    Test_Type,
+    TextAnswer,
+    TextQuestion,
+    Tool_Configuration,
+    Tool_Product_Settings,
+    Tool_Type,
+    User,
+    UserContactInfo,
+)
+
+from .dojo_test_case import DojoAPITestCase
 
 logger = logging.getLogger(__name__)
 

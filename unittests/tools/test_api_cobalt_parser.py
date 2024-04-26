@@ -1,10 +1,10 @@
 import json
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from unittest.mock import patch
 
-from dojo.tools.api_cobalt.parser import ApiCobaltParser
 from dojo.models import Test, Test_Type
+from dojo.tools.api_cobalt.parser import ApiCobaltParser
+
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestApiCobaltParser(DojoTestCase):

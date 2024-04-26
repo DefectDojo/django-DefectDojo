@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from jira.exceptions import JIRAError
 
-from dojo.models import Finding, Notes, User, Dojo_User
+from dojo.models import Dojo_User, Finding, Notes, User
 
 """
 Author: Aaron Weaver

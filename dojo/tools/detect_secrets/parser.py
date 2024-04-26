@@ -1,6 +1,8 @@
-import json
 import hashlib
+import json
+
 import dateutil.parser
+
 from dojo.models import Finding
 
 

@@ -1,6 +1,5 @@
 from .importer import SonarQubeApiImporter
 
-
 SCAN_SONARQUBE_API = "SonarQube API Import"
 
 

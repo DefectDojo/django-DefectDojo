@@ -1,7 +1,7 @@
 import datetime
 
+from dojo.models import Finding, Test
 from dojo.tools.stackhawk.parser import StackHawkParser
-from dojo.models import Test, Finding
 from unittests.dojo_test_case import DojoTestCase
 
 

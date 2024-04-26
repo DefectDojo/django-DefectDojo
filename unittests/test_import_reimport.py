@@ -1,17 +1,19 @@
 import datetime
-from django.urls import reverse
-from dojo.models import Test_Type, User, Test, Finding
-from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient
-from django.test.client import Client
-from django.utils import timezone
 
-from .dojo_test_case import DojoAPITestCase, get_unit_tests_path
-from .test_utils import assertTestImportModelsCreated
-from django.test import override_settings
 # from unittest import skip
 import logging
 
+from django.test import override_settings
+from django.test.client import Client
+from django.urls import reverse
+from django.utils import timezone
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient
+
+from dojo.models import Finding, Test, Test_Type, User
+
+from .dojo_test_case import DojoAPITestCase, get_unit_tests_path
+from .test_utils import assertTestImportModelsCreated
 
 logger = logging.getLogger(__name__)
 

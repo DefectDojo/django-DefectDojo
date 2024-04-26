@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
+from dojo.models import Engagement, Product, Test
 from dojo.tools.openvas.parser import OpenVASParser
-from dojo.models import Test, Engagement, Product
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestOpenVASParser(DojoTestCase):

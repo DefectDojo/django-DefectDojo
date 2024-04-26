@@ -1,5 +1,6 @@
-from dojo.models import Finding
 import re
+
+from dojo.models import Finding
 
 
 class SonarQubeRESTAPIJSON:

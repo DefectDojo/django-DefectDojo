@@ -1,7 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-
 from dojo.models import Test
 from dojo.tools.pip_audit.parser import PipAuditParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestPipAuditParser(DojoTestCase):

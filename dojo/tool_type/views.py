@@ -2,15 +2,15 @@
 import logging
 
 from django.contrib import messages
-from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from dojo.utils import add_breadcrumb
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.forms import ToolTypeForm
 from dojo.models import Tool_Type
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.scantist.parser import ScantistParser
 from dojo.models import Test
+from dojo.tools.scantist.parser import ScantistParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestScantistParser(DojoTestCase):

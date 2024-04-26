@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.chefinspect.parser import ChefInspectParser
 from dojo.models import Test
+from dojo.tools.chefinspect.parser import ChefInspectParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestChefInspectParser(DojoTestCase):

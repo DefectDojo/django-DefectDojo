@@ -1,8 +1,9 @@
 import os.path
 
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-from dojo.tools.trufflehog.parser import TruffleHogParser
 from dojo.models import Test
+from dojo.tools.trufflehog.parser import TruffleHogParser
+
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 def sample_path(file_name):

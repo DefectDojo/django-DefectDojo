@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.dockle.parser import DockleParser
 from dojo.models import Test
+from dojo.tools.dockle.parser import DockleParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestDockleParser(DojoTestCase):

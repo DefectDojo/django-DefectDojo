@@ -1,6 +1,7 @@
 from django.test import TestCase
-from dojo.tools.noseyparker.parser import NoseyParkerParser
+
 from dojo.models import Test
+from dojo.tools.noseyparker.parser import NoseyParkerParser
 
 
 class TestNoseyParkerParser(TestCase):

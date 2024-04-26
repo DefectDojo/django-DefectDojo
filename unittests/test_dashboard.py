@@ -4,11 +4,12 @@ from unittest.mock import patch
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
-from .dojo_test_case import DojoTestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from dojo.models import Finding, Test, Engagement, Risk_Acceptance, System_Settings
+from dojo.models import Engagement, Finding, Risk_Acceptance, System_Settings, Test
+
+from .dojo_test_case import DojoTestCase
 
 User = get_user_model()
 

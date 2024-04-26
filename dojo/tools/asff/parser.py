@@ -1,6 +1,8 @@
 import json
+
 import dateutil
 from netaddr import IPAddress
+
 from dojo.models import Endpoint, Finding
 
 SEVERITY_MAPPING = {
