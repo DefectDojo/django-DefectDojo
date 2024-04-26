@@ -426,7 +426,6 @@ class FindingTagFilter(DojoFilter):
         queryset=Product.tags.tag_model.objects.all().order_by("name"),
         help_text="Filter Products by the selected tags")
 
-    
     not_tags = ModelMultipleChoiceFilter(
         field_name="tags__name",
         to_field_name="name",
