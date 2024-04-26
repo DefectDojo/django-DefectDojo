@@ -12,6 +12,8 @@
     "securityRisk": "HIGH",
     "description": "A vulnerability in the JsonMapObjectReaderWriter of Apache CXF allows an attacker to submit malformed JSON to a web service, which results in the thread getting stuck in an infinite loop, consuming CPU indefinitely. This issue affects Apache CXF versions prior to 3.4.4; Apache CXF versions prior to 3.3.11.",
     "privateVulnerability": false,
+    "epss_score": 0.1,
+    "epss_percentile": 0.2,
     "components": [
       {
         "id": 1270458,

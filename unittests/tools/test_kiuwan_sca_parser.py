@@ -39,3 +39,5 @@ class TestKiuwanSCAParser(DojoTestCase):
         self.assertEqual(finding1.cwe, 835)
         self.assertEqual(finding1.unique_id_from_tool, 158713)
         self.assertEqual(finding1.cvssv3_score, 7.5)
+        self.assertEqual(finding1.epss_score, 0.1)
+        self.assertEqual(finding1.epss_percentile, 0.2)
