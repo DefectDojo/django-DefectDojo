@@ -1980,23 +1980,29 @@ class ApiTemplateFindingFilter(DojoFilter):
                      'mitigation']
 
 
-class MetricsFindingFilterHelper(FilterSet):
+class MetricsFindingFilter(FindingFilter):
     start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
     end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
     date = MetricsDateRangeFilter()
     vulnerability_id = CharFilter(method=vulnerability_id_filter, label='Vulnerability Id')
 
-    def manage_args(self, *args: list, **kwargs: dict):
+    not_tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        exclude=True,
+        queryset=Endpoint.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
+
+    def __init__(self, *args, **kwargs):
         if args[0]:
             if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
                 args[0]._mutable = True
                 args[0]['date'] = 8
                 args[0]._mutable = False
 
-
-class MetricsFindingFilter(FindingFilter, MetricsFindingFilterHelper):
-    def __init__(self, *args, **kwargs):
-        self.manage_args(*args, **kwargs)
         super().__init__(*args, **kwargs)
 
     class Meta(FindingFilter.Meta):
@@ -2004,12 +2010,32 @@ class MetricsFindingFilter(FindingFilter, MetricsFindingFilterHelper):
         fields = get_finding_filterset_fields(metrics=True)
 
 
-class MetricsFindingFilterWithoutObjectLookups(FindingFilterWithoutObjectLookups, MetricsFindingFilterHelper):
+class MetricsFindingFilterWithoutObjectLookups(FindingFilterWithoutObjectLookups):
+    start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
+    end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
+    date = MetricsDateRangeFilter()
+    vulnerability_id = CharFilter(method=vulnerability_id_filter, label='Vulnerability Id')
+
+    not_tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        exclude=True,
+        queryset=Endpoint.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
+
     def __init__(self, *args, **kwargs):
-        self.manage_args(*args, **kwargs)
+        if args[0]:
+            if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
+                args[0]._mutable = True
+                args[0]['date'] = 8
+                args[0]._mutable = False
+
         super().__init__(*args, **kwargs)
 
-    class Meta(FindingFilter.Meta):
+    class Meta(FindingFilterWithoutObjectLookups.Meta):
         model = Finding
         fields = get_finding_filterset_fields(metrics=True, filter_string_matching=True)
 
