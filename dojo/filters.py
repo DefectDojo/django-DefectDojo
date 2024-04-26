@@ -1515,7 +1515,7 @@ class FindingFilterNonModelFilters(FilterSet):
         field_name="epss_score",
         label="EPSS score range",
         help_text=(
-            "The range of EPSS score percentages to filter on; the left input is a lower bound, " 
+            "The range of EPSS score percentages to filter on; the left input is a lower bound, "
             "the right is an upper bound. Leaving one empty will skip that bound (e.g., leaving "
             "the lower bound input empty will filter only on the upper bound -- filtering on "
             "\"less than or equal\")."
