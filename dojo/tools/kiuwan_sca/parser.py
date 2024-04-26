@@ -38,7 +38,6 @@ class KiuwanSCAParser(object):
 
             finding = Finding(test=test)
             finding.unique_id_from_tool = row["id"]
-            finding.title = row["cve"]
             finding.cve = row["cve"]
             finding.description = row["description"]
             finding.severity = self.SEVERITY[row["securityRisk"]]
@@ -46,6 +45,10 @@ class KiuwanSCAParser(object):
             if "components" in row and len(row["components"]) > 0:
                 finding.component_name = row["components"][0]["artifact"]
                 finding.component_version = row["components"][0]["version"]
+                finding.title = finding.component_name
+
+            if not finding.title:
+                finding.title = row["cve"]
 
             if "cwe" in row:
                 try:
