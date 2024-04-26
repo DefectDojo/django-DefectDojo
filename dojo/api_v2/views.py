@@ -17,6 +17,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 import base64
 import mimetypes
 from dojo.engagement.services import close_engagement, reopen_engagement
+from dojo.api_v2.api_error import ApiError
+from dojo.api_v2.utils import http_response
 from dojo.importers.reimporter.utils import (
     get_target_engagement_if_exists,
     get_target_product_if_exists,
@@ -78,6 +80,8 @@ from dojo.models import (
     Answered_Survey,
     General_Survey,
     Check_List,
+    TransferFinding,
+    TransferFindingFinding,
     Announcement,
 )
 from dojo.endpoint.views import get_endpoint_ids
@@ -166,6 +170,7 @@ from drf_spectacular.views import SpectacularAPIView
 from drf_spectacular.renderers import OpenApiJsonRenderer2
 from dojo.authorization.roles_permissions import Permissions
 from dojo.user.utils import get_configuration_permissions_codenames
+import dojo.transfer_findings.helper as helper_tf
 
 logger = logging.getLogger(__name__)
 
@@ -388,8 +393,6 @@ class EndpointStatusViewSet(
             Permissions.Endpoint_View
         ).distinct()
 
-
-# Authorization: object-based
 class EngagementViewSet(
     PrefetchDojoModelViewSet,
     ra_api.AcceptedRisksMixin,
@@ -3331,3 +3334,75 @@ class AnnouncementViewSet(
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = "__all__"
     permission_classes = (permissions.UserHasConfigurationPermissionStaff,)
+
+
+# Authorization: configuration
+class AnnouncementViewSet(
+    DojoModelViewSet
+):
+    serializer_class = serializers.AnnouncementSerializer
+    queryset = Announcement.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = "__all__"
+    permission_classes = (permissions.UserHasConfigurationPermissionStaff,)
+
+
+class TransferFindingViewSet(prefetch.PrefetchListMixin,
+                             prefetch.PrefetchRetrieveMixin,
+                             DojoModelViewSet):
+    queryset = TransferFinding.objects.all().order_by('id')
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.TransferFindingSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ["id",
+                        "destination_engagement",
+                        "origin_product_type",
+                        "origin_product",
+                        "origin_engagement",
+                        "owner"]
+
+
+class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
+                             prefetch.PrefetchRetrieveMixin,
+                             DojoModelViewSet):
+    queryset = TransferFindingFinding.objects.all()
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.TransferFindingFindingsSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ["id"]
+
+    @extend_schema(
+        request=serializers.TransferFindingFindingSerializer,
+        responses={status.HTTP_200_OK: serializers.TransferFindingFindingsUpdateSerializer},
+    )
+    @action(detail=True, methods=['post'])
+    def change_status(self, request, pk=None):
+        serializer = serializers.TransferFindingFindingsUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
+            request_findings = request.data["findings"]
+            if transfer_finding_findings:
+                helper_tf.transfer_findings(transfer_finding_findings, request_findings)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return http_response.no_content(data=serializer.data, message=f"Transfer Finding {pk} Not Found")
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def destroy(self, request, pk=None):
+        serializer = serializers.TransferFindingFindingsUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            if request.data.get('findings'):
+                obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
+                request_findings = request.data["findings"]
+                for transfer_finding_finding in obj_transfer_finding_findings:
+                    if str(transfer_finding_finding.findings.id) in request_findings:
+                        helper_tf.send_notification_transfer_finding(transfer_finding_finding.transfer_findings, status="removed")
+                        transfer_finding_finding.delete()
+
+                return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+            else:
+                super().destroy(request, pk)
+                return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
