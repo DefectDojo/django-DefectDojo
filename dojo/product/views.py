@@ -68,6 +68,10 @@ def product(request):
     # see https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
     name_words = prods.values_list('name', flat=True)
 
+    prods = prods.annotate(
+        findings_count=Count('engagement__test__finding', filter=Q(engagement__test__finding__active=True))
+    )
+
     prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
 
     prod_list = get_page_items(request, prod_filter.qs, 25)
