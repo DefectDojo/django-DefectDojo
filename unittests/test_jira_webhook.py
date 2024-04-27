@@ -404,7 +404,7 @@ class JIRAWebhookTest(DojoTestCase):
 
     def test_webhook_get(self):
         response = self.client.get(reverse('jira_web_hook'))
-        self.assertEqual(201, response.status_code, response.content[:1000])
+        self.assertEqual(405, response.status_code, response.content[:1000])
 
     def test_webhook_jira_disabled(self):
         self.system_settings(enable_jira=False)

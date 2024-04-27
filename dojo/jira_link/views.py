@@ -54,6 +54,10 @@ def webhook(request, secret=None):
     All responses here will return a 201 so that we may have control over the
     logging level
     """
+    # Make sure the request is a POST, otherwise, we reject
+    if request.method != "POST":
+        return webhook_responser_handler("debug", "Only POST requests are supported")
+    # Determine if th webhook is in use or not
     system_settings = System_Settings.objects.get()
     # If the jira integration is not enabled, then return a 404
     if not system_settings.enable_jira:
@@ -74,9 +78,6 @@ def webhook(request, secret=None):
     # example json bodies at the end of this file
     if request.content_type != "application/json":
         return webhook_responser_handler("debug", "only application/json supported")
-    # Make sure the request is a POST, otherwise, we reject
-    if request.method != "POST":
-        return webhook_responser_handler("debug", "Only POST requests are supported")
     # Time to process the request
     try:
         parsed = json.loads(request.body.decode("utf-8"))
@@ -240,7 +241,7 @@ def check_for_and_create_comment(parsed_json):
         findings = [jissue.finding_group.findings.all()]
         create_notification(event='other', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding_group", args=(jissue.finding_group.id,)), icon='check')
     elif jissue.engagement:
-        return webhook_responser_handler("debug", "Update for engagement ignored")
+        return webhook_responser_handler("debug", "Comment for engagement ignored")
     else:
         return webhook_responser_handler("info", f"Received issue update for {jissue.jira_key} for unknown object")
     # Set the fields for the notes
