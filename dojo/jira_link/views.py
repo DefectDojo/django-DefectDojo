@@ -80,7 +80,10 @@ def webhook(request, secret=None):
             # xml examples at the end of file
             jid = parsed['issue']['id']
             # This may raise a 404, but it will be handled in the exception response
-            jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
+            try:
+                jissue = JIRA_Issue.objects.get(jira_id=jid)
+            except JIRA_Instance.DoesNotExist:
+                return webhook_responser_handler(404, f"JIRA issue {jid} is not linked to a DefectDojo Finding")
             findings = None
             # Determine what type of object we will be working with
             if jissue.finding:
@@ -208,7 +211,10 @@ def check_for_and_create_comment(parsed_json):
     commenter_display_name = comment.get('updateAuthor', {}).get('displayName')
     # example: body['comment']['self'] = "http://www.testjira.com/jira_under_a_path/rest/api/2/issue/666/comment/456843"
     jid = comment.get('self', '').split('/')[-3]
-    jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
+    try:
+        jissue = JIRA_Issue.objects.get(jira_id=jid)
+    except JIRA_Instance.DoesNotExist:
+        return webhook_responser_handler(404, f"JIRA issue {jid} is not linked to a DefectDojo Finding")
     logging.debug(f"Received issue comment for {jissue.jira_key}")
     logger.debug('jissue: %s', vars(jissue))
 
