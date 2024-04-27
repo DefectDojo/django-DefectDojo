@@ -158,7 +158,7 @@ def webhook(request, secret=None):
             )
         return webhook_responser_handler("debug", message)
 
-    return HttpResponse('Success!', status=200)
+    return webhook_responser_handler("No logging here", "Success!")
 
 
 def check_for_and_create_comment(parsed_json):
