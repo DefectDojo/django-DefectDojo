@@ -69,6 +69,7 @@ class FindingQueriesTest(DojoTestCase):
                     'weeks_between',
                     'start_date',
                     'end_date',
+                    'form',
                 ]
             )
 
@@ -189,6 +190,7 @@ class EndpointQueriesTest(DojoTestCase):
                     'weeks_between',
                     'start_date',
                     'end_date',
+                    'form',
                 ]
             )
 
