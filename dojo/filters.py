@@ -1201,7 +1201,7 @@ class ProductFilter(ProductFilterHelper, DojoFilter):
     class Meta:
         model = Product
         fields = [
-            "name", "name_exact", "prod_type", "business_criticality", 
+            "name", "name_exact", "prod_type", "business_criticality",
             "platform", "lifecycle", "origin", "external_audience",
             "internet_accessible", "tags"
         ]
