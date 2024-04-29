@@ -223,7 +223,7 @@ def check_for_and_create_comment(parsed_json):
     try:
         jissue = JIRA_Issue.objects.get(jira_id=jid)
     except JIRA_Instance.DoesNotExist:
-        return webhook_responser_handler(404, f"JIRA issue {jid} is not linked to a DefectDojo Finding")
+        return webhook_responser_handler("info", f"JIRA issue {jid} is not linked to a DefectDojo Finding")
     logging.debug(f"Received issue comment for {jissue.jira_key}")
     logger.debug('jissue: %s', vars(jissue))
 
