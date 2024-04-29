@@ -39,7 +39,7 @@ def webhook_responser_handler(
     elif log_level == "debug":
         logger.debug(message)
     # Return the response with the code
-    return HttpResponse(message, status=201)
+    return HttpResponse(message, status=200)
 
 
 @csrf_exempt
