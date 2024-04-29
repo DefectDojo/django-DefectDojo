@@ -419,6 +419,12 @@ class System_Settings(models.Model):
         verbose_name=_('Enable Remediation Advice'),
         help_text=_("Enables global remediation advice and matching on CWE and Title. The text will be replaced for mitigation, impact and references on a finding. Useful for providing consistent impact and remediation advice regardless of the scanner."))
 
+    enable_similar_findings = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Enable Similar Findings"),
+        help_text=_("Enable the query of similar findings on the view finding page. This feature can involve potentially large queries and negatively impact performance"))
+
     engagement_auto_close = models.BooleanField(
         default=False,
         blank=False,
@@ -569,6 +575,14 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("API expose error details"),
         help_text=_("When turned on, the API will expose error details in the response."))
+    filter_string_matching = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Filter String Matching Optimization"),
+        help_text=_(
+            "When turned on, all filter operations in the UI will require string matches rather than ID. "
+            "This is a performance enhancement to avoid fetching objects unnecessarily."
+        ))
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
@@ -2993,11 +3007,12 @@ class Finding(models.Model):
         if not user:
             from dojo.utils import get_current_user
             user = get_current_user()
-
         # Title Casing
         from titlecase import titlecase
         self.title = titlecase(self.title[:511])
-
+        # Set the date of the finding if nothing is supplied
+        if self.date is None:
+            self.date = timezone.now()
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
 

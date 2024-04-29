@@ -1755,8 +1755,11 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     @extend_schema_field(BurpRawRequestResponseSerializer)
     def get_request_response(self, obj):
-        # burp_req_resp = BurpRawRequestResponse.objects.filter(finding=obj)
+        # Not necessarily Burp scan specific - these are just any request/response pairs
         burp_req_resp = obj.burprawrequestresponse_set.all()
+        var = settings.MAX_REQRESP_FROM_API
+        if var > -1:
+            burp_req_resp = burp_req_resp[:var]
         burp_list = []
         for burp in burp_req_resp:
             request = burp.get_request()
