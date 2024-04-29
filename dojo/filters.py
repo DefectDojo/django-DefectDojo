@@ -2526,11 +2526,11 @@ class EndpointFilterWithoutObjectLookups(EndpointFilterHelper):
         self.user = None
         if 'user' in kwargs:
             self.user = kwargs.pop('user')
-        super(EndpointFilterWithoutObjectLookups, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @property
     def qs(self):
-        parent = super(EndpointFilterWithoutObjectLookups, self).qs
+        parent = super().qs
         return get_authorized_endpoints(Permissions.Endpoint_View, parent)
 
     class Meta:
@@ -2689,7 +2689,7 @@ class EngagementTestFilterWithoutObjectLookups(EngagementTestFilterHelper):
 
     def __init__(self, *args, **kwargs):
         self.engagement = kwargs.pop('engagement')
-        super(EngagementTestFilterWithoutObjectLookups, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.form.fields['test_type'].queryset = Test_Type.objects.filter(test__engagement=self.engagement).distinct().order_by('name')
 
 
