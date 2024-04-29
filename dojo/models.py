@@ -421,6 +421,12 @@ class System_Settings(models.Model):
         verbose_name=_('Enable Remediation Advice'),
         help_text=_("Enables global remediation advice and matching on CWE and Title. The text will be replaced for mitigation, impact and references on a finding. Useful for providing consistent impact and remediation advice regardless of the scanner."))
 
+    enable_similar_findings = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Enable Similar Findings"),
+        help_text=_("Enable the query of similar findings on the view finding page. This feature can involve potentially large queries and negatively impact performance"))
+
     engagement_auto_close = models.BooleanField(
         default=False,
         blank=False,
