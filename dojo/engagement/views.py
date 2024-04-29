@@ -1,6 +1,7 @@
 import logging
 import csv
 import re
+from typing import List
 from django.views import View
 from openpyxl import Workbook
 from openpyxl.styles import Font
@@ -14,7 +15,7 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.urls import reverse, Resolver404
 from django.db.models import Q, Count
-from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponse, FileResponse, QueryDict
+from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponse, FileResponse, QueryDict, HttpRequest
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
@@ -23,7 +24,14 @@ from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 
 from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.filters import EngagementFilter, EngagementDirectFilter, EngagementTestFilter
+from dojo.filters import (
+    EngagementFilter,
+    EngagementFilterWithoutObjectLookups,
+    EngagementDirectFilter,
+    EngagementDirectFilterWithoutObjectLookups,
+    EngagementTestFilter,
+    EngagementTestFilterWithoutObjectLookups
+)
 from dojo.forms import CheckForm, \
     UploadThreatForm, RiskAcceptanceForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
@@ -112,7 +120,9 @@ def get_filtered_engagements(request, view):
             'product__jira_project_set__jira_instance'
         )
 
-    engagements = EngagementDirectFilter(request.GET, queryset=engagements)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = EngagementDirectFilterWithoutObjectLookups if filter_string_matching else EngagementDirectFilter
+    engagements = filter_class(request.GET, queryset=engagements)
 
     return engagements
 
@@ -181,8 +191,9 @@ def engagements_all(request):
             'engagement_set__jira_project__jira_instance',
             'jira_project_set__jira_instance'
         )
-
-    filtered = EngagementFilter(
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = EngagementFilterWithoutObjectLookups if filter_string_matching else EngagementFilter
+    filtered = filter_class(
         request.GET,
         queryset=filter_qs
     )
@@ -384,11 +395,21 @@ class ViewEngagement(View):
         risks_accepted = eng.risk_acceptance.all().select_related('owner').annotate(accepted_findings_count=Count('accepted_findings__id'))
         return risks_accepted
 
+    def get_filtered_tests(
+        self,
+        request: HttpRequest,
+        queryset: List[Test],
+        engagement: Engagement,
+    ):
+        filter_string_matching = get_system_setting("filter_string_matching", False)
+        filter_class = EngagementTestFilterWithoutObjectLookups if filter_string_matching else EngagementTestFilter
+        return filter_class(request.GET, queryset=queryset, engagement=engagement)
+
     def get(self, request, eid, *args, **kwargs):
         eng = get_object_or_404(Engagement, id=eid)
         tests = eng.test_set.all().order_by('test_type__name', '-updated')
         default_page_num = 10
-        tests_filter = EngagementTestFilter(request.GET, queryset=tests, engagement=eng)
+        tests_filter = self.get_filtered_tests(request, tests, eng)
         paged_tests = get_page_items(request, tests_filter.qs, default_page_num)
         paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)
         prod = eng.product
@@ -458,7 +479,7 @@ class ViewEngagement(View):
 
         default_page_num = 10
 
-        tests_filter = EngagementTestFilter(request.GET, queryset=tests, engagement=eng)
+        tests_filter = self.get_filtered_tests(request, tests, eng)
         paged_tests = get_page_items(request, tests_filter.qs, default_page_num)
         # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
         paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)

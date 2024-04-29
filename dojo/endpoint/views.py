@@ -12,12 +12,12 @@ from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Q, QuerySet, Count
 
 from dojo.endpoint.utils import clean_hosts_run, endpoint_meta_import
-from dojo.filters import EndpointFilter
+from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm, ImportEndpointMetaForm
 from dojo.models import Product, Endpoint, Finding, DojoMeta, Endpoint_Status
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, Product_Tab, calculate_grade, redirect, \
-    add_error_message_to_response, is_scan_file_too_large
+    add_error_message_to_response, is_scan_file_too_large, get_system_setting
 from dojo.notifications.helper import create_notification
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
@@ -42,12 +42,13 @@ def process_endpoints_view(request, host_view=False, vulnerable=False):
 
     endpoints = endpoints.prefetch_related('product', 'product__tags', 'tags').distinct()
     endpoints = get_authorized_endpoints(Permissions.Endpoint_View, endpoints, request.user)
-
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
     if host_view:
-        ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user).qs)
-        endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
+        ids = get_endpoint_ids(filter_class(request.GET, queryset=endpoints, user=request.user).qs)
+        endpoints = filter_class(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
     else:
-        endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
+        endpoints = filter_class(request.GET, queryset=endpoints, user=request.user)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
 
