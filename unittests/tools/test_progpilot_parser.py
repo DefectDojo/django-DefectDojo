@@ -20,3 +20,24 @@ class TestProgpilotParser(DojoTestCase):
             self.assertEqual("sql_injection", finding.title)
             self.assertEqual("/home/User/Modules/progpilot/Order.php", finding.file_path)
             self.assertEqual(593, finding.line)
+
+    def test_crunch42parser_single_has_one_finding(self):
+        testfile = open("unittests/scans/progpilot/progpilot2.json")
+        parser = ProgpilotParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(1, len(findings))
+
+    def test_crunch42parser_single_has_many_findings3(self):
+            testfile = open("unittests/scans/progpilot/progpilot3.json")
+            parser = ProgpilotParser()
+            findings = parser.get_findings(testfile, Test())
+            testfile.close()
+            self.assertEqual(3, len(findings))
+
+    def test_crunch42parser_single_has_many_findings4(self):
+            testfile = open("unittests/scans/progpilot/progpilot4.json")
+            parser = ProgpilotParser()
+            findings = parser.get_findings(testfile, Test())
+            testfile.close()
+            self.assertEqual(2, len(findings))
