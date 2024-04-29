@@ -10,7 +10,7 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.http import Http404, HttpResponse, QueryDict
+from django.http import Http404, HttpResponse, QueryDict, HttpRequest
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
@@ -53,75 +53,77 @@ def report_url_resolver(request):
     return url_resolver + ":" + request.META['SERVER_PORT']
 
 
-def report_builder(request):
-    add_breadcrumb(title="Report Builder", top_level=True, request=request)
-    findings = get_authorized_findings(Permissions.Finding_View)
-    findings = ReportFindingFilter(request.GET, queryset=findings)
-    endpoints = Endpoint.objects.filter(finding__active=True,
-                                        finding__verified=True,
-                                        finding__false_p=False,
-                                        finding__duplicate=False,
-                                        finding__out_of_scope=False,
-                                        ).distinct()
-    filter_string_matching = get_system_setting("filter_string_matching", False)
-    filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
-    endpoints = filter_class(request.GET, queryset=endpoints, user=request.user)
+class ReportBuilder(View):
+    def get(self, request: HttpRequest) -> HttpResponse:
+        add_breadcrumb(title="Report Builder", top_level=True, request=request)
+        findings = get_authorized_findings(Permissions.Finding_View)
+        findings = ReportFindingFilter(request.GET, queryset=findings)
+        endpoints = Endpoint.objects.filter(finding__active=True,
+                                            finding__verified=True,
+                                            finding__false_p=False,
+                                            finding__duplicate=False,
+                                            finding__out_of_scope=False,
+                                            ).distinct()
+        filter_string_matching = get_system_setting("filter_string_matching", False)
+        filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
+        endpoints = filter_class(request.GET, queryset=endpoints, user=request.user)
 
-    in_use_widgets = [ReportOptions(request=request)]
-    available_widgets = [CoverPage(request=request),
-                         TableOfContents(request=request),
-                         WYSIWYGContent(request=request),
-                         FindingList(request=request, findings=findings),
-                         EndpointList(request=request, endpoints=endpoints),
-                         PageBreak()]
-    return render(request,
-                  'dojo/report_builder.html',
-                  {"available_widgets": available_widgets,
-                   "in_use_widgets": in_use_widgets})
+        in_use_widgets = [ReportOptions(request=request)]
+        available_widgets = [CoverPage(request=request),
+                             TableOfContents(request=request),
+                             WYSIWYGContent(request=request),
+                             FindingList(request=request, findings=findings),
+                             EndpointList(request=request, endpoints=endpoints),
+                             PageBreak()]
+        return render(request,
+                      'dojo/report_builder.html',
+                      {"available_widgets": available_widgets,
+                       "in_use_widgets": in_use_widgets})
 
 
-def custom_report(request):
-    # saving the report
-    form = CustomReportJsonForm(request.POST)
-    host = report_url_resolver(request)
-    if form.is_valid():
-        selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
-                                                 finding_notes=False, finding_images=False, host=host)
-        report_format = 'AsciiDoc'
-        finding_notes = True
-        finding_images = True
+class CustomReport(View):
+    def post(self, request: HttpRequest) -> HttpResponse:
+        # saving the report
+        form = CustomReportJsonForm(request.POST)
+        host = report_url_resolver(request)
+        if form.is_valid():
+            selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
+                                                     finding_notes=False, finding_images=False, host=host)
+            report_format = 'AsciiDoc'
+            finding_notes = True
+            finding_images = True
 
-        if 'report-options' in selected_widgets:
-            options = selected_widgets['report-options']
-            report_format = options.report_type
-            finding_notes = (options.include_finding_notes == '1')
-            finding_images = (options.include_finding_images == '1')
+            if 'report-options' in selected_widgets:
+                options = selected_widgets['report-options']
+                report_format = options.report_type
+                finding_notes = (options.include_finding_notes == '1')
+                finding_images = (options.include_finding_images == '1')
 
-        selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
-                                                 finding_notes=finding_notes, finding_images=finding_images, host=host)
+            selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
+                                                     finding_notes=finding_notes, finding_images=finding_images, host=host)
 
-        if report_format == 'AsciiDoc':
-            widgets = list(selected_widgets.values())
-            return render(request,
-                          'dojo/custom_asciidoc_report.html',
-                          {"widgets": widgets,
-                           "host": host,
-                           "finding_notes": finding_notes,
-                           "finding_images": finding_images,
-                           "user_id": request.user.id})
-        elif report_format == 'HTML':
-            widgets = list(selected_widgets.values())
-            return render(request,
-                          'dojo/custom_html_report.html',
-                          {"widgets": widgets,
-                           "host": "",
-                           "finding_notes": finding_notes,
-                           "finding_images": finding_images,
-                           "user_id": request.user.id})
+            if report_format == 'AsciiDoc':
+                widgets = list(selected_widgets.values())
+                return render(request,
+                              'dojo/custom_asciidoc_report.html',
+                              {"widgets": widgets,
+                               "host": host,
+                               "finding_notes": finding_notes,
+                               "finding_images": finding_images,
+                               "user_id": request.user.id})
+            elif report_format == 'HTML':
+                widgets = list(selected_widgets.values())
+                return render(request,
+                              'dojo/custom_html_report.html',
+                              {"widgets": widgets,
+                               "host": "",
+                               "finding_notes": finding_notes,
+                               "finding_images": finding_images,
+                               "user_id": request.user.id})
+            else:
+                raise PermissionDenied()
         else:
             raise PermissionDenied()
-    else:
-        raise PermissionDenied()
 
 
 def report_findings(request):
