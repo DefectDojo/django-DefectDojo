@@ -1885,8 +1885,8 @@ def add_product_group(request, pid):
 
 
 def view_transfer_finding(request, pid=None):
-    __pt = get_object_or_404(Product, id=pid)
-    transfer_finding = TransferFinding.objects.all().order_by('-id')
+    pt = get_object_or_404(Product, id=pid)
+    transfer_finding = TransferFinding.objects.filter(origin_product=pt) | TransferFinding.objects.filter(destination_product=pt).order_by('-id')
     paginator = Paginator(transfer_finding, 25)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)

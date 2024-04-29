@@ -62,11 +62,6 @@ class Permissions(IntEnum):
     Risk_Unaccept = 1214
     Risk_Acceptance_Bullk = 1215
     
-    Transfer_Finding_View = 1216
-    Transfer_Finding_Edit = 1217
-    Transfer_Finding_Delete = 1218
-    Transfer_Finding_Add = 1219
-
     Test_View = 1302
     Test_Add = 1303
     Test_Edit = 1306
@@ -143,6 +138,11 @@ class Permissions(IntEnum):
     Credential_Delete = 2707
     
     Metrics_Panel = 2708
+
+    Transfer_Finding_View = 2801
+    Transfer_Finding_Edit = 2802
+    Transfer_Finding_Delete = 2803
+    Transfer_Finding_Add = 2804
 
     @classmethod
     def has_value(cls, value):

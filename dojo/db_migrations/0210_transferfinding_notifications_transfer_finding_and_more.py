@@ -7,7 +7,7 @@ import multiselectfield.db.fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("dojo", "0210_product_type_environment_manager_and_more"),
+         ("dojo", "0209_merge_acunetix"),
     ]
 
     operations = [
