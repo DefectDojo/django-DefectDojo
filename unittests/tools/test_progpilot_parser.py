@@ -10,9 +10,11 @@ class TestProgpilotParser(DojoTestCase):
         parser = ProgpilotParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
-        self.assertEqual(8, len(findings))
+        self.assertEqual(2, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
-            self.assertEqual("Info", finding.severity)
+            self.assertEqual("Medium", finding.severity)
             self.assertIsNotNone(finding.description)
             self.assertGreater(len(finding.description), 0)
+            self.assertEqual(89, finding.cwe)
+            self.assertEqual("sql_injection", finding.title)
