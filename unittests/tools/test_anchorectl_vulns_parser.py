@@ -23,5 +23,5 @@ class TestAnchoreCTLVulnsParser(DojoTestCase):
     def test_anchore_engine_parser_has_many_findings(self):
         with open("unittests/scans/anchorectl_vulns/many_vulns.json") as testfile:
             parser = AnchoreCTLVulnsParser()
-            findings = parser.get_findings(testfile, Test())        
+            findings = parser.get_findings(testfile, Test())
             self.assertEqual(23, len(findings))

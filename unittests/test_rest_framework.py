@@ -1041,7 +1041,7 @@ class FilesTest(DojoAPITestCase):
         # Test the creation
         for level in self.url_levels.keys():
             length = FileUpload.objects.count()
-            with open(f'{str(self.path)}/scans/acunetix/one_finding.xml', 'r') as testfile:
+            with open(f'{str(self.path)}/scans/acunetix/one_finding.xml') as testfile:
                 payload = {
                     "title": level,
                     "file": testfile
@@ -1051,7 +1051,7 @@ class FilesTest(DojoAPITestCase):
                 self.assertEqual(FileUpload.objects.count(), length + 1)
                 # Save the ID of the newly created file object
                 self.url_levels[level] = response.data.get('id')
-                
+
         #  Test the download
         with open(f'{str(self.path)}/scans/acunetix/one_finding.xml') as file:
             file_data = file.read()
@@ -1721,7 +1721,7 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
 
     def __del__(self: object):
         self.payload['file'].close()
-        
+
     @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
     @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')

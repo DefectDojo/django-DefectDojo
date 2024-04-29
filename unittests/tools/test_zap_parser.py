@@ -155,7 +155,7 @@ class TestZapParser(DojoTestCase):
                 self.assertEqual("bodgeit/contact.jsp", endpoint.path)
 
     def test_parse_juicy(self):
-        """Generated with OWASP Juicy shop"""        
+        """Generated with OWASP Juicy shop"""
         with open("unittests/scans/zap/juicy2.xml") as testfile:
             parser = ZapParser()
             findings = parser.get_findings(testfile, Test())

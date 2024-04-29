@@ -9,7 +9,7 @@ class TestIntSightsParser(DojoTestCase):
         with open("unittests/scans/intsights/intsights_one_vul.json") as testfile:
             parser = IntSightsParser()
             findings = parser.get_findings(testfile, Test())
-        
+
             self.assertEqual(1, len(findings))
 
             finding = list(findings)[0]

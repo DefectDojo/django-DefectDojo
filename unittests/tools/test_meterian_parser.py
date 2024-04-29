@@ -22,7 +22,7 @@ class TestMeterianParser(DojoTestCase):
         with open("unittests/scans/meterian/report_one_vuln.json") as testfile:
             parser = MeterianParser()
             findings = parser.get_findings(testfile, Test())
-        
+
             self.assertEqual(1, len(findings))
 
     def test_meterianParser_report_has_many_findings(self):
@@ -36,7 +36,7 @@ class TestMeterianParser(DojoTestCase):
         with open("unittests/scans/meterian/report_one_vuln.json") as testfile:
             parser = MeterianParser()
             findings = parser.get_findings(testfile, Test())
-        
+
             finding = findings[0]
             self.assertEqual(1, len(findings))
             self.assertEqual("date-and-time:0.6.3", finding.title)
@@ -66,7 +66,7 @@ class TestMeterianParser(DojoTestCase):
         with open("unittests/scans/meterian/report_one_vuln_no_remediation.json") as testfile:
             parser = MeterianParser()
             findings = parser.get_findings(testfile, Test())
-        
+
             finding = findings[0]
             self.assertTrue(finding.mitigation.startswith("We were not able to provide a safe version for this library."))
             self.assertIn("You should consider replacing this component as it could be an "
@@ -76,7 +76,7 @@ class TestMeterianParser(DojoTestCase):
         with open("unittests/scans/meterian/report_multi_language.json") as testfile:
             parser = MeterianParser()
             findings = parser.get_findings(testfile, Test())
-        
+
             self.assertEqual(2, len(findings))
             self.assertIn("nodejs", findings[0].tags)
             self.assertIn("ruby", findings[1].tags)

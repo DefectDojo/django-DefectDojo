@@ -218,7 +218,7 @@ class TestVeracodeScannerParser(DojoTestCase):
             self.assertEqual('https', endpoint.protocol)
             self.assertEqual('www.example.com', endpoint.host)
             self.assertEqual('index.html', endpoint.path)
-            
+
             return finding
 
     @override_settings(USE_FIRST_SEEN=True)

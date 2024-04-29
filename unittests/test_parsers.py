@@ -80,7 +80,7 @@ class TestParsers(DojoTestCase):
                 if file.is_file() and file.name != '__pycache__' and file.name != "__init__.py":
                     f = os.path.join(basedir, 'dojo', 'tools', parser_dir.name, file.name)
                     read_true = False
-                    with open(f, "r") as f:
+                    with open(f) as f:
                         for line in f.readlines():
                             if read_true is True:
                                 if ('"utf-8"' in str(line) or "'utf-8'" in str(line) or '"utf-8-sig"' in str(line) or "'utf-8-sig'" in str(line)) and i <= 4:

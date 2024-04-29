@@ -67,7 +67,7 @@ class TestNpmAuditParser(DojoTestCase):
             with open(path.join(path.dirname(__file__), "../scans/npm_audit/empty_with_error.json")) as testfile:
                 parser = NpmAuditParser()
                 parser.get_findings(testfile, Test())
-                
+
         self.assertIn("npm audit report contains errors:", str(context.exception))
         self.assertIn("ENOAUDIT", str(context.exception))
 
@@ -76,7 +76,7 @@ class TestNpmAuditParser(DojoTestCase):
             with open(path.join(path.dirname(__file__), "../scans/npm_audit/many_vuln_npm7.json")) as testfile:
                 parser = NpmAuditParser()
                 parser.get_findings(testfile, Test())
-                
+
         self.assertIn("npm7 with auditReportVersion 2 or higher not yet supported", str(context.exception))
 
     def test_npm_audit_censored_hash(self):

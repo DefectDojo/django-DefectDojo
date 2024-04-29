@@ -109,7 +109,7 @@ class TestTenableParser(DojoTestCase):
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
-        with open(path.join(path.dirname(__file__), "../scans/tenable/nessus/nessus_many_vuln2-all.csv"), "rt") as testfile:
+        with open(path.join(path.dirname(__file__), "../scans/tenable/nessus/nessus_many_vuln2-all.csv")) as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
             for finding in findings:

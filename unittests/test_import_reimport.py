@@ -1814,7 +1814,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
                 payload['service'] = service
 
             result = self.import_scan_ui(engagement, payload)
-        
+
             return result
 
     def reimport_scan_with_params_ui(self, test_id, filename, scan_type='ZAP Scan', minimum_severity='Low', active=True, verified=False, push_to_jira=None, tags=None, close_old_findings=True, scan_date=None):

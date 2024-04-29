@@ -30,7 +30,7 @@ class TestKubeHunterParser(TestCase):
         with open("unittests/scans/kubehunter/kubehunter_many_vul.json") as testfile:
             parser = KubeHunterParser()
             findings = parser.get_findings(testfile, Test())
-            
+
             self.assertEqual(8, len(findings))
 
     def test_kubehunter_parser_empty_with_error(self):

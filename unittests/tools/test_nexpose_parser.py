@@ -31,7 +31,7 @@ class TestNexposeParser(DojoTestCase):
         with open("unittests/scans/nexpose/many_vulns.xml") as testfile:
             parser = NexposeParser()
             findings = parser.get_findings(testfile, test)
-            
+
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()

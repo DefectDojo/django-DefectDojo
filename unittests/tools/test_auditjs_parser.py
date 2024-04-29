@@ -62,7 +62,7 @@ class TestAuditJSParser(DojoTestCase):
             with open("unittests/scans/auditjs/empty_with_error.json") as testfile:
                 parser = AuditJSParser()
                 parser.get_findings(testfile, Test())
-                
+
         self.assertTrue(
             "Invalid JSON format. Are you sure you used --json option ?" in str(context.exception)
         )
@@ -71,6 +71,6 @@ class TestAuditJSParser(DojoTestCase):
         with open("unittests/scans/auditjs/auditjs_with_package_namespace.json") as testfile:
             parser = AuditJSParser()
             findings = parser.get_findings(testfile, Test())
-        
+
             self.assertEqual(1, len(findings))
             self.assertEqual("%40next/env", findings[0].component_name)

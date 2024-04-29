@@ -10,7 +10,7 @@ class TestNoseyParkerParser(TestCase):
             parser = NoseyParkerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
-        
+
     def test_noseyparker_parser_one_vuln(self):
         with open("unittests/scans/noseyparker/noseyparker_one_vul.jsonl") as testfile:
             parser = NoseyParkerParser()

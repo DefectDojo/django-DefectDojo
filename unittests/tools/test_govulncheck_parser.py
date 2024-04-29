@@ -24,7 +24,7 @@ class TestGovulncheckParser(DojoTestCase):
         with open("unittests/scans/govulncheck/many_vulns.json") as testfile:
             parser = GovulncheckParser()
             findings = parser.get_findings(testfile, Test())
-            
+
             self.assertEqual(3, len(findings))
 
             with self.subTest(i=0):
@@ -76,7 +76,7 @@ class TestGovulncheckParser(DojoTestCase):
         with open("unittests/scans/govulncheck/many_vulns_new_version.json") as testfile:
             parser = GovulncheckParser()
             findings = parser.get_findings(testfile, Test())
-        
+
             self.assertEqual(1, len(findings))
 
             with self.subTest(i=0):
@@ -97,7 +97,7 @@ class TestGovulncheckParser(DojoTestCase):
         with open("unittests/scans/govulncheck/many_vulns_new_version_custom_severity.json") as testfile:
             parser = GovulncheckParser()
             findings = parser.get_findings(testfile, Test())
-        
+
             self.assertEqual(2, len(findings))
 
             with self.subTest(i=0):
