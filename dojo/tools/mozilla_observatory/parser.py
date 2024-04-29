@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class MozillaObservatoryParser(object):
+class MozillaObservatoryParser:
     """Mozilla Observatory
 
     See: https://observatory.mozilla.org

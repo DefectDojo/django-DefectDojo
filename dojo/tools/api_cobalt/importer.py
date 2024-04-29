@@ -6,7 +6,7 @@ from .api_client import CobaltAPI
 logger = logging.getLogger(__name__)
 
 
-class CobaltApiImporter(object):
+class CobaltApiImporter:
     """
     Import from Cobalt.io API
     """

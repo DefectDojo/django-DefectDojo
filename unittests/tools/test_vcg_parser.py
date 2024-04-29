@@ -10,7 +10,7 @@ from dojo.tools.vcg.parser import VCGParser
 from dojo.tools.vcg.parser import VCGXmlParser
 
 
-class TestFile(object):
+class TestFile:
     def read(self):
         return self.content
 

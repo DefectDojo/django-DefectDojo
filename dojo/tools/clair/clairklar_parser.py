@@ -3,7 +3,7 @@ from dojo.models import Finding
 logger = logging.getLogger(__name__)
 
 
-class ClairKlarScan(object):
+class ClairKlarScan:
     def get_items_klar(self, tree, test):
         items = list()
         clair_severities = [

@@ -4,7 +4,7 @@ from defusedxml import ElementTree
 from dojo.models import Finding
 
 
-class FortifyFPRParser(object):
+class FortifyFPRParser:
     def parse_fpr(self, filename, test):
         if str(filename.__class__) == "<class '_io.TextIOWrapper'>":
             input_zip = zipfile.ZipFile(filename.name, 'r')

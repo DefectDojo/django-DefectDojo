@@ -4,7 +4,7 @@ from dojo.tools.awssecurityhub.guardduty import GuardDuty
 from dojo.tools.awssecurityhub.compliance import Compliance
 
 
-class AwsSecurityHubParser(object):
+class AwsSecurityHubParser:
 
     def get_scan_types(self):
         return ["AWS Security Hub Scan"]

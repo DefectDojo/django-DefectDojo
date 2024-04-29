@@ -2,7 +2,7 @@ import json
 from dojo.models import Endpoint, Finding
 
 
-class SSHAuditParser(object):
+class SSHAuditParser:
     def get_scan_types(self):
         return ["SSH Audit Importer"]
 

@@ -7,7 +7,7 @@ from django.utils.encoding import force_str
 from dojo.models import Endpoint, Finding
 
 
-class ArachniParser(object):
+class ArachniParser:
     """Arachni Web Scanner (http://arachni-scanner.com/wiki)
 
     Reports are generated with arachni_reporter tool:

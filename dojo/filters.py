@@ -131,7 +131,7 @@ class FindingStatusFilter(ChoiceFilter):
     def __init__(self, *args, **kwargs):
         kwargs['choices'] = [
             (key, value[0]) for key, value in six.iteritems(self.options)]
-        super(FindingStatusFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def filter(self, qs, value):
         earliest_finding = get_earliest_finding(qs)
@@ -179,7 +179,7 @@ class FindingSLAFilter(ChoiceFilter):
     def __init__(self, *args, **kwargs):
         kwargs['choices'] = [
             (key, value[0]) for key, value in six.iteritems(self.options)]
-        super(FindingSLAFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def filter(self, qs, value):
         try:
@@ -214,7 +214,7 @@ class ProductSLAFilter(ChoiceFilter):
     def __init__(self, *args, **kwargs):
         kwargs['choices'] = [
             (key, value[0]) for key, value in six.iteritems(self.options)]
-        super(ProductSLAFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def filter(self, qs, value):
         try:
@@ -246,7 +246,7 @@ def cwe_options(queryset):
 
 class DojoFilter(FilterSet):
     def __init__(self, *args, **kwargs):
-        super(DojoFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         for field in ['tags', 'test__tags', 'test__engagement__tags', 'test__engagement__product__tags',
                         'not_tags', 'not_test__tags', 'not_test__engagement__tags', 'not_test__engagement__product__tags']:
@@ -589,7 +589,7 @@ class DateRangeFilter(ChoiceFilter):
     def __init__(self, *args, **kwargs):
         kwargs['choices'] = [
             (key, value[0]) for key, value in six.iteritems(self.options)]
-        super(DateRangeFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def filter(self, qs, value):
         try:
@@ -651,7 +651,7 @@ class DateRangeOmniFilter(ChoiceFilter):
     def __init__(self, *args, **kwargs):
         kwargs['choices'] = [
             (key, value[0]) for key, value in six.iteritems(self.options)]
-        super(DateRangeOmniFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def filter(self, qs, value):
         try:
@@ -675,7 +675,7 @@ class ReportBooleanFilter(ChoiceFilter):
     def __init__(self, *args, **kwargs):
         kwargs['choices'] = [
             (key, value[0]) for key, value in six.iteritems(self.options)]
-        super(ReportBooleanFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def filter(self, qs, value):
         try:
@@ -710,7 +710,7 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
     def __init__(self, *args, **kwargs):
         kwargs['choices'] = [
             (key, value[0]) for key, value in six.iteritems(self.options)]
-        super(ReportRiskAcceptanceFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def filter(self, qs, value):
         try:
@@ -785,7 +785,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
     def __init__(self, *args, **kwargs):
         kwargs['choices'] = [
             (key, value[0]) for key, value in six.iteritems(self.options)]
-        super(MetricsDateRangeFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def filter(self, qs, value):
         if value == 8:
@@ -858,7 +858,7 @@ class ComponentFilter(ProductComponentFilter):
         label="Product")
 
     def __init__(self, *args, **kwargs):
-        super(ComponentFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.form.fields[
             'test__engagement__product__prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
         self.form.fields[
@@ -874,6 +874,8 @@ class EngagementDirectFilterHelper(FilterSet):
     tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Tag name contains")
     not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Not tag name contains", exclude=True)
     has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
+    target_start = DateRangeFilter()
+    target_end = DateRangeFilter()
     test__engagement__product__lifecycle = MultipleChoiceFilter(
         choices=Product.LIFECYCLE_CHOICES,
         label="Product lifecycle",
@@ -913,7 +915,7 @@ class EngagementDirectFilter(EngagementDirectFilterHelper, DojoFilter):
         queryset=Engagement.tags.tag_model.objects.all().order_by("name"))
 
     def __init__(self, *args, **kwargs):
-        super(EngagementDirectFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.form.fields["product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
         self.form.fields["lead"].queryset = get_authorized_users(Permissions.Product_Type_View) \
             .filter(engagement__lead__isnull=False).distinct()
@@ -996,9 +998,9 @@ class EngagementFilter(EngagementFilterHelper, DojoFilter):
         queryset=Engagement.tags.tag_model.objects.all().order_by("name"))
 
     def __init__(self, *args, **kwargs):
-        super(EngagementFilter, self).__init__(*args, **kwargs)
-        self.form.fields["prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
-        self.form.fields["engagement__lead"].queryset = get_authorized_users(Permissions.Product_Type_View) \
+        super().__init__(*args, **kwargs)
+        self.form.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+        self.form.fields['engagement__lead'].queryset = get_authorized_users(Permissions.Product_Type_View) \
             .filter(engagement__lead__isnull=False).distinct()
 
     class Meta:
@@ -1075,7 +1077,7 @@ class ProductEngagementFilter(ProductEngagementFilterHelper, DojoFilter):
         queryset=Engagement.tags.tag_model.objects.all().order_by("name"))
 
     def __init__(self, *args, **kwargs):
-        super(ProductEngagementFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.form.fields["lead"].queryset = get_authorized_users(
             Permissions.Product_Type_View).filter(engagement__lead__isnull=False).distinct()
 
@@ -1162,6 +1164,7 @@ class ProductFilterHelper(FilterSet):
             ('origin', 'origin'),
             ('external_audience', 'external_audience'),
             ('internet_accessible', 'internet_accessible'),
+            ('findings_count', 'findings_count')
         ),
         field_labels={
             'name': 'Product Name',
@@ -1173,6 +1176,7 @@ class ProductFilterHelper(FilterSet):
             'origin': 'Origin ',
             'external_audience': 'External Audience ',
             'internet_accessible': 'Internet Accessible ',
+            'findings_count': 'Findings Count ',
         }
     )
 
@@ -1195,7 +1199,7 @@ class ProductFilter(ProductFilterHelper, DojoFilter):
         self.user = None
         if "user" in kwargs:
             self.user = kwargs.pop("user")
-        super(ProductFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.form.fields["prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
 
     class Meta:
@@ -1221,7 +1225,7 @@ class ProductFilterWithoutObjectLookups(ProductFilterHelper):
 
     def __init__(self, *args, **kwargs):
         kwargs.pop("user", None)
-        super(ProductFilterWithoutObjectLookups, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     class Meta:
         model = Product
@@ -1955,7 +1959,7 @@ class TemplateFindingFilter(DojoFilter):
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
 
     def __init__(self, *args, **kwargs):
-        super(TemplateFindingFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.form.fields['cwe'].choices = cwe_options(self.queryset)
 
 
@@ -2381,12 +2385,12 @@ class EndpointFilter(EndpointFilterHelper, DojoFilter):
         self.user = None
         if 'user' in kwargs:
             self.user = kwargs.pop('user')
-        super(EndpointFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.form.fields['product'].queryset = get_authorized_products(Permissions.Product_View)
 
     @property
     def qs(self):
-        parent = super(EndpointFilter, self).qs
+        parent = super().qs
         return get_authorized_endpoints(Permissions.Endpoint_View, parent)
 
     class Meta:
@@ -2971,7 +2975,7 @@ class LogEntryFilter(DojoFilter):
     timestamp = DateRangeFilter()
 
     def __init__(self, *args, **kwargs):
-        super(LogEntryFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.form.fields['actor'].queryset = get_authorized_users(Permissions.Product_View)
 
     class Meta:
@@ -3090,7 +3094,7 @@ class QuestionTypeFilter(ChoiceFilter):
     def __init__(self, *args, **kwargs):
         kwargs['choices'] = [
             (key, value[0]) for key, value in six.iteritems(self.options)]
-        super(QuestionTypeFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def filter(self, qs, value):
         try:

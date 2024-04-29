@@ -3,7 +3,7 @@ from datetime import datetime
 from dojo.models import Finding
 
 
-class GitlabSecretDetectionReportParser(object):
+class GitlabSecretDetectionReportParser:
     """
     GitLab's secret detection report
     See more: https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/secret-detection-report-format.json
