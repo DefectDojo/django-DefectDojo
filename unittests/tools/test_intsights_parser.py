@@ -55,8 +55,7 @@ class TestIntSightsParser(DojoTestCase):
 
     def test_intsights_parser_invalid_text_with_error_csv(self):
         with self.assertRaises(ValueError):
-            with open(
-                "unittests/scans/intsights/intsights_invalid_file.txt") as testfile:
+            with open("unittests/scans/intsights/intsights_invalid_file.txt") as testfile:
                 parser = IntSightsParser()
                 parser.get_findings(testfile, Test())
 
