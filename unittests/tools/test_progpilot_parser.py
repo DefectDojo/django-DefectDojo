@@ -18,3 +18,5 @@ class TestProgpilotParser(DojoTestCase):
             self.assertGreater(len(finding.description), 0)
             self.assertEqual(89, finding.cwe)
             self.assertEqual("sql_injection", finding.title)
+            self.assertEqual("/home/User/Modules/progpilot/Order.php",finding.file_path)
+            self.assertEqual(593,finding.line)

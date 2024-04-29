@@ -49,20 +49,12 @@ class ProgpilotParser:
                 description += "**tainted_flow:** " + str(tainted_flow) + "\n"
             if sink_name is not None:
                 description += "**sink_name:** " + str(sink_name) + "\n"
-            if sink_line is not None:
-                description += "**sink_line:** " + str(sink_line) + "\n"
             if sink_column is not None:
                 description += "**sink_column:** " + str(sink_column) + "\n"
-            if sink_file is not None:
-                description += "**sink_file:** " + str(sink_file) + "\n"
             if vuln_rule is not None:
                 description += "**vuln_rule:** " + str(vuln_rule) + "\n"
-            if vuln_line is not None:
-                description += "**vuln_line:** " + str(vuln_line) + "\n"
             if vuln_column is not None:
                 description += "**vuln_column:** " + str(vuln_column) + "\n"
-            if vuln_file is not None:
-                description += "**vuln_file:** " + str(vuln_file) + "\n"
             if vuln_description is not None:
                 description += "**vuln_description:** " + str(vuln_description) + "\n"
             find = Finding(
@@ -74,6 +66,14 @@ class ProgpilotParser:
                 static_finding=True,
                 unique_id_from_tool=vuln_id
             )
+            if sink_line is not None:
+                find.line = sink_line
+            elif vuln_line is not None:
+                find.line = vuln_line
+            if sink_file is not None:
+                find.file_path = sink_file 
+            elif vuln_file is not None:
+                find.file_path = vuln_file
             if vuln_cwe is not None:
                 find.cwe = int(vuln_cwe.split("CWE_")[1])
             findings.append(find)
