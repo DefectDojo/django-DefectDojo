@@ -602,6 +602,14 @@ class ViewFinding(View):
         }
 
     def get_similar_findings(self, request: HttpRequest, finding: Finding):
+        similar_findings_enabled = get_system_setting("enable_similar_findings", True)
+        if similar_findings_enabled is False:
+            return {
+                "similar_findings_enabled": similar_findings_enabled,
+                "duplicate_cluster": duplicate_cluster(request, finding),
+                "similar_findings": None,
+                "similar_findings_filter": None,
+            }
         # add related actions for non-similar and non-duplicate cluster members
         finding.related_actions = calculate_possible_related_actions_for_similar_finding(
             request, finding, finding
@@ -638,6 +646,7 @@ class ViewFinding(View):
             )
 
         return {
+            "similar_findings_enabled": similar_findings_enabled,
             "duplicate_cluster": duplicate_cluster(request, finding),
             "similar_findings": similar_findings,
             "similar_findings_filter": similar_findings_filter,
