@@ -1107,7 +1107,7 @@ class RiskPendingForm(forms.ModelForm):
     class Meta:
         model = Risk_Acceptance
         fields = ["name", "accepted_findings",
-                  "recommendation", "recommendation_details",
+                  "recommendation_details",
                   "path", "accepted_by", "path",
                   "expiration_date", "owner"]
 
