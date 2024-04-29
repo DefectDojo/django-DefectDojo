@@ -2250,6 +2250,8 @@ class ImportScanSerializer(serializers.Serializer):
         data = self.validated_data
         # Extract the data from the form
         context = self.set_context(data)
+        # set the jira option again as it was overridden
+        context["push_to_jira"] = push_to_jira
         # Import the scan with all of the supplied data
         self.process_scan(data, context)
 
@@ -2546,6 +2548,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         data = self.validated_data
         # Extract the data from the form
         context = self.set_context(data)
+        # set the jira option again as it was overridden
+        context["push_to_jira"] = push_to_jira
         # Process the auto create context inputs
         auto_create_manager = AutoCreateContextManager()
         self.process_auto_create_create_context(auto_create_manager, context)

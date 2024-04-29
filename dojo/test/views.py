@@ -805,11 +805,12 @@ class ReImportScanResultsView(View):
         self,
         request: HttpRequest,
         test: Test,
-    ) -> JIRAImportScanForm:
+    ) -> Tuple[JIRAImportScanForm | None, bool]:
         """
         Returns a JiraImportScanForm if jira is enabled
         """
         jira_form = None
+        push_all_jira_issues = False
         # Decide if we need to present the Push to JIRA form
         if get_system_setting('enable_jira'):
             # Determine if jira issues should be pushed automatically
@@ -827,7 +828,7 @@ class ReImportScanResultsView(View):
                         push_all=push_all_jira_issues,
                         prefix='jiraform'
                     )
-        return jira_form
+        return jira_form, push_all_jira_issues
 
     def handle_request(
         self,
@@ -861,7 +862,7 @@ class ReImportScanResultsView(View):
             api_scan_configuration_queryset=Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id),
         )
         # Get the jira form
-        jira_form = self.get_jira_form(request, test)
+        jira_form, push_all_jira_issues = self.get_jira_form(request, test)
         # Return the request and the context
         return request, {
             "test": test,
@@ -871,6 +872,7 @@ class ReImportScanResultsView(View):
             "jform": jira_form,
             "scan_type": scan_type,
             "scan_types": get_scan_types_sorted(),
+            "push_all_jira_issues": push_all_jira_issues,
             "additional_message": (
                 "When re-uploading a scan, any findings not found in original scan will be updated as "
                 "mitigated.  The process attempts to identify the differences, however manual verification "
@@ -890,7 +892,7 @@ class ReImportScanResultsView(View):
         if context.get("form") is not None:
             form_validation_list.append(context.get("form").is_valid())
         if context.get("jform") is not None:
-            form_validation_list.append(context.get("form").is_valid())
+            form_validation_list.append(context.get("jform").is_valid())
         return all(form_validation_list)
 
     def process_form(

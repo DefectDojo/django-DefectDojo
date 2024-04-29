@@ -819,7 +819,7 @@ class ImportScanResultsView(View):
         # Get the credential mapping form
         cred_form = self.get_credential_form(request, engagement)
         # Get the jira form
-        jira_form, push_all_issues = self.get_jira_form(request, engagement_or_product)
+        jira_form, push_all_jira_issues = self.get_jira_form(request, engagement_or_product)
         # Return the request and the context
         return request, {
             "user": user,
@@ -835,7 +835,7 @@ class ImportScanResultsView(View):
             "cred_form": cred_form,
             "jform": jira_form,
             "scan_types": get_scan_types_sorted(),
-            "push_all_issues": push_all_issues,
+            "push_all_jira_issues": push_all_jira_issues,
         }
 
     def validate_forms(
@@ -847,12 +847,12 @@ class ImportScanResultsView(View):
         level are bubbled up to the user first before we process too much
         """
         form_validation_list = []
-        if (form := context.get("form")) is not None:
-            form_validation_list.append(form.is_valid())
-        if (form := context.get("jform")) is not None:
-            form_validation_list.append(form.is_valid())
-        if (form := context.get("cred_form")) is not None:
-            form_validation_list.append(form.is_valid())
+        if context.get("form") is not None:
+            form_validation_list.append(context.get("form").is_valid())
+        if context.get("jform") is not None:
+            form_validation_list.append(context.get("jform").is_valid())
+        if context.get("cred_form") is not None:
+            form_validation_list.append(context.get("cred_form").is_valid())
         return all(form_validation_list)
 
     def create_engagement(
