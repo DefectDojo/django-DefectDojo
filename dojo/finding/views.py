@@ -1296,8 +1296,7 @@ def close_finding(request, fid):
                     event="other",
                     title="Closing of %s" % finding.title,
                     finding=finding,
-                    description='The finding "%s" was closed by %s'
-                    % (finding.title, request.user),
+                    description=f'The finding "{finding.title}" was closed by {request.user}',
                     url=reverse("view_finding", args=(finding.id,)),
                 )
                 return HttpResponseRedirect(
@@ -1460,8 +1459,7 @@ def reopen_finding(request, fid):
         event="other",
         title="Reopening of %s" % finding.title,
         finding=finding,
-        description='The finding "%s" was reopened by %s'
-        % (finding.title, request.user),
+        description=f'The finding "{finding.title}" was reopened by {request.user}',
         url=reverse("view_finding", args=(finding.id,)),
     )
     return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
@@ -1518,8 +1516,7 @@ def copy_finding(request, fid):
             create_notification(
                 event="other",
                 title="Copying of %s" % finding.title,
-                description='The finding "%s" was copied by %s to %s'
-                % (finding.title, request.user, test.title),
+                description=f'The finding "{finding.title}" was copied by {request.user} to {test.title}',
                 product=product,
                 url=request.build_absolute_uri(
                     reverse("copy_finding", args=(finding_copy.id,))
@@ -2291,8 +2288,7 @@ def apply_cwe_mitigation(apply_to_findings, template, update=True):
                     template.save()
                     new_note = Notes()
                     new_note.entry = (
-                        "CWE remediation text applied to finding for CWE: %s using template: %s."
-                        % (template.cwe, template.title)
+                        f"CWE remediation text applied to finding for CWE: {template.cwe} using template: {template.title}."
                     )
                     new_note.author, _created = User.objects.get_or_create(
                         username="System"
@@ -2535,9 +2531,7 @@ def merge_finding_product(request, pid):
                     for finding in findings_to_merge.exclude(
                         pk=finding_to_merge_into.pk
                     ):
-                        notes_entry = "{}\n- {} ({}),".format(
-                            notes_entry, finding.title, finding.id
-                        )
+                        notes_entry = f"{notes_entry}\n- {finding.title} ({finding.id}),"
                         if finding.static_finding:
                             static = finding.static_finding
 
@@ -2545,23 +2539,17 @@ def merge_finding_product(request, pid):
                             dynamic = finding.dynamic_finding
 
                         if form.cleaned_data["append_description"]:
-                            finding_descriptions = "{}\n{}".format(
-                                finding_descriptions, finding.description
-                            )
+                            finding_descriptions = f"{finding_descriptions}\n{finding.description}"
                             # Workaround until file path is one to many
                             if finding.file_path:
-                                finding_descriptions = "{}\n**File Path:** {}\n".format(
-                                    finding_descriptions, finding.file_path
-                                )
+                                finding_descriptions = f"{finding_descriptions}\n**File Path:** {finding.file_path}\n"
 
                         # If checked merge the Reference
                         if (
                             form.cleaned_data["append_reference"]
                             and finding.references is not None
                         ):
-                            finding_references = "{}\n{}".format(
-                                finding_references, finding.references
-                            )
+                            finding_references = f"{finding_references}\n{finding.references}"
 
                         # if checked merge the endpoints
                         if form.cleaned_data["add_endpoints"]:
@@ -2583,9 +2571,7 @@ def merge_finding_product(request, pid):
                         # Add merge finding information to the note if set to inactive
                         if form.cleaned_data["finding_action"] == "inactive":
                             single_finding_notes_entry = ("Finding has been set to inactive "
-                                                          "and merged with the finding: {}.").format(
-                                finding_to_merge_into.title
-                            )
+                                                          f"and merged with the finding: {finding_to_merge_into.title}.")
                             note = Notes(
                                 entry=single_finding_notes_entry, author=request.user
                             )
@@ -2598,9 +2584,7 @@ def merge_finding_product(request, pid):
 
                     # Update the finding to merge into
                     if finding_descriptions != "":
-                        finding_to_merge_into.description = "{}\n\n{}".format(
-                            finding_to_merge_into.description, finding_descriptions
-                        )
+                        finding_to_merge_into.description = f"{finding_to_merge_into.description}\n\n{finding_descriptions}"
 
                     if finding_to_merge_into.static_finding:
                         static = finding.static_finding
@@ -2609,9 +2593,7 @@ def merge_finding_product(request, pid):
                         dynamic = finding.dynamic_finding
 
                     if finding_references != "":
-                        finding_to_merge_into.references = "{}\n{}".format(
-                            finding_to_merge_into.references, finding_references
-                        )
+                        finding_to_merge_into.references = f"{finding_to_merge_into.references}\n{finding_references}"
 
                     finding_to_merge_into.static_finding = static
                     finding_to_merge_into.dynamic_finding = dynamic
@@ -2641,9 +2623,7 @@ def merge_finding_product(request, pid):
                         findings_to_merge.delete()
 
                     notes_entry = ("Finding consists of merged findings from the following "
-                                   "findings which have been {}: {}").format(
-                        finding_action, notes_entry[:-1]
-                    )
+                                   f"findings which have been {finding_action}: {notes_entry[:-1]}")
                     note = Notes(entry=notes_entry, author=request.user)
                     note.save()
                     finding_to_merge_into.notes.add(note)
@@ -2733,18 +2713,14 @@ def finding_bulk_update_all(request, pid=None):
 
                 if skipped_find_count > 0:
                     add_error_message_to_response(
-                        "Skipped deletion of {} findings because you are not authorized.".format(
-                            skipped_find_count
-                        )
+                        f"Skipped deletion of {skipped_find_count} findings because you are not authorized."
                     )
 
                 if deleted_find_count > 0:
                     messages.add_message(
                         request,
                         messages.SUCCESS,
-                        "Bulk delete of {} findings was successful.".format(
-                            deleted_find_count
-                        ),
+                        f"Bulk delete of {deleted_find_count} findings was successful.",
                         extra_tags="alert-success",
                     )
         else:
@@ -2765,9 +2741,7 @@ def finding_bulk_update_all(request, pid=None):
 
                 if skipped_find_count > 0:
                     add_error_message_to_response(
-                        "Skipped update of {} findings because you are not authorized.".format(
-                            skipped_find_count
-                        )
+                        f"Skipped update of {skipped_find_count} findings because you are not authorized."
                     )
 
                 finds = prefetch_for_findings(finds)
@@ -2904,8 +2878,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     if added:
                         add_success_message_to_response(
-                            "Added %s findings to finding group %s"
-                            % (added, finding_group.name)
+                            f"Added {added} findings to finding group {finding_group.name}"
                         )
                         return_url = reverse(
                             "view_finding_group", args=(finding_group.id,)
@@ -2913,9 +2886,8 @@ def finding_bulk_update_all(request, pid=None):
 
                     if skipped:
                         add_success_message_to_response(
-                            ("Skipped %s findings when adding to finding group %s, "
-                             "findings already part of another group")
-                            % (skipped, finding_group.name)
+                            f"Skipped {skipped} findings when adding to finding group {finding_group.name}, "
+                            "findings already part of another group"
                         )
 
                     # refresh findings from db
@@ -2931,8 +2903,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     if removed:
                         add_success_message_to_response(
-                            "Removed %s findings from finding groups %s"
-                            % (
+                            "Removed {} findings from finding groups {}".format(
                                 removed,
                                 ",".join(
                                     [
@@ -2975,9 +2946,8 @@ def finding_bulk_update_all(request, pid=None):
 
                     if skipped:
                         add_success_message_to_response(
-                            ("Skipped %s findings when grouping by %s as these findings "
-                             "were already in an existing group")
-                            % (skipped, finding_group_by_option)
+                            f"Skipped {skipped} findings when grouping by {finding_group_by_option} as these findings "
+                            "were already in an existing group"
                         )
 
                     # refresh findings from db
@@ -3121,9 +3091,7 @@ def finding_bulk_update_all(request, pid=None):
                     messages.add_message(
                         request,
                         messages.SUCCESS,
-                        "Bulk update of {} findings was successful.".format(
-                            updated_find_count
-                        ),
+                        f"Bulk update of {updated_find_count} findings was successful.",
                         extra_tags="alert-success",
                     )
             else:

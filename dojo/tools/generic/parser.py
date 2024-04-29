@@ -9,7 +9,7 @@ from dojo.models import Endpoint, Finding
 from dojo.tools.parser_test import ParserTest
 
 
-class GenericParser(object):
+class GenericParser:
     ID = "Generic Findings Import"
 
     def get_scan_types(self):
@@ -229,7 +229,7 @@ class GenericParser(object):
 
             # manage internal de-duplication
             key = hashlib.sha256(
-                f"{finding.severity}|{finding.title}|{finding.description}".encode("utf-8")
+                f"{finding.severity}|{finding.title}|{finding.description}".encode()
             ).hexdigest()
             if key in dupes:
                 find = dupes[key]

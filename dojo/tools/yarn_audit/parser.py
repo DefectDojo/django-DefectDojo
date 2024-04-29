@@ -4,7 +4,7 @@ from dojo.models import Finding
 from dojo.tools.utils import get_npm_cwe
 
 
-class YarnAuditParser(object):
+class YarnAuditParser:
     def get_scan_types(self):
         return ["Yarn Audit Scan"]
 
@@ -85,7 +85,6 @@ class YarnAuditParser(object):
                 test=test,
                 severity=self.severitytranslator(severity=tree.get("advisories").get(element).get("severity")),
                 description=description,
-                cve=tree.get("advisories").get(element).get("cves")[0],
                 mitigation=tree.get("advisories").get(element).get("recommendation"),
                 references=url + "\n" + references,
                 component_name=tree.get("advisories").get(element).get("module_name"),
@@ -98,6 +97,10 @@ class YarnAuditParser(object):
                 static_finding=True,
                 dynamic_finding=False,
             )
+            if tree.get("advisories").get(element).get("cves") != []:
+                dojo_finding.unsaved_vulnerability_ids = list()
+                for cve in tree.get("advisories").get(element).get("cves"):
+                    dojo_finding.unsaved_vulnerability_ids.append(cve)
             if tree.get("advisories").get(element).get("cwe") != []:
                 dojo_finding.cwe = tree.get("advisories").get(element).get("cwe")[0].strip("CWE-")
             items.append(dojo_finding)

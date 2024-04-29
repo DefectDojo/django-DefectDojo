@@ -20,7 +20,7 @@ is added to each
 '''
 
 
-class NpmAudit7PlusParser(object):
+class NpmAudit7PlusParser:
     """Represents the parser class."""
 
     def get_scan_types(self):
@@ -57,8 +57,8 @@ class NpmAudit7PlusParser(object):
         if tree.get("audit"):
             if not tree.get("audit").get("auditReportVersion"):
                 raise ValueError(
-                    ("This parser only supports output from npm audit version"
-                        " 7 and above.")
+                    "This parser only supports output from npm audit version"
+                    " 7 and above."
                 )
             subtree = tree.get("audit").get("vulnerabilities")
         # output from npm audit --dry-run --json
@@ -67,8 +67,8 @@ class NpmAudit7PlusParser(object):
         else:
             if not tree.get("auditReportVersion"):
                 raise ValueError(
-                    ("This parser only supports output from npm audit version"
-                        " 7 and above.")
+                    "This parser only supports output from npm audit version"
+                    " 7 and above."
                 )
             subtree = tree.get("vulnerabilities")
 
@@ -125,7 +125,7 @@ def get_item(item_node, tree, test):
     if isinstance(item_node["fixAvailable"], dict):
         fix_name = item_node["fixAvailable"]["name"]
         fix_version = item_node["fixAvailable"]["version"]
-        mitigation = "Update {0} to version {1}".format(fix_name, fix_version)
+        mitigation = f"Update {fix_name} to version {fix_version}"
     else:
         mitigation = "No specific mitigation provided by tool."
 
@@ -187,8 +187,7 @@ def get_vuln_description(item_node, tree):
     if isinstance(item_node["fixAvailable"], dict):
         fix_name = item_node["fixAvailable"]["name"]
         fix_version = item_node["fixAvailable"]["version"]
-        mitigation = "Fix Available: Update {0} to version {1}".format(
-            fix_name, fix_version)
+        mitigation = f"Fix Available: Update {fix_name} to version {fix_version}"
     else:
         mitigation = "No specific mitigation provided by tool."
 

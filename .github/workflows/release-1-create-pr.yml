@@ -75,7 +75,7 @@ jobs:
           grep -H version helm/defectdojo/Chart.yaml
 
       - name: Push version changes
-        uses: stefanzweifel/git-auto-commit-action@v5.0.0
+        uses: stefanzweifel/git-auto-commit-action@v5.0.1
         with:
           commit_user_name: "${{ env.GIT_USERNAME }}"
           commit_user_email: "${{ env.GIT_EMAIL }}"

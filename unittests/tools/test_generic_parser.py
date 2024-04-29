@@ -4,7 +4,7 @@ from dojo.models import Test, Engagement, Product, Finding
 from dojo.tools.generic.parser import GenericParser
 
 
-class TestFile(object):
+class TestFile:
 
     def read(self):
         return self.content

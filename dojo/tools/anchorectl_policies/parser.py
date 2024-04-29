@@ -54,9 +54,7 @@ class AnchoreCTLPoliciesParser:
                                 test=test,
                                 description=description,
                                 severity=severity,
-                                references="Policy ID: {}\nTrigger ID: {}".format(
-                                    policy_id, trigger_id
-                                ),
+                                references=f"Policy ID: {policy_id}\nTrigger ID: {trigger_id}",
                                 file_path=search_filepath(description),
                                 component_name=repo,
                                 component_version=tag,
@@ -69,7 +67,7 @@ class AnchoreCTLPoliciesParser:
                             items.append(find)
                         except (KeyError, IndexError) as err:
                             raise ValueError(
-                                "Invalid format: {} key not found".format(err)
+                                f"Invalid format: {err} key not found"
                             )
         except AttributeError as err:
             # import empty policies without error (e.g. policies or images
