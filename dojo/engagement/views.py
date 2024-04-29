@@ -1,7 +1,7 @@
 import logging
 import csv
 import re
-from typing import List, tuple
+from typing import List, Tuple
 from django.views import View
 from openpyxl import Workbook
 from openpyxl.styles import Font
