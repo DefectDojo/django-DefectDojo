@@ -826,6 +826,29 @@ class ProductComponentFilter(DojoFilter):
     )
 
 
+class ComponentFilterWithoutObjectLookups(ProductComponentFilter):
+    test__engagement__product__prod_type__name = CharFilter(
+        field_name="test__engagement__product__prod_type__name",
+        lookup_expr="iexact",
+        label="Product Type Name",
+        help_text="Search for Product Type names that are an exact match")
+    test__engagement__product__prod_type__name_contains = CharFilter(
+        field_name="test__engagement__product__prod_type__name",
+        lookup_expr="icontains",
+        label="Product Type Name Contains",
+        help_text="Search for Product Type names that contain a given pattern")
+    test__engagement__product__name = CharFilter(
+        field_name="test__engagement__product__name",
+        lookup_expr="iexact",
+        label="Product Name",
+        help_text="Search for Product names that are an exact match")
+    test__engagement__product__name_contains = CharFilter(
+        field_name="test__engagement__product__name",
+        lookup_expr="icontains",
+        label="Product Name Contains",
+        help_text="Search for Product names that contain a given pattern")
+
+
 class ComponentFilter(ProductComponentFilter):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
@@ -842,125 +865,140 @@ class ComponentFilter(ProductComponentFilter):
             'test__engagement__product'].queryset = get_authorized_products(Permissions.Product_View)
 
 
-class EngagementDirectFilter(DojoFilter):
-    name = CharFilter(lookup_expr='icontains', label='Engagement name contains')
-    lead = ModelChoiceFilter(queryset=Dojo_User.objects.none(), label="Lead")
-    version = CharFilter(field_name='version', lookup_expr='icontains', label='Engagement version')
-    test__version = CharFilter(field_name='test__version', lookup_expr='icontains', label='Test version')
-
-    product__name = CharFilter(lookup_expr='icontains', label='Product name contains')
-    product__prod_type = ModelMultipleChoiceFilter(
-        queryset=Product_Type.objects.none(),
-        label="Product Type")
+class EngagementDirectFilterHelper(FilterSet):
+    name = CharFilter(lookup_expr="icontains", label="Engagement name contains")
+    version = CharFilter(field_name="version", lookup_expr="icontains", label="Engagement version")
+    test__version = CharFilter(field_name="test__version", lookup_expr="icontains", label="Test version")
+    product__name = CharFilter(lookup_expr="icontains", label="Product name contains")
+    status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES, label="Status")
+    tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Tag name contains")
+    not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Not tag name contains", exclude=True)
+    has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
     test__engagement__product__lifecycle = MultipleChoiceFilter(
-        choices=Product.LIFECYCLE_CHOICES, label='Product lifecycle', null_label='Empty')
-    status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
-                                              label="Status")
-
-    tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
-
-    not_tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        exclude=True,
-        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
-
-    has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
-
+        choices=Product.LIFECYCLE_CHOICES,
+        label="Product lifecycle",
+        null_label="Empty")
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
-            ('target_start', 'target_start'),
-            ('name', 'name'),
-            ('product__name', 'product__name'),
-            ('product__prod_type__name', 'product__prod_type__name'),
-            ('lead__first_name', 'lead__first_name'),
+            ("target_start", "target_start"),
+            ("name", "name"),
+            ("product__name", "product__name"),
+            ("product__prod_type__name", "product__prod_type__name"),
+            ("lead__first_name", "lead__first_name"),
         ),
         field_labels={
-            'target_start': 'Start date',
-            'name': 'Engagement',
-            'product__name': 'Product Name',
-            'product__prod_type__name': 'Product Type',
-            'lead__first_name': 'Lead',
+            "target_start": "Start date",
+            "name": "Engagement",
+            "product__name": "Product Name",
+            "product__prod_type__name": "Product Type",
+            "lead__first_name": "Lead",
         }
-
     )
+
+
+class EngagementDirectFilter(EngagementDirectFilterHelper, DojoFilter):
+    lead = ModelChoiceFilter(queryset=Dojo_User.objects.none(), label="Lead")
+    product__prod_type = ModelMultipleChoiceFilter(
+        queryset=Product_Type.objects.none(),
+        label="Product Type")
+    tags = ModelMultipleChoiceFilter(
+        field_name="tags__name",
+        to_field_name="name",
+        queryset=Engagement.tags.tag_model.objects.all().order_by("name"))
+    not_tags = ModelMultipleChoiceFilter(
+        field_name="tags__name",
+        to_field_name="name",
+        exclude=True,
+        queryset=Engagement.tags.tag_model.objects.all().order_by("name"))
 
     def __init__(self, *args, **kwargs):
         super(EngagementDirectFilter, self).__init__(*args, **kwargs)
-        self.form.fields['product__prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
-        self.form.fields['lead'].queryset = get_authorized_users(Permissions.Product_Type_View) \
+        self.form.fields["product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+        self.form.fields["lead"].queryset = get_authorized_users(Permissions.Product_Type_View) \
             .filter(engagement__lead__isnull=False).distinct()
 
     class Meta:
         model = Engagement
-        fields = ['product__name', 'product__prod_type']
+        fields = ["product__name", "product__prod_type"]
 
 
-class EngagementFilter(DojoFilter):
-    engagement__name = CharFilter(lookup_expr='icontains', label='Engagement name contains')
-    engagement__lead = ModelChoiceFilter(queryset=Dojo_User.objects.none(), label="Lead")
-    engagement__version = CharFilter(field_name='engagement__version', lookup_expr='icontains', label='Engagement version')
-    engagement__test__version = CharFilter(field_name='engagement__test__version', lookup_expr='icontains', label='Test version')
+class EngagementDirectFilterWithoutObjectLookups(EngagementDirectFilterHelper):
+    lead = CharFilter(
+        field_name="lead__username",
+        lookup_expr="iexact",
+        label="Lead Username",
+        help_text="Search for Lead username that are an exact match")
+    lead_contains = CharFilter(
+        field_name="lead__username",
+        lookup_expr="icontains",
+        label="Lead Username Contains",
+        help_text="Search for Lead username that contain a given pattern")
+    product__prod_type__name = CharFilter(
+        field_name="product__prod_type__name",
+        lookup_expr="iexact",
+        label="Product Type Name",
+        help_text="Search for Product Type names that are an exact match")
+    product__prod_type__name_contains = CharFilter(
+        field_name="product__prod_type__name",
+        lookup_expr="icontains",
+        label="Product Type Name Contains",
+        help_text="Search for Product Type names that contain a given pattern")
 
-    name = CharFilter(lookup_expr='icontains', label='Product name contains')
-    prod_type = ModelMultipleChoiceFilter(
-        queryset=Product_Type.objects.none(),
-        label="Product Type")
+    class Meta:
+        model = Engagement
+        fields = ["product__name"]
+
+
+class EngagementFilterHelper(FilterSet):
+    name = CharFilter(lookup_expr="icontains", label="Product name contains")
+    tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Tag name contains")
+    not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Not tag name contains", exclude=True)
+    has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
+    engagement__name = CharFilter(lookup_expr="icontains", label="Engagement name contains")
+    engagement__version = CharFilter(field_name="engagement__version", lookup_expr="icontains", label="Engagement version")
+    engagement__test__version = CharFilter(field_name="engagement__test__version", lookup_expr="icontains", label="Test version")
     engagement__product__lifecycle = MultipleChoiceFilter(
-        choices=Product.LIFECYCLE_CHOICES, label='Product lifecycle', null_label='Empty')
-    engagement__status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
-                                              label="Status")
-
-    tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
-
-    not_tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        exclude=True,
-        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
-
-    has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
-
+        choices=Product.LIFECYCLE_CHOICES,
+        label="Product lifecycle",
+        null_label="Empty")
+    engagement__status = MultipleChoiceFilter(
+        choices=ENGAGEMENT_STATUS_CHOICES,
+        label="Status")
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
-            ('name', 'name'),
-            ('prod_type__name', 'prod_type__name'),
+            ("name", "name"),
+            ("prod_type__name", "prod_type__name"),
         ),
         field_labels={
-            'name': 'Product Name',
-            'prod_type__name': 'Product Type',
+            "name": "Product Name",
+            "prod_type__name": "Product Type",
         }
-
     )
+
+
+class EngagementFilter(EngagementFilterHelper, DojoFilter):
+    engagement__lead = ModelChoiceFilter(
+        queryset=Dojo_User.objects.none(),
+        label="Lead")
+    prod_type = ModelMultipleChoiceFilter(
+        queryset=Product_Type.objects.none(),
+        label="Product Type")
+    tags = ModelMultipleChoiceFilter(
+        field_name="tags__name",
+        to_field_name="name",
+        queryset=Engagement.tags.tag_model.objects.all().order_by("name"))
+    not_tags = ModelMultipleChoiceFilter(
+        field_name="tags__name",
+        to_field_name="name",
+        exclude=True,
+        queryset=Engagement.tags.tag_model.objects.all().order_by("name"))
 
     def __init__(self, *args, **kwargs):
         super(EngagementFilter, self).__init__(*args, **kwargs)
-        self.form.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
-        self.form.fields['engagement__lead'].queryset = get_authorized_users(Permissions.Product_Type_View) \
+        self.form.fields["prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+        self.form.fields["engagement__lead"].queryset = get_authorized_users(Permissions.Product_Type_View) \
             .filter(engagement__lead__isnull=False).distinct()
 
     class Meta:
@@ -968,37 +1006,42 @@ class EngagementFilter(DojoFilter):
         fields = ['name', 'prod_type']
 
 
-class ProductEngagementFilter(DojoFilter):
-    lead = ModelChoiceFilter(queryset=Dojo_User.objects.none(), label="Lead")
+class EngagementFilterWithoutObjectLookups(EngagementFilterHelper):
+    engagement__lead = CharFilter(
+        field_name="engagement__lead__username",
+        lookup_expr="iexact",
+        label="Lead Username",
+        help_text="Search for Lead username that are an exact match")
+    engagement__lead_contains = CharFilter(
+        field_name="engagement__lead__username",
+        lookup_expr="icontains",
+        label="Lead Username Contains",
+        help_text="Search for Lead username that contain a given pattern")
+    prod_type__name = CharFilter(
+        field_name="prod_type__name",
+        lookup_expr="iexact",
+        label="Product Type Name",
+        help_text="Search for Product Type names that are an exact match")
+    prod_type__name_contains = CharFilter(
+        field_name="prod_type__name",
+        lookup_expr="icontains",
+        label="Product Type Name Contains",
+        help_text="Search for Product Type names that contain a given pattern")
+
+    class Meta:
+        model = Product
+        fields = ['name']
+
+
+class ProductEngagementFilterHelper(FilterSet):
     version = CharFilter(lookup_expr='icontains', label='Engagement version')
     test__version = CharFilter(field_name='test__version', lookup_expr='icontains', label='Test version')
-
     name = CharFilter(lookup_expr='icontains')
-    status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
-                                              label="Status")
-
+    status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES, label="Status")
     target_start = DateRangeFilter()
     target_end = DateRangeFilter()
-
-    tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
-
-    not_tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        exclude=True,
-        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
-
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -1012,17 +1055,42 @@ class ProductEngagementFilter(DojoFilter):
         field_labels={
             'name': 'Engagement Name',
         }
-
     )
-
-    def __init__(self, *args, **kwargs):
-        super(ProductEngagementFilter, self).__init__(*args, **kwargs)
-        self.form.fields['lead'].queryset = get_authorized_users(Permissions.Product_Type_View) \
-            .filter(engagement__lead__isnull=False).distinct()
 
     class Meta:
         model = Product
         fields = ['name']
+
+
+class ProductEngagementFilter(ProductEngagementFilterHelper, DojoFilter):
+    lead = ModelChoiceFilter(queryset=Dojo_User.objects.none(), label="Lead")
+    tags = ModelMultipleChoiceFilter(
+        field_name="tags__name",
+        to_field_name="name",
+        queryset=Engagement.tags.tag_model.objects.all().order_by("name"))
+    not_tags = ModelMultipleChoiceFilter(
+        field_name="tags__name",
+        to_field_name="name",
+        exclude=True,
+        queryset=Engagement.tags.tag_model.objects.all().order_by("name"))
+
+    def __init__(self, *args, **kwargs):
+        super(ProductEngagementFilter, self).__init__(*args, **kwargs)
+        self.form.fields["lead"].queryset = get_authorized_users(
+            Permissions.Product_Type_View).filter(engagement__lead__isnull=False).distinct()
+
+
+class ProductEngagementFilterWithoutObjectLookups(ProductEngagementFilterHelper, DojoFilter):
+    lead = CharFilter(
+        field_name="lead__username",
+        lookup_expr="iexact",
+        label="Lead Username",
+        help_text="Search for Lead username that are an exact match")
+    lead_contains = CharFilter(
+        field_name="lead__username",
+        lookup_expr="icontains",
+        label="Lead Username Contains",
+        help_text="Search for Lead username that contain a given pattern")
 
 
 class ApiEngagementFilter(DojoFilter):
@@ -1069,107 +1137,19 @@ class ApiEngagementFilter(DojoFilter):
                      'pen_test', 'status', 'product', 'name', 'version', 'tags']
 
 
-class ProductFilter(DojoFilter):
+class ProductFilterHelper(FilterSet):
     name = CharFilter(lookup_expr='icontains', label="Product Name")
     name_exact = CharFilter(field_name='name', lookup_expr='iexact', label="Exact Product Name")
-    prod_type = ModelMultipleChoiceFilter(
-        queryset=Product_Type.objects.none(),
-        label="Product Type")
     business_criticality = MultipleChoiceFilter(choices=Product.BUSINESS_CRITICALITY_CHOICES, null_label="Empty")
     platform = MultipleChoiceFilter(choices=Product.PLATFORM_CHOICES, null_label="Empty")
     lifecycle = MultipleChoiceFilter(choices=Product.LIFECYCLE_CHOICES, null_label="Empty")
     origin = MultipleChoiceFilter(choices=Product.ORIGIN_CHOICES, null_label="Empty")
     external_audience = BooleanFilter(field_name='external_audience')
     internet_accessible = BooleanFilter(field_name='internet_accessible')
-
-    # not specifying anything for tags will render a multiselect input functioning as OR
-
-    tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        queryset=Product.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    # tags_and = ModelMultipleChoiceFilter(
-    #     field_name='tags__name',
-    #     to_field_name='name',
-    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
-    #     label='tags (AND)',
-    #     conjoined=True,
-    # )
-
-    # tags__name = ModelMultipleChoiceFilter(
-    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
-    #     label="tags (AND)"
-    # )
-
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label="Tag contains")
-
-    # tags__name = CharFilter(
-    #     lookup_expr='icontains',
-    #     label="Tag contains",
-    # )
-
-    # tags__all = ModelMultipleChoiceFilter(
-    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
-    #     field_name='tags__name',
-    #     label="tags (AND)"
-    # )
-
-    # not working below
-
-    # tags = ModelMultipleChoiceFilter(
-    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
-    #     label="tags_widget", widget=TagWidget, tag_options=tagulous.models.TagOptions(
-    #         force_lowercase=True,)
-    # ,)
-
-    # tags__name = CharFilter(lookup_expr='icontains')
-
-    # tags__and = ModelMultipleChoiceFilter(
-    #     field_name='tags__name',
-    #     to_field_name='name',
-    #     lookup_expr='in',
-    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
-    #     label="tags (AND)"
-    # )
-
-    # tags = ModelMultipleChoiceFilter(
-    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
-    #     label="tags (OR)"
-    # )
-
-    # tags = ModelMultipleChoiceFilter(
-    #     field_name='tags__name',
-    #     to_field_name='name',
-    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
-    #     label="tags (OR2)",
-    # )
-
-    # tags = ModelMultipleChoiceFilter(
-    #     field_name='tags',
-    #     to_field_name='name',
-    #     # lookup_expr='icontains', # nor working
-    #     # without lookup_expr we get an error: ValueError: invalid literal for int() with base 10: 'magento'
-    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
-    #     label="tags (OR3)",
-    # )
-
-    not_tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        exclude=True,
-        queryset=Product.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
-
     outside_of_sla = ProductSLAFilter(label="Outside of SLA")
-
     has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
-
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -1194,24 +1174,61 @@ class ProductFilter(DojoFilter):
             'external_audience': 'External Audience ',
             'internet_accessible': 'Internet Accessible ',
         }
-
     )
 
-    # tags = CharFilter(lookup_expr='icontains', label="Tags")
+
+class ProductFilter(ProductFilterHelper, DojoFilter):
+    prod_type = ModelMultipleChoiceFilter(
+        queryset=Product_Type.objects.none(),
+        label="Product Type")
+    tags = ModelMultipleChoiceFilter(
+        field_name="tags__name",
+        to_field_name="name",
+        queryset=Product.tags.tag_model.objects.all().order_by("name"))
+    not_tags = ModelMultipleChoiceFilter(
+        field_name="tags__name",
+        to_field_name="name",
+        exclude=True,
+        queryset=Product.tags.tag_model.objects.all().order_by("name"))
 
     def __init__(self, *args, **kwargs):
         self.user = None
-        if 'user' in kwargs:
-            self.user = kwargs.pop('user')
-
+        if "user" in kwargs:
+            self.user = kwargs.pop("user")
         super(ProductFilter, self).__init__(*args, **kwargs)
-
-        self.form.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+        self.form.fields["prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
 
     class Meta:
         model = Product
-        fields = ['name', 'name_exact', 'prod_type', 'business_criticality', 'platform', 'lifecycle', 'origin', 'external_audience',
-                  'internet_accessible', 'tags']
+        fields = [
+            "name", "name_exact", "prod_type", "business_criticality",
+            "platform", "lifecycle", "origin", "external_audience",
+            "internet_accessible", "tags"
+        ]
+
+
+class ProductFilterWithoutObjectLookups(ProductFilterHelper):
+    prod_type__name = CharFilter(
+        field_name="prod_type__name",
+        lookup_expr="iexact",
+        label="Product Type Name",
+        help_text="Search for Product Type names that are an exact match")
+    prod_type__name_contains = CharFilter(
+        field_name="prod_type__name",
+        lookup_expr="icontains",
+        label="Product Type Name Contains",
+        help_text="Search for Product Type names that contain a given pattern")
+
+    def __init__(self, *args, **kwargs):
+        kwargs.pop("user", None)
+        super(ProductFilterWithoutObjectLookups, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Product
+        fields = [
+            "name", "name_exact", "business_criticality", "platform",
+            "lifecycle", "origin", "external_audience", "internet_accessible",
+        ]
 
 
 class ApiProductFilter(DojoFilter):
@@ -1444,7 +1461,7 @@ class PercentageRangeFilter(RangeFilter):
         return super().filter(qs, value)
 
 
-class FindingFilterNonModelFilters(FilterSet):
+class FindingFilterHelper(FilterSet):
     title = CharFilter(lookup_expr="icontains")
     date = DateRangeFilter()
     on = DateFilter(field_name="date", lookup_expr="exact", label="On")
@@ -1569,7 +1586,7 @@ class FindingFilterNonModelFilters(FilterSet):
         self.form.fields['cwe'].choices = cwe_options(self.queryset)
 
 
-class FindingFilterWithoutObjectLookups(FindingFilterNonModelFilters, FindingTagStringFilter):
+class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFilter):
     reporter = CharFilter(
         field_name="reporter__username",
         lookup_expr="iexact",
@@ -1677,7 +1694,7 @@ class FindingFilterWithoutObjectLookups(FindingFilterNonModelFilters, FindingTag
             del self.form.fields['test__name_contains']
 
 
-class FindingFilter(FindingFilterNonModelFilters, FindingTagFilter):
+class FindingFilter(FindingFilterHelper, FindingTagFilter):
     reporter = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.none())
     reviewers = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.none())
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
@@ -2025,113 +2042,262 @@ class MetricsFindingFilterWithoutObjectLookups(FindingFilterWithoutObjectLookups
         fields = get_finding_filterset_fields(metrics=True, filter_string_matching=True)
 
 
-class MetricsEndpointFilter(FilterSet):
-    start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
-    end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
+class MetricsEndpointFilterHelper(FilterSet):
+    start_date = DateFilter(field_name="date", label="Start Date", lookup_expr=("gt"))
+    end_date = DateFilter(field_name="date", label="End Date", lookup_expr=("lt"))
     date = MetricsDateRangeFilter()
+    finding__test__engagement__version = CharFilter(lookup_expr="icontains", label="Engagement Version")
+    finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES, label="Severity")
+    endpoint__host = CharFilter(lookup_expr="icontains", label="Endpoint Host")
+    finding_title = CharFilter(lookup_expr="icontains", label="Finding Title")
+    tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Tag name contains")
+    not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Not tag name contains", exclude=True)
+
+
+class MetricsEndpointFilter(MetricsEndpointFilterHelper):
     finding__test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
     finding__test__engagement = ModelMultipleChoiceFilter(
         queryset=Engagement.objects.none(),
         label="Engagement")
-    finding__test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
-    finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES, label="Severity")
-
-    endpoint__host = CharFilter(lookup_expr='icontains', label="Endpoint Host")
-    finding_title = CharFilter(lookup_expr='icontains', label="Finding Title")
-
-    tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
+    endpoint__tags = ModelMultipleChoiceFilter(
+        field_name='endpoint__tags__name',
         to_field_name='name',
-        queryset=Endpoint.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
-
-    not_tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
+        label='Endpoint tags',
+        queryset=Endpoint.tags.tag_model.objects.all().order_by('name'))
+    finding__tags = ModelMultipleChoiceFilter(
+        field_name='finding__tags__name',
+        to_field_name='name',
+        label='Finding tags',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'))
+    finding__test__tags = ModelMultipleChoiceFilter(
+        field_name='finding__test__tags__name',
+        to_field_name='name',
+        label='Test tags',
+        queryset=Test.tags.tag_model.objects.all().order_by('name'))
+    finding__test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='finding__test__engagement__tags__name',
+        to_field_name='name',
+        label='Engagement tags',
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'))
+    finding__test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='finding__test__engagement__product__tags__name',
+        to_field_name='name',
+        label='Product tags',
+        queryset=Product.tags.tag_model.objects.all().order_by('name'))
+    not_endpoint__tags = ModelMultipleChoiceFilter(
+        field_name='endpoint__tags__name',
         to_field_name='name',
         exclude=True,
-        queryset=Endpoint.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
-
-    not_tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
+        label='Endpoint without tags',
+        queryset=Endpoint.tags.tag_model.objects.all().order_by('name'))
+    not_finding__tags = ModelMultipleChoiceFilter(
+        field_name='finding__tags__name',
         to_field_name='name',
         exclude=True,
-        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    not_test__tags = ModelMultipleChoiceFilter(
-        field_name='test__tags__name',
+        label='Finding without tags',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'))
+    not_finding__test__tags = ModelMultipleChoiceFilter(
+        field_name='finding__test__tags__name',
         to_field_name='name',
         exclude=True,
         label='Test without tags',
-        queryset=Test.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    not_test__engagement__tags = ModelMultipleChoiceFilter(
-        field_name='test__engagement__tags__name',
+        queryset=Test.tags.tag_model.objects.all().order_by('name'))
+    not_finding__test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='finding__test__engagement__tags__name',
         to_field_name='name',
         exclude=True,
         label='Engagement without tags',
-        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    not_test__engagement__product__tags = ModelMultipleChoiceFilter(
-        field_name='test__engagement__product__tags__name',
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'))
+    not_finding__test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='finding__test__engagement__product__tags__name',
         to_field_name='name',
         exclude=True,
         label='Product without tags',
-        queryset=Product.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
-
-    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+        queryset=Product.tags.tag_model.objects.all().order_by('name'))
 
     def __init__(self, *args, **kwargs):
         if args[0]:
-            if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
+            if args[0].get("start_date", "") != "" or args[0].get("end_date", "") != "":
                 args[0]._mutable = True
-                args[0]['date'] = 8
+                args[0]["date"] = 8
                 args[0]._mutable = False
 
         self.pid = None
-        if 'pid' in kwargs:
-            self.pid = kwargs.pop('pid')
+        if "pid" in kwargs:
+            self.pid = kwargs.pop("pid")
 
         super().__init__(*args, **kwargs)
         if self.pid:
-            del self.form.fields['finding__test__engagement__product__prod_type']
-            self.form.fields['finding__test__engagement'].queryset = Engagement.objects.filter(
+            del self.form.fields["finding__test__engagement__product__prod_type"]
+            self.form.fields["finding__test__engagement"].queryset = Engagement.objects.filter(
                 product_id=self.pid
             ).all()
         else:
-            self.form.fields['finding__test__engagement'].queryset = get_authorized_engagements(Permissions.Engagement_View).order_by('name')
+            self.form.fields["finding__test__engagement"].queryset = get_authorized_engagements(Permissions.Engagement_View).order_by("name")
 
-        if 'finding__test__engagement__product__prod_type' in self.form.fields:
+        if "finding__test__engagement__product__prod_type" in self.form.fields:
             self.form.fields[
-                'finding__test__engagement__product__prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+                "finding__test__engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
 
     class Meta:
         model = Endpoint_Status
-        exclude = ['last_modified', 'endpoint', 'finding']
+        exclude = ["last_modified", "endpoint", "finding"]
 
 
-class EndpointFilter(DojoFilter):
-    product = ModelMultipleChoiceFilter(
-        queryset=Product.objects.none(),
-        label="Product")
+class MetricsEndpointFilterWithoutObjectLookups(MetricsEndpointFilterHelper, FindingTagStringFilter):
+    finding__test__engagement__product__prod_type = CharFilter(
+        field_name="finding__test__engagement__product__prod_type",
+        lookup_expr="iexact",
+        label="Product Type Name",
+        help_text="Search for Product Type names that are an exact match")
+    finding__test__engagement__product__prod_type_contains = CharFilter(
+        field_name="finding__test__engagement__product__prod_type",
+        lookup_expr="icontains",
+        label="Product Type Name Contains",
+        help_text="Search for Product Type names that contain a given pattern")
+    finding__test__engagement = CharFilter(
+        field_name="finding__test__engagement",
+        lookup_expr="iexact",
+        label="Engagement Name",
+        help_text="Search for Engagement names that are an exact match")
+    finding__test__engagement_contains = CharFilter(
+        field_name="finding__test__engagement",
+        lookup_expr="icontains",
+        label="Engagement Name Contains",
+        help_text="Search for Engagement names that contain a given pattern")
+    endpoint__tags_contains = CharFilter(
+        label="Endpoint Tag Contains",
+        field_name="endpoint__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Endpoint that contain a given pattern")
+    endpoint__tags = CharFilter(
+        label="Endpoint Tag",
+        field_name="endpoint__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Endpoint that are an exact match")
+    finding__tags_contains = CharFilter(
+        label="Finding Tag Contains",
+        field_name="finding__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Finding that contain a given pattern")
+    finding__tags = CharFilter(
+        label="Finding Tag",
+        field_name="finding__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Finding that are an exact match")
+    finding__test__tags_contains = CharFilter(
+        label="Test Tag Contains",
+        field_name="finding__test__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Finding that contain a given pattern")
+    finding__test__tags = CharFilter(
+        label="Test Tag",
+        field_name="finding__test__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Finding that are an exact match")
+    finding__test__engagement__tags_contains = CharFilter(
+        label="Engagement Tag Contains",
+        field_name="finding__test__engagement__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Finding that contain a given pattern")
+    finding__test__engagement__tags = CharFilter(
+        label="Engagement Tag",
+        field_name="finding__test__engagement__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Finding that are an exact match")
+    finding__test__engagement__product__tags_contains = CharFilter(
+        label="Product Tag Contains",
+        field_name="finding__test__engagement__product__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Finding that contain a given pattern")
+    finding__test__engagement__product__tags = CharFilter(
+        label="Product Tag",
+        field_name="finding__test__engagement__product__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Finding that are an exact match")
+
+    not_endpoint__tags_contains = CharFilter(
+        label="Endpoint Tag Does Not Contain",
+        field_name="endpoint__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Endpoint that contain a given pattern, and exclude them",
+        exclude=True)
+    not_endpoint__tags = CharFilter(
+        label="Not Endpoint Tag",
+        field_name="endpoint__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Endpoint that are an exact match, and exclude them",
+        exclude=True)
+    not_finding__tags_contains = CharFilter(
+        label="Finding Tag Does Not Contain",
+        field_name="finding__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Finding that contain a given pattern, and exclude them",
+        exclude=True)
+    not_finding__tags = CharFilter(
+        label="Not Finding Tag",
+        field_name="finding__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Finding that are an exact match, and exclude them",
+        exclude=True)
+    not_finding__test__tags_contains = CharFilter(
+        label="Test Tag Does Not Contain",
+        field_name="finding__test__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Test that contain a given pattern, and exclude them",
+        exclude=True)
+    not_finding__test__tags = CharFilter(
+        label="Not Test Tag",
+        field_name="finding__test__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Test that are an exact match, and exclude them",
+        exclude=True)
+    not_finding__test__engagement__tags_contains = CharFilter(
+        label="Engagement Tag Does Not Contain",
+        field_name="finding__test__engagement__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Engagement that contain a given pattern, and exclude them",
+        exclude=True)
+    not_finding__test__engagement__tags = CharFilter(
+        label="Not Engagement Tag",
+        field_name="finding__test__engagement__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Engagement that are an exact match, and exclude them",
+        exclude=True)
+    not_finding__test__engagement__product__tags_contains = CharFilter(
+        label="Product Tag Does Not Contain",
+        field_name="finding__test__engagement__product__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Product that contain a given pattern, and exclude them",
+        exclude=True)
+    not_finding__test__engagement__product__tags = CharFilter(
+        label="Not Product Tag",
+        field_name="finding__test__engagement__product__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Product that are an exact match, and exclude them",
+        exclude=True)
+
+    def __init__(self, *args, **kwargs):
+        if args[0]:
+            if args[0].get("start_date", "") != "" or args[0].get("end_date", "") != "":
+                args[0]._mutable = True
+                args[0]["date"] = 8
+                args[0]._mutable = False
+        self.pid = None
+        if "pid" in kwargs:
+            self.pid = kwargs.pop("pid")
+        super().__init__(*args, **kwargs)
+        if self.pid:
+            del self.form.fields["finding__test__engagement__product__prod_type"]
+
+    class Meta:
+        model = Endpoint_Status
+        exclude = ["last_modified", "endpoint", "finding"]
+
+
+class EndpointFilterHelper(FilterSet):
     protocol = CharFilter(lookup_expr='icontains')
     userinfo = CharFilter(lookup_expr='icontains')
     host = CharFilter(lookup_expr='icontains')
@@ -2139,58 +2305,9 @@ class EndpointFilter(DojoFilter):
     path = CharFilter(lookup_expr='icontains')
     query = CharFilter(lookup_expr='icontains')
     fragment = CharFilter(lookup_expr='icontains')
-
-    tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        queryset=Endpoint.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
-
-    tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    test__tags = ModelMultipleChoiceFilter(
-        field_name='test__tags__name',
-        to_field_name='name',
-        queryset=Test.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    test__engagement__tags = ModelMultipleChoiceFilter(
-        field_name='test__engagement__tags__name',
-        to_field_name='name',
-        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    test__engagement__product__tags = ModelMultipleChoiceFilter(
-        field_name='test__engagement__product__tags__name',
-        to_field_name='name',
-        queryset=Product.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
-    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
-
-    not_tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        exclude=True,
-        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
-
     has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
-
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -2198,6 +2315,67 @@ class EndpointFilter(DojoFilter):
             ('host', 'host'),
         ),
     )
+
+
+class EndpointFilter(EndpointFilterHelper, DojoFilter):
+    product = ModelMultipleChoiceFilter(
+        queryset=Product.objects.none(),
+        label="Product")
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        label="Endpoint Tags",
+        queryset=Endpoint.tags.tag_model.objects.all().order_by('name'))
+    findings__tags = ModelMultipleChoiceFilter(
+        field_name='findings__tags__name',
+        to_field_name='name',
+        label="Finding Tags",
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'))
+    findings__test__tags = ModelMultipleChoiceFilter(
+        field_name='findings__test__tags__name',
+        to_field_name='name',
+        label="Test Tags",
+        queryset=Test.tags.tag_model.objects.all().order_by('name'))
+    findings__test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='findings__test__engagement__tags__name',
+        to_field_name='name',
+        label="Engagement Tags",
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'))
+    findings__test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='findings__test__engagement__product__tags__name',
+        to_field_name='name',
+        label="Product Tags",
+        queryset=Product.tags.tag_model.objects.all().order_by('name'))
+    not_tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        label="Not Endpoint Tags",
+        exclude=True,
+        queryset=Endpoint.tags.tag_model.objects.all().order_by('name'))
+    not_findings__tags = ModelMultipleChoiceFilter(
+        field_name='findings__tags__name',
+        to_field_name='name',
+        label="Not Finding Tags",
+        exclude=True,
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'))
+    not_findings__test__tags = ModelMultipleChoiceFilter(
+        field_name='findings__test__tags__name',
+        to_field_name='name',
+        label="Not Test Tags",
+        exclude=True,
+        queryset=Test.tags.tag_model.objects.all().order_by('name'))
+    not_findings__test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='findings__test__engagement__tags__name',
+        to_field_name='name',
+        label="Not Engagement Tags",
+        exclude=True,
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'))
+    not_findings__test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='findings__test__engagement__product__tags__name',
+        to_field_name='name',
+        label="Not Product Tags",
+        exclude=True,
+        queryset=Product.tags.tag_model.objects.all().order_by('name'))
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -2213,7 +2391,147 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['findings']
+        exclude = ["findings", "inherited_tags"]
+
+
+class EndpointFilterWithoutObjectLookups(EndpointFilterHelper):
+    product__name = CharFilter(
+        field_name="product__name",
+        lookup_expr="iexact",
+        label="Product Name",
+        help_text="Search for Product names that are an exact match")
+    product__name_contains = CharFilter(
+        field_name="product__name",
+        lookup_expr="icontains",
+        label="Product Name Contains",
+        help_text="Search for Product names that contain a given pattern")
+
+    tags_contains = CharFilter(
+        label="Endpoint Tag Contains",
+        field_name="tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Endpoint that contain a given pattern")
+    tags = CharFilter(
+        label="Endpoint Tag",
+        field_name="tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Endpoint that are an exact match")
+    findings__tags_contains = CharFilter(
+        label="Finding Tag Contains",
+        field_name="findings__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Finding that contain a given pattern")
+    findings__tags = CharFilter(
+        label="Finding Tag",
+        field_name="findings__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Finding that are an exact match")
+    findings__test__tags_contains = CharFilter(
+        label="Test Tag Contains",
+        field_name="findings__test__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Finding that contain a given pattern")
+    findings__test__tags = CharFilter(
+        label="Test Tag",
+        field_name="findings__test__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Finding that are an exact match")
+    findings__test__engagement__tags_contains = CharFilter(
+        label="Engagement Tag Contains",
+        field_name="findings__test__engagement__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Finding that contain a given pattern")
+    findings__test__engagement__tags = CharFilter(
+        label="Engagement Tag",
+        field_name="findings__test__engagement__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Finding that are an exact match")
+    findings__test__engagement__product__tags_contains = CharFilter(
+        label="Product Tag Contains",
+        field_name="findings__test__engagement__product__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Finding that contain a given pattern")
+    findings__test__engagement__product__tags = CharFilter(
+        label="Product Tag",
+        field_name="findings__test__engagement__product__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Finding that are an exact match")
+
+    not_tags_contains = CharFilter(
+        label="Endpoint Tag Does Not Contain",
+        field_name="tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Endpoint that contain a given pattern, and exclude them",
+        exclude=True)
+    not_tags = CharFilter(
+        label="Not Endpoint Tag",
+        field_name="tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Endpoint that are an exact match, and exclude them",
+        exclude=True)
+    not_findings__tags_contains = CharFilter(
+        label="Finding Tag Does Not Contain",
+        field_name="findings__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Finding that contain a given pattern, and exclude them",
+        exclude=True)
+    not_findings__tags = CharFilter(
+        label="Not Finding Tag",
+        field_name="findings__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Finding that are an exact match, and exclude them",
+        exclude=True)
+    not_findings__test__tags_contains = CharFilter(
+        label="Test Tag Does Not Contain",
+        field_name="findings__test__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Test that contain a given pattern, and exclude them",
+        exclude=True)
+    not_findings__test__tags = CharFilter(
+        label="Not Test Tag",
+        field_name="findings__test__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Test that are an exact match, and exclude them",
+        exclude=True)
+    not_findings__test__engagement__tags_contains = CharFilter(
+        label="Engagement Tag Does Not Contain",
+        field_name="findings__test__engagement__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Engagement that contain a given pattern, and exclude them",
+        exclude=True)
+    not_findings__test__engagement__tags = CharFilter(
+        label="Not Engagement Tag",
+        field_name="findings__test__engagement__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Engagement that are an exact match, and exclude them",
+        exclude=True)
+    not_findings__test__engagement__product__tags_contains = CharFilter(
+        label="Product Tag Does Not Contain",
+        field_name="findings__test__engagement__product__tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Product that contain a given pattern, and exclude them",
+        exclude=True)
+    not_findings__test__engagement__product__tags = CharFilter(
+        label="Not Product Tag",
+        field_name="findings__test__engagement__product__tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Product that are an exact match, and exclude them",
+        exclude=True)
+
+    def __init__(self, *args, **kwargs):
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+        super(EndpointFilterWithoutObjectLookups, self).__init__(*args, **kwargs)
+
+    @property
+    def qs(self):
+        parent = super(EndpointFilterWithoutObjectLookups, self).qs
+        return get_authorized_endpoints(Permissions.Endpoint_View, parent)
+
+    class Meta:
+        model = Endpoint
+        exclude = ["findings", "inherited_tags", "product"]
 
 
 class ApiEndpointFilter(DojoFilter):
@@ -2257,37 +2575,15 @@ class ApiRiskAcceptanceFilter(DojoFilter):
         ]
 
 
-class EngagementTestFilter(DojoFilter):
-    lead = ModelChoiceFilter(queryset=Dojo_User.objects.none(), label="Lead")
+class EngagementTestFilterHelper(FilterSet):
     version = CharFilter(lookup_expr='icontains', label='Version')
-
     if settings.TRACK_IMPORT_HISTORY:
         test_import__version = CharFilter(field_name='test_import__version', lookup_expr='icontains', label='Reimported Version')
-
     target_start = DateRangeFilter()
     target_end = DateRangeFilter()
-
-    tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        queryset=Test.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
-
-    not_tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        exclude=True,
-        queryset=Test.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
-
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
-
     has_tags = BooleanFilter(field_name='tags', lookup_expr='isnull', exclude=True, label='Has tags')
-
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -2301,14 +2597,31 @@ class EngagementTestFilter(DojoFilter):
         field_labels={
             'name': 'Test Name',
         }
-
     )
+
+
+class EngagementTestFilter(EngagementTestFilterHelper, DojoFilter):
+    lead = ModelChoiceFilter(queryset=Dojo_User.objects.none(), label="Lead")
+    api_scan_configuration = ModelChoiceFilter(
+        queryset=Product_API_Scan_Configuration.objects.none(),
+        label="API Scan Configuration")
+    tags = ModelMultipleChoiceFilter(
+        field_name="tags__name",
+        to_field_name="name",
+        queryset=Test.tags.tag_model.objects.all().order_by("name"))
+    not_tags = ModelMultipleChoiceFilter(
+        field_name="tags__name",
+        to_field_name="name",
+        exclude=True,
+        queryset=Test.tags.tag_model.objects.all().order_by("name"))
 
     class Meta:
         model = Test
-        fields = ['id', 'title', 'test_type', 'target_start',
-                     'target_end', 'percent_complete',
-                     'version', 'api_scan_configuration']
+        fields = [
+            "title", "test_type", "target_start",
+            "target_end", "percent_complete",
+            "version", "api_scan_configuration",
+        ]
 
     def __init__(self, *args, **kwargs):
         self.engagement = kwargs.pop('engagement')
@@ -2317,6 +2630,63 @@ class EngagementTestFilter(DojoFilter):
         self.form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product=self.engagement.product).distinct()
         self.form.fields['lead'].queryset = get_authorized_users(Permissions.Product_Type_View) \
             .filter(test__lead__isnull=False).distinct()
+
+
+class EngagementTestFilterWithoutObjectLookups(EngagementTestFilterHelper):
+    lead = CharFilter(
+        field_name="lead__username",
+        lookup_expr="iexact",
+        label="Lead Username",
+        help_text="Search for Lead username that are an exact match")
+    lead_contains = CharFilter(
+        field_name="lead__username",
+        lookup_expr="icontains",
+        label="Lead Username Contains",
+        help_text="Search for Lead username that contain a given pattern")
+    api_scan_configuration__tool_configuration__name = CharFilter(
+        field_name="api_scan_configuration__tool_configuration__name",
+        lookup_expr="iexact",
+        label="API Scan Configuration Name",
+        help_text="Search for Lead username that are an exact match")
+    api_scan_configuration__tool_configuration__name_contains = CharFilter(
+        field_name="api_scan_configuration__tool_configuration__name",
+        lookup_expr="icontains",
+        label="API Scan Configuration Name Contains",
+        help_text="Search for Lead username that contain a given pattern")
+    tags_contains = CharFilter(
+        label="Test Tag Contains",
+        field_name="tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Test that contain a given pattern")
+    tags = CharFilter(
+        label="Test Tag",
+        field_name="tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Test that are an exact match")
+    not_tags_contains = CharFilter(
+        label="Test Tag Does Not Contain",
+        field_name="tags__name",
+        lookup_expr="icontains",
+        help_text="Search for tags on a Test that contain a given pattern, and exclude them",
+        exclude=True)
+    not_tags = CharFilter(
+        label="Not Test Tag",
+        field_name="tags__name",
+        lookup_expr="iexact",
+        help_text="Search for tags on a Test that are an exact match, and exclude them",
+        exclude=True)
+
+    class Meta:
+        model = Test
+        fields = [
+            "title", "test_type", "target_start",
+            "target_end", "percent_complete", "version",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self.engagement = kwargs.pop('engagement')
+        super(EngagementTestFilterWithoutObjectLookups, self).__init__(*args, **kwargs)
+        self.form.fields['test_type'].queryset = Test_Type.objects.filter(test__engagement=self.engagement).distinct().order_by('name')
 
 
 class ApiTestFilter(DojoFilter):

@@ -25,8 +25,19 @@ from django.utils.translation import gettext as _
 from django.views import View
 
 from dojo.templatetags.display_tags import asvs_calc_level
-from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, MetricsEndpointFilter, \
-    MetricsFindingFilter, MetricsFindingFilterWithoutObjectLookups, ProductComponentFilter
+from dojo.filters import (
+    ProductEngagementFilter,
+    ProductEngagementFilterWithoutObjectLookups,
+    ProductFilter,
+    ProductFilterWithoutObjectLookups,
+    EngagementFilter,
+    EngagementFilterWithoutObjectLookups,
+    MetricsEndpointFilter,
+    MetricsEndpointFilterWithoutObjectLookups,
+    MetricsFindingFilter,
+    MetricsFindingFilterWithoutObjectLookups,
+    ProductComponentFilter,
+)
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, \
     AdHocFindingForm, \
     EngagementPresetsForm, DeleteEngagementPresetsForm, ProductNotificationsForm, \
@@ -39,7 +50,7 @@ from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, T
     Endpoint, Engagement_Presets, DojoMeta, Notifications, BurpRawRequestResponse, Product_Member, \
     Product_Group, Product_API_Scan_Configuration
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, \
-    add_breadcrumb, async_delete, \
+    add_breadcrumb, async_delete, calculate_finding_age, \
     get_system_setting, get_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs, \
     get_enabled_notifications_list, get_zero_severity_level, sum_by_severity_level, get_open_findings_burndown
 
@@ -67,8 +78,9 @@ def product(request):
     # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records
     # see https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
     name_words = prods.values_list('name', flat=True)
-
-    prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = ProductFilterWithoutObjectLookups if filter_string_matching else ProductFilter
+    prod_filter = filter_class(request.GET, queryset=prods, user=request.user)
 
     prod_list = get_page_items(request, prod_filter.qs, 25)
 
@@ -370,7 +382,9 @@ def endpoint_querys(request, prod):
         'finding__test__engagement__risk_acceptance',
         'finding__risk_acceptance_set',
         'finding__reporter').annotate(severity=F('finding__severity'))
-    endpoints = MetricsEndpointFilter(request.GET, queryset=endpoints_query)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = MetricsEndpointFilterWithoutObjectLookups if filter_string_matching else MetricsEndpointFilter
+    endpoints = filter_class(request.GET, queryset=endpoints_query)
     endpoints_qs = queryset_check(endpoints)
     filters['form'] = endpoints.form
 
@@ -450,7 +464,9 @@ def view_product_metrics(request, pid):
     engs = Engagement.objects.filter(product=prod, active=True)
     view = identify_view(request)
 
-    result = EngagementFilter(
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = EngagementFilterWithoutObjectLookups if filter_string_matching else EngagementFilter
+    result = filter_class(
         request.GET,
         queryset=Engagement.objects.filter(product=prod, active=False).order_by('-target_end'))
 
@@ -462,16 +478,9 @@ def view_product_metrics(request, pid):
     elif view == 'Endpoint':
         filters = endpoint_querys(request, prod)
 
-    start_date = filters['start_date']
+    start_date = timezone.make_aware(datetime.combine(filters['start_date'], datetime.min.time()))
     end_date = filters['end_date']
 
-    tests = Test.objects.filter(engagement__product=prod).prefetch_related('finding_set', 'test_type')
-    tests = tests.annotate(verified_finding_count=Count('finding__id', filter=Q(finding__verified=True)))
-
-    open_vulnerabilities = filters['open_vulns']
-    all_vulnerabilities = filters['all_vulns']
-
-    start_date = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
     r = relativedelta(end_date, start_date)
     weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7)))
     if weeks_between <= 0:
@@ -487,19 +496,45 @@ def view_product_metrics(request, pid):
     critical_weekly = OrderedDict()
     high_weekly = OrderedDict()
     medium_weekly = OrderedDict()
+    open_objs_by_age = {}
 
     open_objs_by_severity = get_zero_severity_level()
     closed_objs_by_severity = get_zero_severity_level()
     accepted_objs_by_severity = get_zero_severity_level()
 
-    for finding in filters.get("all", []):
-        iso_cal = finding.date.isocalendar()
+    # Optimization: Make all queries lists, and only pull values of fields for metrics based calculations
+    open_vulnerabilities = list(filters['open_vulns'].values('cwe', 'count'))
+    all_vulnerabilities = list(filters['all_vulns'].values('cwe', 'count'))
+
+    verified_objs_by_severity = list(filters.get('verified').values('severity'))
+    inactive_objs_by_severity = list(filters.get('inactive').values('severity'))
+    false_positive_objs_by_severity = list(filters.get('false_positive').values('severity'))
+    out_of_scope_objs_by_severity = list(filters.get('out_of_scope').values('severity'))
+    new_objs_by_severity = list(filters.get('new_verified').values('severity'))
+    all_objs_by_severity = list(filters.get('all').values('severity'))
+
+    all_findings = list(filters.get("all", []).values('id', 'date', 'severity'))
+    open_findings = list(filters.get("open", []).values('id', 'date', 'mitigated', 'severity'))
+    closed_findings = list(filters.get("closed", []).values('id', 'date', 'severity'))
+    accepted_findings = list(filters.get("accepted", []).values('id', 'date', 'severity'))
+
+    '''
+        Optimization: Create dictionaries in the structure of { finding_id: True } for index based search
+        Previously the for-loop below used "if finding in open_findings" -- an average O(n^2) time complexity
+        This allows for "if open_findings.get(finding_id, None)" -- an average O(n) time complexity
+    '''
+    open_findings_dict = {f.get('id'): True for f in open_findings}
+    closed_findings_dict = {f.get('id'): True for f in closed_findings}
+    accepted_findings_dict = {f.get('id'): True for f in accepted_findings}
+
+    for finding in all_findings:
+        iso_cal = finding.get('date').isocalendar()
         date = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
         html_date = date.strftime("<span class='small'>%m/%d<br/>%Y</span>")
         unix_timestamp = (tcalendar.timegm(date.timetuple()) * 1000)
 
         # Open findings
-        if finding in filters.get("open", []):
+        if open_findings_dict.get(finding.get('id', None), None):
             if unix_timestamp not in critical_weekly:
                 critical_weekly[unix_timestamp] = {'count': 0, 'week': html_date}
             if unix_timestamp not in high_weekly:
@@ -514,9 +549,15 @@ def view_product_metrics(request, pid):
                 open_close_weekly[unix_timestamp]['week'] = html_date
 
             if view == 'Finding':
-                severity = finding.severity
+                severity = finding.get('severity')
             elif view == 'Endpoint':
-                severity = finding.finding.severity
+                severity = finding.finding.get('severity')
+
+            finding_age = calculate_finding_age(finding)
+            if open_objs_by_age.get(finding_age, None):
+                open_objs_by_age[finding_age] += 1
+            else:
+                open_objs_by_age[finding_age] = 1
 
             if unix_timestamp in severity_weekly:
                 if severity in severity_weekly[unix_timestamp]:
@@ -544,28 +585,33 @@ def view_product_metrics(request, pid):
                 else:
                     medium_weekly[unix_timestamp] = {'count': 1, 'week': html_date}
             # Optimization: count severity level on server side
-            if open_objs_by_severity.get(finding.severity) is not None:
-                open_objs_by_severity[finding.severity] += 1
+            if open_objs_by_severity.get(finding.get('severity')) is not None:
+                open_objs_by_severity[finding.get('severity')] += 1
+
         # Close findings
-        if finding in filters.get("closed", []):
+        elif closed_findings_dict.get(finding.get('id', None), None):
             if unix_timestamp in open_close_weekly:
                 open_close_weekly[unix_timestamp]['closed'] += 1
             else:
                 open_close_weekly[unix_timestamp] = {'closed': 1, 'open': 0, 'accepted': 0}
                 open_close_weekly[unix_timestamp]['week'] = html_date
             # Optimization: count severity level on server side
-            if closed_objs_by_severity.get(finding.severity) is not None:
-                closed_objs_by_severity[finding.severity] += 1
+            if closed_objs_by_severity.get(finding.get('severity')) is not None:
+                closed_objs_by_severity[finding.get('severity')] += 1
+
         # Risk Accepted findings
-        if finding in filters.get("accepted", []):
+        if accepted_findings_dict.get(finding.get('id', None), None):
             if unix_timestamp in open_close_weekly:
                 open_close_weekly[unix_timestamp]['accepted'] += 1
             else:
                 open_close_weekly[unix_timestamp] = {'closed': 0, 'open': 0, 'accepted': 1}
                 open_close_weekly[unix_timestamp]['week'] = html_date
             # Optimization: count severity level on server side
-            if accepted_objs_by_severity.get(finding.severity) is not None:
-                accepted_objs_by_severity[finding.severity] += 1
+            if accepted_objs_by_severity.get(finding.get('severity')) is not None:
+                accepted_objs_by_severity[finding.get('severity')] += 1
+
+    tests = Test.objects.filter(engagement__product=prod).prefetch_related('finding_set', 'test_type')
+    tests = tests.annotate(verified_finding_count=Count('finding__id', filter=Q(finding__verified=True)))
 
     test_data = {}
     for t in tests:
@@ -574,9 +620,11 @@ def view_product_metrics(request, pid):
         else:
             test_data[t.test_type.name] = t.verified_finding_count
 
-    product_tab = Product_Tab(prod, title=_("Product"), tab="metrics")
+    # Optimization: Format Open/Total CWE vulnerabilities graph data here, instead of template
+    open_vulnerabilities = [['CWE-' + str(f.get('cwe')), f.get('count')] for f in open_vulnerabilities]
+    all_vulnerabilities = [['CWE-' + str(f.get('cwe')), f.get('count')] for f in all_vulnerabilities]
 
-    open_objs_by_age = {x: len([_ for _ in filters.get('open') if _.age == x]) for x in set([_.age for _ in filters.get('open')])}
+    product_tab = Product_Tab(prod, title=_("Product"), tab="metrics")
 
     return render(request, 'dojo/product_metrics.html', {
         'prod': prod,
@@ -584,28 +632,30 @@ def view_product_metrics(request, pid):
         'engs': engs,
         'inactive_engs': inactive_engs_page,
         'view': view,
-        'verified_objs': filters.get('verified', None),
-        'verified_objs_by_severity': sum_by_severity_level(filters.get('verified')),
-        'open_objs': filters.get('open', None),
+        'verified_objs': len(verified_objs_by_severity),
+        'verified_objs_by_severity': sum_by_severity_level(verified_objs_by_severity),
+        'open_objs': len(open_findings),
         'open_objs_by_severity': open_objs_by_severity,
         'open_objs_by_age': open_objs_by_age,
-        'inactive_objs': filters.get('inactive', None),
-        'inactive_objs_by_severity': sum_by_severity_level(filters.get('inactive')),
-        'closed_objs': filters.get('closed', None),
+        'inactive_objs': len(inactive_objs_by_severity),
+        'inactive_objs_by_severity': sum_by_severity_level(inactive_objs_by_severity),
+        'closed_objs': len(closed_findings),
         'closed_objs_by_severity': closed_objs_by_severity,
-        'false_positive_objs': filters.get('false_positive', None),
-        'false_positive_objs_by_severity': sum_by_severity_level(filters.get('false_positive')),
-        'out_of_scope_objs': filters.get('out_of_scope', None),
-        'out_of_scope_objs_by_severity': sum_by_severity_level(filters.get('out_of_scope')),
-        'accepted_objs': filters.get('accepted', None),
+        'false_positive_objs': len(false_positive_objs_by_severity),
+        'false_positive_objs_by_severity': sum_by_severity_level(false_positive_objs_by_severity),
+        'out_of_scope_objs': len(out_of_scope_objs_by_severity),
+        'out_of_scope_objs_by_severity': sum_by_severity_level(out_of_scope_objs_by_severity),
+        'accepted_objs': len(accepted_findings),
         'accepted_objs_by_severity': accepted_objs_by_severity,
-        'new_objs': filters.get('new_verified', None),
-        'new_objs_by_severity': sum_by_severity_level(filters.get('new_verified')),
-        'all_objs': filters.get('all', None),
-        'all_objs_by_severity': sum_by_severity_level(filters.get('all')),
+        'new_objs': len(new_objs_by_severity),
+        'new_objs_by_severity': sum_by_severity_level(new_objs_by_severity),
+        'all_objs': len(all_objs_by_severity),
+        'all_objs_by_severity': sum_by_severity_level(all_objs_by_severity),
         'form': filters.get('form', None),
         'reset_link': reverse('view_product_metrics', args=(prod.id,)) + '?type=' + view,
+        'open_vulnerabilities_count': len(open_vulnerabilities),
         'open_vulnerabilities': open_vulnerabilities,
+        'all_vulnerabilities_count': len(all_vulnerabilities),
         'all_vulnerabilities': all_vulnerabilities,
         'start_date': start_date,
         'punchcard': punchcard,
@@ -638,31 +688,36 @@ def async_burndown_metrics(request, pid):
 @user_is_authorized(Product, Permissions.Engagement_View, 'pid')
 def view_engagements(request, pid):
     prod = get_object_or_404(Product, id=pid)
-
     default_page_num = 10
     recent_test_day_count = 7
-
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = ProductEngagementFilterWithoutObjectLookups if filter_string_matching else ProductEngagementFilter
     # In Progress Engagements
     engs = Engagement.objects.filter(product=prod, active=True, status="In Progress").order_by('-updated')
-    active_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='active')
+    active_engs_filter = filter_class(request.GET, queryset=engs, prefix='active')
     result_active_engs = get_page_items(request, active_engs_filter.qs, default_page_num, prefix="engs")
-    # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
-    result_active_engs.object_list = prefetch_for_view_engagements(result_active_engs.object_list,
-                                                                   recent_test_day_count)
-
+    # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771
+    # and https://code.djangoproject.com/ticket/25375
+    result_active_engs.object_list = prefetch_for_view_engagements(
+        result_active_engs.object_list,
+        recent_test_day_count,
+    )
     # Engagements that are queued because they haven't started or paused
     engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True).order_by('-updated')
-    queued_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='queued')
+    queued_engs_filter = filter_class(request.GET, queryset=engs, prefix='queued')
     result_queued_engs = get_page_items(request, queued_engs_filter.qs, default_page_num, prefix="queued_engs")
-    result_queued_engs.object_list = prefetch_for_view_engagements(result_queued_engs.object_list,
-                                                                   recent_test_day_count)
-
+    result_queued_engs.object_list = prefetch_for_view_engagements(
+        result_queued_engs.object_list,
+        recent_test_day_count,
+    )
     # Cancelled or Completed Engagements
     engs = Engagement.objects.filter(product=prod, active=False).order_by('-target_end')
-    inactive_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='closed')
+    inactive_engs_filter = filter_class(request.GET, queryset=engs, prefix='closed')
     result_inactive_engs = get_page_items(request, inactive_engs_filter.qs, default_page_num, prefix="inactive_engs")
-    result_inactive_engs.object_list = prefetch_for_view_engagements(result_inactive_engs.object_list,
-                                                                     recent_test_day_count)
+    result_inactive_engs.object_list = prefetch_for_view_engagements(
+        result_inactive_engs.object_list,
+        recent_test_day_count,
+    )
 
     product_tab = Product_Tab(prod, title=_("All Engagements"), tab="engagements")
     return render(request, 'dojo/view_engagements.html', {
