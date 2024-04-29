@@ -5,7 +5,37 @@
 {% load static %}
 
 {% block add_styles %}
-<style>
+  {{ block.super }}
+    .chosen-container {
+    width: 70% !important;
+    }
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+    width: 70% !important;
+    }
+    .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border-left-color: #09f;
+      
+        animation: spin 1s ease infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+      
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      #spinnerContainer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     .limitar-texto {
         white-space: nowrap;
@@ -28,7 +58,6 @@
     white-space: normal;
   }
     
-</style>
     {{ block.super }}
 {% endblock %}
 {% block add_css %}
@@ -37,7 +66,6 @@
 {% endblock %}
 {% block content %}
     {{ block.super }}
-  
     <!-- Tu modal confirmed-->
     <div class="modal fade confirmed-modal" id="confirmedModal" data-tf-action="action" data-tf-id="None" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-sm" id="idconfirmedmodal" role="document">
@@ -58,7 +86,6 @@
       </div>
       </div>
   </div>
-  
     <!-- Tu modal -->
 <div class="modal fade" id="modalTransferFinding" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
