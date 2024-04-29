@@ -39,8 +39,11 @@ import copy
 from dojo.filters import (
     TemplateFindingFilter,
     SimilarFindingFilter,
+    SimilarFindingFilterWithoutObjectLookups,
     FindingFilter,
+    FindingFilterWithoutObjectLookups,
     AcceptedFindingFilter,
+    AcceptedFindingFilterWithoutObjectLookups,
     TestImportFindingActionFilter,
     TestImportFilter,
 )
@@ -345,10 +348,13 @@ class BaseListFindings:
             "pid": self.get_product_id(),
         }
 
+        filter_string_matching = get_system_setting("filter_string_matching", False)
+        finding_filter_class = FindingFilterWithoutObjectLookups if filter_string_matching else FindingFilter
+        accepted_finding_filter_class = AcceptedFindingFilterWithoutObjectLookups if filter_string_matching else AcceptedFindingFilter
         return (
-            AcceptedFindingFilter(*args, **kwargs)
+            accepted_finding_filter_class(*args, **kwargs)
             if self.get_filter_name() == "Accepted"
-            else FindingFilter(*args, **kwargs)
+            else finding_filter_class(*args, **kwargs)
         )
 
     def get_filtered_findings(self):
@@ -606,7 +612,9 @@ class ViewFinding(View):
                     request, finding, finding.duplicate_finding
                 )
             )
-        similar_findings_filter = SimilarFindingFilter(
+        filter_string_matching = get_system_setting("filter_string_matching", False)
+        finding_filter_class = SimilarFindingFilterWithoutObjectLookups if filter_string_matching else SimilarFindingFilter
+        similar_findings_filter = finding_filter_class(
             request.GET,
             queryset=get_authorized_findings(Permissions.Finding_View),
             user=request.user,

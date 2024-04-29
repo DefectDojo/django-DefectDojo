@@ -26,7 +26,7 @@ from django.views import View
 
 from dojo.templatetags.display_tags import asvs_calc_level
 from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, MetricsEndpointFilter, \
-    MetricsFindingFilter, ProductComponentFilter
+    MetricsFindingFilter, MetricsFindingFilterWithoutObjectLookups, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, \
     AdHocFindingForm, \
     EngagementPresetsForm, DeleteEngagementPresetsForm, ProductNotificationsForm, \
@@ -67,6 +67,10 @@ def product(request):
     # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records
     # see https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
     name_words = prods.values_list('name', flat=True)
+
+    prods = prods.annotate(
+        findings_count=Count('engagement__test__finding', filter=Q(engagement__test__finding__active=True))
+    )
 
     prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
 
@@ -304,7 +308,9 @@ def finding_querys(request, prod):
         # 'test__test_type',
         # 'risk_acceptance_set',
         'reporter')
-    findings = MetricsFindingFilter(request.GET, queryset=findings_query, pid=prod)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    finding_filter_class = MetricsFindingFilterWithoutObjectLookups if filter_string_matching else MetricsFindingFilter
+    findings = finding_filter_class(request.GET, queryset=findings_query, pid=prod)
     findings_qs = queryset_check(findings)
     filters['form'] = findings.form
 
