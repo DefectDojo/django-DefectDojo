@@ -3,7 +3,6 @@ import json
 from dojo.models import Finding
 
 
-# Parser for semgrep
 class SemgrepParser(object):
     def get_scan_types(self):
         return ["Semgrep JSON Report"]
@@ -19,75 +18,123 @@ class SemgrepParser(object):
 
         dupes = dict()
 
-        for item in data["results"]:
-            finding = Finding(
-                test=test,
-                title=item["check_id"],
-                severity=self.convert_severity(item["extra"]["severity"]),
-                description=self.get_description(item),
-                file_path=item["path"],
-                line=item["start"]["line"],
-                static_finding=True,
-                dynamic_finding=False,
-                vuln_id_from_tool=item["check_id"],
-                nb_occurences=1,
-            )
+        if "results" in data:
+            for item in data.get("results", []):
+                finding = Finding(
+                    test=test,
+                    title=item.get("check_id"),
+                    severity=self.convert_severity(item["extra"]["severity"]),
+                    description=self.get_description(item),
+                    file_path=item["path"],
+                    line=item["start"]["line"],
+                    static_finding=True,
+                    dynamic_finding=False,
+                    vuln_id_from_tool=item["check_id"],
+                    nb_occurences=1,
+                )
 
-            # fingerprint detection
-            unique_id_from_tool = item.get("extra", {}).get("fingerprint")
-            if unique_id_from_tool:
-                finding.unique_id_from_tool = unique_id_from_tool
+                # fingerprint detection
+                unique_id_from_tool = item.get("extra", {}).get("fingerprint")
+                if unique_id_from_tool:
+                    finding.unique_id_from_tool = unique_id_from_tool
 
-            # manage CWE
-            if "cwe" in item["extra"]["metadata"]:
-                if isinstance(item["extra"]["metadata"].get("cwe"), list):
-                    finding.cwe = int(
-                        item["extra"]["metadata"]
-                        .get("cwe")[0]
-                        .partition(":")[0]
-                        .partition("-")[2]
+                # manage CWE
+                if "cwe" in item["extra"]["metadata"]:
+                    if isinstance(item["extra"]["metadata"].get("cwe"), list):
+                        finding.cwe = int(
+                            item["extra"]["metadata"]
+                            .get("cwe")[0]
+                            .partition(":")[0]
+                            .partition("-")[2]
+                        )
+                    else:
+                        finding.cwe = int(
+                            item["extra"]["metadata"]
+                            .get("cwe")
+                            .partition(":")[0]
+                            .partition("-")[2]
+                        )
+
+                # manage references from metadata
+                if "references" in item["extra"]["metadata"]:
+                    finding.references = "\n".join(
+                        item["extra"]["metadata"]["references"]
                     )
+
+                # manage mitigation from metadata
+                if "fix" in item["extra"]:
+                    finding.mitigation = item["extra"]["fix"]
+                elif "fix_regex" in item["extra"]:
+                    finding.mitigation = "\n".join(
+                        [
+                            "**You can automaticaly apply this regex:**",
+                            "\n```\n",
+                            json.dumps(item["extra"]["fix_regex"]),
+                            "\n```\n",
+                        ]
+                    )
+
+                dupe_key = finding.title + finding.file_path + str(finding.line)
+
+                if dupe_key in dupes:
+                    find = dupes[dupe_key]
+                    find.nb_occurences += 1
                 else:
-                    finding.cwe = int(
-                        item["extra"]["metadata"]
-                        .get("cwe")
-                        .partition(":")[0]
-                        .partition("-")[2]
-                    )
+                    dupes[dupe_key] = finding
 
-            # manage references from metadata
-            if "references" in item["extra"]["metadata"]:
-                finding.references = "\n".join(
-                    item["extra"]["metadata"]["references"]
+        elif "vulns" in data:
+            for item in data.get("vulns", []):
+                finding = Finding(
+                    test=test,
+                    title=item.get("title"),
+                    severity=self.convert_severity(item["advisory"]["severity"]),
+                    description=item.get("advisory", {}).get("description"),
+                    file_path=item["dependencyFileLocation"]["path"],
+                    line=item["dependencyFileLocation"]["startLine"],
+                    static_finding=True,
+                    dynamic_finding=False,
+                    vuln_id_from_tool=item["repositoryId"],
+                    nb_occurences=1,
                 )
 
-            # manage mitigation from metadata
-            if "fix" in item["extra"]:
-                finding.mitigation = item["extra"]["fix"]
-            elif "fix_regex" in item["extra"]:
-                finding.mitigation = "\n".join(
-                    [
-                        "**You can automaticaly apply this regex:**",
-                        "\n```\n",
-                        json.dumps(item["extra"]["fix_regex"]),
-                        "\n```\n",
-                    ]
-                )
+                # fingerprint detection
+                unique_id_from_tool = item.get("extra", {}).get("fingerprint")
+                if unique_id_from_tool:
+                    finding.unique_id_from_tool = unique_id_from_tool
 
-            dupe_key = finding.title + finding.file_path + str(finding.line)
+                # manage CWE
+                if "cweIds" in item["advisory"]["references"]:
+                    if isinstance(item["advisory"]["references"].get("cweIds"), list):
+                        finding.cwe = int(
+                            item["advisory"]["references"]
+                            .get("cweIds")[0]
+                            .partition(":")[0]
+                            .partition("-")[2]
+                        )
+                    else:
+                        finding.cwe = int(
+                            item["advisory"]["references"]
+                            .get("cweIds")
+                            .partition(":")[0]
+                            .partition("-")[2]
+                        )
 
-            if dupe_key in dupes:
-                find = dupes[dupe_key]
-                find.nb_occurences += 1
-            else:
-                dupes[dupe_key] = finding
+                dupe_key = finding.title + finding.file_path + str(finding.line)
+
+                if dupe_key in dupes:
+                    find = dupes[dupe_key]
+                    find.nb_occurences += 1
+                else:
+                    dupes[dupe_key] = finding
 
         return list(dupes.values())
 
     def convert_severity(self, val):
-        if "WARNING" == val.upper():
+        if "CRITICAL" == val.upper():
+            return "Critical"
+        elif "WARNING" == val.upper():
             return "Medium"
-        elif "ERROR" == val.upper():
+        elif "ERROR" == val.upper() or "HIGH" == val.upper():
             return "High"
         elif "INFO" == val.upper():
             return "Info"
