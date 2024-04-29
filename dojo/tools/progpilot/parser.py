@@ -71,7 +71,7 @@ class ProgpilotParser:
             elif vuln_line is not None:
                 find.line = vuln_line
             if sink_file is not None:
-                find.file_path = sink_file 
+                find.file_path = sink_file
             elif vuln_file is not None:
                 find.file_path = vuln_file
             if vuln_cwe is not None:
