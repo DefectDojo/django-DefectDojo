@@ -5,10 +5,8 @@ from dojo.models import Test
 
 class TestDependencyTrackParser(DojoTestCase):
 
-    def test_dependency_track_parser_with_empty_list_for_findings_key_has_no_findings(
-        self,
-    ):
-       with open(
+    def test_dependency_track_parser_with_empty_list_for_findings_key_has_no_findings(self,):
+        with open(
             get_unit_tests_path() + "/scans/dependency_track/no_findings_because_findings_key_is_empty_list.json"
         ) as testfile:
             parser = DependencyTrackParser()

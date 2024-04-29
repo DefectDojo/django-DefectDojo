@@ -519,8 +519,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
                 payload['service'] = service
 
             return self.import_scan(payload, expected_http_status_code)
-            
-    
+
     def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=False, push_to_jira=None,
                                   tags=None, close_old_findings=True, group_by=None, engagement_name=None, scan_date=None,
                                   product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None):
@@ -569,8 +568,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
                 payload['scan_date'] = scan_date
 
             return self.reimport_scan(payload, expected_http_status_code=expected_http_status_code)
-            
-    
+
     def endpoint_meta_import_scan_with_params(self, filename, product=1, product_name=None,
                                               create_endpoints=True, create_tags=True, create_dojo_meta=True,
                                               expected_http_status_code=201):

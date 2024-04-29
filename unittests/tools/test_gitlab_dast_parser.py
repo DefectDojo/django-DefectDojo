@@ -5,7 +5,7 @@ from dojo.models import Test
 
 class TestGitlabDastParser(DojoTestCase):
     def test_parse_file_with_no_vuln_has_no_findings(self):
-       with open("unittests/scans/gitlab_dast/gitlab_dast_zero_vul.json") as testfile:
+        with open("unittests/scans/gitlab_dast/gitlab_dast_zero_vul.json") as testfile:
             parser = GitlabDastParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))

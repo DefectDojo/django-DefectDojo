@@ -56,7 +56,6 @@ class TestDojoCloseOld(DojoTestCase):
             # Dedupe is off and close old findings does not close old findings if they are the same finding.
             # If this behaviour changes, or dedupe is on, the number of closed findings will be 4
             self.assertEqual(8, len_closed_findings)
-        
 
     def test_close_old_same_product_scan(self):
         scan = get_unit_tests_path() + "/scans/acunetix/many_findings.xml"
