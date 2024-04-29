@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.urls import reverse
 from django.db import DEFAULT_DB_ALIAS
-from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseBadRequest
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -15,8 +15,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import PermissionDenied
 # Local application/library imports
 from dojo.forms import JIRAForm, DeleteJIRAInstanceForm, ExpressJIRAForm
-from dojo.models import User, JIRA_Instance, JIRA_Issue, Notes
-from dojo.utils import add_breadcrumb, add_error_message_to_response, get_system_setting
+from dojo.models import System_Settings, User, JIRA_Instance, JIRA_Issue, Notes
+from dojo.utils import add_breadcrumb, add_error_message_to_response
 from dojo.notifications.helper import create_notification
 from django.views.decorators.http import require_POST
 import dojo.jira_link.helper as jira_helper
@@ -26,114 +26,140 @@ from dojo.authorization.authorization import user_has_configuration_permission
 logger = logging.getLogger(__name__)
 
 
-# for examples of incoming json, see the unit tests for the webhook: https://github.com/DefectDojo/django-DefectDojo/blob/master/unittests/test_jira_webhook.py
-# or the officials docs (which are not always clear): https://developer.atlassian.com/server/jira/platform/webhooks/
+def webhook_responser_handler(
+    log_level: str,
+    message: str,
+) -> HttpResponse:
+    # These represent an error and will be sent to the debugger
+    # for development purposes
+    if log_level == "info":
+        logger.info(message)
+    # These are more common in misconfigurations and have a better
+    # chance of being seen by a user
+    elif log_level == "debug":
+        logger.debug(message)
+    # Return the response with the code
+    return HttpResponse(message, status=200)
+
+
 @csrf_exempt
 @require_POST
 def webhook(request, secret=None):
-    if not get_system_setting('enable_jira'):
-        logger.debug('ignoring incoming webhook as JIRA is disabled.')
-        raise Http404('JIRA disabled')
-    elif not get_system_setting('enable_jira_web_hook'):
-        logger.debug('ignoring incoming webhook as JIRA Webhook is disabled.')
-        raise Http404('JIRA Webhook disabled')
-    elif not get_system_setting('disable_jira_webhook_secret'):
-        if not get_system_setting('jira_webhook_secret'):
-            logger.warning('ignoring incoming webhook as JIRA Webhook secret is empty in Defect Dojo system settings.')
-            raise PermissionDenied('JIRA Webhook secret cannot be empty')
-        if secret != get_system_setting('jira_webhook_secret'):
-            logger.warning('invalid secret provided to JIRA Webhook')
-            raise PermissionDenied('invalid or no secret provided to JIRA Webhook')
+    """
+    for examples of incoming json, see the unit tests for the webhook:
+        https://github.com/DefectDojo/django-DefectDojo/blob/master/unittests/test_jira_webhook.py
+    or the officials docs (which are not always clear):
+        https://developer.atlassian.com/server/jira/platform/webhooks/
 
+    All responses here will return a 201 so that we may have control over the
+    logging level
+    """
+    # Make sure the request is a POST, otherwise, we reject
+    if request.method != "POST":
+        return webhook_responser_handler("debug", "Only POST requests are supported")
+    # Determine if th webhook is in use or not
+    system_settings = System_Settings.objects.get()
+    # If the jira integration is not enabled, then return a 404
+    if not system_settings.enable_jira:
+        return webhook_responser_handler("info", "Ignoring incoming webhook as JIRA is disabled.")
+    # If the webhook is not enabled, then return a 404
+    elif not system_settings.enable_jira_web_hook:
+        return webhook_responser_handler("info", "Ignoring incoming webhook as JIRA Webhook is disabled.")
+    # Determine if the request should be "authenticated"
+    elif not system_settings.disable_jira_webhook_secret:
+        # Make sure there is a value for the webhook secret before making a comparison
+        if not system_settings.jira_webhook_secret:
+            return webhook_responser_handler("info", "Ignoring incoming webhook as JIRA Webhook secret is empty in Defect Dojo system settings.")
+        # Make sure the secret supplied in the path of the webhook request matches the
+        # secret supplied in the system settings
+        if secret != system_settings.jira_webhook_secret:
+            return webhook_responser_handler("info", "Invalid or no secret provided to JIRA Webhook")
     # if webhook secret is disabled in system_settings, we ignore the incoming secret, even if it doesn't match
-
     # example json bodies at the end of this file
+    if request.content_type != "application/json":
+        return webhook_responser_handler("debug", "only application/json supported")
+    # Time to process the request
+    try:
+        parsed = json.loads(request.body.decode("utf-8"))
+        # Check if the events supplied are supported
+        if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
+            return webhook_responser_handler("info", f"Unrecognized JIRA webhook event received: {parsed.get('webhookEvent')}")
 
-    if request.content_type != 'application/json':
-        return HttpResponseBadRequest("only application/json supported")
-
-    if request.method == 'POST':
-        try:
-            parsed = json.loads(request.body.decode('utf-8'))
-            if parsed.get('webhookEvent') == 'jira:issue_updated':
-                # xml examples at the end of file
-                jid = parsed['issue']['id']
-                jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
-
-                findings = None
-                if jissue.finding:
-                    logging.info(f"Received issue update for {jissue.jira_key} for finding {jissue.finding.id}")
-                    findings = [jissue.finding]
-                elif jissue.finding_group:
-                    logging.info(f"Received issue update for {jissue.jira_key} for finding group {jissue.finding_group}")
-                    findings = jissue.finding_group.findings.all()
-                elif jissue.engagement:
-                    # if parsed['issue']['fields']['resolution'] != None:
-                    #     eng.active = False
-                    #     eng.status = 'Completed'
-                    #     eng.save()
-                    return HttpResponse('Update for engagement ignored')
-                else:
-                    logging.info(f"Received issue update for {jissue.jira_key} for unknown object")
-                    raise Http404(f'No finding, finding_group or engagement found for JIRA issue {jissue.jira_key}')
-
-                assignee = parsed['issue']['fields'].get('assignee')
-                assignee_name = 'Jira User'
-                if assignee is not None:
-                    # First look for the 'name' field. If not present, try 'displayName'. Else put None
-                    assignee_name = assignee.get('name', assignee.get('displayName'))
-
-                resolution = parsed['issue']['fields']['resolution']
-
-                #         "resolution":{
-                #             "self":"http://www.testjira.com/rest/api/2/resolution/11",
-                #             "id":"11",
-                #             "description":"Cancelled by the customer.",
-                #             "name":"Cancelled"
-                #         },
-
-                # or
-                #         "resolution": null
-
-                # or
-                #         "resolution": "None"
-
-                resolution = resolution if resolution and resolution != "None" else None
-                resolution_id = resolution['id'] if resolution else None
-                resolution_name = resolution['name'] if resolution else None
-                jira_now = parse_datetime(parsed['issue']['fields']['updated'])
-
-                if findings:
-                    for finding in findings:
-                        jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jissue)
-                # Check for any comment that could have come along with the resolution
-                if (error_response := check_for_and_create_comment(parsed)) is not None:
-                    return error_response
-
-            if parsed.get('webhookEvent') == 'comment_created':
-                if (error_response := check_for_and_create_comment(parsed)) is not None:
-                    return error_response
-
-            if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
-                logger.info(f"Unrecognized JIRA webhook event received: {parsed.get('webhookEvent')}")
-
-        except Exception as e:
-            if isinstance(e, Http404):
-                logger.warning('404 error processing JIRA webhook')
-                logger.warning(str(e))
-            else:
-                logger.exception(e)
-
+        if parsed.get('webhookEvent') == 'jira:issue_updated':
+            # xml examples at the end of file
+            jid = parsed['issue']['id']
+            # This may raise a 404, but it will be handled in the exception response
             try:
-                logger.debug('jira_webhook_body_parsed:')
-                logger.debug(json.dumps(parsed, indent=4))
-            except Exception:
-                logger.debug('jira_webhook_body:')
-                logger.debug(request.body.decode('utf-8'))
+                jissue = JIRA_Issue.objects.get(jira_id=jid)
+            except JIRA_Instance.DoesNotExist:
+                return webhook_responser_handler("info", f"JIRA issue {jid} is not linked to a DefectDojo Finding")
+            findings = None
+            # Determine what type of object we will be working with
+            if jissue.finding:
+                logging.debug(f"Received issue update for {jissue.jira_key} for finding {jissue.finding.id}")
+                findings = [jissue.finding]
+            elif jissue.finding_group:
+                logging.debug(f"Received issue update for {jissue.jira_key} for finding group {jissue.finding_group}")
+                findings = jissue.finding_group.findings.all()
+            elif jissue.engagement:
+                return webhook_responser_handler("debug", "Update for engagement ignored")
+            else:
+                return webhook_responser_handler("info", f"Received issue update for {jissue.jira_key} for unknown object")
+            # Process the assignee if present
+            assignee = parsed['issue']['fields'].get('assignee')
+            assignee_name = 'Jira User'
+            if assignee is not None:
+                # First look for the 'name' field. If not present, try 'displayName'. Else put None
+                assignee_name = assignee.get('name', assignee.get('displayName'))
 
-            # reraise to make sure we don't silently swallow things
-            raise
-    return HttpResponse('')
+            #         "resolution":{
+            #             "self":"http://www.testjira.com/rest/api/2/resolution/11",
+            #             "id":"11",
+            #             "description":"Cancelled by the customer.",
+            #             "name":"Cancelled"
+            #         },
+
+            # or
+            #         "resolution": null
+
+            # or
+            #         "resolution": "None"
+
+            resolution = parsed['issue']['fields']['resolution']
+            resolution = resolution if resolution and resolution != "None" else None
+            resolution_id = resolution['id'] if resolution else None
+            resolution_name = resolution['name'] if resolution else None
+            jira_now = parse_datetime(parsed['issue']['fields']['updated'])
+
+            if findings:
+                for finding in findings:
+                    jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jissue)
+            # Check for any comment that could have come along with the resolution
+            if (error_response := check_for_and_create_comment(parsed)) is not None:
+                return error_response
+
+        if parsed.get('webhookEvent') == 'comment_created':
+            if (error_response := check_for_and_create_comment(parsed)) is not None:
+                return error_response
+
+    except Exception as e:
+        # Check if the issue is originally a 404
+        if isinstance(e, Http404):
+            return webhook_responser_handler("debug", str(e))
+        # Try to get a little more information on the exact exception
+        try:
+            message = (
+                f"Original Exception: {e}\n"
+                f"jira webhook body parsed:\n{json.dumps(parsed, indent=4)}"
+            )
+        except Exception:
+            message = (
+                f"Original Exception: {e}\n"
+                f"jira webhook body :\n{request.body.decode('utf-8')}"
+            )
+        return webhook_responser_handler("debug", message)
+
+    return webhook_responser_handler("No logging here", "Success!")
 
 
 def check_for_and_create_comment(parsed_json):
@@ -194,31 +220,30 @@ def check_for_and_create_comment(parsed_json):
     commenter_display_name = comment.get('updateAuthor', {}).get('displayName')
     # example: body['comment']['self'] = "http://www.testjira.com/jira_under_a_path/rest/api/2/issue/666/comment/456843"
     jid = comment.get('self', '').split('/')[-3]
-    jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
-    logging.info(f"Received issue comment for {jissue.jira_key}")
+    try:
+        jissue = JIRA_Issue.objects.get(jira_id=jid)
+    except JIRA_Instance.DoesNotExist:
+        return webhook_responser_handler("info", f"JIRA issue {jid} is not linked to a DefectDojo Finding")
+    logging.debug(f"Received issue comment for {jissue.jira_key}")
     logger.debug('jissue: %s', vars(jissue))
 
     jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
     for jira_user_id in jira_usernames:
         # logger.debug('incoming username: %s jira config username: %s', commenter.lower(), jira_user_id.lower())
         if jira_user_id.lower() == commenter.lower():
-            logger.debug('skipping incoming JIRA comment as the user id of the comment in JIRA (%s) matches the JIRA username in DefectDojo (%s)', commenter.lower(), jira_user_id.lower())
-            return HttpResponse('')
+            return webhook_responser_handler("debug", f"skipping incoming JIRA comment as the user id of the comment in JIRA {commenter.lower()} matches the JIRA username in DefectDojo {jira_user_id.lower()}")
 
     findings = None
     if jissue.finding:
         findings = [jissue.finding]
         create_notification(event='other', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding", args=(jissue.finding.id,)), icon='check')
-
     elif jissue.finding_group:
         findings = [jissue.finding_group.findings.all()]
         create_notification(event='other', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding_group", args=(jissue.finding_group.id,)), icon='check')
-
     elif jissue.engagement:
-        return HttpResponse('Comment for engagement ignored')
+        return webhook_responser_handler("debug", "Comment for engagement ignored")
     else:
-        raise Http404(f'No finding or engagement found for JIRA issue {jissue.jira_key}')
-
+        return webhook_responser_handler("info", f"Received issue update for {jissue.jira_key} for unknown object")
     # Set the fields for the notes
     author, _ = User.objects.get_or_create(username='JIRA')
     entry = f'({commenter_display_name} ({commenter})): {comment_text}'
