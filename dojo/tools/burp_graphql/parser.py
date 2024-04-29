@@ -9,7 +9,7 @@ from dojo.models import Endpoint, Finding
 logger = logging.getLogger(__name__)
 
 
-class BurpGraphQLParser(object):
+class BurpGraphQLParser:
     def get_scan_types(self):
         return ["Burp GraphQL API"]
 

@@ -111,7 +111,7 @@ def format_url(path):
     return f"{BASE_API_URL}{path}"
 
 
-class SchemaChecker():
+class SchemaChecker:
     def __init__(self, components):
         self._prefix = []
         self._has_failed = False
@@ -272,7 +272,7 @@ class TestType(Enum):
     CONFIGURATION_PERMISSIONS = 3
 
 
-class BaseClass():
+class BaseClass:
     class RESTEndpointTest(DojoAPITestCase):
         def __init__(self, *args, **kwargs):
             DojoAPITestCase.__init__(self, *args, **kwargs)
@@ -1051,6 +1051,7 @@ class FilesTest(DojoAPITestCase):
                 self.assertEqual(FileUpload.objects.count(), length + 1)
                 # Save the ID of the newly created file object
                 self.url_levels[level] = response.data.get('id')
+                
         #  Test the download
         with open(f'{str(self.path)}/scans/acunetix/one_finding.xml') as file:
             file_data = file.read()

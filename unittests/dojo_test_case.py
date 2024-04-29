@@ -27,7 +27,7 @@ def get_unit_tests_path():
     return os.path.dirname(os.path.realpath(__file__))
 
 
-class DojoTestUtilsMixin(object):
+class DojoTestUtilsMixin:
 
     def get_test_admin(self, *args, **kwargs):
         return User.objects.get(username='admin')
@@ -377,7 +377,7 @@ class DojoTestUtilsMixin(object):
         findings = Test.objects.get(id=test_id).finding_set.all()
         for finding in findings:
             logger.debug('finding!')
-            self.assertNotEquals(jira_helper.get_jira_updated(finding), updated_map[finding.id])
+            self.assertNotEqual(jira_helper.get_jira_updated(finding), updated_map[finding.id])
 
     # Toggle epic mapping on jira product
     def toggle_jira_project_epic_mapping(self, obj, value):

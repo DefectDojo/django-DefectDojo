@@ -563,6 +563,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(6, len(findings))
         my_file_handle.close()
 
+
     def test_parse_json_file_from_api_with_multiple_findings_json(self):
         my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/findings_over_api.json"
