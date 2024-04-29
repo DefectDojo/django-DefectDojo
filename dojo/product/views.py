@@ -25,8 +25,19 @@ from django.utils.translation import gettext as _
 from django.views import View
 
 from dojo.templatetags.display_tags import asvs_calc_level
-from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, MetricsEndpointFilter, \
-    MetricsFindingFilter, MetricsFindingFilterWithoutObjectLookups, ProductComponentFilter
+from dojo.filters import (
+    ProductEngagementFilter,
+    ProductEngagementFilterWithoutObjectLookups,
+    ProductFilter,
+    ProductFilterWithoutObjectLookups,
+    EngagementFilter,
+    EngagementFilterWithoutObjectLookups,
+    MetricsEndpointFilter,
+    MetricsEndpointFilterWithoutObjectLookups,
+    MetricsFindingFilter,
+    MetricsFindingFilterWithoutObjectLookups,
+    ProductComponentFilter,
+)
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, \
     AdHocFindingForm, \
     EngagementPresetsForm, DeleteEngagementPresetsForm, ProductNotificationsForm, \
@@ -67,8 +78,9 @@ def product(request):
     # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records
     # see https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
     name_words = prods.values_list('name', flat=True)
-
-    prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = ProductFilterWithoutObjectLookups if filter_string_matching else ProductFilter
+    prod_filter = filter_class(request.GET, queryset=prods, user=request.user)
 
     prod_list = get_page_items(request, prod_filter.qs, 25)
 
@@ -370,7 +382,9 @@ def endpoint_querys(request, prod):
         'finding__test__engagement__risk_acceptance',
         'finding__risk_acceptance_set',
         'finding__reporter').annotate(severity=F('finding__severity'))
-    endpoints = MetricsEndpointFilter(request.GET, queryset=endpoints_query)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = MetricsEndpointFilterWithoutObjectLookups if filter_string_matching else MetricsEndpointFilter
+    endpoints = filter_class(request.GET, queryset=endpoints_query)
     endpoints_qs = queryset_check(endpoints)
     filters['form'] = endpoints.form
 
@@ -450,7 +464,9 @@ def view_product_metrics(request, pid):
     engs = Engagement.objects.filter(product=prod, active=True)
     view = identify_view(request)
 
-    result = EngagementFilter(
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = EngagementFilterWithoutObjectLookups if filter_string_matching else EngagementFilter
+    result = filter_class(
         request.GET,
         queryset=Engagement.objects.filter(product=prod, active=False).order_by('-target_end'))
 
@@ -638,31 +654,36 @@ def async_burndown_metrics(request, pid):
 @user_is_authorized(Product, Permissions.Engagement_View, 'pid')
 def view_engagements(request, pid):
     prod = get_object_or_404(Product, id=pid)
-
     default_page_num = 10
     recent_test_day_count = 7
-
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = ProductEngagementFilterWithoutObjectLookups if filter_string_matching else ProductEngagementFilter
     # In Progress Engagements
     engs = Engagement.objects.filter(product=prod, active=True, status="In Progress").order_by('-updated')
-    active_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='active')
+    active_engs_filter = filter_class(request.GET, queryset=engs, prefix='active')
     result_active_engs = get_page_items(request, active_engs_filter.qs, default_page_num, prefix="engs")
-    # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
-    result_active_engs.object_list = prefetch_for_view_engagements(result_active_engs.object_list,
-                                                                   recent_test_day_count)
-
+    # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771
+    # and https://code.djangoproject.com/ticket/25375
+    result_active_engs.object_list = prefetch_for_view_engagements(
+        result_active_engs.object_list,
+        recent_test_day_count,
+    )
     # Engagements that are queued because they haven't started or paused
     engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True).order_by('-updated')
-    queued_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='queued')
+    queued_engs_filter = filter_class(request.GET, queryset=engs, prefix='queued')
     result_queued_engs = get_page_items(request, queued_engs_filter.qs, default_page_num, prefix="queued_engs")
-    result_queued_engs.object_list = prefetch_for_view_engagements(result_queued_engs.object_list,
-                                                                   recent_test_day_count)
-
+    result_queued_engs.object_list = prefetch_for_view_engagements(
+        result_queued_engs.object_list,
+        recent_test_day_count,
+    )
     # Cancelled or Completed Engagements
     engs = Engagement.objects.filter(product=prod, active=False).order_by('-target_end')
-    inactive_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='closed')
+    inactive_engs_filter = filter_class(request.GET, queryset=engs, prefix='closed')
     result_inactive_engs = get_page_items(request, inactive_engs_filter.qs, default_page_num, prefix="inactive_engs")
-    result_inactive_engs.object_list = prefetch_for_view_engagements(result_inactive_engs.object_list,
-                                                                     recent_test_day_count)
+    result_inactive_engs.object_list = prefetch_for_view_engagements(
+        result_inactive_engs.object_list,
+        recent_test_day_count,
+    )
 
     product_tab = Product_Tab(prod, title=_("All Engagements"), tab="engagements")
     return render(request, 'dojo/view_engagements.html', {

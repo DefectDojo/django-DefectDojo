@@ -20,7 +20,13 @@ from django.utils.html import escape
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
 
-from dojo.filters import MetricsFindingFilter, UserFilter, MetricsEndpointFilter, MetricsFindingFilterWithoutObjectLookups
+from dojo.filters import (
+    MetricsEndpointFilter,
+    MetricsEndpointFilterWithoutObjectLookups,
+    MetricsFindingFilter,
+    MetricsFindingFilterWithoutObjectLookups,
+    UserFilter,
+)
 from dojo.forms import SimpleMetricsForm, ProductTypeCountsForm, ProductTagCountsForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Risk_Acceptance, Dojo_User, Endpoint_Status
@@ -144,6 +150,7 @@ def finding_querys(prod_type, request):
     filter_string_matching = get_system_setting("filter_string_matching", False)
     finding_filter_class = MetricsFindingFilterWithoutObjectLookups if filter_string_matching else MetricsFindingFilter
     findings = finding_filter_class(request.GET, queryset=findings_query)
+    form = findings.form
     findings_qs = queryset_check(findings)
     # Quick check to determine if the filters were too tight and filtered everything away
     if not findings_qs and not findings_query:
@@ -207,6 +214,7 @@ def finding_querys(prod_type, request):
         'weeks_between': weeks_between,
         'start_date': start_date,
         'end_date': end_date,
+        'form': form,
     }
 
 
@@ -220,8 +228,10 @@ def endpoint_querys(prod_type, request):
         'finding__reporter')
 
     endpoints_query = get_authorized_endpoint_status(Permissions.Endpoint_View, endpoints_query, request.user)
-    endpoints = MetricsEndpointFilter(request.GET, queryset=endpoints_query)
-
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = MetricsEndpointFilterWithoutObjectLookups if filter_string_matching else MetricsEndpointFilter
+    endpoints = filter_class(request.GET, queryset=endpoints_query)
+    form = endpoints.form
     endpoints_qs = queryset_check(endpoints)
 
     if not endpoints_qs:
@@ -297,6 +307,7 @@ def endpoint_querys(prod_type, request):
         'weeks_between': weeks_between,
         'start_date': start_date,
         'end_date': end_date,
+        'form': form,
     }
 
 
@@ -447,6 +458,7 @@ def metrics(request, mtype):
         'closed_in_period_details': closed_in_period_details,
         'punchcard': punchcard,
         'ticks': ticks,
+        'form': filters.get('form', None),
         'show_pt_filter': show_pt_filter,
     })
 
