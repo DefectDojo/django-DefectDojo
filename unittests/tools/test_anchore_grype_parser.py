@@ -19,19 +19,19 @@ class TestAnchoreGrypeParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1509, len(findings))
             for finding in findings:
-                    self.assertIn(finding.severity, Finding.SEVERITIES)
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+                vulnerability_ids = finding.unsaved_vulnerability_ids
+                self.assertGreaterEqual(len(vulnerability_ids), 1)
+                if finding.vuln_id_from_tool == "CVE-2011-3389":
                     vulnerability_ids = finding.unsaved_vulnerability_ids
-                    self.assertGreaterEqual(len(vulnerability_ids), 1)
-                    if finding.vuln_id_from_tool == "CVE-2011-3389":
-                            vulnerability_ids = finding.unsaved_vulnerability_ids
-                            self.assertEqual(1, len(vulnerability_ids))
-                            self.assertEqual('CVE-2011-3389', vulnerability_ids[0])
-                            self.assertEqual("Medium", finding.severity)
-                            self.assertEqual("libgnutls-openssl27", finding.component_name)
-                            self.assertEqual("3.6.7-4+deb10u5", finding.component_version)
-                            self.assertEqual("/var/lib/dpkg/status", finding.file_path)
-                            found = True
-                            break
+                    self.assertEqual(1, len(vulnerability_ids))
+                    self.assertEqual('CVE-2011-3389', vulnerability_ids[0])
+                    self.assertEqual("Medium", finding.severity)
+                    self.assertEqual("libgnutls-openssl27", finding.component_name)
+                    self.assertEqual("3.6.7-4+deb10u5", finding.component_version)
+                    self.assertEqual("/var/lib/dpkg/status", finding.file_path)
+                    found = True
+                    break
             self.assertTrue(found)
 
     def test_grype_parser_with_one_criticle_vuln_has_one_findings(self):
@@ -41,18 +41,18 @@ class TestAnchoreGrypeParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1567, len(findings))
             for finding in findings:
-                    self.assertIn(finding.severity, Finding.SEVERITIES)
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+                vulnerability_ids = finding.unsaved_vulnerability_ids
+                self.assertGreaterEqual(len(vulnerability_ids), 1)
+                if finding.vuln_id_from_tool == "CVE-2019-9192":
                     vulnerability_ids = finding.unsaved_vulnerability_ids
-                    self.assertGreaterEqual(len(vulnerability_ids), 1)
-                    if finding.vuln_id_from_tool == "CVE-2019-9192":
-                            vulnerability_ids = finding.unsaved_vulnerability_ids
-                            self.assertEqual(1, len(vulnerability_ids))
-                            self.assertEqual('CVE-2019-9192', vulnerability_ids[0])
-                            self.assertEqual("libc6-dev", finding.component_name)
-                            self.assertEqual("2.28-10", finding.component_version)
-                            self.assertEqual("Info", finding.severity)
-                            found = True
-                            break
+                    self.assertEqual(1, len(vulnerability_ids))
+                    self.assertEqual('CVE-2019-9192', vulnerability_ids[0])
+                    self.assertEqual("libc6-dev", finding.component_name)
+                    self.assertEqual("2.28-10", finding.component_version)
+                    self.assertEqual("Info", finding.severity)
+                    found = True
+                    break
             self.assertTrue(found)
 
     def test_grype_parser_with_many_vulns3(self):
@@ -62,18 +62,18 @@ class TestAnchoreGrypeParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(327, len(findings))
             for finding in findings:
-                    self.assertIn(finding.severity, Finding.SEVERITIES)
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+                vulnerability_ids = finding.unsaved_vulnerability_ids
+                self.assertGreaterEqual(len(vulnerability_ids), 1)
+                if finding.vuln_id_from_tool == "CVE-2011-3389":
                     vulnerability_ids = finding.unsaved_vulnerability_ids
-                    self.assertGreaterEqual(len(vulnerability_ids), 1)
-                    if finding.vuln_id_from_tool == "CVE-2011-3389":
-                            vulnerability_ids = finding.unsaved_vulnerability_ids
-                            self.assertEqual(1, len(vulnerability_ids))
-                            self.assertEqual('CVE-2011-3389', vulnerability_ids[0])
-                            self.assertEqual("Medium", finding.severity)
-                            self.assertEqual("libgnutls30", finding.component_name)
-                            self.assertEqual("3.6.7-4+deb10u5", finding.component_version)
-                            found = True
-                            break
+                    self.assertEqual(1, len(vulnerability_ids))
+                    self.assertEqual('CVE-2011-3389', vulnerability_ids[0])
+                    self.assertEqual("Medium", finding.severity)
+                    self.assertEqual("libgnutls30", finding.component_name)
+                    self.assertEqual("3.6.7-4+deb10u5", finding.component_version)
+                    found = True
+                    break
             self.assertTrue(found)
 
     def test_grype_parser_with_new_matcher_list(self):
@@ -83,18 +83,18 @@ class TestAnchoreGrypeParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(9, len(findings))
             for finding in findings:
-                    self.assertIn(finding.severity, Finding.SEVERITIES)
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+                vulnerability_ids = finding.unsaved_vulnerability_ids
+                self.assertGreaterEqual(len(vulnerability_ids), 1)
+                if finding.vuln_id_from_tool == "CVE-1999-1338":
                     vulnerability_ids = finding.unsaved_vulnerability_ids
-                    self.assertGreaterEqual(len(vulnerability_ids), 1)
-                    if finding.vuln_id_from_tool == "CVE-1999-1338":
-                            vulnerability_ids = finding.unsaved_vulnerability_ids
-                            self.assertEqual(1, len(vulnerability_ids))
-                            self.assertEqual('CVE-1999-1338', vulnerability_ids[0])
-                            self.assertEqual("Medium", finding.severity)
-                            self.assertIn("javascript-matcher", finding.description)
-                            self.assertEqual("delegate", finding.component_name)
-                            self.assertEqual("3.2.0", finding.component_version)
-                            found = True
+                    self.assertEqual(1, len(vulnerability_ids))
+                    self.assertEqual('CVE-1999-1338', vulnerability_ids[0])
+                    self.assertEqual("Medium", finding.severity)
+                    self.assertIn("javascript-matcher", finding.description)
+                    self.assertEqual("delegate", finding.component_name)
+                    self.assertEqual("3.2.0", finding.component_version)
+                    found = True
             self.assertTrue(found)
 
     def test_check_all_fields(self):
