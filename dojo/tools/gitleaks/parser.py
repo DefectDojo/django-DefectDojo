@@ -25,9 +25,9 @@ class GitleaksParser:
         issues = json.load(filename)
         # empty report are just null object
         if issues is None:
-            return list()
+            return []
 
-        dupes = dict()
+        dupes = {}
 
         for issue in issues:
             if issue.get("rule"):

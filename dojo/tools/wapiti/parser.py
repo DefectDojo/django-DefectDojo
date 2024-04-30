@@ -45,7 +45,7 @@ class WapitiParser:
 
         url = root.findtext('report_infos/info[@name="target"]')
 
-        dupes = dict()
+        dupes = {}
         for vulnerability in root.findall("vulnerabilities/vulnerability"):
             category = vulnerability.attrib["name"]
             description = vulnerability.findtext("description")

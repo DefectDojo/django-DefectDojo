@@ -31,16 +31,16 @@ class SarifParser:
     def get_findings(self, filehandle, test):
         """For simple interface of parser contract we just aggregate everything"""
         tree = json.load(filehandle)
-        items = list()
+        items = []
         # for each runs we just aggregate everything
-        for run in tree.get("runs", list()):
+        for run in tree.get("runs", []):
             items.extend(self.__get_items_from_run(run))
         return items
 
     def get_tests(self, scan_type, handle):
         tree = json.load(handle)
-        tests = list()
-        for run in tree.get("runs", list()):
+        tests = []
+        for run in tree.get("runs", []):
             test = ParserTest(
                 name=run["tool"]["driver"]["name"],
                 type=run["tool"]["driver"]["name"],
@@ -51,13 +51,13 @@ class SarifParser:
         return tests
 
     def __get_items_from_run(self, run):
-        items = list()
+        items = []
         # load rules
         rules = get_rules(run)
         artifacts = get_artifacts(run)
         # get the timestamp of the run if possible
         run_date = self.__get_last_invocation_date(run)
-        for result in run.get("results", list()):
+        for result in run.get("results", []):
             item = get_item(result, rules, artifacts, run_date)
             if item is not None:
                 items.append(item)
@@ -462,7 +462,7 @@ def get_fingerprints_hashes(values):
     Method that generate a `unique_id_from_tool` data from the `fingerprints` attribute.
      - for now, we take the value of the last version of the first hash method.
     """
-    fingerprints = dict()
+    fingerprints = {}
     for key in values:
         if "/" in key:
             key_method = key.split("/")[-2]

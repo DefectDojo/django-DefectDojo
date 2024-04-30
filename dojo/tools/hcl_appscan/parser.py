@@ -107,7 +107,7 @@ class HCLAppScanParser:
                 )
                 findings.append(finding)
                 try:
-                    finding.unsaved_endpoints = list()
+                    finding.unsaved_endpoints = []
                     endpoint = Endpoint(host=host, port=port)
                     finding.unsaved_endpoints.append(endpoint)
                 except UnboundLocalError:

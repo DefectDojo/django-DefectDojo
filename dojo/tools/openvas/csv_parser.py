@@ -260,7 +260,7 @@ class OpenVASCSVParser:
         return date_column_strategy
 
     def read_column_names(self, row):
-        column_names = dict()
+        column_names = {}
         index = 0
         for column in row:
             column_names[index] = column
@@ -268,8 +268,8 @@ class OpenVASCSVParser:
         return column_names
 
     def get_findings(self, filename, test):
-        column_names = dict()
-        dupes = dict()
+        column_names = {}
+        dupes = {}
         chain = self.create_chain()
         content = filename.read()
         if isinstance(content, bytes):
@@ -278,7 +278,7 @@ class OpenVASCSVParser:
         row_number = 0
         for row in reader:
             finding = Finding(test=test)
-            finding.unsaved_vulnerability_ids = list()
+            finding.unsaved_vulnerability_ids = []
             finding.unsaved_endpoints = [Endpoint()]
             if row_number == 0:
                 column_names = self.read_column_names(row)

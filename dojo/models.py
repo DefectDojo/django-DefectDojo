@@ -419,6 +419,12 @@ class System_Settings(models.Model):
         verbose_name=_('Enable Remediation Advice'),
         help_text=_("Enables global remediation advice and matching on CWE and Title. The text will be replaced for mitigation, impact and references on a finding. Useful for providing consistent impact and remediation advice regardless of the scanner."))
 
+    enable_similar_findings = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Enable Similar Findings"),
+        help_text=_("Enable the query of similar findings on the view finding page. This feature can involve potentially large queries and negatively impact performance"))
+
     engagement_auto_close = models.BooleanField(
         default=False,
         blank=False,
@@ -1650,7 +1656,7 @@ class Endpoint(models.Model):
         if self.path or self.path == '':
             while len(self.path) > 0 and self.path[0] == "/":  # Endpoint store "root-less" path
                 self.path = self.path[1:]
-            if any([null_char in self.path for null_char in null_char_list]):
+            if any(null_char in self.path for null_char in null_char_list):
                 old_value = self.path
                 if 'postgres' in db_type:
                     action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
@@ -1663,7 +1669,7 @@ class Endpoint(models.Model):
         if self.query or self.query == '':
             if len(self.query) > 0 and self.query[0] == "?":
                 self.query = self.query[1:]
-            if any([null_char in self.query for null_char in null_char_list]):
+            if any(null_char in self.query for null_char in null_char_list):
                 old_value = self.query
                 if 'postgres' in db_type:
                     action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
@@ -1676,7 +1682,7 @@ class Endpoint(models.Model):
         if self.fragment or self.fragment == '':
             if len(self.fragment) > 0 and self.fragment[0] == "#":
                 self.fragment = self.fragment[1:]
-            if any([null_char in self.fragment for null_char in null_char_list]):
+            if any(null_char in self.fragment for null_char in null_char_list):
                 old_value = self.fragment
                 if 'postgres' in db_type:
                     action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
@@ -2692,24 +2698,16 @@ class Finding(models.Model):
             if self.unsaved_vulnerability_ids:
                 deduplicationLogger.debug("get_vulnerability_ids before the finding was saved")
                 # convert list of unsaved vulnerability_ids to the list of their canonical representation
-                vulnerability_id_str_list = list(
-                    map(
-                        lambda vulnerability_id: str(vulnerability_id),
-                        self.unsaved_vulnerability_ids
-                    ))
+                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in self.unsaved_vulnerability_ids]
                 # deduplicate (usually done upon saving finding) and sort endpoints
-                vulnerability_id_str = ''.join(sorted(list(dict.fromkeys(vulnerability_id_str_list))))
+                vulnerability_id_str = ''.join(sorted(dict.fromkeys(vulnerability_id_str_list)))
             else:
                 deduplicationLogger.debug("finding has no unsaved vulnerability references")
         else:
             vulnerability_ids = Vulnerability_Id.objects.filter(finding=self)
             deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(vulnerability_ids.count()))
             # convert list of vulnerability_ids to the list of their canonical representation
-            vulnerability_id_str_list = list(
-                map(
-                    lambda vulnerability_id: str(vulnerability_id),
-                    vulnerability_ids.all()
-                ))
+            vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in vulnerability_ids.all()]
             # sort vulnerability_ids strings
             vulnerability_id_str = ''.join(sorted(vulnerability_id_str_list))
         return vulnerability_id_str
@@ -2722,17 +2720,11 @@ class Finding(models.Model):
             if len(self.unsaved_endpoints) > 0:
                 deduplicationLogger.debug("get_endpoints before the finding was saved")
                 # convert list of unsaved endpoints to the list of their canonical representation
-                endpoint_str_list = list(
-                    map(
-                        lambda endpoint: str(endpoint),
-                        self.unsaved_endpoints
-                    ))
+                endpoint_str_list = [str(endpoint) for endpoint in self.unsaved_endpoints]
                 # deduplicate (usually done upon saving finding) and sort endpoints
                 endpoint_str = ''.join(
                     sorted(
-                        list(
-                            dict.fromkeys(endpoint_str_list)
-                        )))
+                        dict.fromkeys(endpoint_str_list)))
             else:
                 # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
                 # In this case, before saving the finding, both static_finding and dynamic_finding are True
@@ -2741,11 +2733,7 @@ class Finding(models.Model):
         else:
             deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(self.endpoints.count()))
             # convert list of endpoints to the list of their canonical representation
-            endpoint_str_list = list(
-                map(
-                    lambda endpoint: str(endpoint),
-                    self.endpoints.all()
-                ))
+            endpoint_str_list = [str(endpoint) for endpoint in self.endpoints.all()]
             # sort endpoints strings
             endpoint_str = ''.join(
                 sorted(
@@ -3298,7 +3286,7 @@ class Finding(models.Model):
     def vulnerability_ids(self):
         # Get vulnerability ids from database and convert to list of strings
         vulnerability_ids_model = self.vulnerability_id_set.all()
-        vulnerability_ids = list()
+        vulnerability_ids = []
         for vulnerability_id in vulnerability_ids_model:
             vulnerability_ids.append(vulnerability_id.vulnerability_id)
 
@@ -3392,7 +3380,7 @@ class Finding_Group(TimeStampedModel):
     def severity(self):
         if not self.findings.all():
             return None
-        max_number_severity = max([Finding.get_number_severity(find.severity) for find in self.findings.all()])
+        max_number_severity = max(Finding.get_number_severity(find.severity) for find in self.findings.all())
         return Finding.get_severity(max_number_severity)
 
     @cached_property
@@ -3408,7 +3396,7 @@ class Finding_Group(TimeStampedModel):
         if not self.findings.all():
             return None
 
-        return max([find.age for find in self.findings.all()])
+        return max(find.age for find in self.findings.all())
 
     @cached_property
     def sla_days_remaining_internal(self):
@@ -3430,20 +3418,20 @@ class Finding_Group(TimeStampedModel):
         if not self.findings.all():
             return None
 
-        if any([find.active for find in self.findings.all()]):
+        if any(find.active for find in self.findings.all()):
             return 'Active'
 
-        if all([find.is_mitigated for find in self.findings.all()]):
+        if all(find.is_mitigated for find in self.findings.all()):
             return 'Mitigated'
 
         return 'Inactive'
 
     @cached_property
     def mitigated(self):
-        return all([find.mitigated is not None for find in self.findings.all()])
+        return all(find.mitigated is not None for find in self.findings.all())
 
     def get_sla_start_date(self):
-        return min([find.get_sla_start_date() for find in self.findings.all()])
+        return min(find.get_sla_start_date() for find in self.findings.all())
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -3497,7 +3485,7 @@ class Finding_Template(models.Model):
     def vulnerability_ids(self):
         # Get vulnerability ids from database and convert to list of strings
         vulnerability_ids_model = self.vulnerability_id_template_set.all()
-        vulnerability_ids = list()
+        vulnerability_ids = []
         for vulnerability_id in vulnerability_ids_model:
             vulnerability_ids.append(vulnerability_id.vulnerability_id)
 
