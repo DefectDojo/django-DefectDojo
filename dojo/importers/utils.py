@@ -155,8 +155,9 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
                 fragment=endpoint.fragment,
                 product=test.engagement.product)
         except (MultipleObjectsReturned):
-            raise Exception("Endpoints in your database are broken. Please access {} and migrate them to new format or "
-                            "remove them.".format(reverse('endpoint_migrate')))
+            msg = "Endpoints in your database are broken. Please access {} and migrate them to new format or " \
+                  "remove them.".format(reverse('endpoint_migrate'))
+            raise Exception(msg)
 
         _eps, _created = Endpoint_Status.objects.get_or_create(
             finding=finding,

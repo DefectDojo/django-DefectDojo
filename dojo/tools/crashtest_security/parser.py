@@ -247,4 +247,5 @@ class CrashtestSecurityParser:
         elif filename.name.lower().endswith(".json"):
             return CrashtestSecurityJsonParser().get_findings(filename, test)
         else:
-            raise ValueError("Unknown File Format")
+            msg = "Unknown File Format"
+            raise ValueError(msg)

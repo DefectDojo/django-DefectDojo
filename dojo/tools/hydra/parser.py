@@ -72,9 +72,8 @@ class HydraParser:
             or (username is None)
             or (password is None)
         ):
-            raise ValueError(
-                "Vital information is missing for this finding! Skipping this finding!"
-            )
+            msg = "Vital information is missing for this finding! Skipping this finding!"
+            raise ValueError(msg)
 
         finding = Finding(
             test=test,
@@ -103,8 +102,7 @@ class HydraParser:
         report = json.load(json_output)
 
         if "generator" not in report or "results" not in report:
-            raise ValueError(
-                "Unexpected JSON format provided. That doesn't look like a Hydra scan!"
-            )
+            msg = "Unexpected JSON format provided. That doesn't look like a Hydra scan!"
+            raise ValueError(msg)
 
         return report

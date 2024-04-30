@@ -14,9 +14,8 @@ class CobaltAPI:
             self.api_token = tool_config.api_key
             self.org_token = tool_config.extras
         else:
-            raise Exception(
-                f"Cobalt.io Authentication type {tool_config.authentication_type} not supported"
-            )
+            msg = f"Cobalt.io Authentication type {tool_config.authentication_type} not supported"
+            raise Exception(msg)
 
     def get_asset(self, asset_id):
         """
@@ -30,7 +29,8 @@ class CobaltAPI:
             if asset["resource"]["id"] == asset_id:
                 return asset
 
-        raise Exception(f"Asset {asset_id} not found in organisation")
+        msg = f"Asset {asset_id} not found in organisation"
+        raise Exception(msg)
 
     def get_assets(self):
         """Returns all org assets"""
@@ -42,11 +42,12 @@ class CobaltAPI:
         if response.ok:
             return response.json().get("data")
         else:
-            raise Exception(
+            msg = (
                 "Unable to get assets due to {} - {}".format(
                     response.status_code, response.content.decode("utf-8")
                 )
             )
+            raise Exception(msg)
 
     def get_findings(self, asset_id):
         """
@@ -62,11 +63,12 @@ class CobaltAPI:
         if response.ok:
             return response.json()
         else:
-            raise Exception(
+            msg = (
                 "Unable to get asset findings due to {} - {}".format(
                     response.status_code, response.content.decode("utf-8")
                 )
             )
+            raise Exception(msg)
 
     def test_connection(self):
         # Request orgs for the org name
@@ -90,12 +92,13 @@ class CobaltAPI:
             org_name = org["resource"]["name"]
             return f'You have access to the "{org_name}" organization'
         else:
-            raise Exception(
+            msg = (
                 "Connection failed (error: {} - {})".format(
                     response_assets.status_code,
                     response_assets.content.decode("utf-8"),
                 )
             )
+            raise Exception(msg)
 
     def test_product_connection(self, api_scan_configuration):
         asset = self.get_asset(api_scan_configuration.service_key_1)

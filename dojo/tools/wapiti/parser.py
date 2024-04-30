@@ -31,9 +31,8 @@ class WapitiParser:
         root = tree.getroot()
         # check if it is
         if "report" not in root.tag:
-            raise ValueError(
-                "This doesn't seem to be a valid Wapiti XML file."
-            )
+            msg = "This doesn't seem to be a valid Wapiti XML file."
+            raise ValueError(msg)
 
         severity_mapping = {
             "4": "Critical",

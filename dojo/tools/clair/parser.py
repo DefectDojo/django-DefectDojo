@@ -37,5 +37,6 @@ class ClairParser:
                 self.scanner = "clairklar"
                 subtree = tree.get("Vulnerabilities")
         except BaseException:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
         return subtree

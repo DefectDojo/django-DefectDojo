@@ -202,9 +202,8 @@ def user_has_permission(user, obj, permission):
                 user, obj.finding.test.engagement.product, permission
             )
     else:
-        raise NoAuthorizationImplementedError(
-            f"No authorization implemented for class {type(obj).__name__} and permission {permission}"
-        )
+        msg = f"No authorization implemented for class {type(obj).__name__} and permission {permission}"
+        raise NoAuthorizationImplementedError(msg)
 
 
 def user_has_global_permission(user, permission):
@@ -258,9 +257,8 @@ def user_has_global_permission_or_403(user, permission):
 
 def get_roles_for_permission(permission):
     if not Permissions.has_value(permission):
-        raise PermissionDoesNotExistError(
-            f"Permission {permission} does not exist"
-        )
+        msg = f"Permission {permission} does not exist"
+        raise PermissionDoesNotExistError(msg)
     roles_for_permissions = set()
     roles = get_roles_with_permissions()
     for role in roles:
@@ -274,7 +272,8 @@ def role_has_permission(role, permission):
     if role is None:
         return False
     if not Roles.has_value(role):
-        raise RoleDoesNotExistError(f"Role {role} does not exist")
+        msg = f"Role {role} does not exist"
+        raise RoleDoesNotExistError(msg)
     roles = get_roles_with_permissions()
     permissions = roles.get(role)
     if not permissions:
@@ -286,7 +285,8 @@ def role_has_global_permission(role, permission):
     if role is None:
         return False
     if not Roles.has_value(role):
-        raise RoleDoesNotExistError(f"Role {role} does not exist")
+        msg = f"Role {role} does not exist"
+        raise RoleDoesNotExistError(msg)
     roles = get_global_roles_with_permissions()
     permissions = roles.get(role)
     if permissions and permission in permissions:

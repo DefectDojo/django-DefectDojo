@@ -61,10 +61,11 @@ class SonarQubeApiImporter:
             )  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 7 and 8
             # Double check of config
             if config.product != product:
-                raise ValidationError(
+                msg = (
                     "Product API Scan Configuration and Product do not match. "
                     f'Product: "{product.name}" ({product.id}), config.product: "{config.product.name}" ({config.product.id})'
                 )
+                raise ValidationError(msg)
         else:
             sqqs = product.product_api_scan_configuration_set.filter(
                 product=product,
@@ -77,19 +78,21 @@ class SonarQubeApiImporter:
             elif (
                 sqqs.count() > 1
             ):  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 6
-                raise ValidationError(
+                msg = (
                     "More than one Product API Scan Configuration has been configured, but none of them has been "
                     "chosen. Please specify which one should be used. "
                     f'Product: "{product.name}" ({product.id})'
                 )
+                raise ValidationError(msg)
             else:
                 # We are not handling cases no. 1-3 anymore -
                 # https://github.com/DefectDojo/django-DefectDojo/pull/4676
-                raise ValidationError(
+                msg = (
                     "There are no API Scan Configurations for this Product.\n"
                     "Please add at least one API Scan Configuration for SonarQube to this Product. "
                     f'Product: "{product.name}" ({product.id})'
                 )
+                raise ValidationError(msg)
 
         return SonarQubeAPI(tool_config=config.tool_configuration), config
 
