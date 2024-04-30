@@ -108,7 +108,8 @@ class TwistlockJsonParser:
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return tree
 
@@ -220,4 +221,5 @@ class TwistlockParser:
         elif filename.name.lower().endswith(".csv"):
             return TwistlockCSVParser().parse(filename, test)
         else:
-            raise ValueError("Unknown File Format")
+            msg = "Unknown File Format"
+            raise ValueError(msg)

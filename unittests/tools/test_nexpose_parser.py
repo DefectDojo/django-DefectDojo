@@ -1,9 +1,11 @@
 import datetime
+
 from django.test import override_settings
 
-from ..dojo_test_case import DojoTestCase
+from dojo.models import Engagement, Product, Test
 from dojo.tools.nexpose.parser import NexposeParser
-from dojo.models import Test, Engagement, Product
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestNexposeParser(DojoTestCase):

@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.h1.parser import H1Parser
 from dojo.models import Test
+from dojo.tools.h1.parser import H1Parser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestHackerOneParser(DojoTestCase):

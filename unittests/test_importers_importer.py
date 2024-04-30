@@ -1,19 +1,19 @@
-from unittest.mock import patch
+import logging
 import uuid
-from .dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittest.mock import patch
+
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
+
 from dojo.importers.default_importer import DefaultImporter
 from dojo.models import Development_Environment, Engagement, Finding, Product, Product_Type, Test, User
-from dojo.tools.sarif.parser import SarifParser
 from dojo.tools.gitlab_sast.parser import GitlabSastParser
-from .dojo_test_case import DojoAPITestCase
-from .test_utils import assertImportModelsCreated
-import logging
-
+from dojo.tools.sarif.parser import SarifParser
 from dojo.utils import get_object_or_none
 
+from .dojo_test_case import DojoAPITestCase, DojoTestCase, get_unit_tests_path
+from .test_utils import assertImportModelsCreated
 
 logger = logging.getLogger(__name__)
 

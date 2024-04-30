@@ -1,6 +1,7 @@
-from .dojo_test_case import DojoTestCase, get_unit_tests_path
 import os
 import re
+
+from .dojo_test_case import DojoTestCase, get_unit_tests_path
 
 basedir = os.path.join(get_unit_tests_path(), '..')
 

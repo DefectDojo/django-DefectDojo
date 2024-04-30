@@ -1,4 +1,5 @@
 import json
+
 from dojo.models import Finding
 
 
@@ -21,7 +22,8 @@ class Crunch42Parser:
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return tree
 

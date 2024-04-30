@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.wiz.parser import WizParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestWizParser(DojoTestCase):

@@ -1,11 +1,12 @@
 import datetime
-from django.test import override_settings
-
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.veracode_sca.parser import VeracodeScaParser
-from dojo.models import Test
 
 from dateutil.tz import UTC
+from django.test import override_settings
+
+from dojo.models import Test
+from dojo.tools.veracode_sca.parser import VeracodeScaParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestVeracodeScaScannerParser(DojoTestCase):

@@ -145,9 +145,8 @@ class TrivyParser:
                     )
                 return findings
             else:
-                raise ValueError(
-                    "Schema of Trivy json report is not supported"
-                )
+                msg = "Schema of Trivy json report is not supported"
+                raise ValueError(msg)
 
     def get_result_items(self, test, results, service_name=None, artifact_name=""):
         items = []

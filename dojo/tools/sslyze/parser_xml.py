@@ -55,9 +55,8 @@ class SSLyzeXMLParser:
         # get root of tree.
         root = tree.getroot()
         if "document" not in root.tag:
-            raise NamespaceErr(
-                "This doesn't seem to be a valid sslyze xml file."
-            )
+            msg = "This doesn't seem to be a valid sslyze xml file."
+            raise NamespaceErr(msg)
 
         results = root.find("results")
         dupes = {}

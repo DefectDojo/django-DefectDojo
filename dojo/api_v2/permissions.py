@@ -1,37 +1,38 @@
 import re
+
+from django.shortcuts import get_object_or_404
+from rest_framework import permissions, serializers
 from rest_framework.exceptions import (
     ParseError,
     PermissionDenied,
     ValidationError,
 )
+
+from dojo.authorization.authorization import (
+    user_has_configuration_permission,
+    user_has_global_permission,
+    user_has_permission,
+)
+from dojo.authorization.roles_permissions import Permissions
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.models import (
+    Cred_Mapping,
+    Dojo_Group,
     Endpoint,
     Engagement,
     Finding,
     Finding_Group,
-    Product_Type,
     Product,
+    Product_Type,
     Test,
-    Dojo_Group,
-    Cred_Mapping,
 )
-from django.shortcuts import get_object_or_404
-from rest_framework import permissions, serializers
-from dojo.authorization.authorization import (
-    user_has_global_permission,
-    user_has_permission,
-    user_has_configuration_permission,
-)
-from dojo.authorization.roles_permissions import Permissions
 
 
 def check_post_permission(request, post_model, post_pk, post_permission):
     if request.method == "POST":
         if request.data.get(post_pk) is None:
-            raise ParseError(
-                f"Unable to check for permissions: Attribute '{post_pk}' is required"
-            )
+            msg = f"Unable to check for permissions: Attribute '{post_pk}' is required"
+            raise ParseError(msg)
         object = get_object_or_404(post_model, pk=request.data.get(post_pk))
         return user_has_permission(request.user, object, post_permission)
     else:
@@ -436,9 +437,8 @@ class UserHasImportPermission(permissions.BasePermission):
             )
         elif engagement_id := converted_dict.get("engagement_id"):
             # engagement_id doesn't exist
-            raise serializers.ValidationError(
-                f"Engagement \"{engagement_id}\" does not exist"
-            )
+            msg = f"Engagement \"{engagement_id}\" does not exist"
+            raise serializers.ValidationError(msg)
 
         if not converted_dict.get("auto_create_context"):
             raise_no_auto_create_import_validation_error(
@@ -492,13 +492,11 @@ class UserHasMetaImportPermission(permissions.BasePermission):
             )
         elif product_id := converted_dict.get("product_id"):
             # product_id doesn't exist
-            raise serializers.ValidationError(
-                f"Product \"{product_id}\" does not exist"
-            )
+            msg = f"Product \"{product_id}\" does not exist"
+            raise serializers.ValidationError(msg)
         else:
-            raise serializers.ValidationError(
-                "Need product_id or product_name to perform import"
-            )
+            msg = "Need product_id or product_name to perform import"
+            raise serializers.ValidationError(msg)
 
 
 class UserHasProductPermission(permissions.BasePermission):
@@ -635,9 +633,8 @@ class UserHasReimportPermission(permissions.BasePermission):
             )
         elif test_id := converted_dict.get("test_id"):
             # test_id doesn't exist
-            raise serializers.ValidationError(
-                f"Test \"{test_id}\" does not exist"
-            )
+            msg = f"Test \"{test_id}\" does not exist"
+            raise serializers.ValidationError(msg)
 
         if not converted_dict.get("auto_create_context"):
             raise_no_auto_create_import_validation_error(
@@ -922,10 +919,12 @@ def raise_no_auto_create_import_validation_error(
 ):
     # check for mandatory fields first
     if not product_name:
-        raise ValidationError("product_name parameter missing")
+        msg = "product_name parameter missing"
+        raise ValidationError(msg)
 
     if not engagement_name:
-        raise ValidationError("engagement_name parameter missing")
+        msg = "engagement_name parameter missing"
+        raise ValidationError(msg)
 
     if product_type_name and not product_type:
         raise serializers.ValidationError(
@@ -934,29 +933,25 @@ def raise_no_auto_create_import_validation_error(
 
     if product_name and not product:
         if product_type_name:
-            raise serializers.ValidationError(
-                f"Product '{product_name}' does not exist in Product_Type '{product_type_name}'"
-            )
+            msg = f"Product '{product_name}' does not exist in Product_Type '{product_type_name}'"
+            raise serializers.ValidationError(msg)
         else:
             raise serializers.ValidationError(
                 "Product '%s' does not exist" % product_name
             )
 
     if engagement_name and not engagement:
-        raise serializers.ValidationError(
-            f"Engagement '{engagement_name}' does not exist in Product '{product_name}'"
-        )
+        msg = f"Engagement '{engagement_name}' does not exist in Product '{product_name}'"
+        raise serializers.ValidationError(msg)
 
     # these are only set for reimport
     if test_title:
-        raise serializers.ValidationError(
-            f"Test '{test_title}' with scan_type '{scan_type}' does not exist in Engagement '{engagement_name}'"
-        )
+        msg = f"Test '{test_title}' with scan_type '{scan_type}' does not exist in Engagement '{engagement_name}'"
+        raise serializers.ValidationError(msg)
 
     if scan_type:
-        raise serializers.ValidationError(
-            f"Test with scan_type '{scan_type}' does not exist in Engagement '{engagement_name}'"
-        )
+        msg = f"Test with scan_type '{scan_type}' does not exist in Engagement '{engagement_name}'"
+        raise serializers.ValidationError(msg)
 
     raise ValidationError(error_message)
 
@@ -987,10 +982,12 @@ def check_auto_create_permission(
     - User must have Product_Type_Add_Product permission for the Product_Type, or the user has the Product_Type_Add permission
     """
     if not product_name:
-        raise ValidationError("product_name parameter missing")
+        msg = "product_name parameter missing"
+        raise ValidationError(msg)
 
     if not engagement_name:
-        raise ValidationError("engagement_name parameter missing")
+        msg = "engagement_name parameter missing"
+        raise ValidationError(msg)
 
     if engagement:
         # existing engagement, nothing special to check

@@ -1,7 +1,9 @@
 import json
 
 from cvss import parser as cvss_parser
+
 from dojo.models import Endpoint, Finding
+
 from .importer import EdgescanImporter
 
 ES_SEVERITIES = {1: "Info", 2: "Low", 3: "Medium", 4: "High", 5: "Critical"}

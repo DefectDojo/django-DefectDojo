@@ -1,8 +1,8 @@
-import logging
 import json
+import logging
 import re
-import html2text
 
+import html2text
 
 from dojo.models import Endpoint, Finding
 
@@ -23,7 +23,8 @@ class BurpGraphQLParser:
         data = json.load(filename)
 
         if "Issues" not in data:
-            raise ValueError("No Issues found")
+            msg = "No Issues found"
+            raise ValueError(msg)
 
         return self.create_findings(data.get("Issues"), test)
 
@@ -64,7 +65,8 @@ class BurpGraphQLParser:
             if not issue.get("issue_type") or not issue["issue_type"].get(
                 "name"
             ):
-                raise ValueError("Issue does not have a name")
+                msg = "Issue does not have a name"
+                raise ValueError(msg)
 
             issue_name = issue["issue_type"]["name"]
 

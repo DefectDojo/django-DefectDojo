@@ -1,5 +1,6 @@
 import csv
 import io
+
 from dojo.tools.sysdig_reports.sysdig_data import SysdigData
 
 
@@ -26,11 +27,13 @@ class CSVParser:
         for row in reader:
             # Compare headers to values.
             if len(row) != len(reader.fieldnames):
-                raise ValueError(f"Number of fields in row ({len(row)}) does not match number of headers ({len(reader.fieldnames)})")
+                msg = f"Number of fields in row ({len(row)}) does not match number of headers ({len(reader.fieldnames)})"
+                raise ValueError(msg)
 
             # Check for a CVE value to being with
             if not row[reader.fieldnames[0]].startswith("CVE"):
-                raise ValueError(f"Expected 'CVE' at the start but got: {row[reader.fieldnames[0]]}")
+                msg = f"Expected 'CVE' at the start but got: {row[reader.fieldnames[0]]}"
+                raise ValueError(msg)
 
             csvarray.append(row)
 

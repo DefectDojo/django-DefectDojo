@@ -3,8 +3,9 @@ import logging
 
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from dojo.models import Engagement
+
 import dojo.jira_link.helper as jira_helper
+from dojo.models import Engagement
 
 logger = logging.getLogger(__name__)
 

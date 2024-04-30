@@ -35,7 +35,8 @@ class GitleaksParser:
             elif issue.get("Description"):
                 self.get_finding_current(issue, test, dupes)
             else:
-                raise ValueError("Format is not recognized for Gitleaks")
+                msg = "Format is not recognized for Gitleaks"
+                raise ValueError(msg)
 
         return list(dupes.values())
 

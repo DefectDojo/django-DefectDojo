@@ -1,6 +1,6 @@
+import base64
 import json
 import logging
-import base64
 
 from dojo.models import Endpoint, Finding
 
@@ -117,9 +117,8 @@ class BurpApiParser:
                 elif segment["type"] == "HighlightSegment":
                     output += "\n\n------------------------------------------------------------------\n\n"
                 else:
-                    raise ValueError(
-                        f"unknown segment type in Burp data {segment['type']}"
-                    )
+                    msg = f"unknown segment type in Burp data {segment['type']}"
+                    raise ValueError(msg)
         return output
 
 

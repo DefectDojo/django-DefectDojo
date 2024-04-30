@@ -1,15 +1,16 @@
 # Django settings for DefectDojo
-import os
-from datetime import timedelta
-from celery.schedules import crontab
-from dojo import __version__
-import environ
-from netaddr import IPNetwork, IPSet
 import json
 import logging
+import os
 import warnings
+from datetime import timedelta
 from email.utils import getaddresses
 
+import environ
+from celery.schedules import crontab
+from netaddr import IPNetwork, IPSet
+
+from dojo import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -896,9 +897,10 @@ SAML2_ENABLED = env('DD_SAML2_ENABLED')
 SAML2_LOGIN_BUTTON_TEXT = env('DD_SAML2_LOGIN_BUTTON_TEXT')
 SAML2_LOGOUT_URL = env('DD_SAML2_LOGOUT_URL')
 if SAML2_ENABLED:
+    from os import path
+
     import saml2
     import saml2.saml
-    from os import path
     # SSO_URL = env('DD_SSO_URL')
     SAML_METADATA = {}
     if len(env('DD_SAML2_METADATA_AUTO_CONF_URL')) > 0:

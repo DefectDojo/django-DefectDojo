@@ -1,18 +1,22 @@
+import copy
+import datetime
+import logging
+
 from dateutil.relativedelta import relativedelta
-from dojo.utils import get_system_setting
-from django.utils import timezone
-from django.utils.http import urlencode
+from django.db.models import Q
 from django.urls import reverse
-from .dojo_test_case import DojoTestCase
-from dojo.models import Risk_Acceptance, Finding, System_Settings
+from django.utils import timezone
+
 # from unittest.mock import patch
 from django.utils.datastructures import MultiValueDict
-from django.db.models import Q
-import copy
+from django.utils.http import urlencode
+
 # from unittest import skip
 import dojo.risk_acceptance.helper as ra_helper
-import logging
-import datetime
+from dojo.models import Finding, Risk_Acceptance, System_Settings
+from dojo.utils import get_system_setting
+
+from .dojo_test_case import DojoTestCase
 
 logger = logging.getLogger(__name__)
 

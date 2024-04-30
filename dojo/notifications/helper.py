@@ -1,9 +1,9 @@
 import logging
-import requests
 
+import requests
 from django.conf import settings
 from django.core.mail import EmailMessage
-from django.db.models import Q, Count, Prefetch
+from django.db.models import Count, Prefetch, Q
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -12,7 +12,7 @@ from django.utils.translation import gettext as _
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
-from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
+from dojo.models import Alerts, Dojo_User, Notifications, System_Settings, UserContactInfo
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
 
 logger = logging.getLogger(__name__)
@@ -331,8 +331,9 @@ def send_alert_notification(event, user=None, *args, **kwargs):
 
 
 def get_slack_user_id(user_email):
-    from dojo.utils import get_system_setting
     import json
+
+    from dojo.utils import get_system_setting
 
     user_id = None
 

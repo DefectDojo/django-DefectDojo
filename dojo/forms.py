@@ -1,58 +1,114 @@
+import logging
 import os
-import re
-from datetime import datetime, date
 import pickle
+import re
 import warnings
-from dojo.widgets import TableCheckboxWidget
-from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
+from datetime import date, datetime
+
+import tagulous
+from crispy_forms.bootstrap import InlineCheckboxes, InlineRadios
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
-from django.db.models import Count, Q
+from crum import get_current_user
 from dateutil.relativedelta import relativedelta
 from django import forms
-from django.contrib.auth.password_validation import validate_password
+from django.conf import settings
 from django.contrib.auth.models import Permission
+from django.contrib.auth.password_validation import validate_password
 from django.core import validators
 from django.core.exceptions import ValidationError
+from django.db.models import Count, Q
 from django.forms import modelformset_factory
-from django.forms.widgets import Widget, Select
+from django.forms.widgets import Select, Widget
+from django.urls import reverse
+from django.utils import timezone
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from polymorphic.base import ManagerInheritanceWarning
-import tagulous
-
-from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
-    validate_endpoints_to_add
-from dojo.models import Announcement, Finding, Finding_Group, Product_Type, Product, Note_Type, \
-    Check_List, SLA_Configuration, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
-    Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, \
-    JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
-    Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
-    App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
-    Benchmark_Product_Summary, Engagement_Presets, DojoMeta, \
-    Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
-    ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, EFFORT_FOR_FIXING_CHOICES, Product_Type_Member, \
-    Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, \
-    Product_API_Scan_Configuration
-
-from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
-from django.urls import reverse
 from tagulous.forms import TagField
-import logging
-from crum import get_current_user
-from dojo.utils import get_system_setting, get_product, is_finding_groups_enabled, \
-    get_password_requirements_string, is_scan_file_too_large
-from django.conf import settings
-from dojo.authorization.roles_permissions import Permissions
-from dojo.product_type.queries import get_authorized_product_types
-from dojo.product.queries import get_authorized_products
-from dojo.finding.queries import get_authorized_findings
-from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users
-from dojo.user.utils import get_configuration_permissions_fields
-from dojo.group.queries import get_authorized_groups, get_group_member_roles
+
 import dojo.jira_link.helper as jira_helper
+from dojo.authorization.roles_permissions import Permissions
+from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
+from dojo.finding.queries import get_authorized_findings
+from dojo.group.queries import get_authorized_groups, get_group_member_roles
+from dojo.models import (
+    EFFORT_FOR_FIXING_CHOICES,
+    SEVERITY_CHOICES,
+    Announcement,
+    Answered_Survey,
+    App_Analysis,
+    Benchmark_Product,
+    Benchmark_Product_Summary,
+    Benchmark_Requirement,
+    Check_List,
+    Choice,
+    ChoiceAnswer,
+    ChoiceQuestion,
+    Cred_Mapping,
+    Cred_User,
+    Development_Environment,
+    Dojo_Group,
+    Dojo_Group_Member,
+    Dojo_User,
+    DojoMeta,
+    Endpoint,
+    Engagement,
+    Engagement_Presets,
+    Engagement_Survey,
+    FileUpload,
+    Finding,
+    Finding_Group,
+    Finding_Template,
+    General_Survey,
+    GITHUB_Conf,
+    GITHUB_Issue,
+    GITHUB_PKey,
+    Global_Role,
+    JIRA_Instance,
+    JIRA_Issue,
+    JIRA_Project,
+    Note_Type,
+    Notes,
+    Notifications,
+    Objects_Product,
+    Product,
+    Product_API_Scan_Configuration,
+    Product_Group,
+    Product_Member,
+    Product_Type,
+    Product_Type_Group,
+    Product_Type_Member,
+    Question,
+    Regulation,
+    Risk_Acceptance,
+    SLA_Configuration,
+    Stub_Finding,
+    System_Settings,
+    Test,
+    Test_Type,
+    TextAnswer,
+    TextQuestion,
+    Tool_Configuration,
+    Tool_Product_Settings,
+    Tool_Type,
+    User,
+    UserContactInfo,
+)
+from dojo.product.queries import get_authorized_products
+from dojo.product_type.queries import get_authorized_product_types
+from dojo.tools.factory import get_choices_sorted, requires_file, requires_tool_type
+from dojo.user.queries import get_authorized_users, get_authorized_users_for_product_and_product_type
+from dojo.user.utils import get_configuration_permissions_fields
+from dojo.utils import (
+    get_password_requirements_string,
+    get_product,
+    get_system_setting,
+    is_finding_groups_enabled,
+    is_scan_file_too_large,
+)
+from dojo.widgets import TableCheckboxWidget
 
 logger = logging.getLogger(__name__)
 
@@ -522,15 +578,18 @@ class ImportScanForm(forms.Form):
         cleaned_data = super().clean()
         scan_type = cleaned_data.get("scan_type")
         file = cleaned_data.get("file")
-        if requires_file(scan_type) and not file:
-            raise forms.ValidationError(f'Uploading a Report File is required for {scan_type}')
-        if file and is_scan_file_too_large(file):
-            raise forms.ValidationError(_(f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB"))
         tool_type = requires_tool_type(scan_type)
+        if requires_file(scan_type) and not file:
+            msg = _(f"Uploading a Report File is required for {scan_type}")
+            raise forms.ValidationError(msg)
+        if file and is_scan_file_too_large(file):
+            msg = _(f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB")
+            raise forms.ValidationError(msg)
         if tool_type:
             api_scan_configuration = cleaned_data.get('api_scan_configuration')
             if api_scan_configuration and tool_type != api_scan_configuration.tool_configuration.tool_type.name:
-                raise forms.ValidationError(f'API scan configuration must be of tool type {tool_type}')
+                msg = f'API scan configuration must be of tool type {tool_type}'
+                raise forms.ValidationError(msg)
 
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data['endpoints_to_add'])
         if errors:
@@ -544,7 +603,8 @@ class ImportScanForm(forms.Form):
     def clean_scan_date(self):
         date = self.cleaned_data.get('scan_date', None)
         if date and date.date() > datetime.today().date():
-            raise forms.ValidationError("The date cannot be in the future!")
+            msg = "The date cannot be in the future!"
+            raise forms.ValidationError(msg)
         return date
 
     def get_scan_type(self):
@@ -632,14 +692,17 @@ class ReImportScanForm(forms.Form):
         cleaned_data = super().clean()
         file = cleaned_data.get("file")
         if requires_file(self.scan_type) and not file:
-            raise forms.ValidationError("Uploading a report file is required for re-uploading findings.")
+            msg = _("Uploading a report file is required for re-uploading findings.")
+            raise forms.ValidationError(msg)
         if file and is_scan_file_too_large(file):
-            raise forms.ValidationError(_(f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB"))
+            msg = _(f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB")
+            raise forms.ValidationError(msg)
         tool_type = requires_tool_type(self.scan_type)
         if tool_type:
             api_scan_configuration = cleaned_data.get('api_scan_configuration')
             if api_scan_configuration and tool_type != api_scan_configuration.tool_configuration.tool_type.name:
-                raise forms.ValidationError(f'API scan configuration must be of tool type {tool_type}')
+                msg = f'API scan configuration must be of tool type {tool_type}'
+                raise forms.ValidationError(msg)
 
         return cleaned_data
 
@@ -647,7 +710,8 @@ class ReImportScanForm(forms.Form):
     def clean_scan_date(self):
         date = self.cleaned_data.get('scan_date', None)
         if date and date.date() > timezone.localtime(timezone.now()).date():
-            raise forms.ValidationError("The date cannot be in the future!")
+            msg = "The date cannot be in the future!"
+            raise forms.ValidationError(msg)
         return date
 
 
@@ -1058,14 +1122,14 @@ class AddFindingForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         if ((cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']):
-            raise forms.ValidationError('Duplicate findings cannot be'
-                                        ' verified or active')
+            msg = 'Duplicate findings cannot be verified or active'
+            raise forms.ValidationError(msg)
         if cleaned_data['false_p'] and cleaned_data['verified']:
-            raise forms.ValidationError('False positive findings cannot '
-                                        'be verified.')
+            msg = 'False positive findings cannot be verified.'
+            raise forms.ValidationError(msg)
         if cleaned_data['active'] and 'risk_accepted' in cleaned_data and cleaned_data['risk_accepted']:
-            raise forms.ValidationError('Active findings cannot '
-                                        'be risk accepted.')
+            msg = 'Active findings cannot be risk accepted.'
+            raise forms.ValidationError(msg)
 
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data['endpoints_to_add'])
         if errors:
@@ -1139,11 +1203,11 @@ class AdHocFindingForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         if ((cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']):
-            raise forms.ValidationError('Duplicate findings cannot be'
-                                        ' verified or active')
+            msg = 'Duplicate findings cannot be verified or active'
+            raise forms.ValidationError(msg)
         if cleaned_data['false_p'] and cleaned_data['verified']:
-            raise forms.ValidationError('False positive findings cannot '
-                                        'be verified.')
+            msg = 'False positive findings cannot be verified.'
+            raise forms.ValidationError(msg)
 
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data['endpoints_to_add'])
         if errors:
@@ -1318,14 +1382,14 @@ class FindingForm(forms.ModelForm):
         cleaned_data = super().clean()
 
         if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
-            raise forms.ValidationError('Duplicate findings cannot be'
-                                        ' verified or active')
+            msg = 'Duplicate findings cannot be verified or active'
+            raise forms.ValidationError(msg)
         if cleaned_data['false_p'] and cleaned_data['verified']:
-            raise forms.ValidationError('False positive findings cannot '
-                                        'be verified.')
+            msg = 'False positive findings cannot be verified.'
+            raise forms.ValidationError(msg)
         if cleaned_data['active'] and 'risk_accepted' in cleaned_data and cleaned_data['risk_accepted']:
-            raise forms.ValidationError('Active findings cannot '
-                                        'be risk accepted.')
+            msg = 'Active findings cannot be risk accepted.'
+            raise forms.ValidationError(msg)
 
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data['endpoints_to_add'])
         if errors:
@@ -1365,9 +1429,11 @@ class StubFindingForm(forms.ModelForm):
         cleaned_data = super().clean()
         if 'title' in cleaned_data:
             if len(cleaned_data['title']) <= 0:
-                raise forms.ValidationError("The title is required.")
+                msg = "The title is required."
+                raise forms.ValidationError(msg)
         else:
-            raise forms.ValidationError("The title is required.")
+            msg = "The title is required."
+            raise forms.ValidationError(msg)
 
         return cleaned_data
 
@@ -1401,9 +1467,11 @@ class ApplyFindingTemplateForm(forms.Form):
 
         if 'title' in cleaned_data:
             if len(cleaned_data['title']) <= 0:
-                raise forms.ValidationError("The title is required.")
+                msg = "The title is required."
+                raise forms.ValidationError(msg)
         else:
-            raise forms.ValidationError("The title is required.")
+            msg = "The title is required."
+            raise forms.ValidationError(msg)
 
         return cleaned_data
 
@@ -1481,11 +1549,11 @@ class FindingBulkUpdateForm(forms.ModelForm):
         cleaned_data = super().clean()
 
         if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
-            raise forms.ValidationError('Duplicate findings cannot be'
-                                        ' verified or active')
+            msg = 'Duplicate findings cannot be verified or active'
+            raise forms.ValidationError(msg)
         if cleaned_data['false_p'] and cleaned_data['verified']:
-            raise forms.ValidationError('False positive findings cannot '
-                                        'be verified.')
+            msg = 'False positive findings cannot be verified.'
+            raise forms.ValidationError(msg)
         return cleaned_data
 
     class Meta:
@@ -1533,9 +1601,8 @@ class EditEndpointForm(forms.ModelForm):
             product=self.product
         )
         if endpoint.count() > 1 or (endpoint.count() == 1 and endpoint.first().pk != self.endpoint_instance.pk):
-            raise forms.ValidationError(
-                'It appears as though an endpoint with this data already exists for this product.',
-                code='invalid')
+            msg = 'It appears as though an endpoint with this data already exists for this product.'
+            raise forms.ValidationError(msg, code='invalid')
 
         return cleaned_data
 
@@ -1592,8 +1659,8 @@ class AddEndpointForm(forms.Form):
             else:
                 self.product = Product.objects.get(id=int(product))
         else:
-            raise forms.ValidationError('Please enter a valid URL or IP address.',
-                                        code='invalid')
+            msg = 'Please enter a valid URL or IP address.'
+            raise forms.ValidationError(msg, code='invalid')
 
         endpoints_to_add_list, errors = validate_endpoints_to_add(endpoint)
         if errors:
@@ -1785,7 +1852,8 @@ class ReviewFindingForm(forms.Form):
         if cleaned_data.get("allow_all_reviewers", False):
             cleaned_data["reviewers"] = [user.id for user in self.reviewer_queryset]
         if len(cleaned_data.get("reviewers", [])) == 0:
-            raise ValidationError("Please select at least one user from the reviewers list")
+            msg = "Please select at least one user from the reviewers list"
+            raise ValidationError(msg)
         return cleaned_data
 
     class Meta:
@@ -2076,11 +2144,14 @@ class ChangePasswordForm(forms.Form):
         confirm_password = self.cleaned_data.get('confirm_password')
 
         if not self.user.check_password(current_password):
-            raise forms.ValidationError('Current password is incorrect.')
+            msg = 'Current password is incorrect.'
+            raise forms.ValidationError(msg)
         if new_password == current_password:
-            raise forms.ValidationError('New password must be different from current password.')
+            msg = 'New password must be different from current password.'
+            raise forms.ValidationError(msg)
         if new_password != confirm_password:
-            raise forms.ValidationError('Passwords do not match.')
+            msg = 'Passwords do not match.'
+            raise forms.ValidationError(msg)
 
         return cleaned_data
 
@@ -2448,7 +2519,8 @@ class ToolTypeForm(forms.ModelForm):
             name = form_data.get("name")
             # Make sure this will not create a duplicate test type
             if Tool_Type.objects.filter(name=name).count() > 0:
-                raise forms.ValidationError('A Tool Type with the name already exists')
+                msg = 'A Tool Type with the name already exists'
+                raise forms.ValidationError(msg)
 
         return form_data
 
@@ -2500,9 +2572,8 @@ class ToolConfigForm(forms.ModelForm):
                 url_validator = URLValidator(schemes=['ssh', 'http', 'https'])
                 url_validator(form_data["url"])
         except forms.ValidationError:
-            raise forms.ValidationError(
-                'It does not appear as though this endpoint is a valid URL/SSH or IP address.',
-                code='invalid')
+            msg = 'It does not appear as though this endpoint is a valid URL/SSH or IP address.'
+            raise forms.ValidationError(msg, code='invalid')
 
         return form_data
 
@@ -2574,9 +2645,8 @@ class ToolProductSettingsForm(forms.ModelForm):
                 url_validator = URLValidator(schemes=['ssh', 'http', 'https'])
                 url_validator(form_data["url"])
         except forms.ValidationError:
-            raise forms.ValidationError(
-                'It does not appear as though this endpoint is a valid URL/SSH or IP address.',
-                code='invalid')
+            msg = 'It does not appear as though this endpoint is a valid URL/SSH or IP address.'
+            raise forms.ValidationError(msg, code='invalid')
 
         return form_data
 
@@ -2858,9 +2928,11 @@ class JIRAProjectForm(forms.ModelForm):
                 return cleaned_data
 
             if self.target == 'engagement':
-                raise ValidationError('JIRA Project needs a JIRA Instance, JIRA Project Key, and Epic issue type name, or choose to inherit settings from product')
+                msg = 'JIRA Project needs a JIRA Instance, JIRA Project Key, and Epic issue type name, or choose to inherit settings from product'
+                raise ValidationError(msg)
             else:
-                raise ValidationError('JIRA Project needs a JIRA Instance, JIRA Project Key, and Epic issue type name, leave empty to have no JIRA integration setup')
+                msg = 'JIRA Project needs a JIRA Instance, JIRA Project Key, and Epic issue type name, leave empty to have no JIRA integration setup'
+                raise ValidationError(msg)
 
 
 class GITHUBFindingForm(forms.Form):
@@ -2884,7 +2956,8 @@ class JIRAFindingForm(forms.Form):
         self.finding_form = kwargs.pop('finding_form', None)
 
         if self.instance is None and self.jira_project is None:
-            raise ValueError('either and finding instance or jira_project is needed')
+            msg = 'either and finding instance or jira_project is needed'
+            raise ValueError(msg)
 
         super().__init__(*args, **kwargs)
         self.fields['push_to_jira'] = forms.BooleanField()
@@ -3095,7 +3168,8 @@ class QuestionForm(forms.Form):
         self.question = kwargs.get('question')
 
         if not self.question:
-            raise ValueError('Need a question to render')
+            msg = 'Need a question to render'
+            raise ValueError(msg)
 
         del kwargs['question']
         super().__init__(*args, **kwargs)
@@ -3126,13 +3200,15 @@ class TextQuestionForm(QuestionForm):
 
     def save(self):
         if not self.is_valid():
-            raise forms.ValidationError('form is not valid')
+            msg = 'form is not valid'
+            raise forms.ValidationError(msg)
 
         answer = self.cleaned_data.get('answer')
 
         if not answer:
             if self.fields['answer'].required:
-                raise forms.ValidationError('Required')
+                msg = 'Required'
+                raise forms.ValidationError(msg)
             return
 
         text_answer, created = TextAnswer.objects.get_or_create(
@@ -3202,13 +3278,15 @@ class ChoiceQuestionForm(QuestionForm):
 
     def save(self):
         if not self.is_valid():
-            raise forms.ValidationError('Form is not valid')
+            msg = 'Form is not valid'
+            raise forms.ValidationError(msg)
 
         real_answer = self.cleaned_data.get('answer')
 
         if not real_answer:
             if self.fields['answer'].required:
-                raise forms.ValidationError('Required')
+                msg = 'Required'
+                raise forms.ValidationError(msg)
             return
 
         choices = Choice.objects.filter(id__in=real_answer)
@@ -3271,11 +3349,14 @@ class AddGeneralQuestionnaireForm(forms.ModelForm):
         if expiration:
             today = datetime.today().date()
             if expiration < today:
-                raise forms.ValidationError("The expiration cannot be in the past")
+                msg = "The expiration cannot be in the past"
+                raise forms.ValidationError(msg)
             elif expiration.day == today.day:
-                raise forms.ValidationError("The expiration cannot be today")
+                msg = "The expiration cannot be today"
+                raise forms.ValidationError(msg)
         else:
-            raise forms.ValidationError("An expiration for the survey must be supplied")
+            msg = "An expiration for the survey must be supplied"
+            raise forms.ValidationError(msg)
         return expiration
 
 
@@ -3491,7 +3572,8 @@ class ConfigurationPermissionsForm(forms.Form):
             elif self.group:
                 self.group.auth_group.permissions.add(self.permissions[codename])
             else:
-                raise Exception('Neither user or group are set')
+                msg = 'Neither user or group are set'
+                raise Exception(msg)
         else:
             # Checkbox is unset
             if self.user:
@@ -3499,4 +3581,5 @@ class ConfigurationPermissionsForm(forms.Form):
             elif self.group:
                 self.group.auth_group.permissions.remove(self.permissions[codename])
             else:
-                raise Exception('Neither user or group are set')
+                msg = 'Neither user or group are set'
+                raise Exception(msg)

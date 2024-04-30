@@ -3,10 +3,11 @@ Parser for Aquasecurity trivy-operator (https://github.com/aquasecurity/trivy-op
 """
 
 import json
-from dojo.tools.trivy_operator.vulnerability_handler import TrivyVulnerabilityHandler
+
 from dojo.tools.trivy_operator.checks_handler import TrivyChecksHandler
-from dojo.tools.trivy_operator.secrets_handler import TrivySecretsHandler
 from dojo.tools.trivy_operator.compliance_handler import TrivyComplianceHandler
+from dojo.tools.trivy_operator.secrets_handler import TrivySecretsHandler
+from dojo.tools.trivy_operator.vulnerability_handler import TrivyVulnerabilityHandler
 
 
 class TrivyOperatorParser:
