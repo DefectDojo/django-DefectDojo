@@ -1,27 +1,26 @@
 import logging
+from abc import ABC
 from datetime import datetime
 from typing import List, Tuple
-from abc import ABC
 
-from django.utils import timezone
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.core.serializers import serialize, deserialize
+from django.core.serializers import deserialize, serialize
 from django.db.models.query_utils import Q
+from django.utils import timezone
 
-from dojo.importers.base_importer import BaseImporter, Parser
-import dojo.notifications.helper as notifications_helper
 import dojo.finding.helper as finding_helper
-from dojo.utils import is_finding_groups_enabled
 import dojo.jira_link.helper as jira_helper
+import dojo.notifications.helper as notifications_helper
+from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.models import (
+    Dojo_User,
     Engagement,
+    Finding,
+    Notes,
     Test,
     Test_Import,
-    Finding,
-    Dojo_User,
-    Notes,
 )
-
+from dojo.utils import is_finding_groups_enabled
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")

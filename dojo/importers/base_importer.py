@@ -1,40 +1,23 @@
 import base64
 import logging
-from typing import List, Tuple
 from abc import ABC, abstractmethod
 from datetime import datetime
+from typing import List, Tuple
 
-from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.core.files.base import ContentFile
-from django.utils.timezone import make_aware
-from django.utils import timezone
 from django.conf import settings
-from django.core.exceptions import ValidationError
-from django.core.exceptions import MultipleObjectsReturned
+from django.core.exceptions import MultipleObjectsReturned, ValidationError
+from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.timezone import make_aware
 
-from dojo.decorators import dojo_async_task
-from dojo.celery import app
-from dojo.utils import max_safe, get_current_user, is_finding_groups_enabled
 import dojo.finding.helper as finding_helper
+from dojo.celery import app
+from dojo.decorators import dojo_async_task
 from dojo.endpoint.utils import endpoint_get_or_create
-from dojo.tools.factory import get_parser
 from dojo.importers.endpoint_manager import DefaultReImporterEndpointManager
 from dojo.models import (
-    # models
-    Engagement,
-    Test_Type,
-    Test,
-    Finding,
-    Endpoint,
-    Endpoint_Status,
-    Dojo_User,
-    Test_Import,
-    Test_Import_Finding_Action,
-    Vulnerability_Id,
-    Tool_Configuration,
-    BurpRawRequestResponse,
-    FileUpload,
     # Import History States
     IMPORT_CLOSED_FINDING,
     IMPORT_CREATED_FINDING,
@@ -42,8 +25,23 @@ from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
     # Finding Severities
     SEVERITIES,
+    BurpRawRequestResponse,
+    Dojo_User,
+    Endpoint,
+    Endpoint_Status,
+    # models
+    Engagement,
+    FileUpload,
+    Finding,
+    Test,
+    Test_Import,
+    Test_Import_Finding_Action,
+    Test_Type,
+    Tool_Configuration,
+    Vulnerability_Id,
 )
-
+from dojo.tools.factory import get_parser
+from dojo.utils import get_current_user, is_finding_groups_enabled, max_safe
 
 logger = logging.getLogger(__name__)
 
@@ -100,10 +98,11 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         BaseImporter are not being used directly
         """
         if isinstance(self, BaseImporter):
-            raise NotImplementedError(
+            msg = (
                 "The BaseImporter class must not be used directly. "
                 "Please use a class that extends the BaseImporter class."
             )
+            raise NotImplementedError(msg)
 
     @abstractmethod
     def process_scan(
@@ -197,7 +196,8 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         # Ensure that a test is present when calling this method as there are cases where
         # the test will be created by this function in a child class
         if test is None or not isinstance(test, Test):
-            raise ValidationError("A test must be supplied to the parse the file")
+            msg = "A test must be supplied to the parse the file"
+            raise ValidationError(msg)
         try:
             return parser.get_findings(scan, test)
         except ValueError as e:
@@ -593,10 +593,11 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
                     fragment=endpoint.fragment,
                     product=test.engagement.product)
             except (MultipleObjectsReturned):
-                raise Exception(
+                msg = (
                     f"Endpoints in your database are broken. "
                     f"Please access {reverse('endpoint_migrate')} and migrate them to new format or remove them."
                 )
+                raise Exception(msg)
 
             Endpoint_Status.objects.get_or_create(
                 finding=finding,
@@ -690,12 +691,14 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
             return test
         # Ensure that a test was supplied
         elif not isinstance(test, Test):
-            raise ValidationError("A test must be supplied to verify the Tool_Configuration against")
+            msg = "A test must be supplied to verify the Tool_Configuration against"
+            raise ValidationError(msg)
         # Validate that the test has a value
         elif test is not None:
             # Make sure the Tool_Configuration is connected to the product that the test is
             if api_scan_configuration.product != test.engagement.product:
-                raise ValidationError("API Scan Configuration has to be from same product as the Test")
+                msg = "API Scan Configuration has to be from same product as the Test"
+                raise ValidationError(msg)
             # If the Tool_Configuration on the test is not the same as the one supplied, then lets
             # use the one that is supplied
             if test.api_scan_configuration != api_scan_configuration:
@@ -724,12 +727,14 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
             return engagement
         # Ensure that an engagement was supplied
         elif not isinstance(engagement, Engagement):
-            raise ValidationError("A engagement must be supplied to verify the Tool_Configuration against")
+            msg = "A engagement must be supplied to verify the Tool_Configuration against"
+            raise ValidationError(msg)
         # Validate that the engagement has a value
         elif engagement is not None and isinstance(engagement, Engagement):
             # Make sure the Tool_Configuration is connected to the engagement that the test is
             if api_scan_configuration.product != engagement.product:
-                raise ValidationError('API Scan Configuration has to be from same product as the Engagement')
+                msg = "API Scan Configuration has to be from same product as the Engagement"
+                raise ValidationError(msg)
             # Return the test here for an early exit
             return engagement
 
@@ -756,10 +761,11 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
             finding.severity = 'Info'
         # Ensure the final severity is one of the supported options
         if finding.severity not in SEVERITIES:
-            raise ValidationError(
+            msg = (
                 f"Finding severity \"{finding.severity}\" is not supported. "
                 f"Any of the following are supported: {SEVERITIES}."
             )
+            raise ValidationError(msg)
         # Set the numerical severity on the finding based on the cleaned severity
         finding.numerical_severity = Finding.get_numerical_severity(finding.severity)
         # Return the finding if all else is good

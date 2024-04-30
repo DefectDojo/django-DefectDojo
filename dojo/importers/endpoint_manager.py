@@ -1,17 +1,16 @@
 import logging
 from typing import List
 
-from django.utils import timezone
 from django.conf import settings
+from django.utils import timezone
 
-from dojo.decorators import dojo_async_task
 from dojo.celery import app
+from dojo.decorators import dojo_async_task
 from dojo.models import (
-    Finding,
-    Endpoint_Status,
     Dojo_User,
+    Endpoint_Status,
+    Finding,
 )
-
 
 logger = logging.getLogger(__name__)
 

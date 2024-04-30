@@ -1,10 +1,10 @@
 import logging
-from datetime import timedelta, datetime
-from crum import get_current_user
+from datetime import datetime, timedelta
 from typing import Any
 
-from django.utils import timezone
+from crum import get_current_user
 from django.http.request import QueryDict
+from django.utils import timezone
 
 from dojo.models import (
     Engagement,
@@ -16,7 +16,6 @@ from dojo.models import (
     Test,
 )
 from dojo.utils import get_last_object_or_none, get_object_or_none
-
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -58,7 +57,8 @@ class AutoCreateContextManager:
                 object_id = object_id[0]
             # Ensure the ID is an integer, not a string
             elif isinstance(object_id, str) and not object_id.isdigit():
-                raise ValueError(f"{key} must be an integer")
+                msg = f"{key} must be an integer"
+                raise ValueError(msg)
             # Update the "test" entry in the dict with the ID
             data[label] = object_id
 
@@ -140,11 +140,12 @@ class AutoCreateContextManager:
         if product_name and (product := get_object_or_none(Product, name=product_name)):
             # product type name must match if provided
             if product_type_name and product.prod_type.name != product_type_name:
-                raise ValueError(
-                    "The fetched product has a conflict with the supplied product type name: "
+                msg = (
+                     "The fetched product has a conflict with the supplied product type name: "
                     f"existing product type name - {product.prod_type.name} vs "
                     f"supplied product type name - {product_type_name}"
                 )
+                raise ValueError(msg)
             # Return the product
             return product
         return None
@@ -254,7 +255,8 @@ class AutoCreateContextManager:
             return product
         # not found .... create it
         if not auto_create_context:
-            raise ValueError('auto_create_context not True, unable to create non-existing product')
+            msg = "auto_create_context not True, unable to create non-existing product"
+            raise ValueError(msg)
         # Look for a product type first
         product_type = self.get_or_create_product_type(product_type_name=product_type_name)
         # Create the product
@@ -298,7 +300,8 @@ class AutoCreateContextManager:
             return engagement
         # not found .... create it
         if not auto_create_context:
-            raise ValueError('auto_create_context not True, unable to create non-existing engagement')
+            msg = "auto_create_context not True, unable to create non-existing engagement"
+            raise ValueError(msg)
         # Get a product first
         product = self.get_or_create_product(
             product_name=product_name,

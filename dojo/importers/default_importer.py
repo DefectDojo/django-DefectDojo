@@ -1,26 +1,25 @@
 import logging
+from abc import ABC
 from datetime import datetime
 from typing import List, Tuple
-from abc import ABC
 
-from django.utils import timezone
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.core.serializers import serialize, deserialize
+from django.core.serializers import deserialize, serialize
 from django.db.models.query_utils import Q
+from django.utils import timezone
 
-from dojo.importers.base_importer import BaseImporter, Parser
-import dojo.notifications.helper as notifications_helper
 import dojo.finding.helper as finding_helper
-from dojo.utils import is_finding_groups_enabled
 import dojo.jira_link.helper as jira_helper
+import dojo.notifications.helper as notifications_helper
+from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.models import (
+    Dojo_User,
     Engagement,
+    Finding,
     Test,
     Test_Import,
-    Finding,
-    Dojo_User,
 )
-
+from dojo.utils import is_finding_groups_enabled
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -61,10 +60,11 @@ class DefaultImporter(BaseImporter):
         # Ensure the following fields were supplied in the kwargs
         required_fields = ["engagement", "lead", "environment"]
         if not all(field in kwargs for field in required_fields):
-            raise ValueError(
+            msg = (
                 "(Importer) parse_findings_static_test_type - "
                 f"The following fields must be supplied: {required_fields}"
             )
+            raise ValueError(msg)
         # Grab the fields from the kwargs
         engagement = kwargs.get("engagement")
         lead = kwargs.get("lead")
