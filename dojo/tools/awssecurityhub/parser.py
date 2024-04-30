@@ -1,9 +1,9 @@
 import json
 
 from dojo.tools.awssecurityhub.compliance import Compliance
-from dojo.tools.parser_test import ParserTest
 from dojo.tools.awssecurityhub.guardduty import GuardDuty
 from dojo.tools.awssecurityhub.inspector import Inspector
+from dojo.tools.parser_test import ParserTest
 
 
 class AwsSecurityHubParser:
@@ -22,9 +22,10 @@ class AwsSecurityHubParser:
         data = json.load(scan)
         findings = data.get("Findings", data.get("findings", None))
         if not isinstance(findings, list):
-            raise TypeError("Incorrect Security Hub report format")
-        prod = list()
-        aws_acc = list()
+            msg = "Incorrect Security Hub report format"
+            raise TypeError(msg)
+        prod = []
+        aws_acc = []
         for finding in findings:
             prod.append(finding.get("ProductName", "AWS Security Hub Ruleset"))
             aws_acc.append(finding.get("AwsAccountId"))
