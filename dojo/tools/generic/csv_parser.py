@@ -17,7 +17,7 @@ class GenericCSVParser:
             io.StringIO(content), delimiter=",", quotechar='"'
         )
 
-        dupes = dict()
+        dupes = {}
         for row in reader:
             finding = Finding(
                 title=row["Title"],

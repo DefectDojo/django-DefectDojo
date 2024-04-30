@@ -11,7 +11,7 @@ class GenericJSONParser:
             type=data.get("type", self.ID),
             version=data.get("version"),
         )
-        test_internal.findings = list()
+        test_internal.findings = []
         for item in data.get("findings", []):
             # remove endpoints of the dictionnary
             unsaved_endpoints = None
