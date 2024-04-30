@@ -36,7 +36,7 @@ class TFSecParser:
                 "Incorrect TFSec scan, missing attribute 'results'"
             )
         if data.get("results") is None:
-            return list()
+            return []
         for item in data.get("results"):
             if item.get("passed", None):
                 continue

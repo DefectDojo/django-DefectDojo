@@ -15,7 +15,7 @@ class AnchoreEngineParser:
 
     def get_findings(self, filename, test):
         data = json.load(filename)
-        dupes = dict()
+        dupes = {}
         for item in data["vulnerabilities"]:
             vulnerability_id = item.get("vuln")
 

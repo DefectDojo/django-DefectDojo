@@ -69,7 +69,7 @@ class TwistlockCSVParser:
         if filename is None:
             return
         content = filename.read()
-        dupes = dict()
+        dupes = {}
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.DictReader(
@@ -97,7 +97,7 @@ class TwistlockJsonParser:
         tree = self.parse_json(json_output)
         items = []
         if tree:
-            items = [data for data in self.get_items(tree, test)]
+            items = list(self.get_items(tree, test))
         return items
 
     def parse_json(self, json_output):
@@ -213,7 +213,7 @@ class TwistlockParser:
 
     def get_findings(self, filename, test):
         if filename is None:
-            return list()
+            return []
 
         if filename.name.lower().endswith(".json"):
             return TwistlockJsonParser().parse(filename, test)

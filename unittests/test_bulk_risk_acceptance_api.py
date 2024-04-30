@@ -44,24 +44,24 @@ class TestBulkRiskAcceptanceApi(APITestCase):
                            reporter=reporter, numerical_severity='S1', static_finding=True, dynamic_finding=False)
 
         Finding.objects.bulk_create(
-            map(lambda i: create_finding(cls.test_a, cls.user, f'CVE-1999-{i}'), range(50, 150, 3)))
+            create_finding(cls.test_a, cls.user, f'CVE-1999-{i}') for i in range(50, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_a):
             Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
         Finding.objects.bulk_create(
-            map(lambda i: create_finding(cls.test_b, cls.user, f'CVE-1999-{i}'), range(51, 150, 3)))
+            create_finding(cls.test_b, cls.user, f'CVE-1999-{i}') for i in range(51, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_b):
             Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
         Finding.objects.bulk_create(
-            map(lambda i: create_finding(cls.test_c, cls.user, f'CVE-1999-{i}'), range(52, 150, 3)))
+            create_finding(cls.test_c, cls.user, f'CVE-1999-{i}') for i in range(52, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_c):
             Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
 
         Finding.objects.bulk_create(
-            map(lambda i: create_finding(cls.test_d, cls.user, f'CVE-2000-{i}'), range(50, 150, 3)))
+            create_finding(cls.test_d, cls.user, f'CVE-2000-{i}') for i in range(50, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_d):
             Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
         Finding.objects.bulk_create(
-            map(lambda i: create_finding(cls.test_e, cls.user, f'CVE-1999-{i}'), range(50, 150, 3)))
+            create_finding(cls.test_e, cls.user, f'CVE-1999-{i}') for i in range(50, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_e):
             Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
 

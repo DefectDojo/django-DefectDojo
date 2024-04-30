@@ -86,7 +86,7 @@ class CycloneDXJSONParser:
                                 finding.severity = Cyclonedxhelper().fix_severity(severity)
                             else:
                                 finding.severity = cvssv3.severities()[0]
-                vulnerability_ids = list()
+                vulnerability_ids = []
                 # set id as first vulnerability id
                 if vulnerability.get("id"):
                     vulnerability_ids.append(vulnerability.get("id"))

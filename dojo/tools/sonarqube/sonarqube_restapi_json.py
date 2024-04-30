@@ -107,7 +107,7 @@ class SonarQubeRESTAPIJSON:
                         cvssv3_score=cvss,
                         tags=["vulnerability"],
                     )
-                    vulnids = list()
+                    vulnids = []
                     if "Reference: CVE" in message:
                         cve_pattern = r'Reference: CVE-\d{4}-\d{4,7}'
                         cves = re.findall(cve_pattern, message)
@@ -128,7 +128,7 @@ class SonarQubeRESTAPIJSON:
                         cves = re.findall(cve_pattern, message)
                         for cve in cves:
                             vulnids.append(cve.split("References: ")[1])
-                    item.unsaved_vulnerability_ids = list()
+                    item.unsaved_vulnerability_ids = []
                     for vulnid in vulnids:
                         item.unsaved_vulnerability_ids.append(vulnid)
                 elif issue.get("type") == "CODE_SMELL":

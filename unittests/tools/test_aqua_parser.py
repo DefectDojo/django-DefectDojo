@@ -79,7 +79,7 @@ class TestAquaParser(DojoTestCase):
         with open("unittests/scans/aqua/vulns_with_aqua_severity.json") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
-            sevs = list()
+            sevs = []
 
             for finding in findings:
                 sevs.append(finding.severity)

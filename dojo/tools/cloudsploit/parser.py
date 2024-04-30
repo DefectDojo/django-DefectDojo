@@ -25,7 +25,7 @@ class CloudsploitParser:
     def get_findings(self, file, test):
         data = json.load(file)
         find_date = datetime.now()
-        dupes = dict()
+        dupes = {}
         for item in data:
             title = item["title"]
             if isinstance(item["region"], str):

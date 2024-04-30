@@ -23,7 +23,7 @@ class TestsslParser:
             io.StringIO(content), delimiter=",", quotechar='"'
         )
 
-        dupes = dict()
+        dupes = {}
         for row in reader:
             # filter 'OK'
             # possible values: LOW|MEDIUM|HIGH|CRITICAL + WARN|OK|INFO

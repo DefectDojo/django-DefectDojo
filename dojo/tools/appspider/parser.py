@@ -29,7 +29,7 @@ class AppSpiderParser:
                 "At this time it is the only file that is consumable by DefectDojo."
             )
 
-        dupes = dict()
+        dupes = {}
 
         for finding in root.iter("Vuln"):
             severity = self.convert_severity(finding.find("AttackScore").text)
@@ -41,8 +41,8 @@ class AppSpiderParser:
             cwe = int(finding.find("CweId").text)
 
             dupe_key = severity + title
-            unsaved_endpoints = list()
-            unsaved_req_resp = list()
+            unsaved_endpoints = []
+            unsaved_req_resp = []
 
             if title is None:
                 title = ""

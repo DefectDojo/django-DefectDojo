@@ -32,7 +32,7 @@ class TalismanParser:
         Converts a Talisman JSON report to DefectDojo findings
         """
         if filename is None:
-            return list()
+            return []
 
         json_data = json.load(filename)
         results = json_data.get("results")

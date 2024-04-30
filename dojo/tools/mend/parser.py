@@ -21,7 +21,7 @@ class MendParser:
 
     def get_findings(self, file, test):
         if file is None:
-            return list()
+            return []
 
         data = file.read()
         try:
@@ -155,7 +155,7 @@ class MendParser:
                 + f.title.encode("utf-8")
             ).hexdigest()
 
-        dupes = dict()
+        dupes = {}
         for finding in findings:
             dupe_key = create_finding_key(finding)
             if dupe_key not in dupes:

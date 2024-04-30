@@ -21,7 +21,7 @@ class ClairParser:
             elif self.scanner == "clairklar":
                 return ClairKlarScan().get_items_klar(tree, test)
         else:
-            return list()
+            return []
 
     def parse_json(self, json_output):
         try:

@@ -14,7 +14,7 @@ class IntSightsJSONParser:
 
         original_alerts = json.load(json_file)
         for original_alert in original_alerts.get("Alerts", []):
-            alert = dict()
+            alert = {}
             alert["alert_id"] = original_alert["_id"]
             alert["title"] = original_alert["Details"]["Title"]
             alert["description"] = original_alert["Details"]["Description"]

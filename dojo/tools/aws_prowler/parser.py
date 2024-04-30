@@ -34,7 +34,7 @@ class AWSProwlerParser:
             content = content.decode("utf-8")
         csv.field_size_limit(int(sys.maxsize / 10))  # the request/resp are big
         reader = csv.DictReader(io.StringIO(content))
-        dupes = dict()
+        dupes = {}
 
         account = None
 
@@ -130,7 +130,7 @@ class AWSProwlerParser:
         return list(dupes.values())
 
     def process_json(self, file, test):
-        dupes = dict()
+        dupes = {}
 
         data = file.readlines()
         for issue in data:

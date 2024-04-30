@@ -451,12 +451,10 @@ class DojoDefaultReImporter:
                     jira_helper.push_to_jira(findings[0])
 
         if is_finding_groups_enabled() and push_to_jira:
-            for finding_group in set(
-                [
-                    finding.finding_group
-                    for finding in reactivated_items + unchanged_items
-                    if finding.finding_group is not None and not finding.is_mitigated
-                ]
+            for finding_group in set(  # noqa: C401
+                finding.finding_group
+                for finding in reactivated_items + unchanged_items
+                if finding.finding_group is not None and not finding.is_mitigated
             ):
                 jira_helper.push_to_jira(finding_group)
 
@@ -540,12 +538,10 @@ class DojoDefaultReImporter:
                 mitigated_findings.append(finding)
 
         if is_finding_groups_enabled() and push_to_jira:
-            for finding_group in set(
-                [
-                    finding.finding_group
-                    for finding in to_mitigate
-                    if finding.finding_group is not None
-                ]
+            for finding_group in set(  # noqa: C401
+                finding.finding_group
+                for finding in to_mitigate
+                if finding.finding_group is not None
             ):
                 jira_helper.push_to_jira(finding_group)
 

@@ -33,7 +33,7 @@ class H1Parser:
         except Exception:
             tree = json.loads(data)
         # Convert JSON  report to DefectDojo format
-        dupes = dict()
+        dupes = {}
         for content in tree["data"]:
             # Get all relevant data
             date = content["attributes"]["created_at"]
@@ -114,7 +114,7 @@ class H1Parser:
                     cwe=cwe,
                     dynamic_finding=False
                 )
-                finding.unsaved_endpoints = list()
+                finding.unsaved_endpoints = []
                 dupes[dupe_key] = finding
         return dupes.values()
 

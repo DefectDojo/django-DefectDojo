@@ -65,7 +65,7 @@ class WpscanParser:
                 finding.mitigation = "fixed in : " + vul["fixed_in"]
             # manage CVE
             if "cve" in vul["references"]:
-                finding.unsaved_vulnerability_ids = list()
+                finding.unsaved_vulnerability_ids = []
                 for vulnerability_id in vul["references"]["cve"]:
                     finding.unsaved_vulnerability_ids.append(
                         f"CVE-{vulnerability_id}"
@@ -90,7 +90,7 @@ class WpscanParser:
         if "start_time" in tree:
             report_date = datetime.utcfromtimestamp(tree.get("start_time"))
 
-        dupes = dict()
+        dupes = {}
         # manage plugin findings
         for plugin in tree.get("plugins", []):
             node = tree["plugins"][plugin]
