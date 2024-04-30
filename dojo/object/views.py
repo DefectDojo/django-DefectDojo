@@ -58,7 +58,8 @@ def edit_object(request, pid, ttid):
     object = Objects_Product.objects.get(pk=ttid)
     product = get_object_or_404(Product, id=pid)
     if object.product != product:
-        raise BadRequest(f'Product {pid} does not fit to product of Object {object.product.id}')
+        msg = f'Product {pid} does not fit to product of Object {object.product.id}'
+        raise BadRequest(msg)
 
     if request.method == 'POST':
         tform = ObjectSettingsForm(request.POST, instance=object)
@@ -87,7 +88,8 @@ def delete_object(request, pid, ttid):
     object = Objects_Product.objects.get(pk=ttid)
     product = get_object_or_404(Product, id=pid)
     if object.product != product:
-        raise BadRequest(f'Product {pid} does not fit to product of Object {object.product.id}')
+        msg = f'Product {pid} does not fit to product of Object {object.product.id}'
+        raise BadRequest(msg)
 
     if request.method == 'POST':
         tform = ObjectSettingsForm(request.POST, instance=object)

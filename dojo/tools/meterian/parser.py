@@ -35,7 +35,8 @@ class MeterianParser:
                 if "reports" in report_json["reports"]["security"]:
                     return report_json["reports"]["security"]["reports"]
 
-        raise ValueError("Malformed report: the security reports are missing.")
+        msg = "Malformed report: the security reports are missing."
+        raise ValueError(msg)
 
     def do_get_findings(self, single_security_report, scan_date, test):
         findings = []

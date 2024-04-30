@@ -180,7 +180,8 @@ def get_title(result, rule):
             title = rule["id"]
 
     if title is None:
-        raise ValueError("No information found to create a title")
+        msg = "No information found to create a title"
+        raise ValueError(msg)
 
     return textwrap.shorten(title, 150)
 

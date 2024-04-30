@@ -27,7 +27,8 @@ class PhpSymfonySecurityCheckParser:
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise Exception("Invalid format")
+            msg = "Invalid format"
+            raise Exception(msg)
 
         return tree
 

@@ -362,9 +362,11 @@ def generate_report(request, obj, host_view=False):
         pass
     else:
         if obj is None:
-            raise Exception('No object is given to generate report for')
+            msg = 'No object is given to generate report for'
+            raise Exception(msg)
         else:
-            raise Exception(f'Report cannot be generated for object of type {type(obj).__name__}')
+            msg = f'Report cannot be generated for object of type {type(obj).__name__}'
+            raise Exception(msg)
 
     report_format = request.GET.get('report_type', 'AsciiDoc')
     include_finding_notes = int(request.GET.get('include_finding_notes', 0))
@@ -684,7 +686,8 @@ def get_list_index(list, index):
 def get_findings(request):
     url = request.META.get('QUERY_STRING')
     if not url:
-        raise Http404('Please use the report button when viewing findings')
+        msg = 'Please use the report button when viewing findings'
+        raise Http404(msg)
     else:
         if url.startswith('url='):
             url = url[4:]

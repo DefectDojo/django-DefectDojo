@@ -24,9 +24,8 @@ class IbmAppParser:
 
         # validate XML file
         if "xml-report" not in root.tag:
-            raise ValueError(
-                "This does not look like a valid expected Ibm AppScan DAST XML file."
-            )
+            msg = "This does not look like a valid expected Ibm AppScan DAST XML file."
+            raise ValueError(msg)
 
         # self.hosts = self.fetch_host_details()
         issue_types = self.fetch_issue_types(root)

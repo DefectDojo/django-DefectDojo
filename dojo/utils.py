@@ -136,7 +136,8 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         custom_filter = {'test': test}
 
     else:
-        raise ValueError('No product, engagement or test provided as argument.')
+        msg = 'No product, engagement or test provided as argument.'
+        raise ValueError(msg)
 
     deduplication_algorithm = finding.test.deduplication_algorithm
 
@@ -486,13 +487,17 @@ def set_duplicate(new_finding, existing_finding):
     deduplicationLogger.debug(f"existing_finding.status(): {existing_finding.id} {existing_finding.status()}")
     if existing_finding.duplicate:
         deduplicationLogger.debug('existing finding: %s:%s:duplicate=%s;duplicate_finding=%s', existing_finding.id, existing_finding.title, existing_finding.duplicate, existing_finding.duplicate_finding.id if existing_finding.duplicate_finding else 'None')
-        raise Exception("Existing finding is a duplicate")
+        msg = "Existing finding is a duplicate"
+        raise Exception(msg)
     if existing_finding.id == new_finding.id:
-        raise Exception("Can not add duplicate to itself")
+        msg = "Can not add duplicate to itself"
+        raise Exception(msg)
     if is_duplicate_reopen(new_finding, existing_finding):
-        raise Exception("Found a regression. Ignore this so that a new duplicate chain can be made")
+        msg = "Found a regression. Ignore this so that a new duplicate chain can be made"
+        raise Exception(msg)
     if new_finding.duplicate and finding_mitigated(existing_finding):
-        raise Exception("Skip this finding as we do not want to attach a new duplicate to a mitigated finding")
+        msg = "Skip this finding as we do not want to attach a new duplicate to a mitigated finding"
+        raise Exception(msg)
 
     deduplicationLogger.debug('Setting new finding ' + str(new_finding.id) + ' as a duplicate of existing finding ' + str(existing_finding.id))
     new_finding.duplicate = True
@@ -1786,7 +1791,8 @@ def redirect(request, redirect_to):
     """Only allow redirects to allowed_hosts to prevent open redirects"""
     if is_safe_url(redirect_to):
         return HttpResponseRedirect(redirect_to)
-    raise ValueError('invalid redirect, host and scheme not in allowed_hosts')
+    msg = 'invalid redirect, host and scheme not in allowed_hosts'
+    raise ValueError(msg)
 
 
 def file_size_mb(file_obj):
@@ -2150,7 +2156,8 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
         # get maximum, which is the first due to descending order
         last_id = models.first().id + 1
     else:
-        raise ValueError('order must be ''asc'' or ''desc''')
+        msg = 'order must be ''asc'' or ''desc'''
+        raise ValueError(msg)
     # use filter to make count fast on mysql
     total_count = models.filter(id__gt=0).count()
     logger.debug('%s found %d models for mass update:', log_prefix, total_count)

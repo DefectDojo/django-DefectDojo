@@ -24,9 +24,8 @@ class MicrofocusWebinspectParser:
         # get root of tree.
         root = tree.getroot()
         if "Sessions" not in root.tag:
-            raise ValueError(
-                "This doesn't seem to be a valid Webinspect xml file."
-            )
+            msg = "This doesn't seem to be a valid Webinspect xml file."
+            raise ValueError(msg)
 
         dupes = {}
         for session in root:

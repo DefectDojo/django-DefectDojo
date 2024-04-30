@@ -20,7 +20,8 @@ class NmapParser:
         root = tree.getroot()
         dupes = {}
         if "nmaprun" not in root.tag:
-            raise ValueError("This doesn't seem to be a valid Nmap xml file.")
+            msg = "This doesn't seem to be a valid Nmap xml file."
+            raise ValueError(msg)
 
         report_date = None
         try:

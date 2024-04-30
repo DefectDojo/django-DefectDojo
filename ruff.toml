@@ -41,6 +41,7 @@ select = [
    "EXE",
    "TRIO",
    "C4",
+   "EM",
    "ICN",
    "LOG",
    "SLOT",

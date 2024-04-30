@@ -293,7 +293,8 @@ def identify_view(request):
         # although any XSS should be catch by django autoescape, we see people sometimes using '|safe'...
         if view in ['Endpoint', 'Finding']:
             return view
-        raise ValueError('invalid view, view must be "Endpoint" or "Finding"')
+        msg = 'invalid view, view must be "Endpoint" or "Finding"'
+        raise ValueError(msg)
     else:
         if get_data.get('finding__severity', None):
             return 'Endpoint'

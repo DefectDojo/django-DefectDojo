@@ -275,7 +275,8 @@ class DojoDefaultImporter:
         now = timezone.now()
 
         if api_scan_configuration and api_scan_configuration.product != engagement.product:
-            raise ValidationError('API Scan Configuration has to be from same product as  the Engagement')
+            msg = 'API Scan Configuration has to be from same product as  the Engagement'
+            raise ValidationError(msg)
 
         # check if the parser that handle the scan_type manage tests
         # if yes, we parse the data first

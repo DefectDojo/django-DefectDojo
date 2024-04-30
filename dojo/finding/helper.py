@@ -146,7 +146,8 @@ def can_edit_mitigated_data(user):
 def create_finding_group(finds, finding_group_name):
     logger.debug('creating finding_group_create')
     if not finds or len(finds) == 0:
-        raise ValueError('cannot create empty Finding Group')
+        msg = 'cannot create empty Finding Group'
+        raise ValueError(msg)
 
     finding_group_name_dummy = 'bulk group ' + strftime("%a, %d %b  %Y %X", timezone.now().timetuple())
 

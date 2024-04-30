@@ -617,7 +617,8 @@ class DojoForgotUsernameForm(PasswordResetForm):
                 connection.open()
                 connection.close()
         except Exception:
-            raise ValidationError("SMTP server is not configured correctly...")
+            msg = "SMTP server is not configured correctly..."
+            raise ValidationError(msg)
 
 
 class DojoPasswordResetForm(PasswordResetForm):
@@ -643,7 +644,8 @@ class DojoPasswordResetForm(PasswordResetForm):
                 connection.close()
         except Exception as e:
             logger.error(f"SMTP Server Connection Failure: {str(e)}")
-            raise ValidationError("SMTP server is not configured correctly...")
+            msg = "SMTP server is not configured correctly..."
+            raise ValidationError(msg)
 
 
 class DojoPasswordResetView(PasswordResetView):

@@ -30,7 +30,8 @@ class CustomReportJsonForm(forms.Form):
         try:
             json.loads(jdata)
         except:
-            raise forms.ValidationError("Invalid data in json")
+            msg = "Invalid data in json"
+            raise forms.ValidationError(msg)
         return jdata
 
 
@@ -255,7 +256,8 @@ class FindingList(Widget):
         if 'findings' in kwargs:
             self.findings = kwargs.get('findings')
         else:
-            raise Exception("Need to instantiate with finding queryset.")
+            msg = "Need to instantiate with finding queryset."
+            raise Exception(msg)
 
         if 'finding_notes' in kwargs:
             self.finding_notes = kwargs.get('finding_notes')
@@ -330,7 +332,8 @@ class EndpointList(Widget):
         if 'endpoints' in kwargs:
             self.endpoints = kwargs.get('endpoints')
         else:
-            raise Exception("Need to instantiate with endpoint queryset.")
+            msg = "Need to instantiate with endpoint queryset."
+            raise Exception(msg)
 
         if 'finding_notes' in kwargs:
             self.finding_notes = kwargs.get('finding_notes')

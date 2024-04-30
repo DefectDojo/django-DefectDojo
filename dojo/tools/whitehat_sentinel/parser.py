@@ -36,9 +36,8 @@ class WhiteHatSentinelParser:
             "collection" not in findings_collection.keys()
             or not findings_collection["collection"]
         ):
-            raise ValueError(
-                "collection key not present or there were not findings present."
-            )
+            msg = "collection key not present or there were not findings present."
+            raise ValueError(msg)
 
         # Convert a WhiteHat Vuln with Attack Vectors to a list of DefectDojo
         # findings

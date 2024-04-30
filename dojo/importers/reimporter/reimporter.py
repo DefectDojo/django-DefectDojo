@@ -582,9 +582,8 @@ class DojoDefaultReImporter:
 
         if api_scan_configuration:
             if api_scan_configuration.product != test.engagement.product:
-                raise ValidationError(
-                    "API Scan Configuration has to be from same product as the Test"
-                )
+                msg = "API Scan Configuration has to be from same product as the Test"
+                raise ValidationError(msg)
             if test.api_scan_configuration != api_scan_configuration:
                 test.api_scan_configuration = api_scan_configuration
                 test.save()
