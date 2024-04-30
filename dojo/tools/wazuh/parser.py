@@ -1,6 +1,7 @@
 import hashlib
 import json
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
 class WazuhParser:

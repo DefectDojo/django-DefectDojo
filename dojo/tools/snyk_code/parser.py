@@ -1,6 +1,7 @@
 import json
 
 from cvss.cvss3 import CVSS3
+
 from dojo.models import Finding
 
 
@@ -36,7 +37,8 @@ class SnykCodeParser:
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return tree
 

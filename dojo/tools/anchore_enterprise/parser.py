@@ -83,9 +83,8 @@ class AnchoreEnterpriseParser:
                                         ]
                                     items.append(find)
                             except (KeyError, IndexError) as err:
-                                raise ValueError(
-                                    f"Invalid format: {err} key not found"
-                                )
+                                msg = f"Invalid format: {err} key not found"
+                                raise ValueError(msg)
         except AttributeError as err:
             # import empty policies without error (e.g. policies or images
             # objects are not a dictionary)

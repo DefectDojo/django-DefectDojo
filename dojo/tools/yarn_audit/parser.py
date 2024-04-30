@@ -39,9 +39,8 @@ class YarnAuditParser:
                 items[unique_key] = item
             elif element.get("type") == "error":
                 error = element.get("data")
-                raise ValueError(
-                    "yarn audit report contains errors: %s", error
-                )
+                msg = "yarn audit report contains errors: %s"
+                raise ValueError(msg, error)
         return list(items.values())
 
     def get_items_auditci(self, tree, test):  # https://github.com/DefectDojo/django-DefectDojo/issues/6495

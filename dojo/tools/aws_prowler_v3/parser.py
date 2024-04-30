@@ -23,7 +23,8 @@ class AWSProwlerV3Parser:
         if file.name.lower().endswith('.json'):
             return self.process_json(file, test)
         else:
-            raise ValueError('Unknown file format')
+            msg = 'Unknown file format'
+            raise ValueError(msg)
 
     def process_json(self, file, test):
         dupes = {}

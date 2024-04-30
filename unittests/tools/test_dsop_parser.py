@@ -1,7 +1,7 @@
-from ..dojo_test_case import DojoTestCase
+from dojo.models import Test
 from dojo.tools.dsop.parser import DsopParser
 
-from dojo.models import Test
+from ..dojo_test_case import DojoTestCase
 
 
 class TestDsopParser(DojoTestCase):

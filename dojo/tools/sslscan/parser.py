@@ -23,9 +23,8 @@ class SslscanParser:
         # get root of tree.
         root = tree.getroot()
         if "document" not in root.tag:
-            raise NamespaceErr(
-                "This doesn't seem to be a valid sslscan xml file."
-            )
+            msg = "This doesn't seem to be a valid sslscan xml file."
+            raise NamespaceErr(msg)
         dupes = {}
         for ssltest in root:
             for target in ssltest:

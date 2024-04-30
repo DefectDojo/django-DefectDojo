@@ -1,7 +1,11 @@
+from dojo.models import Finding, Test
+from dojo.tools.jfrog_xray_on_demand_binary_scan.parser import (
+    JFrogXrayOnDemandBinaryScanParser,
+    clean_title,
+    get_component_name_version,
+)
+
 from ..dojo_test_case import DojoTestCase
-from dojo.models import Test, Finding
-from dojo.tools.jfrog_xray_on_demand_binary_scan.parser import \
-    JFrogXrayOnDemandBinaryScanParser, get_component_name_version, clean_title
 
 
 class TestJFrogXrayOnDemandBinaryScanParser(DojoTestCase):

@@ -1,5 +1,7 @@
 from xml.dom import NamespaceErr
+
 from defusedxml import ElementTree as ET
+
 from dojo.models import Finding
 
 
@@ -9,9 +11,8 @@ class OpenVASXMLParser:
         tree = ET.parse(filename)
         root = tree.getroot()
         if "report" not in root.tag:
-            raise NamespaceErr(
-                "This doesn't seem to be a valid Greenbone OpenVAS XML file."
-            )
+            msg = "This doesn't seem to be a valid Greenbone OpenVAS XML file."
+            raise NamespaceErr(msg)
         report = root.find("report")
         results = report.find("results")
         for result in results:

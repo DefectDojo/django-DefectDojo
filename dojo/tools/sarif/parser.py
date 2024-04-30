@@ -2,11 +2,12 @@ import json
 import logging
 import re
 import textwrap
+
 import dateutil.parser
 from django.utils.translation import gettext as _
 
-from dojo.tools.parser_test import ParserTest
 from dojo.models import Finding
+from dojo.tools.parser_test import ParserTest
 
 logger = logging.getLogger(__name__)
 
@@ -180,7 +181,8 @@ def get_title(result, rule):
             title = rule["id"]
 
     if title is None:
-        raise ValueError("No information found to create a title")
+        msg = "No information found to create a title"
+        raise ValueError(msg)
 
     return textwrap.shorten(title, 150)
 

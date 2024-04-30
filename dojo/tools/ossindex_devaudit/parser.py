@@ -33,7 +33,8 @@ class OssIndexDevauditParser:
         try:
             tree = json.load(json_file)
         except JSONDecodeError:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return tree
 
@@ -67,9 +68,8 @@ def get_item(
     try:
         cwe = int(cwe_data.split("-")[1])
     except ValueError:
-        raise ValueError(
-            "Attempting to convert the CWE value to an integer failed"
-        )
+        msg = "Attempting to convert the CWE value to an integer failed"
+        raise ValueError(msg)
 
     finding = Finding(
         title=dependency_source

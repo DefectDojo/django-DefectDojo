@@ -14,7 +14,7 @@ from django.utils.safestring import mark_safe
 from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups, ReportFindingFilter
 from dojo.forms import CustomReportOptionsForm
 from dojo.models import Endpoint, Finding
-from dojo.utils import get_page_items, get_words_for_field, get_system_setting
+from dojo.utils import get_page_items, get_system_setting, get_words_for_field
 
 """
 Widgets are content sections that can be included on reports.  The report builder will allow any number of widgets
@@ -30,7 +30,8 @@ class CustomReportJsonForm(forms.Form):
         try:
             json.loads(jdata)
         except:
-            raise forms.ValidationError("Invalid data in json")
+            msg = "Invalid data in json"
+            raise forms.ValidationError(msg)
         return jdata
 
 
@@ -255,7 +256,8 @@ class FindingList(Widget):
         if 'findings' in kwargs:
             self.findings = kwargs.get('findings')
         else:
-            raise Exception("Need to instantiate with finding queryset.")
+            msg = "Need to instantiate with finding queryset."
+            raise Exception(msg)
 
         if 'finding_notes' in kwargs:
             self.finding_notes = kwargs.get('finding_notes')
@@ -330,7 +332,8 @@ class EndpointList(Widget):
         if 'endpoints' in kwargs:
             self.endpoints = kwargs.get('endpoints')
         else:
-            raise Exception("Need to instantiate with endpoint queryset.")
+            msg = "Need to instantiate with endpoint queryset."
+            raise Exception(msg)
 
         if 'finding_notes' in kwargs:
             self.finding_notes = kwargs.get('finding_notes')

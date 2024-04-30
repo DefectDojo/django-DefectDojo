@@ -139,7 +139,8 @@ class SemgrepParser:
         elif "INFO" == val.upper():
             return "Info"
         else:
-            raise ValueError(f"Unknown value for severity: {val}")
+            msg = f"Unknown value for severity: {val}"
+            raise ValueError(msg)
 
     def get_description(self, item):
         description = ""

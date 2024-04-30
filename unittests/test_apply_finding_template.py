@@ -1,19 +1,16 @@
 import datetime
-from django.http import Http404
-from dojo.models import Product, Product_Type
-from dojo.models import Engagement
-from dojo.models import Test_Type
-from dojo.models import Test
-from dojo.models import Finding
-from dojo.models import Finding_Template
-from dojo.models import System_Settings
-from dojo.finding import views
-from .dojo_test_case import DojoTestCase
-from django.test.client import RequestFactory
+from unittest import skip
+
 from django.contrib.auth.models import User
 from django.contrib.messages.storage.fallback import FallbackStorage
+from django.http import Http404
+from django.test.client import RequestFactory
 from django.utils import timezone
-from unittest import skip
+
+from dojo.finding import views
+from dojo.models import Engagement, Finding, Finding_Template, Product, Product_Type, System_Settings, Test, Test_Type
+
+from .dojo_test_case import DojoTestCase
 
 
 class FindingMother:

@@ -1,9 +1,18 @@
 import json
 from unittest import mock
 
+from dojo.models import (
+    Engagement,
+    Product,
+    Product_API_Scan_Configuration,
+    Product_Type,
+    Test,
+    Tool_Configuration,
+    Tool_Type,
+)
 from dojo.tools.api_sonarqube.parser import ApiSonarQubeParser
+
 from ..dojo_test_case import DojoTestCase
-from dojo.models import Tool_Type, Tool_Configuration, Product_Type, Product, Engagement, Test, Product_API_Scan_Configuration
 
 
 def dummy_product(self, *args, **kwargs):

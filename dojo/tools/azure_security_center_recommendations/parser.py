@@ -1,7 +1,8 @@
-import sys
-import io
 import csv
+import io
+import sys
 from datetime import datetime
+
 from dojo.models import Finding
 
 
@@ -22,7 +23,8 @@ class AzureSecurityCenterRecommendationsParser:
         if file.name.lower().endswith(".csv"):
             return self.process_csv(file, test)
         else:
-            raise ValueError("Unknown file format")
+            msg = "Unknown file format"
+            raise ValueError(msg)
 
     def process_csv(self, file, test):
         content = file.read()

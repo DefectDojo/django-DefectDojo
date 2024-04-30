@@ -35,9 +35,8 @@ class XanitizerParser:
 
         root = tree.getroot()
         if "XanitizerFindingsList" not in root.tag:
-            raise ValueError(
-                f"'{filename}' is not a valid Xanitizer findings list report XML file."
-            )
+            msg = f"'{filename}' is not a valid Xanitizer findings list report XML file."
+            raise ValueError(msg)
 
         return root
 

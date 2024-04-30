@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.auditjs.parser import AuditJSParser
 from dojo.models import Test
+from dojo.tools.auditjs.parser import AuditJSParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestAuditJSParser(DojoTestCase):

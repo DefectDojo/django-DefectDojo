@@ -1,5 +1,7 @@
 import logging
+
 from defusedxml import ElementTree as etree
+
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)

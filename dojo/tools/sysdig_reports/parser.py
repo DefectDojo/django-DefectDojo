@@ -1,9 +1,10 @@
+import json
+
+import cvss.parser
+from cvss.cvss3 import CVSS3
+
 from dojo.models import Finding
 from dojo.tools.sysdig_reports.sysdig_csv_parser import CSVParser
-
-from cvss.cvss3 import CVSS3
-import cvss.parser
-import json
 
 
 class SysdigReportsParser:

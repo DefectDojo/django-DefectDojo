@@ -2,8 +2,9 @@ import json
 import textwrap
 from datetime import datetime
 
-from dojo.models import Finding
 from html2text import html2text
+
+from dojo.models import Finding
 
 
 class AWSScout2Parser:
