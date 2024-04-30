@@ -49,7 +49,7 @@ class FindingQueriesTest(DojoTestCase):
         mock_timezone.return_value = mock_datetime
 
         # Queries over Finding and Risk_Acceptance
-        with self.assertNumQueries(24):
+        with self.assertNumQueries(25):
             product_types = []
             finding_queries = views.finding_querys(
                 product_types,
@@ -69,6 +69,7 @@ class FindingQueriesTest(DojoTestCase):
                     'weeks_between',
                     'start_date',
                     'end_date',
+                    'form',
                 ]
             )
 
@@ -169,7 +170,7 @@ class EndpointQueriesTest(DojoTestCase):
 
     def test_endpoint_queries(self):
         # Queries over Finding and Endpoint_Status
-        with self.assertNumQueries(69):
+        with self.assertNumQueries(70):
             product_types = []
             endpoint_queries = views.endpoint_querys(
                 product_types,
@@ -189,6 +190,7 @@ class EndpointQueriesTest(DojoTestCase):
                     'weeks_between',
                     'start_date',
                     'end_date',
+                    'form',
                 ]
             )
 

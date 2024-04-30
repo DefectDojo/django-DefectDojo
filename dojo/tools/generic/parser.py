@@ -50,7 +50,7 @@ class GenericParser:
             type=data.get("type", self.ID),
             version=data.get("version"),
         )
-        test_internal.findings = list()
+        test_internal.findings = []
         for item in data.get("findings", []):
             # remove endpoints of the dictionnary
             unsaved_endpoints = None
@@ -167,7 +167,7 @@ class GenericParser:
             io.StringIO(content), delimiter=",", quotechar='"'
         )
 
-        dupes = dict()
+        dupes = {}
         for row in reader:
             finding = Finding(
                 title=row["Title"],

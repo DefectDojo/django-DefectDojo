@@ -23,9 +23,9 @@ class OssIndexDevauditParser:
         tree = self.parse_json(json_file)
 
         if tree:
-            return list([data for data in self.get_items(tree, test)])
+            return list(self.get_items(tree, test))
         else:
-            return list()
+            return []
 
     def parse_json(self, json_file):
         if json_file is None:
@@ -40,7 +40,7 @@ class OssIndexDevauditParser:
     def get_items(self, tree, test):
         items = {}
 
-        results = {key: value for (key, value) in tree.items()}
+        results = dict(tree.items())
         for package in results.get("Packages", []):
             package_data = package["Package"]
             if len(package.get("Vulnerabilities", [])) > 0:

@@ -21,7 +21,7 @@ class BundlerAuditParser:
         if isinstance(lines, bytes):
             lines = lines.decode("utf-8")  # passes in unittests, but would fail in production
 
-        dupes = dict()
+        dupes = {}
         find_date = datetime.now()
         warnings = lines.split("\n\n")
 

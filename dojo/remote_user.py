@@ -98,4 +98,13 @@ class RemoteUserScheme(OpenApiAuthenticationExtension):
     priority = 1
 
     def get_security_definition(self, auto_schema):
-        return settings.SWAGGER_SETTINGS['SECURITY_DEFINITIONS']['remoteUserAuth']
+        header_name = settings.AUTH_REMOTEUSER_USERNAME_HEADER
+        if header_name.startswith('HTTP_'):
+            header_name = header_name[5:]
+        header_name = header_name.replace('_', '-').capitalize()
+
+        return {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': header_name,
+        }

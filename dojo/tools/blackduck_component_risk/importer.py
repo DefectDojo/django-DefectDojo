@@ -39,8 +39,8 @@ class BlackduckCRImporter:
         :param report: the file
         :return: (dict, dict, dict)
         """
-        components = dict()
-        source = dict()
+        components = {}
+        source = {}
         try:
             with zipfile.ZipFile(str(report)) as zip:
                 c_file = False

@@ -15,7 +15,7 @@ class PmdParser:
         return "CSV Report"
 
     def get_findings(self, filename, test):
-        dupes = dict()
+        dupes = {}
 
         content = filename.read()
         if isinstance(content, bytes):

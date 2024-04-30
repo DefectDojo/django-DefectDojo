@@ -19,7 +19,7 @@ class CobaltParser:
 
     def get_findings(self, filename, test):
         if filename is None:
-            return list()
+            return []
 
         content = filename.read()
         if isinstance(content, bytes):
@@ -27,7 +27,7 @@ class CobaltParser:
         reader = csv.DictReader(
             io.StringIO(content), delimiter=",", quotechar='"'
         )
-        dupes = dict()
+        dupes = {}
         for row in reader:
             finding = Finding(test=test)
             finding.title = (

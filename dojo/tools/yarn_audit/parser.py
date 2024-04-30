@@ -16,7 +16,7 @@ class YarnAuditParser:
 
     def get_findings(self, json_output, test):
         if json_output is None:
-            return list()
+            return []
         tree = None
         lines = json_output.read()
         if isinstance(lines, bytes):
@@ -135,7 +135,7 @@ class YarnAuditParser:
                 dynamic_finding=False,
             )
             if tree.get("advisories").get(element).get("cves") != []:
-                dojo_finding.unsaved_vulnerability_ids = list()
+                dojo_finding.unsaved_vulnerability_ids = []
                 for cve in tree.get("advisories").get(element).get("cves"):
                     dojo_finding.unsaved_vulnerability_ids.append(cve)
             if tree.get("advisories").get(element).get("cwe") != []:
@@ -209,7 +209,7 @@ class YarnAuditParser:
             dynamic_finding=False,
         )
         if len(item_node["cves"]) > 0:
-            dojo_finding.unsaved_vulnerability_ids = list()
+            dojo_finding.unsaved_vulnerability_ids = []
             for vulnerability_id in item_node["cves"]:
                 dojo_finding.unsaved_vulnerability_ids.append(vulnerability_id)
         return dojo_finding

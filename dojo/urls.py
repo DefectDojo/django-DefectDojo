@@ -81,7 +81,7 @@ v2_api.register(r'endpoint_status', EndpointStatusViewSet)
 v2_api.register(r'engagements', EngagementViewSet)
 v2_api.register(r'development_environments', DevelopmentEnvironmentViewSet)
 v2_api.register(r'finding_templates', FindingTemplatesViewSet)
-v2_api.register(r'findings', FindingViewSet)
+v2_api.register(r'findings', FindingViewSet, basename='finding')
 v2_api.register(r'jira_configurations', JiraInstanceViewSet)  # backwards compatibility
 v2_api.register(r'jira_instances', JiraInstanceViewSet)
 v2_api.register(r'jira_finding_mappings', JiraIssuesViewSet)

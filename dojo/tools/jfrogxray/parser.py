@@ -73,7 +73,7 @@ def get_item(vulnerability, test):
     else:
         severity = "Info"
 
-    vulnerability_ids = list()
+    vulnerability_ids = []
     cwe = None
     cvssv3 = None
     cvss_v3 = "No CVSS v3 score."

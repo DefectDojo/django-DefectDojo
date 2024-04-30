@@ -1,6 +1,7 @@
 from django.test import Client, override_settings
 from netaddr import IPSet
 from dojo.models import User, Dojo_Group, Dojo_Group_Member
+from dojo.remote_user import RemoteUserScheme
 from .dojo_test_case import DojoTestCase
 
 
@@ -193,3 +194,15 @@ class TestRemoteUser(DojoTestCase):
                                     )
         self.assertEqual(resp.status_code, 302)
         self.assertIn('Requested came from untrusted proxy', cm.output[0])
+
+    @override_settings(
+        AUTH_REMOTEUSER_ENABLED=True,
+        AUTH_REMOTEUSER_USERNAME_HEADER="HTTP_OUR_REMOTE_USER",
+    )
+    def test_api_schema(self):
+        security_definition = RemoteUserScheme.get_security_definition(None, None)
+        self.assertEqual(security_definition, {
+            "type": "apiKey",
+            "in": "header",
+            "name": "Our-remote-user",
+        })

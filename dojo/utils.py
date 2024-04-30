@@ -14,6 +14,7 @@ from datetime import date, datetime, timedelta
 from math import pi, sqrt
 import vobject
 from dateutil.relativedelta import relativedelta, MO, SU
+from dateutil.parser import parse
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse, get_script_prefix
@@ -785,8 +786,8 @@ def get_punchcard_data(objs, start_date, weeks, view='Finding'):
         # map from python to javascript, do not use week numbers or day numbers from database.
         day_offset = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1, 5: 0, 6: 6}
 
-        punchcard = list()
-        ticks = list()
+        punchcard = []
+        ticks = []
         highest_day_count = 0
         tick = 0
         day_counts = [0, 0, 0, 0, 0, 0, 0]
@@ -869,8 +870,8 @@ def get_period_counts_legacy(findings,
                              period_interval,
                              start_date,
                              relative_delta='months'):
-    opened_in_period = list()
-    accepted_in_period = list()
+    opened_in_period = []
+    accepted_in_period = []
     opened_in_period.append(
         ['Timestamp', 'Date', 'S0', 'S1', 'S2', 'S3', 'Total', 'Closed'])
     accepted_in_period.append(
@@ -964,9 +965,9 @@ def get_period_counts(findings,
 
     start_date = datetime(start_date.year, start_date.month, start_date.day, tzinfo=tz)
 
-    opened_in_period = list()
-    active_in_period = list()
-    accepted_in_period = list()
+    opened_in_period = []
+    active_in_period = []
+    accepted_in_period = []
     opened_in_period.append(
         ['Timestamp', 'Date', 'S0', 'S1', 'S2', 'S3', 'Total', 'Closed'])
     active_in_period.append(
@@ -1357,7 +1358,7 @@ def reopen_external_issue(find, note, external_issue_provider, **kwargs):
 def process_notifications(request, note, parent_url, parent_title):
     regex = re.compile(r'(?:\A|\s)@(\w+)\b')
 
-    usernames_to_check = set([un.lower() for un in regex.findall(note.entry)])
+    usernames_to_check = set(un.lower() for un in regex.findall(note.entry))  # noqa: C401
 
     users_to_notify = [
         User.objects.filter(username=username).get()
@@ -2398,10 +2399,38 @@ def sum_by_severity_level(metrics):
     values = get_zero_severity_level()
 
     for m in metrics:
-        if values.get(m.severity) is not None:
-            values[m.severity] += 1
+        if values.get(m.get('severity')) is not None:
+            values[m.get('severity')] += 1
 
     return values
+
+
+def calculate_finding_age(f):
+    start_date = f.get('date', None)
+    if start_date and isinstance(start_date, str):
+        start_date = parse(start_date).date()
+
+    if settings.SLA_BUSINESS_DAYS:
+        if f.get('mitigated'):
+            mitigated_date = f.get('mitigated')
+            if isinstance(mitigated_date, datetime):
+                mitigated_date = f.get('mitigated').date()
+            days = get_work_days(f.get('date'), mitigated_date)
+        else:
+            days = get_work_days(f.get('date'), timezone.now().date())
+    else:
+        if isinstance(start_date, datetime):
+            start_date = start_date.date()
+
+        if f.get('mitigated'):
+            mitigated_date = f.get('mitigated')
+            if isinstance(mitigated_date, datetime):
+                mitigated_date = f.get('mitigated').date()
+            diff = mitigated_date - start_date
+        else:
+            diff = timezone.now().date() - start_date
+        days = diff.days
+    return days if days > 0 else 0
 
 
 def get_open_findings_burndown(product):

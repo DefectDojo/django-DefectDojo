@@ -28,18 +28,18 @@ class TrivyOperatorParser:
             data = json.loads(scan_data)
 
         if data is None:
-            return list()
+            return []
         metadata = data.get("metadata", None)
         if metadata is None:
-            return list()
+            return []
         labels = metadata.get("labels", None)
         if labels is None:
-            return list()
+            return []
         report = data.get("report", None)
         benchmark = data.get("status", None)
         if benchmark is not None:
             benchmarkreport = benchmark.get("detailReport", None)
-        findings = list()
+        findings = []
         if report is not None:
             resource_namespace = labels.get(
                 "trivy-operator.resource.namespace", ""

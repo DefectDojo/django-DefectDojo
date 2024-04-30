@@ -75,7 +75,7 @@ class ThreagileParser:
         if not isinstance(tree, list):
             raise TypeError("Invalid ThreAgile risks file")
         if not tree:
-            return list()
+            return []
         findings = []
         for item in tree:
             for field in self.REQUIRED_FIELDS:

@@ -43,17 +43,17 @@ def get_parser(scan_type):
 
 
 def get_scan_types_sorted():
-    res = list()
+    res = []
     for key in PARSERS:
         res.append((key, PARSERS[key].get_description_for_scan_types(key)))
-    return sorted(tuple(res), key=lambda x: x[0].lower())
+    return sorted(res, key=lambda x: x[0].lower())
 
 
 def get_choices_sorted():
-    res = list()
+    res = []
     for key in PARSERS:
         res.append((key, key))
-    return sorted(tuple(res), key=lambda x: x[1].lower())
+    return sorted(res, key=lambda x: x[1].lower())
 
 
 def requires_file(scan_type):
@@ -68,7 +68,7 @@ def requires_file(scan_type):
 
 
 def get_api_scan_configuration_hints():
-    res = list()
+    res = []
     for name, parser in PARSERS.items():
         if hasattr(parser, "api_scan_configuration_hint"):
             scan_types = parser.get_scan_types()
