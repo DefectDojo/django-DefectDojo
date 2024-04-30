@@ -73,7 +73,7 @@ class TestYarnAuditParser(DojoTestCase):
                 self.assertTrue("ECONNREFUSED" in str(context.exception))
 
     def test_yarn_audit_parser_issue_6495(self):
-         with open("unittests/scans/yarn_audit/issue_6495.json") as testfile:
+        with open("unittests/scans/yarn_audit/issue_6495.json") as testfile:
             parser = YarnAuditParser()
             findings = parser.get_findings(testfile, self.get_test())
             testfile.close()
@@ -83,7 +83,7 @@ class TestYarnAuditParser(DojoTestCase):
             self.assertEqual(findings[1].cve, None)
 
     def test_yarn_audit_parser_yarn2_audit_issue9911(self):
-         with open("unittests/scans/yarn_audit/yarn2_audit_issue9911.json") as testfile:
+        with open("unittests/scans/yarn_audit/yarn2_audit_issue9911.json") as testfile:
             parser = YarnAuditParser()
             findings = parser.get_findings(testfile, self.get_test())
             testfile.close()
