@@ -1,8 +1,10 @@
 import hashlib
 
-from dojo.models import Finding
-from .importer import BlackduckBinaryAnalysisImporter
 from cvss import CVSS2, CVSS3
+
+from dojo.models import Finding
+
+from .importer import BlackduckBinaryAnalysisImporter
 
 
 class BlackduckBinaryAnalysisParser:

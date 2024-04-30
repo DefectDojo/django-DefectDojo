@@ -1,26 +1,47 @@
-import logging
-from typing import Any
-from dojo.utils import add_error_message_to_response, get_system_setting, to_str_typed
-import os
 import io
 import json
+import logging
+import os
+from typing import Any
+
 import requests
 from django.conf import settings
+from django.contrib import messages
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
-from dojo.models import Finding, Finding_Group, Risk_Acceptance, Stub_Finding, Test, Engagement, Product, \
-    JIRA_Issue, JIRA_Project, System_Settings, Notes, JIRA_Instance, User
 from requests.auth import HTTPBasicAuth
-from dojo.notifications.helper import create_notification
-from django.contrib import messages
+
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
-from dojo.utils import truncate_with_dots, prod_name, get_file_images
-from django.urls import reverse
-from dojo.forms import JIRAProjectForm, JIRAEngagementForm
+from dojo.forms import JIRAEngagementForm, JIRAProjectForm
+from dojo.models import (
+    Engagement,
+    Finding,
+    Finding_Group,
+    JIRA_Instance,
+    JIRA_Issue,
+    JIRA_Project,
+    Notes,
+    Product,
+    Risk_Acceptance,
+    Stub_Finding,
+    System_Settings,
+    Test,
+    User,
+)
+from dojo.notifications.helper import create_notification
+from dojo.utils import (
+    add_error_message_to_response,
+    get_file_images,
+    get_system_setting,
+    prod_name,
+    to_str_typed,
+    truncate_with_dots,
+)
 
 logger = logging.getLogger(__name__)
 

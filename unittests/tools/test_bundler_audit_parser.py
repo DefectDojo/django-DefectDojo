@@ -1,7 +1,9 @@
 from os import path
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.bundler_audit.parser import BundlerAuditParser
+
 from dojo.models import Test
+from dojo.tools.bundler_audit.parser import BundlerAuditParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestBundlerAuditParser(DojoTestCase):

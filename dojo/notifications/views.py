@@ -1,16 +1,15 @@
 import logging
 
 from django.contrib import messages
-from django.shortcuts import render
+from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest
+from django.shortcuts import render
 from django.utils.translation import gettext as _
 from django.views import View
-from django.core.exceptions import PermissionDenied
 
-from dojo.models import Notifications
-from dojo.utils import get_enabled_notifications_list
-from dojo.utils import add_breadcrumb
 from dojo.forms import NotificationsForm
+from dojo.models import Notifications
+from dojo.utils import add_breadcrumb, get_enabled_notifications_list
 
 logger = logging.getLogger(__name__)
 

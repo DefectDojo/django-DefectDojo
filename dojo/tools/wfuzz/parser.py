@@ -1,8 +1,9 @@
-import json
 import hashlib
+import json
+
 import hyperlink
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
 
 
 class WFuzzParser:

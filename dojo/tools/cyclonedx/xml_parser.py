@@ -1,9 +1,12 @@
-import re
 import logging
+import re
+
 import dateutil
 from defusedxml import ElementTree
+
 from dojo.models import Finding
 from dojo.tools.cyclonedx.helpers import Cyclonedxhelper
+
 LOGGER = logging.getLogger(__name__)
 
 

@@ -1,11 +1,11 @@
 from datetime import datetime
 
 import pytz
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 from dojo.models import Test
-from dojo.tools.qualys_infrascan_webgui.parser import \
-    QualysInfrascanWebguiParser
+from dojo.tools.qualys_infrascan_webgui.parser import QualysInfrascanWebguiParser
+
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestQualysInfrascanWebguiParser(DojoTestCase):

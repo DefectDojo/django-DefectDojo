@@ -1,6 +1,7 @@
 from django.test import TestCase
-from dojo.tools.bearer_cli.parser import BearerParser
+
 from dojo.models import Test
+from dojo.tools.bearer_cli.parser import BearerParser
 
 
 class TestBearerParser(TestCase):

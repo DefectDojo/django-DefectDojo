@@ -1,13 +1,38 @@
+import json
+import logging
 import re
-from dojo.finding.queries import get_authorized_findings
-from dojo.group.utils import get_auth_group_name
-from django.contrib.auth.models import Group
+from datetime import datetime
 from typing import List
+
+import six
+import tagulous
+from django.conf import settings
+from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.db.utils import IntegrityError
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
+from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.fields import DictField, MultipleChoiceField
-from datetime import datetime
-from dojo.endpoint.utils import endpoint_filter
+
+import dojo.jira_link.helper as jira_helper
+from dojo.authorization.authorization import user_has_permission
+from dojo.authorization.roles_permissions import Permissions
+from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
+from dojo.finding.helper import (
+    save_vulnerability_ids,
+    save_vulnerability_ids_template,
+)
+from dojo.finding.queries import get_authorized_findings
+from dojo.group.utils import get_auth_group_name
+from dojo.importers.importer.importer import DojoDefaultImporter as Importer
+from dojo.importers.reimporter.reimporter import (
+    DojoDefaultReImporter as ReImporter,
+)
 from dojo.importers.reimporter.utils import (
     get_or_create_engagement,
     get_target_engagement_if_exists,
@@ -16,113 +41,86 @@ from dojo.importers.reimporter.utils import (
     get_target_test_if_exists,
 )
 from dojo.models import (
+    DEFAULT_NOTIFICATION,
     IMPORT_ACTIONS,
+    NOTIFICATION_CHOICES,
     SEVERITIES,
-    SLA_Configuration,
-    STATS_FIELDS,
-    Dojo_User,
-    Finding_Group,
-    Product,
-    Engagement,
-    Test,
-    Finding,
-    User,
-    Stub_Finding,
-    Risk_Acceptance,
-    Finding_Template,
-    Test_Type,
-    Development_Environment,
-    NoteHistory,
-    JIRA_Issue,
-    Tool_Product_Settings,
-    Tool_Configuration,
-    Tool_Type,
-    Product_Type,
-    JIRA_Instance,
-    Endpoint,
-    JIRA_Project,
-    Cred_Mapping,
-    Notes,
-    DojoMeta,
-    Note_Type,
-    App_Analysis,
-    Endpoint_Status,
-    Cred_User,
-    Sonarqube_Issue,
-    Sonarqube_Issue_Transition,
-    Endpoint_Params,
-    Regulation,
-    System_Settings,
-    FileUpload,
     SEVERITY_CHOICES,
-    Test_Import,
-    Test_Import_Finding_Action,
-    Product_Type_Member,
-    Product_Member,
-    Product_Group,
-    Product_Type_Group,
+    STATS_FIELDS,
+    Announcement,
+    Answer,
+    Answered_Survey,
+    App_Analysis,
+    Check_List,
+    ChoiceAnswer,
+    ChoiceQuestion,
+    Cred_Mapping,
+    Cred_User,
+    Development_Environment,
     Dojo_Group,
-    Role,
-    Global_Role,
     Dojo_Group_Member,
+    Dojo_User,
+    DojoMeta,
+    Endpoint,
+    Endpoint_Params,
+    Endpoint_Status,
+    Engagement,
+    Engagement_Presets,
+    Engagement_Survey,
+    FileUpload,
+    Finding,
+    Finding_Group,
+    Finding_Template,
+    General_Survey,
+    Global_Role,
+    JIRA_Instance,
+    JIRA_Issue,
+    JIRA_Project,
     Language_Type,
     Languages,
-    Notifications,
-    NOTIFICATION_CHOICES,
-    Engagement_Presets,
     Network_Locations,
-    UserContactInfo,
+    Note_Type,
+    NoteHistory,
+    Notes,
+    Notifications,
+    Product,
     Product_API_Scan_Configuration,
-    DEFAULT_NOTIFICATION,
+    Product_Group,
+    Product_Member,
+    Product_Type,
+    Product_Type_Group,
+    Product_Type_Member,
+    Question,
+    Regulation,
+    Risk_Acceptance,
+    Role,
+    SLA_Configuration,
+    Sonarqube_Issue,
+    Sonarqube_Issue_Transition,
+    Stub_Finding,
+    System_Settings,
+    Test,
+    Test_Import,
+    Test_Import_Finding_Action,
+    Test_Type,
+    TextAnswer,
+    TextQuestion,
+    Tool_Configuration,
+    Tool_Product_Settings,
+    Tool_Type,
+    User,
+    UserContactInfo,
     Vulnerability_Id,
     Vulnerability_Id_Template,
     get_current_date,
-    Question,
-    TextQuestion,
-    ChoiceQuestion,
-    Answer,
-    TextAnswer,
-    ChoiceAnswer,
-    Engagement_Survey,
-    Answered_Survey,
-    General_Survey,
-    Check_List,
-    Announcement,
 )
-
 from dojo.tools.factory import (
-    requires_file,
     get_choices_sorted,
+    requires_file,
     requires_tool_type,
 )
-from dojo.utils import is_scan_file_too_large
-from django.conf import settings
-from rest_framework import serializers
-from django.core.exceptions import ValidationError, PermissionDenied
-from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth.models import Permission
-from django.utils import timezone
-from django.urls import reverse
-from django.db.utils import IntegrityError
-import six
-from django.utils.translation import gettext_lazy as _
-import json
-import dojo.jira_link.helper as jira_helper
-import logging
-import tagulous
-from dojo.endpoint.utils import endpoint_meta_import
-from dojo.importers.importer.importer import DojoDefaultImporter as Importer
-from dojo.importers.reimporter.reimporter import (
-    DojoDefaultReImporter as ReImporter,
-)
-from dojo.authorization.authorization import user_has_permission
-from dojo.authorization.roles_permissions import Permissions
-from dojo.finding.helper import (
-    save_vulnerability_ids,
-    save_vulnerability_ids_template,
-)
 from dojo.user.utils import get_configuration_permissions_codenames
-
+from dojo.utils import is_scan_file_too_large
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")

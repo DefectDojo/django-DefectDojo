@@ -1,7 +1,8 @@
 import logging
-from dojo.models import SLA_Configuration, Product, Finding
+
 from dojo.celery import app
 from dojo.decorators import dojo_async_task
+from dojo.models import Finding, Product, SLA_Configuration
 
 logger = logging.getLogger(__name__)
 

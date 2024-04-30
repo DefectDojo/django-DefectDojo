@@ -1,6 +1,6 @@
+import base64
 import json
 import logging
-import base64
 
 from dojo.models import Endpoint, Finding
 

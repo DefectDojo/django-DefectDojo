@@ -4,13 +4,14 @@ Tests for metrics database queries
 
 from datetime import date, datetime, timezone
 from unittest.mock import patch
-import pytz
 
+import pytz
 from django.test import RequestFactory
 from django.urls import reverse
 
 from dojo.metrics import views
 from dojo.models import User
+
 from .dojo_test_case import DojoTestCase
 
 

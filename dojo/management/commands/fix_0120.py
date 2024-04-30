@@ -1,10 +1,11 @@
+import logging
+
 from django.core.management.base import BaseCommand
-from dojo.models import Test
+from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.migrations.executor import MigrationExecutor
-from django.db import connections, DEFAULT_DB_ALIAS
 from django.db.utils import OperationalError
 
-import logging
+from dojo.models import Test
 
 logger = logging.getLogger(__name__)
 

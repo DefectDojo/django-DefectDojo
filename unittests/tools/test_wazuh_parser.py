@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.wazuh.parser import WazuhParser
 from dojo.models import Test
+from dojo.tools.wazuh.parser import WazuhParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestWazuhParser(DojoTestCase):

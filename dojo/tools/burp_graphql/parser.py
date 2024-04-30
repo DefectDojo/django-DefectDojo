@@ -1,8 +1,8 @@
-import logging
 import json
+import logging
 import re
-import html2text
 
+import html2text
 
 from dojo.models import Endpoint, Finding
 

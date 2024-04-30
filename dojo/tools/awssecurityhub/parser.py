@@ -1,7 +1,8 @@
 import json
-from dojo.tools.awssecurityhub.inspector import Inspector
-from dojo.tools.awssecurityhub.guardduty import GuardDuty
+
 from dojo.tools.awssecurityhub.compliance import Compliance
+from dojo.tools.awssecurityhub.guardduty import GuardDuty
+from dojo.tools.awssecurityhub.inspector import Inspector
 
 
 class AwsSecurityHubParser:

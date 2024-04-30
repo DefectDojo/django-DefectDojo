@@ -1,44 +1,65 @@
-from dojo.authorization.roles_permissions import Permissions
-from dojo.finding.queries import get_authorized_findings
-import re
 import binascii
-import os
+import calendar as tcalendar
 import hashlib
-import bleach
+import logging
 import mimetypes
-import hyperlink
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
+import os
+import re
 from calendar import monthrange
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
+
+import bleach
+import crum
+import hyperlink
 import vobject
-from dateutil.relativedelta import relativedelta, MO, SU
+from asteval import Interpreter
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from dateutil.parser import parse
+from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.core.paginator import Paginator
-from django.urls import get_resolver, reverse, get_script_prefix
-from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
+from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
+from django.db.models.query import QuerySet
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.http import HttpResponseRedirect
+from django.urls import get_resolver, get_script_prefix, reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from django.dispatch import receiver
-from django.db.models.signals import post_save
-from django.db.models.query import QuerySet
-import calendar as tcalendar
-from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
-from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Product, \
-    Test, User, Dojo_User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Dojo_Group_Member, NOTIFICATION_CHOICES
-from asteval import Interpreter
-from dojo.notifications.helper import create_notification
-import logging
-from django.contrib import messages
-from django.http import HttpResponseRedirect
-import crum
+
+from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
-from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
-
+from dojo.finding.queries import get_authorized_findings
+from dojo.github import (
+    add_external_issue_github,
+    close_external_issue_github,
+    reopen_external_issue_github,
+    update_external_issue_github,
+)
+from dojo.models import (
+    NOTIFICATION_CHOICES,
+    Benchmark_Type,
+    Dojo_Group_Member,
+    Dojo_User,
+    Endpoint,
+    Engagement,
+    Finding,
+    Finding_Group,
+    Finding_Template,
+    Language_Type,
+    Languages,
+    Notifications,
+    Product,
+    System_Settings,
+    Test,
+    User,
+)
+from dojo.notifications.helper import create_notification
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -1757,8 +1778,7 @@ def is_safe_url(url):
         from django.utils.http import url_has_allowed_host_and_scheme
     except ImportError:
         # django < 3
-        from django.utils.http import \
-            is_safe_url as url_has_allowed_host_and_scheme
+        from django.utils.http import is_safe_url as url_has_allowed_host_and_scheme
 
     return url_has_allowed_host_and_scheme(url, allowed_hosts=None)
 

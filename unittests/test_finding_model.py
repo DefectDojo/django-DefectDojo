@@ -1,7 +1,10 @@
-from .dojo_test_case import DojoTestCase
-from dojo.models import User, Finding, Test, Engagement, DojoMeta
 from datetime import datetime, timedelta
+
 from crum import impersonate
+
+from dojo.models import DojoMeta, Engagement, Finding, Test, User
+
+from .dojo_test_case import DojoTestCase
 
 
 class TestFindingModel(DojoTestCase):

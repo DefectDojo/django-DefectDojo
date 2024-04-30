@@ -1,4 +1,5 @@
 import json
+
 from cvss import parser as cvss_parser
 from cvss.cvss3 import CVSS3
 

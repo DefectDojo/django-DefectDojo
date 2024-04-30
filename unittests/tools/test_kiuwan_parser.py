@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.kiuwan.parser import KiuwanParser
 from dojo.models import Test
+from dojo.tools.kiuwan.parser import KiuwanParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestKiuwanParser(DojoTestCase):

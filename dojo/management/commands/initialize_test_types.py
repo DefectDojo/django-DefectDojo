@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
-from dojo.tools.factory import PARSERS
+
 from dojo.models import Test_Type, Tool_Type
+from dojo.tools.factory import PARSERS
 
 
 class Command(BaseCommand):

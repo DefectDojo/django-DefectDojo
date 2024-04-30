@@ -2,10 +2,10 @@ import hashlib
 import re
 
 from defusedxml.ElementTree import parse
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_ipv46_address
 
 from dojo.models import Endpoint, Finding
-from django.core.validators import validate_ipv46_address
-from django.core.exceptions import ValidationError
 
 
 class OpenscapParser:

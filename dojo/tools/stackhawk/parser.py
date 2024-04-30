@@ -1,7 +1,8 @@
 import json
 
-from dojo.models import Endpoint, Finding
 from django.utils.dateparse import parse_datetime
+
+from dojo.models import Endpoint, Finding
 
 
 class StackHawkScanMetadata:

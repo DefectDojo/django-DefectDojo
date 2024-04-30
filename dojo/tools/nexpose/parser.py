@@ -1,11 +1,12 @@
-import html2text
 import re
-from defusedxml import ElementTree
-from hyperlink._url import SCHEME_PORT_MAP
 from datetime import datetime
-from django.conf import settings
 
-from dojo.models import Finding, Endpoint
+import html2text
+from defusedxml import ElementTree
+from django.conf import settings
+from hyperlink._url import SCHEME_PORT_MAP
+
+from dojo.models import Endpoint, Finding
 
 
 class NexposeParser:

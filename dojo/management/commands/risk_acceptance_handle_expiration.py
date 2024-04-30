@@ -1,6 +1,7 @@
-from django.core.management.base import BaseCommand
-import dojo.risk_acceptance.helper as ra_helper
 from crum import impersonate
+from django.core.management.base import BaseCommand
+
+import dojo.risk_acceptance.helper as ra_helper
 from dojo.models import Dojo_User
 
 

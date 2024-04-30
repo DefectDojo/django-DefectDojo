@@ -1,5 +1,7 @@
 from xml.dom import NamespaceErr
+
 from defusedxml import ElementTree as ET
+
 from dojo.models import Finding
 
 

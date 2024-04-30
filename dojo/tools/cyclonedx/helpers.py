@@ -1,5 +1,7 @@
-from cvss import CVSS3
 import logging
+
+from cvss import CVSS3
+
 LOGGER = logging.getLogger(__name__)
 
 

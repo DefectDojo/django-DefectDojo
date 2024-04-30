@@ -1,7 +1,9 @@
 from os import path
-from ..dojo_test_case import DojoTestCase
+
+from dojo.models import Engagement, Finding, Product, Test
 from dojo.tools.tenable.parser import TenableParser
-from dojo.models import Finding, Test, Engagement, Product
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestTenableParser(DojoTestCase):

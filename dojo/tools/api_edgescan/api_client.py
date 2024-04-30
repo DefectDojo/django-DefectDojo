@@ -1,6 +1,7 @@
-import requests
 import json
 from json.decoder import JSONDecodeError
+
+import requests
 
 
 class EdgescanAPI:
