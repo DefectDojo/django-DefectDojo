@@ -5,37 +5,51 @@ import operator
 from calendar import monthrange
 from collections import OrderedDict
 from datetime import date, datetime, timedelta
+from functools import reduce
 from math import ceil
 from operator import itemgetter
 
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from django.urls import reverse
-from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
+from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
-from django.utils.html import escape
-from django.views.decorators.cache import cache_page
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.utils import timezone
-
-from dojo.filters import MetricsFindingFilter, UserFilter, MetricsEndpointFilter
-from dojo.forms import SimpleMetricsForm, ProductTypeCountsForm, ProductTagCountsForm
-from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
-    Risk_Acceptance, Dojo_User, Endpoint_Status
-from dojo.utils import get_page_items, add_breadcrumb, findings_this_period, opened_in_period, count_findings, \
-    get_period_counts, get_system_setting, get_punchcard_data, queryset_check
-from functools import reduce
+from django.utils.html import escape
+from django.utils.translation import gettext as _
+from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
+
+from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
+from dojo.endpoint.queries import get_authorized_endpoint_status
+from dojo.filters import (
+    MetricsEndpointFilter,
+    MetricsEndpointFilterWithoutObjectLookups,
+    MetricsFindingFilter,
+    MetricsFindingFilterWithoutObjectLookups,
+    UserFilter,
+)
+from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY
+from dojo.finding.queries import get_authorized_findings
+from dojo.forms import ProductTagCountsForm, ProductTypeCountsForm, SimpleMetricsForm
+from dojo.models import Dojo_User, Endpoint_Status, Engagement, Finding, Product, Product_Type, Risk_Acceptance, Test
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
-from dojo.finding.queries import get_authorized_findings
-from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY
-from dojo.endpoint.queries import get_authorized_endpoint_status
-from dojo.authorization.authorization import user_has_permission_or_403
-from django.utils.translation import gettext as _
+from dojo.utils import (
+    add_breadcrumb,
+    count_findings,
+    findings_this_period,
+    get_page_items,
+    get_period_counts,
+    get_punchcard_data,
+    get_system_setting,
+    opened_in_period,
+    queryset_check,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -141,7 +155,10 @@ def finding_querys(prod_type, request):
         'test__engagement__risk_acceptance',
         'test__test_type',
     )
-    findings = MetricsFindingFilter(request.GET, queryset=findings_query)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    finding_filter_class = MetricsFindingFilterWithoutObjectLookups if filter_string_matching else MetricsFindingFilter
+    findings = finding_filter_class(request.GET, queryset=findings_query)
+    form = findings.form
     findings_qs = queryset_check(findings)
     # Quick check to determine if the filters were too tight and filtered everything away
     if not findings_qs and not findings_query:
@@ -205,6 +222,7 @@ def finding_querys(prod_type, request):
         'weeks_between': weeks_between,
         'start_date': start_date,
         'end_date': end_date,
+        'form': form,
     }
 
 
@@ -218,8 +236,10 @@ def endpoint_querys(prod_type, request):
         'finding__reporter')
 
     endpoints_query = get_authorized_endpoint_status(Permissions.Endpoint_View, endpoints_query, request.user)
-    endpoints = MetricsEndpointFilter(request.GET, queryset=endpoints_query)
-
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = MetricsEndpointFilterWithoutObjectLookups if filter_string_matching else MetricsEndpointFilter
+    endpoints = filter_class(request.GET, queryset=endpoints_query)
+    form = endpoints.form
     endpoints_qs = queryset_check(endpoints)
 
     if not endpoints_qs:
@@ -295,6 +315,7 @@ def endpoint_querys(prod_type, request):
         'weeks_between': weeks_between,
         'start_date': start_date,
         'end_date': end_date,
+        'form': form,
     }
 
 
@@ -314,15 +335,20 @@ def get_in_period_details(findings):
         elif obj.age > 90:
             age_detail[3] += 1
 
-        in_period_counts[obj.severity] += 1
-        in_period_counts['Total'] += 1
-
-        if obj.test.engagement.product.name not in in_period_details:
-            in_period_details[obj.test.engagement.product.name] = {
-                'path': reverse('product_open_findings', args=(obj.test.engagement.product.id,)),
-                'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
-        in_period_details[obj.test.engagement.product.name][obj.severity] += 1
-        in_period_details[obj.test.engagement.product.name]['Total'] += 1
+        # This condition should be true in nearly all cases,
+        # but there are some far edge cases
+        if obj.severity in in_period_counts:
+            in_period_counts[obj.severity] += 1
+            in_period_counts['Total'] += 1
+        # This condition should be true in nearly all cases,
+        # but there are some far edge cases
+        if obj.severity in in_period_details:
+            if obj.test.engagement.product.name not in in_period_details:
+                in_period_details[obj.test.engagement.product.name] = {
+                    'path': reverse('product_open_findings', args=(obj.test.engagement.product.id,)),
+                    'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
+            in_period_details[obj.test.engagement.product.name][obj.severity] += 1
+            in_period_details[obj.test.engagement.product.name]['Total'] += 1
 
     return in_period_counts, in_period_details, age_detail
 
@@ -387,7 +413,7 @@ def metrics(request, mtype):
     # legacy code calls has 'prod_type' as 'related_name' for product.... so weird looking prefetch
     prod_type = prod_type.prefetch_related('prod_type')
 
-    filters = dict()
+    filters = {}
     if view == 'Finding':
         page_name = _('Product Type Metrics by Findings')
         filters = finding_querys(prod_type, request)
@@ -410,8 +436,8 @@ def metrics(request, mtype):
         for obj in filters['closed']
     ])
 
-    punchcard = list()
-    ticks = list()
+    punchcard = []
+    ticks = []
 
     if 'view' in request.GET and 'dashboard' == request.GET['view']:
         punchcard, ticks = get_punchcard_data(queryset_check(filters['all']), filters['start_date'], filters['weeks_between'], view)
@@ -440,6 +466,7 @@ def metrics(request, mtype):
         'closed_in_period_details': closed_in_period_details,
         'punchcard': punchcard,
         'ticks': ticks,
+        'form': filters.get('form', None),
         'show_pt_filter': show_pt_filter,
     })
 
@@ -996,7 +1023,7 @@ def view_engineer(request, eid):
                                            mitigated__isnull=True,
                                            active=True).count()
         vulns[product.id] = f_count
-    od = OrderedDict(sorted(list(vulns.items()), key=itemgetter(1)))
+    od = OrderedDict(sorted(vulns.items(), key=itemgetter(1)))
     items = list(od.items())
     items.reverse()
     top = items[: 10]

@@ -1,12 +1,15 @@
 import logging
-from dojo.tools.sonarqube.soprasteria_helper import SonarQubeSoprasteriaHelper
+
 from lxml import etree
+
+from dojo.tools.sonarqube.soprasteria_helper import SonarQubeSoprasteriaHelper
+
 logger = logging.getLogger(__name__)
 
 
 class SonarQubeSoprasteriaJSON:
     def get_json_items(self, json_content, test, mode):
-        dupes = dict()
+        dupes = {}
         rules = json_content["rules"]
         issues = json_content["issues"]
         for issue in issues:

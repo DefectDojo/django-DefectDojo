@@ -1,8 +1,8 @@
 import csv
+import datetime
 import hashlib
 import io
 import sys
-import datetime
 
 from dojo.models import Endpoint, Finding
 
@@ -25,7 +25,7 @@ class ContrastParser:
             content = content.decode("utf-8")
         csv.field_size_limit(int(sys.maxsize / 10))  # the request/resp are big
         reader = csv.DictReader(io.StringIO(content))
-        dupes = dict()
+        dupes = {}
 
         for row in reader:
             # Vulnerability Name,Vulnerability ID,Category,Rule

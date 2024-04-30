@@ -5,6 +5,7 @@ import json
 
 from cvss import parser as cvss_parser
 from dateutil.parser import parse
+
 from dojo.models import Endpoint, Finding
 from dojo.tools.parser_test import ParserTest
 
@@ -50,7 +51,7 @@ class GenericParser:
             type=data.get("type", self.ID),
             version=data.get("version"),
         )
-        test_internal.findings = list()
+        test_internal.findings = []
         for item in data.get("findings", []):
             # remove endpoints of the dictionnary
             unsaved_endpoints = None
@@ -72,7 +73,8 @@ class GenericParser:
             required = {"title", "severity", "description"}
             missing = sorted(required.difference(item))
             if missing:
-                raise ValueError(f"Required fields are missing: {missing}")
+                msg = f"Required fields are missing: {missing}"
+                raise ValueError(msg)
 
             # check for allowed keys
             allowed = {
@@ -121,9 +123,8 @@ class GenericParser:
             }.union(required)
             not_allowed = sorted(set(item).difference(allowed))
             if not_allowed:
-                raise ValueError(
-                    f"Not allowed fields are present: {not_allowed}"
-                )
+                msg = f"Not allowed fields are present: {not_allowed}"
+                raise ValueError(msg)
 
             finding = Finding(**item)
 
@@ -167,7 +168,7 @@ class GenericParser:
             io.StringIO(content), delimiter=",", quotechar='"'
         )
 
-        dupes = dict()
+        dupes = {}
         for row in reader:
             finding = Finding(
                 title=row["Title"],

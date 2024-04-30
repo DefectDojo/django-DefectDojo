@@ -1,8 +1,9 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-
-from dojo.models import Test, Engagement, Product
-from dojo.tools.checkmarx_osa.parser import CheckmarxOsaParser
 from datetime import datetime
+
+from dojo.models import Engagement, Product, Test
+from dojo.tools.checkmarx_osa.parser import CheckmarxOsaParser
+
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestCheckmarxOsaParser(DojoTestCase):
@@ -185,9 +186,10 @@ class TestCheckmarxOsaParser(DojoTestCase):
             my_file_handle, _product, _engagement, test = self.init(
                 get_unit_tests_path() + "/scans/checkmarx_osa/single_finding_no_libraryId.json"
             )
-            parser = CheckmarxOsaParser()
-            parser.get_findings(my_file_handle, test)
-            self.teardown(my_file_handle)
+            with my_file_handle:
+                parser = CheckmarxOsaParser()
+                parser.get_findings(my_file_handle, test)
+
         self.assertEqual(
             "Invalid format: missing mandatory field libraryId", str(context.exception)
         )

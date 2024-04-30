@@ -1,12 +1,12 @@
 import hashlib
 import logging
 import re
-import dateutil
+from datetime import datetime
 
+import dateutil
 from cpe import CPE
 from defusedxml import ElementTree
 from packageurl import PackageURL
-from datetime import datetime
 
 from dojo.models import Finding
 
@@ -347,7 +347,7 @@ class DependencyCheckParser:
         return "OWASP Dependency Check output can be imported in Xml format."
 
     def get_findings(self, filename, test):
-        dupes = dict()
+        dupes = {}
         namespace = ""
         content = filename.read()
         #  'utf-8' This line is to pass a unittest in test_parsers.TestParsers.test_file_existence.

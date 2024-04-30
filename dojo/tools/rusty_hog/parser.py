@@ -1,6 +1,7 @@
 import json
-from dojo.tools.parser_test import ParserTest
+
 from dojo.models import Finding
+from dojo.tools.parser_test import ParserTest
 
 
 class RustyhogParser:
@@ -33,7 +34,7 @@ class RustyhogParser:
 
     def get_tests(self, scan_type, handle):
         tree = self.parse_json(handle)
-        tests = list()
+        tests = []
         parsername = "Rusty Hog"
         for node in tree:
             if (

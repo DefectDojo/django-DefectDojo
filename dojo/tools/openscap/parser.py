@@ -2,10 +2,10 @@ import hashlib
 import re
 
 from defusedxml.ElementTree import parse
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_ipv46_address
 
 from dojo.models import Endpoint, Finding
-from django.core.validators import validate_ipv46_address
-from django.core.exceptions import ValidationError
 
 
 class OpenscapParser:
@@ -26,13 +26,11 @@ class OpenscapParser:
 
         # check if xml file hash correct root or not.
         if "Benchmark" not in root.tag:
-            raise ValueError(
-                "This doesn't seem to be a valid Openscap vulnerability scan xml file."
-            )
+            msg = "This doesn't seem to be a valid Openscap vulnerability scan xml file."
+            raise ValueError(msg)
         if "http://checklists.nist.gov/xccdf/" not in namespace:
-            raise ValueError(
-                "This doesn't seem to be a valid Openscap vulnerability scan xml file."
-            )
+            msg = "This doesn't seem to be a valid Openscap vulnerability scan xml file."
+            raise ValueError(msg)
 
         # read rules
         rules = {}
@@ -49,7 +47,7 @@ class OpenscapParser:
         for ip in test_result.findall(f"./{namespace}target-address"):
             ips.append(ip.text)
 
-        dupes = dict()
+        dupes = {}
         # run both rule, and rule-result in parallel so that we can get title
         # for failed test from rule.
         for rule_result in test_result.findall(

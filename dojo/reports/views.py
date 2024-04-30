@@ -1,35 +1,46 @@
+import csv
 import logging
 import re
-import csv
-from openpyxl import Workbook
-from openpyxl.styles import Font
-from tempfile import NamedTemporaryFile
-
-
 from datetime import datetime
+from tempfile import NamedTemporaryFile
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.http import Http404, HttpResponse, QueryDict
-from django.shortcuts import render, get_object_or_404
-from django.utils import timezone
 from django.core.exceptions import PermissionDenied
+from django.http import Http404, HttpResponse, QueryDict
+from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
 from django.views import View
+from openpyxl import Workbook
+from openpyxl.styles import Font
 
-from dojo.filters import ReportFindingFilter, EndpointReportFilter, \
-    EndpointFilter
-from dojo.forms import ReportOptionsForm
-from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
-    Dojo_User, Endpoint, Risk_Acceptance
-from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGContent, FindingList, EndpointList, \
-    CustomReportJsonForm, ReportOptions, report_widget_factory
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, get_period_counts_legacy, Product_Tab, \
-    get_words_for_field
+from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups, EndpointReportFilter, ReportFindingFilter
 from dojo.finding.queries import get_authorized_findings
 from dojo.finding.views import BaseListFindings
+from dojo.forms import ReportOptionsForm
+from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Risk_Acceptance, Test
+from dojo.reports.widgets import (
+    CoverPage,
+    CustomReportJsonForm,
+    EndpointList,
+    FindingList,
+    PageBreak,
+    ReportOptions,
+    TableOfContents,
+    WYSIWYGContent,
+    report_widget_factory,
+)
+from dojo.utils import (
+    Product_Tab,
+    add_breadcrumb,
+    get_page_items,
+    get_period_counts_legacy,
+    get_system_setting,
+    get_words_for_field,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +74,9 @@ def report_builder(request):
                                         finding__duplicate=False,
                                         finding__out_of_scope=False,
                                         ).distinct()
-
-    endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
+    endpoints = filter_class(request.GET, queryset=endpoints, user=request.user)
 
     in_use_widgets = [ReportOptions(request=request)]
     available_widgets = [CoverPage(request=request),
@@ -361,9 +373,11 @@ def generate_report(request, obj, host_view=False):
         pass
     else:
         if obj is None:
-            raise Exception('No object is given to generate report for')
+            msg = 'No object is given to generate report for'
+            raise Exception(msg)
         else:
-            raise Exception(f'Report cannot be generated for object of type {type(obj).__name__}')
+            msg = f'Report cannot be generated for object of type {type(obj).__name__}'
+            raise Exception(msg)
 
     report_format = request.GET.get('report_type', 'AsciiDoc')
     include_finding_notes = int(request.GET.get('include_finding_notes', 0))
@@ -435,7 +449,7 @@ def generate_report(request, obj, host_view=False):
         report_title = "Product Report"
         findings = ReportFindingFilter(request.GET, product=product, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
             test__engagement__product=product)))
-        ids = set(finding.id for finding in findings.qs)
+        ids = set(finding.id for finding in findings.qs)  # noqa: C401
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
         endpoints = Endpoint.objects.filter(product=product).distinct()
@@ -466,7 +480,7 @@ def generate_report(request, obj, host_view=False):
         template = 'dojo/engagement_pdf_report.html'
         report_title = "Engagement Report"
 
-        ids = set(finding.id for finding in findings.qs)
+        ids = set(finding.id for finding in findings.qs)  # noqa: C401
         tests = Test.objects.filter(finding__id__in=ids).distinct()
         endpoints = Endpoint.objects.filter(product=engagement.product).distinct()
 
@@ -683,7 +697,8 @@ def get_list_index(list, index):
 def get_findings(request):
     url = request.META.get('QUERY_STRING')
     if not url:
-        raise Http404('Please use the report button when viewing findings')
+        msg = 'Please use the report button when viewing findings'
+        raise Http404(msg)
     else:
         if url.startswith('url='):
             url = url[4:]

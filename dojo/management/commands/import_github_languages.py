@@ -1,9 +1,10 @@
 import json
 import logging
+
 import requests
 from django.core.management.base import BaseCommand
-from dojo.models import Language_Type
 
+from dojo.models import Language_Type
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,8 @@ class Command(BaseCommand):
         try:
             deserialized = json.loads(requests.get('https://raw.githubusercontent.com/ozh/github-colors/master/colors.json').text)
         except:
-            raise Exception("Invalid format")
+            msg = "Invalid format"
+            raise Exception(msg)
 
         new_language_types = 0
 

@@ -3,7 +3,6 @@ import json
 
 from dojo.models import Finding
 
-
 NEUVECTOR_SCAN_NAME = "NeuVector (compliance)"
 
 
@@ -11,7 +10,7 @@ def parse(json_output, test):
     tree = parse_json(json_output)
     items = []
     if tree:
-        items = [data for data in get_items(tree, test)]
+        items = list(get_items(tree, test))
     return items
 
 
@@ -23,7 +22,8 @@ def parse_json(json_output):
         except Exception:
             tree = json.loads(data)
     except Exception:
-        raise ValueError("Invalid format")
+        msg = "Invalid format"
+        raise ValueError(msg)
 
     return tree
 
@@ -145,9 +145,10 @@ class NeuVectorComplianceParser:
 
     def get_findings(self, filename, test):
         if filename is None:
-            return list()
+            return []
 
         if filename.name.lower().endswith(".json"):
             return parse(filename, test)
         else:
-            raise ValueError("Unknown File Format")
+            msg = "Unknown File Format"
+            raise ValueError(msg)

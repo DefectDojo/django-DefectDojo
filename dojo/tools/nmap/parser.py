@@ -2,6 +2,7 @@ import datetime
 
 from cpe import CPE
 from defusedxml.ElementTree import parse
+
 from dojo.models import Endpoint, Finding
 
 
@@ -18,9 +19,10 @@ class NmapParser:
     def get_findings(self, file, test):
         tree = parse(file)
         root = tree.getroot()
-        dupes = dict()
+        dupes = {}
         if "nmaprun" not in root.tag:
-            raise ValueError("This doesn't seem to be a valid Nmap xml file.")
+            msg = "This doesn't seem to be a valid Nmap xml file."
+            raise ValueError(msg)
 
         report_date = None
         try:
@@ -126,7 +128,7 @@ class NmapParser:
                         mitigation="N/A",
                         impact="No impact provided",
                     )
-                    find.unsaved_endpoints = list()
+                    find.unsaved_endpoints = []
                     dupes[dupe_key] = find
                     if report_date:
                         find.date = report_date
@@ -160,7 +162,7 @@ class NmapParser:
             component_cpe = CPE(component_element.attrib["key"])
             for vuln in component_element.findall("table"):
                 # convert elements in dict
-                vuln_attributes = dict()
+                vuln_attributes = {}
                 for elem in vuln.findall("elem"):
                     vuln_attributes[elem.attrib["key"].lower()] = elem.text
 

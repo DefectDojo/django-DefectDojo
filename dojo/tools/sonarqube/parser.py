@@ -1,11 +1,14 @@
+import json
 import logging
-from dojo.tools.sonarqube.soprasteria_json import SonarQubeSoprasteriaJSON
-from dojo.tools.sonarqube.soprasteria_html import SonarQubeSoprasteriaHTML
+import zipfile
+
+from lxml import etree
+
 from dojo.tools.sonarqube.sonarqube_restapi_json import SonarQubeRESTAPIJSON
 from dojo.tools.sonarqube.sonarqube_restapi_zip import SonarQubeRESTAPIZIP
-from lxml import etree
-import zipfile
-import json
+from dojo.tools.sonarqube.soprasteria_html import SonarQubeSoprasteriaHTML
+from dojo.tools.sonarqube.soprasteria_json import SonarQubeSoprasteriaJSON
+
 logger = logging.getLogger(__name__)
 
 
