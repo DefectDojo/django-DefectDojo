@@ -1,8 +1,9 @@
 import os.path
 
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from dojo.models import Engagement, Product, Test
 from dojo.tools.trustwave.parser import TrustwaveParser
-from dojo.models import Test, Engagement, Product
+
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 def sample_path(file_name):

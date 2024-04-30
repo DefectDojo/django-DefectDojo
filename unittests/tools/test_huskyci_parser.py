@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-from dojo.tools.huskyci.parser import HuskyCIParser
 from dojo.models import Test
+from dojo.tools.huskyci.parser import HuskyCIParser
+
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestHuskyCIParser(DojoTestCase):

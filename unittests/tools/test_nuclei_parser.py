@@ -1,8 +1,11 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.nuclei.parser import NucleiParser
-from dojo.models import Test
 from datetime import datetime
+
 from dateutil.tz import tzoffset
+
+from dojo.models import Test
+from dojo.tools.nuclei.parser import NucleiParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestNucleiParser(DojoTestCase):

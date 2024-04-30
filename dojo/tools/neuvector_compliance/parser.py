@@ -3,7 +3,6 @@ import json
 
 from dojo.models import Finding
 
-
 NEUVECTOR_SCAN_NAME = "NeuVector (compliance)"
 
 

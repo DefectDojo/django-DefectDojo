@@ -1,7 +1,8 @@
-import sys
-import io
 import csv
+import io
+import sys
 from datetime import datetime
+
 from dojo.models import Finding
 
 

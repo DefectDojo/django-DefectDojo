@@ -1,47 +1,46 @@
 import base64
+import copy
 import hashlib
 import logging
 import os
 import re
-import copy
 import warnings
-from typing import Dict, Set, Optional
+from datetime import datetime
+from typing import Dict, Optional, Set
 from uuid import uuid4
-from django.conf import settings
+
+import hyperlink
+import tagulous.admin
 from auditlog.registry import auditlog
+from cvss import CVSS3
+from dateutil.relativedelta import relativedelta
+from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.db.models.expressions import Case, When
-from django.urls import reverse
-from django.core.validators import RegexValidator, validate_ipv46_address, MinValueValidator, MaxValueValidator
-from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
-from django.db import models, connection
-from django.db.models import Q, Count
+from django.core.files.base import ContentFile
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator, validate_ipv46_address
+from django.db import connection, models
+from django.db.models import Count, JSONField, Q
+from django.db.models.expressions import Case, When
 from django.db.models.functions import Lower
-from django_extensions.db.models import TimeStampedModel
-from django.utils.deconstruct import deconstructible
-from django.utils.timezone import now
-from django.utils.functional import cached_property
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.deconstruct import deconstructible
+from django.utils.functional import cached_property
 from django.utils.html import escape
-from pytz import all_timezones
-from polymorphic.models import PolymorphicModel
-from polymorphic.managers import PolymorphicManager
-from polymorphic.base import ManagerInheritanceWarning
-from multiselectfield import MultiSelectField
-from django import forms
+from django.utils.timezone import now
 from django.utils.translation import gettext as _
-from dateutil.relativedelta import relativedelta
-from datetime import datetime
+from django_extensions.db.models import TimeStampedModel
+from multiselectfield import MultiSelectField
+from polymorphic.base import ManagerInheritanceWarning
+from polymorphic.managers import PolymorphicManager
+from polymorphic.models import PolymorphicModel
+from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
-import tagulous.admin
-from django.db.models import JSONField
-import hyperlink
-from cvss import CVSS3
-
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -3274,6 +3273,7 @@ class Finding(models.Model):
 
     def get_references_with_links(self):
         import re
+
         from dojo.utils import create_bleached_link
         if self.references is None:
             return None

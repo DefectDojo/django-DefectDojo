@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+
 from dojo.models import Product_API_Scan_Configuration
 
 from .api_client import BlackduckAPI

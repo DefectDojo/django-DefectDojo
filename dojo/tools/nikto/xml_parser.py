@@ -1,9 +1,12 @@
-import re
 import hashlib
 import logging
-from dojo.models import Endpoint, Finding
+import re
+
 from defusedxml import ElementTree as ET
 from django.core.exceptions import ValidationError
+
+from dojo.models import Endpoint, Finding
+
 logger = logging.getLogger(__name__)
 
 

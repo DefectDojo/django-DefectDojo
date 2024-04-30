@@ -1,8 +1,11 @@
 import datetime
+
 from dateutil.tz import tzlocal
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.detect_secrets.parser import DetectSecretsParser
+
 from dojo.models import Test
+from dojo.tools.detect_secrets.parser import DetectSecretsParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestDetectSecretsParser(DojoTestCase):

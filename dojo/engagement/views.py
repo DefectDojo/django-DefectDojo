@@ -1,70 +1,108 @@
-import logging
 import csv
-import re
-from typing import List
-from django.views import View
-from openpyxl import Workbook
-from openpyxl.styles import Font
-from tempfile import NamedTemporaryFile
-
-from datetime import datetime
+import logging
 import operator
-from django.contrib.auth.models import User
+import re
+from datetime import datetime
+from functools import reduce
+from tempfile import NamedTemporaryFile
+from time import strftime
+from typing import List
+
 from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import ValidationError, PermissionDenied
-from django.urls import reverse, Resolver404
-from django.db.models import Q, Count
-from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponse, FileResponse, QueryDict, HttpRequest
-from django.shortcuts import render, get_object_or_404
-from django.views.decorators.cache import cache_page
-from django.utils import timezone
-from time import strftime
 from django.contrib.admin.utils import NestedObjects
+from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS
+from django.db.models import Count, Q
+from django.db.models.query import Prefetch, QuerySet
+from django.http import FileResponse, HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict, StreamingHttpResponse
+from django.shortcuts import get_object_or_404, render
+from django.urls import Resolver404, reverse
+from django.utils import timezone
+from django.views import View
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
+from openpyxl import Workbook
+from openpyxl.styles import Font
 
+import dojo.jira_link.helper as jira_helper
+import dojo.notifications.helper as notifications_helper
+import dojo.risk_acceptance.helper as ra_helper
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.roles_permissions import Permissions
+from dojo.endpoint.utils import save_endpoints_to_add
+from dojo.engagement.queries import get_authorized_engagements
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import (
-    EngagementFilter,
-    EngagementFilterWithoutObjectLookups,
     EngagementDirectFilter,
     EngagementDirectFilterWithoutObjectLookups,
+    EngagementFilter,
+    EngagementFilterWithoutObjectLookups,
     EngagementTestFilter,
-    EngagementTestFilterWithoutObjectLookups
+    EngagementTestFilterWithoutObjectLookups,
 )
-from dojo.forms import CheckForm, \
-    UploadThreatForm, RiskAcceptanceForm, NoteForm, DoneForm, \
-    EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
-    CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm, \
-    EditRiskAcceptanceForm
-
-from dojo.models import Finding, Product, Engagement, Test, \
-    Check_List, Test_Import, Notes, \
-    Risk_Acceptance, Development_Environment, Endpoint, \
-    Cred_Mapping, System_Settings, Note_Type, Product_API_Scan_Configuration
-from dojo.tools.factory import get_scan_types_sorted
-from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, async_delete, \
-    get_system_setting, get_setting, redirect_to_return_url_or_else, get_return_url, calculate_grade
-from dojo.notifications.helper import create_notification
-from dojo.finding.views import find_available_notetypes
-from functools import reduce
-from django.db.models.query import Prefetch, QuerySet
-import dojo.jira_link.helper as jira_helper
-import dojo.risk_acceptance.helper as ra_helper
-from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.finding.helper import NOT_ACCEPTED_FINDINGS_QUERY
-from django.views.decorators.vary import vary_on_cookie
-from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.roles_permissions import Permissions
-from dojo.product.queries import get_authorized_products
-from dojo.engagement.queries import get_authorized_engagements
-from dojo.user.queries import get_authorized_users
-from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.finding.views import find_available_notetypes
+from dojo.forms import (
+    AddFindingsRiskAcceptanceForm,
+    CheckForm,
+    CredMappingForm,
+    DeleteEngagementForm,
+    DoneForm,
+    EditRiskAcceptanceForm,
+    EngForm,
+    ImportScanForm,
+    JIRAEngagementForm,
+    JIRAImportScanForm,
+    JIRAProjectForm,
+    NoteForm,
+    ReplaceRiskAcceptanceProofForm,
+    RiskAcceptanceForm,
+    TestForm,
+    TypedNoteForm,
+    UploadThreatForm,
+)
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
-import dojo.notifications.helper as notifications_helper
-from dojo.endpoint.utils import save_endpoints_to_add
-
+from dojo.models import (
+    Check_List,
+    Cred_Mapping,
+    Development_Environment,
+    Endpoint,
+    Engagement,
+    Finding,
+    Note_Type,
+    Notes,
+    Product,
+    Product_API_Scan_Configuration,
+    Risk_Acceptance,
+    System_Settings,
+    Test,
+    Test_Import,
+)
+from dojo.notifications.helper import create_notification
+from dojo.product.queries import get_authorized_products
+from dojo.risk_acceptance.helper import prefetch_for_expiration
+from dojo.tools.factory import get_scan_types_sorted
+from dojo.user.queries import get_authorized_users
+from dojo.utils import (
+    FileIterWrapper,
+    Product_Tab,
+    add_breadcrumb,
+    add_error_message_to_response,
+    add_success_message_to_response,
+    async_delete,
+    calculate_grade,
+    get_cal_event,
+    get_page_items,
+    get_return_url,
+    get_setting,
+    get_system_setting,
+    handle_uploaded_threat,
+    is_scan_file_too_large,
+    redirect_to_return_url_or_else,
+)
 
 logger = logging.getLogger(__name__)
 
