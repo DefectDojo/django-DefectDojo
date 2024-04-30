@@ -42,6 +42,8 @@ from dojo.filters import (
     EngagementFilterWithoutObjectLookups,
     EngagementTestFilter,
     EngagementTestFilterWithoutObjectLookups,
+    ProductEngagementsFilter,
+    ProductEngagementsFilterWithoutObjectLookups,
 )
 from dojo.finding.helper import NOT_ACCEPTED_FINDINGS_QUERY
 from dojo.finding.views import find_available_notetypes
@@ -215,8 +217,11 @@ def engagements_all(request):
     products_with_engagements = products_with_engagements.filter(~Q(engagement=None)).distinct()
 
     # count using prefetch instead of just using 'engagement__set_test_test` to avoid loading all test in memory just to count them
+    filter_string_matching = get_system_setting('filter_string_matching', False)
+    products_filter_class = ProductEngagementsFilterWithoutObjectLookups if filter_string_matching else ProductEngagementsFilter
+    engagement_query = Engagement.objects.annotate(test_count=Count('test__id'))
     filter_qs = products_with_engagements.prefetch_related(
-        Prefetch('engagement_set', queryset=Engagement.objects.all().annotate(test_count=Count('test__id')))
+        Prefetch('engagement_set', queryset=products_filter_class(request.GET, engagement_query).qs)
     )
 
     filter_qs = filter_qs.prefetch_related(
@@ -230,7 +235,6 @@ def engagements_all(request):
             'engagement_set__jira_project__jira_instance',
             'jira_project_set__jira_instance'
         )
-    filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = EngagementFilterWithoutObjectLookups if filter_string_matching else EngagementFilter
     filtered = filter_class(
         request.GET,
@@ -238,7 +242,7 @@ def engagements_all(request):
     )
 
     prods = get_page_items(request, filtered.qs, 25)
-
+    prods.paginator.count = sum(len(prod.engagement_set.all()) for prod in prods)
     name_words = products_with_engagements.values_list('name', flat=True)
     eng_words = get_authorized_engagements(Permissions.Engagement_View).values_list('name', flat=True).distinct()
 
