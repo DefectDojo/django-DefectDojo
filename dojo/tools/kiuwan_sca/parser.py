@@ -1,21 +1,22 @@
 import json
 import hashlib
-import io
 
 from dojo.models import Finding
 
 __author__ = "mwager"
+
+
 class KiuwanSCAParser(object):
     SEVERITY = {
-        "-" : "Low",
-        "LOW" : "Low",
-        "MEDIUM" : "Medium",
-        "HIGH" : "High",
-        "CRITICAL" : "Critical",
-        "Low" : "Low",
-        "Medium" : "Medium",
-        "High" : "High",
-        "Critical" : "Critical"
+        "-": "Low",
+        "LOW": "Low",
+        "MEDIUM": "Medium",
+        "HIGH": "High",
+        "CRITICAL": "Critical",
+        "Low": "Low",
+        "Medium": "Medium",
+        "High": "High",
+        "Critical": "Critical"
     }
 
     def get_scan_types(self):
@@ -33,7 +34,7 @@ class KiuwanSCAParser(object):
 
         for row in data:
             # if a finding was "muted" in the Kiuwan UI, we ignore it (e.g. marked as false positive)
-            if row["muted"] == True:
+            if row["muted"] is True:
                 continue
 
             finding = Finding(test=test)
@@ -45,7 +46,7 @@ class KiuwanSCAParser(object):
             if "components" in row and len(row["components"]) > 0:
                 finding.component_name = row["components"][0]["artifact"]
                 finding.component_version = row["components"][0]["version"]
-                finding.title = finding.component_name
+                finding.title = finding.component_name + " v" + str(finding.component_version)
 
             if not finding.title:
                 finding.title = row["cve"]
@@ -57,9 +58,9 @@ class KiuwanSCAParser(object):
                     pass
 
             if "epss_score" in row:
-                    finding.epss_score = row["epss_score"]
+                finding.epss_score = row["epss_score"]
             if "epss_percentile" in row:
-                    finding.epss_percentile = row["epss_percentile"]
+                finding.epss_percentile = row["epss_percentile"]
 
             if "cVSSv3BaseScore" in row:
                 finding.cvssv3_score = float(row["cVSSv3BaseScore"])
