@@ -173,7 +173,7 @@ def parse_finding(host, tree):
             if last_fixed is not None:
                 _temp["mitigation_date"] = datetime.datetime.strptime(
                     last_fixed, "%Y-%m-%dT%H:%M:%SZ"
-                ).date()
+                )
             else:
                 _temp["mitigation_date"] = None
         # read cvss value if present
