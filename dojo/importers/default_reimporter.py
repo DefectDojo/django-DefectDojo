@@ -307,7 +307,7 @@ class DefaultReImporter(BaseImporter):
                 mitigated_findings.append(finding)
         # push finding groups to jira since we only only want to push whole groups
         if finding_groups_enabled and push_to_jira:
-            for finding_group in set([finding.finding_group for finding in findings if finding.finding_group is not None]):
+            for finding_group in {finding.finding_group for finding in findings if finding.finding_group is not None}:
                 jira_helper.push_to_jira(finding_group)
 
         return mitigated_findings
@@ -831,13 +831,11 @@ class DefaultReImporter(BaseImporter):
                     jira_helper.push_to_jira(findings[0])
 
         if is_finding_groups_enabled() and push_to_jira:
-            for finding_group in set(
-                [
+            for finding_group in {
                     finding.finding_group
                     for finding in reactivated_items + unchanged_items
                     if finding.finding_group is not None and not finding.is_mitigated
-                ]
-            ):
+            }:
                 jira_helper.push_to_jira(finding_group)
 
     def process_results(

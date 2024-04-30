@@ -320,7 +320,7 @@ class DefaultImporter(BaseImporter):
             )
         # push finding groups to jira since we only only want to push whole groups
         if finding_groups_enabled and push_to_jira:
-            for finding_group in set([finding.finding_group for finding in old_findings if finding.finding_group is not None]):
+            for finding_group in {finding.finding_group for finding in old_findings if finding.finding_group is not None}:
                 jira_helper.push_to_jira(finding_group)
 
         return old_findings

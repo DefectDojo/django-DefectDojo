@@ -2146,7 +2146,7 @@ class ImportScanSerializer(serializers.Serializer):
         Process all of the user supplied inputs to massage them into the correct
         format the importer is expecting to see
         """
-        context = {k: v for k, v in data.items()}
+        context = dict(items)
         # update some vars
         context["scan"] = data.get("file", None)
         context["environment"] = Development_Environment.objects.get(
@@ -2422,7 +2422,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         Process all of the user supplied inputs to massage them into the correct
         format the importer is expecting to see
         """
-        context = {k: v for k, v in data.items()}
+        context = dict(items)
         # update some vars
         context["scan"] = data.get("file", None)
         context["environment"] = Development_Environment.objects.get(
