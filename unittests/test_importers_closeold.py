@@ -1,10 +1,11 @@
 import logging
 
 from django.utils import timezone
-from dojo_test_case import DojoTestCase, get_unit_tests_path
 
 from dojo.importers.default_importer import DefaultImporter
 from dojo.models import Development_Environment, Engagement, Product, Product_Type, User
+
+from .dojo_test_case import DojoTestCase, get_unit_tests_path
 
 logger = logging.getLogger(__name__)
 
