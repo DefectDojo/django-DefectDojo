@@ -1,10 +1,11 @@
-import json
 import hashlib
+import json
 import logging
+
 from cvss import parser as cvss_parser
 from dateutil import parser as date_parser
-from dojo.models import Finding, Endpoint
 
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 
@@ -94,9 +95,7 @@ class NucleiParser:
             if classification:
                 if "cve-id" in classification and classification["cve-id"]:
                     cve_ids = classification["cve-id"]
-                    finding.unsaved_vulnerability_ids = list(
-                        map(lambda x: x.upper(), cve_ids)
-                    )
+                    finding.unsaved_vulnerability_ids = [x.upper() for x in cve_ids]
                 if (
                     "cwe-id" in classification
                     and classification["cwe-id"]

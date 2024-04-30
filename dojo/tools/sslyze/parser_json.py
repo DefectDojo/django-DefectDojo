@@ -86,7 +86,8 @@ class SSLyzeJSONParser:
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise Exception("Invalid format")
+            msg = "Invalid format"
+            raise Exception(msg)
 
         return tree
 
@@ -587,7 +588,7 @@ def get_finding(
     if vulnerability_id:
         finding.unsaved_vulnerability_ids = [vulnerability_id]
     if endpoint is not None:
-        finding.unsaved_endpoints = list()
+        finding.unsaved_endpoints = []
         finding.unsaved_endpoints.append(endpoint)
     return finding
 

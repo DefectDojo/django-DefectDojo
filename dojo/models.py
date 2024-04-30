@@ -1,47 +1,46 @@
 import base64
+import copy
 import hashlib
 import logging
 import os
 import re
-import copy
 import warnings
-from typing import Dict, Set, Optional
+from datetime import datetime
+from typing import Dict, Optional, Set
 from uuid import uuid4
-from django.conf import settings
+
+import hyperlink
+import tagulous.admin
 from auditlog.registry import auditlog
+from cvss import CVSS3
+from dateutil.relativedelta import relativedelta
+from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.db.models.expressions import Case, When
-from django.urls import reverse
-from django.core.validators import RegexValidator, validate_ipv46_address, MinValueValidator, MaxValueValidator
-from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
-from django.db import models, connection
-from django.db.models import Q, Count
+from django.core.files.base import ContentFile
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator, validate_ipv46_address
+from django.db import connection, models
+from django.db.models import Count, JSONField, Q
+from django.db.models.expressions import Case, When
 from django.db.models.functions import Lower
-from django_extensions.db.models import TimeStampedModel
-from django.utils.deconstruct import deconstructible
-from django.utils.timezone import now
-from django.utils.functional import cached_property
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.deconstruct import deconstructible
+from django.utils.functional import cached_property
 from django.utils.html import escape
-from pytz import all_timezones
-from polymorphic.models import PolymorphicModel
-from polymorphic.managers import PolymorphicManager
-from polymorphic.base import ManagerInheritanceWarning
-from multiselectfield import MultiSelectField
-from django import forms
+from django.utils.timezone import now
 from django.utils.translation import gettext as _
-from dateutil.relativedelta import relativedelta
-from datetime import datetime
+from django_extensions.db.models import TimeStampedModel
+from multiselectfield import MultiSelectField
+from polymorphic.base import ManagerInheritanceWarning
+from polymorphic.managers import PolymorphicManager
+from polymorphic.models import PolymorphicModel
+from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
-import tagulous.admin
-from django.db.models import JSONField
-import hyperlink
-from cvss import CVSS3
-
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -419,6 +418,12 @@ class System_Settings(models.Model):
         verbose_name=_('Enable Remediation Advice'),
         help_text=_("Enables global remediation advice and matching on CWE and Title. The text will be replaced for mitigation, impact and references on a finding. Useful for providing consistent impact and remediation advice regardless of the scanner."))
 
+    enable_similar_findings = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Enable Similar Findings"),
+        help_text=_("Enable the query of similar findings on the view finding page. This feature can involve potentially large queries and negatively impact performance"))
+
     engagement_auto_close = models.BooleanField(
         default=False,
         blank=False,
@@ -569,6 +574,14 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("API expose error details"),
         help_text=_("When turned on, the API will expose error details in the response."))
+    filter_string_matching = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Filter String Matching Optimization"),
+        help_text=_(
+            "When turned on, all filter operations in the UI will require string matches rather than ID. "
+            "This is a performance enhancement to avoid fetching objects unnecessarily."
+        ))
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
@@ -846,9 +859,11 @@ class DojoMeta(models.Model):
                 ids_count += 1
 
         if ids_count == 0:
-            raise ValidationError('Metadata entries need either a product, an endpoint or a finding')
+            msg = 'Metadata entries need either a product, an endpoint or a finding'
+            raise ValidationError(msg)
         if ids_count > 1:
-            raise ValidationError('Metadata entries may not have more than one relation, either a product, an endpoint either or a finding')
+            msg = 'Metadata entries may not have more than one relation, either a product, an endpoint either or a finding'
+            raise ValidationError(msg)
 
     def __str__(self):
         return f"{self.name}: {self.value}"
@@ -879,7 +894,8 @@ class SLA_Configuration(models.Model):
 
         for sla_day in sla_days:
             if sla_day < 1:
-                raise ValidationError('SLA Days must be at least 1')
+                msg = 'SLA Days must be at least 1'
+                raise ValidationError(msg)
 
     def save(self, *args, **kwargs):
         # get the initial sla config before saving (if this is an existing sla config)
@@ -933,7 +949,8 @@ class SLA_Configuration(models.Model):
         if self.id != 1:
             super().delete(*args, **kwargs)
         else:
-            raise ValidationError("Unable to delete default SLA Configuration")
+            msg = "Unable to delete default SLA Configuration"
+            raise ValidationError(msg)
 
     def get_summary(self):
         return f'{self.name} - Critical: {self.critical}, High: {self.high}, Medium: {self.medium}, Low: {self.low}'
@@ -1642,7 +1659,7 @@ class Endpoint(models.Model):
         if self.path or self.path == '':
             while len(self.path) > 0 and self.path[0] == "/":  # Endpoint store "root-less" path
                 self.path = self.path[1:]
-            if any([null_char in self.path for null_char in null_char_list]):
+            if any(null_char in self.path for null_char in null_char_list):
                 old_value = self.path
                 if 'postgres' in db_type:
                     action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
@@ -1655,7 +1672,7 @@ class Endpoint(models.Model):
         if self.query or self.query == '':
             if len(self.query) > 0 and self.query[0] == "?":
                 self.query = self.query[1:]
-            if any([null_char in self.query for null_char in null_char_list]):
+            if any(null_char in self.query for null_char in null_char_list):
                 old_value = self.query
                 if 'postgres' in db_type:
                     action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
@@ -1668,7 +1685,7 @@ class Endpoint(models.Model):
         if self.fragment or self.fragment == '':
             if len(self.fragment) > 0 and self.fragment[0] == "#":
                 self.fragment = self.fragment[1:]
-            if any([null_char in self.fragment for null_char in null_char_list]):
+            if any(null_char in self.fragment for null_char in null_char_list):
                 old_value = self.fragment
                 if 'postgres' in db_type:
                     action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
@@ -1709,10 +1726,12 @@ class Endpoint(models.Model):
                     if clean_url[:len(dummy_scheme) + 3] == (dummy_scheme + '://'):
                         clean_url = clean_url[len(dummy_scheme) + 3:]
                     else:
-                        raise ValueError('hyperlink lib did not create URL as was expected')
+                        msg = 'hyperlink lib did not create URL as was expected'
+                        raise ValueError(msg)
                 return clean_url
             else:
-                raise ValueError('Missing host')
+                msg = 'Missing host'
+                raise ValueError(msg)
         except:
             url = ''
             if self.protocol:
@@ -1899,7 +1918,8 @@ class Endpoint(models.Model):
             from urllib.parse import urlparse
             url = hyperlink.parse(url="//" + urlparse(uri).netloc)
         except hyperlink.URLParseError as e:
-            raise ValidationError(f'Invalid URL format: {e}')
+            msg = f'Invalid URL format: {e}'
+            raise ValidationError(msg)
 
         query_parts = []  # inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1768
         for k, v in url.query:
@@ -2242,7 +2262,7 @@ class Finding(models.Model):
                            help_text=_("External reference that provides more information about this flaw."))  # not displayed and pretty much the same as references. To remove?
     severity = models.CharField(max_length=200,
                                 verbose_name=_('Severity'),
-                                help_text=_('The severity level of this flaw (Critical, High, Medium, Low, Informational).'))
+                                help_text=_('The severity level of this flaw (Critical, High, Medium, Low, Info).'))
     description = models.TextField(verbose_name=_('Description'),
                                 help_text=_("Longer more descriptive information about the flaw."))
     mitigation = models.TextField(verbose_name=_('Mitigation'),
@@ -2684,24 +2704,16 @@ class Finding(models.Model):
             if self.unsaved_vulnerability_ids:
                 deduplicationLogger.debug("get_vulnerability_ids before the finding was saved")
                 # convert list of unsaved vulnerability_ids to the list of their canonical representation
-                vulnerability_id_str_list = list(
-                    map(
-                        lambda vulnerability_id: str(vulnerability_id),
-                        self.unsaved_vulnerability_ids
-                    ))
+                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in self.unsaved_vulnerability_ids]
                 # deduplicate (usually done upon saving finding) and sort endpoints
-                vulnerability_id_str = ''.join(sorted(list(dict.fromkeys(vulnerability_id_str_list))))
+                vulnerability_id_str = ''.join(sorted(dict.fromkeys(vulnerability_id_str_list)))
             else:
                 deduplicationLogger.debug("finding has no unsaved vulnerability references")
         else:
             vulnerability_ids = Vulnerability_Id.objects.filter(finding=self)
             deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(vulnerability_ids.count()))
             # convert list of vulnerability_ids to the list of their canonical representation
-            vulnerability_id_str_list = list(
-                map(
-                    lambda vulnerability_id: str(vulnerability_id),
-                    vulnerability_ids.all()
-                ))
+            vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in vulnerability_ids.all()]
             # sort vulnerability_ids strings
             vulnerability_id_str = ''.join(sorted(vulnerability_id_str_list))
         return vulnerability_id_str
@@ -2714,17 +2726,11 @@ class Finding(models.Model):
             if len(self.unsaved_endpoints) > 0:
                 deduplicationLogger.debug("get_endpoints before the finding was saved")
                 # convert list of unsaved endpoints to the list of their canonical representation
-                endpoint_str_list = list(
-                    map(
-                        lambda endpoint: str(endpoint),
-                        self.unsaved_endpoints
-                    ))
+                endpoint_str_list = [str(endpoint) for endpoint in self.unsaved_endpoints]
                 # deduplicate (usually done upon saving finding) and sort endpoints
                 endpoint_str = ''.join(
                     sorted(
-                        list(
-                            dict.fromkeys(endpoint_str_list)
-                        )))
+                        dict.fromkeys(endpoint_str_list)))
             else:
                 # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
                 # In this case, before saving the finding, both static_finding and dynamic_finding are True
@@ -2733,11 +2739,7 @@ class Finding(models.Model):
         else:
             deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(self.endpoints.count()))
             # convert list of endpoints to the list of their canonical representation
-            endpoint_str_list = list(
-                map(
-                    lambda endpoint: str(endpoint),
-                    self.endpoints.all()
-                ))
+            endpoint_str_list = [str(endpoint) for endpoint in self.endpoints.all()]
             # sort endpoints strings
             endpoint_str = ''.join(
                 sorted(
@@ -2993,11 +2995,12 @@ class Finding(models.Model):
         if not user:
             from dojo.utils import get_current_user
             user = get_current_user()
-
         # Title Casing
         from titlecase import titlecase
         self.title = titlecase(self.title[:511])
-
+        # Set the date of the finding if nothing is supplied
+        if self.date is None:
+            self.date = timezone.now()
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
 
@@ -3156,33 +3159,34 @@ class Finding(models.Model):
                 st = dojo_meta.value.strip()
                 if st:
                     return st.lower()
-        return 'github'
+        return ''
 
-    def bitbucket_public_prepare_scm_base_link(self, uri):
-        # bitbucket public (https://bitbucket.org) url template for browse is:
-        # https://bitbucket.org/<username>/<repository-slug>
+    def scm_public_prepare_base_link(self, uri):
+        # scm public (https://scm-domain.org) url template for browse is:
+        # https://scm-domain.org/<username>/<repository-slug>
         # but when you get repo url for git, its template is:
-        # https://bitbucket.org/<username>/<repository-slug>.git
+        # https://scm-domain.org/<username>/<repository-slug>.git
         # so to create browser url - git url should be recomposed like below:
 
         parts_uri = uri.split('.git')
         return parts_uri[0]
 
-    def bitbucket_public_prepare_scm_link(self, uri):
+    def git_public_prepare_scm_link(self, uri, scm_type):
         # if commit hash or branch/tag is set for engagement/test -
         # hash or branch/tag should be appended to base browser link
+        intermediate_path = '/blob/' if scm_type in ['github', 'gitlab'] else '/src/'
 
-        link = self.bitbucket_public_prepare_scm_base_link(uri)
+        link = self.scm_public_prepare_base_link(uri)
         if self.test.commit_hash:
-            link += '/src/' + self.test.commit_hash + '/' + self.file_path
+            link += intermediate_path + self.test.commit_hash + '/' + self.file_path
         elif self.test.engagement.commit_hash:
-            link += '/src/' + self.test.engagement.commit_hash + '/' + self.file_path
+            link += intermediate_path + self.test.engagement.commit_hash + '/' + self.file_path
         elif self.test.branch_tag:
-            link += '/src/' + self.test.branch_tag + '/' + self.file_path
+            link += intermediate_path + self.test.branch_tag + '/' + self.file_path
         elif self.test.engagement.branch_tag:
-            link += '/src/' + self.test.engagement.branch_tag + '/' + self.file_path
+            link += intermediate_path + self.test.engagement.branch_tag + '/' + self.file_path
         else:
-            link += '/src/master/' + self.file_path
+            link += intermediate_path + 'master/' + self.file_path
 
         return link
 
@@ -3224,22 +3228,6 @@ class Finding(models.Model):
 
         return link
 
-    def github_prepare_scm_link(self, uri):
-        link = uri
-
-        if self.test.commit_hash:
-            link += '/blob/' + self.test.commit_hash + '/' + self.file_path
-        elif self.test.engagement.commit_hash:
-            link += '/blob/' + self.test.engagement.commit_hash + '/' + self.file_path
-        elif self.test.branch_tag:
-            link += '/blob/' + self.test.branch_tag + '/' + self.file_path
-        elif self.test.engagement.branch_tag:
-            link += '/blob/' + self.test.engagement.branch_tag + '/' + self.file_path
-        else:
-            link += '/' + self.file_path
-
-        return link
-
     def get_file_path_with_raw_link(self):
         if self.file_path is None:
             return None
@@ -3247,12 +3235,12 @@ class Finding(models.Model):
         link = self.test.engagement.source_code_management_uri
         scm_type = self.get_scm_type()
         if (self.test.engagement.source_code_management_uri is not None):
-            if scm_type == 'github' or ("https://github.com/" in self.test.engagement.source_code_management_uri):
-                link = self.github_prepare_scm_link(link)
-            elif scm_type == 'bitbucket-standalone':
+            if scm_type == 'bitbucket-standalone':
                 link = self.bitbucket_standalone_prepare_scm_link(link)
-            elif scm_type == 'bitbucket':
-                link = self.bitbucket_public_prepare_scm_link(link)
+            elif scm_type in ['github', 'gitlab', 'gitea', 'codeberg', 'bitbucket']:
+                link = self.git_public_prepare_scm_link(link, scm_type)
+            elif 'https://github.com/' in self.test.engagement.source_code_management_uri:
+                link = self.git_public_prepare_scm_link(link, 'github')
             else:
                 link += '/' + self.file_path
         else:
@@ -3260,7 +3248,7 @@ class Finding(models.Model):
 
         # than - add line part to browser url
         if self.line:
-            if scm_type == 'github' or scm_type == 'gitlab':
+            if scm_type in ['github', 'gitlab', 'gitea', 'codeberg'] or 'https://github.com/' in self.test.engagement.source_code_management_uri:
                 link = link + '#L' + str(self.line)
             elif scm_type == 'bitbucket-standalone':
                 link = link + '#' + str(self.line)
@@ -3270,6 +3258,7 @@ class Finding(models.Model):
 
     def get_references_with_links(self):
         import re
+
         from dojo.utils import create_bleached_link
         if self.references is None:
             return None
@@ -3289,7 +3278,7 @@ class Finding(models.Model):
     def vulnerability_ids(self):
         # Get vulnerability ids from database and convert to list of strings
         vulnerability_ids_model = self.vulnerability_id_set.all()
-        vulnerability_ids = list()
+        vulnerability_ids = []
         for vulnerability_id in vulnerability_ids_model:
             vulnerability_ids.append(vulnerability_id.vulnerability_id)
 
@@ -3383,7 +3372,7 @@ class Finding_Group(TimeStampedModel):
     def severity(self):
         if not self.findings.all():
             return None
-        max_number_severity = max([Finding.get_number_severity(find.severity) for find in self.findings.all()])
+        max_number_severity = max(Finding.get_number_severity(find.severity) for find in self.findings.all())
         return Finding.get_severity(max_number_severity)
 
     @cached_property
@@ -3399,7 +3388,7 @@ class Finding_Group(TimeStampedModel):
         if not self.findings.all():
             return None
 
-        return max([find.age for find in self.findings.all()])
+        return max(find.age for find in self.findings.all())
 
     @cached_property
     def sla_days_remaining_internal(self):
@@ -3421,20 +3410,20 @@ class Finding_Group(TimeStampedModel):
         if not self.findings.all():
             return None
 
-        if any([find.active for find in self.findings.all()]):
+        if any(find.active for find in self.findings.all()):
             return 'Active'
 
-        if all([find.is_mitigated for find in self.findings.all()]):
+        if all(find.is_mitigated for find in self.findings.all()):
             return 'Mitigated'
 
         return 'Inactive'
 
     @cached_property
     def mitigated(self):
-        return all([find.mitigated is not None for find in self.findings.all()])
+        return all(find.mitigated is not None for find in self.findings.all())
 
     def get_sla_start_date(self):
-        return min([find.get_sla_start_date() for find in self.findings.all()])
+        return min(find.get_sla_start_date() for find in self.findings.all())
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -3488,7 +3477,7 @@ class Finding_Template(models.Model):
     def vulnerability_ids(self):
         # Get vulnerability ids from database and convert to list of strings
         vulnerability_ids_model = self.vulnerability_id_template_set.all()
-        vulnerability_ids = list()
+        vulnerability_ids = []
         for vulnerability_id in vulnerability_ids_model:
             vulnerability_ids.append(vulnerability_id.vulnerability_id)
 
@@ -3903,7 +3892,8 @@ class JIRA_Project(models.Model):
 
     def clean(self):
         if not self.jira_instance:
-            raise ValidationError('Cannot save JIRA Project Configuration without JIRA Instance')
+            msg = 'Cannot save JIRA Project Configuration without JIRA Instance'
+            raise ValidationError(msg)
 
     def __str__(self):
         return ('%s: ' + self.project_key + '(%s)') % (str(self.id), str(self.jira_instance.url) if self.jira_instance else 'None')

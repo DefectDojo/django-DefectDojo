@@ -50,11 +50,11 @@
                                 <i class="fa-solid fa-crosshairs fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ verified_objs|length }}</span>
+                                    <span class=" fa-2x">{{ verified_objs }}</span>
                                     <span><a
                                             href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that are open/active and verified">Verified
-                                        {{ view }}{{ verified_objs|length|pluralize }} <i
+                                        {{ view }}{{ verified_objs|pluralize }} <i
                                                 class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -79,10 +79,10 @@
                                 <i class="fa-solid fa-bug fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ open_objs|length }}</span>
+                                    <span class=" fa-2x">{{ open_objs }}</span>
                                     <span><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                         title="Findings that are open/active, but not (yet) verified">Open
-                                        {{ view }}{{ open_objs|length|pluralize }} <i
+                                        {{ view }}{{ open_objs|pluralize }} <i
                                                 class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -107,7 +107,7 @@
                                 <i class="fa-solid fa-check fa-2x"></i>
 
                                 <div class="pull-right text-right">
-                                    <span class="fa-2x">{{ accepted_objs|length }}</span>
+                                    <span class="fa-2x">{{ accepted_objs }}</span>
                                     <span><a
                                             href="{% url 'accepted_findings' %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that have been accepted in a risk acceptance.">Risk Accepted
@@ -135,10 +135,10 @@
                                 <i class="fa-solid fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="text-right pull-right">
-                                    <span class="fa-2x">{{ closed_objs|length }}</span>
+                                    <span class="fa-2x">{{ closed_objs }}</span>
                                     <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are closed and mitigated.">Closed
-                                        {{ view }}{{ closed_objs|length|pluralize }} <i
+                                        {{ view }}{{ closed_objs|pluralize }} <i
                                                 class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -163,10 +163,10 @@
                                 <i class="fa-solid fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="text-right pull-right">
-                                    <span class="fa-2x">{{ false_positive_objs|length }}</span>
+                                    <span class="fa-2x">{{ false_positive_objs }}</span>
                                     <span><a href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are marked as false postive.">False-postive
-                                        {{ view }}{{ false_positive_objs|length|pluralize }} <i
+                                        {{ view }}{{ false_positive_objs|pluralize }} <i
                                                 class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -191,11 +191,11 @@
                                 <i class="fa-solid fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ out_of_scope_objs|length }}</span>
+                                    <span class=" fa-2x">{{ out_of_scope_objs }}</span>
                                     <span><a
                                             href="{% url 'product_out_of_scope_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that are marked as out of scope.">Out Of Scope
-                                        {{ view }}{{ out_of_scope_objs|length|pluralize }} <i
+                                        {{ view }}{{ out_of_scope_objs|pluralize }} <i
                                                 class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -220,10 +220,10 @@
                                 <i class="fa-solid fa-bullseye fa-2x"></i>
 
                                 <div class="text-right pull-right">
-                                    <span class="fa-2x">{{ all_objs|length }}</span>
+                                    <span class="fa-2x">{{ all_objs }}</span>
                                     <span><a href="{% url 'product_all_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="All findings.">Total
-                                        {{ view }}{{ all_objs|length|pluralize }} <i
+                                        {{ view }}{{ all_objs|pluralize }} <i
                                                 class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -248,10 +248,10 @@
                                 <i class="fa-solid fa-bug fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ inactive_objs|length }}</span>
+                                    <span class=" fa-2x">{{ inactive_objs }}</span>
                                     <span><a href="{% url 'product_inactive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are not active but not mitigated for some reason">Inactive
-                                        {{ view }}{{ inactive_objs|length|pluralize }} <i
+                                        {{ view }}{{ inactive_objs|pluralize }} <i
                                                 class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -406,8 +406,8 @@
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
                            class="text-info fa-solid fa-circle-info"></i>
-                        <small>Finding age of {{ open_objs|length|apnumber }} open
-                            finding{{ open_objs|length|pluralize }}</small>
+                        <small>Finding age of {{ open_objs|apnumber }} open
+                            finding{{ open_objs|pluralize }}</small>
                     </div>
                 </div>
             </div>
@@ -456,8 +456,8 @@
                     </div>
                     <div class="panel-footer">
                         <i class="text-info fa-solid fa-circle-info"></i>
-                        <small>Showing {{ open_vulnerabilities|length|apnumber }}
-                            vulnerabilit{{ open_vulnerabilities|length|pluralize:"y,ies"}} from Open findings</small>
+                        <small>Showing {{ open_vulnerabilities_count|apnumber }}
+                            vulnerabilit{{ open_vulnerabilities_count|pluralize:"y,ies"}} from Open findings</small>
                     </div>
                 </div>
             </div>
@@ -471,8 +471,8 @@
                     </div>
                     <div class="panel-footer">
                         <i class="text-info fa-solid fa-circle-info"></i>
-                        <small>Showing {{ all_vulnerabilities|length|apnumber }}
-                            vulnerabilit{{ all_vulnerabilities|length|pluralize:"y,ies"}} from all findings</small>
+                        <small>Showing {{ all_vulnerabilities_count|apnumber }}
+                            vulnerabilit{{ all_vulnerabilities_count|pluralize:"y,ies"}} from all findings</small>
                     </div>
                 </div>
             </div>
@@ -701,17 +701,8 @@
             });
             finding_age(data_2, ticks);
             
-            data = [];
-            {% for x in open_vulnerabilities %}
-                data.push(['CWE-{{x.cwe}}', {{x.count}}]);
-            {% endfor %}
-            draw_vulnerabilities_graph("#open_vulnerabilities", data);
-            
-            data = [];
-            {% for x in all_vulnerabilities %}
-                data.push(['CWE-{{x.cwe}}', {{x.count}}]);
-            {% endfor %}
-            draw_vulnerabilities_graph("#all_vulnerabilities", data);
+            draw_vulnerabilities_graph("#open_vulnerabilities", {{ open_vulnerabilities|safe }});
+            draw_vulnerabilities_graph("#all_vulnerabilities", {{ all_vulnerabilities|safe }});
 
             //$(".product-graphs").hide();
             $("#meta_accordion").accordion();

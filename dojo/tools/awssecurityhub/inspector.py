@@ -1,5 +1,6 @@
 from datetime import datetime
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
 class Inspector:
@@ -47,7 +48,7 @@ class Inspector:
             else:
                 mitigated = datetime.utcnow()
         title_suffix = ""
-        hosts = list()
+        hosts = []
         for resource in finding.get("Resources", []):
             component_name = resource.get("Type")
             hosts.append(Endpoint(host=f"{component_name} {resource.get('Id')}"))
@@ -85,7 +86,7 @@ class Inspector:
             dynamic_finding=False,
             component_name=component_name,
         )
-        result.unsaved_endpoints = list()
+        result.unsaved_endpoints = []
         result.unsaved_endpoints.extend(hosts)
         if epss_score is not None:
             result.epss_score = epss_score

@@ -1,7 +1,9 @@
 from os import path
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.osv_scanner.parser import OSVScannerParser
+
 from dojo.models import Test
+from dojo.tools.osv_scanner.parser import OSVScannerParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestOSVScannerParser(DojoTestCase):

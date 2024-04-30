@@ -1,11 +1,11 @@
 import re
 import uuid
 from datetime import datetime
-from django.conf import settings
 
 from defusedxml import ElementTree
+from django.conf import settings
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
 
 XML_NAMESPACE = {"x": "https://www.veracode.com/schema/reports/export/1.0"}
 
@@ -33,7 +33,7 @@ class VeracodeXMLParser:
             root.attrib["last_update_time"], "%Y-%m-%d %H:%M:%S %Z"
         )
 
-        dupes = dict()
+        dupes = {}
 
         # Get SAST findings
         # This assumes `<category/>` only exists within the `<severity/>`
@@ -51,15 +51,10 @@ class VeracodeXMLParser:
             )
             # Bullet list of recommendations:
             mitigation_text += "".join(
-                list(
-                    map(
-                        lambda x: "    * " + x.get("text") + "\n",
-                        category_node.findall(
+                ["    * " + x.get("text") + "\n" for x in category_node.findall(
                             "x:recommendations/x:para/x:bulletitem",
                             namespaces=XML_NAMESPACE,
-                        ),
-                    )
-                )
+                        )]
             )
 
             for flaw_node in category_node.findall(

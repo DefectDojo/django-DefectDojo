@@ -1,4 +1,5 @@
 import json
+
 from dojo.models import Finding
 
 
@@ -26,7 +27,7 @@ class RedHatSatelliteParser:
         return severity
 
     def get_findings(self, filename, test):
-        findings = list()
+        findings = []
         tree = filename.read()
         try:
             data = json.loads(str(tree, "utf-8"))
@@ -72,7 +73,7 @@ class RedHatSatelliteParser:
                 dynamic_finding=True,
             )
             if errata_id is not None:
-                find.unsaved_vulnerability_ids = list()
+                find.unsaved_vulnerability_ids = []
                 find.unsaved_vulnerability_ids.append(errata_id)
             if cves is not None:
                 for cve in cves:

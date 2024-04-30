@@ -1,4 +1,5 @@
 import json
+
 from dojo.models import Endpoint, Finding
 
 
@@ -7,7 +8,7 @@ class NiktoJSONParser:
         data = json.load(file)
         if len(data) == 1 and isinstance(data, list):
             data = data[0]
-        dupes = dict()
+        dupes = {}
         host = data.get("host")
         port = data.get("port")
         if port is not None:

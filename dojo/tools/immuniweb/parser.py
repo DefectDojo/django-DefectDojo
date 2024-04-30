@@ -22,11 +22,10 @@ class ImmuniwebParser:
         root = ImmuniScanTree.getroot()
         # validate XML file
         if "Vulnerabilities" not in root.tag:
-            raise ValueError(
-                "This does not look like a valid expected Immuniweb XML file."
-            )
+            msg = "This does not look like a valid expected Immuniweb XML file."
+            raise ValueError(msg)
 
-        dupes = dict()
+        dupes = {}
 
         for vulnerability in root.iter("Vulnerability"):
             """
@@ -83,7 +82,7 @@ class ImmuniwebParser:
                 )
                 if vulnerability_id:
                     finding.unsaved_vulnerability_ids = [vulnerability_id]
-                finding.unsaved_endpoints = list()
+                finding.unsaved_endpoints = []
                 dupes[dupe_key] = finding
 
                 finding.unsaved_endpoints.append(Endpoint.from_uri(url))

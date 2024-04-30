@@ -3,7 +3,7 @@ from .utils import _get_prefetchable_fields
 
 
 def _get_path_to_GET_serializer_map(generator):
-    path_to_GET_serializer = dict()
+    path_to_GET_serializer = {}
     for (
         path,
         path_pattern,

@@ -1,49 +1,85 @@
 # #  tests
-from django.db.models.query import Prefetch
-from dojo.engagement.queries import get_authorized_engagements
-from dojo.importers.utils import construct_imported_message
+import base64
 import logging
 import operator
-import base64
 from datetime import datetime
+from functools import reduce
+
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import ValidationError
-from django.urls import reverse, Resolver404
-from django.db.models import Q, QuerySet, Count
-from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
-from django.shortcuts import render, get_object_or_404
-from django.views.decorators.cache import cache_page
+from django.db import DEFAULT_DB_ALIAS
+from django.db.models import Count, Q, QuerySet
+from django.db.models.query import Prefetch
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import Resolver404, reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from django.contrib.admin.utils import NestedObjects
-from django.db import DEFAULT_DB_ALIAS
-
-from dojo.filters import TemplateFindingFilter, FindingFilter, TestImportFilter
-from dojo.forms import NoteForm, TestForm, \
-    DeleteTestForm, AddFindingForm, TypedNoteForm, \
-    ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
-    FindingBulkUpdateForm, CopyTestForm
-from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, Cred_Mapping, Test_Import, Product_API_Scan_Configuration, Test_Import_Finding_Action
-
-from dojo.tools.factory import get_choices_sorted, get_scan_types_sorted
-from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
-    Product_Tab, is_scan_file_too_large, get_words_for_field, get_setting, async_delete, redirect_to_return_url_or_else, calculate_grade
-from dojo.notifications.helper import create_notification
-from dojo.finding.views import find_available_notetypes
-from functools import reduce
-import dojo.jira_link.helper as jira_helper
-import dojo.finding.helper as finding_helper
-from django.views.decorators.vary import vary_on_cookie
 from django.views import View
-from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.roles_permissions import Permissions
-from dojo.test.queries import get_authorized_tests
-from dojo.user.queries import get_authorized_users
-from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 
+import dojo.finding.helper as finding_helper
+import dojo.jira_link.helper as jira_helper
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.roles_permissions import Permissions
+from dojo.engagement.queries import get_authorized_engagements
+from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups, TemplateFindingFilter, TestImportFilter
+from dojo.finding.views import find_available_notetypes
+from dojo.forms import (
+    AddFindingForm,
+    CopyTestForm,
+    DeleteTestForm,
+    FindingBulkUpdateForm,
+    JIRAFindingForm,
+    JIRAImportScanForm,
+    NoteForm,
+    ReImportScanForm,
+    TestForm,
+    TypedNoteForm,
+)
+from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
+from dojo.importers.utils import construct_imported_message
+from dojo.models import (
+    IMPORT_UNTOUCHED_FINDING,
+    BurpRawRequestResponse,
+    Cred_Mapping,
+    Endpoint,
+    Finding,
+    Finding_Group,
+    Finding_Template,
+    Note_Type,
+    Product_API_Scan_Configuration,
+    Stub_Finding,
+    Test,
+    Test_Import,
+    Test_Import_Finding_Action,
+)
+from dojo.notifications.helper import create_notification
+from dojo.test.queries import get_authorized_tests
+from dojo.tools.factory import get_choices_sorted, get_scan_types_sorted
+from dojo.user.queries import get_authorized_users
+from dojo.utils import (
+    Product_Tab,
+    add_breadcrumb,
+    add_error_message_to_response,
+    add_field_errors_to_response,
+    add_success_message_to_response,
+    async_delete,
+    calculate_grade,
+    get_cal_event,
+    get_page_items,
+    get_page_items_and_count,
+    get_setting,
+    get_system_setting,
+    get_words_for_field,
+    is_scan_file_too_large,
+    process_notifications,
+    redirect_to_return_url_or_else,
+)
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -108,7 +144,9 @@ class ViewTest(View):
 
     def get_findings(self, request: HttpRequest, test: Test):
         findings = Finding.objects.filter(test=test).order_by("numerical_severity")
-        findings = FindingFilter(request.GET, queryset=findings)
+        filter_string_matching = get_system_setting("filter_string_matching", False)
+        finding_filter_class = FindingFilterWithoutObjectLookups if filter_string_matching else FindingFilter
+        findings = finding_filter_class(request.GET, queryset=findings)
         paged_findings = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25, prefix='findings')
 
         return {

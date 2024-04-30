@@ -1,21 +1,21 @@
-from unittest.mock import patch
+import logging
 import uuid
-from .dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittest.mock import patch
+
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
+
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
+from dojo.importers.utils import handle_vulnerability_ids
 from dojo.models import Development_Environment, Engagement, Finding, Product, Product_Type, Test, User
 from dojo.tools.factory import get_parser
-from dojo.tools.sarif.parser import SarifParser
 from dojo.tools.gitlab_sast.parser import GitlabSastParser
-from .dojo_test_case import DojoAPITestCase
-from .test_utils import assertImportModelsCreated
-import logging
-from dojo.importers.utils import handle_vulnerability_ids
-
+from dojo.tools.sarif.parser import SarifParser
 from dojo.utils import get_object_or_none
 
+from .dojo_test_case import DojoAPITestCase, DojoTestCase, get_unit_tests_path
+from .test_utils import assertImportModelsCreated
 
 logger = logging.getLogger(__name__)
 
@@ -42,120 +42,120 @@ TEST_TITLE_NEW = 'lol importing via reimport'
 class TestDojoDefaultImporter(DojoTestCase):
     def test_parse_findings(self):
         scan_type = "Acunetix Scan"
-        scan = open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml")
+        with open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml") as scan:
 
-        user, _created = User.objects.get_or_create(username="admin")
+            user, _created = User.objects.get_or_create(username="admin")
 
-        product_type, _created = Product_Type.objects.get_or_create(name="test")
-        product, _created = Product.objects.get_or_create(
-            name="TestDojoDefaultImporter",
-            prod_type=product_type,
-        )
+            product_type, _created = Product_Type.objects.get_or_create(name="test")
+            product, _created = Product.objects.get_or_create(
+                name="TestDojoDefaultImporter",
+                prod_type=product_type,
+            )
 
-        engagement_name = "Test Create Engagement"
-        engagement, _created = Engagement.objects.get_or_create(
-            name=engagement_name,
-            product=product,
-            target_start=timezone.now(),
-            target_end=timezone.now(),
-        )
-        lead, _ = User.objects.get_or_create(username="admin")
-        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+            engagement_name = "Test Create Engagement"
+            engagement, _created = Engagement.objects.get_or_create(
+                name=engagement_name,
+                product=product,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            lead, _ = User.objects.get_or_create(username="admin")
+            environment, _ = Development_Environment.objects.get_or_create(name="Development")
 
-        # boot
-        importer = Importer()
+            # boot
+            importer = Importer()
 
-        # create the test
-        # by defaut test_type == scan_type
-        test = importer.create_test(scan_type, scan_type, engagement, lead, environment)
+            # create the test
+            # by defaut test_type == scan_type
+            test = importer.create_test(scan_type, scan_type, engagement, lead, environment)
 
-        # parse the findings
-        parser = get_parser(scan_type)
-        parsed_findings = parser.get_findings(scan, test)
+            # parse the findings
+            parser = get_parser(scan_type)
+            parsed_findings = parser.get_findings(scan, test)
 
-        # process
-        minimum_severity = "Info"
-        active = True
-        verified = True
-        scan_date = None
-        new_findings = importer.process_parsed_findings(
-            test,
-            parsed_findings,
-            scan_type,
-            user,
-            active,
-            verified,
-            minimum_severity=minimum_severity,
-            scan_date=scan_date,
-            sync=True
-        )
+            # process
+            minimum_severity = "Info"
+            active = True
+            verified = True
+            scan_date = None
+            new_findings = importer.process_parsed_findings(
+                test,
+                parsed_findings,
+                scan_type,
+                user,
+                active,
+                verified,
+                minimum_severity=minimum_severity,
+                scan_date=scan_date,
+                sync=True
+            )
 
-        for finding in new_findings:
-            self.assertIn(finding.numerical_severity, ["S0", "S1", "S2", "S3", "S4"])
+            for finding in new_findings:
+                self.assertIn(finding.numerical_severity, ["S0", "S1", "S2", "S3", "S4"])
 
     def test_import_scan(self):
-        scan = open(get_unit_tests_path() + "/scans/sarif/spotbugs.sarif")
-        scan_type = SarifParser().get_scan_types()[0]  # SARIF format implement the new method
+        with open(get_unit_tests_path() + "/scans/sarif/spotbugs.sarif") as scan:
+            scan_type = SarifParser().get_scan_types()[0]  # SARIF format implement the new method
 
-        user, _ = User.objects.get_or_create(username="admin")
-        _user_reporter, _ = User.objects.get_or_create(username="user_reporter")
+            user, _ = User.objects.get_or_create(username="admin")
+            _user_reporter, _ = User.objects.get_or_create(username="user_reporter")
 
-        product_type, _ = Product_Type.objects.get_or_create(name="test2")
-        product, _ = Product.objects.get_or_create(
-            name="TestDojoDefaultImporter2",
-            prod_type=product_type,
-        )
+            product_type, _ = Product_Type.objects.get_or_create(name="test2")
+            product, _ = Product.objects.get_or_create(
+                name="TestDojoDefaultImporter2",
+                prod_type=product_type,
+            )
 
-        engagement, _ = Engagement.objects.get_or_create(
-            name="Test Create Engagement2",
-            product=product,
-            target_start=timezone.now(),
-            target_end=timezone.now(),
-        )
-        importer = Importer()
-        scan_date = None
-        environment, _ = Development_Environment.objects.get_or_create(name="Development")
-        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
-                    active=True, verified=True, tags=None, minimum_severity=None,
-                    user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None)
+            engagement, _ = Engagement.objects.get_or_create(
+                name="Test Create Engagement2",
+                product=product,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            importer = Importer()
+            scan_date = None
+            environment, _ = Development_Environment.objects.get_or_create(name="Development")
+            test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
+                        active=True, verified=True, tags=None, minimum_severity=None,
+                        user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
+                        commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None)
 
-        self.assertEqual(f"SpotBugs Scan ({scan_type})", test.test_type.name)
-        self.assertEqual(56, len_new_findings)
-        self.assertEqual(0, len_closed_findings)
+            self.assertEqual(f"SpotBugs Scan ({scan_type})", test.test_type.name)
+            self.assertEqual(56, len_new_findings)
+            self.assertEqual(0, len_closed_findings)
 
     def test_import_scan_without_test_scan_type(self):
         # GitLabSastParser implements get_tests but report has no scanner name
-        scan = open(f"{get_unit_tests_path()}/scans/gitlab_sast/gl-sast-report-1-vuln_v15.json")
-        scan_type = GitlabSastParser().get_scan_types()[0]
+        with open(f"{get_unit_tests_path()}/scans/gitlab_sast/gl-sast-report-1-vuln_v15.json") as scan:
+            scan_type = GitlabSastParser().get_scan_types()[0]
 
-        user, _ = User.objects.get_or_create(username="admin")
-        _user_reporter, _ = User.objects.get_or_create(username="user_reporter")
+            user, _ = User.objects.get_or_create(username="admin")
+            _user_reporter, _ = User.objects.get_or_create(username="user_reporter")
 
-        product_type, _ = Product_Type.objects.get_or_create(name="test2")
-        product, _ = Product.objects.get_or_create(
-            name="TestDojoDefaultImporter2",
-            prod_type=product_type,
-        )
+            product_type, _ = Product_Type.objects.get_or_create(name="test2")
+            product, _ = Product.objects.get_or_create(
+                name="TestDojoDefaultImporter2",
+                prod_type=product_type,
+            )
 
-        engagement, _ = Engagement.objects.get_or_create(
-            name="Test Create Engagement2",
-            product=product,
-            target_start=timezone.now(),
-            target_end=timezone.now(),
-        )
+            engagement, _ = Engagement.objects.get_or_create(
+                name="Test Create Engagement2",
+                product=product,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
 
-        importer = Importer()
-        scan_date = None
-        environment, _ = Development_Environment.objects.get_or_create(name="Development")
-        test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
-                    active=True, verified=True, tags=None, minimum_severity=None,
-                    user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None)
+            importer = Importer()
+            scan_date = None
+            environment, _ = Development_Environment.objects.get_or_create(name="Development")
+            test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
+                        active=True, verified=True, tags=None, minimum_severity=None,
+                        user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
+                        commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None)
 
-        self.assertEqual("GitLab SAST Report", test.test_type.name)
-        self.assertEqual(1, len_new_findings)
-        self.assertEqual(0, len_closed_findings)
+            self.assertEqual("GitLab SAST Report", test.test_type.name)
+            self.assertEqual(1, len_new_findings)
+            self.assertEqual(0, len_closed_findings)
 
 
 class FlexibleImportTestAPI(DojoAPITestCase):

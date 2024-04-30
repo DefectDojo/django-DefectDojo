@@ -1,5 +1,6 @@
 from datetime import datetime
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
 class GuardDuty:
@@ -34,7 +35,7 @@ class GuardDuty:
         description += f"AwsAccountId: {finding.get('AwsAccountId', '')}\n"
         description += f"Region: {finding.get('Region', '')}\n"
         title_suffix = ""
-        hosts = list()
+        hosts = []
         for resource in finding.get("Resources", []):
             component_name = resource.get("Type")
             if component_name in ("AwsEcrContainerImage", "AwsEc2Instance"):
@@ -73,7 +74,7 @@ class GuardDuty:
             dynamic_finding=False,
             component_name=component_name,
         )
-        result.unsaved_endpoints = list()
+        result.unsaved_endpoints = []
         result.unsaved_endpoints.extend(hosts)
         if epss_score is not None:
             result.epss_score = epss_score

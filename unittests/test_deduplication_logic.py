@@ -1,10 +1,13 @@
-from .dojo_test_case import DojoTestCase
-from dojo.models import Finding, User, Product, Endpoint, Endpoint_Status, Test, Engagement
-from dojo.models import System_Settings
-from django.conf import settings
-from crum import impersonate
-import unittest
 import logging
+import unittest
+
+from crum import impersonate
+from django.conf import settings
+
+from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, System_Settings, Test, User
+
+from .dojo_test_case import DojoTestCase
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 

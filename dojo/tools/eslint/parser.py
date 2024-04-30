@@ -28,7 +28,7 @@ class ESLintParser:
         except Exception:
             data = json.loads(tree)
 
-        items = list()
+        items = []
         for item in data:
             findingdetail = ""
 

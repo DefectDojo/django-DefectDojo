@@ -1,6 +1,8 @@
 import re
 import zipfile
+
 from defusedxml import ElementTree
+
 from dojo.models import Finding
 
 
@@ -18,7 +20,7 @@ class FortifyFPRParser:
             namespace = matches.group(0)
         except BaseException:
             namespace = ""
-        items = list()
+        items = []
         for child in root:
             if "Vulnerabilities" in child.tag:
                 for vuln in child:

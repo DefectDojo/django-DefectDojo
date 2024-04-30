@@ -18,11 +18,12 @@ class SslyzeParser:
 
     def get_findings(self, filename, test):
         if filename is None:
-            return list()
+            return []
 
         if filename.name.lower().endswith(".xml"):
             return SSLyzeXMLParser().get_findings(filename, test)
         elif filename.name.lower().endswith(".json"):
             return SSLyzeJSONParser().get_findings(filename, test)
         else:
-            raise ValueError("Unknown File Format")
+            msg = "Unknown File Format"
+            raise ValueError(msg)

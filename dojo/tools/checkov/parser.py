@@ -41,7 +41,8 @@ class CheckovParser:
             except BaseException:
                 deserialized = json.loads(data)
         except BaseException:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return (
             [deserialized] if not isinstance(

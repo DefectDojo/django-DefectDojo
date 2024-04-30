@@ -11,10 +11,10 @@ from django.utils.encoding import force_str
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
-from dojo.filters import EndpointFilter, ReportFindingFilter
+from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups, ReportFindingFilter
 from dojo.forms import CustomReportOptionsForm
 from dojo.models import Endpoint, Finding
-from dojo.utils import get_page_items, get_words_for_field
+from dojo.utils import get_page_items, get_system_setting, get_words_for_field
 
 """
 Widgets are content sections that can be included on reports.  The report builder will allow any number of widgets
@@ -30,7 +30,8 @@ class CustomReportJsonForm(forms.Form):
         try:
             json.loads(jdata)
         except:
-            raise forms.ValidationError("Invalid data in json")
+            msg = "Invalid data in json"
+            raise forms.ValidationError(msg)
         return jdata
 
 
@@ -255,7 +256,8 @@ class FindingList(Widget):
         if 'findings' in kwargs:
             self.findings = kwargs.get('findings')
         else:
-            raise Exception("Need to instantiate with finding queryset.")
+            msg = "Need to instantiate with finding queryset."
+            raise Exception(msg)
 
         if 'finding_notes' in kwargs:
             self.finding_notes = kwargs.get('finding_notes')
@@ -330,7 +332,8 @@ class EndpointList(Widget):
         if 'endpoints' in kwargs:
             self.endpoints = kwargs.get('endpoints')
         else:
-            raise Exception("Need to instantiate with endpoint queryset.")
+            msg = "Need to instantiate with endpoint queryset."
+            raise Exception(msg)
 
         if 'finding_notes' in kwargs:
             self.finding_notes = kwargs.get('finding_notes')
@@ -407,7 +410,9 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
                     d[item['name']] = item['value']
 
             endpoints = Endpoint.objects.filter(id__in=endpoints)
-            endpoints = EndpointFilter(d, queryset=endpoints, user=request.user)
+            filter_string_matching = get_system_setting("filter_string_matching", False)
+            filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
+            endpoints = filter_class(d, queryset=endpoints, user=request.user)
             user_id = user.id if user is not None else None
             endpoints = EndpointList(request=request, endpoints=endpoints, finding_notes=finding_notes,
                                      finding_images=finding_images, host=host, user_id=user_id)

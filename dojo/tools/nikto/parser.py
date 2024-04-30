@@ -30,4 +30,5 @@ class NiktoParser:
         elif filename.name.lower().endswith(".json"):
             return NiktoJSONParser().process_json(filename, test)
         else:
-            raise ValueError("Unknown File Format")
+            msg = "Unknown File Format"
+            raise ValueError(msg)

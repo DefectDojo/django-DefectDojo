@@ -2,9 +2,10 @@ import logging
 
 from django.utils import timezone
 
-from dojo.models import Finding, Risk_Acceptance
-from .importer import SonarQubeApiImporter
 import dojo.risk_acceptance.helper as ra_helper
+from dojo.models import Finding, Risk_Acceptance
+
+from .importer import SonarQubeApiImporter
 
 logger = logging.getLogger(__name__)
 

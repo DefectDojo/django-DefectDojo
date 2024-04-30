@@ -1,6 +1,7 @@
-import requests
 import json
 from json.decoder import JSONDecodeError
+
+import requests
 
 
 class EdgescanAPI:
@@ -16,9 +17,8 @@ class EdgescanAPI:
             self.url = tool_config.url or self.DEFAULT_URL
             self.options = self.get_extra_options(tool_config)
         else:
-            raise Exception(
-                f"Edgescan Authentication type {tool_config.authentication_type} not supported"
-            )
+            msg = f"Edgescan Authentication type {tool_config.authentication_type} not supported"
+            raise Exception(msg)
 
     @staticmethod
     def get_extra_options(tool_config):
@@ -26,7 +26,8 @@ class EdgescanAPI:
             try:
                 return json.loads(tool_config.extras)
             except (JSONDecodeError, TypeError):
-                raise ValueError("JSON not provided in Extras field.")
+                msg = "JSON not provided in Extras field."
+                raise ValueError(msg)
 
     def get_findings(self, asset_ids):
         if asset_ids:

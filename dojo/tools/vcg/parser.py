@@ -47,7 +47,7 @@ class VCGFinding:
         self.filename = ""
         self.line = ""
         self.code_line = ""
-        self.priority_mapping = dict()
+        self.priority_mapping = {}
         self.priority_mapping[1] = "Critical"
         self.priority_mapping[2] = "High"
         self.priority_mapping[3] = "Medium"
@@ -101,7 +101,7 @@ class VCGXmlParser:
         return finding
 
     def parse(self, content, test):
-        dupes = dict()
+        dupes = {}
 
         if content is None:
             return dupes
@@ -172,7 +172,7 @@ class VCGCsvParser:
         return finding
 
     def parse(self, content, test):
-        dupes = dict()
+        dupes = {}
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.reader(io.StringIO(content), delimiter=",", quotechar='"')
@@ -213,7 +213,7 @@ class VCGParser:
 
     def get_findings(self, filename, test):
         if filename is None:
-            return list()
+            return []
 
         content = filename.read()
         #  'utf-8' This line was added to pass a unittest in test_parsers.TestParsers.test_file_existence.
@@ -222,4 +222,5 @@ class VCGParser:
         elif filename.name.lower().endswith(".csv"):
             return list(VCGCsvParser().parse(content, test).values())
         else:
-            raise ValueError("Unknown File Format")
+            msg = "Unknown File Format"
+            raise ValueError(msg)
