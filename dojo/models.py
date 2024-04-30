@@ -265,11 +265,11 @@ class Role(models.Model):
     name = models.CharField(max_length=255, unique=True)
     is_owner = models.BooleanField(default=False)
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         ordering = ('name',)
+
+    def __str__(self):
+        return self.name
 
 
 class System_Settings(models.Model):
@@ -741,6 +741,21 @@ class Product_Type(models.Model):
     members = models.ManyToManyField(Dojo_User, through='Product_Type_Member', related_name='prod_type_members', blank=True)
     authorization_groups = models.ManyToManyField(Dojo_Group, through='Product_Type_Group', related_name='product_type_groups', blank=True)
 
+    class Meta:
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('product_type', args=[str(self.id)])
+
+    def get_breadcrumbs(self):
+        bc = [{'title': str(self),
+               'url': reverse('edit_product_type', args=(self.id,))}]
+        return bc
+
     @cached_property
     def critical_present(self):
         c_findings = Finding.objects.filter(
@@ -779,21 +794,6 @@ class Product_Type(models.Model):
     def unaccepted_open_findings(self):
         return Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test__engagement__product__prod_type=self)
 
-    class Meta:
-        ordering = ('name',)
-
-    def __str__(self):
-        return self.name
-
-    def get_breadcrumbs(self):
-        bc = [{'title': str(self),
-               'url': reverse('edit_product_type', args=(self.id,))}]
-        return bc
-
-    def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('product_type', args=[str(self.id)])
-
 
 class Product_Line(models.Model):
     name = models.CharField(max_length=300)
@@ -813,11 +813,11 @@ class Test_Type(models.Model):
     dynamic_tool = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         ordering = ('name',)
+
+    def __str__(self):
+        return self.name
 
     def get_breadcrumbs(self):
         bc = [{'title': str(self),
@@ -844,6 +844,14 @@ class DojoMeta(models.Model):
                                  editable=False,
                                  related_name='finding_meta')
 
+    class Meta:
+        unique_together = (('product', 'name'),
+                           ('endpoint', 'name'),
+                           ('finding', 'name'))
+
+    def __str__(self):
+        return f"{self.name}: {self.value}"
+
     """
     Verify that this metadata entry belongs only to one object.
     """
@@ -865,14 +873,6 @@ class DojoMeta(models.Model):
             msg = 'Metadata entries may not have more than one relation, either a product, an endpoint either or a finding'
             raise ValidationError(msg)
 
-    def __str__(self):
-        return f"{self.name}: {self.value}"
-
-    class Meta:
-        unique_together = (('product', 'name'),
-                           ('endpoint', 'name'),
-                           ('finding', 'name'))
-
 
 class SLA_Configuration(models.Model):
     name = models.CharField(max_length=128, unique=True, blank=False, verbose_name=_('Custom SLA Name'),
@@ -889,13 +889,11 @@ class SLA_Configuration(models.Model):
     async_updating = models.BooleanField(default=False,
                                             help_text=_('Findings under this SLA configuration are asynchronously being updated'))
 
-    def clean(self):
-        sla_days = [self.critical, self.high, self.medium, self.low]
+    class Meta:
+        ordering = ['name']
 
-        for sla_day in sla_days:
-            if sla_day < 1:
-                msg = 'SLA Days must be at least 1'
-                raise ValidationError(msg)
+    def __str__(self):
+        return self.name
 
     def save(self, *args, **kwargs):
         # get the initial sla config before saving (if this is an existing sla config)
@@ -937,11 +935,13 @@ class SLA_Configuration(models.Model):
                 from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async
                 update_sla_expiration_dates_sla_config_async(self, tuple(severities), products)
 
-    def __str__(self):
-        return self.name
+    def clean(self):
+        sla_days = [self.critical, self.high, self.medium, self.low]
 
-    class Meta:
-        ordering = ['name']
+        for sla_day in sla_days:
+            if sla_day < 1:
+                msg = 'SLA Days must be at least 1'
+                raise ValidationError(msg)
 
     def delete(self, *args, **kwargs):
         logger.debug('%d sla configuration delete', self.id)
@@ -1062,6 +1062,12 @@ class Product(models.Model):
     async_updating = models.BooleanField(default=False,
                                             help_text=_('Findings under this Product or SLA configuration are asynchronously being updated'))
 
+    class Meta:
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
+
     def save(self, *args, **kwargs):
         # get the product's sla config before saving (if this is an existing product)
         initial_sla_config = None
@@ -1091,11 +1097,9 @@ class Product(models.Model):
                 from dojo.product.helpers import update_sla_expiration_dates_product_async
                 update_sla_expiration_dates_product_async(self, sla_config)
 
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        ordering = ('name',)
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_product', args=[str(self.id)])
 
     @cached_property
     def findings_count(self):
@@ -1211,10 +1215,6 @@ class Product(models.Model):
     def has_jira_configured(self):
         import dojo.jira_link.helper as jira_helper
         return jira_helper.has_jira_configured(self)
-
-    def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('view_product', args=[str(self.id)])
 
     def violates_sla(self):
         findings = Finding.objects.filter(test__engagement__product=self,
@@ -1438,23 +1438,14 @@ class Engagement(models.Model):
             models.Index(fields=['product', 'active']),
         ]
 
-    def is_overdue(self):
-        if self.engagement_type == 'CI/CD':
-            overdue_grace_days = 10
-        else:
-            overdue_grace_days = 0
-
-        max_end_date = timezone.now() - relativedelta(days=overdue_grace_days)
-
-        if self.target_end < max_end_date.date():
-            return True
-
-        return False
-
     def __str__(self):
         return "Engagement %i: %s (%s)" % (self.id if id else 0, self.name if self.name else '',
                                         self.target_start.strftime(
                                             "%b %d, %Y"))
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_engagement', args=[str(self.id)])
 
     def copy(self):
         copy = self
@@ -1486,6 +1477,19 @@ class Engagement(models.Model):
 
         return copy
 
+    def is_overdue(self):
+        if self.engagement_type == 'CI/CD':
+            overdue_grace_days = 10
+        else:
+            overdue_grace_days = 0
+
+        max_end_date = timezone.now() - relativedelta(days=overdue_grace_days)
+
+        if self.target_end < max_end_date.date():
+            return True
+
+        return False
+
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
         bc += [{'title': str(self),
@@ -1504,10 +1508,6 @@ class Engagement(models.Model):
     def has_jira_issue(self):
         import dojo.jira_link.helper as jira_helper
         return jira_helper.has_jira_issue(self)
-
-    def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('view_engagement', args=[str(self.id)])
 
     @property
     def is_ci_cd(self):
@@ -1552,15 +1552,14 @@ class Endpoint_Status(models.Model):
     endpoint = models.ForeignKey('Endpoint', null=False, blank=False, on_delete=models.CASCADE, related_name='status_endpoint')
     finding = models.ForeignKey('Finding', null=False, blank=False, on_delete=models.CASCADE, related_name='status_finding')
 
-    @property
-    def age(self):
-
-        if self.mitigated:
-            diff = self.mitigated_time.date() - self.date
-        else:
-            diff = get_current_date() - self.date
-        days = diff.days
-        return days if days > 0 else 0
+    class Meta:
+        indexes = [
+            models.Index(fields=['finding', 'mitigated']),
+            models.Index(fields=['endpoint', 'mitigated']),
+        ]
+        constraints = [
+            models.UniqueConstraint(fields=['finding', 'endpoint'], name='endpoint-finding relation')
+        ]
 
     def __str__(self):
         return f"'{str(self.finding)}' on '{str(self.endpoint)}'"
@@ -1577,14 +1576,15 @@ class Endpoint_Status(models.Model):
 
         return copy
 
-    class Meta:
-        indexes = [
-            models.Index(fields=['finding', 'mitigated']),
-            models.Index(fields=['endpoint', 'mitigated']),
-        ]
-        constraints = [
-            models.UniqueConstraint(fields=['finding', 'endpoint'], name='endpoint-finding relation')
-        ]
+    @property
+    def age(self):
+
+        if self.mitigated:
+            diff = self.mitigated_time.date() - self.date
+        else:
+            diff = get_current_date() - self.date
+        days = diff.days
+        return days if days > 0 else 0
 
 
 class Endpoint(models.Model):
@@ -1621,6 +1621,62 @@ class Endpoint(models.Model):
         indexes = [
             models.Index(fields=['product']),
         ]
+
+    def __str__(self):
+        try:
+            if self.host:
+                dummy_scheme = 'dummy-scheme'  # workaround for https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L988
+                url = hyperlink.EncodedURL(
+                    scheme=self.protocol if self.protocol else dummy_scheme,
+                    userinfo=self.userinfo or '',
+                    host=self.host,
+                    port=self.port,
+                    path=tuple(self.path.split('/')) if self.path else (),
+                    query=tuple(
+                        (
+                            qe.split("=", 1)
+                            if "=" in qe
+                            else (qe, None)
+                        )
+                        for qe in self.query.split("&")
+                    ) if self.query else (),  # inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1427
+                    fragment=self.fragment or ''
+                )
+                # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
+                # Example: https://google.com and https://google.com:443
+                normalize_path = self.path  # it used to add '/' at the end of host
+                clean_url = url.normalize(scheme=True, host=True, path=normalize_path, query=True, fragment=True, userinfo=True, percents=True).to_uri().to_text()
+                if not self.protocol:
+                    if clean_url[:len(dummy_scheme) + 3] == (dummy_scheme + '://'):
+                        clean_url = clean_url[len(dummy_scheme) + 3:]
+                    else:
+                        msg = 'hyperlink lib did not create URL as was expected'
+                        raise ValueError(msg)
+                return clean_url
+            else:
+                msg = 'Missing host'
+                raise ValueError(msg)
+        except:
+            url = ''
+            if self.protocol:
+                url += f'{self.protocol}://'
+            if self.userinfo:
+                url += f'{self.userinfo}@'
+            if self.host:
+                url += self.host
+            if self.port:
+                url += f':{self.port}'
+            if self.path:
+                url += '{}{}'.format('/' if self.path[0] != '/' else '', self.path)
+            if self.query:
+                url += f'?{self.query}'
+            if self.fragment:
+                url += f'#{self.fragment}'
+            return url
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_endpoint', args=[str(self.id)])
 
     def clean(self):
         errors = []
@@ -1697,58 +1753,6 @@ class Endpoint(models.Model):
 
         if errors:
             raise ValidationError(errors)
-
-    def __str__(self):
-        try:
-            if self.host:
-                dummy_scheme = 'dummy-scheme'  # workaround for https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L988
-                url = hyperlink.EncodedURL(
-                    scheme=self.protocol if self.protocol else dummy_scheme,
-                    userinfo=self.userinfo or '',
-                    host=self.host,
-                    port=self.port,
-                    path=tuple(self.path.split('/')) if self.path else (),
-                    query=tuple(
-                        (
-                            qe.split("=", 1)
-                            if "=" in qe
-                            else (qe, None)
-                        )
-                        for qe in self.query.split("&")
-                    ) if self.query else (),  # inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1427
-                    fragment=self.fragment or ''
-                )
-                # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
-                # Example: https://google.com and https://google.com:443
-                normalize_path = self.path  # it used to add '/' at the end of host
-                clean_url = url.normalize(scheme=True, host=True, path=normalize_path, query=True, fragment=True, userinfo=True, percents=True).to_uri().to_text()
-                if not self.protocol:
-                    if clean_url[:len(dummy_scheme) + 3] == (dummy_scheme + '://'):
-                        clean_url = clean_url[len(dummy_scheme) + 3:]
-                    else:
-                        msg = 'hyperlink lib did not create URL as was expected'
-                        raise ValueError(msg)
-                return clean_url
-            else:
-                msg = 'Missing host'
-                raise ValueError(msg)
-        except:
-            url = ''
-            if self.protocol:
-                url += f'{self.protocol}://'
-            if self.userinfo:
-                url += f'{self.userinfo}@'
-            if self.host:
-                url += self.host
-            if self.port:
-                url += f':{self.port}'
-            if self.path:
-                url += '{}{}'.format('/' if self.path[0] != '/' else '', self.path)
-            if self.query:
-                url += f'?{self.query}'
-            if self.fragment:
-                url += f'#{self.fragment}'
-            return url
 
     def __hash__(self):
         return self.__str__().__hash__()
@@ -1947,10 +1951,6 @@ class Endpoint(models.Model):
             fragment=fragment,
         )
 
-    def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('view_endpoint', args=[str(self.id)])
-
     def inherit_tags(self, potentially_existing_tags):
         # get a copy of the tags to be inherited
         incoming_inherited_tags = [tag.name for tag in self.product.tags.all()]
@@ -2028,13 +2028,17 @@ class Test(models.Model):
             models.Index(fields=['engagement', 'test_type']),
         ]
 
-    def test_type_name(self) -> str:
-        return self.test_type.name
-
     def __str__(self):
         if self.title:
             return f"{self.title} ({self.test_type})"
         return str(self.test_type)
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_test', args=[str(self.id)])
+
+    def test_type_name(self) -> str:
+        return self.test_type.name
 
     def get_breadcrumbs(self):
         bc = self.engagement.get_breadcrumbs()
@@ -2128,10 +2132,6 @@ class Test(models.Model):
 
         deduplicationLogger.debug(f'HASHCODE_ALLOWS_NULL_CWE is: {hashCodeAllowsNullCwe}')
         return hashCodeAllowsNullCwe
-
-    def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('view_test', args=[str(self.id)])
 
     def delete(self, *args, **kwargs):
         logger.debug('%d test delete', self.id)
@@ -2574,6 +2574,87 @@ class Finding(models.Model):
             models.Index(fields=['duplicate_finding', 'id']),
         ]
 
+    def __str__(self):
+        return self.title
+
+    def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
+
+        from dojo.finding import helper as finding_helper
+
+        if not user:
+            from dojo.utils import get_current_user
+            user = get_current_user()
+        # Title Casing
+        from titlecase import titlecase
+        self.title = titlecase(self.title[:511])
+        # Set the date of the finding if nothing is supplied
+        if self.date is None:
+            self.date = timezone.now()
+        # Assign the numerical severity for correct sorting order
+        self.numerical_severity = Finding.get_numerical_severity(self.severity)
+
+        # Synchronize cvssv3 score using cvssv3 vector
+        if self.cvssv3:
+            try:
+                cvss_object = CVSS3(self.cvssv3)
+                # use the environmental score, which is the most refined score
+                self.cvssv3_score = cvss_object.scores()[2]
+            except Exception as ex:
+                logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
+
+        # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
+        # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
+        if dedupe_option:
+            if (self.hash_code is not None):
+                deduplicationLogger.debug("Hash_code already computed for finding")
+            else:
+                self.hash_code = self.compute_hash_code()
+                deduplicationLogger.debug("Hash_code computed for finding: %s", self.hash_code)
+
+        if self.pk is None:
+            # We enter here during the first call from serializers.py
+            from dojo.utils import apply_cwe_to_template
+            self = apply_cwe_to_template(self)
+
+            if (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
+                self.static_finding = True
+                self.dynamic_finding = False
+            elif (self.file_path is not None):
+                self.static_finding = True
+
+            # because we have reduced the number of (super()).save() calls, the helper is no longer called for new findings
+            # so we call it manually
+            finding_helper.update_finding_status(self, user, changed_fields={'id': (None, None)})
+
+        else:
+            # logger.debug('setting static / dynamic in save')
+            # need to have an id/pk before we can access endpoints
+            if (self.file_path is not None) and (self.endpoints.count() == 0):
+                self.static_finding = True
+                self.dynamic_finding = False
+            elif (self.file_path is not None):
+                self.static_finding = True
+
+        # update the SLA expiration date last, after all other finding fields have been updated
+        self.set_sla_expiration_date()
+
+        logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
+        super().save(*args, **kwargs)
+
+        self.found_by.add(self.test.test_type)
+
+        # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
+        if dedupe_option or issue_updater_option or product_grading_option or push_to_jira:
+            finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
+                issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
+        else:
+            logger.debug('no options selected that require finding post processing')
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_finding', args=[str(self.id)])
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -2617,10 +2698,6 @@ class Finding(models.Model):
         copy.tags.set(old_tags)
 
         return copy
-
-    def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('view_finding', args=[str(self.id)])
 
     def delete(self, *args, **kwargs):
         logger.debug('%d finding delete', self.id)
@@ -2817,9 +2894,6 @@ class Finding(models.Model):
 
         return None
 
-    def __str__(self):
-        return self.title
-
     def status(self):
         status = []
         if self.under_review:
@@ -2986,80 +3060,6 @@ class Finding(models.Model):
     def save_no_options(self, *args, **kwargs):
         return self.save(dedupe_option=False, rules_option=False, product_grading_option=False,
              issue_updater_option=False, push_to_jira=False, user=None, *args, **kwargs)
-
-    def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,
-             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
-
-        from dojo.finding import helper as finding_helper
-
-        if not user:
-            from dojo.utils import get_current_user
-            user = get_current_user()
-        # Title Casing
-        from titlecase import titlecase
-        self.title = titlecase(self.title[:511])
-        # Set the date of the finding if nothing is supplied
-        if self.date is None:
-            self.date = timezone.now()
-        # Assign the numerical severity for correct sorting order
-        self.numerical_severity = Finding.get_numerical_severity(self.severity)
-
-        # Synchronize cvssv3 score using cvssv3 vector
-        if self.cvssv3:
-            try:
-                cvss_object = CVSS3(self.cvssv3)
-                # use the environmental score, which is the most refined score
-                self.cvssv3_score = cvss_object.scores()[2]
-            except Exception as ex:
-                logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
-
-        # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
-        # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
-        if dedupe_option:
-            if (self.hash_code is not None):
-                deduplicationLogger.debug("Hash_code already computed for finding")
-            else:
-                self.hash_code = self.compute_hash_code()
-                deduplicationLogger.debug("Hash_code computed for finding: %s", self.hash_code)
-
-        if self.pk is None:
-            # We enter here during the first call from serializers.py
-            from dojo.utils import apply_cwe_to_template
-            self = apply_cwe_to_template(self)
-
-            if (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
-                self.static_finding = True
-                self.dynamic_finding = False
-            elif (self.file_path is not None):
-                self.static_finding = True
-
-            # because we have reduced the number of (super()).save() calls, the helper is no longer called for new findings
-            # so we call it manually
-            finding_helper.update_finding_status(self, user, changed_fields={'id': (None, None)})
-
-        else:
-            # logger.debug('setting static / dynamic in save')
-            # need to have an id/pk before we can access endpoints
-            if (self.file_path is not None) and (self.endpoints.count() == 0):
-                self.static_finding = True
-                self.dynamic_finding = False
-            elif (self.file_path is not None):
-                self.static_finding = True
-
-        # update the SLA expiration date last, after all other finding fields have been updated
-        self.set_sla_expiration_date()
-
-        logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
-        super().save(*args, **kwargs)
-
-        self.found_by.add(self.test.test_type)
-
-        # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
-        if dedupe_option or issue_updater_option or product_grading_option or push_to_jira:
-            finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
-                issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
-        else:
-            logger.debug('no options selected that require finding post processing')
 
     # Check if a mandatory field is empty. If it's the case, fill it with "no <fieldName> given"
     def clean(self):
@@ -3464,14 +3464,14 @@ class Finding_Template(models.Model):
     def __str__(self):
         return self.title
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('edit_template', args=[str(self.id)])
+
     def get_breadcrumbs(self):
         bc = [{'title': str(self),
                'url': reverse('view_template', args=(self.id,))}]
         return bc
-
-    def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('edit_template', args=[str(self.id)])
 
     @cached_property
     def vulnerability_ids(self):
@@ -3809,6 +3809,9 @@ class JIRA_Instance(models.Model):
     global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name=_("Globally send SLA notifications as comment?"), help_text=_("This setting can be overidden at the Product level"))
     finding_jira_sync = models.BooleanField(default=False, blank=False, verbose_name=_("Automatically sync Findings with JIRA?"), help_text=_("If enabled, this will sync changes to a Finding automatically to JIRA"))
 
+    def __str__(self):
+        return self.configuration_name + " | " + self.url + " | " + self.username
+
     @property
     def accepted_resolutions(self):
         return [m.strip() for m in (self.accepted_mapping_resolution or '').split(',')]
@@ -3816,9 +3819,6 @@ class JIRA_Instance(models.Model):
     @property
     def false_positive_resolutions(self):
         return [m.strip() for m in (self.false_positive_mapping_resolution or '').split(',')]
-
-    def __str__(self):
-        return self.configuration_name + " | " + self.url + " | " + self.username
 
     def get_priority(self, status):
         if status == 'Info':
@@ -3890,13 +3890,13 @@ class JIRA_Project(models.Model):
     product_jira_sla_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send SLA notifications as comment?"))
     risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send Risk Acceptance expiration notifications as comment?"))
 
+    def __str__(self):
+        return ('%s: ' + self.project_key + '(%s)') % (str(self.id), str(self.jira_instance.url) if self.jira_instance else 'None')
+
     def clean(self):
         if not self.jira_instance:
             msg = 'Cannot save JIRA Project Configuration without JIRA Instance'
             raise ValidationError(msg)
-
-    def __str__(self):
-        return ('%s: ' + self.project_key + '(%s)') % (str(self.id), str(self.jira_instance.url) if self.jira_instance else 'None')
 
 
 # declare form here as we can't import forms.py due to circular imports not even locally
@@ -3942,6 +3942,14 @@ class JIRA_Issue(models.Model):
                                        verbose_name=_('Jira last update'),
                                        help_text=_("The date the linked Jira issue was last modified."))
 
+    def __str__(self):
+        text = ""
+        if self.finding:
+            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
+        elif self.engagement:
+            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
+        return text + " | Jira Key: " + str(self.jira_key)
+
     def set_obj(self, obj):
         if isinstance(obj, Finding):
             self.finding = obj
@@ -3951,14 +3959,6 @@ class JIRA_Issue(models.Model):
             self.engagement = obj
         else:
             raise TypeError('unknown object type while creating JIRA_Issue: %s' % to_str_typed(obj))
-
-    def __str__(self):
-        text = ""
-        if self.finding:
-            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
-        elif self.engagement:
-            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
-        return text + " | Jira Key: " + str(self.jira_key)
 
 
 NOTIFICATION_CHOICE_SLACK = ("slack", "slack")
@@ -4014,6 +4014,9 @@ class Notifications(models.Model):
             models.Index(fields=['user', 'product']),
         ]
 
+    def __str__(self):
+        return f"Notifications about {self.product or 'all projects'} for {self.user or 'system notifications'}"
+
     @classmethod
     def merge_notifications_list(cls, notifications_list):
         if not notifications_list:
@@ -4044,9 +4047,6 @@ class Notifications(models.Model):
                 result.sla_breach_combined = {*result.sla_breach_combined, *notifications.sla_breach_combined}
                 result.risk_acceptance_expiration = {*result.risk_acceptance_expiration, *notifications.risk_acceptance_expiration}
         return result
-
-    def __str__(self):
-        return f"Notifications about {self.product or 'all projects'} for {self.user or 'system notifications'}"
 
 
 class NotificationsAdmin(admin.ModelAdmin):
@@ -4160,11 +4160,11 @@ class Languages(models.Model):
     code = models.IntegerField(blank=True, null=True, verbose_name=_('Number of code lines'))
     created = models.DateTimeField(auto_now_add=True, null=False)
 
-    def __str__(self):
-        return self.language.language
-
     class Meta:
         unique_together = [('language', 'product')]
+
+    def __str__(self):
+        return self.language.language
 
 
 class App_Analysis(models.Model):
@@ -4307,11 +4307,11 @@ class Benchmark_Product(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=False)
     updated = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return self.product.name + ': ' + self.control.objective_number + ': ' + self.control.category.name
-
     class Meta:
         unique_together = [('product', 'control')]
+
+    def __str__(self):
+        return self.product.name + ': ' + self.control.objective_number + ': ' + self.control.category.name
 
 
 class Benchmark_Product_Summary(models.Model):
@@ -4336,11 +4336,11 @@ class Benchmark_Product_Summary(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=False)
     updated = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return self.product.name + ': ' + self.benchmark_type.name
-
     class Meta:
         unique_together = [('product', 'benchmark_type')]
+
+    def __str__(self):
+        return self.product.name + ': ' + self.benchmark_type.name
 
 
 # ==========================
