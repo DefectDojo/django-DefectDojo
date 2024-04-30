@@ -176,7 +176,6 @@ class FlexibleImportTestAPI(DojoAPITestCase):
         # engagement name is not unique by itself and not unique inside a product
         self.engagement_last = self.create_engagement(ENGAGEMENT_NAME_DEFAULT, product=self.product)
 
-    @patch('dojo.jira_link.helper.get_jira_project')
     def test_import_by_engagement_id(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=0, products=0, product_types=0, endpoints=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=self.engagement.id, test_title=TEST_TITLE_DEFAULT)
@@ -186,7 +185,6 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             self.assertEqual(import0['product_id'], self.engagement.product.id)
         mock.assert_called_with(self.engagement)
 
-    @patch('dojo.jira_link.helper.get_jira_project')
     def test_import_by_product_name_exists_engagement_name_exists(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=0, products=0, product_types=0, endpoints=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
@@ -202,7 +200,6 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
-    @patch('dojo.jira_link.helper.get_jira_project')
     def test_import_by_product_name_exists_engagement_name_not_exists_auto_create(self, mock):
         mock.return_value = None
         with assertImportModelsCreated(self, tests=1, engagements=1, products=0, product_types=0, endpoints=0):
@@ -377,7 +374,6 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type='Acunetix Scan', product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, test_title=TEST_TITLE_DEFAULT, expected_http_status_code=400)
 
-    @patch('dojo.jira_link.helper.get_jira_project')
     def test_reimport_by_product_name_exists_engagement_name_exists_scan_type_not_exsists_test_title_exists_auto_create(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=0, products=0, product_types=0, endpoints=1):
             import0 = self.reimport_scan_with_params(None, ACUNETIX_AUDIT_ONE_VULN_FILENAME, scan_type='Acunetix Scan', product_name=PRODUCT_NAME_DEFAULT,
@@ -392,7 +388,6 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type='Acunetix Scan', product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, test_title='bogus title', expected_http_status_code=400)
 
-    @patch('dojo.jira_link.helper.get_jira_project')
     def test_reimport_by_product_name_exists_engagement_name_exists_scan_type_not_exsists_test_title_not_exists_auto_create(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=0, products=0, product_types=0, endpoints=1):
             import0 = self.reimport_scan_with_params(None, ACUNETIX_AUDIT_ONE_VULN_FILENAME, scan_type='Acunetix Scan', product_name=PRODUCT_NAME_DEFAULT,
@@ -417,7 +412,6 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
-    @patch('dojo.jira_link.helper.get_jira_project')
     def test_reimport_by_product_name_exists_engagement_name_not_exists_auto_create(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=0, product_types=0, endpoints=0):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
