@@ -3,7 +3,6 @@ from dojo.tools.semgrep.parser import SemgrepParser
 from dojo.models import Test
 
 
-# Test of semgrep parser
 class TestSemgrepParser(DojoTestCase):
 
     def test_parse_empty(self):
@@ -121,3 +120,14 @@ class TestSemgrepParser(DojoTestCase):
             parser = SemgrepParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
+
+    def test_parse_sca_deployments_vulns(self):
+        with open("unittests/scans/semgrep/sca-deployments-vulns.json") as testfile:
+            parser = SemgrepParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(18, len(findings))
+            finding = findings[0]
+            self.assertEqual("High", finding.severity)
+            self.assertEqual("requirements3.txt", finding.file_path)
+            self.assertEqual('222', finding.line)
+            self.assertEqual(617, finding.cwe)
