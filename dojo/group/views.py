@@ -330,7 +330,7 @@ class AddGroup(View):
                 group_member.group = group
                 group_member.user = request.user
                 role_name = "Owner"
-                group_member.role = Role.objects.get(name = role_name)
+                group_member.role = Role.objects.get(name=role_name)
                 group_member.role.id = 4
                 group_member.save()
                 messages.add_message(
