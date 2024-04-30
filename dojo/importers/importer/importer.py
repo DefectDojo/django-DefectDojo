@@ -1,23 +1,22 @@
 import base64
+import logging
 
-from django.db.models.query_utils import Q
-from dojo.importers import utils as importer_utils
-from dojo.decorators import dojo_async_task
-from dojo.utils import get_current_user, is_finding_groups_enabled
-from dojo.celery import app
-from django.core.exceptions import ValidationError
+from django.conf import settings
 from django.core import serializers
+from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
+from django.db.models.query_utils import Q
+from django.utils import timezone
+
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
 import dojo.notifications.helper as notifications_helper
-from django.conf import settings
-from django.core.files.base import ContentFile
-from django.utils import timezone
-from dojo.models import (BurpRawRequestResponse, FileUpload,
-                         Finding, Test, Test_Import, Test_Type)
+from dojo.celery import app
+from dojo.decorators import dojo_async_task
+from dojo.importers import utils as importer_utils
+from dojo.models import BurpRawRequestResponse, FileUpload, Finding, Test, Test_Import, Test_Type
 from dojo.tools.factory import get_parser
-import logging
-
+from dojo.utils import get_current_user, is_finding_groups_enabled
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -275,7 +274,8 @@ class DojoDefaultImporter:
         now = timezone.now()
 
         if api_scan_configuration and api_scan_configuration.product != engagement.product:
-            raise ValidationError('API Scan Configuration has to be from same product as  the Engagement')
+            msg = 'API Scan Configuration has to be from same product as  the Engagement'
+            raise ValidationError(msg)
 
         # check if the parser that handle the scan_type manage tests
         # if yes, we parse the data first

@@ -1,12 +1,11 @@
 import csv
-import json
 import io
+import json
+from datetime import datetime
 
 from cvss import parser as cvss_parser
-from datetime import datetime
 from dateutil import parser
 from django.conf import settings
-
 from django.utils import timezone
 
 from dojo.models import Finding

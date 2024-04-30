@@ -1,9 +1,9 @@
 import datetime
 
-from ..dojo_test_case import DojoTestCase
-
 from dojo.models import Test
 from dojo.tools.wpscan.parser import WpscanParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestWpscanParser(DojoTestCase):

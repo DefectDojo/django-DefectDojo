@@ -1,10 +1,11 @@
 import json
 import re
+
 from cvss import CVSS3
 from dateutil import parser
 from django.conf import settings
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
 
 
 class VeracodeJSONParser:

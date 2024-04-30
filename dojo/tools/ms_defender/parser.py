@@ -1,6 +1,7 @@
 import json
-from dojo.models import Finding, Endpoint
 import zipfile
+
+from dojo.models import Endpoint, Finding
 
 
 class MSDefenderParser:

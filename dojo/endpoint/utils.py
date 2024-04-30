@@ -1,19 +1,17 @@
-import logging
-import re
 import csv
 import io
+import logging
+import re
 
-from django.urls import reverse
 from django.contrib import messages
-from django.core.exceptions import MultipleObjectsReturned
+from django.core.exceptions import MultipleObjectsReturned, ValidationError
+from django.core.validators import validate_ipv46_address
+from django.db.models import Count, Q
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from hyperlink._url import SCHEME_PORT_MAP
 
-from django.core.validators import validate_ipv46_address
-from django.core.exceptions import ValidationError
-from django.db.models import Q, Count
-from django.http import HttpResponseRedirect
-
-from dojo.models import Endpoint, DojoMeta
+from dojo.models import DojoMeta, Endpoint
 
 logger = logging.getLogger(__name__)
 
@@ -322,7 +320,8 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
                 extra_tags='alert-danger')
             return HttpResponseRedirect(reverse('import_endpoint_meta', args=(product.id, )))
         elif origin == 'API':
-            raise ValidationError('The column "hostname" must be present to map host to Endpoint.')
+            msg = 'The column "hostname" must be present to map host to Endpoint.'
+            raise ValidationError(msg)
 
     keys = [key for key in reader.fieldnames if key != 'hostname']
 

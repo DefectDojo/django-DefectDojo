@@ -1,22 +1,23 @@
 import base64
 import logging
 
+from django.conf import settings
+from django.core import serializers
+from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
+from django.db.models import Q
+from django.utils import timezone
+
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
 import dojo.notifications.helper as notifications_helper
-from dojo.decorators import dojo_async_task
 from dojo.celery import app
-from django.conf import settings
-from django.core.exceptions import ValidationError
-from django.core import serializers
-from django.core.files.base import ContentFile
-from django.utils import timezone
+from dojo.decorators import dojo_async_task
 from dojo.importers import utils as importer_utils
 from dojo.importers.reimporter import utils as reimporter_utils
 from dojo.models import BurpRawRequestResponse, FileUpload, Finding, Notes, Test_Import
 from dojo.tools.factory import get_parser
 from dojo.utils import get_current_user, is_finding_groups_enabled
-from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -582,9 +583,8 @@ class DojoDefaultReImporter:
 
         if api_scan_configuration:
             if api_scan_configuration.product != test.engagement.product:
-                raise ValidationError(
-                    "API Scan Configuration has to be from same product as the Test"
-                )
+                msg = "API Scan Configuration has to be from same product as the Test"
+                raise ValidationError(msg)
             if test.api_scan_configuration != api_scan_configuration:
                 test.api_scan_configuration = api_scan_configuration
                 test.save()

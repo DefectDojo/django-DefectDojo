@@ -1,7 +1,7 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-
-from dojo.models import Test, Engagement, Product
+from dojo.models import Engagement, Product, Test
 from dojo.tools.sonarqube.parser import SonarQubeParser
+
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestSonarQubeParser(DojoTestCase):

@@ -1,13 +1,12 @@
-import io
 import csv
+import io
 
 from defusedxml import ElementTree
-from ..dojo_test_case import DojoTestCase
 
 from dojo.models import Test
-from dojo.tools.vcg.parser import VCGCsvParser
-from dojo.tools.vcg.parser import VCGParser
-from dojo.tools.vcg.parser import VCGXmlParser
+from dojo.tools.vcg.parser import VCGCsvParser, VCGParser, VCGXmlParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestFile:

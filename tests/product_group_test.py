@@ -1,12 +1,13 @@
-import unittest
 import sys
+import unittest
+
 from base_test_class import BaseTestCase
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import Select, WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
 from group_test import GroupTest
 from product_test import ProductTest
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
 
 
 class ProductGroupTest(BaseTestCase):

@@ -18,12 +18,14 @@ spec:
   selector:
     matchLabels:
       defectdojo.org/component: celery
+      defectdojo.org/subcomponent: beat
       app.kubernetes.io/name: {{ include "defectdojo.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
         defectdojo.org/component: celery
+        defectdojo.org/subcomponent: beat
         app.kubernetes.io/name: {{ include "defectdojo.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         {{- if .Values.podLabels }}

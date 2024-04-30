@@ -2,9 +2,10 @@ import hashlib
 import json
 import logging
 import re
-from typing import Union, List
 from datetime import datetime
-from dojo.models import Finding, Endpoint
+from typing import List, Union
+
+from dojo.models import Endpoint, Finding
 
 
 class WhiteHatSentinelParser:
@@ -36,9 +37,8 @@ class WhiteHatSentinelParser:
             "collection" not in findings_collection.keys()
             or not findings_collection["collection"]
         ):
-            raise ValueError(
-                "collection key not present or there were not findings present."
-            )
+            msg = "collection key not present or there were not findings present."
+            raise ValueError(msg)
 
         # Convert a WhiteHat Vuln with Attack Vectors to a list of DefectDojo
         # findings

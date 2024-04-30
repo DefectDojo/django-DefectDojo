@@ -1,6 +1,6 @@
-from rest_framework.test import APITestCase, APIClient
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient, APITestCase
 
 
 class NotificationsTest(APITestCase):

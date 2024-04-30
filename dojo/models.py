@@ -1,47 +1,46 @@
 import base64
+import copy
 import hashlib
 import logging
 import os
 import re
-import copy
 import warnings
-from typing import Dict, Set, Optional
+from datetime import datetime
+from typing import Dict, Optional, Set
 from uuid import uuid4
-from django.conf import settings
+
+import hyperlink
+import tagulous.admin
 from auditlog.registry import auditlog
+from cvss import CVSS3
+from dateutil.relativedelta import relativedelta
+from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.db.models.expressions import Case, When
-from django.urls import reverse
-from django.core.validators import RegexValidator, validate_ipv46_address, MinValueValidator, MaxValueValidator
-from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
-from django.db import models, connection
-from django.db.models import Q, Count
+from django.core.files.base import ContentFile
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator, validate_ipv46_address
+from django.db import connection, models
+from django.db.models import Count, JSONField, Q
+from django.db.models.expressions import Case, When
 from django.db.models.functions import Lower
-from django_extensions.db.models import TimeStampedModel
-from django.utils.deconstruct import deconstructible
-from django.utils.timezone import now
-from django.utils.functional import cached_property
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.deconstruct import deconstructible
+from django.utils.functional import cached_property
 from django.utils.html import escape
-from pytz import all_timezones
-from polymorphic.models import PolymorphicModel
-from polymorphic.managers import PolymorphicManager
-from polymorphic.base import ManagerInheritanceWarning
-from multiselectfield import MultiSelectField
-from django import forms
+from django.utils.timezone import now
 from django.utils.translation import gettext as _
-from dateutil.relativedelta import relativedelta
-from datetime import datetime
+from django_extensions.db.models import TimeStampedModel
+from multiselectfield import MultiSelectField
+from polymorphic.base import ManagerInheritanceWarning
+from polymorphic.managers import PolymorphicManager
+from polymorphic.models import PolymorphicModel
+from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
-import tagulous.admin
-from django.db.models import JSONField
-import hyperlink
-from cvss import CVSS3
-
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -860,9 +859,11 @@ class DojoMeta(models.Model):
                 ids_count += 1
 
         if ids_count == 0:
-            raise ValidationError('Metadata entries need either a product, an endpoint or a finding')
+            msg = 'Metadata entries need either a product, an endpoint or a finding'
+            raise ValidationError(msg)
         if ids_count > 1:
-            raise ValidationError('Metadata entries may not have more than one relation, either a product, an endpoint either or a finding')
+            msg = 'Metadata entries may not have more than one relation, either a product, an endpoint either or a finding'
+            raise ValidationError(msg)
 
     def __str__(self):
         return f"{self.name}: {self.value}"
@@ -893,7 +894,8 @@ class SLA_Configuration(models.Model):
 
         for sla_day in sla_days:
             if sla_day < 1:
-                raise ValidationError('SLA Days must be at least 1')
+                msg = 'SLA Days must be at least 1'
+                raise ValidationError(msg)
 
     def save(self, *args, **kwargs):
         # get the initial sla config before saving (if this is an existing sla config)
@@ -947,7 +949,8 @@ class SLA_Configuration(models.Model):
         if self.id != 1:
             super().delete(*args, **kwargs)
         else:
-            raise ValidationError("Unable to delete default SLA Configuration")
+            msg = "Unable to delete default SLA Configuration"
+            raise ValidationError(msg)
 
     def get_summary(self):
         return f'{self.name} - Critical: {self.critical}, High: {self.high}, Medium: {self.medium}, Low: {self.low}'
@@ -1723,10 +1726,12 @@ class Endpoint(models.Model):
                     if clean_url[:len(dummy_scheme) + 3] == (dummy_scheme + '://'):
                         clean_url = clean_url[len(dummy_scheme) + 3:]
                     else:
-                        raise ValueError('hyperlink lib did not create URL as was expected')
+                        msg = 'hyperlink lib did not create URL as was expected'
+                        raise ValueError(msg)
                 return clean_url
             else:
-                raise ValueError('Missing host')
+                msg = 'Missing host'
+                raise ValueError(msg)
         except:
             url = ''
             if self.protocol:
@@ -1913,7 +1918,8 @@ class Endpoint(models.Model):
             from urllib.parse import urlparse
             url = hyperlink.parse(url="//" + urlparse(uri).netloc)
         except hyperlink.URLParseError as e:
-            raise ValidationError(f'Invalid URL format: {e}')
+            msg = f'Invalid URL format: {e}'
+            raise ValidationError(msg)
 
         query_parts = []  # inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1768
         for k, v in url.query:
@@ -3153,33 +3159,34 @@ class Finding(models.Model):
                 st = dojo_meta.value.strip()
                 if st:
                     return st.lower()
-        return 'github'
+        return ''
 
-    def bitbucket_public_prepare_scm_base_link(self, uri):
-        # bitbucket public (https://bitbucket.org) url template for browse is:
-        # https://bitbucket.org/<username>/<repository-slug>
+    def scm_public_prepare_base_link(self, uri):
+        # scm public (https://scm-domain.org) url template for browse is:
+        # https://scm-domain.org/<username>/<repository-slug>
         # but when you get repo url for git, its template is:
-        # https://bitbucket.org/<username>/<repository-slug>.git
+        # https://scm-domain.org/<username>/<repository-slug>.git
         # so to create browser url - git url should be recomposed like below:
 
         parts_uri = uri.split('.git')
         return parts_uri[0]
 
-    def bitbucket_public_prepare_scm_link(self, uri):
+    def git_public_prepare_scm_link(self, uri, scm_type):
         # if commit hash or branch/tag is set for engagement/test -
         # hash or branch/tag should be appended to base browser link
+        intermediate_path = '/blob/' if scm_type in ['github', 'gitlab'] else '/src/'
 
-        link = self.bitbucket_public_prepare_scm_base_link(uri)
+        link = self.scm_public_prepare_base_link(uri)
         if self.test.commit_hash:
-            link += '/src/' + self.test.commit_hash + '/' + self.file_path
+            link += intermediate_path + self.test.commit_hash + '/' + self.file_path
         elif self.test.engagement.commit_hash:
-            link += '/src/' + self.test.engagement.commit_hash + '/' + self.file_path
+            link += intermediate_path + self.test.engagement.commit_hash + '/' + self.file_path
         elif self.test.branch_tag:
-            link += '/src/' + self.test.branch_tag + '/' + self.file_path
+            link += intermediate_path + self.test.branch_tag + '/' + self.file_path
         elif self.test.engagement.branch_tag:
-            link += '/src/' + self.test.engagement.branch_tag + '/' + self.file_path
+            link += intermediate_path + self.test.engagement.branch_tag + '/' + self.file_path
         else:
-            link += '/src/master/' + self.file_path
+            link += intermediate_path + 'master/' + self.file_path
 
         return link
 
@@ -3221,22 +3228,6 @@ class Finding(models.Model):
 
         return link
 
-    def github_prepare_scm_link(self, uri):
-        link = uri
-
-        if self.test.commit_hash:
-            link += '/blob/' + self.test.commit_hash + '/' + self.file_path
-        elif self.test.engagement.commit_hash:
-            link += '/blob/' + self.test.engagement.commit_hash + '/' + self.file_path
-        elif self.test.branch_tag:
-            link += '/blob/' + self.test.branch_tag + '/' + self.file_path
-        elif self.test.engagement.branch_tag:
-            link += '/blob/' + self.test.engagement.branch_tag + '/' + self.file_path
-        else:
-            link += '/' + self.file_path
-
-        return link
-
     def get_file_path_with_raw_link(self):
         if self.file_path is None:
             return None
@@ -3244,12 +3235,12 @@ class Finding(models.Model):
         link = self.test.engagement.source_code_management_uri
         scm_type = self.get_scm_type()
         if (self.test.engagement.source_code_management_uri is not None):
-            if scm_type == 'github' or ("https://github.com/" in self.test.engagement.source_code_management_uri):
-                link = self.github_prepare_scm_link(link)
-            elif scm_type == 'bitbucket-standalone':
+            if scm_type == 'bitbucket-standalone':
                 link = self.bitbucket_standalone_prepare_scm_link(link)
-            elif scm_type == 'bitbucket':
-                link = self.bitbucket_public_prepare_scm_link(link)
+            elif scm_type in ['github', 'gitlab', 'gitea', 'codeberg', 'bitbucket']:
+                link = self.git_public_prepare_scm_link(link, scm_type)
+            elif 'https://github.com/' in self.test.engagement.source_code_management_uri:
+                link = self.git_public_prepare_scm_link(link, 'github')
             else:
                 link += '/' + self.file_path
         else:
@@ -3257,7 +3248,7 @@ class Finding(models.Model):
 
         # than - add line part to browser url
         if self.line:
-            if scm_type == 'github' or scm_type == 'gitlab':
+            if scm_type in ['github', 'gitlab', 'gitea', 'codeberg'] or 'https://github.com/' in self.test.engagement.source_code_management_uri:
                 link = link + '#L' + str(self.line)
             elif scm_type == 'bitbucket-standalone':
                 link = link + '#' + str(self.line)
@@ -3267,6 +3258,7 @@ class Finding(models.Model):
 
     def get_references_with_links(self):
         import re
+
         from dojo.utils import create_bleached_link
         if self.references is None:
             return None
@@ -3900,7 +3892,8 @@ class JIRA_Project(models.Model):
 
     def clean(self):
         if not self.jira_instance:
-            raise ValidationError('Cannot save JIRA Project Configuration without JIRA Instance')
+            msg = 'Cannot save JIRA Project Configuration without JIRA Instance'
+            raise ValidationError(msg)
 
     def __str__(self):
         return ('%s: ' + self.project_key + '(%s)') % (str(self.id), str(self.jira_instance.url) if self.jira_instance else 'None')

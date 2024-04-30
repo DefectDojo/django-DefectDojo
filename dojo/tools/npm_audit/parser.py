@@ -32,20 +32,19 @@ class NpmAuditParser:
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format, unable to parse json.")
+            msg = "Invalid format, unable to parse json."
+            raise ValueError(msg)
 
         if tree.get("auditReportVersion"):
-            raise ValueError(
-                "npm7 with auditReportVersion 2 or higher not yet supported as it lacks the most important fields in the reports"
-            )
+            msg = "npm7 with auditReportVersion 2 or higher not yet supported as it lacks the most important fields in the reports"
+            raise ValueError(msg)
 
         if tree.get("error"):
             error = tree.get("error")
             code = error["code"]
             summary = error["summary"]
-            raise ValueError(
-                "npm audit report contains errors: %s, %s", code, summary
-            )
+            msg = "npm audit report contains errors: %s, %s"
+            raise ValueError(msg, code, summary)
 
         subtree = tree.get("advisories")
 

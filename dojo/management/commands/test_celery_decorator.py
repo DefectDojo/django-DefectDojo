@@ -1,10 +1,11 @@
 
+from functools import wraps
+
 from django.core.management.base import BaseCommand
 
-from dojo.models import Finding, Notes
 # from dojo.utils import get_system_setting, do_dedupe_finding, dojo_async_task
 from dojo.celery import app
-from functools import wraps
+from dojo.models import Finding, Notes
 from dojo.utils import test_valentijn
 
 

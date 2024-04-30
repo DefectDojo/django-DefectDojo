@@ -1,17 +1,24 @@
-from django.core.exceptions import ValidationError
-from django.core.exceptions import MultipleObjectsReturned
-from django.conf import settings
-from django.utils.timezone import make_aware
-from dojo.decorators import dojo_async_task
-from dojo.celery import app
-from dojo.endpoint.utils import endpoint_get_or_create
-from dojo.utils import max_safe
-from django.urls import reverse
-from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, \
-    IMPORT_REACTIVATED_FINDING, IMPORT_UNTOUCHED_FINDING, Test_Import, Test_Import_Finding_Action, \
-    Endpoint_Status, Vulnerability_Id
 import logging
 
+from django.conf import settings
+from django.core.exceptions import MultipleObjectsReturned, ValidationError
+from django.urls import reverse
+from django.utils.timezone import make_aware
+
+from dojo.celery import app
+from dojo.decorators import dojo_async_task
+from dojo.endpoint.utils import endpoint_get_or_create
+from dojo.models import (
+    IMPORT_CLOSED_FINDING,
+    IMPORT_CREATED_FINDING,
+    IMPORT_REACTIVATED_FINDING,
+    IMPORT_UNTOUCHED_FINDING,
+    Endpoint_Status,
+    Test_Import,
+    Test_Import_Finding_Action,
+    Vulnerability_Id,
+)
+from dojo.utils import max_safe
 
 logger = logging.getLogger(__name__)
 
@@ -155,8 +162,9 @@ def add_endpoints_to_unsaved_finding(finding, test, endpoints, **kwargs):
                 fragment=endpoint.fragment,
                 product=test.engagement.product)
         except (MultipleObjectsReturned):
-            raise Exception("Endpoints in your database are broken. Please access {} and migrate them to new format or "
-                            "remove them.".format(reverse('endpoint_migrate')))
+            msg = "Endpoints in your database are broken. Please access {} and migrate them to new format or " \
+                  "remove them.".format(reverse('endpoint_migrate'))
+            raise Exception(msg)
 
         _eps, _created = Endpoint_Status.objects.get_or_create(
             finding=finding,

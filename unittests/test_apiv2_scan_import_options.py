@@ -1,8 +1,9 @@
-from rest_framework.test import APITestCase, APIClient
-from django.urls import reverse
-from dojo.models import Finding, Test, Test_Type
-from rest_framework.authtoken.models import Token
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.urls import reverse
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient, APITestCase
+
+from dojo.models import Finding, Test, Test_Type
 
 
 class ScanImportOptionsTest(APITestCase):

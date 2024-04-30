@@ -1,5 +1,6 @@
-from dojo.tools.sonarqube.sonarqube_restapi_json import SonarQubeRESTAPIJSON
 import json
+
+from dojo.tools.sonarqube.sonarqube_restapi_json import SonarQubeRESTAPIJSON
 
 
 class SonarQubeRESTAPIZIP:

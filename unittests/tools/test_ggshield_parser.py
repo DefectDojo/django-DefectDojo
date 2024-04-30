@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.ggshield.parser import GgshieldParser
 from dojo.models import Test
+from dojo.tools.ggshield.parser import GgshieldParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestGgshieldParser(DojoTestCase):

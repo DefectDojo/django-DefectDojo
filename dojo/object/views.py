@@ -1,14 +1,16 @@
 import logging
+
 from django.contrib import messages
 from django.core.exceptions import BadRequest
-from django.urls import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
-from dojo.models import Product, Objects_Product
-from dojo.forms import ObjectSettingsForm, DeleteObjectsSettingsForm
-from dojo.utils import Product_Tab
-from dojo.authorization.roles_permissions import Permissions
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+
 from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.roles_permissions import Permissions
+from dojo.forms import DeleteObjectsSettingsForm, ObjectSettingsForm
+from dojo.models import Objects_Product, Product
+from dojo.utils import Product_Tab
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +60,8 @@ def edit_object(request, pid, ttid):
     object = Objects_Product.objects.get(pk=ttid)
     product = get_object_or_404(Product, id=pid)
     if object.product != product:
-        raise BadRequest(f'Product {pid} does not fit to product of Object {object.product.id}')
+        msg = f'Product {pid} does not fit to product of Object {object.product.id}'
+        raise BadRequest(msg)
 
     if request.method == 'POST':
         tform = ObjectSettingsForm(request.POST, instance=object)
@@ -87,7 +90,8 @@ def delete_object(request, pid, ttid):
     object = Objects_Product.objects.get(pk=ttid)
     product = get_object_or_404(Product, id=pid)
     if object.product != product:
-        raise BadRequest(f'Product {pid} does not fit to product of Object {object.product.id}')
+        msg = f'Product {pid} does not fit to product of Object {object.product.id}'
+        raise BadRequest(msg)
 
     if request.method == 'POST':
         tform = ObjectSettingsForm(request.POST, instance=object)

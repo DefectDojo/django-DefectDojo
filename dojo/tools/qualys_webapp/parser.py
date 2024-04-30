@@ -1,11 +1,8 @@
-#!/usr/bin/env python
-#
-# -*- coding:utf-8 -*-
-
 import base64
 import re
 import xml.etree.ElementTree
 from datetime import datetime
+
 from dojo.models import Endpoint, Finding
 
 try:

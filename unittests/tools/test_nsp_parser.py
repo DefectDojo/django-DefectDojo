@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.nsp.parser import NspParser
 from dojo.models import Test
+from dojo.tools.nsp.parser import NspParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestNspParser(DojoTestCase):
