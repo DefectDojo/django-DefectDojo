@@ -17,7 +17,7 @@ class TruffleHog3Parser:
     def get_findings(self, filename, test):
         data = json.load(filename)
 
-        dupes = dict()
+        dupes = {}
 
         for json_data in data:
             if json_data.get("reason"):

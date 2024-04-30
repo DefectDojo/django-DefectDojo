@@ -28,7 +28,7 @@ class OSVScannerParser:
             data = json.load(file)
         except json.decoder.JSONDecodeError:
             return []
-        findings = list()
+        findings = []
         for result in data["results"]:
             source_path = result["source"]["path"]
             source_type = result["source"]["type"]
@@ -69,7 +69,7 @@ class OSVScannerParser:
                         references=reference,
                     )
                     if vulnerabilityid != "":
-                        finding.unsaved_vulnerability_ids = list()
+                        finding.unsaved_vulnerability_ids = []
                         finding.unsaved_vulnerability_ids.append(vulnerabilityid)
                     findings.append(finding)
         return findings

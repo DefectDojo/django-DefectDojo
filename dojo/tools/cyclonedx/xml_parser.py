@@ -158,7 +158,7 @@ class CycloneDXXMLParser:
             )
         if len(cwes) > 0:
             finding.cwe = cwes[0]
-        vulnerability_ids = list()
+        vulnerability_ids = []
         # set id as first vulnerability id
         if vuln_id:
             vulnerability_ids.append(vuln_id)
@@ -207,7 +207,7 @@ class CycloneDXXMLParser:
             if url:
                 references += f"**URL:** {url}\n"
             references += "\n"
-        vulnerability_ids = list()
+        vulnerability_ids = []
         # set id as first vulnerability id
         if vuln_id:
             vulnerability_ids.append(vuln_id)

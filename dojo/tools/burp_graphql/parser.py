@@ -30,7 +30,7 @@ class BurpGraphQLParser:
     def create_findings(self, scan_data, test):
         finding_data = self.parse_findings(scan_data)
 
-        items = list()
+        items = []
 
         for issue in finding_data:
             find = Finding(
@@ -58,7 +58,7 @@ class BurpGraphQLParser:
         return items
 
     def parse_findings(self, scan_data):
-        issue_dict = dict()
+        issue_dict = {}
 
         for issue in scan_data:
             if not issue.get("issue_type") or not issue["issue_type"].get(
@@ -95,7 +95,7 @@ class BurpGraphQLParser:
         )
 
     def create_finding(self, issue):
-        finding = dict()
+        finding = {}
         finding["Impact"] = ""
         finding["Description"] = ""
         finding["Mitigation"] = ""
@@ -169,7 +169,7 @@ class BurpGraphQLParser:
 
     def parse_evidence(self, evidence):
         evidence_len = len(evidence)
-        req_resp_list = list()
+        req_resp_list = []
 
         i = 0
         while i < evidence_len:

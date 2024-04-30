@@ -28,7 +28,7 @@ class MicrofocusWebinspectParser:
                 "This doesn't seem to be a valid Webinspect xml file."
             )
 
-        dupes = dict()
+        dupes = {}
         for session in root:
             url = session.find("URL").text
             endpoint = Endpoint.from_uri(url)

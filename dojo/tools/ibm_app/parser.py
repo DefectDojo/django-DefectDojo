@@ -30,7 +30,7 @@ class IbmAppParser:
 
         # self.hosts = self.fetch_host_details()
         issue_types = self.fetch_issue_types(root)
-        dupes = dict()
+        dupes = {}
         # Now time to loop through individual issues and perform necessary
         # actions
         for issue in root.iter("issue-group"):
@@ -107,7 +107,7 @@ class IbmAppParser:
                             finding.unsaved_vulnerability_ids = [
                                 vulnerability_id
                             ]
-                        finding.unsaved_endpoints = list()
+                        finding.unsaved_endpoints = []
                         dupes[dupe_key] = finding
 
                         # in case empty string is returned as url

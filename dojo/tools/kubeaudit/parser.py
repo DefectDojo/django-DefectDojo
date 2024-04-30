@@ -25,7 +25,7 @@ class KubeAuditParser:
 
     def get_findings(self, filename, test):
         lines = filename.readlines()
-        findings = list()
+        findings = []
         for line in lines:
             try:
                 tree = json.loads(str(line, "utf-8"))

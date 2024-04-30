@@ -49,7 +49,7 @@ class OpenscapParser:
         for ip in test_result.findall(f"./{namespace}target-address"):
             ips.append(ip.text)
 
-        dupes = dict()
+        dupes = {}
         # run both rule, and rule-result in parallel so that we can get title
         # for failed test from rule.
         for rule_result in test_result.findall(

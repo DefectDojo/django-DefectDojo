@@ -602,6 +602,14 @@ class ViewFinding(View):
         }
 
     def get_similar_findings(self, request: HttpRequest, finding: Finding):
+        similar_findings_enabled = get_system_setting("enable_similar_findings", True)
+        if similar_findings_enabled is False:
+            return {
+                "similar_findings_enabled": similar_findings_enabled,
+                "duplicate_cluster": duplicate_cluster(request, finding),
+                "similar_findings": None,
+                "similar_findings_filter": None,
+            }
         # add related actions for non-similar and non-duplicate cluster members
         finding.related_actions = calculate_possible_related_actions_for_similar_finding(
             request, finding, finding
@@ -638,6 +646,7 @@ class ViewFinding(View):
             )
 
         return {
+            "similar_findings_enabled": similar_findings_enabled,
             "duplicate_cluster": duplicate_cluster(request, finding),
             "similar_findings": similar_findings,
             "similar_findings_filter": similar_findings_filter,
@@ -2683,7 +2692,7 @@ def finding_bulk_update_all(request, pid=None):
         finding_to_update = request.POST.getlist("finding_to_update")
         finds = Finding.objects.filter(id__in=finding_to_update).order_by("id")
         total_find_count = finds.count()
-        prods = set([find.test.engagement.product for find in finds])
+        prods = set(find.test.engagement.product for find in finds)  # noqa: C401
         if request.POST.get("delete_bulk_findings"):
             if form.is_valid() and finding_to_update:
                 if pid is not None:
@@ -2987,8 +2996,8 @@ def finding_bulk_update_all(request, pid=None):
 
                 error_counts = defaultdict(lambda: 0)
                 success_count = 0
-                finding_groups = set(
-                    [find.finding_group for find in finds if find.has_finding_group]
+                finding_groups = set(  # noqa: C401
+                    find.finding_group for find in finds if find.has_finding_group
                 )
                 logger.debug("finding_groups: %s", finding_groups)
                 groups_pushed_to_jira = False

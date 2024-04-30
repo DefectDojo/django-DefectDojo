@@ -32,7 +32,7 @@ class BlackduckImporter(Importer):
         If passed in a regular security.csv, process it.
         No file information then.
         """
-        security_issues = dict()
+        security_issues = {}
         with open(str(report)) as f:
             security_issues = self.__partition_by_key(f)
 
@@ -46,8 +46,8 @@ class BlackduckImporter(Importer):
         Will take a zip file, look for security.csv and files.csv and union them on project id.
         This allows to have the file component for a vulnerability.
         """
-        files = dict()
-        security_issues = dict()
+        files = {}
+        security_issues = {}
 
         with zipfile.ZipFile(str(report)) as zip:
             for full_file_name in zip.namelist():

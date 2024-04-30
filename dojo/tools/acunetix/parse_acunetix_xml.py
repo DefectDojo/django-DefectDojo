@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class AcunetixXMLParser:
     """This parser is written for Acunetix XML reports"""
     def get_findings(self, filename, test):
-        dupes = dict()
+        dupes = {}
         root = parse(filename).getroot()
         for scan in root.findall("Scan"):
             start_url = scan.findtext("StartURL")
@@ -81,7 +81,7 @@ class AcunetixXMLParser:
                         )
                     )
                 # add requests
-                finding.unsaved_req_resp = list()
+                finding.unsaved_req_resp = []
                 if len(item.findall("TechnicalDetails/Request")):
                     finding.dynamic_finding = (
                         True  # if there is some requests it's dynamic

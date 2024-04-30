@@ -2949,7 +2949,7 @@ def report_generate(request, obj, options):
         )
         report_name = "Engagement Report: " + str(engagement)
 
-        ids = set(finding.id for finding in findings.qs)
+        ids = set(finding.id for finding in findings.qs)  # noqa: C401
         ids = get_endpoint_ids(
             Endpoint.objects.filter(product=engagement.product).distinct()
         )
