@@ -14,6 +14,7 @@ from datetime import date, datetime, timedelta
 from math import pi, sqrt
 import vobject
 from dateutil.relativedelta import relativedelta, MO, SU
+from dateutil.parser import parse
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse, get_script_prefix
@@ -2417,10 +2418,38 @@ def sum_by_severity_level(metrics):
     values = get_zero_severity_level()
 
     for m in metrics:
-        if values.get(m.severity) is not None:
-            values[m.severity] += 1
+        if values.get(m.get('severity')) is not None:
+            values[m.get('severity')] += 1
 
     return values
+
+
+def calculate_finding_age(f):
+    start_date = f.get('date', None)
+    if start_date and isinstance(start_date, str):
+        start_date = parse(start_date).date()
+
+    if settings.SLA_BUSINESS_DAYS:
+        if f.get('mitigated'):
+            mitigated_date = f.get('mitigated')
+            if isinstance(mitigated_date, datetime):
+                mitigated_date = f.get('mitigated').date()
+            days = get_work_days(f.get('date'), mitigated_date)
+        else:
+            days = get_work_days(f.get('date'), timezone.now().date())
+    else:
+        if isinstance(start_date, datetime):
+            start_date = start_date.date()
+
+        if f.get('mitigated'):
+            mitigated_date = f.get('mitigated')
+            if isinstance(mitigated_date, datetime):
+                mitigated_date = f.get('mitigated').date()
+            diff = mitigated_date - start_date
+        else:
+            diff = timezone.now().date() - start_date
+        days = diff.days
+    return days if days > 0 else 0
 
 
 def get_open_findings_burndown(product):
