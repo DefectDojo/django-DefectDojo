@@ -1053,6 +1053,32 @@ class EngagementFilter(EngagementFilterHelper, DojoFilter):
         fields = ['name', 'prod_type']
 
 
+class ProductEngagementsFilter(DojoFilter):
+    engagement__name = CharFilter(field_name='name', lookup_expr='icontains', label='Engagement name contains')
+    engagement__lead = ModelChoiceFilter(field_name='lead', queryset=Dojo_User.objects.none(), label="Lead")
+    engagement__version = CharFilter(field_name='version', lookup_expr='icontains', label='Engagement version')
+    engagement__test__version = CharFilter(field_name='test__version', lookup_expr='icontains', label='Test version')
+    engagement__status = MultipleChoiceFilter(field_name='status', choices=ENGAGEMENT_STATUS_CHOICES,
+                                              label="Status")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.form.fields['engagement__lead'].queryset = get_authorized_users(Permissions.Product_Type_View) \
+            .filter(engagement__lead__isnull=False).distinct()
+
+    class Meta:
+        model = Engagement
+        fields = []
+
+
+class ProductEngagementsFilterWithoutObjectLookups(ProductEngagementsFilter):
+    engagement__lead = CharFilter(
+        field_name="lead__username",
+        lookup_expr="iexact",
+        label="Lead Username",
+        help_text="Search for Lead username that are an exact match")
+
+
 class EngagementFilterWithoutObjectLookups(EngagementFilterHelper):
     engagement__lead = CharFilter(
         field_name="engagement__lead__username",
