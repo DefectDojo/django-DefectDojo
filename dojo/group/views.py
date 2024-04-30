@@ -25,7 +25,6 @@ from dojo.group.queries import get_authorized_groups, get_product_groups_for_gro
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.authorization.authorization import user_has_configuration_permission, user_has_permission_or_403
 from dojo.group.utils import get_auth_group_name
-from dojo.authorization.roles_permissions import Permissions
 from dojo.models import Role
 
 logger = logging.getLogger(__name__)
@@ -330,8 +329,8 @@ class AddGroup(View):
                 group_member = Dojo_Group_Member()
                 group_member.group = group
                 group_member.user = request.user
-                role_name="Owner"
-                group_member.role = Role.objects.get(name=role_name)
+                role_name = "Owner"
+                group_member.role = Role.objects.get(name = role_name)
                 group_member.role.id = 4
                 group_member.save()
                 messages.add_message(
