@@ -1026,6 +1026,14 @@ class ProductEngagementsFilter(DojoFilter):
         fields = []
 
 
+class ProductEngagementsFilterWithoutObjectLookups(ProductEngagementsFilter):
+    engagement__lead = CharFilter(
+        field_name="lead__username",
+        lookup_expr="iexact",
+        label="Lead Username",
+        help_text="Search for Lead username that are an exact match")
+
+
 class EngagementFilterWithoutObjectLookups(EngagementFilterHelper):
     engagement__lead = CharFilter(
         field_name="engagement__lead__username",

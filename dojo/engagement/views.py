@@ -31,7 +31,8 @@ from dojo.filters import (
     EngagementDirectFilterWithoutObjectLookups,
     EngagementTestFilter,
     EngagementTestFilterWithoutObjectLookups,
-    ProductEngagementsFilter
+    ProductEngagementsFilter,
+    ProductEngagementsFilterWithoutObjectLookups
 )
 from dojo.forms import CheckForm, \
     UploadThreatForm, RiskAcceptanceForm, NoteForm, DoneForm, \
@@ -177,9 +178,11 @@ def engagements_all(request):
     products_with_engagements = products_with_engagements.filter(~Q(engagement=None)).distinct()
 
     # count using prefetch instead of just using 'engagement__set_test_test` to avoid loading all test in memory just to count them
+    filter_string_matching = get_system_setting('filter_string_matching', False)
+    products_filter_class = ProductEngagementsFilterWithoutObjectLookups if filter_string_matching else ProductEngagementsFilter
     engagement_query = Engagement.objects.annotate(test_count=Count('test__id'))
     filter_qs = products_with_engagements.prefetch_related(
-        Prefetch('engagement_set', queryset=ProductEngagementsFilter(request.GET, engagement_query).qs)
+        Prefetch('engagement_set', queryset=products_filter_class(request.GET, engagement_query).qs)
     )
 
     filter_qs = filter_qs.prefetch_related(
@@ -193,7 +196,6 @@ def engagements_all(request):
             'engagement_set__jira_project__jira_instance',
             'jira_project_set__jira_instance'
         )
-    filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = EngagementFilterWithoutObjectLookups if filter_string_matching else EngagementFilter
     filtered = filter_class(
         request.GET,
