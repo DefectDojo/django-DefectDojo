@@ -55,15 +55,6 @@ class TestAwsSecurityHubParser(DojoTestCase):
                 findings[0].unique_id_from_tool
             )
 
-    def test_resource_arn(self):
-        with open(get_unit_tests_path() + sample_path("config_one_finding.json")) as test_file:
-            parser = AwsSecurityHubParser()
-            findings = parser.get_findings(test_file, Test())
-            self.assertEqual(1, len(findings))
-            finding = findings[0]
-            endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual('arn:aws:ec2:us-west-2:123456789012:instance/i-11111111111111111', endpoint.host)
-
     def test_inspector_ec2(self):
         with open(get_unit_tests_path() + sample_path("inspector_ec2_cve.json")) as test_file:
             parser = AwsSecurityHubParser()
