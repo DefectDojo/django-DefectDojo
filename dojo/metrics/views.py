@@ -405,7 +405,7 @@ def metrics(request, mtype):
     # legacy code calls has 'prod_type' as 'related_name' for product.... so weird looking prefetch
     prod_type = prod_type.prefetch_related('prod_type')
 
-    filters = dict()
+    filters = {}
     if view == 'Finding':
         page_name = _('Product Type Metrics by Findings')
         filters = finding_querys(prod_type, request)
@@ -428,8 +428,8 @@ def metrics(request, mtype):
         for obj in filters['closed']
     ])
 
-    punchcard = list()
-    ticks = list()
+    punchcard = []
+    ticks = []
 
     if 'view' in request.GET and 'dashboard' == request.GET['view']:
         punchcard, ticks = get_punchcard_data(queryset_check(filters['all']), filters['start_date'], filters['weeks_between'], view)
@@ -1015,7 +1015,7 @@ def view_engineer(request, eid):
                                            mitigated__isnull=True,
                                            active=True).count()
         vulns[product.id] = f_count
-    od = OrderedDict(sorted(list(vulns.items()), key=itemgetter(1)))
+    od = OrderedDict(sorted(vulns.items(), key=itemgetter(1)))
     items = list(od.items())
     items.reverse()
     top = items[: 10]

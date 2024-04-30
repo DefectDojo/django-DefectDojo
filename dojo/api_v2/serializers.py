@@ -1674,7 +1674,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         # Save vulnerability ids and pop them
         if "vulnerability_id_set" in validated_data:
             vulnerability_id_set = validated_data.pop("vulnerability_id_set")
-            vulnerability_ids = list()
+            vulnerability_ids = []
             if vulnerability_id_set:
                 for vulnerability_id in vulnerability_id_set:
                     vulnerability_ids.append(
@@ -1819,7 +1819,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         new_finding = super(TaggitSerializer, self).create(validated_data)
 
         if vulnerability_id_set:
-            vulnerability_ids = list()
+            vulnerability_ids = []
             for vulnerability_id in vulnerability_id_set:
                 vulnerability_ids.append(vulnerability_id["vulnerability_id"])
             validated_data["cve"] = vulnerability_ids[0]
@@ -1916,7 +1916,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
         )
 
         if vulnerability_id_set:
-            vulnerability_ids = list()
+            vulnerability_ids = []
             for vulnerability_id in vulnerability_id_set:
                 vulnerability_ids.append(vulnerability_id["vulnerability_id"])
             validated_data["cve"] = vulnerability_ids[0]
@@ -1933,7 +1933,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
             vulnerability_id_set = validated_data.pop(
                 "vulnerability_id_template_set"
             )
-            vulnerability_ids = list()
+            vulnerability_ids = []
             if vulnerability_id_set:
                 for vulnerability_id in vulnerability_id_set:
                     vulnerability_ids.append(

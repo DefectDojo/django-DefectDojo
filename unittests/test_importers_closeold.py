@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 class TestDojoCloseOld(DojoTestCase):
     def test_close_old_same_engagement(self):
         importer = DefaultImporter()
-        scan = get_unit_tests_path() + "/scans/acunetix/many_findings.xml"
         scan_type = "Acunetix Scan"
         user, _ = User.objects.get_or_create(username="admin")
         product_type, _ = Product_Type.objects.get_or_create(name="closeold")
@@ -34,31 +33,31 @@ class TestDojoCloseOld(DojoTestCase):
             "active": True,
             "verified": False,
         }
-        # Import first test
-        _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(
-            scan, scan_type, engagement, close_old_findings=False, **import_options,
-        )
-        self.assertEqual(4, len_new_findings)
-        self.assertEqual(0, len_closed_findings)
-        # Import same test, should close no findings
-        _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(
-            scan, scan_type, engagement, close_old_findings=True, **import_options,
-        )
-        self.assertEqual(4, len_new_findings)
-        self.assertEqual(0, len_closed_findings)
+        with open(get_unit_tests_path() + "/scans/acunetix/many_findings.xml") as scan:
+            # Import first test
+            _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(
+                scan, scan_type, engagement, close_old_findings=False, **import_options,
+            )
+            self.assertEqual(4, len_new_findings)
+            self.assertEqual(0, len_closed_findings)
+            # Import same test, should close no findings
+            _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(
+                scan, scan_type, engagement, close_old_findings=True, **import_options,
+            )
+            self.assertEqual(4, len_new_findings)
+            self.assertEqual(0, len_closed_findings)
         # Import test with only one finding. Remaining findings should close
-        scan = open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml")
-        _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(
-            scan, scan_type, engagement, close_old_findings=True, **import_options,
-        )
-        self.assertEqual(1, len_new_findings)
-        # Dedupe is off and close old findings does not close old findings if they are the same finding.
-        # If this behavior changes, or dedupe is on, the number of closed findings will be 4
-        self.assertEqual(8, len_closed_findings)
+        with open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml") as scan:
+            _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(
+                scan, scan_type, engagement, close_old_findings=True, **import_options,
+            )
+            self.assertEqual(1, len_new_findings)
+            # Dedupe is off and close old findings does not close old findings if they are the same finding.
+            # If this behavior changes, or dedupe is on, the number of closed findings will be 4
+            self.assertEqual(8, len_closed_findings)
 
     def test_close_old_same_product_scan(self):
         importer = DefaultImporter()
-        scan = get_unit_tests_path() + "/scans/acunetix/many_findings.xml"
         scan_type = "Acunetix Scan"
         user, _ = User.objects.get_or_create(username="admin")
         product_type, _ = Product_Type.objects.get_or_create(name="test2")
@@ -94,24 +93,25 @@ class TestDojoCloseOld(DojoTestCase):
             "verified": False,
             "close_old_findings_product_scope": True,
         }
-        # Import first test
-        _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(
-            scan, scan_type, engagement1, close_old_findings=False, **import_options,
-        )
-        self.assertEqual(4, len_new_findings)
-        self.assertEqual(0, len_closed_findings)
-        # Import same test, should close no findings
-        _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(
-            scan, scan_type, engagement2, close_old_findings=True, **import_options,
-        )
-        self.assertEqual(4, len_new_findings)
-        self.assertEqual(0, len_closed_findings)
+        with open(get_unit_tests_path() + "/scans/acunetix/many_findings.xml") as scan:
+            # Import first test
+            _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(
+                scan, scan_type, engagement1, close_old_findings=False, **import_options,
+            )
+            self.assertEqual(4, len_new_findings)
+            self.assertEqual(0, len_closed_findings)
+            # Import same test, should close no findings
+            _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(
+                scan, scan_type, engagement2, close_old_findings=True, **import_options,
+            )
+            self.assertEqual(4, len_new_findings)
+            self.assertEqual(0, len_closed_findings)
         # Import test with only one finding. Remaining findings should close
-        scan = open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml")
-        _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(
-            scan, scan_type, engagement3, close_old_findings=True, **import_options,
-        )
-        self.assertEqual(1, len_new_findings)
-        # Dedupe is off, and close old findings does not close old findings if they are the same finding.
-        # If this behavior changes, or dedupe is on, the number of closed findings will be 4
-        self.assertEqual(8, len_closed_findings)
+        with open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml") as scan:
+            _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(
+                scan, scan_type, engagement3, close_old_findings=True, **import_options,
+            )
+            self.assertEqual(1, len_new_findings)
+            # Dedupe is off, and close old findings does not close old findings if they are the same finding.
+            # If this behavior changes, or dedupe is on, the number of closed findings will be 4
+            self.assertEqual(8, len_closed_findings)

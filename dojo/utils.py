@@ -786,8 +786,8 @@ def get_punchcard_data(objs, start_date, weeks, view='Finding'):
         # map from python to javascript, do not use week numbers or day numbers from database.
         day_offset = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1, 5: 0, 6: 6}
 
-        punchcard = list()
-        ticks = list()
+        punchcard = []
+        ticks = []
         highest_day_count = 0
         tick = 0
         day_counts = [0, 0, 0, 0, 0, 0, 0]
@@ -870,8 +870,8 @@ def get_period_counts_legacy(findings,
                              period_interval,
                              start_date,
                              relative_delta='months'):
-    opened_in_period = list()
-    accepted_in_period = list()
+    opened_in_period = []
+    accepted_in_period = []
     opened_in_period.append(
         ['Timestamp', 'Date', 'S0', 'S1', 'S2', 'S3', 'Total', 'Closed'])
     accepted_in_period.append(
@@ -965,9 +965,9 @@ def get_period_counts(findings,
 
     start_date = datetime(start_date.year, start_date.month, start_date.day, tzinfo=tz)
 
-    opened_in_period = list()
-    active_in_period = list()
-    accepted_in_period = list()
+    opened_in_period = []
+    active_in_period = []
+    accepted_in_period = []
     opened_in_period.append(
         ['Timestamp', 'Date', 'S0', 'S1', 'S2', 'S3', 'Total', 'Closed'])
     active_in_period.append(
@@ -1358,7 +1358,7 @@ def reopen_external_issue(find, note, external_issue_provider, **kwargs):
 def process_notifications(request, note, parent_url, parent_title):
     regex = re.compile(r'(?:\A|\s)@(\w+)\b')
 
-    usernames_to_check = set([un.lower() for un in regex.findall(note.entry)])
+    usernames_to_check = set(un.lower() for un in regex.findall(note.entry))  # noqa: C401
 
     users_to_notify = [
         User.objects.filter(username=username).get()

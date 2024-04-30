@@ -16,7 +16,7 @@ class SemgrepParser:
     def get_findings(self, filename, test):
         data = json.load(filename)
 
-        dupes = dict()
+        dupes = {}
 
         if "results" in data:
             for item in data.get("results", []):

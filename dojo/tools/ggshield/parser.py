@@ -24,7 +24,7 @@ class GgshieldParser:
         """
         json_data = json.load(filename)
         issues = json_data.get("scans")
-        dupes = dict()
+        dupes = {}
 
         for issue in issues:
             if issue.get("total_incidents") > 0:

@@ -36,7 +36,7 @@ class RubocopParser:
     def get_findings(self, scan_file, test):
         """Load a file as JSON file and create findings"""
         data = json.load(scan_file)
-        findings = list()
+        findings = []
         for vuln_file in data.get("files", []):
             path = vuln_file.get("path")
             for offense in vuln_file.get("offenses", []):

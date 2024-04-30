@@ -25,7 +25,7 @@ class CoverityApiParser:
                 file.name,
             )
 
-        items = list()
+        items = []
         for issue in tree["viewContentsV1"]["rows"]:
             # get only security findings
             if "Security" != issue.get("displayIssueKind"):

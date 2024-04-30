@@ -173,7 +173,7 @@ def parse_finding(host, tree):
             if last_fixed is not None:
                 _temp["mitigation_date"] = datetime.datetime.strptime(
                     last_fixed, "%Y-%m-%dT%H:%M:%SZ"
-                ).date()
+                )
             else:
                 _temp["mitigation_date"] = None
         # read cvss value if present
@@ -279,7 +279,7 @@ def parse_finding(host, tree):
         if _temp.get("CVSS_value") is not None:
             finding.cvssv3_score = _temp.get("CVSS_value")
         finding.verified = True
-        finding.unsaved_endpoints = list()
+        finding.unsaved_endpoints = []
         finding.unsaved_endpoints.append(ep)
         ret_rows.append(finding)
     return ret_rows
