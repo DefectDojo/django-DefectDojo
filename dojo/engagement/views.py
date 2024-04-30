@@ -43,7 +43,7 @@ from dojo.filters import (
     EngagementTestFilter,
     EngagementTestFilterWithoutObjectLookups,
     ProductEngagementsFilter,
-    ProductEngagementsFilterWithoutObjectLookups
+    ProductEngagementsFilterWithoutObjectLookups,
 )
 from dojo.finding.helper import NOT_ACCEPTED_FINDINGS_QUERY
 from dojo.finding.views import find_available_notetypes
