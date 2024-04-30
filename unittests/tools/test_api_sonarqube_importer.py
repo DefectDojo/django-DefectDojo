@@ -62,7 +62,7 @@ def dummy_hotspot_rule_wo_risk_description(self, *args, **kwargs):
 
 
 def empty_list(self, *args, **kwargs):
-    return list()
+    return []
 
 
 class TestSonarqubeImporterNoSQToolConfig(DojoTestCase):

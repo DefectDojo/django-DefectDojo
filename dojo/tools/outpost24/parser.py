@@ -19,7 +19,7 @@ class Outpost24Parser:
 
     def get_findings(self, file, test):
         tree = ElementTree.parse(file)
-        items = list()
+        items = []
         for detail in tree.iterfind(".//detaillist/detail"):
             # finding details
             title = detail.findtext("name")

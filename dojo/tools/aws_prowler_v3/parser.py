@@ -26,7 +26,7 @@ class AWSProwlerV3Parser:
             raise ValueError('Unknown file format')
 
     def process_json(self, file, test):
-        dupes = dict()
+        dupes = {}
 
         data = json.load(file)
         for deserialized in data:

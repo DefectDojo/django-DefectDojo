@@ -19,13 +19,13 @@ class OrtParser:
 
     def get_findings(self, json_output, test):
         if json_output is None:
-            return list()
+            return []
 
         evaluated_model = self.parse_json(json_output)
         if evaluated_model:
             return self.get_items(evaluated_model, test)
         else:
-            return list()
+            return []
 
     def parse_json(self, json_output):
         try:

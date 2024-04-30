@@ -19,7 +19,7 @@ class GosecParser:
             data = json.loads(str(tree, "utf-8"))
         except Exception:
             data = json.loads(tree)
-        dupes = dict()
+        dupes = {}
 
         for item in data["Issues"]:
             impact = ""

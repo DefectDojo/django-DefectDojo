@@ -37,7 +37,7 @@ class RiskReconParser:
             return self._get_findings_internal(findings, test)
 
     def _get_findings_internal(self, findings, test):
-        dupes = dict()
+        dupes = {}
         for item in findings:
             findingdetail = ""
             title = (

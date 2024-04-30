@@ -436,7 +436,7 @@ def generate_report(request, obj, host_view=False):
         report_title = "Product Report"
         findings = ReportFindingFilter(request.GET, product=product, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
             test__engagement__product=product)))
-        ids = set(finding.id for finding in findings.qs)
+        ids = set(finding.id for finding in findings.qs)  # noqa: C401
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
         endpoints = Endpoint.objects.filter(product=product).distinct()
@@ -467,7 +467,7 @@ def generate_report(request, obj, host_view=False):
         template = 'dojo/engagement_pdf_report.html'
         report_title = "Engagement Report"
 
-        ids = set(finding.id for finding in findings.qs)
+        ids = set(finding.id for finding in findings.qs)  # noqa: C401
         tests = Test.objects.filter(finding__id__in=ids).distinct()
         endpoints = Endpoint.objects.filter(product=engagement.product).distinct()
 

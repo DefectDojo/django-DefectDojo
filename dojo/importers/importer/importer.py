@@ -257,7 +257,7 @@ class DojoDefaultImporter:
                 old_finding.save(dedupe_option=False, push_to_jira=push_to_jira)
 
         if is_finding_groups_enabled() and push_to_jira:
-            for finding_group in set([finding.finding_group for finding in old_findings if finding.finding_group is not None]):
+            for finding_group in set(finding.finding_group for finding in old_findings if finding.finding_group is not None):  # noqa: C401
                 jira_helper.push_to_jira(finding_group)
 
         return old_findings

@@ -30,7 +30,7 @@ class MozillaObservatoryParser:
         else:
             nodes = data
 
-        findings = list()
+        findings = []
         for key in nodes:
             node = nodes[key]
 

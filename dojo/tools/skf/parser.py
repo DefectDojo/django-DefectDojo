@@ -96,14 +96,14 @@ class SKFParser:
         if isinstance(content, bytes):
             content = content.decode("utf-8")
 
-        column_names = dict()
+        column_names = {}
         chain = self.create_chain()
 
         row_number = 0
         reader = csv.reader(
             io.StringIO(content), delimiter=",", quotechar='"', escapechar="\\"
         )
-        dupes = dict()
+        dupes = {}
         for row in reader:
             finding = Finding(test=test)
             finding.severity = "Info"

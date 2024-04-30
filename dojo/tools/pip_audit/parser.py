@@ -40,7 +40,7 @@ class PipAuditParser:
 
 def get_file_findings(data, test):
     """Return the findings in the vluns array inside the dependencies key."""
-    findings = list()
+    findings = []
     for dependency in data["dependencies"]:
         item_findings = get_item_findings(dependency, test)
         if item_findings is not None:
@@ -50,7 +50,7 @@ def get_file_findings(data, test):
 
 def get_legacy_findings(data, test):
     """Return the findings gathered from the vulns element."""
-    findings = list()
+    findings = []
     for item in data:
         item_findings = get_item_findings(item, test)
         if item_findings is not None:
@@ -60,7 +60,7 @@ def get_legacy_findings(data, test):
 
 def get_item_findings(item, test):
     """Return list of Findings."""
-    findings = list()
+    findings = []
     vulnerabilities = item.get("vulns", [])
     if vulnerabilities:
         component_name = item["name"]
@@ -99,7 +99,7 @@ def get_item_findings(item, test):
                 static_finding=True,
                 dynamic_finding=False,
             )
-            vulnerability_ids = list()
+            vulnerability_ids = []
             if vuln_id:
                 vulnerability_ids.append(vuln_id)
             if vulnerability_ids:

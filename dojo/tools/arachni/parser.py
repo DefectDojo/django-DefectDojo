@@ -74,7 +74,7 @@ class ArachniParser:
                 resp += str(key) + ": " + str(value) + "\n\n"
 
         resp += "\n\n\n" + force_str(respz["body"])
-        unsaved_req_resp = list()
+        unsaved_req_resp = []
 
         if request is not None and respz is not None:
             unsaved_req_resp.append({"req": req, "resp": resp})

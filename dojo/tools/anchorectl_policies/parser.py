@@ -27,7 +27,7 @@ class AnchoreCTLPoliciesParser:
             data = json.loads(content)
 
         find_date = datetime.now()
-        items = list()
+        items = []
         try:
             for image in data:
                 if image['detail'] is not None:

@@ -307,7 +307,7 @@ def identify_view(request):
 
 
 def finding_querys(request, prod):
-    filters = dict()
+    filters = {}
     findings_query = Finding.objects.filter(test__engagement__product=prod)
     # prefetch only what's needed to avoid lots of repeated queries
     findings_query = findings_query.prefetch_related(
@@ -376,7 +376,7 @@ def finding_querys(request, prod):
 
 
 def endpoint_querys(request, prod):
-    filters = dict()
+    filters = {}
     endpoints_query = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
                                                      finding__severity__in=(
                                                          'Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
@@ -474,7 +474,7 @@ def view_product_metrics(request, pid):
 
     inactive_engs_page = get_page_items(request, result.qs, 10)
 
-    filters = dict()
+    filters = {}
     if view == 'Finding':
         filters = finding_querys(request, prod)
     elif view == 'Endpoint':
