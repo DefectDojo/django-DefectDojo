@@ -3159,33 +3159,34 @@ class Finding(models.Model):
                 st = dojo_meta.value.strip()
                 if st:
                     return st.lower()
-        return 'github'
+        return ''
 
-    def bitbucket_public_prepare_scm_base_link(self, uri):
-        # bitbucket public (https://bitbucket.org) url template for browse is:
-        # https://bitbucket.org/<username>/<repository-slug>
+    def scm_public_prepare_base_link(self, uri):
+        # scm public (https://scm-domain.org) url template for browse is:
+        # https://scm-domain.org/<username>/<repository-slug>
         # but when you get repo url for git, its template is:
-        # https://bitbucket.org/<username>/<repository-slug>.git
+        # https://scm-domain.org/<username>/<repository-slug>.git
         # so to create browser url - git url should be recomposed like below:
 
         parts_uri = uri.split('.git')
         return parts_uri[0]
 
-    def bitbucket_public_prepare_scm_link(self, uri):
+    def git_public_prepare_scm_link(self, uri, scm_type):
         # if commit hash or branch/tag is set for engagement/test -
         # hash or branch/tag should be appended to base browser link
+        intermediate_path = '/blob/' if scm_type in ['github', 'gitlab'] else '/src/'
 
-        link = self.bitbucket_public_prepare_scm_base_link(uri)
+        link = self.scm_public_prepare_base_link(uri)
         if self.test.commit_hash:
-            link += '/src/' + self.test.commit_hash + '/' + self.file_path
+            link += intermediate_path + self.test.commit_hash + '/' + self.file_path
         elif self.test.engagement.commit_hash:
-            link += '/src/' + self.test.engagement.commit_hash + '/' + self.file_path
+            link += intermediate_path + self.test.engagement.commit_hash + '/' + self.file_path
         elif self.test.branch_tag:
-            link += '/src/' + self.test.branch_tag + '/' + self.file_path
+            link += intermediate_path + self.test.branch_tag + '/' + self.file_path
         elif self.test.engagement.branch_tag:
-            link += '/src/' + self.test.engagement.branch_tag + '/' + self.file_path
+            link += intermediate_path + self.test.engagement.branch_tag + '/' + self.file_path
         else:
-            link += '/src/master/' + self.file_path
+            link += intermediate_path + 'master/' + self.file_path
 
         return link
 
@@ -3227,22 +3228,6 @@ class Finding(models.Model):
 
         return link
 
-    def github_prepare_scm_link(self, uri):
-        link = uri
-
-        if self.test.commit_hash:
-            link += '/blob/' + self.test.commit_hash + '/' + self.file_path
-        elif self.test.engagement.commit_hash:
-            link += '/blob/' + self.test.engagement.commit_hash + '/' + self.file_path
-        elif self.test.branch_tag:
-            link += '/blob/' + self.test.branch_tag + '/' + self.file_path
-        elif self.test.engagement.branch_tag:
-            link += '/blob/' + self.test.engagement.branch_tag + '/' + self.file_path
-        else:
-            link += '/' + self.file_path
-
-        return link
-
     def get_file_path_with_raw_link(self):
         if self.file_path is None:
             return None
@@ -3250,12 +3235,12 @@ class Finding(models.Model):
         link = self.test.engagement.source_code_management_uri
         scm_type = self.get_scm_type()
         if (self.test.engagement.source_code_management_uri is not None):
-            if scm_type == 'github' or ("https://github.com/" in self.test.engagement.source_code_management_uri):
-                link = self.github_prepare_scm_link(link)
-            elif scm_type == 'bitbucket-standalone':
+            if scm_type == 'bitbucket-standalone':
                 link = self.bitbucket_standalone_prepare_scm_link(link)
-            elif scm_type == 'bitbucket':
-                link = self.bitbucket_public_prepare_scm_link(link)
+            elif scm_type in ['github', 'gitlab', 'gitea', 'codeberg', 'bitbucket']:
+                link = self.git_public_prepare_scm_link(link, scm_type)
+            elif 'https://github.com/' in self.test.engagement.source_code_management_uri:
+                link = self.git_public_prepare_scm_link(link, 'github')
             else:
                 link += '/' + self.file_path
         else:
@@ -3263,7 +3248,7 @@ class Finding(models.Model):
 
         # than - add line part to browser url
         if self.line:
-            if scm_type == 'github' or scm_type == 'gitlab':
+            if scm_type in ['github', 'gitlab', 'gitea', 'codeberg'] or 'https://github.com/' in self.test.engagement.source_code_management_uri:
                 link = link + '#L' + str(self.line)
             elif scm_type == 'bitbucket-standalone':
                 link = link + '#' + str(self.line)
