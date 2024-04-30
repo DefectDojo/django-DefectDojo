@@ -6,7 +6,7 @@ from dojo.models import Finding
 __author__ = "mwager"
 
 
-class KiuwanSCAParser(object):
+class KiuwanSCAParser:
     SEVERITY = {
         "-": "Low",
         "LOW": "Low",
