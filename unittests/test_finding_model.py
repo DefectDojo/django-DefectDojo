@@ -214,6 +214,53 @@ class TestFindingModel(DojoTestCase):
 
         self.assertEqual('<a href=\"https://bb.example.com/users/some-user/repos/some-test-repo/browse/some-folder/some-file.ext?at=some-branch#5432" target=\"_blank\" title=\"some-folder/some-file.ext\">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
 
+    def test_get_file_path_with_link_and_source_code_management_uri_gitea_or_codeberg_project_with_no_details_and_line(self):
+        # checks that for gitea and codeberg in custom field
+        # dojo makes correct url
+
+        # create scm-type custom field with value "gitea"
+        product_type = self.create_product_type('test_product_type')
+        product = self.create_product(name='test_product', prod_type=product_type)
+        product_metadata = DojoMeta(product=product, name="scm-type", value="gitea")
+        product_metadata.save()
+
+        # create finding with scm uri line
+        test = Test()
+        engagement = Engagement()
+        engagement.product = product
+        test.engagement = engagement
+        finding = Finding()
+        finding.test = test
+        finding.file_path = 'some-folder/some-file.ext'
+        finding.line = 5432
+
+        engagement.source_code_management_uri = 'https://bb.example.com/some-test-user/some-test-repo.git'
+        self.assertEqual('<a href=\"https://bb.example.com/some-test-user/some-test-repo/src/master/some-folder/some-file.ext#L5432" target=\"_blank\" title=\"some-folder/some-file.ext\">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+
+    def test_get_file_path_with_link_and_source_code_management_uri_gitea_or_codeberg_project_with_commithash_and_line(self):
+        # checks that for gitea and codeberg in custom field  and existing commit hash in finding
+        # dojo makes correct url
+
+        # create scm-type custom field with value "gitea"
+        product_type = self.create_product_type('test_product_type')
+        product = self.create_product(name='test_product', prod_type=product_type)
+        product_metadata = DojoMeta(product=product, name="scm-type", value="gitea")
+        product_metadata.save()
+
+        # create finding with scm uri and commit hash, branch and line
+        test = Test()
+        engagement = Engagement()
+        engagement.product = product
+        test.engagement = engagement
+        engagement.commit_hash = "some-commit-hash"
+        finding = Finding()
+        finding.test = test
+        finding.file_path = 'some-folder/some-file.ext'
+        finding.line = 5432
+
+        engagement.source_code_management_uri = 'https://bb.example.com/some-test-user/some-test-repo.git'
+        self.assertEqual('<a href=\"https://bb.example.com/some-test-user/some-test-repo/src/some-commit-hash/some-folder/some-file.ext#L5432" target=\"_blank\" title=\"some-folder/some-file.ext\">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+
     def test_get_file_path_with_xss_attack(self):
         test = Test()
         engagement = Engagement()

@@ -24,7 +24,7 @@ For Interactive Engagement it needs to be the URL including the branch:
 For CI/CD Engagement, where user could set commit hash, branch/tag and code line it should look like examples below:
 - for GitHub - like https://github.com/DefectDojo/django-DefectDojo 
 - for GitLab - like https://gitlab.com/gitlab-org/gitlab
-- for public BitBucket - like https://bitbucket.org/some-user/some-project.git (like git clone url)
+- for public BitBucket, Gitea and Codeberg - like https://bitbucket.org/some-user/some-project.git (like git clone url)
 - for standalone/onpremise BitBucket https://bb.example.com/scm/some-project.git or https://bb.example.com/scm/some-user-name/some-repo.git for user public repo (like git clone url)
 
 If user does not set commit hash or branch/tag in appropriate fields of CI/CD Engagement edit form, the URL should look like in Interactive Engagement edit form.
@@ -39,7 +39,7 @@ Product SCM type add:
 
 ![Product scm type](../../../static/images/product-scm-type_1.png)
 
-Possible SCM types could be 'github', 'gitlab', 'bitbucket', 'bitbucket-standalone' or nothing (for default github).
+Possible SCM types could be 'github', 'gitlab', 'bitbucket', 'bitbucket-standalone', 'gitea', 'codeberg' or nothing (for default github).
 
 
 ## Link in Finding
