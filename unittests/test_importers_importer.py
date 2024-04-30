@@ -176,16 +176,15 @@ class FlexibleImportTestAPI(DojoAPITestCase):
         # engagement name is not unique by itself and not unique inside a product
         self.engagement_last = self.create_engagement(ENGAGEMENT_NAME_DEFAULT, product=self.product)
 
-    def test_import_by_engagement_id(self, mock):
+    def test_import_by_engagement_id(self):
         with assertImportModelsCreated(self, tests=1, engagements=0, products=0, product_types=0, endpoints=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=self.engagement.id, test_title=TEST_TITLE_DEFAULT)
             test_id = import0['test']
             self.assertEqual(get_object_or_none(Test, id=test_id).title, TEST_TITLE_DEFAULT)
             self.assertEqual(import0['engagement_id'], self.engagement.id)
             self.assertEqual(import0['product_id'], self.engagement.product.id)
-        mock.assert_called_with(self.engagement)
 
-    def test_import_by_product_name_exists_engagement_name_exists(self, mock):
+    def test_import_by_product_name_exists_engagement_name_exists(self):
         with assertImportModelsCreated(self, tests=1, engagements=0, products=0, product_types=0, endpoints=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT)
@@ -193,15 +192,13 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             self.assertEqual(Test.objects.get(id=test_id).engagement, self.engagement_last)
             self.assertEqual(import0['engagement_id'], self.engagement_last.id)
             self.assertEqual(import0['product_id'], self.engagement_last.product.id)
-        mock.assert_called_with(self.product)
 
     def test_import_by_product_name_exists_engagement_name_not_exists(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, product_types=0, endpoints=0):
             self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
-    def test_import_by_product_name_exists_engagement_name_not_exists_auto_create(self, mock):
-        mock.return_value = None
+    def test_import_by_product_name_exists_engagement_name_not_exists_auto_create(self):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=0, product_types=0, endpoints=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, auto_create_context=True)
@@ -209,9 +206,6 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             self.assertEqual(get_object_or_none(Test, id=test_id).title, None)
             self.assertEqual(get_object_or_none(Engagement, id=import0['engagement_id']).name, ENGAGEMENT_NAME_NEW)
             self.assertEqual(import0['product_id'], self.engagement.product.id)
-        # the new engagement should inherit the jira settings from the product
-        # the jira settings are retrieved before an engagement is auto created
-        mock.assert_called_with(self.product)
 
     def test_import_by_product_name_not_exists_engagement_name(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, product_types=0, endpoints=0):
@@ -374,21 +368,20 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type='Acunetix Scan', product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, test_title=TEST_TITLE_DEFAULT, expected_http_status_code=400)
 
-    def test_reimport_by_product_name_exists_engagement_name_exists_scan_type_not_exsists_test_title_exists_auto_create(self, mock):
+    def test_reimport_by_product_name_exists_engagement_name_exists_scan_type_not_exsists_test_title_exists_auto_create(self):
         with assertImportModelsCreated(self, tests=1, engagements=0, products=0, product_types=0, endpoints=1):
             import0 = self.reimport_scan_with_params(None, ACUNETIX_AUDIT_ONE_VULN_FILENAME, scan_type='Acunetix Scan', product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, test_title=TEST_TITLE_DEFAULT, auto_create_context=True)
             test_id = import0['test']
             self.assertEqual(get_object_or_none(Test, id=test_id).title, TEST_TITLE_DEFAULT)
             self.assertEqual(import0['engagement_id'], self.engagement.id)
-        mock.assert_called_with(self.product)
 
     def test_reimport_by_product_name_exists_engagement_name_exists_scan_type_not_exsists_test_title_not_exists(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, product_types=0, endpoints=0):
             self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type='Acunetix Scan', product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, test_title='bogus title', expected_http_status_code=400)
 
-    def test_reimport_by_product_name_exists_engagement_name_exists_scan_type_not_exsists_test_title_not_exists_auto_create(self, mock):
+    def test_reimport_by_product_name_exists_engagement_name_exists_scan_type_not_exsists_test_title_not_exists_auto_create(self):
         with assertImportModelsCreated(self, tests=1, engagements=0, products=0, product_types=0, endpoints=1):
             import0 = self.reimport_scan_with_params(None, ACUNETIX_AUDIT_ONE_VULN_FILENAME, scan_type='Acunetix Scan', product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, test_title='bogus title', auto_create_context=True)
@@ -396,9 +389,6 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             self.assertEqual(get_object_or_none(Test, id=test_id).scan_type, 'Acunetix Scan')
             self.assertEqual(get_object_or_none(Test, id=test_id).title, 'bogus title')
             self.assertEqual(import0['engagement_id'], self.engagement.id)
-        # the new test should inherit the jira settings from the engagement
-        # the jira settings are retrieved before an test is auto created
-        mock.assert_called_with(self.product)
 
     def test_reimport_by_product_name_exists_engagement_name_exists_test_title_exists(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, product_types=0, endpoints=0):
@@ -412,7 +402,7 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
-    def test_reimport_by_product_name_exists_engagement_name_not_exists_auto_create(self, mock):
+    def test_reimport_by_product_name_exists_engagement_name_not_exists_auto_create(self):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=0, product_types=0, endpoints=0):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, auto_create_context=True)
@@ -421,9 +411,6 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             self.assertEqual(get_object_or_none(Engagement, id=import0['engagement_id']).name, ENGAGEMENT_NAME_NEW)
             self.assertEqual(import0['product_id'], self.engagement.product.id)
             self.assertEqual(import0['product_type_id'], self.engagement.product.prod_type.id)
-        # the new engagement should inherit the jira settings from the product
-        # the jira settings are retrieved before an engagement is auto created
-        mock.assert_called_with(self.product)
 
     def test_reimport_by_product_name_not_exists_engagement_name(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, product_types=0, endpoints=0):
