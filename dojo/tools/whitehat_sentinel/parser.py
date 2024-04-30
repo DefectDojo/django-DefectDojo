@@ -28,7 +28,7 @@ class WhiteHatSentinelParser:
         findings_collection = json.load(file)
 
         if not findings_collection.keys():
-            return list()
+            return []
 
         # Make sure the findings key exists in the dictionary and that it is
         # not null or an empty list
@@ -198,7 +198,7 @@ class WhiteHatSentinelParser:
             test: The test ID that the DefectDojo finding should be associated with
         Returns: A DefectDojo Finding object
         """
-        dupes = dict()
+        dupes = {}
 
         for whitehat_vuln in whitehat_sentinel_vulns:
             date_created = whitehat_vuln["found"].split("T")[0]

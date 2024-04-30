@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.db.models import Count, Q
 from django.db.models.expressions import Value
-from dojo.utils import add_breadcrumb, get_page_items
-from dojo.filters import ComponentFilter
+from dojo.utils import add_breadcrumb, get_page_items, get_system_setting
+from dojo.filters import ComponentFilter, ComponentFilterWithoutObjectLookups
 from dojo.components.sql_group_concat import Sql_GroupConcat
 from django.db import connection
 from django.contrib.postgres.aggregates import StringAgg
@@ -52,7 +52,9 @@ def components(request):
         "-total"
     )  # Default sort by total descending
 
-    comp_filter = ComponentFilter(request.GET, queryset=component_query)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = ComponentFilterWithoutObjectLookups if filter_string_matching else ComponentFilter
+    comp_filter = filter_class(request.GET, queryset=component_query)
     result = get_page_items(request, comp_filter.qs, 25)
 
     # Filter out None values for auto-complete

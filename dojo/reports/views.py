@@ -17,7 +17,7 @@ from django.core.exceptions import PermissionDenied
 from django.views import View
 
 from dojo.filters import ReportFindingFilter, EndpointReportFilter, \
-    EndpointFilter
+    EndpointFilter, EndpointFilterWithoutObjectLookups
 from dojo.forms import ReportOptionsForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Dojo_User, Endpoint, Risk_Acceptance
@@ -63,8 +63,9 @@ def report_builder(request):
                                         finding__duplicate=False,
                                         finding__out_of_scope=False,
                                         ).distinct()
-
-    endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
+    endpoints = filter_class(request.GET, queryset=endpoints, user=request.user)
 
     in_use_widgets = [ReportOptions(request=request)]
     available_widgets = [CoverPage(request=request),
@@ -435,7 +436,7 @@ def generate_report(request, obj, host_view=False):
         report_title = "Product Report"
         findings = ReportFindingFilter(request.GET, product=product, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
             test__engagement__product=product)))
-        ids = set(finding.id for finding in findings.qs)
+        ids = set(finding.id for finding in findings.qs)  # noqa: C401
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
         endpoints = Endpoint.objects.filter(product=product).distinct()
@@ -466,7 +467,7 @@ def generate_report(request, obj, host_view=False):
         template = 'dojo/engagement_pdf_report.html'
         report_title = "Engagement Report"
 
-        ids = set(finding.id for finding in findings.qs)
+        ids = set(finding.id for finding in findings.qs)  # noqa: C401
         tests = Test.objects.filter(finding__id__in=ids).distinct()
         endpoints = Endpoint.objects.filter(product=engagement.product).distinct()
 

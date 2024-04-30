@@ -6,11 +6,11 @@ from watson import search as watson
 from django.db.models import Q
 from dojo.forms import SimpleSearchForm
 from dojo.models import Finding, Finding_Template, Product, Test, Engagement, Languages
-from dojo.utils import add_breadcrumb, get_page_items, get_words_for_field
+from dojo.utils import add_breadcrumb, get_page_items, get_words_for_field, get_system_setting
 import re
 from dojo.finding.views import prefetch_for_findings
 from dojo.endpoint.views import prefetch_for_endpoints
-from dojo.filters import FindingFilter
+from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups
 from django.conf import settings
 import shlex
 import itertools
@@ -117,8 +117,9 @@ def simple_search(request):
 
             elif search_findings:
                 logger.debug('searching findings')
-
-                findings_filter = FindingFilter(request.GET, queryset=findings, user=request.user, pid=None, prefix='finding')
+                filter_string_matching = get_system_setting("filter_string_matching", False)
+                finding_filter_class = FindingFilterWithoutObjectLookups if filter_string_matching else FindingFilter
+                findings_filter = finding_filter_class(request.GET, queryset=findings, user=request.user, pid=None, prefix='finding')
                 # setting initial values for filters is not supported and discouraged: https://django-filter.readthedocs.io/en/stable/guide/tips.html#using-initial-values-as-defaults
                 # we could try to modify request.GET before generating the filter, but for now we'll leave it as is
 

@@ -33,7 +33,7 @@ class BlackduckBinaryAnalysisParser:
         return findings
 
     def ingest_findings(self, sorted_findings, test):
-        findings = dict()
+        findings = {}
         for i in sorted_findings:
             file_path = str(i.object_full_path)
             object_sha1 = i.object_sha1

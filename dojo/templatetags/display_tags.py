@@ -191,9 +191,10 @@ def percentage(fraction, value):
 
 @register.filter
 def format_epss(value):
-    if value is None:
+    try:
+        return f'{value:.2%}'
+    except (ValueError, TypeError):
         return 'N.A.'
-    return f'{value:.2%}'
 
 
 def asvs_calc_level(benchmark_score):
@@ -796,7 +797,7 @@ def first_vulnerability_id(finding):
 def additional_vulnerability_ids(finding):
     vulnerability_ids = finding.vulnerability_ids
     if vulnerability_ids and len(vulnerability_ids) > 1:
-        references = list()
+        references = []
         for vulnerability_id in vulnerability_ids[1:]:
             references.append(vulnerability_id)
         return references

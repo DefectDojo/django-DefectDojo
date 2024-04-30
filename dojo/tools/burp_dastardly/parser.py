@@ -23,7 +23,7 @@ class BurpDastardlyParser:
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):
-        items = list()
+        items = []
         for node in tree.findall("testsuite"):
             if int(node.attrib["failures"]) != 0:
                 name = node.attrib["name"]

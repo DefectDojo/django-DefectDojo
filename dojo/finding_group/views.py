@@ -1,8 +1,8 @@
-from dojo.utils import Product_Tab, add_breadcrumb, get_words_for_field, get_page_items
+from dojo.utils import Product_Tab, add_breadcrumb, get_words_for_field, get_page_items, get_system_setting
 from dojo.forms import DeleteFindingGroupForm, EditFindingGroupForm, FindingBulkUpdateForm
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import prefetch_for_findings
-from dojo.filters import FindingFilter
+from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.db.utils import DEFAULT_DB_ALIAS
@@ -25,13 +25,14 @@ def view_finding_group(request, fgid):
     finding_group = get_object_or_404(Finding_Group, pk=fgid)
     findings = finding_group.findings.all()
     edit_finding_group_form = EditFindingGroupForm(instance=finding_group)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    finding_filter_class = FindingFilterWithoutObjectLookups if filter_string_matching else FindingFilter
 
     show_product_column = True
     custom_breadcrumb = None
     product_tab = None
     jira_project = None
     github_config = None
-
     if finding_group.test.engagement.product.id:
         pid = finding_group.test.engagement.product.id
         product = get_object_or_404(Product, id=pid)
@@ -39,7 +40,7 @@ def view_finding_group(request, fgid):
         product_tab = Product_Tab(product, title="Findings", tab="findings")
         jira_project = jira_helper.get_jira_project(product)
         github_config = GITHUB_PKey.objects.filter(product=pid).first()
-        findings_filter = FindingFilter(request.GET, findings, user=request.user, pid=pid)
+        findings_filter = finding_filter_class(request.GET, findings, user=request.user, pid=pid)
     elif finding_group.test.engagement.id:
         eid = finding_group.test.engagement.id
         engagement = get_object_or_404(Engagement, id=eid)
@@ -47,7 +48,7 @@ def view_finding_group(request, fgid):
         product_tab = Product_Tab(engagement.product, title=engagement.name, tab="engagements")
         jira_project = jira_helper.get_jira_project(engagement)
         github_config = GITHUB_PKey.objects.filter(product__engagement=eid).first()
-        findings_filter = FindingFilter(request.GET, findings, user=request.user, eid=eid)
+        findings_filter = finding_filter_class(request.GET, findings, user=request.user, eid=eid)
 
     title_words = get_words_for_field(Finding, 'title')
     component_words = get_words_for_field(Finding, 'component_name')

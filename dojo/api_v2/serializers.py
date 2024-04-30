@@ -1725,7 +1725,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         # Save vulnerability ids and pop them
         if "vulnerability_id_set" in validated_data:
             vulnerability_id_set = validated_data.pop("vulnerability_id_set")
-            vulnerability_ids = list()
+            vulnerability_ids = []
             if vulnerability_id_set:
                 for vulnerability_id in vulnerability_id_set:
                     vulnerability_ids.append(
@@ -1792,6 +1792,13 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         return data
 
+    def validate_severity(self, value: str) -> str:
+        if value not in SEVERITIES:
+            raise serializers.ValidationError(
+                f"Severity must be one of the following: {SEVERITIES}"
+            )
+        return value
+
     def build_relational_field(self, field_name, relation_info):
         if field_name == "notes":
             return NoteSerializer, {"many": True, "read_only": True}
@@ -1799,8 +1806,11 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     @extend_schema_field(BurpRawRequestResponseSerializer)
     def get_request_response(self, obj):
-        # burp_req_resp = BurpRawRequestResponse.objects.filter(finding=obj)
+        # Not necessarily Burp scan specific - these are just any request/response pairs
         burp_req_resp = obj.burprawrequestresponse_set.all()
+        var = settings.MAX_REQRESP_FROM_API
+        if var > -1:
+            burp_req_resp = burp_req_resp[:var]
         burp_list = []
         for burp in burp_req_resp:
             request = burp.get_request()
@@ -1860,7 +1870,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         new_finding = super(TaggitSerializer, self).create(validated_data)
 
         if vulnerability_id_set:
-            vulnerability_ids = list()
+            vulnerability_ids = []
             for vulnerability_id in vulnerability_id_set:
                 vulnerability_ids.append(vulnerability_id["vulnerability_id"])
             validated_data["cve"] = vulnerability_ids[0]
@@ -1919,6 +1929,13 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         return data
 
+    def validate_severity(self, value: str) -> str:
+        if value not in SEVERITIES:
+            raise serializers.ValidationError(
+                f"Severity must be one of the following: {SEVERITIES}"
+            )
+        return value
+
 
 class VulnerabilityIdTemplateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -1950,7 +1967,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
         )
 
         if vulnerability_id_set:
-            vulnerability_ids = list()
+            vulnerability_ids = []
             for vulnerability_id in vulnerability_id_set:
                 vulnerability_ids.append(vulnerability_id["vulnerability_id"])
             validated_data["cve"] = vulnerability_ids[0]
@@ -1967,7 +1984,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
             vulnerability_id_set = validated_data.pop(
                 "vulnerability_id_template_set"
             )
-            vulnerability_ids = list()
+            vulnerability_ids = []
             if vulnerability_id_set:
                 for vulnerability_id in vulnerability_id_set:
                     vulnerability_ids.append(
@@ -1995,6 +2012,13 @@ class StubFindingSerializer(serializers.ModelSerializer):
         model = Stub_Finding
         fields = "__all__"
 
+    def validate_severity(self, value: str) -> str:
+        if value not in SEVERITIES:
+            raise serializers.ValidationError(
+                f"Severity must be one of the following: {SEVERITIES}"
+            )
+        return value
+
 
 class StubFindingCreateSerializer(serializers.ModelSerializer):
     test = serializers.PrimaryKeyRelatedField(queryset=Test.objects.all())
@@ -2005,6 +2029,13 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "reporter": {"default": serializers.CurrentUserDefault()},
         }
+
+    def validate_severity(self, value: str) -> str:
+        if value not in SEVERITIES:
+            raise serializers.ValidationError(
+                f"Severity must be one of the following: {SEVERITIES}"
+            )
+        return value
 
 
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):

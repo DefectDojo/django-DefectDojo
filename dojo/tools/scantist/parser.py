@@ -77,7 +77,7 @@ class ScantistParser:
                 finding.unsaved_vulnerability_ids = [vulnerability_id]
             return finding
 
-        items = dict()
+        items = {}
         for node in tree:
             item = get_findings(node, test)
 

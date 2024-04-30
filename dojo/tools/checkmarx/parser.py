@@ -47,12 +47,12 @@ class CheckmarxParser:
         cxscan = ElementTree.parse(filename)
         root = cxscan.getroot()
 
-        dupes = dict()
-        language_list = dict()
+        dupes = {}
+        language_list = {}
         #  Dictionary to hold the vuln_id_from_tool values:
         #  - key: the concatenated aggregate keys
         #  - value: a list of vuln_id_from_tool
-        vuln_ids_from_tool = dict()
+        vuln_ids_from_tool = {}
         for query in root.findall("Query"):
             _name, _cwe, categories, _queryId = self.getQueryElements(query)
             language = ""

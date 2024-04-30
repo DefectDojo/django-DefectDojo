@@ -26,7 +26,7 @@ class BrakemanParser:
             data = json.loads(str(tree, "utf-8"))
         except BaseException:
             data = json.loads(tree)
-        dupes = dict()
+        dupes = {}
         find_date = parser.parse(data["scan_info"]["end_time"])
 
         for item in data["warnings"]:

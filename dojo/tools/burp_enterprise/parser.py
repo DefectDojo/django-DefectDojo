@@ -70,7 +70,7 @@ class BurpEnterpriseParser:
 
     # Get the endpoints and severities associated with each vulnerability
     def pre_allocate_items(self, tree):
-        items = list()
+        items = []
         endpoint_text = tree.xpath(
             "/html/body/div/div[contains(@class, 'section')]/h1"
         )
@@ -97,7 +97,7 @@ class BurpEnterpriseParser:
                 else:
                     endpoint = item_list[0].text.strip()
                     severity = item_list[1].text.strip()
-                    vuln = dict()
+                    vuln = {}
                     vuln["Severity"] = severity
                     vuln["Title"] = title
                     vuln["Description"] = ""
@@ -119,7 +119,7 @@ class BurpEnterpriseParser:
             "/html/body/div/div[contains(@class, 'section details')]/div[contains(@class, 'issue-container')]"
         )
         if len(vulns) == 0:
-            return list()
+            return []
 
         dict_index = 0
         description = ["Issue detail:", "Issue description"]
@@ -200,7 +200,7 @@ class BurpEnterpriseParser:
         # Dictonary to hold the aggregated findings with:
         #  - key: the concatenated aggregate keys
         #  - value: the finding
-        dupes = dict()
+        dupes = {}
         for details in items:
             if details.get("Description") == "":
                 continue
@@ -234,14 +234,14 @@ class BurpEnterpriseParser:
             if len(details.get("Request")) > 0:
                 requests = details.get("Request").split("SPLITTER")[:-1]
                 responses = details.get("Response").split("SPLITTER")[:-1]
-                unsaved_req_resp = list()
+                unsaved_req_resp = []
                 for index in range(0, len(requests)):
                     unsaved_req_resp.append(
                         {"req": requests[index], "resp": responses[index]}
                     )
                 find.unsaved_req_resp = unsaved_req_resp
 
-            find.unsaved_endpoints = list()
+            find.unsaved_endpoints = []
             dupes[aggregateKeys] = find
 
             for url in details.get("Endpoint"):

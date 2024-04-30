@@ -200,6 +200,8 @@ env = environ.FileAwareEnv(
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
     DD_SIMILAR_FINDINGS_MAX_RESULTS=(int, 25),
+    # The maximum number of request/response pairs to return from the API. Values <0 return all pairs.
+    DD_MAX_REQRESP_FROM_API=(int, -1),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
     DD_JIRA_SSL_VERIFY=(bool, True),
     # You can set extra Jira issue types via a simple env var that supports a csv format, like "Work Item,Vulnerability"
@@ -233,7 +235,6 @@ env = environ.FileAwareEnv(
     DD_FEATURE_FINDING_GROUPS=(bool, True),
     DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
     DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/'),
-
     # Initial behaviour in Defect Dojo was to delete all duplicates when an original was deleted
     # New behaviour is to leave the duplicates in place, but set the oldest of duplicates as new original
     # Set to True to revert to the old behaviour where all duplicates are deleted
@@ -599,6 +600,7 @@ SLA_BUSINESS_DAYS = env('DD_SLA_BUSINESS_DAYS')  # Use business days to calculat
 
 SEARCH_MAX_RESULTS = env('DD_SEARCH_MAX_RESULTS')
 SIMILAR_FINDINGS_MAX_RESULTS = env('DD_SIMILAR_FINDINGS_MAX_RESULTS')
+MAX_REQRESP_FROM_API = env('DD_MAX_REQRESP_FROM_API')
 MAX_AUTOCOMPLETE_WORDS = env('DD_MAX_AUTOCOMPLETE_WORDS')
 
 LOGIN_EXEMPT_URLS = (
@@ -816,7 +818,6 @@ INSTALLED_APPS = (
     'polymorphic',  # provides admin templates
     'django.contrib.admin',
     'django.contrib.humanize',
-    'gunicorn',
     'auditlog',
     'dojo',
     'watson',
