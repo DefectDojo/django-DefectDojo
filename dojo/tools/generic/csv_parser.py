@@ -1,8 +1,10 @@
 import csv
 import hashlib
 import io
+
 from cvss import parser as cvss_parser
 from dateutil.parser import parse
+
 from dojo.models import Endpoint, Finding
 
 

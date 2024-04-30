@@ -33,7 +33,8 @@ class GenericJSONParser:
             required = {"title", "severity", "description"}
             missing = sorted(required.difference(item))
             if missing:
-                raise ValueError(f"Required fields are missing: {missing}")
+                msg = f"Required fields are missing: {missing}"
+                raise ValueError(msg)
 
             # check for allowed keys
             allowed = {
@@ -82,9 +83,8 @@ class GenericJSONParser:
             }.union(required)
             not_allowed = sorted(set(item).difference(allowed))
             if not_allowed:
-                raise ValueError(
-                    f"Not allowed fields are present: {not_allowed}"
-                )
+                msg = f"Not allowed fields are present: {not_allowed}"
+                raise ValueError(msg)
             finding = Finding(**item)
 
             # manage endpoints
