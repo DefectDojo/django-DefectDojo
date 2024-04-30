@@ -46,3 +46,4 @@ class TestAwsProwlerParser(DojoTestCase):
         self.assertEqual("Unused security groups", findings[6].title)
         self.assertEqual("Medium", findings[6].severity)
         self.assertEqual(1032, findings[6].cwe)
+
