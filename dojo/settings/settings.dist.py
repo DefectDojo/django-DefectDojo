@@ -1590,7 +1590,7 @@ LOGGING = {
         },
         'saml2': {
             'handlers': [rf'{LOGGING_HANDLER}'],
-            'level': f'{LOG_LEVEL}',
+            'level': str(LOG_LEVEL),
             'propagate': False,
         },
         'MARKDOWN': {
