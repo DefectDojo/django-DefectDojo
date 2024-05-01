@@ -302,7 +302,7 @@ class FlexibleImportTestAPI(DojoAPITestCase):
         with self.subTest('invalid engagement'):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
                 engagement=1254235, expected_http_status_code=400)
-            self.assertEqual(import0, ["Engagement '1254235' doesn''t exist"])
+            self.assertEqual(import0, ["Engagement '1254235' doesn't exist"])
 
         with self.subTest('invalid engagement, but exists in another product'):
             # random product to avoid collision with other tests
