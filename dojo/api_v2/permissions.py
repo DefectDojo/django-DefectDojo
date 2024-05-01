@@ -512,7 +512,7 @@ class UserHasMetaImportPermission(permissions.BasePermission):
             )
         elif product_id:
             # product_id doesn't exist
-            msg = f"product '{product_id}' doesn''t exist"
+            msg = f"product '{product_id}' doesn't exist"
             raise serializers.ValidationError(msg)
         else:
             msg = "Need product_id or product_name to perform import"
