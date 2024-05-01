@@ -2795,9 +2795,9 @@ class JIRAProjectForm(forms.ModelForm):
         if self.target == 'engagement':
             product_name = self.product.name if self.product else self.engagement.product.name if self.engagement.product else ''
 
-            self.fields['project_key'].widget = forms.TextInput(attrs={'placeholder': 'JIRA settings inherited from product 'f'{product_name}'''})
-            self.fields['project_key'].help_text = 'JIRA settings are inherited from product 'f'{product_name}'', unless configured differently here.'
-            self.fields['jira_instance'].help_text = 'JIRA settings are inherited from product 'f'{product_name}'' , unless configured differently here.'
+            self.fields['project_key'].widget = forms.TextInput(attrs={'placeholder': f"JIRA settings inherited from product '{product_name}'"})
+            self.fields['project_key'].help_text = f"JIRA settings are inherited from product '{product_name}', unless configured differently here."
+            self.fields['jira_instance'].help_text = f"JIRA settings are inherited from product '{product_name}' , unless configured differently here."
 
             # if we don't have an instance, django will insert a blank empty one :-(
             # so we have to check for id to make sure we only trigger this when there is a real instance from db
