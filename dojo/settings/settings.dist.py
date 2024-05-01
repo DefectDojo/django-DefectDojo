@@ -931,7 +931,7 @@ if SAML2_ENABLED:
         'xmlsec_binary': '/usr/bin/xmlsec1',
 
         # your entity id, usually your subdomain plus the url to the metadata view
-        'entityid': f'{SAML2_ENTITY_ID}',
+        'entityid': str(SAML2_ENTITY_ID),
 
         # directory with attribute mapping
         'attribute_map_dir': path.join(BASEDIR, 'attribute-maps'),
