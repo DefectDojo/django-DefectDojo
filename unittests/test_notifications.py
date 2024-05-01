@@ -2,7 +2,10 @@ from unittest.mock import patch
 
 from auditlog.context import set_actor
 from django.test import override_settings
+from django.urls import reverse
 from django.utils import timezone
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient, APITestCase
 
 from dojo.models import (
     DEFAULT_NOTIFICATION,
@@ -374,3 +377,19 @@ class TestNotificationTriggers(DojoTestCase):
         with set_actor(self.notification_tester):
             prod_type.delete()
         self.assertEqual(mock.call_args_list[-1].kwargs['description'], 'The product type "notif prod type" was deleted')
+
+
+class TestNotificationTriggersApi(APITestCase):
+    fixtures = ['dojo_testdata.json']
+
+    def setUp(self):
+        token = Token.objects.get(user__username='admin')
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+    @patch('dojo.notifications.helper.process_notifications')
+    @override_settings(ENABLE_AUDITLOG=True)
+    def test_auditlog_on(self, mock):
+        prod_type = Product_Type.objects.create(name='notif prod type API')
+        self.client.delete(reverse('product_type-detail', args=(prod_type.pk,)), format='json')
+        self.assertEqual(mock.call_args_list[-1].kwargs['description'], 'The product type "notif prod type API" was deleted by admin')

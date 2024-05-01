@@ -857,7 +857,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'dojo.middleware.AdditionalHeaderMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'watson.middleware.SearchContextMiddleware',
-    'auditlog.middleware.AuditlogMiddleware',
+    'dojo.middleware.AuditlogMiddleware',
     'crum.CurrentRequestUserMiddleware',
     'dojo.request_cache.middleware.RequestCacheMiddleware',
 ]
