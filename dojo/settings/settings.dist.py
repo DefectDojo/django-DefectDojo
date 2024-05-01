@@ -1573,7 +1573,7 @@ LOGGING = {
         },
         'celery': {
             'handlers': [rf'{LOGGING_HANDLER}'],
-            'level': f'{LOG_LEVEL}',
+            'level': str(LOG_LEVEL),
             'propagate': False,
             # workaround some celery logging known issue
             'worker_hijack_root_logger': False,
