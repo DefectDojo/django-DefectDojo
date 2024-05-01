@@ -453,7 +453,7 @@ class UserHasImportPermission(permissions.BasePermission):
             )
         elif engagement_id:
             # engagement_id doesn't exist
-            msg = f"Engagement '{engagement_id}' doesn''t exist"
+            msg = f"Engagement '{engagement_id}' doesn't exist"
             raise serializers.ValidationError(msg)
 
         if not auto_create_context:
