@@ -31,7 +31,7 @@ def add_alerts(self, runinterval):
     upcoming_engagements = Engagement.objects.filter(target_start__gt=now + timedelta(days=3), target_start__lt=now + timedelta(days=3) + runinterval).order_by('target_start')
     for engagement in upcoming_engagements:
         create_notification(event='upcoming_engagement',
-                            title='Upcoming engagement: %s' % engagement.name,
+                            title=f'Upcoming engagement: {engagement.name}',
                             engagement=engagement,
                             recipients=[engagement.lead],
                             url=reverse('view_engagement', args=(engagement.id,)))
@@ -42,7 +42,7 @@ def add_alerts(self, runinterval):
         status='In Progress').order_by('-target_end')
     for eng in stale_engagements:
         create_notification(event='stale_engagement',
-                            title='Stale Engagement: %s' % eng.name,
+                            title=f'Stale Engagement: {eng.name}',
                             description='The engagement "{}" is stale. Target end was {}.'.format(eng.name, eng.target_end.strftime("%b. %d, %Y")),
                             url=reverse('view_engagement', args=(eng.id,)),
                             recipients=[eng.lead])

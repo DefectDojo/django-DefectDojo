@@ -383,7 +383,7 @@ def copy_test(request, tid):
                 'Test Copied successfully.',
                 extra_tags='alert-success')
             create_notification(event='other',
-                                title='Copying of %s' % test.title,
+                                title=f'Copying of {test.title}',
                                 description=f'The test "{test.title}" was copied by {request.user} to {engagement.name}',
                                 product=product,
                                 url=request.build_absolute_uri(reverse('view_test', args=(test_copy.id,))),
@@ -456,7 +456,7 @@ def test_ics(request, tid):
     output = cal.serialize()
     response = HttpResponse(content=output)
     response['Content-Type'] = 'text/calendar'
-    response['Content-Disposition'] = 'attachment; filename=%s.ics' % test.test_type.name
+    response['Content-Disposition'] = f'attachment; filename={test.test_type.name}.ics'
     return response
 
 
@@ -739,7 +739,7 @@ def add_temp_finding(request, tid, fid):
                     if jform.cleaned_data.get('push_to_jira'):
                         jira_helper.push_to_jira(new_finding)
                 else:
-                    add_error_message_to_response('jira form validation failed: %s' % jform.errors)
+                    add_error_message_to_response(f'jira form validation failed: {jform.errors}')
             if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
                 burp_rr = BurpRawRequestResponse(
                     finding=new_finding,
@@ -910,7 +910,7 @@ def re_import_scan_results(request, tid):
                                                 apply_tags_to_findings=apply_tags_to_findings, apply_tags_to_endpoints=apply_tags_to_endpoints)
             except Exception as e:
                 logger.exception(e)
-                add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
+                add_error_message_to_response(f'An exception error occurred during the report import:{str(e)}')
                 error = True
 
             if not error:

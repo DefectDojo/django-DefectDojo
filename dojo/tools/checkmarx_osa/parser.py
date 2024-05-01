@@ -122,6 +122,5 @@ class CheckmarxOsaParser:
     def check_mandatory(self, item, mandatory_vulnerability_fields):
         for field in mandatory_vulnerability_fields:
             if field not in item:
-                raise ValueError(
-                    "Invalid format: missing mandatory field %s" % field
-                )
+                msg = f"Invalid format: missing mandatory field {field}"
+                raise ValueError(msg)

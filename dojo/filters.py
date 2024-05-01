@@ -101,7 +101,7 @@ EARLIEST_FINDING = None
 
 def custom_filter(queryset, name, value):
     values = value.split(',')
-    filter = ('%s__in' % (name))
+    filter = (f'{name}__in')
     return queryset.filter(Q(**{filter: values}))
 
 
@@ -322,14 +322,14 @@ def get_tags_model_from_field_name(field):
     try:
         parts = field.split('__')
         model_name = parts[-2]
-        return apps.get_model('dojo.%s' % model_name, require_ready=True), exclude
+        return apps.get_model(f'dojo.{model_name}', require_ready=True), exclude
     except Exception:
         return None, exclude
 
 
 def get_tags_label_from_model(model):
     if model:
-        return 'Tags (%s)' % model.__name__.title()
+        return f'Tags ({model.__name__.title()})'
     else:
         return 'Tags (Unknown)'
 
@@ -602,32 +602,32 @@ class DateRangeFilter(ChoiceFilter):
     options = {
         None: (_('Any date'), lambda qs, name: qs.all()),
         1: (_('Today'), lambda qs, name: qs.filter(**{
-            '%s__year' % name: now().year,
-            '%s__month' % name: now().month,
-            '%s__day' % name: now().day
+            f'{name}__year': now().year,
+            f'{name}__month': now().month,
+            f'{name}__day': now().day
         })),
         2: (_('Past 7 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=7)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+            f'{name}__gte': _truncate(now() - timedelta(days=7)),
+            f'{name}__lt': _truncate(now() + timedelta(days=1)),
         })),
         3: (_('Past 30 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=30)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+            f'{name}__gte': _truncate(now() - timedelta(days=30)),
+            f'{name}__lt': _truncate(now() + timedelta(days=1)),
         })),
         4: (_('Past 90 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=90)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+            f'{name}__gte': _truncate(now() - timedelta(days=90)),
+            f'{name}__lt': _truncate(now() + timedelta(days=1)),
         })),
         5: (_('Current month'), lambda qs, name: qs.filter(**{
-            '%s__year' % name: now().year,
-            '%s__month' % name: now().month
+            f'{name}__year': now().year,
+            f'{name}__month': now().month
         })),
         6: (_('Current year'), lambda qs, name: qs.filter(**{
-            '%s__year' % name: now().year,
+            f'{name}__year': now().year,
         })),
         7: (_('Past year'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=365)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+            f'{name}__gte': _truncate(now() - timedelta(days=365)),
+            f'{name}__lt': _truncate(now() + timedelta(days=1)),
         })),
     }
 
@@ -648,48 +648,48 @@ class DateRangeOmniFilter(ChoiceFilter):
     options = {
         None: (_('Any date'), lambda qs, name: qs.all()),
         1: (_('Today'), lambda qs, name: qs.filter(**{
-            '%s__year' % name: now().year,
-            '%s__month' % name: now().month,
-            '%s__day' % name: now().day
+            f'{name}__year': now().year,
+            f'{name}__month': now().month,
+            f'{name}__day': now().day
         })),
         2: (_('Next 7 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=7)),
+            f'{name}__gte': _truncate(now() + timedelta(days=1)),
+            f'{name}__lt': _truncate(now() + timedelta(days=7)),
         })),
         3: (_('Next 30 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=30)),
+            f'{name}__gte': _truncate(now() + timedelta(days=1)),
+            f'{name}__lt': _truncate(now() + timedelta(days=30)),
         })),
         4: (_('Next 90 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=90)),
+            f'{name}__gte': _truncate(now() + timedelta(days=1)),
+            f'{name}__lt': _truncate(now() + timedelta(days=90)),
         })),
         5: (_('Past 7 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=7)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+            f'{name}__gte': _truncate(now() - timedelta(days=7)),
+            f'{name}__lt': _truncate(now() + timedelta(days=1)),
         })),
         6: (_('Past 30 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=30)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+            f'{name}__gte': _truncate(now() - timedelta(days=30)),
+            f'{name}__lt': _truncate(now() + timedelta(days=1)),
         })),
         7: (_('Past 90 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=90)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+            f'{name}__gte': _truncate(now() - timedelta(days=90)),
+            f'{name}__lt': _truncate(now() + timedelta(days=1)),
         })),
         8: (_('Current month'), lambda qs, name: qs.filter(**{
-            '%s__year' % name: now().year,
-            '%s__month' % name: now().month
+            f'{name}__year': now().year,
+            f'{name}__month': now().month
         })),
         9: (_('Past year'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=365)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+            f'{name}__gte': _truncate(now() - timedelta(days=365)),
+            f'{name}__lt': _truncate(now() + timedelta(days=1)),
         })),
         10: (_('Current year'), lambda qs, name: qs.filter(**{
-            '%s__year' % name: now().year,
+            f'{name}__year': now().year,
         })),
         11: (_('Next year'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=365)),
+            f'{name}__gte': _truncate(now() + timedelta(days=1)),
+            f'{name}__lt': _truncate(now() + timedelta(days=365)),
         })),
     }
 
@@ -710,10 +710,10 @@ class ReportBooleanFilter(ChoiceFilter):
     options = {
         None: (_('Either'), lambda qs, name: qs.all()),
         1: (_('Yes'), lambda qs, name: qs.filter(**{
-            '%s' % name: True
+            f'{name}': True
         })),
         2: (_('No'), lambda qs, name: qs.filter(**{
-            '%s' % name: False
+            f'{name}': False
         })),
     }
 
@@ -781,8 +781,8 @@ class MetricsDateRangeFilter(ChoiceFilter):
             datetime(now().year, now().month, 1, 0, 0, 0))
         self.end_date = now()
         return qs.filter(**{
-            '%s__year' % name: self.start_date.year,
-            '%s__month' % name: self.start_date.month
+            f'{name}__year': self.start_date.year,
+            f'{name}__month': self.start_date.month
         })
 
     def current_year(self, qs, name):
@@ -790,15 +790,15 @@ class MetricsDateRangeFilter(ChoiceFilter):
             datetime(now().year, 1, 1, 0, 0, 0))
         self.end_date = now()
         return qs.filter(**{
-            '%s__year' % name: now().year,
+            f'{name}__year': now().year,
         })
 
     def past_x_days(self, qs, name, days):
         self.start_date = _truncate(now() - timedelta(days=days))
         self.end_date = _truncate(now() + timedelta(days=1))
         return qs.filter(**{
-            '%s__gte' % name: self.start_date,
-            '%s__lt' % name: self.end_date,
+            f'{name}__gte': self.start_date,
+            f'{name}__lt': self.end_date,
         })
 
     def past_seven_days(self, qs, name):

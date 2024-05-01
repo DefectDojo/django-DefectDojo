@@ -123,7 +123,7 @@ def delete_finding_group(request, fgid):
                                      extra_tags='alert-success')
 
                 create_notification(event='other',
-                                    title='Deletion of %s' % finding_group.name,
+                                    title=f'Deletion of {finding_group.name}',
                                     product=product,
                                     description=f'The finding group "{finding_group.name}" was deleted by {request.user}',
                                     url=request.build_absolute_uri(reverse('view_test', args=(finding_group.test.id,))),

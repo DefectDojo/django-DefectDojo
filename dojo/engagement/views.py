@@ -280,8 +280,8 @@ def edit_engagement(request, eid):
             if (new_status == "Cancelled" or new_status == "Completed"):
                 engagement.active = False
                 create_notification(event='close_engagement',
-                        title='Closure of %s' % engagement.name,
-                        description='The engagement "%s" was closed' % (engagement.name),
+                        title=f'Closure of {engagement.name}',
+                        description=f'The engagement "{engagement.name}" was closed',
                         engagement=engagement, url=reverse('engagement_all_findings', args=(engagement.id, ))),
             else:
                 engagement.active = True
@@ -362,7 +362,7 @@ def delete_engagement(request, eid):
                     message,
                     extra_tags='alert-success')
                 create_notification(event='other',
-                                    title='Deletion of %s' % engagement.name,
+                                    title=f'Deletion of {engagement.name}',
                                     product=product,
                                     description=f'The engagement "{engagement.name}" was deleted by {request.user}',
                                     url=request.build_absolute_uri(reverse('view_engagements', args=(product.id, ))),
@@ -405,7 +405,7 @@ def copy_engagement(request, eid):
                 'Engagement Copied successfully.',
                 extra_tags='alert-success')
             create_notification(event='other',
-                                title='Copying of %s' % engagement.name,
+                                title=f'Copying of {engagement.name}',
                                 description=f'The engagement "{engagement.name}" was copied by {request.user}',
                                 product=product,
                                 url=request.build_absolute_uri(reverse('view_engagement', args=(engagement_copy.id, ))),
@@ -884,7 +884,7 @@ class ImportScanResultsView(View):
 
             except Exception as e:
                 logger.exception(e)
-                add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
+                add_error_message_to_response(f'An exception error occurred during the report import:{str(e)}')
                 error = True
 
             # Save the credential to the test
@@ -917,8 +917,8 @@ def close_eng(request, eid):
         'Engagement closed successfully.',
         extra_tags='alert-success')
     create_notification(event='close_engagement',
-                        title='Closure of %s' % eng.name,
-                        description='The engagement "%s" was closed' % (eng.name),
+                        title=f'Closure of {eng.name}',
+                        description=f'The engagement "{eng.name}" was closed',
                         engagement=eng, url=reverse('engagement_all_findings', args=(eng.id, ))),
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
@@ -933,9 +933,9 @@ def reopen_eng(request, eid):
         'Engagement reopened successfully.',
         extra_tags='alert-success')
     create_notification(event='other',
-                        title='Reopening of %s' % eng.name,
+                        title=f'Reopening of {eng.name}',
                         engagement=eng,
-                        description='The engagement "%s" was reopened' % (eng.name),
+                        description=f'The engagement "{eng.name}" was reopened',
                         url=reverse('view_engagement', args=(eng.id, ))),
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
@@ -1051,7 +1051,7 @@ def add_risk_acceptance(request, eid, fid=None):
 
             return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
     else:
-        risk_acceptance_title_suggestion = 'Accept: %s' % finding
+        risk_acceptance_title_suggestion = f'Accept: {finding}'
         form = RiskAcceptanceForm(initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
 
     finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
@@ -1291,8 +1291,7 @@ def download_risk_acceptance(request, eid, raid):
     response = StreamingHttpResponse(
         FileIterWrapper(
             open(settings.MEDIA_ROOT + "/" + risk_acceptance.path.name, mode='rb')))
-    response['Content-Disposition'] = 'attachment; filename="%s"' \
-                                      % risk_acceptance.filename()
+    response['Content-Disposition'] = f'attachment; filename="{risk_acceptance.filename()}"'
     mimetype, _encoding = mimetypes.guess_type(risk_acceptance.path.name)
     response['Content-Type'] = mimetype
     return response
@@ -1361,7 +1360,7 @@ def engagement_ics(request, eid):
     output = cal.serialize()
     response = HttpResponse(content=output)
     response['Content-Type'] = 'text/calendar'
-    response['Content-Disposition'] = 'attachment; filename=%s.ics' % eng.name
+    response['Content-Disposition'] = f'attachment; filename={eng.name}.ics'
     return response
 
 

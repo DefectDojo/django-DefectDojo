@@ -1254,7 +1254,7 @@ def build_query(query_string, search_fields):
     for term in terms:
         or_query = None  # Query to search for a given term in each field
         for field_name in search_fields:
-            q = Q(**{"%s__icontains" % field_name: term})
+            q = Q(**{f"{field_name}__icontains": term})
 
             if or_query:
                 or_query = or_query | q
@@ -1400,7 +1400,7 @@ def process_notifications(request, note, parent_url, parent_title):
         event='user_mentioned',
         section=parent_title,
         note=note,
-        title='%s jotted a note' % request.user,
+        title=f'{request.user} jotted a note',
         url=parent_url,
         icon='commenting',
         recipients=users_to_notify)
@@ -1878,7 +1878,7 @@ def sla_compute_and_notify(*args, **kwargs):
             combined_notifications[pt] = {p: {kind: [notification]}}
 
     def _notification_title_for_finding(finding, kind, sla_age):
-        title = "Finding %s - " % (finding.id)
+        title = f"Finding {finding.id} - "
         if kind == 'breached':
             abs_sla_age = abs(sla_age)
             period = "day"
@@ -2051,7 +2051,7 @@ def get_words_for_field(model, fieldname):
 
     if models is not None:
         words = [
-            word for field_value in models.order_by().filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (field_value.split() if field_value else []) if len(word) > 2
+            word for field_value in models.order_by().filter(**{f'{fieldname}__isnull': False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (field_value.split() if field_value else []) if len(word) > 2
         ]
     else:
         words = []
@@ -2094,10 +2094,11 @@ def get_object_or_none(klass, *args, **kwargs):
 
     if not hasattr(queryset, 'get'):
         klass__name = klass.__name__ if isinstance(klass, type) else klass.__class__.__name__
-        raise ValueError(
+        msg = (
             "First argument to get_object_or_None() must be a Model, Manager, "
-            "or QuerySet, not '%s'." % klass__name
+            f"or QuerySet, not '{klass__name}'."
         )
+        raise ValueError(msg)
     try:
         return queryset.get(*args, **kwargs)
     except queryset.model.DoesNotExist:
@@ -2120,10 +2121,11 @@ def get_last_object_or_none(klass, *args, **kwargs):
 
     if not hasattr(queryset, 'get'):
         klass__name = klass.__name__ if isinstance(klass, type) else klass.__class__.__name__
-        raise ValueError(
+        msg = (
             "First argument to get_last_object_or_None() must be a Model, Manager, "
-            "or QuerySet, not '%s'." % klass__name
+            f"or QuerySet, not '{klass__name}'."
         )
+        raise ValueError(msg)
     try:
         results = queryset.filter(*args, **kwargs).order_by('id')
         logger.debug('last_object_or_none: %s', results.query)

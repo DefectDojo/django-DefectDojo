@@ -108,10 +108,10 @@ def is_push_all_issues(instance):
 def can_be_pushed_to_jira(obj, form=None):
     # logger.debug('can be pushed to JIRA: %s', finding_or_form)
     if not get_jira_project(obj):
-        return False, '%s cannot be pushed to jira as there is no jira project configuration for this product.' % to_str_typed(obj), 'error_no_jira_project'
+        return False, f'{to_str_typed(obj)} cannot be pushed to jira as there is no jira project configuration for this product.', 'error_no_jira_project'
 
     if not hasattr(obj, 'has_jira_issue'):
-        return False, '%s cannot be pushed to jira as there is no jira_issue attribute.' % to_str_typed(obj), 'error_no_jira_issue_attribute'
+        return False, f'{to_str_typed(obj)} cannot be pushed to jira as there is no jira_issue attribute.', 'error_no_jira_issue_attribute'
 
     if isinstance(obj, Stub_Finding):
         # stub findings don't have active/verified/etc and can always be pushed
@@ -142,16 +142,16 @@ def can_be_pushed_to_jira(obj, form=None):
             jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
 
             if jira_minimum_threshold and jira_minimum_threshold > Finding.get_number_severity(severity):
-                logger.debug('Finding below the minimum JIRA severity threshold (%s).' % System_Settings.objects.get().jira_minimum_severity)
-                return False, 'Finding below the minimum JIRA severity threshold (%s).' % System_Settings.objects.get().jira_minimum_severity, 'below_minimum_threshold'
+                logger.debug(f'Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).')
+                return False, f'Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).', 'below_minimum_threshold'
     elif isinstance(obj, Finding_Group):
         if not obj.findings.all():
-            return False, '%s cannot be pushed to jira as it is empty.' % to_str_typed(obj), 'error_empty'
+            return False, f'{to_str_typed(obj)} cannot be pushed to jira as it is empty.', 'error_empty'
         if 'Active' not in obj.status():
-            return False, '%s cannot be pushed to jira as it is not active.' % to_str_typed(obj), 'error_inactive'
+            return False, f'{to_str_typed(obj)} cannot be pushed to jira as it is not active.', 'error_inactive'
 
     else:
-        return False, '%s cannot be pushed to jira as it is of unsupported type.' % to_str_typed(obj), 'error_unsupported'
+        return False, f'{to_str_typed(obj)} cannot be pushed to jira as it is of unsupported type.', 'error_unsupported'
 
     return True, None, None
 
@@ -448,11 +448,11 @@ def jira_transition(jira, issue, transition_id):
     except JIRAError as jira_error:
         logger.debug('error transitioning jira issue ' + issue.key + ' ' + str(jira_error))
         logger.exception(jira_error)
-        alert_text = "JiraError HTTP %s" % jira_error.status_code
+        alert_text = f"JiraError HTTP {jira_error.status_code}"
         if jira_error.url:
-            alert_text += " url: %s" % jira_error.url
+            alert_text += f" url: {jira_error.url}"
         if jira_error.text:
-            alert_text += "\ntext: %s" % jira_error.text
+            alert_text += f"\ntext: {jira_error.text}"
         log_jira_generic_alert('error transitioning jira issue ' + issue.key, alert_text)
         return None
 

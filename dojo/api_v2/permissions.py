@@ -453,9 +453,8 @@ class UserHasImportPermission(permissions.BasePermission):
             )
         elif engagement_id:
             # engagement_id doesn't exist
-            raise serializers.ValidationError(
-                "Engagement '%s' doesn''t exist" % engagement_id
-            )
+            msg = f"Engagement '{engagement_id}' doesn''t exist"
+            raise serializers.ValidationError(msg)
 
         if not auto_create_context:
             raise_no_auto_create_import_validation_error(
@@ -513,9 +512,8 @@ class UserHasMetaImportPermission(permissions.BasePermission):
             )
         elif product_id:
             # product_id doesn't exist
-            raise serializers.ValidationError(
-                "product '%s' doesn''t exist" % product_id
-            )
+            msg = f"product '{product_id}' doesn''t exist"
+            raise serializers.ValidationError(msg)
         else:
             msg = "Need product_id or product_name to perform import"
             raise serializers.ValidationError(msg)
@@ -663,9 +661,8 @@ class UserHasReimportPermission(permissions.BasePermission):
             )
         elif test_id:
             # test_id doesn't exist
-            raise serializers.ValidationError(
-                "Test '%s' doesn't exist" % test_id
-            )
+            msg = f"Test '{test_id}' doesn't exist"
+            raise serializers.ValidationError(msg)
 
         if not auto_create_context:
             raise_no_auto_create_import_validation_error(
@@ -958,18 +955,16 @@ def raise_no_auto_create_import_validation_error(
         raise ValidationError(msg)
 
     if product_type_name and not product_type:
-        raise serializers.ValidationError(
-            "Product Type '%s' doesn't exist" % (product_type_name)
-        )
+        msg = f"Product Type '{product_type_name}' doesn't exist"
+        raise serializers.ValidationError(msg)
 
     if product_name and not product:
         if product_type_name:
             msg = f"Product '{product_name}' doesn't exist in Product_Type '{product_type_name}'"
             raise serializers.ValidationError(msg)
         else:
-            raise serializers.ValidationError(
-                "Product '%s' doesn't exist" % product_name
-            )
+            msg = f"Product '{product_name}' doesn't exist"
+            raise serializers.ValidationError(msg)
 
     if engagement_name and not engagement:
         msg = f"Engagement '{engagement_name}' doesn't exist in Product '{product_name}'"
@@ -1028,37 +1023,29 @@ def check_auto_create_permission(
 
     if product and product_name and engagement_name:
         if not user_has_permission(user, product, Permissions.Engagement_Add):
-            raise PermissionDenied(
-                "No permission to create engagements in product '%s'"
-                % product_name
-            )
+            msg = f"No permission to create engagements in product '{product_name}'"
+            raise PermissionDenied(msg)
 
         if not user_has_permission(
             user, product, Permissions.Import_Scan_Result
         ):
-            raise PermissionDenied(
-                "No permission to import scans into product '%s'"
-                % product_name
-            )
+            msg = f"No permission to import scans into product '{product_name}'"
+            raise PermissionDenied(msg)
 
         # all good
         return True
 
     if not product and product_name:
         if not product_type_name:
-            raise serializers.ValidationError(
-                "Product '%s' doesn't exist and no product_type_name provided to create the new product in"
-                % product_name
-            )
+            msg = f"Product '{product_name}' doesn't exist and no product_type_name provided to create the new product in"
+            raise serializers.ValidationError(msg)
 
         if not product_type:
             if not user_has_global_permission(
                 user, Permissions.Product_Type_Add
             ):
-                raise PermissionDenied(
-                    "No permission to create product_type '%s'"
-                    % product_type_name
-                )
+                msg = f"No permission to create product_type '{product_type_name}'"
+                raise PermissionDenied(msg)
             # new product type can be created with current user as owner, so
             # all objects in it can be created as well
             return True
@@ -1066,10 +1053,8 @@ def check_auto_create_permission(
             if not user_has_permission(
                 user, product_type, Permissions.Product_Type_Add_Product
             ):
-                raise PermissionDenied(
-                    "No permission to create products in product_type '%s'"
-                    % product_type
-                )
+                msg = f"No permission to create products in product_type '{product_type}'"
+                raise PermissionDenied(msg)
 
         # product can be created, so objects in it can be created as well
         return True

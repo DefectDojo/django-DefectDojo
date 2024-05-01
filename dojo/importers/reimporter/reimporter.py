@@ -203,14 +203,12 @@ class DojoDefaultReImporter:
                                 finding.component_version,
                             )
                             existing_note = finding.notes.filter(
-                                entry="Finding has skipped reactivation from %s re-upload with user decision do_not_reactivate."
-                                % scan_type,
+                                entry=f"Finding has skipped reactivation from {scan_type} re-upload with user decision do_not_reactivate.",
                                 author=user,
                             )
                             if len(existing_note) == 0:
                                 note = Notes(
-                                    entry="Finding has skipped reactivation from %s re-upload with user decision do_not_reactivate."
-                                    % scan_type,
+                                    entry=f"Finding has skipped reactivation from {scan_type} re-upload with user decision do_not_reactivate.",
                                     author=user,
                                 )
                                 note.save()
@@ -232,7 +230,7 @@ class DojoDefaultReImporter:
                     # don't dedupe before endpoints are added
                     finding.save(dedupe_option=False)
                     note = Notes(
-                        entry="Re-activated by %s re-upload." % scan_type, author=user
+                        entry=f"Re-activated by {scan_type} re-upload.", author=user
                     )
                     note.save()
 
@@ -532,7 +530,7 @@ class DojoDefaultReImporter:
                     finding.save(push_to_jira=push_to_jira, dedupe_option=False)
 
                 note = Notes(
-                    entry="Mitigated by %s re-upload." % test.test_type, author=user
+                    entry=f"Mitigated by {test.test_type} re-upload.", author=user
                 )
                 note.save()
                 finding.notes.add(note)
