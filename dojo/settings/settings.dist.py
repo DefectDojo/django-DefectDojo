@@ -1563,7 +1563,7 @@ LOGGING = {
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins', 'console'],
-            'level': f'{LOG_LEVEL}',
+            'level': str(LOG_LEVEL),
             'propagate': False,
         },
         'django.security': {
