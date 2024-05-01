@@ -1585,7 +1585,7 @@ LOGGING = {
         },
         'dojo.specific-loggers.deduplication': {
             'handlers': [rf'{LOGGING_HANDLER}'],
-            'level': f'{LOG_LEVEL}',
+            'level': str(LOG_LEVEL),
             'propagate': False,
         },
         'saml2': {
