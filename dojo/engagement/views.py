@@ -954,6 +954,7 @@ class ImportScanResultsView(View):
         except Exception as e:
             logger.exception(e)
             return f"An exception error occurred during the report import: {e}"
+        return None
 
     def process_form(
         self,
@@ -1009,6 +1010,7 @@ class ImportScanResultsView(View):
                 context["verified"] = True
             elif verifiedChoice == 'force_to_false':
                 context["verified"] = False
+        return None
 
     def process_jira_form(
         self,
@@ -1024,6 +1026,7 @@ class ImportScanResultsView(View):
         # Determine if push all issues is enabled
         push_all_jira_issues = context.get("push_all_jira_issues", False)
         context["push_to_jira"] = push_all_jira_issues or (form and form.cleaned_data.get("push_to_jira"))
+        return None
 
     def process_credentials_form(
         self,
@@ -1047,6 +1050,7 @@ class ImportScanResultsView(View):
             new_cred_mapping.save()
             # update the context
             context["cred_user"] = cred_user
+        return None
 
     def success_redirect(
         self,

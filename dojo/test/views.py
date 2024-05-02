@@ -963,6 +963,7 @@ class ReImportScanResultsView(View):
         # Override the tags and version
         context.get("test").tags = context.get("tags")
         context.get("test").version = context.get("version")
+        return None
 
     def process_jira_form(
         self,
@@ -978,6 +979,7 @@ class ReImportScanResultsView(View):
         # Determine if push all issues is enabled
         push_all_jira_issues = context.get("push_all_jira_issues", False)
         context["push_to_jira"] = push_all_jira_issues or (form and form.cleaned_data.get("push_to_jira"))
+        return None
 
     def reimport_findings(
         self,
@@ -1013,6 +1015,7 @@ class ReImportScanResultsView(View):
         except Exception as e:
             logger.exception(e)
             return f"An exception error occurred during the report import: {e}"
+        return None
 
     def success_redirect(
         self,

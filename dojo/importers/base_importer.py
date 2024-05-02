@@ -196,7 +196,7 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         # Ensure that a test is present when calling this method as there are cases where
         # the test will be created by this function in a child class
         if test is None or not isinstance(test, Test):
-            msg = "A test must be supplied to the parse the file"
+            msg = "A test must be supplied to parse the file"
             raise ValidationError(msg)
         try:
             return parser.get_findings(scan, test)
@@ -310,11 +310,32 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
                 **kwargs,
             )
 
+    def update_test_meta(
+        self,
+        test: Test,
+        **kwargs: dict,
+    ) -> Test:
+        """
+        Update the test with some values stored in the kwargs dict. The common
+        fields used today are `version`, `branch_tag`, `build_id`, and `commit_hash`
+        """
+        # Add the extra fields to the test if they are specified here
+        if not (version := kwargs.get("version")).isspace():
+            test.version = version
+        if not (branch_tag := kwargs.get("branch_tag")).isspace():
+            test.branch_tag = branch_tag
+        if not (build_id := kwargs.get("build_id")).isspace():
+            test.build_id = build_id
+        if not (commit_hash := kwargs.get("commit_hash")).isspace():
+            test.commit_hash = commit_hash
+
+        return test
+
     def update_timestamps(
         self,
         test: Test,
         **kwargs: dict,
-    ) -> None:
+    ) -> Test:
         """
         Update the target end dates for tests as imports are occurring:
         - Import
@@ -343,18 +364,8 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         if not max_test_start_date.tzinfo:
             max_test_start_date = make_aware(max_test_start_date)
         test.target_end = max_test_start_date
-        # Add the extra fields to the test if they are specified here
-        if (version := kwargs.get("version")) is not None and len(version) > 0:
-            test.version = version
-        if (branch_tag := kwargs.get("branch_tag")) is not None and len(branch_tag) > 0:
-            test.branch_tag = branch_tag
-        if (build_id := kwargs.get("build_id")) is not None and len(build_id) > 0:
-            test.build_id = build_id
-        if (commit_hash := kwargs.get("commit_hash")) is not None and len(commit_hash) > 0:
-            test.commit_hash = commit_hash
-        # Save the test and engagement for changes to take affect
-        test.save()
-        test.engagement.save()
+
+        return test
 
     def update_test_tags(
         self,
@@ -523,8 +534,8 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         ```
         """
         # Break the list of parsed findings into "chunk_size" lists
-        chunk_list = [list[i:i + chunk_size] for i in range(0, len(list), chunk_size)]
-        logger.debug('IMPORT_SCAN: Split endpoints into ' + str(len(chunk_list)) + ' chunks of ' + str(chunk_size))
+        chunk_list = [object_list[i:i + chunk_size] for i in range(0, len(object_list), chunk_size)]
+        logger.debug(f"IMPORT_SCAN: Split endpoints/findings into {len(chunk_list)} chunks of {chunk_size}")
         return chunk_list
 
     def chunk_endpoints_and_disperse(
@@ -551,6 +562,7 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         else:
             # Do not run this asynchronously or chunk the endpoints
             self.add_endpoints_to_unsaved_finding(finding, test, endpoints, sync=True)
+        return None
 
     def clean_unsaved_endpoints(
         self,
@@ -565,6 +577,7 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
                 endpoint.clean()
             except ValidationError as e:
                 logger.warning(f"DefectDojo is storing broken endpoint because cleaning wasn't successful: {e}")
+        return None
 
     @dojo_async_task
     @app.task()
@@ -603,8 +616,8 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
                 finding=finding,
                 endpoint=ep,
                 defaults={'date': finding.date})
-
         logger.debug(f"IMPORT_SCAN: {len(endpoints)} imported")
+        return None
 
     @dojo_async_task
     @app.task()
@@ -620,6 +633,7 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         """
         test.percent_complete = 100
         test.save()
+        return None
 
     def get_or_create_test_type(
         self,
@@ -628,9 +642,9 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         """
         Ensures that a test type exists for a given test. This function can be called
         in the following circumstances:
-        - Ensuring a test exists for import
-        - Ensuring a test exists for reimport with auto-create context
-        - Creating a new test for dynamic test types such as generic and sarif
+        - Ensuring a test type exists for import
+        - Ensuring a test type exists for reimport with auto-create context
+        - Creating a new test type for dynamic test types such as generic and sarif
         """
         test_type, created = Test_Type.objects.get_or_create(name=test_type_name)
         if created:
@@ -717,7 +731,7 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         engagement is found on the product. If not, then raise a validation
         error that will bubble up back to the user
 
-        if f there is a case where the Tool_Configuration supplied to
+        if there is a case where the Tool_Configuration supplied to
         this function does not match the one saved on the engagement, then
         we will user the one supplied rather than the one on the engagement.
         """
@@ -727,7 +741,7 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
             return engagement
         # Ensure that an engagement was supplied
         elif not isinstance(engagement, Engagement):
-            msg = "A engagement must be supplied to verify the Tool_Configuration against"
+            msg = "An engagement must be supplied to verify the Tool_Configuration against"
             raise ValidationError(msg)
         # Validate that the engagement has a value
         elif engagement is not None and isinstance(engagement, Engagement):

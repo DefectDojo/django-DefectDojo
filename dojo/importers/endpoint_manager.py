@@ -36,6 +36,7 @@ class DefaultReImporterEndpointManager:
                 endpoint_status.mitigated_by = user
                 endpoint_status.mitigated = True
                 endpoint_status.save()
+        return None
 
     @dojo_async_task
     @app.task()
@@ -56,6 +57,7 @@ class DefaultReImporterEndpointManager:
                 endpoint_status.mitigated = False
                 endpoint_status.last_modified = timezone.now()
                 endpoint_status.save()
+        return None
 
     def chunk_endpoints_and_reactivate(
         self,
@@ -73,12 +75,13 @@ class DefaultReImporterEndpointManager:
             # If there is only one chunk, then do not bother with async
             if len(chunked_list) < 2:
                 self.reactivate_endpoint_status(endpoint_status_list, sync=True)
-            logger.debug(f"Split endpoints into {len(chunked_list)} chunks of {chunked_list[0]}")
+            logger.debug(f"Split endpoints into {len(chunked_list)} chunks of {len(chunked_list[0])}")
             # First kick off all the workers
             for endpoint_status_list in chunked_list:
                 self.reactivate_endpoint_status(endpoint_status_list, sync=False)
         else:
             self.reactivate_endpoint_status(endpoint_status_list, sync=True)
+        return None
 
     def chunk_endpoints_and_mitigate(
         self,
@@ -97,12 +100,13 @@ class DefaultReImporterEndpointManager:
             # If there is only one chunk, then do not bother with async
             if len(chunked_list) < 2:
                 self.mitigate_endpoint_status(endpoint_status_list, user, sync=True)
-            logger.debug(f"Split endpoints into {len(chunked_list)} chunks of {chunked_list[0]}")
+            logger.debug(f"Split endpoints into {len(chunked_list)} chunks of {len(chunked_list[0])}")
             # First kick off all the workers
             for endpoint_status_list in chunked_list:
                 self.mitigate_endpoint_status(endpoint_status_list, user, sync=False)
         else:
             self.mitigate_endpoint_status(endpoint_status_list, user, sync=True)
+        return None
 
     def update_endpoint_status(
         self,
@@ -110,7 +114,7 @@ class DefaultReImporterEndpointManager:
         new_finding: Finding,
         user: Dojo_User,
         **kwargs: dict,
-    ):
+    ) -> None:
         """
         Update the list of endpoints from the new finding with the list that is in the old finding
         """
@@ -137,3 +141,4 @@ class DefaultReImporterEndpointManager:
             )
             self.chunk_endpoints_and_reactivate(endpoint_status_to_reactivate)
         self.chunk_endpoints_and_mitigate(endpoint_status_to_mitigate, user)
+        return None

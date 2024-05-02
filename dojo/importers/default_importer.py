@@ -51,7 +51,7 @@ class DefaultImporter(BaseImporter):
         scan_type: str,
         test_type_name: str,
         **kwargs: dict,
-    ):
+    ) -> Test:
         """
         Create a fresh test object to be used by the importer. This
         new test will be attached to the supplied engagement with the
@@ -136,7 +136,12 @@ class DefaultImporter(BaseImporter):
         # to occur in the form that is then passed to the kwargs
         closed_findings = self.close_old_findings(test, test.finding_set.values(), user, **kwargs)
         # Update the timestamps of the test object by looking at the findings imported
-        self.update_timestamps(test, **kwargs)
+        test = self.update_timestamps(test, **kwargs)
+        # Update the test meta
+        test = self.update_test_meta(test, **kwargs)
+        # Save the test and engagement for changes to take affect
+        test.save()
+        test.engagement.save()
         # Create a test import history object to record the flags sent to the importer
         # This operation will return None if the user does not have the import history
         # feature enabled

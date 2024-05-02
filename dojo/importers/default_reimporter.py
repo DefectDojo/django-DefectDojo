@@ -99,7 +99,12 @@ class DefaultReImporter(BaseImporter):
         closed_findings = self.close_old_findings(test, findings_to_mitigate, user, **kwargs)
         # Update the timestamps of the test object by looking at the findings imported
         logger.debug("REIMPORT_SCAN: Updating test/engagement timestamps")
-        self.update_timestamps(test, **kwargs)
+        test = self.update_timestamps(test, **kwargs)
+        # Update the test meta
+        test = self.update_test_meta(test, **kwargs)
+        # Save the test and engagement for changes to take affect
+        test.save()
+        test.engagement.save()
         logger.debug("REIMPORT_SCAN: Updating test tags")
         self.update_test_tags(test, kwargs.get("tags", []))
         # Create a test import history object to record the flags sent to the importer
