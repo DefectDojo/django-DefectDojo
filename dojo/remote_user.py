@@ -100,6 +100,9 @@ class RemoteUserScheme(OpenApiAuthenticationExtension):
     priority = 1
 
     def get_security_definition(self, auto_schema):
+        if not settings.AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER:
+            return {}
+
         header_name = settings.AUTH_REMOTEUSER_USERNAME_HEADER
         if header_name.startswith('HTTP_'):
             header_name = header_name[5:]

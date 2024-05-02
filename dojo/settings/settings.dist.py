@@ -181,6 +181,9 @@ env = environ.FileAwareEnv(
     DD_AUTH_REMOTEUSER_TRUSTED_PROXY=(list, ['127.0.0.1/32']),
     # REMOTE_USER will be processed only on login page. Check https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#using-remote-user-on-login-pages-only
     DD_AUTH_REMOTEUSER_LOGIN_ONLY=(bool, False),
+    # `RemoteUser` is usually used behind AuthN proxy and users should not know about this mechanism from Swagger because it is not usable by users.
+    # It should be hidden by default.
+    DD_AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
     DD_DOCUMENTATION_URL=(str, 'https://documentation.defectdojo.com'),
     # merging findings doesn't always work well with dedupe and reimport etc.
@@ -1045,6 +1048,7 @@ AUTH_REMOTEUSER_FIRSTNAME_HEADER = env('DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER')
 AUTH_REMOTEUSER_LASTNAME_HEADER = env('DD_AUTH_REMOTEUSER_LASTNAME_HEADER')
 AUTH_REMOTEUSER_GROUPS_HEADER = env('DD_AUTH_REMOTEUSER_GROUPS_HEADER')
 AUTH_REMOTEUSER_GROUPS_CLEANUP = env('DD_AUTH_REMOTEUSER_GROUPS_CLEANUP')
+AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER = env('DD_AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER')
 
 AUTH_REMOTEUSER_TRUSTED_PROXY = IPSet()
 for ip_range in env('DD_AUTH_REMOTEUSER_TRUSTED_PROXY'):
