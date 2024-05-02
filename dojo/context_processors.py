@@ -49,7 +49,7 @@ def bind_announcement(request):
     try:
         if request.user.is_authenticated:
             user_announcement = UserAnnouncement.objects.select_related(
-                "announcement"
+                "announcement",
             ).get(user=request.user)
             return {"announcement": user_announcement.announcement}
         return {}

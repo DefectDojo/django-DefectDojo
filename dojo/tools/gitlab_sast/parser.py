@@ -37,7 +37,7 @@ class GitlabSastParser:
         test = ParserTest(
             name=scanner_name,
             type=scanner_type,
-            version=scanner_version
+            version=scanner_version,
         )
         test.findings = self.get_items(tree)
         return [test]
@@ -67,7 +67,7 @@ class GitlabSastParser:
             'High': 3,         # Firm
             'Medium': 4,       # Firm
             'Low': 6,          # Tentative
-            'Experimental': 7  # Tentative
+            'Experimental': 7,  # Tentative
         }
         return switcher.get(argument, None)
 

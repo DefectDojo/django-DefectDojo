@@ -296,7 +296,7 @@ class AutoCreateContextManager:
         engagement = self.get_target_engagement_if_exists(
             engagement_id=engagement_id,
             engagement_name=engagement_name,
-            product=product
+            product=product,
         )
         # If we have an engagement, we cna just return it
         if engagement:

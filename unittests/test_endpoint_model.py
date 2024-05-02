@@ -112,47 +112,47 @@ class TestEndpointModel(DojoTestCase):
     def test_get_or_create(self):
         _endpoint1, created1 = endpoint_get_or_create(
             protocol='http',
-            host='bar.foo'
+            host='bar.foo',
         )
         self.assertTrue(created1)
 
         _endpoint2, created2 = endpoint_get_or_create(
             protocol='http',
-            host='bar.foo'
+            host='bar.foo',
         )
         self.assertFalse(created2)
 
         _endpoint3, created3 = endpoint_get_or_create(
             protocol='http',
             host='bar.foo',
-            port=80
+            port=80,
         )
         self.assertFalse(created3)
 
         _endpoint4, created4 = endpoint_get_or_create(
             protocol='http',
             host='bar.foo',
-            port=8080
+            port=8080,
         )
         self.assertTrue(created4)
 
         _endpoint5, created5 = endpoint_get_or_create(
             protocol='https',
             host='bar.foo',
-            port=443
+            port=443,
         )
         self.assertTrue(created5)
 
         _endpoint6, created6 = endpoint_get_or_create(
             protocol='https',
-            host='bar.foo'
+            host='bar.foo',
         )
         self.assertFalse(created6)
 
         _endpoint7, created7 = endpoint_get_or_create(
             protocol='https',
             host='bar.foo',
-            port=8443
+            port=8443,
         )
         self.assertTrue(created7)
 
@@ -171,7 +171,7 @@ class TestEndpointModel(DojoTestCase):
         p = Product.objects.get_or_create(
             name="test product",
             description="",
-            prod_type=Product_Type.objects.get_or_create(name="test pt")[0]
+            prod_type=Product_Type.objects.get_or_create(name="test pt")[0],
         )[0]
         e1 = Endpoint(host="localhost")
         e2 = Endpoint(host="localhost", product=p)
@@ -184,12 +184,12 @@ class TestEndpointModel(DojoTestCase):
         p1 = Product.objects.get_or_create(
             name="test product 1",
             description="",
-            prod_type=Product_Type.objects.get_or_create(name="test pt")[0]
+            prod_type=Product_Type.objects.get_or_create(name="test pt")[0],
         )[0]
         p2 = Product.objects.get_or_create(
             name="test product 2",
             description="",
-            prod_type=Product_Type.objects.get_or_create(name="test pt")[0]
+            prod_type=Product_Type.objects.get_or_create(name="test pt")[0],
         )[0]
         # Define the endpoints
         e1 = Endpoint(host="localhost", product=p1)
@@ -213,13 +213,13 @@ class TestEndpointStatusBrokenModel(DojoTestCase):
         self.engagement = Engagement.objects.create(
             product=self.product,
             target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
-            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc)
+            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc),
         )
         self.test = Test.objects.create(
             engagement=self.engagement,
             target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
             target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc),
-            test_type_id=1
+            test_type_id=1,
         )
         from django.contrib.auth import get_user_model
         user = get_user_model().objects.create().pk
@@ -233,36 +233,36 @@ class TestEndpointStatusBrokenModel(DojoTestCase):
                 last_modified=datetime.datetime(2021, 4, 1, tzinfo=timezone.utc),
                 mitigated=False,
                 finding_id=self.finding,
-                endpoint_id=self.endpoint
+                endpoint_id=self.endpoint,
             ).pk,
             'removed_endpoint': Endpoint_Status.objects.create(
                 date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
                 last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
                 mitigated=True,
                 finding_id=self.another_finding,
-                endpoint_id=None
+                endpoint_id=None,
             ).pk,
             'removed_finding': Endpoint_Status.objects.create(
                 date=datetime.datetime(2021, 2, 1, tzinfo=timezone.utc),
                 last_modified=datetime.datetime(2021, 5, 1, tzinfo=timezone.utc),
                 mitigated=True,
                 finding_id=None,
-                endpoint_id=self.another_endpoint
+                endpoint_id=self.another_endpoint,
             ).pk,
         }
 
         Finding.objects.get(id=self.finding).endpoint_status.add(
-            Endpoint_Status.objects.get(id=self.endpoint_status['standard'])
+            Endpoint_Status.objects.get(id=self.endpoint_status['standard']),
         )
         Finding.objects.get(id=self.another_finding).endpoint_status.add(
-            Endpoint_Status.objects.get(id=self.endpoint_status['removed_endpoint'])
+            Endpoint_Status.objects.get(id=self.endpoint_status['removed_endpoint']),
         )
 
         Endpoint.objects.get(id=self.endpoint).endpoint_status.add(
-            Endpoint_Status.objects.get(id=self.endpoint_status['standard'])
+            Endpoint_Status.objects.get(id=self.endpoint_status['standard']),
         )
         Endpoint.objects.get(id=self.another_endpoint).endpoint_status.add(
-            Endpoint_Status.objects.get(id=self.endpoint_status['removed_finding'])
+            Endpoint_Status.objects.get(id=self.endpoint_status['removed_finding']),
         )
 
         remove_broken_endpoint_statuses(apps)

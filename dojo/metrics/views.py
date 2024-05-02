@@ -68,7 +68,7 @@ def critical_product_metrics(request, mtype):
     return render(request, template, {
         'name': page_name,
         'critical_prods': critical_products,
-        'url_prefix': get_system_setting('url_prefix')
+        'url_prefix': get_system_setting('url_prefix'),
     })
 
 
@@ -108,11 +108,11 @@ def metrics(request, mtype):
     in_period_counts, in_period_details, age_detail = get_in_period_details(all_findings)
 
     accepted_in_period_details = get_accepted_in_period_details(
-        findings_queryset(filters['accepted'])
+        findings_queryset(filters['accepted']),
     )
 
     closed_in_period_counts, closed_in_period_details = get_closed_in_period_details(
-        findings_queryset(filters['closed'])
+        findings_queryset(filters['closed']),
     )
 
     punchcard = []
@@ -387,7 +387,7 @@ def product_type_counts(request):
                    'overall_in_pt': aip,
                    'all_current_in_pt': all_current_in_pt,
                    'top_ten': top_ten,
-                   'pt': pt}
+                   'pt': pt},
                   )
 
 
@@ -545,7 +545,7 @@ def product_tag_counts(request):
                    'overall_in_pt': aip,
                    'all_current_in_pt': all_current_in_pt,
                    'top_ten': top_ten,
-                   'pt': pt}
+                   'pt': pt},
                   )
 
 
@@ -722,22 +722,22 @@ def view_engineer(request, eid):
                 z_count += findings.filter(
                     test=test,
                     mitigated__isnull=True,
-                    severity='Critical'
+                    severity='Critical',
                 ).count()
                 o_count += findings.filter(
                     test=test,
                     mitigated__isnull=True,
-                    severity='High'
+                    severity='High',
                 ).count()
                 t_count += findings.filter(
                     test=test,
                     mitigated__isnull=True,
-                    severity='Medium'
+                    severity='Medium',
                 ).count()
                 h_count += findings.filter(
                     test=test,
                     mitigated__isnull=True,
-                    severity='Low'
+                    severity='Low',
                 ).count()
         prod = Product.objects.get(id=product)
         all_findings_link = "<a href='{}'>{}</a>".format(

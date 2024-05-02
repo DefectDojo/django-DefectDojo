@@ -41,7 +41,7 @@ class ContrastParser:
             if severity == "Note":
                 severity = "Info"
             date_raw = datetime.datetime.utcfromtimestamp(
-                int(row.get("First Seen")) / 1000
+                int(row.get("First Seen")) / 1000,
             )
             finding = Finding(
                 title=title.split(" from")[0],
@@ -76,11 +76,11 @@ class ContrastParser:
                         + "\n"
                         + row.get("Request Body"),
                         "resp": "",
-                    }
+                    },
                 )
 
             dupe_key = hashlib.sha256(
-                f"{finding.vuln_id_from_tool}".encode()
+                f"{finding.vuln_id_from_tool}".encode(),
             ).digest()
 
             if dupe_key in dupes:
@@ -90,7 +90,7 @@ class ContrastParser:
                     + finding.description
                 )
                 dupes[dupe_key].unsaved_endpoints.extend(
-                    finding.unsaved_endpoints
+                    finding.unsaved_endpoints,
                 )
                 dupes[dupe_key].nb_occurences += finding.nb_occurences
                 dupes[

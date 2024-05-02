@@ -164,16 +164,16 @@ def get_title(result, rule):
     title = None
     if "message" in result:
         title = get_message_from_multiformatMessageString(
-            result["message"], rule
+            result["message"], rule,
         )
     if title is None and rule is not None:
         if "shortDescription" in rule:
             title = get_message_from_multiformatMessageString(
-                rule["shortDescription"], rule
+                rule["shortDescription"], rule,
             )
         elif "fullDescription" in rule:
             title = get_message_from_multiformatMessageString(
-                rule["fullDescription"], rule
+                rule["fullDescription"], rule,
             )
         elif "name" in rule:
             title = rule["name"]
@@ -267,7 +267,7 @@ def get_description(result, rule):
     message = ""
     if "message" in result:
         message = get_message_from_multiformatMessageString(
-            result["message"], rule
+            result["message"], rule,
         )
         description += f"**Result message:** {message}\n"
     if get_snippet(result) is not None:
@@ -278,13 +278,13 @@ def get_description(result, rule):
         shortDescription = ""
         if "shortDescription" in rule:
             shortDescription = get_message_from_multiformatMessageString(
-                rule["shortDescription"], rule
+                rule["shortDescription"], rule,
             )
             if shortDescription != message:
                 description += f"**{_('Rule short description')}:** {shortDescription}\n"
         if "fullDescription" in rule:
             fullDescription = get_message_from_multiformatMessageString(
-                rule["fullDescription"], rule
+                rule["fullDescription"], rule,
             )
             if (
                 fullDescription != message
@@ -308,7 +308,7 @@ def get_references(rule):
             reference = rule["helpUri"]
         elif "help" in rule:
             helpText = get_message_from_multiformatMessageString(
-                rule["help"], rule
+                rule["help"], rule,
             )
             if helpText.startswith("http"):
                 reference = helpText
@@ -435,7 +435,7 @@ def get_item(result, rules, artifacts, run_date):
     # manage fixes provided in the report
     if "fixes" in result:
         finding.mitigation = "\n".join(
-            [fix.get("description", {}).get("text") for fix in result["fixes"]]
+            [fix.get("description", {}).get("text") for fix in result["fixes"]],
         )
 
     if run_date:
@@ -460,7 +460,7 @@ def get_item(result, rules, artifacts, run_date):
         hashes = get_fingerprints_hashes(result["partialFingerprints"])
         sorted_hashes = sorted(hashes.keys())
         finding.unique_id_from_tool = "|".join(
-            [f'{key}:{hashes[key]["value"]}' for key in sorted_hashes]
+            [f'{key}:{hashes[key]["value"]}' for key in sorted_hashes],
         )
     return finding
 

@@ -41,7 +41,7 @@ class DockleParser:
             description = sorted(item.get("alerts", []))
             description = "\n".join(description)
             dupe_key = hashlib.sha256(
-                (code + title).encode("utf-8")
+                (code + title).encode("utf-8"),
             ).hexdigest()
 
             if dupe_key in dupes:

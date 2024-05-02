@@ -24,7 +24,7 @@ class AcunetixXMLParser:
             # get report date
             if scan.findtext("StartTime") and "" != scan.findtext("StartTime"):
                 report_date = dateutil.parser.parse(
-                    scan.findtext("StartTime")
+                    scan.findtext("StartTime"),
                 ).date()
             for item in scan.findall("ReportItems/ReportItem"):
                 finding = Finding(
@@ -32,10 +32,10 @@ class AcunetixXMLParser:
                     title=item.findtext("Name"),
                     severity=self.get_severity(item.findtext("Severity")),
                     description=html2text.html2text(
-                        item.findtext("Description")
+                        item.findtext("Description"),
                     ).strip(),
                     false_p=self.get_false_positive(
-                        item.findtext("IsFalsePositive")
+                        item.findtext("IsFalsePositive"),
                     ),
                     static_finding=True,
                     dynamic_finding=False,
@@ -44,14 +44,14 @@ class AcunetixXMLParser:
                 if item.findtext("Impact") and "" != item.findtext("Impact"):
                     finding.impact = item.findtext("Impact")
                 if item.findtext("Recommendation") and "" != item.findtext(
-                    "Recommendation"
+                    "Recommendation",
                 ):
                     finding.mitigation = item.findtext("Recommendation")
                 if report_date:
                     finding.date = report_date
                 if item.findtext("CWEList/CWE"):
                     finding.cwe = self.get_cwe_number(
-                        item.findtext("CWEList/CWE")
+                        item.findtext("CWEList/CWE"),
                     )
                 references = []
                 for reference in item.findall("References/Reference"):
@@ -62,7 +62,7 @@ class AcunetixXMLParser:
                     finding.references = "\n".join(references)
                 if item.findtext("CVSS3/Descriptor"):
                     cvss_objects = cvss_parser.parse_cvss_from_text(
-                        item.findtext("CVSS3/Descriptor")
+                        item.findtext("CVSS3/Descriptor"),
                     )
                     if len(cvss_objects) > 0:
                         finding.cvssv3 = cvss_objects[0].clean_vector()
@@ -72,7 +72,7 @@ class AcunetixXMLParser:
                     and len(item.findtext("Details").strip()) > 0
                 ):
                     finding.description += "\n\n**Details:**\n{}".format(
-                        html2text.html2text(item.findtext("Details"))
+                        html2text.html2text(item.findtext("Details")),
                     )
                 if (
                     item.findtext("TechnicalDetails")
@@ -80,7 +80,7 @@ class AcunetixXMLParser:
                 ):
                     finding.description += (
                         "\n\n**TechnicalDetails:**\n\n{}".format(
-                            item.findtext("TechnicalDetails")
+                            item.findtext("TechnicalDetails"),
                         )
                     )
                 # add requests
@@ -94,7 +94,7 @@ class AcunetixXMLParser:
                     )
                     for request in item.findall("TechnicalDetails/Request"):
                         finding.unsaved_req_resp.append(
-                            {"req": (request.text or ""), "resp": ""}
+                            {"req": (request.text or ""), "resp": ""},
                         )
                 # manage the endpoint
                 url = hyperlink.parse(start_url)
@@ -112,8 +112,8 @@ class AcunetixXMLParser:
                             finding.title,
                             str(finding.impact),
                             str(finding.mitigation),
-                        ]
-                    ).encode("utf-8")
+                        ],
+                    ).encode("utf-8"),
                 ).hexdigest()
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
@@ -124,14 +124,14 @@ class AcunetixXMLParser:
                     ):
                         find.description += (
                             "\n-----\n\n**Details:**\n{}".format(
-                                html2text.html2text(item.findtext("Details"))
+                                html2text.html2text(item.findtext("Details")),
                             )
                         )
                     find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                     find.unsaved_req_resp.extend(finding.unsaved_req_resp)
                     find.nb_occurences += finding.nb_occurences
                     logger.debug(
-                        f"Duplicate finding : {finding.title}"
+                        f"Duplicate finding : {finding.title}",
                     )
                 else:
                     dupes[dupe_key] = finding

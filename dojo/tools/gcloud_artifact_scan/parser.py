@@ -51,7 +51,7 @@ class GCloudArtifactScanParser:
                         component_version=vuln["vulnerability"]["packageIssue"][0]["affectedVersion"]["fullName"],
                         static_finding=True,
                         dynamic_finding=False,
-                        cvssv3_score=vuln["vulnerability"]["cvssScore"]
+                        cvssv3_score=vuln["vulnerability"]["cvssScore"],
                     )
                     findings.append(finding)
         return findings

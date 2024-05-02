@@ -47,7 +47,7 @@ class TFSecParser:
             start_line = item.get("location").get("start_line")
             end_line = item.get("location").get("end_line")
             description = "\n".join(
-                ["Rule ID: " + rule_id, item.get("description")]
+                ["Rule ID: " + rule_id, item.get("description")],
             )
             impact = item.get("impact")
             resolution = item.get("resolution")
@@ -67,7 +67,7 @@ class TFSecParser:
                     + file
                     + str(start_line)
                     + str(end_line)
-                ).encode("utf-8")
+                ).encode("utf-8"),
             ).hexdigest()
 
             if dupe_key in dupes:

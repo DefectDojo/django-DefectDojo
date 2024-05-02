@@ -70,7 +70,7 @@ class TestSonarqubeImporterNoSQToolConfig(DojoTestCase):
     # Testing case no 1. https://github.com/DefectDojo/django-DefectDojo/pull/4676
     fixtures = [
         'unit_sonarqube_toolType.json',
-        'unit_sonarqube_product.json'
+        'unit_sonarqube_product.json',
     ]
 
     def setUp(self):
@@ -88,7 +88,7 @@ class TestSonarqubeImporterOneSQToolConfig(DojoTestCase):
     fixtures = [
         'unit_sonarqube_toolType.json',
         'unit_sonarqube_toolConfig1.json',
-        'unit_sonarqube_product.json'
+        'unit_sonarqube_product.json',
     ]
 
     def setUp(self):
@@ -107,7 +107,7 @@ class TestSonarqubeImporterMultipleSQToolConfig(DojoTestCase):
         'unit_sonarqube_toolType.json',
         'unit_sonarqube_toolConfig1.json',
         'unit_sonarqube_toolConfig2.json',
-        'unit_sonarqube_product.json'
+        'unit_sonarqube_product.json',
     ]
 
     def setUp(self):
@@ -127,7 +127,7 @@ class TestSonarqubeImporterOneSQConfigNoKey(DojoTestCase):
         'unit_sonarqube_toolConfig1.json',
         'unit_sonarqube_toolConfig2.json',
         'unit_sonarqube_product.json',
-        'unit_sonarqube_sqcNoKey.json'
+        'unit_sonarqube_sqcNoKey.json',
     ]
 
     def setUp(self):
@@ -153,7 +153,7 @@ class TestSonarqubeImporterOneSQConfigWithKey(DojoTestCase):
         'unit_sonarqube_toolConfig1.json',
         'unit_sonarqube_toolConfig2.json',
         'unit_sonarqube_product.json',
-        'unit_sonarqube_sqcWithKey.json'
+        'unit_sonarqube_sqcWithKey.json',
     ]
 
     def setUp(self):
@@ -180,7 +180,7 @@ class TestSonarqubeImporterMultipleSQConfigs(DojoTestCase):
         'unit_sonarqube_toolConfig2.json',
         'unit_sonarqube_product.json',
         'unit_sonarqube_sqcNoKey.json',
-        'unit_sonarqube_sqcWithKey.json'
+        'unit_sonarqube_sqcWithKey.json',
     ]
 
     def setUp(self):
@@ -201,7 +201,7 @@ class TestSonarqubeImporterSelectedSQConfigsNoKey(DojoTestCase):
         'unit_sonarqube_toolConfig2.json',
         'unit_sonarqube_product.json',
         'unit_sonarqube_sqcNoKey.json',
-        'unit_sonarqube_sqcWithKey.json'
+        'unit_sonarqube_sqcWithKey.json',
     ]
 
     def setUp(self):
@@ -209,7 +209,7 @@ class TestSonarqubeImporterSelectedSQConfigsNoKey(DojoTestCase):
         engagement = Engagement(product=product)
         self.test = Test(
             engagement=engagement,
-            api_scan_configuration=Product_API_Scan_Configuration.objects.all().first()
+            api_scan_configuration=Product_API_Scan_Configuration.objects.all().first(),
         )
 
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_project', dummy_product)
@@ -231,7 +231,7 @@ class TestSonarqubeImporterSelectedSQConfigsWithKey(DojoTestCase):
         'unit_sonarqube_toolConfig2.json',
         'unit_sonarqube_product.json',
         'unit_sonarqube_sqcNoKey.json',
-        'unit_sonarqube_sqcWithKey.json'
+        'unit_sonarqube_sqcWithKey.json',
     ]
 
     def setUp(self):
@@ -239,13 +239,13 @@ class TestSonarqubeImporterSelectedSQConfigsWithKey(DojoTestCase):
         engagement = Engagement(product=product)
         self.test = Test(
             engagement=engagement,
-            api_scan_configuration=Product_API_Scan_Configuration.objects.all().last()
+            api_scan_configuration=Product_API_Scan_Configuration.objects.all().last(),
         )
         other_product = Product(name='other product')
         other_engagement = Engagement(product=other_product)
         self.other_test = Test(
             engagement=other_engagement,
-            api_scan_configuration=Product_API_Scan_Configuration.objects.all().last()
+            api_scan_configuration=Product_API_Scan_Configuration.objects.all().last(),
         )
 
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_project', dummy_product)
@@ -272,7 +272,7 @@ class TestSonarqubeImporterExternalRule(DojoTestCase):
         'unit_sonarqube_toolConfig2.json',
         'unit_sonarqube_product.json',
         'unit_sonarqube_sqcNoKey.json',
-        'unit_sonarqube_sqcWithKey.json'
+        'unit_sonarqube_sqcWithKey.json',
     ]
 
     def setUp(self):
@@ -280,7 +280,7 @@ class TestSonarqubeImporterExternalRule(DojoTestCase):
         engagement = Engagement(product=product)
         self.test = Test(
             engagement=engagement,
-            api_scan_configuration=Product_API_Scan_Configuration.objects.all().last()
+            api_scan_configuration=Product_API_Scan_Configuration.objects.all().last(),
         )
 
     @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_project', dummy_product)
@@ -308,7 +308,7 @@ class TestSonarqubeImporterTwoIssuesNoHotspots(DojoTestCase):
         'unit_sonarqube_toolType.json',
         'unit_sonarqube_toolConfig1.json',
         'unit_sonarqube_sqcWithKey.json',
-        'unit_sonarqube_product.json'
+        'unit_sonarqube_product.json',
     ]
 
     def setUp(self):
@@ -333,7 +333,7 @@ class TestSonarqubeImporterNoIssuesOneHotspot(DojoTestCase):
         'unit_sonarqube_toolType.json',
         'unit_sonarqube_toolConfig1.json',
         'unit_sonarqube_sqcWithKey.json',
-        'unit_sonarqube_product.json'
+        'unit_sonarqube_product.json',
     ]
 
     def setUp(self):
@@ -358,7 +358,7 @@ class TestSonarqubeImporterNoIssuesTwoHotspots(DojoTestCase):
         'unit_sonarqube_toolType.json',
         'unit_sonarqube_toolConfig1.json',
         'unit_sonarqube_sqcWithKey.json',
-        'unit_sonarqube_product.json'
+        'unit_sonarqube_product.json',
     ]
 
     def setUp(self):
@@ -383,7 +383,7 @@ class TestSonarqubeImporterTwoIssuesTwoHotspots(DojoTestCase):
         'unit_sonarqube_toolType.json',
         'unit_sonarqube_toolConfig1.json',
         'unit_sonarqube_sqcWithKey.json',
-        'unit_sonarqube_product.json'
+        'unit_sonarqube_product.json',
     ]
 
     def setUp(self):
@@ -408,7 +408,7 @@ class TestSonarqubeImporterValidateHotspotData(DojoTestCase):
         'unit_sonarqube_toolType.json',
         'unit_sonarqube_toolConfig1.json',
         'unit_sonarqube_sqcWithKey.json',
-        'unit_sonarqube_product.json'
+        'unit_sonarqube_product.json',
     ]
 
     def setUp(self):
@@ -437,7 +437,7 @@ class TestSonarqubeImporterValidateHotspotData(DojoTestCase):
             '\n\n'
             'There is a risk if you answered yes to any of those questions.'
             '\n\n',
-            findings[0].description
+            findings[0].description,
         )
         self.assertEqual(str(findings[0].severity), 'High')
         self.assertMultiLineEqual(
@@ -459,7 +459,7 @@ class TestSonarqubeImporterValidateHotspotData(DojoTestCase):
             '\n'
             '[Hard Coded Password](http://h3xstream.github.io/find-sec-bugs/bugs.htm#HARD_CODE_PASSWORD)'
             '\n',
-            findings[0].references
+            findings[0].references,
         )
         self.assertEqual(str(findings[0].file_path), 'internal.dummy.project:spec/support/user_fixture.rb')
         self.assertEqual(findings[0].line, 9)
@@ -479,7 +479,7 @@ class TestSonarqubeImporterHotspotRule_WO_Risk_Description(DojoTestCase):
         'unit_sonarqube_toolType.json',
         'unit_sonarqube_toolConfig1.json',
         'unit_sonarqube_sqcWithKey.json',
-        'unit_sonarqube_product.json'
+        'unit_sonarqube_product.json',
     ]
 
     def setUp(self):
@@ -508,7 +508,7 @@ class TestSonarqubeImporterHotspotRule_WO_Risk_Description(DojoTestCase):
             '\n\n'
             'There is a risk if you answered yes to any of those questions.'
             '\n\n',
-            findings[0].description
+            findings[0].description,
         )
         self.assertEqual(str(findings[0].severity), 'High')
         self.assertEqual(findings[0].references, '[Hotspot permalink](http://localhosecurity_hotspots?id=internal.dummy.project&hotspots=AXgm6Z-ophPPY0C1qhRq) \n')

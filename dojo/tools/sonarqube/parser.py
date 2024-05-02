@@ -53,6 +53,6 @@ class SonarQubeParser:
                 raise ValueError(
                     "Internal error: Invalid mode "
                     + self.mode
-                    + ". Expected: one of None, 'detailed'"
+                    + ". Expected: one of None, 'detailed'",
                 )
             return SonarQubeSoprasteriaHTML().get_items(tree, test, self.mode)

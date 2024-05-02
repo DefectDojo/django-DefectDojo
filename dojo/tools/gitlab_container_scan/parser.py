@@ -119,13 +119,13 @@ class GitlabContainerScanParser:
             dependency_name = self._get_dependency_name(dependency)
             if dependency_name:
                 finding.component_name = textwrap.shorten(
-                    dependency_name, width=190, placeholder="..."
+                    dependency_name, width=190, placeholder="...",
                 )
 
             dependency_version = self._get_dependency_version(dependency)
             if dependency_version:
                 finding.component_version = textwrap.shorten(
-                    dependency_version, width=90, placeholder="..."
+                    dependency_version, width=90, placeholder="...",
                 )
 
             if "solution" in vulnerability:

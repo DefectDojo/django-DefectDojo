@@ -29,7 +29,7 @@ class BlackduckParser:
         importer = BlackduckImporter()
 
         findings = sorted(
-            importer.parse_findings(filename), key=lambda f: f.vuln_id
+            importer.parse_findings(filename), key=lambda f: f.vuln_id,
         )
         return findings
 
@@ -46,7 +46,7 @@ class BlackduckParser:
             references = self.format_reference(i)
 
             dupe_key = hashlib.md5(
-                f"{title} | {i.vuln_source}".encode()
+                f"{title} | {i.vuln_source}".encode(),
             ).hexdigest()
 
             if dupe_key in dupes:

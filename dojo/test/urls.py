@@ -8,7 +8,7 @@ urlpatterns = [
     re_path(
         r'^test/(?P<test_id>\d+)$',
         views.ViewTest.as_view(),
-        name='view_test'
+        name='view_test',
     ),
     re_path(r'^test/(?P<tid>\d+)/ics$', views.test_ics,
         name='test_ics'),

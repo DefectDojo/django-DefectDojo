@@ -95,7 +95,7 @@ class TestSslyzeJSONParser(DojoTestCase):
             self.assertEqual('Medium', finding.severity)
             self.assertEqual(
                 'TLS recommendations of German BSI: https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-2.pdf?__blob=publicationFile&v=10',
-                finding.references
+                finding.references,
             )
 
             self.assertEqual(1, len(finding.unsaved_endpoints))
@@ -134,7 +134,7 @@ class TestSslyzeJSONParser(DojoTestCase):
             self.assertEqual('Medium', finding.severity)
             self.assertEqual(
                 'TLS recommendations of German BSI: https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-2.pdf?__blob=publicationFile&v=10',
-                finding.references
+                finding.references,
             )
 
             self.assertEqual(1, len(finding.unsaved_endpoints))
@@ -148,7 +148,7 @@ class TestSslyzeJSONParser(DojoTestCase):
             self.assertEqual('Medium', finding.severity)
             self.assertEqual(
                 'TLS recommendations of German BSI: https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-2.pdf?__blob=publicationFile&v=10',
-                finding.references
+                finding.references,
             )
 
             self.assertEqual(1, len(finding.unsaved_endpoints))

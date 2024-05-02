@@ -63,7 +63,7 @@ class ScoutSuiteParser:
                     str(items["max_level"]),
                     str(items["resources_count"]),
                     str(items["rules_count"]),
-                ]
+                ],
             )
 
         tests = []
@@ -92,7 +92,7 @@ class ScoutSuiteParser:
         last_run_date = None
         if "time" in data.get("last_run", {}):
             last_run_date = datetime.strptime(
-                data["last_run"]["time"][0:10], "%Y-%m-%d"
+                data["last_run"]["time"][0:10], "%Y-%m-%d",
             ).date()
 
         # Configured Services
@@ -138,7 +138,7 @@ class ScoutSuiteParser:
                         dynamic_finding=False,
                         static_finding=True,
                         vuln_id_from_tool=":".join(
-                            [data["provider_code"], finding_name]
+                            [data["provider_code"], finding_name],
                         ),
                     )
                     if finding.get("references"):

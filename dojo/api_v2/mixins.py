@@ -15,7 +15,7 @@ class DeletePreviewModelMixin:
     @extend_schema(
         methods=["GET"],
         responses={
-            status.HTTP_200_OK: serializers.DeletePreviewSerializer(many=True)
+            status.HTTP_200_OK: serializers.DeletePreviewSerializer(many=True),
         },
     )
     @action(detail=True, methods=["get"], filter_backends=[], suffix="List")

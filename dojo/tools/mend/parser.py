@@ -76,7 +76,7 @@ class MendParser:
             cvss3_score = node.get("cvss3_score", None)
             cvss3_vector = node.get("scoreMetadataVector", None)
             severity_justification = "CVSS v3 score: {} ({})".format(
-                cvss3_score if cvss3_score is not None else "N/A", cvss3_vector if cvss3_vector is not None else "N/A"
+                cvss3_score if cvss3_score is not None else "N/A", cvss3_vector if cvss3_vector is not None else "N/A",
             )
             cwe = 1035  # default OWASP a9 until the report actually has them
 
@@ -99,7 +99,7 @@ class MendParser:
                         filepaths.append(sfile.get("localPath"))
                 except Exception:
                     logger.exception(
-                        "Error handling local paths for vulnerability."
+                        "Error handling local paths for vulnerability.",
                     )
 
             new_finding = Finding(
@@ -115,7 +115,7 @@ class MendParser:
                 severity_justification=severity_justification,
                 dynamic_finding=True,
                 cvssv3=cvss3_vector,
-                cvssv3_score=float(cvss3_score) if cvss3_score is not None else None
+                cvssv3_score=float(cvss3_score) if cvss3_score is not None else None,
             )
             if cve:
                 new_finding.unsaved_vulnerability_ids = [cve]
@@ -136,7 +136,7 @@ class MendParser:
                 ):
                     for vuln in lib_node.get("vulnerabilities"):
                         findings.append(
-                            _build_common_output(vuln, lib_node.get("name"))
+                            _build_common_output(vuln, lib_node.get("name")),
                         )
 
         elif "vulnerabilities" in content:
@@ -152,7 +152,7 @@ class MendParser:
             """
             return hashlib.md5(
                 f.description.encode("utf-8")
-                + f.title.encode("utf-8")
+                + f.title.encode("utf-8"),
             ).hexdigest()
 
         dupes = {}

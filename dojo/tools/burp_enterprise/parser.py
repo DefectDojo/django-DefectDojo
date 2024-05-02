@@ -72,10 +72,10 @@ class BurpEnterpriseParser:
     def pre_allocate_items(self, tree):
         items = []
         endpoint_text = tree.xpath(
-            "/html/body/div/div[contains(@class, 'section')]/h1"
+            "/html/body/div/div[contains(@class, 'section')]/h1",
         )
         severities = tree.xpath(
-            "/html/body/div/div[contains(@class, 'section')]/table[contains(@class, 'issue-table')]/tbody"
+            "/html/body/div/div[contains(@class, 'section')]/table[contains(@class, 'issue-table')]/tbody",
         )
         endpoint_text = [
             endpoint
@@ -116,7 +116,7 @@ class BurpEnterpriseParser:
         # Check that there is at least one vulnerability (the vulnerabilities
         # table is absent when no vuln are found)
         vulns = tree.xpath(
-            "/html/body/div/div[contains(@class, 'section details')]/div[contains(@class, 'issue-container')]"
+            "/html/body/div/div[contains(@class, 'section details')]/div[contains(@class, 'issue-container')]",
         )
         if len(vulns) == 0:
             return []
@@ -237,7 +237,7 @@ class BurpEnterpriseParser:
                 unsaved_req_resp = []
                 for index in range(len(requests)):
                     unsaved_req_resp.append(
-                        {"req": requests[index], "resp": responses[index]}
+                        {"req": requests[index], "resp": responses[index]},
                     )
                 find.unsaved_req_resp = unsaved_req_resp
 

@@ -45,7 +45,7 @@ if os.environ.get("DD_DEBUG") == "True" and not os.getenv("RUN_MAIN") and is_deb
         # Required, otherwise debugpy will try to use the uwsgi binary as the python interpreter - https://github.com/microsoft/debugpy/issues/262
         debugpy.configure({
                             "python": "python",
-                            "subProcess": True
+                            "subProcess": True,
                         })
         debugpy.listen(("0.0.0.0", debugpy_port))  # noqa: T100
         if os.environ.get("DD_DEBUG_WAIT_FOR_CLIENT") == "True":

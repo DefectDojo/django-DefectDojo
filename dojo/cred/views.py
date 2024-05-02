@@ -30,7 +30,7 @@ def new_cred(request):
                 messages.SUCCESS,
                 'Credential Successfully Created.',
                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('cred', ))
+            return HttpResponseRedirect(reverse('cred'))
     else:
         tform = CredUserForm()
         add_breadcrumb(
@@ -64,7 +64,7 @@ def edit_cred(request, ttid):
                 messages.SUCCESS,
                 'Credential Successfully Updated.',
                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('cred', ))
+            return HttpResponseRedirect(reverse('cred'))
     else:
         tool_config.password = prepare_for_view(tool_config.password)
 
@@ -112,7 +112,7 @@ def view_cred_details(request, ttid):
         'cred': cred,
         'form': form,
         'notes': notes,
-        'cred_products': cred_products
+        'cred_products': cred_products,
     })
 
 
@@ -177,7 +177,7 @@ def view_cred_product(request, pid, ttid):
             'cred_type': cred_type,
             'edit_link': edit_link,
             'delete_link': delete_link,
-            'view_link': view_link
+            'view_link': view_link,
         })
 
 
@@ -226,7 +226,7 @@ def view_cred_product_engagement(request, eid, ttid):
             'cred_type': cred_type,
             'edit_link': edit_link,
             'delete_link': delete_link,
-            'cred_product': cred_product
+            'cred_product': cred_product,
         })
 
 
@@ -277,7 +277,7 @@ def view_cred_engagement_test(request, tid, ttid):
             'cred_type': cred_type,
             'edit_link': edit_link,
             'delete_link': delete_link,
-            'cred_product': cred_product
+            'cred_product': cred_product,
         })
 
 
@@ -328,7 +328,7 @@ def view_cred_finding(request, fid, ttid):
             'cred_type': cred_type,
             'edit_link': edit_link,
             'delete_link': delete_link,
-            'cred_product': cred_product
+            'cred_product': cred_product,
         })
 
 
@@ -356,7 +356,7 @@ def edit_cred_product(request, pid, ttid):
     return render(request, 'dojo/edit_cred_all.html', {
         'tform': tform,
         'product_tab': product_tab,
-        'cred_type': "Product"
+        'cred_type': "Product",
     })
 
 
@@ -390,7 +390,7 @@ def edit_cred_product_engagement(request, eid, ttid):
 
     return render(request, 'dojo/edit_cred_all.html', {
         'tform': tform,
-        'cred_type': "Engagement"
+        'cred_type': "Engagement",
     })
 
 
@@ -425,7 +425,7 @@ def new_cred_product(request, pid):
     return render(request, 'dojo/new_cred_product.html', {
         'tform': tform,
         'pid': pid,
-        'product_tab': product_tab
+        'product_tab': product_tab,
     })
 
 
@@ -476,7 +476,7 @@ def new_cred_product_engagement(request, eid):
         request, 'dojo/new_cred_mapping.html', {
             'tform': tform,
             'eid': eid,
-            'formlink': reverse('new_cred_product_engagement', args=(eid, ))
+            'formlink': reverse('new_cred_product_engagement', args=(eid, )),
         })
 
 
@@ -526,7 +526,7 @@ def new_cred_engagement_test(request, tid):
         request, 'dojo/new_cred_mapping.html', {
             'tform': tform,
             'eid': tid,
-            'formlink': reverse('new_cred_engagement_test', args=(tid, ))
+            'formlink': reverse('new_cred_engagement_test', args=(tid, )),
         })
 
 
@@ -577,7 +577,7 @@ def new_cred_finding(request, fid):
         request, 'dojo/new_cred_mapping.html', {
             'tform': tform,
             'eid': fid,
-            'formlink': reverse('new_cred_finding', args=(fid, ))
+            'formlink': reverse('new_cred_finding', args=(fid, )),
         })
 
 
@@ -663,7 +663,7 @@ def delete_cred_controller(request, destination_url, id, ttid):
         product_tab = Product_Tab(product, title="Delete Credential Mapping", tab="settings")
     return render(request, 'dojo/delete_cred_all.html', {
         'tform': tform,
-        'product_tab': product_tab
+        'product_tab': product_tab,
     })
 
 

@@ -36,7 +36,7 @@ def get_authorized_groups(permission, user=None):
         authorized_product_type_roles,
         authorized_product_roles,
         authorized_product_type_groups,
-        authorized_product_groups
+        authorized_product_groups,
     )
 
 
@@ -60,7 +60,7 @@ def get_authorized_findings(permission, queryset=None, user=None):
         authorized_product_type_roles,
         authorized_product_roles,
         authorized_product_type_groups,
-        authorized_product_groups
+        authorized_product_groups,
     ) = get_authorized_groups(permission, user=user)
 
     findings = findings.annotate(
@@ -93,7 +93,7 @@ def get_authorized_stub_findings(permission):
         authorized_product_type_roles,
         authorized_product_roles,
         authorized_product_type_groups,
-        authorized_product_groups
+        authorized_product_groups,
     ) = get_authorized_groups(permission, user=user)
 
     findings = Stub_Finding.objects.annotate(

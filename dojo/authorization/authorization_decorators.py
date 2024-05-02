@@ -15,7 +15,7 @@ def user_is_authorized(model, permission, arg, lookup="pk", func=None):
 
     if func is None:
         return functools.partial(
-            user_is_authorized, model, permission, arg, lookup
+            user_is_authorized, model, permission, arg, lookup,
         )
 
     @functools.wraps(func)

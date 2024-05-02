@@ -91,7 +91,7 @@ class NoseyParkerParser:
                             line=line_num,
                             static_finding=True,
                             nb_occurences=1,
-                            dynamic_finding=False
+                            dynamic_finding=False,
 
                         )
                         dupes[key] = finding

@@ -43,7 +43,7 @@ class NeuVectorJsonParser:
                 unique_key = node.get("name") + str(
                     package_name
                     + str(node.get("package_version"))
-                    + str(node.get("severity"))
+                    + str(node.get("severity")),
                 )
                 items[unique_key] = item
         return list(items.values())

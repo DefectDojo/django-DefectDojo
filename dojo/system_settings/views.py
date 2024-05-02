@@ -34,7 +34,7 @@ class SystemSettingsView(View):
         # Set the initial context
         context = {
             "system_settings_obj": system_settings_obj,
-            "form": self.get_form(request, system_settings_obj)
+            "form": self.get_form(request, system_settings_obj),
         }
         # Check the status of celery
         self.get_celery_status(context)

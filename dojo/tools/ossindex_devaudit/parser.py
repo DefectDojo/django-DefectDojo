@@ -60,7 +60,7 @@ class OssIndexDevauditParser:
 
 
 def get_item(
-    dependency_name, dependency_version, dependency_source, vulnerability, test
+    dependency_name, dependency_version, dependency_source, vulnerability, test,
 ):
     cwe_data = vulnerability.get("cwe", "CWE-1035")
     if cwe_data is None or cwe_data.startswith("CWE") is False:

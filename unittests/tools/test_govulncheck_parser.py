@@ -11,7 +11,7 @@ class TestGovulncheckParser(DojoTestCase):
                 parser = GovulncheckParser()
                 parser.get_findings(testfile, Test())
         self.assertIn(
-            "Invalid JSON format", str(exp.exception)
+            "Invalid JSON format", str(exp.exception),
         )
 
     def test_parse_no_findings(self):

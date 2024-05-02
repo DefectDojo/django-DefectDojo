@@ -38,7 +38,7 @@ class DetectSecretsParser:
                 description += "**Type:** " + type + "\n"
 
                 dupe_key = hashlib.sha256(
-                    (type + file + str(line) + hashed_secret).encode("utf-8")
+                    (type + file + str(line) + hashed_secret).encode("utf-8"),
                 ).hexdigest()
 
                 if dupe_key in dupes:

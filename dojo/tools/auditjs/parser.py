@@ -55,7 +55,7 @@ class AuditJSParser:
                 )
 
                 component_name, component_version = pacakge_full_name.split(
-                    "@"
+                    "@",
                 )
 
             # Check if there are any vulnerabilities
@@ -94,16 +94,16 @@ class AuditJSParser:
                         cvss_score = vulnerability["cvssScore"]
                     if "cvssVector" in vulnerability:
                         cvss_vectors = cvss.parser.parse_cvss_from_text(
-                            vulnerability["cvssVector"]
+                            vulnerability["cvssVector"],
                         )
                         if len(cvss_vectors) > 0 and isinstance(
-                            cvss_vectors[0], CVSS3
+                            cvss_vectors[0], CVSS3,
                         ):
                             # Only set finding vector if it's version 3
                             cvss_vector = cvss_vectors[0].clean_vector()
                             severity = cvss_vectors[0].severities()[0]
                         elif len(cvss_vectors) > 0 and isinstance(
-                            cvss_vectors[0], CVSS2
+                            cvss_vectors[0], CVSS2,
                         ):
                             # Otherwise add it to description
                             description = (
@@ -148,7 +148,7 @@ class AuditJSParser:
                         if finding.description:
                             find.description += "\n" + finding.description
                         find.unsaved_endpoints.extend(
-                            finding.unsaved_endpoints
+                            finding.unsaved_endpoints,
                         )
                         dupes[dupe_key] = find
                     else:

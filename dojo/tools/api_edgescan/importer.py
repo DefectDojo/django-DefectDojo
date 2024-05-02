@@ -27,7 +27,7 @@ class EdgescanImporter:
                 raise ValidationError(msg)
         else:
             configs = Product_API_Scan_Configuration.objects.filter(
-                product=product
+                product=product,
             )
             if configs.count() == 1:
                 config = configs.first()

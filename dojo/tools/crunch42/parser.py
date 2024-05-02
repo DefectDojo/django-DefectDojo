@@ -49,7 +49,7 @@ class Crunch42Parser:
             for key, node in results.items():
                 for issue in node["issues"]:
                     item = self.get_item(
-                        issue, key, test
+                        issue, key, test,
                     )
                     items[iterator] = item
                     iterator += 1

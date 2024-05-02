@@ -75,7 +75,7 @@ class TestSpotbugsParser(DojoTestCase):
         test_finding = findings[0]
         # Test if line 13 is correct
         self.assertEqual(
-            "At IdentityFunctionCommandInjection.kt:[lines 20-170]", test_finding.description.splitlines()[12]
+            "At IdentityFunctionCommandInjection.kt:[lines 20-170]", test_finding.description.splitlines()[12],
         )
 
     def test_mitigation(self):

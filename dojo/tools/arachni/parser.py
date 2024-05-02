@@ -32,7 +32,7 @@ class ArachniParser:
         report_date = None
         if "finish_datetime" in tree:
             report_date = datetime.strptime(
-                tree.get("finish_datetime"), "%Y-%m-%d %H:%M:%S %z"
+                tree.get("finish_datetime"), "%Y-%m-%d %H:%M:%S %z",
             )
         for node in tree["issues"]:
             item = self.get_item(node, report_date)

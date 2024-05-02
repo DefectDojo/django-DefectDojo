@@ -41,7 +41,7 @@ class OpenVASXMLParser:
                 description="\n".join(description),
                 severity=severity,
                 dynamic_finding=True,
-                static_finding=False
+                static_finding=False,
             )
             findings.append(finding)
         return findings

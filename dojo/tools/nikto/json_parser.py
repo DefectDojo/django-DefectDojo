@@ -27,12 +27,12 @@ class NiktoJSONParser:
                 description=description,
                 vuln_id_from_tool=vulnerability.get("id"),
                 nb_occurences=1,
-                references=vulnerability.get("references")
+                references=vulnerability.get("references"),
             )
             # manage if we have an ID from OSVDB
             if "OSVDB" in vulnerability and "0" != vulnerability.get("OSVDB"):
                 finding.unique_id_from_tool = "OSVDB-" + vulnerability.get(
-                    "OSVDB"
+                    "OSVDB",
                 )
                 finding.description += "\n*This finding is marked as medium as there is a link to OSVDB*"
                 finding.severity = "Medium"

@@ -110,7 +110,7 @@ class GgshieldParser:
                 + findings["match"]
                 + str(findings["line_start"])
                 + str(findings["line_end"])
-            ).encode("utf-8")
+            ).encode("utf-8"),
         ).hexdigest()
 
         if key not in dupes:

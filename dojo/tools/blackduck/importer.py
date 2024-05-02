@@ -38,7 +38,7 @@ class BlackduckImporter(Importer):
 
         project_ids = set(security_issues.keys())
         return self._process_project_findings(
-            project_ids, security_issues, None
+            project_ids, security_issues, None,
         )
 
     def _process_zipfile(self, report):
@@ -63,11 +63,11 @@ class BlackduckImporter(Importer):
 
         project_ids = set(files.keys()) & set(security_issues.keys())
         return self._process_project_findings(
-            project_ids, security_issues, files
+            project_ids, security_issues, files,
         )
 
     def _process_project_findings(
-        self, project_ids, security_issues, files=None
+        self, project_ids, security_issues, files=None,
     ):
         """
         Process findings per projects and return a BlackduckFinding object per the model
@@ -97,7 +97,7 @@ class BlackduckImporter(Importer):
             for issue in security_issues[project_id]:
                 security_issue_dict = dict(issue)
                 cve = self.get_cve(
-                    security_issue_dict.get("Vulnerability id")
+                    security_issue_dict.get("Vulnerability id"),
                 ).upper()
                 location = ", ".join(locations)
 

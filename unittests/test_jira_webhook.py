@@ -29,11 +29,11 @@ class JIRAWebhookTest(DojoTestCase):
                             "48x48": "http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
                             "24x24": "http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
                             "16x16": "http://www.testjira.com/secure/useravatar?size=x small&ownerId=valentijn&avatarId=11101",
-                            "32x32": "http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+                            "32x32": "http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101",
                         },
                         "displayName": "Valentijn Scholten",
                         "active": "true",
-                        "timeZone": "Europe/Amsterdam"
+                        "timeZone": "Europe/Amsterdam",
                     },
                     "body": "test2",
                     "updateAuthor": {
@@ -43,15 +43,15 @@ class JIRAWebhookTest(DojoTestCase):
                             "48x48": "http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
                             "24x24": "http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
                             "16x16": "http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
-                            "32x32": "http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+                            "32x32": "http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101",
                         },
                         "displayName": "Valentijn Scholten",
                         "active": "true",
-                        "timeZone": "Europe/Amsterdam"
+                        "timeZone": "Europe/Amsterdam",
                     },
                     "created": "2020-11-11T18:55:21.425+0100",
-                    "updated": "2020-11-11T18:55:21.425+0100"
-        }
+                    "updated": "2020-11-11T18:55:21.425+0100",
+        },
     }
 
     jira_issue_comment_template_json_with_email = {
@@ -67,11 +67,11 @@ class JIRAWebhookTest(DojoTestCase):
                             "48x48": "http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
                             "24x24": "http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
                             "16x16": "http://www.testjira.com/secure/useravatar?size=x small&ownerId=valentijn&avatarId=11101",
-                            "32x32": "http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+                            "32x32": "http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101",
                         },
                         "displayName": "Valentijn Scholten",
                         "active": "true",
-                        "timeZone": "Europe/Amsterdam"
+                        "timeZone": "Europe/Amsterdam",
                     },
                     "body": "test2",
                     "updateAuthor": {
@@ -81,15 +81,15 @@ class JIRAWebhookTest(DojoTestCase):
                             "48x48": "http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
                             "24x24": "http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
                             "16x16": "http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
-                            "32x32": "http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+                            "32x32": "http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101",
                         },
                         "displayName": "Valentijn Scholten",
                         "active": "true",
-                        "timeZone": "Europe/Amsterdam"
+                        "timeZone": "Europe/Amsterdam",
                     },
                     "created": "2020-11-11T18:55:21.425+0100",
-                    "updated": "2020-11-11T18:55:21.425+0100"
-        }
+                    "updated": "2020-11-11T18:55:21.425+0100",
+        },
     }
 
     jira_issue_update_template_string = """

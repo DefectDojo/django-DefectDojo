@@ -198,8 +198,8 @@ class assertNumOfModelsCreated:
         self.test_case.assertEqual(
             created_count, self.num,
             "%i %s objects created, %i expected. query: %s, first 100 objects: %s" % (
-                created_count, self.queryset.model, self.num, self.queryset.query, self.queryset.all().order_by('-id')[:100]
-            )
+                created_count, self.queryset.model, self.num, self.queryset.query, self.queryset.all().order_by('-id')[:100],
+            ),
         )
 
 
@@ -222,7 +222,7 @@ def assertTestImportModelsCreated(test_case, imports=0, reimports=0, affected_fi
                 tifa_created_count,
                 tifa_closed_count,
                 tifa_reactivated_count,
-                tifa_untouched_count
+                tifa_untouched_count,
               )
 
 

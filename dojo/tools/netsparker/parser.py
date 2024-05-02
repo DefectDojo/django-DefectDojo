@@ -26,11 +26,11 @@ class NetsparkerParser:
         dupes = {}
         if "UTC" in data["Generated"]:
             scan_date = datetime.datetime.strptime(
-                data["Generated"].split(" ")[0], "%d/%m/%Y"
+                data["Generated"].split(" ")[0], "%d/%m/%Y",
             ).date()
         else:
             scan_date = datetime.datetime.strptime(
-                data["Generated"], "%d/%m/%Y %H:%M %p"
+                data["Generated"], "%d/%m/%Y %H:%M %p",
             ).date()
 
         for item in data["Vulnerabilities"]:
@@ -79,13 +79,13 @@ class NetsparkerParser:
             if item["Classification"] is not None:
                 if item["Classification"].get("Cvss") is not None and item["Classification"].get("Cvss").get("Vector") is not None:
                     cvss_objects = cvss_parser.parse_cvss_from_text(
-                        item["Classification"]["Cvss"]["Vector"]
+                        item["Classification"]["Cvss"]["Vector"],
                     )
                     if len(cvss_objects) > 0:
                         finding.cvssv3 = cvss_objects[0].clean_vector()
                 elif item["Classification"].get("Cvss31") is not None and item["Classification"].get("Cvss31").get("Vector") is not None:
                     cvss_objects = cvss_parser.parse_cvss_from_text(
-                        item["Classification"]["Cvss31"]["Vector"]
+                        item["Classification"]["Cvss31"]["Vector"],
                     )
                     if len(cvss_objects) > 0:
                         finding.cvssv3 = cvss_objects[0].clean_vector()

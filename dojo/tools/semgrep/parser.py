@@ -45,20 +45,20 @@ class SemgrepParser:
                             item["extra"]["metadata"]
                             .get("cwe")[0]
                             .partition(":")[0]
-                            .partition("-")[2]
+                            .partition("-")[2],
                         )
                     else:
                         finding.cwe = int(
                             item["extra"]["metadata"]
                             .get("cwe")
                             .partition(":")[0]
-                            .partition("-")[2]
+                            .partition("-")[2],
                         )
 
                 # manage references from metadata
                 if "references" in item["extra"]["metadata"]:
                     finding.references = "\n".join(
-                        item["extra"]["metadata"]["references"]
+                        item["extra"]["metadata"]["references"],
                     )
 
                 # manage mitigation from metadata
@@ -71,7 +71,7 @@ class SemgrepParser:
                             "\n```\n",
                             json.dumps(item["extra"]["fix_regex"]),
                             "\n```\n",
-                        ]
+                        ],
                     )
 
                 dupe_key = finding.title + finding.file_path + str(finding.line)
@@ -109,14 +109,14 @@ class SemgrepParser:
                             item["advisory"]["references"]
                             .get("cweIds")[0]
                             .partition(":")[0]
-                            .partition("-")[2]
+                            .partition("-")[2],
                         )
                     else:
                         finding.cwe = int(
                             item["advisory"]["references"]
                             .get("cweIds")
                             .partition(":")[0]
-                            .partition("-")[2]
+                            .partition("-")[2],
                         )
 
                 dupe_key = finding.title + finding.file_path + str(finding.line)
