@@ -21,9 +21,9 @@ class TestSemgrepParser(DojoTestCase):
             self.assertEqual("src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02194.java", finding.file_path)
             self.assertEqual(64, finding.line)
             self.assertEqual(696, finding.cwe)
-            self.assertEqual("javax crypto Cipher.getInstance(\"AES/GCM/NoPadding\");", finding.mitigation)
+            self.assertEqual('javax crypto Cipher.getInstance("AES/GCM/NoPadding");', finding.mitigation)
             self.assertEqual("java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle", finding.vuln_id_from_tool)
-            self.assertIn("javax.crypto.Cipher c = javax.crypto.Cipher.getInstance(\"DES/CBC/PKCS5Padding\");", finding.description)
+            self.assertIn('javax.crypto.Cipher c = javax.crypto.Cipher.getInstance("DES/CBC/PKCS5Padding");', finding.description)
             self.assertIn("Using CBC with PKCS5Padding is susceptible to padding orcale attacks", finding.description)
 
     def test_parse_many_finding(self):
@@ -36,14 +36,14 @@ class TestSemgrepParser(DojoTestCase):
             self.assertEqual("src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02194.java", finding.file_path)
             self.assertEqual(64, finding.line)
             self.assertEqual(696, finding.cwe)
-            self.assertEqual("javax crypto Cipher.getInstance(\"AES/GCM/NoPadding\");", finding.mitigation)
+            self.assertEqual('javax crypto Cipher.getInstance("AES/GCM/NoPadding");', finding.mitigation)
             self.assertEqual("java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle", finding.vuln_id_from_tool)
             finding = findings[2]
             self.assertEqual("Info", finding.severity)
             self.assertEqual("src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01150.java", finding.file_path)
             self.assertEqual(66, finding.line)
             self.assertEqual(696, finding.cwe)
-            self.assertEqual("javax crypto Cipher.getInstance(\"AES/GCM/NoPadding\");", finding.mitigation)
+            self.assertEqual('javax crypto Cipher.getInstance("AES/GCM/NoPadding");', finding.mitigation)
             self.assertEqual("java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle", finding.vuln_id_from_tool)
 
     def test_parse_repeated_finding(self):
@@ -57,7 +57,7 @@ class TestSemgrepParser(DojoTestCase):
             self.assertEqual(66, finding.line)
             self.assertEqual("java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle", finding.vuln_id_from_tool)
             self.assertEqual(696, finding.cwe)
-            self.assertEqual("javax crypto Cipher.getInstance(\"AES/GCM/NoPadding\");", finding.mitigation)
+            self.assertEqual('javax crypto Cipher.getInstance("AES/GCM/NoPadding");', finding.mitigation)
             self.assertEqual(2, finding.nb_occurences)
 
     def test_parse_many_vulns(self):
