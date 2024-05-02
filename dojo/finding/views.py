@@ -1771,6 +1771,18 @@ def clear_finding_review(request, fid):
             if push_to_jira and finding_in_group:
                 jira_helper.push_to_jira(finding.finding_group)
 
+            create_notification(
+                event="code_review",
+                title="Finding review completed",
+                note=new_note,
+                finding=finding,
+                recipients=[finding.review_requested_by.username],
+                description=f"User {user.get_full_name()} review completed the finding \"{finding.title}\" for accuracy:\n\n{new_note}",
+                icon="check-circle",
+                color_icon="#096C11",
+                url=reverse("view_finding", args=(finding.id,)),
+            )
+
             messages.add_message(
                 request,
                 messages.SUCCESS,

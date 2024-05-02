@@ -185,9 +185,11 @@ def get_item(vulnerability, test):
             vector, cvss, riskFactors
         ),
         impact=severity,
-        vuln_id_from_tool= vulnerability['id']
+        vuln_id_from_tool= vulnerability['id'],
+        publish_date=vulnerability.get('publishedDate', None),
+
     )
-    finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
+    finding.unsaved_tags = [vulnerability['customTag'] if vulnerability.get('customTag', None) else settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
     finding.unsaved_vulnerability_ids = [vulnerability["id"]]
     finding.description = finding.description.strip()
 
