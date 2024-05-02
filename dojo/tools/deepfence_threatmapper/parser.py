@@ -20,7 +20,7 @@ class DeepfenceThreatmapperParser:
         workbook = load_workbook(filename)
         worksheet = workbook.active
         findings = []
-        headers = []
+        headers = {}
         first = True
         for row in worksheet.iter_rows(min_row=1, values_only=True):
             if first:
