@@ -3386,9 +3386,8 @@ def push_to_jira(request, fid):
             )
 
         return JsonResponse({"result": "OK"})
-    except Exception as e:
-        logger.exception(e)
-        logger.error("Error pushing to JIRA: ", exc_info=True)
+    except Exception:
+        logger.exception("Error pushing to JIRA")
         messages.add_message(
             request, messages.ERROR, "Error pushing to JIRA", extra_tags="alert-danger"
         )
