@@ -64,7 +64,7 @@ class TestNexposeParser(DojoTestCase):
 
             # vuln 5
             finding = findings[5]
-            self.assertEqual("Default SSH password: root password \"root\"", finding.title)
+            self.assertEqual('Default SSH password: root password "root"', finding.title)
             self.assertEqual(1, len(finding.unsaved_endpoints))
 
             # vuln 5 - endpoint

@@ -3908,7 +3908,7 @@ class JIRA_Project(models.Model):
     engagement = models.OneToOneField(Engagement, on_delete=models.CASCADE, null=True, blank=True)
     component = models.CharField(max_length=200, blank=True)
     custom_fields = models.JSONField(max_length=200, blank=True, null=True,
-                                   help_text=_("JIRA custom field JSON mapping of Id to value, e.g. {\"customfield_10122\": [{\"name\": \"8.0.1\"}]}"))
+                                   help_text=_('JIRA custom field JSON mapping of Id to value, e.g. {"customfield_10122": [{"name": "8.0.1"}]}'))
     default_assignee = models.CharField(max_length=200, blank=True, null=True,
                                      help_text=_("JIRA default assignee (name). If left blank then it defaults to whatever is configured in JIRA."))
     jira_labels = models.CharField(max_length=200, blank=True, null=True,
