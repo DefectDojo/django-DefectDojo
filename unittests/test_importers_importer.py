@@ -296,7 +296,7 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             self.product = self.create_product(another_product_name)
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=None,
                 engagement_name=ENGAGEMENT_NAME_DEFAULT, product_name=another_product_name, expected_http_status_code=400)
-            self.assertEqual(import0, [f"Engagement 'Engagement 1' does not exist in Product {another_product_name}"])
+            self.assertEqual(import0, [f"Engagement 'Engagement 1' does not exist in Product '{another_product_name}'"])
 
         with self.subTest('invalid engagement not id'):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
@@ -306,7 +306,7 @@ class FlexibleImportTestAPI(DojoAPITestCase):
         with self.subTest('autocreate product but no product type name'):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, auto_create_context=True, expected_http_status_code=400)
-            self.assertEqual(import0, [f"Product {PRODUCT_NAME_NEW} does not exist and no product_type_name provided to create the new product in"])
+            self.assertEqual(import0, [f"Product '{PRODUCT_NAME_NEW}' does not exist and no product_type_name provided to create the new product in"])
 
         with self.subTest('autocreate engagement but no product_name'):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=None,
