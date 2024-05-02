@@ -98,7 +98,7 @@ def get_item(
             artifact_sha256
             + impact_path.name
             + impact_path.version
-            + vulnerability["issue_id"]
+            + vulnerability["issue_id"],
         )
         vuln_id_from_tool = vulnerability["issue_id"]
     elif cve:
@@ -108,7 +108,7 @@ def get_item(
             artifact_sha256
             + impact_path.name
             + impact_path.version
-            + vulnerability["summary"]
+            + vulnerability["summary"],
         )
         vuln_id_from_tool = ""
     result.update(unique_id.encode())

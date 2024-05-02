@@ -165,7 +165,7 @@ class ViewTest(View):
         args = [request.POST] if request.method == "POST" else []
         # Set the initial form args
         kwargs = {
-            "available_note_types": context.get("available_note_types")
+            "available_note_types": context.get("available_note_types"),
         }
 
         return TypedNoteForm(*args, **kwargs)
@@ -437,9 +437,9 @@ def test_ics(request, tid):
         _(f"Test: {test.test_type.name} ({test.engagement.product.name}"),
         _(
             f"Set aside for test {test.test_type.name}, on product {test.engagement.product.name}. "
-            f"Additional detail can be found at {request.build_absolute_uri(reverse('view_test', args=(test.id,)))}"
+            f"Additional detail can be found at {request.build_absolute_uri(reverse('view_test', args=(test.id,)))}",
         ),
-        uid
+        uid,
     )
     output = cal.serialize()
     response = HttpResponse(content=output)
@@ -579,7 +579,7 @@ class AddFindingView(View):
             # Determine if a message should be added
             if jira_message:
                 messages.add_message(
-                    request, messages.SUCCESS, jira_message, extra_tags="alert-success"
+                    request, messages.SUCCESS, jira_message, extra_tags="alert-success",
                 )
 
             return request, True, push_to_jira
@@ -845,12 +845,12 @@ class ReImportScanResultsView(View):
                     jira_form = JIRAImportScanForm(
                         request.POST,
                         push_all=push_all_jira_issues,
-                        prefix='jiraform'
+                        prefix='jiraform',
                     )
                 else:
                     jira_form = JIRAImportScanForm(
                         push_all=push_all_jira_issues,
-                        prefix='jiraform'
+                        prefix='jiraform',
                     )
         return jira_form, push_all_jira_issues
 
@@ -997,7 +997,7 @@ class ReImportScanResultsView(View):
                 untouched_finding_count,
                 _,
             ) = importer_client.process_scan(
-                context.pop("scan", None)
+                context.pop("scan", None),
             )
             # Add a message to the view for the user to see the results
             add_success_message_to_response(importer_client.construct_imported_message(

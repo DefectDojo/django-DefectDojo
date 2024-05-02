@@ -41,6 +41,7 @@ select = [
    "ASYNC",
    "TRIO",
    "S2", "S5", "S7",
+   "COM",
    "C4",
    "T10",
    "DJ003", "DJ012", "DJ013",

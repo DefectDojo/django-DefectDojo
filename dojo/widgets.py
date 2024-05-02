@@ -27,6 +27,6 @@ class TableCheckboxWidget(forms.widgets.Widget):
             'paginator': paginator,
             'page_number': page_number,
             'page': page,
-            'page_param': 'apage'
+            'page_param': 'apage',
         }
         return render_to_string(self.template_name, context)
