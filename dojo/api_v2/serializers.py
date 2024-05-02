@@ -208,7 +208,7 @@ class TagListSerializerField(serializers.ListField):
             except ValueError:
                 self.fail("invalid_json")
 
-        logger.debug("data as json: %s", data)
+        logger.debug(f"data as json: {data}")
 
         if not isinstance(data, list):
             self.fail("not_a_list", input_type=type(data).__name__)

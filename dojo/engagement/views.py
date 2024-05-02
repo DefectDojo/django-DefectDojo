@@ -1319,7 +1319,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             risk_acceptance_form = EditRiskAcceptanceForm(request.POST, request.FILES, instance=risk_acceptance)
             errors = errors or not risk_acceptance_form.is_valid()
             if not errors:
-                logger.debug('path: %s', risk_acceptance_form.cleaned_data['path'])
+                logger.debug(f"path: {risk_acceptance_form.cleaned_data['path']}")
 
                 risk_acceptance_form.save()
 
@@ -1405,8 +1405,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    'Finding%s added successfully.' % ('s' if len(findings) > 1
-                                                       else ''),
+                    f"Finding{'s' if len(findings) > 1 else ''} added successfully.",
                     extra_tags='alert-success')
         if not errors:
             logger.debug('redirecting to return_url')
@@ -1568,13 +1567,17 @@ def engagement_ics(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     start_date = datetime.combine(eng.target_start, datetime.min.time())
     end_date = datetime.combine(eng.target_end, datetime.max.time())
-    uid = "dojo_eng_%d_%d" % (eng.id, eng.product.id)
+    uid = f"dojo_eng_{eng.id}_{eng.product.id}"
     cal = get_cal_event(
-        start_date, end_date,
+        start_date,
+        end_date,
         f"Engagement: {eng.name} ({eng.product.name})",
-        "Set aside for engagement {}, on product {}.  Additional detail can be found at {}".format(eng.name, eng.product.name,
-           request.build_absolute_uri(
-               reverse("view_engagement", args=(eng.id, )))), uid)
+        (
+            f"Set aside for engagement {eng.name}, on product {eng.product.name}. "
+            f"Additional detail can be found at {request.build_absolute_uri(reverse('view_engagement', args=(eng.id, )))}"
+        ),
+        uid
+    )
     output = cal.serialize()
     response = HttpResponse(content=output)
     response['Content-Type'] = 'text/calendar'

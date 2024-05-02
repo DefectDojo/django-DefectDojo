@@ -927,18 +927,16 @@ def raise_no_auto_create_import_validation_error(
         raise ValidationError(msg)
 
     if product_type_name and not product_type:
-        raise serializers.ValidationError(
-            "Product Type '%s' does not exist" % (product_type_name)
-        )
+        msg = f"Product Type '{product_type_name}' does not exist"
+        raise serializers.ValidationError(msg)
 
     if product_name and not product:
         if product_type_name:
             msg = f"Product '{product_name}' does not exist in Product_Type '{product_type_name}'"
             raise serializers.ValidationError(msg)
         else:
-            raise serializers.ValidationError(
-                "Product '%s' does not exist" % product_name
-            )
+            msg = f"Product '{product_name}' does not exist"
+            raise serializers.ValidationError(msg)
 
     if engagement_name and not engagement:
         msg = f"Engagement '{engagement_name}' does not exist in Product '{product_name}'"
@@ -1011,10 +1009,8 @@ def check_auto_create_permission(
 
     if not product and product_name:
         if not product_type_name:
-            raise serializers.ValidationError(
-                "Product '%s' does not exist and no product_type_name provided to create the new product in"
-                % product_name
-            )
+            msg = f"Product '{product_name}' does not exist and no product_type_name provided to create the new product in"
+            raise serializers.ValidationError(msg)
 
         if not product_type:
             if not user_has_global_permission(

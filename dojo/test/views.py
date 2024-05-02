@@ -335,9 +335,9 @@ def delete_test(request, tid):
                                      message,
                                      extra_tags='alert-success')
                 create_notification(event='other',
-                                    title=_('Deletion of %(title)s') % {"title": test.title},
+                                    title=_(f"Deletion of {test.title}"),
                                     product=product,
-                                    description=_('The test "%(title)s" was deleted by %(user)s') % {"title": test.title, "user": request.user},
+                                    description=_(f'The test "{test.title}" was deleted by {request.user}'),
                                     url=request.build_absolute_uri(reverse('view_engagement', args=(eng.id, ))),
                                     recipients=[test.engagement.lead],
                                     icon="exclamation-triangle")
@@ -438,19 +438,17 @@ def test_ics(request, tid):
     test = get_object_or_404(Test, id=tid)
     start_date = datetime.combine(test.target_start, datetime.min.time())
     end_date = datetime.combine(test.target_end, datetime.max.time())
-    uid = "dojo_test_%d_%d_%d" % (test.id, test.engagement.id, test.engagement.product.id)
-    cal = get_cal_event(start_date,
-                        end_date,
-                        _("Test: %(test_type_name)s (%(product_name)s)") % {
-                            'test_type_name': test.test_type.name,
-                            'product_name': test.engagement.product.name
-                        },
-                        _("Set aside for test %(test_type_name)s, on product %(product_name)s. Additional detail can be found at %(detail_url)s") % {
-                            'test_type_name': test.test_type.name,
-                            'product_name': test.engagement.product.name,
-                            'detail_url': request.build_absolute_uri(reverse("view_test", args=(test.id,)))
-                        },
-                        uid)
+    uid = f"dojo_test_{test.id}_{test.engagement.id}_{test.engagement.product.id}"
+    cal = get_cal_event(
+        start_date,
+        end_date,
+        _(f"Test: {test.test_type.name} ({test.engagement.product.name}"),
+        _(
+            f"Set aside for test {test.test_type.name}, on product {test.engagement.product.name}. "
+            f"Additional detail can be found at {request.build_absolute_uri(reverse('view_test', args=(test.id,)))}"
+        ),
+        uid
+    )
     output = cal.serialize()
     response = HttpResponse(content=output)
     response['Content-Type'] = 'text/calendar'
@@ -629,11 +627,9 @@ class AddFindingView(View):
             # Create a notification
             create_notification(
                 event='other',
-                title=_('Addition of %(title)s') % {'title': finding.title},
+                title=_(f'Addition of {finding.title}'),
                 finding=finding,
-                description=_('Finding "%(title)s" was added by %(user)s') % {
-                    'title': finding.title, 'user': request.user
-                },
+                description=_(f'Finding "{finding.title}" was added by {request.user}'),
                 url=reverse("view_finding", args=(finding.id,)),
                 icon="exclamation-triangle")
             # Add a success message
@@ -692,7 +688,7 @@ def add_temp_finding(request, tid, fid):
         form = AddFindingForm(request.POST, req_resp=None, product=test.engagement.product)
         if jira_helper.get_jira_project(test):
             jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test), finding_form=form)
-            logger.debug('jform valid: %s', jform.is_valid())
+            logger.debug(f'jform valid: {jform.is_valid()}')
 
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
@@ -776,12 +772,6 @@ def add_temp_finding(request, tid, fid):
 
         if jira_helper.get_jira_project(test):
             jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test), finding_form=form)
-
-    # logger.debug('form valid: %s', form.is_valid())
-    # logger.debug('jform valid: %s', jform.is_valid())
-    # logger.debug('form errors: %s', form.errors)
-    # logger.debug('jform errors: %s', jform.errors)
-    # logger.debug('jform errors: %s', vars(jform))
 
     product_tab = Product_Tab(test.engagement.product, title=_("Add Finding"), tab="engagements")
     product_tab.setEngagement(test.engagement)
