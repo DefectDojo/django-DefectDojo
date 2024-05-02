@@ -26,12 +26,12 @@ class TestSslyzeJSONParser(DojoTestCase):
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual('Problems in certificate deployments (www.example.com:443)', finding.title)
-            description = '''www.example.com:443 has problems in certificate deployments:
+            description = """www.example.com:443 has problems in certificate deployments:
  - certificate has expired for trust store Android, version 9.0.0_r9
  - certificate has expired for trust store Apple, version iOS 13, iPadOS 13, macOS 10.15, watchOS 6, and tvOS 13
  - certificate has expired for trust store Java, version jdk-13.0.2
  - certificate has expired for trust store Mozilla, version 2019-11-28
- - certificate has expired for trust store Windows, version 2020-05-04'''
+ - certificate has expired for trust store Windows, version 2020-05-04"""
             self.assertEqual(description, finding.description)
             self.assertEqual('Medium', finding.severity)
 
@@ -74,7 +74,7 @@ class TestSslyzeJSONParser(DojoTestCase):
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual('Unrecommended cipher suites for TLS 1.2 (example.com:443)', finding.title)
-            description = '''example.com:443 accepts unrecommended cipher suites for TLS 1.2:
+            description = """example.com:443 accepts unrecommended cipher suites for TLS 1.2:
  - TLS_RSA_WITH_AES_256_GCM_SHA384
  - TLS_RSA_WITH_AES_256_CCM_8
  - TLS_RSA_WITH_AES_256_CCM
@@ -90,7 +90,7 @@ class TestSslyzeJSONParser(DojoTestCase):
  - TLS_DHE_RSA_WITH_AES_256_CCM_8
  - TLS_DHE_RSA_WITH_AES_256_CBC_SHA
  - TLS_DHE_RSA_WITH_AES_128_CCM_8
- - TLS_DHE_RSA_WITH_AES_128_CBC_SHA'''
+ - TLS_DHE_RSA_WITH_AES_128_CBC_SHA"""
             self.assertEqual(description, finding.description)
             self.assertEqual('Medium', finding.severity)
             self.assertEqual(
@@ -118,7 +118,7 @@ class TestSslyzeJSONParser(DojoTestCase):
             # We look at 2 examplary findings, the others are similar and don't give more test coverage
             finding = findings[0]
             self.assertEqual('Unrecommended cipher suites for TLS 1.2 (example.com:443)', finding.title)
-            description = '''example.com:443 accepts unrecommended cipher suites for TLS 1.2:
+            description = """example.com:443 accepts unrecommended cipher suites for TLS 1.2:
  - TLS_RSA_WITH_AES_256_GCM_SHA384
  - TLS_RSA_WITH_AES_256_CBC_SHA256
  - TLS_RSA_WITH_AES_256_CBC_SHA
@@ -129,7 +129,7 @@ class TestSslyzeJSONParser(DojoTestCase):
  - TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
  - TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
  - TLS_DHE_RSA_WITH_AES_256_CBC_SHA
- - TLS_DHE_RSA_WITH_AES_128_CBC_SHA'''
+ - TLS_DHE_RSA_WITH_AES_128_CBC_SHA"""
             self.assertEqual(description, finding.description)
             self.assertEqual('Medium', finding.severity)
             self.assertEqual(

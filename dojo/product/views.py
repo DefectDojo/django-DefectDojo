@@ -580,11 +580,11 @@ def view_product_metrics(request, pid):
     closed_findings = list(filters.get("closed", []).values('id', 'date', 'severity'))
     accepted_findings = list(filters.get("accepted", []).values('id', 'date', 'severity'))
 
-    '''
+    """
         Optimization: Create dictionaries in the structure of { finding_id: True } for index based search
         Previously the for-loop below used "if finding in open_findings" -- an average O(n^2) time complexity
         This allows for "if open_findings.get(finding_id, None)" -- an average O(n) time complexity
-    '''
+    """
     open_findings_dict = {f.get('id'): True for f in open_findings}
     closed_findings_dict = {f.get('id'): True for f in closed_findings}
     accepted_findings_dict = {f.get('id'): True for f in accepted_findings}

@@ -86,7 +86,7 @@ class SymbolValidator:
 
     def get_help_text(self):
         return gettext('The password must contain at least 1 special character, '
-            + '''()[]{}|`~!@#$%^&*_-+=;:'",<>./?.''')
+            + """()[]{}|`~!@#$%^&*_-+=;:'",<>./?.""")
 
 
 class DojoCommonPasswordValidator(CommonPasswordValidator):
