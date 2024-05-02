@@ -424,9 +424,9 @@ def parse_search_query(clean_query):
         else:
             keywords.append(vulnerability_id_fix(query_part))
 
-    logger.debug('query:     %s' % clean_query)
-    logger.debug('operators: %s' % operators)
-    logger.debug('keywords:  %s' % keywords)
+    logger.debug(f'query:     {clean_query}')
+    logger.debug(f'operators: {operators}')
+    logger.debug(f'keywords:  {keywords}')
 
     return operators, keywords
 
@@ -491,12 +491,12 @@ def apply_tag_filters(qs, operators, skip_relations=False):
         if tag_filter in operators:
             value = operators[tag_filter]
             value = ','.join(value)  # contains needs a single value
-            qs = qs.filter(**{'%stags__name__contains' % tag_filters[tag_filter]: value})
+            qs = qs.filter(**{f'{tag_filters[tag_filter]}tags__name__contains': value})
 
     for tag_filter in tag_filters:
         if tag_filter + 's' in operators:
             value = operators[tag_filter + 's']
-            qs = qs.filter(**{'%stags__name__in' % tag_filters[tag_filter]: value})
+            qs = qs.filter(**{f'{tag_filters[tag_filter]}tags__name__in': value})
 
     # negative search based on not- prefix (not-tags, not-test-tags, not-engagement-tags, not-product-tags, etc)
 
@@ -505,13 +505,13 @@ def apply_tag_filters(qs, operators, skip_relations=False):
         if tag_filter in operators:
             value = operators[tag_filter]
             value = ','.join(value)  # contains needs a single value
-            qs = qs.exclude(**{'%stags__name__contains' % tag_filters[tag_filter.replace('not-', '')]: value})
+            qs = qs.exclude(**{'{}tags__name__contains'.format(tag_filters[tag_filter.replace('not-', '')]): value})
 
     for tag_filter in tag_filters:
         tag_filter = 'not-' + tag_filter
         if tag_filter + 's' in operators:
             value = operators[tag_filter + 's']
-            qs = qs.exclude(**{'%stags__name__in' % tag_filters[tag_filter.replace('not-', '')]: value})
+            qs = qs.exclude(**{'{}tags__name__in'.format(tag_filters[tag_filter.replace('not-', '')]): value})
 
     return qs
 

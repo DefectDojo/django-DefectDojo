@@ -419,8 +419,8 @@ def colgroup(parser, token):
         _, iterable, _, num_cols, _, _, varname = token.split_contents()
         num_cols = int(num_cols)
     except ValueError:
-        raise template.TemplateSyntaxError(
-            "Invalid arguments passed to %r." % token.contents.split()[0])
+        msg = f"Invalid arguments passed to {token.contents.split()[0]!r}."
+        raise template.TemplateSyntaxError(msg)
     return Node(iterable, num_cols, varname)
 
 

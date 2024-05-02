@@ -148,7 +148,7 @@ def delete_product_type(request, ptid):
                                      message,
                                      extra_tags='alert-success')
                 create_notification(event='other',
-                                title='Deletion of %s' % product_type.name,
+                                title=f'Deletion of {product_type.name}',
                                 no_users=True,
                                 description=f'The product type "{product_type.name}" was deleted by {request.user}',
                                 url=request.build_absolute_uri(reverse('product_type')),

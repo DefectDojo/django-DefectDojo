@@ -168,7 +168,7 @@ def skipIfNotSubclass(baseclass):
     def decorate(f):
         def wrapper(self, *args, **kwargs):
             if not issubclass(self.viewset, baseclass):
-                self.skipTest('This view does not inherit from %s' % baseclass)
+                self.skipTest(f'This view does not inherit from {baseclass}')
             else:
                 f(self, *args, **kwargs)
         return wrapper
@@ -458,7 +458,7 @@ class BaseClass:
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail(self):
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
             response = self.client.get(relative_url)
             self.assertEqual(200, response.status_code, response.content[:1000])
             # sensitive data must be set to write_only so those are not returned in the response
@@ -472,14 +472,14 @@ class BaseClass:
         @skipIfNotSubclass(DestroyModelMixin)
         def test_delete(self):
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][-1]['id']
+            relative_url = self.url + '{}/'.format(current_objects['results'][-1]['id'])
             response = self.client.delete(relative_url)
             self.assertEqual(204, response.status_code, response.content[:1000])
 
         @skipIfNotSubclass(UpdateModelMixin)
         def test_update(self):
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
             response = self.client.patch(relative_url, self.update_fields)
             self.assertEqual(200, response.status_code, response.content[:1000])
 
@@ -517,7 +517,7 @@ class BaseClass:
         @skipIfNotSubclass(DeletePreviewModelMixin)
         def test_delete_preview(self):
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/delete_preview/' % current_objects['results'][0]['id']
+            relative_url = self.url + '{}/delete_preview/'.format(current_objects['results'][0]['id'])
             response = self.client.get(relative_url)
             # print('delete_preview response.data')
 
@@ -549,7 +549,7 @@ class BaseClass:
             prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
 
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
             response = self.client.get(relative_url, data={
                 "prefetch": ','.join(prefetchable_fields)
             })
@@ -637,7 +637,7 @@ class BaseClass:
             self.setUp_not_authorized()
 
             current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + '%s/' % current_objects[0].id
+            relative_url = self.url + f'{current_objects[0].id}/'
             response = self.client.get(relative_url)
             self.assertEqual(404, response.status_code, response.content[:1000])
 
@@ -664,7 +664,7 @@ class BaseClass:
             mock.return_value = False
 
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
             self.client.delete(relative_url)
 
             if self.endpoint_model == Endpoint_Status:
@@ -687,7 +687,7 @@ class BaseClass:
             mock.return_value = False
 
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
 
             if self.endpoint_model == Endpoint_Status:
                 permission_object = Endpoint.objects.get(id=current_objects['results'][0]['endpoint'])
@@ -726,7 +726,7 @@ class BaseClass:
             self.setUp_not_authorized()
 
             current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + '%s/' % current_objects[0].id
+            relative_url = self.url + f'{current_objects[0].id}/'
             response = self.client.get(relative_url)
             self.assertEqual(403, response.status_code, response.content[:1000])
 
@@ -748,7 +748,7 @@ class BaseClass:
             self.setUp_not_authorized()
 
             current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + '%s/' % current_objects[0].id
+            relative_url = self.url + f'{current_objects[0].id}/'
             response = self.client.delete(relative_url)
             self.assertEqual(403, response.status_code, response.content[:1000])
 
@@ -760,7 +760,7 @@ class BaseClass:
             self.setUp_not_authorized()
 
             current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + '%s/' % current_objects[0].id
+            relative_url = self.url + f'{current_objects[0].id}/'
 
             response = self.client.patch(relative_url, self.update_fields)
             self.assertEqual(403, response.status_code, response.content[:1000])
@@ -774,7 +774,7 @@ class BaseClass:
 
         def test_update(self):
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
             response = self.client.patch(relative_url, self.update_fields)
             self.assertEqual(405, response.status_code, response.content[:1000])
 
@@ -792,7 +792,7 @@ class BaseClass:
             mock.return_value = False
 
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
 
             response = self.client.put(relative_url, self.payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
@@ -822,7 +822,7 @@ class BaseClass:
             self.setUp_not_authorized()
 
             current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + '%s/' % current_objects[0].id
+            relative_url = self.url + f'{current_objects[0].id}/'
             response = self.client.get(relative_url)
             self.assertEqual(200, response.status_code, response.content[:1000])
 
@@ -919,7 +919,7 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
             'finding': object2['finding']
         }
 
-        relative_url = self.url + '%s/' % object1['id']
+        relative_url = self.url + '{}/'.format(object1['id'])
 
         response = self.client.patch(relative_url, unsucessful_payload)
         self.assertEqual(400, response.status_code, response.content[:1000])
@@ -940,7 +940,7 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
             'finding': object2['finding']
         }
 
-        relative_url = self.url + '%s/' % object1['id']
+        relative_url = self.url + '{}/'.format(object1['id'])
 
         response = self.client.put(relative_url, unsucessful_payload)
         self.assertEqual(400, response.status_code, response.content[:1000])
@@ -1073,7 +1073,7 @@ class RiskAcceptanceTest(BaseClass.RESTEndpointTest):
             "notes": []
         }
         current_objects = self.client.get(self.url, format='json').data
-        relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+        relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
         response = self.client.put(relative_url, self.payload)
         self.assertEqual(403, response.status_code, response.content[:1000])
 
@@ -2480,7 +2480,7 @@ class DojoGroupsTest(BaseClass.RESTEndpointTest):
         self.setUp_not_authorized()
 
         current_objects = self.endpoint_model.objects.all()
-        relative_url = self.url + '%s/' % current_objects[0].id
+        relative_url = self.url + f'{current_objects[0].id}/'
         response = self.client.get(relative_url)
         self.assertEqual(403, response.status_code, response.content[:1000])
 
@@ -2816,7 +2816,7 @@ class DevelopmentEnvironmentTest(BaseClass.AuthenticatedViewTest):
 
     def test_delete(self):
         current_objects = self.client.get(self.url, format='json').data
-        relative_url = self.url + '%s/' % current_objects['results'][-1]['id']
+        relative_url = self.url + '{}/'.format(current_objects['results'][-1]['id'])
         response = self.client.delete(relative_url)
         self.assertEqual(409, response.status_code, response.content[:1000])
 

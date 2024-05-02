@@ -220,7 +220,7 @@ env = environ.FileAwareEnv(
     # regular expression to exclude one or more parsers
     # could be usefull to limit parser allowed
     # AWS Scout2 Scan Parser is deprecated (see https://github.com/DefectDojo/django-DefectDojo/pull/5268)
-    DD_PARSER_EXCLUDE=(str, 'AWS Scout2 Scan'),
+    DD_PARSER_EXCLUDE=(str, ''),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
@@ -605,19 +605,19 @@ MAX_REQRESP_FROM_API = env('DD_MAX_REQRESP_FROM_API')
 MAX_AUTOCOMPLETE_WORDS = env('DD_MAX_AUTOCOMPLETE_WORDS')
 
 LOGIN_EXEMPT_URLS = (
-    r'^%sstatic/' % URL_PREFIX,
-    r'^%swebhook/([\w-]+)$' % URL_PREFIX,
-    r'^%swebhook/' % URL_PREFIX,
-    r'^%sjira/webhook/([\w-]+)$' % URL_PREFIX,
-    r'^%sjira/webhook/' % URL_PREFIX,
-    r'^%sreports/cover$' % URL_PREFIX,
-    r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
-    r'^%sapi/v2/' % URL_PREFIX,
+    rf'^{URL_PREFIX}static/',
+    rf'^{URL_PREFIX}webhook/([\w-]+)$',
+    rf'^{URL_PREFIX}webhook/',
+    rf'^{URL_PREFIX}jira/webhook/([\w-]+)$',
+    rf'^{URL_PREFIX}jira/webhook/',
+    rf'^{URL_PREFIX}reports/cover$',
+    rf'^{URL_PREFIX}finding/image/(?P<token>[^/]+)$',
+    rf'^{URL_PREFIX}api/v2/',
     r'complete/',
     r'empty_questionnaire/([\d]+)/answer',
-    r'^%spassword_reset/' % URL_PREFIX,
-    r'^%sforgot_username' % URL_PREFIX,
-    r'^%sreset/' % URL_PREFIX,
+    rf'^{URL_PREFIX}password_reset/',
+    rf'^{URL_PREFIX}forgot_username',
+    rf'^{URL_PREFIX}reset/',
 )
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -910,7 +910,7 @@ if SAML2_ENABLED:
     INSTALLED_APPS += ('djangosaml2',)
     MIDDLEWARE.append('djangosaml2.middleware.SamlSessionMiddleware')
     AUTHENTICATION_BACKENDS += (env('DD_SAML2_AUTHENTICATION_BACKENDS'),)
-    LOGIN_EXEMPT_URLS += (r'^%ssaml2/' % URL_PREFIX,)
+    LOGIN_EXEMPT_URLS += (rf'^{URL_PREFIX}saml2/',)
     SAML_LOGOUT_REQUEST_PREFERRED_BINDING = saml2.BINDING_HTTP_POST
     SAML_IGNORE_LOGOUT_ERRORS = True
     SAML_DJANGO_USER_MAIN_ATTRIBUTE = 'username'
@@ -922,7 +922,7 @@ if SAML2_ENABLED:
     SAML_ALLOW_UNKNOWN_ATTRIBUTES = env('DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE')
     BASEDIR = path.dirname(path.abspath(__file__))
     if len(env('DD_SAML2_ENTITY_ID')) == 0:
-        SAML2_ENTITY_ID = '%s/saml2/metadata/' % SITE_URL
+        SAML2_ENTITY_ID = f'{SITE_URL}/saml2/metadata/'
     else:
         SAML2_ENTITY_ID = env('DD_SAML2_ENTITY_ID')
 
@@ -931,7 +931,7 @@ if SAML2_ENABLED:
         'xmlsec_binary': '/usr/bin/xmlsec1',
 
         # your entity id, usually your subdomain plus the url to the metadata view
-        'entityid': '%s' % SAML2_ENTITY_ID,
+        'entityid': str(SAML2_ENTITY_ID),
 
         # directory with attribute mapping
         'attribute_map_dir': path.join(BASEDIR, 'attribute-maps'),
@@ -955,16 +955,16 @@ if SAML2_ENABLED:
                     # url and binding to the assetion consumer service view
                     # do not change the binding or service name
                     'assertion_consumer_service': [
-                        ('%s/saml2/acs/' % SITE_URL,
+                        (f'{SITE_URL}/saml2/acs/',
                         saml2.BINDING_HTTP_POST),
                     ],
                     # url and binding to the single logout service view
                     # do not change the binding or service name
                     'single_logout_service': [
                         # Disable next two lines for HTTP_REDIRECT for IDP's that only support HTTP_POST. Ex. Okta:
-                        ('%s/saml2/ls/' % SITE_URL,
+                        (f'{SITE_URL}/saml2/ls/',
                         saml2.BINDING_HTTP_REDIRECT),
-                        ('%s/saml2/ls/post' % SITE_URL,
+                        (f'{SITE_URL}/saml2/ls/post',
                         saml2.BINDING_HTTP_POST),
                     ],
                 },
@@ -1156,7 +1156,7 @@ if env('DD_DJANGO_METRICS_ENABLED'):
     database_engine = DATABASES.get('default').get('ENGINE')
     DATABASES['default']['ENGINE'] = database_engine.replace('django.', 'django_prometheus.', 1)
     # CELERY_RESULT_BACKEND.replace('django.core','django_prometheus.', 1)
-    LOGIN_EXEMPT_URLS += (r'^%sdjango_metrics/' % URL_PREFIX,)
+    LOGIN_EXEMPT_URLS += (rf'^{URL_PREFIX}django_metrics/',)
 
 
 # ------------------------------------
@@ -1563,46 +1563,46 @@ LOGGING = {
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins', 'console'],
-            'level': '%s' % LOG_LEVEL,
+            'level': str(LOG_LEVEL),
             'propagate': False,
         },
         'django.security': {
-            'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': '%s' % LOG_LEVEL,
+            'handlers': [rf'{LOGGING_HANDLER}'],
+            'level': str(LOG_LEVEL),
             'propagate': False,
         },
         'celery': {
-            'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': '%s' % LOG_LEVEL,
+            'handlers': [rf'{LOGGING_HANDLER}'],
+            'level': str(LOG_LEVEL),
             'propagate': False,
             # workaround some celery logging known issue
             'worker_hijack_root_logger': False,
         },
         'dojo': {
-            'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': '%s' % LOG_LEVEL,
+            'handlers': [rf'{LOGGING_HANDLER}'],
+            'level': str(LOG_LEVEL),
             'propagate': False,
         },
         'dojo.specific-loggers.deduplication': {
-            'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': '%s' % LOG_LEVEL,
+            'handlers': [rf'{LOGGING_HANDLER}'],
+            'level': str(LOG_LEVEL),
             'propagate': False,
         },
         'saml2': {
-            'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': '%s' % LOG_LEVEL,
+            'handlers': [rf'{LOGGING_HANDLER}'],
+            'level': str(LOG_LEVEL),
             'propagate': False,
         },
         'MARKDOWN': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': '%s' % LOG_LEVEL,
+            'handlers': [rf'{LOGGING_HANDLER}'],
+            'level': str(LOG_LEVEL),
             'propagate': False,
         },
         'titlecase': {
             # The titlecase library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': '%s' % LOG_LEVEL,
+            'handlers': [rf'{LOGGING_HANDLER}'],
+            'level': str(LOG_LEVEL),
             'propagate': False,
         },
     }

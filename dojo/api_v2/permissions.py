@@ -997,18 +997,14 @@ def check_auto_create_permission(
 
     if product and product_name and engagement_name:
         if not user_has_permission(user, product, Permissions.Engagement_Add):
-            raise PermissionDenied(
-                "No permission to create engagements in product '%s'"
-                % product_name
-            )
+            msg = f"No permission to create engagements in product '{product_name}'"
+            raise PermissionDenied(msg)
 
         if not user_has_permission(
             user, product, Permissions.Import_Scan_Result
         ):
-            raise PermissionDenied(
-                "No permission to import scans into product '%s'"
-                % product_name
-            )
+            msg = f"No permission to import scans into product '{product_name}'"
+            raise PermissionDenied(msg)
 
         # all good
         return True
@@ -1024,10 +1020,8 @@ def check_auto_create_permission(
             if not user_has_global_permission(
                 user, Permissions.Product_Type_Add
             ):
-                raise PermissionDenied(
-                    "No permission to create product_type '%s'"
-                    % product_type_name
-                )
+                msg = f"No permission to create product_type '{product_type_name}'"
+                raise PermissionDenied(msg)
             # new product type can be created with current user as owner, so
             # all objects in it can be created as well
             return True
@@ -1035,10 +1029,8 @@ def check_auto_create_permission(
             if not user_has_permission(
                 user, product_type, Permissions.Product_Type_Add_Product
             ):
-                raise PermissionDenied(
-                    "No permission to create products in product_type '%s'"
-                    % product_type
-                )
+                msg = f"No permission to create products in product_type '{product_type}'"
+                raise PermissionDenied(msg)
 
         # product can be created, so objects in it can be created as well
         return True

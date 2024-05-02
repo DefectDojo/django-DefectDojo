@@ -42,6 +42,8 @@ from dojo.filters import (
     EngagementFilterWithoutObjectLookups,
     EngagementTestFilter,
     EngagementTestFilterWithoutObjectLookups,
+    ProductEngagementsFilter,
+    ProductEngagementsFilterWithoutObjectLookups,
 )
 from dojo.finding.helper import NOT_ACCEPTED_FINDINGS_QUERY
 from dojo.finding.views import find_available_notetypes
@@ -215,8 +217,11 @@ def engagements_all(request):
     products_with_engagements = products_with_engagements.filter(~Q(engagement=None)).distinct()
 
     # count using prefetch instead of just using 'engagement__set_test_test` to avoid loading all test in memory just to count them
+    filter_string_matching = get_system_setting('filter_string_matching', False)
+    products_filter_class = ProductEngagementsFilterWithoutObjectLookups if filter_string_matching else ProductEngagementsFilter
+    engagement_query = Engagement.objects.annotate(test_count=Count('test__id'))
     filter_qs = products_with_engagements.prefetch_related(
-        Prefetch('engagement_set', queryset=Engagement.objects.all().annotate(test_count=Count('test__id')))
+        Prefetch('engagement_set', queryset=products_filter_class(request.GET, engagement_query).qs)
     )
 
     filter_qs = filter_qs.prefetch_related(
@@ -230,7 +235,6 @@ def engagements_all(request):
             'engagement_set__jira_project__jira_instance',
             'jira_project_set__jira_instance'
         )
-    filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = EngagementFilterWithoutObjectLookups if filter_string_matching else EngagementFilter
     filtered = filter_class(
         request.GET,
@@ -238,7 +242,7 @@ def engagements_all(request):
     )
 
     prods = get_page_items(request, filtered.qs, 25)
-
+    prods.paginator.count = sum(len(prod.engagement_set.all()) for prod in prods)
     name_words = products_with_engagements.values_list('name', flat=True)
     eng_words = get_authorized_engagements(Permissions.Engagement_View).values_list('name', flat=True).distinct()
 
@@ -276,8 +280,8 @@ def edit_engagement(request, eid):
             if (new_status == "Cancelled" or new_status == "Completed"):
                 engagement.active = False
                 create_notification(event='close_engagement',
-                        title='Closure of %s' % engagement.name,
-                        description='The engagement "%s" was closed' % (engagement.name),
+                        title=f'Closure of {engagement.name}',
+                        description=f'The engagement "{engagement.name}" was closed',
                         engagement=engagement, url=reverse('engagement_all_findings', args=(engagement.id, ))),
             else:
                 engagement.active = True
@@ -358,7 +362,7 @@ def delete_engagement(request, eid):
                     message,
                     extra_tags='alert-success')
                 create_notification(event='other',
-                                    title='Deletion of %s' % engagement.name,
+                                    title=f'Deletion of {engagement.name}',
                                     product=product,
                                     description=f'The engagement "{engagement.name}" was deleted by {request.user}',
                                     url=request.build_absolute_uri(reverse('view_engagements', args=(product.id, ))),
@@ -401,7 +405,7 @@ def copy_engagement(request, eid):
                 'Engagement Copied successfully.',
                 extra_tags='alert-success')
             create_notification(event='other',
-                                title='Copying of %s' % engagement.name,
+                                title=f'Copying of {engagement.name}',
                                 description=f'The engagement "{engagement.name}" was copied by {request.user}',
                                 product=product,
                                 url=request.build_absolute_uri(reverse('view_engagement', args=(engagement_copy.id, ))),
@@ -1131,8 +1135,8 @@ def close_eng(request, eid):
         'Engagement closed successfully.',
         extra_tags='alert-success')
     create_notification(event='close_engagement',
-                        title='Closure of %s' % eng.name,
-                        description='The engagement "%s" was closed' % (eng.name),
+                        title=f'Closure of {eng.name}',
+                        description=f'The engagement "{eng.name}" was closed',
                         engagement=eng, url=reverse('engagement_all_findings', args=(eng.id, ))),
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
@@ -1147,9 +1151,9 @@ def reopen_eng(request, eid):
         'Engagement reopened successfully.',
         extra_tags='alert-success')
     create_notification(event='other',
-                        title='Reopening of %s' % eng.name,
+                        title=f'Reopening of {eng.name}',
                         engagement=eng,
-                        description='The engagement "%s" was reopened' % (eng.name),
+                        description=f'The engagement "{eng.name}" was reopened',
                         url=reverse('view_engagement', args=(eng.id, ))),
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
@@ -1265,7 +1269,7 @@ def add_risk_acceptance(request, eid, fid=None):
 
             return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
     else:
-        risk_acceptance_title_suggestion = 'Accept: %s' % finding
+        risk_acceptance_title_suggestion = f'Accept: {finding}'
         form = RiskAcceptanceForm(initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
 
     finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
@@ -1505,8 +1509,7 @@ def download_risk_acceptance(request, eid, raid):
     response = StreamingHttpResponse(
         FileIterWrapper(
             open(settings.MEDIA_ROOT + "/" + risk_acceptance.path.name, mode='rb')))
-    response['Content-Disposition'] = 'attachment; filename="%s"' \
-                                      % risk_acceptance.filename()
+    response['Content-Disposition'] = f'attachment; filename="{risk_acceptance.filename()}"'
     mimetype, _encoding = mimetypes.guess_type(risk_acceptance.path.name)
     response['Content-Type'] = mimetype
     return response
@@ -1575,7 +1578,7 @@ def engagement_ics(request, eid):
     output = cal.serialize()
     response = HttpResponse(content=output)
     response['Content-Type'] = 'text/calendar'
-    response['Content-Disposition'] = 'attachment; filename=%s.ics' % eng.name
+    response['Content-Disposition'] = f'attachment; filename={eng.name}.ics'
     return response
 
 

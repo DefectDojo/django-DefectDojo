@@ -271,7 +271,7 @@ def get_description(result, rule):
         )
         description += f"**Result message:** {message}\n"
     if get_snippet(result) is not None:
-        description += f"**Snippet:**\n```{get_snippet(result)}```\n"
+        description += f"**Snippet:**\n```\n{get_snippet(result)}\n```\n"
     if rule is not None:
         if "name" in rule:
             description += f"**{_('Rule name')}:** {rule.get('name')}\n"

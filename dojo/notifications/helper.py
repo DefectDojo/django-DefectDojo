@@ -375,7 +375,7 @@ def log_alert(e, notification_type=None, *args, **kwargs):
             user_id=user,
             url=kwargs.get('url', reverse('alerts')),
             title=kwargs.get('title', 'Notification issue')[:250],
-            description=kwargs.get('description', '%s' % e)[:2000],
+            description=kwargs.get('description', str(e))[:2000],
             icon="exclamation-triangle",
             source=notification_type[:100] if notification_type else kwargs.get('source', 'unknown')[:100])
         # relative urls will fail validation
