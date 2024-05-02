@@ -211,8 +211,8 @@ ur += announcement_urls
 
 api_v2_urls = [
     #  Django Rest Framework API v2
-    re_path(r'^%sapi/v2/' % get_system_setting('url_prefix'), include(v2_api.urls)),
-    re_path(r'^%sapi/v2/user_profile/' % get_system_setting('url_prefix'), UserProfileView.as_view(), name='user_profile'),
+    re_path(r'^{}api/v2/'.format(get_system_setting('url_prefix')), include(v2_api.urls)),
+    re_path(r'^{}api/v2/user_profile/'.format(get_system_setting('url_prefix')), UserProfileView.as_view(), name='user_profile'),
 ]
 
 if hasattr(settings, 'API_TOKENS_ENABLED'):
@@ -233,17 +233,17 @@ if hasattr(settings, 'PRELOAD_URL_PATTERNS'):
 
 urlpatterns += [
     # action history
-    re_path(r'^%shistory/(?P<cid>\d+)/(?P<oid>\d+)$' % get_system_setting('url_prefix'), views.action_history, name='action_history'),
-    re_path(r'^%s' % get_system_setting('url_prefix'), include(ur)),
+    re_path(r'^{}history/(?P<cid>\d+)/(?P<oid>\d+)$'.format(get_system_setting('url_prefix')), views.action_history, name='action_history'),
+    re_path(r'^{}'.format(get_system_setting('url_prefix')), include(ur)),
 
     # drf-spectacular = OpenAPI3
-    re_path(r'^%sapi/v2/oa3/schema/' % get_system_setting('url_prefix'), SpectacularAPIView.as_view(), name='schema_oa3'),
-    re_path(r'^%sapi/v2/oa3/swagger-ui/' % get_system_setting('url_prefix'), SpectacularSwaggerView.as_view(url=get_system_setting('url_prefix') + '/api/v2/oa3/schema/?format=json'), name='swagger-ui_oa3'),
+    re_path(r'^{}api/v2/oa3/schema/'.format(get_system_setting('url_prefix')), SpectacularAPIView.as_view(), name='schema_oa3'),
+    re_path(r'^{}api/v2/oa3/swagger-ui/'.format(get_system_setting('url_prefix')), SpectacularSwaggerView.as_view(url=get_system_setting('url_prefix') + '/api/v2/oa3/schema/?format=json'), name='swagger-ui_oa3'),
 
     re_path(r'^robots.txt', lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
     re_path(r'^manage_files/(?P<oid>\d+)/(?P<obj_type>\w+)$', views.manage_files, name='manage_files'),
     re_path(r'^access_file/(?P<fid>\d+)/(?P<oid>\d+)/(?P<obj_type>\w+)$', views.access_file, name='access_file'),
-    re_path(r'^%s/(?P<path>.*)$' % settings.MEDIA_URL.strip('/'), views.protected_serve, {'document_root': settings.MEDIA_ROOT})
+    re_path(r'^{}/(?P<path>.*)$'.format(settings.MEDIA_URL.strip('/')), views.protected_serve, {'document_root': settings.MEDIA_ROOT})
 ]
 
 urlpatterns += api_v2_urls
@@ -251,7 +251,7 @@ urlpatterns += survey_urls
 
 if hasattr(settings, 'DJANGO_METRICS_ENABLED'):
     if settings.DJANGO_METRICS_ENABLED:
-        urlpatterns += [re_path(r'^%sdjango_metrics/' % get_system_setting('url_prefix'), include('django_prometheus.urls'))]
+        urlpatterns += [re_path(r'^{}django_metrics/'.format(get_system_setting('url_prefix')), include('django_prometheus.urls'))]
 
 if hasattr(settings, 'SAML2_ENABLED'):
     if settings.SAML2_ENABLED:
@@ -261,7 +261,7 @@ if hasattr(settings, 'SAML2_ENABLED'):
 if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
     if settings.DJANGO_ADMIN_ENABLED:
         #  django admin
-        urlpatterns += [re_path(r'^%sadmin/' % get_system_setting('url_prefix'), admin.site.urls)]
+        urlpatterns += [re_path(r'^{}admin/'.format(get_system_setting('url_prefix')), admin.site.urls)]
 
 # sometimes urlpatterns needed be added from local_settings.py to avoid having to modify core defect dojo files
 if hasattr(settings, 'EXTRA_URL_PATTERNS'):

@@ -1151,7 +1151,7 @@ def view_engineer(request, eid):
 
     details = sorted(details, key=lambda x: x[2])
 
-    add_breadcrumb(title="%s Metrics" % user.get_full_name(), top_level=False, request=request)
+    add_breadcrumb(title=f"{user.get_full_name()} Metrics", top_level=False, request=request)
 
     return render(request, 'dojo/view_engineer.html', {
         'open_month': open_month,
@@ -1183,7 +1183,7 @@ def view_engineer(request, eid):
         'a_chart_data': a_chart_data,
         'week_chart_data': week_chart_data,
         'week_a_chart_data': week_a_chart_data,
-        'name': '%s Metrics' % user.get_full_name(),
+        'name': f'{user.get_full_name()} Metrics',
         'metric': True,
         'total_update': total_update,
         'details': details,

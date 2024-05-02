@@ -60,7 +60,7 @@ class SslLabsParser:
                 title = f"TLS Grade '{grade}' for {hostName}"
 
                 sev = self.getCriticalityRating(grade)
-                description = "%s \n\n" % title
+                description = f"{title} \n\n"
                 cert = ""
                 if "cert" in endpoints["details"]:
                     cert = endpoints["details"]["cert"]

@@ -53,7 +53,7 @@ class MobSFParser:
             if "maxsdk" in data:
                 test_description = "{}  **Max SDK:** {}\n".format(test_description, data["maxsdk"])
 
-            test_description = "%s\n**File Information:**\n" % (test_description)
+            test_description = f"{test_description}\n**File Information:**\n"
 
             if "name" in data:
                 test_description = "{}  **Name:** {}\n".format(test_description, data["name"])
@@ -74,7 +74,7 @@ class MobSFParser:
                 curl = ""
                 for url in data["urls"]:
                     for curl in url["urls"]:
-                        curl = "%s\n" % (curl)
+                        curl = f"{curl}\n"
 
                 if curl:
                     test_description = f"{test_description}\n**URL's:**\n {curl}\n"

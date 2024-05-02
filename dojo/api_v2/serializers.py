@@ -290,10 +290,8 @@ class TagListSerializerField(serializers.ListField):
             elif isinstance(value, str):
                 value = tagulous.utils.parse_tags(value)
             else:
-                raise ValueError(
-                    "unable to convert %s into list of tags"
-                    % type(value).__name__
-                )
+                msg = f"unable to convert {type(value).__name__} into list of tags"
+                raise ValueError(msg)
         return value
 
 
@@ -1912,9 +1910,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
     def validate_severity(self, value: str) -> str:
         if value not in SEVERITIES:
             msg = f"Severity must be one of the following: {SEVERITIES}"
-            raise serializers.ValidationError(
-                msg
-            )
+            raise serializers.ValidationError(msg)
         return value
 
 
@@ -1996,9 +1992,7 @@ class StubFindingSerializer(serializers.ModelSerializer):
     def validate_severity(self, value: str) -> str:
         if value not in SEVERITIES:
             msg = f"Severity must be one of the following: {SEVERITIES}"
-            raise serializers.ValidationError(
-                msg
-            )
+            raise serializers.ValidationError(msg)
         return value
 
 
@@ -2015,9 +2009,7 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
     def validate_severity(self, value: str) -> str:
         if value not in SEVERITIES:
             msg = f"Severity must be one of the following: {SEVERITIES}"
-            raise serializers.ValidationError(
-                msg
-            )
+            raise serializers.ValidationError(msg)
         return value
 
 

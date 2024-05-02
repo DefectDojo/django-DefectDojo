@@ -57,7 +57,7 @@ class OktaOAuth2(OktaMixin, BaseOAuth2):
         return self.get_json(
             self._url('v1/userinfo'),
             headers={
-                'Authorization': 'Bearer %s' % access_token,
+                'Authorization': f'Bearer {access_token}',
             }
         )
 

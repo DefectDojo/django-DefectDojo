@@ -37,7 +37,7 @@ class NmapParser:
 
             ip = host.find("address[@addrtype='ipv4']").attrib["addr"]
             if ip is not None:
-                host_info += "**IP Address:** %s\n" % ip
+                host_info += f"**IP Address:** {ip}\n"
 
             fqdn = (
                 host.find("hostnames/hostname[@type='PTR']").attrib["name"]
@@ -45,7 +45,7 @@ class NmapParser:
                 else None
             )
             if fqdn is not None:
-                host_info += "**FQDN:** %s\n" % fqdn
+                host_info += f"**FQDN:** {fqdn}\n"
 
             host_info += "\n\n"
 
@@ -53,7 +53,7 @@ class NmapParser:
                 for os_match in os.iter("osmatch"):
                     if "name" in os_match.attrib:
                         host_info += (
-                            "**Host OS:** %s\n" % os_match.attrib["name"]
+                            "**Host OS:** {}\n".format(os_match.attrib["name"])
                         )
                     if "accuracy" in os_match.attrib:
                         host_info += "**Accuracy:** {}%\n".format(
@@ -84,20 +84,17 @@ class NmapParser:
                 if port_element.find("service") is not None:
                     if "product" in port_element.find("service").attrib:
                         service_info += (
-                            "**Product:** %s\n"
-                            % port_element.find("service").attrib["product"]
+                            "**Product:** {}\n".format(port_element.find("service").attrib["product"])
                         )
 
                     if "version" in port_element.find("service").attrib:
                         service_info += (
-                            "**Version:** %s\n"
-                            % port_element.find("service").attrib["version"]
+                            "**Version:** {}\n".format(port_element.find("service").attrib["version"])
                         )
 
                     if "extrainfo" in port_element.find("service").attrib:
                         service_info += (
-                            "**Extra Info:** %s\n"
-                            % port_element.find("service").attrib["extrainfo"]
+                            "**Extra Info:** {}\n".format(port_element.find("service").attrib["extrainfo"])
                         )
 
                     description += service_info
