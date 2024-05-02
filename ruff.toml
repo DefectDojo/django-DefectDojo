@@ -46,6 +46,7 @@ select = [
    "EM",
    "ICN",
    "LOG",
+   "INP",
    "SLOT",
    "PD",
    "PGH",
