@@ -2059,11 +2059,11 @@ def get_current_request():
 
 
 def create_bleached_link(url, title):
-    link = '<a href=\"'
+    link = '<a href="'
     link += url
-    link += '\" target=\"_blank\" title=\"'
+    link += '" target="_blank" title="'
     link += title
-    link += '\">'
+    link += '">'
     link += title
     link += '</a>'
     return bleach.clean(link, tags={'a'}, attributes={'a': ['href', 'target', 'title']})
@@ -2398,7 +2398,7 @@ def get_password_requirements_string():
     if bool(get_system_setting('number_character_required')):
         s += ', one number (0-9)'
     if bool(get_system_setting('special_character_required')):
-        s += ', one special character (()[]{}|\\`~!@#$%^&*_-+=;:\'\",<>./?)'
+        s += ', one special character (()[]{}|\\`~!@#$%^&*_-+=;:\'",<>./?)'
 
     if s.count(', ') == 1:
         password_requirements_string = s.rsplit(', ', 1)[0] + ' and ' + s.rsplit(', ', 1)[1]
