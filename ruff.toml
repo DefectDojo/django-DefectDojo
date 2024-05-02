@@ -36,6 +36,7 @@ select = [
    "E",
    "W",
    "I",
+   "D3",
    "UP",
    "YTT",
    "ASYNC",
