@@ -4384,9 +4384,9 @@ class Benchmark_Product_Summary(models.Model):
 # ==============================
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
     class Question(PolymorphicModel, TimeStampedModel):
-        '''
+        """
             Represents a question.
-        '''
+        """
 
         class Meta:
             ordering = ['order']
@@ -4407,23 +4407,23 @@ with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning
 
 
 class TextQuestion(Question):
-    '''
+    """
     Question with a text answer
-    '''
+    """
     objects = PolymorphicManager()
 
     def get_form(self):
-        '''
+        """
         Returns the form for this model
-        '''
+        """
         from .forms import TextQuestionForm
         return TextQuestionForm
 
 
 class Choice(TimeStampedModel):
-    '''
+    """
     Model to store the choices for multi choice questions
-    '''
+    """
 
     order = models.PositiveIntegerField(default=1)
 
@@ -4437,10 +4437,10 @@ class Choice(TimeStampedModel):
 
 
 class ChoiceQuestion(Question):
-    '''
+    """
     Question with answers that are chosen from a list of choices defined
     by the user.
-    '''
+    """
 
     multichoice = models.BooleanField(default=False,
                                       help_text=_("Select one or more"))
@@ -4448,9 +4448,9 @@ class ChoiceQuestion(Question):
     objects = PolymorphicManager()
 
     def get_form(self):
-        '''
+        """
         Returns the form for this model
-        '''
+        """
 
         from .forms import ChoiceQuestionForm
         return ChoiceQuestionForm
@@ -4516,8 +4516,8 @@ class General_Survey(models.Model):
 
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
     class Answer(PolymorphicModel, TimeStampedModel):
-        ''' Base Answer model
-        '''
+        """ Base Answer model
+        """
         question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
         answered_survey = models.ForeignKey(Answered_Survey,
