@@ -49,7 +49,6 @@ class Parser:
         TODO This should be enforced in the future, but here is not the place
         TODO once this enforced, this stub class should be removed
         """
-        pass
 
 
 class BaseImporter(ImporterOptions):

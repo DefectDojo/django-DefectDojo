@@ -83,7 +83,7 @@ class BurpEnterpriseParser:
             if ("Issues found" in "".join(endpoint.itertext()).strip())
         ]
 
-        for index in range(0, len(severities)):
+        for index in range(len(severities)):
             url = endpoint_text[index].text[16:]
             sev_table = list(severities[index].iter("tr"))
 
@@ -235,7 +235,7 @@ class BurpEnterpriseParser:
                 requests = details.get("Request").split("SPLITTER")[:-1]
                 responses = details.get("Response").split("SPLITTER")[:-1]
                 unsaved_req_resp = []
-                for index in range(0, len(requests)):
+                for index in range(len(requests)):
                     unsaved_req_resp.append(
                         {"req": requests[index], "resp": responses[index]}
                     )

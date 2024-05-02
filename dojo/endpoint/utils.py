@@ -93,7 +93,7 @@ def endpoint_get_or_create(**kwargs):
 def clean_hosts_run(apps, change):
     def err_log(message, html_log, endpoint_html_log, endpoint):
         error_suffix = 'It is not possible to migrate it. Delete or edit this endpoint.'
-        html_log.append({**endpoint_html_log, **{'message': message}})
+        html_log.append({**endpoint_html_log, 'message': message})
         logger.error(f'Endpoint (id={endpoint.pk}) {message}. {error_suffix}')
         broken_endpoints.add(endpoint.pk)
     html_log = []
