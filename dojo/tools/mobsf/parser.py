@@ -21,7 +21,7 @@ class MobSFParser:
     def get_findings(self, filename, test):
         tree = filename.read()
         try:
-            data = json.loads(str(tree, 'utf-8'))
+            data = json.loads(str(tree, "utf-8"))
         except:
             data = json.loads(tree)
         find_date = datetime.now()
@@ -113,7 +113,7 @@ class MobSFParser:
         if "insecure_connections" in data:
             for details in data["insecure_connections"]:
                 insecure_urls = ""
-                for url in details.split(','):
+                for url in details.split(","):
                     insecure_urls = insecure_urls + url + "\n"
 
                 mobsf_item = {

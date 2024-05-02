@@ -178,7 +178,7 @@ class AutoCreateContextManager:
         If a match is not found, and a product is not supplied, return None
         """
         if engagement := get_object_or_none(Engagement, pk=engagement_id):
-            logger.debug('Using existing engagement by id: %s', engagement_id)
+            logger.debug("Using existing engagement by id: %s", engagement_id)
             return engagement
         # if there's no product, then for sure there's no engagement either
         if product is None:
@@ -200,7 +200,7 @@ class AutoCreateContextManager:
         the provided scan_type and test_title.
         """
         if test := get_object_or_none(Test, pk=test_id):
-            logger.debug('Using existing Test by id: %s', test_id)
+            logger.debug("Using existing Test by id: %s", test_id)
             return test
         # If the engagement is not supplied, we cannot do anything
         if not engagement:

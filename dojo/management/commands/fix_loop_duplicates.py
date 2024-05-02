@@ -15,7 +15,7 @@ This script will identify loop dependencies in findings
 
 
 class Command(BaseCommand):
-    help = 'No input commands for fixing Loop findings.'
+    help = "No input commands for fixing Loop findings."
 
     def handle(self, *args, **options):
         fix_loop_duplicates()

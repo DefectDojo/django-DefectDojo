@@ -200,7 +200,7 @@ class TagListSerializerField(serializers.ListField):
         self.pretty_print = pretty_print
 
     def to_internal_value(self, data):
-        if isinstance(data, list) and data == [''] and self.allow_empty:
+        if isinstance(data, list) and data == [""] and self.allow_empty:
             return []
         if isinstance(data, six.string_types):
             if not data:
@@ -1100,7 +1100,7 @@ class ToolTypeSerializer(serializers.ModelSerializer):
             name = data.get("name")
             # Make sure this will not create a duplicate test type
             if Tool_Type.objects.filter(name=name).count() > 0:
-                msg = 'A Tool Type with the name already exists'
+                msg = "A Tool Type with the name already exists"
                 raise serializers.ValidationError(msg)
         return data
 
@@ -1512,12 +1512,12 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         def validate_findings_have_same_engagement(finding_objects: List[Finding]):
-            engagements = finding_objects.values_list('test__engagement__id', flat=True).distinct().count()
+            engagements = finding_objects.values_list("test__engagement__id", flat=True).distinct().count()
             if engagements > 1:
                 msg = "You are not permitted to add findings from multiple engagements"
                 raise PermissionDenied(msg)
 
-        findings = data.get('accepted_findings', [])
+        findings = data.get("accepted_findings", [])
         findings_ids = [x.id for x in findings]
         finding_objects = Finding.objects.filter(id__in=findings_ids)
         authed_findings = get_authorized_findings(Permissions.Finding_Edit).filter(id__in=findings_ids)
@@ -1526,7 +1526,7 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
             raise PermissionDenied(msg)
         if self.context["request"].method == "POST":
             validate_findings_have_same_engagement(finding_objects)
-        elif self.context['request'].method in ['PATCH', 'PUT']:
+        elif self.context["request"].method in ["PATCH", "PUT"]:
             existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
             existing_and_new_findings = existing_findings | finding_objects
             validate_findings_have_same_engagement(existing_and_new_findings)
@@ -2024,12 +2024,12 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        async_updating = getattr(self.instance, 'async_updating', None)
+        async_updating = getattr(self.instance, "async_updating", None)
         if async_updating:
-            new_sla_config = data.get('sla_configuration', None)
-            old_sla_config = getattr(self.instance, 'sla_configuration', None)
+            new_sla_config = data.get("sla_configuration", None)
+            old_sla_config = getattr(self.instance, "sla_configuration", None)
             if new_sla_config and old_sla_config and new_sla_config != old_sla_config:
-                msg = 'Finding SLA expiration dates are currently being recalculated. The SLA configuration for this product cannot be changed until the calculation is complete.'
+                msg = "Finding SLA expiration dates are currently being recalculated. The SLA configuration for this product cannot be changed until the calculation is complete."
                 raise serializers.ValidationError(msg)
         return data
 
@@ -3002,13 +3002,13 @@ class SLAConfigurationSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        async_updating = getattr(self.instance, 'async_updating', None)
+        async_updating = getattr(self.instance, "async_updating", None)
         if async_updating:
-            for field in ['critical', 'enforce_critical', 'high', 'enforce_high', 'medium', 'enforce_medium', 'low', 'enforce_low']:
+            for field in ["critical", "enforce_critical", "high", "enforce_high", "medium", "enforce_medium", "low", "enforce_low"]:
                 old_days = getattr(self.instance, field, None)
                 new_days = data.get(field, None)
                 if old_days is not None and new_days is not None and (old_days != new_days):
-                    msg = 'Finding SLA expiration dates are currently being calculated. The SLA days for this SLA configuration cannot be changed until the calculation is complete.'
+                    msg = "Finding SLA expiration dates are currently being calculated. The SLA days for this SLA configuration cannot be changed until the calculation is complete."
                     raise serializers.ValidationError(msg)
         return data
 

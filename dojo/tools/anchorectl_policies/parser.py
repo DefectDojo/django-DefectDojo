@@ -30,7 +30,7 @@ class AnchoreCTLPoliciesParser:
         items = []
         try:
             for image in data:
-                if image['detail'] is not None:
+                if image["detail"] is not None:
                     for result in image["detail"]:
                         try:
                             gate = result["gate"]

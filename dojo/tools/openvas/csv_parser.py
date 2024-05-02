@@ -95,7 +95,7 @@ class NVDCVEColumnMappingStrategy(ColumnMappingStrategy):
         super().__init__()
 
     def map_column_value(self, finding, column_value):
-        cve_pattern = r'CVE-\d{4}-\d{4,7}'
+        cve_pattern = r"CVE-\d{4}-\d{4,7}"
         cves = re.findall(cve_pattern, column_value)
         for cve in cves:
             finding.unsaved_vulnerability_ids.append(cve)

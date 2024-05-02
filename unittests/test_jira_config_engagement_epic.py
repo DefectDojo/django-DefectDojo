@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class JIRAConfigEngagementEpicTest(DojoVCRTestCase, JIRAConfigEngagementBase):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     product_id = 999
 
@@ -24,10 +24,10 @@ class JIRAConfigEngagementEpicTest(DojoVCRTestCase, JIRAConfigEngagementBase):
 
     def _get_vcr(self, **kwargs):
         my_vcr = super(DojoVCRTestCase, self)._get_vcr(**kwargs)
-        my_vcr.record_mode = 'once'
-        my_vcr.path_transformer = VCR.ensure_suffix('.yaml')
-        my_vcr.filter_headers = ['Authorization', 'X-Atlassian-Token']
-        my_vcr.cassette_library_dir = get_unit_tests_path() + '/vcr/jira/'
+        my_vcr.record_mode = "once"
+        my_vcr.path_transformer = VCR.ensure_suffix(".yaml")
+        my_vcr.filter_headers = ["Authorization", "X-Atlassian-Token"]
+        my_vcr.cassette_library_dir = get_unit_tests_path() + "/vcr/jira/"
         # filters headers doesn't seem to work for cookies, so use callbacks to filter cookies from being recorded
         my_vcr.before_record_request = self.before_record_request
         my_vcr.before_record_response = self.before_record_response
@@ -48,19 +48,19 @@ class JIRAConfigEngagementEpicTest(DojoVCRTestCase, JIRAConfigEngagementBase):
 
     def get_new_engagement_with_jira_project_data_and_epic_mapping(self):
         return {
-            'name': 'new engagement',
-            'description': 'new description',
-            'lead': 1,
-            'product': self.product_id,
-            'target_start': '2070-11-27',
-            'target_end': '2070-12-04',
-            'status': 'Not Started',
-            'jira-project-form-jira_instance': 2,
-            'jira-project-form-project_key': 'NTEST',
-            'jira-project-form-epic_issue_type_name': 'Epic',
-            'jira-project-form-product_jira_sla_notification': 'on',
-            'jira-project-form-enable_engagement_epic_mapping': 'on',
-            'jira-epic-form-push_to_jira': 'on',
+            "name": "new engagement",
+            "description": "new description",
+            "lead": 1,
+            "product": self.product_id,
+            "target_start": "2070-11-27",
+            "target_end": "2070-12-04",
+            "status": "Not Started",
+            "jira-project-form-jira_instance": 2,
+            "jira-project-form-project_key": "NTEST",
+            "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-product_jira_sla_notification": "on",
+            "jira-project-form-enable_engagement_epic_mapping": "on",
+            "jira-epic-form-push_to_jira": "on",
         }
 
     def add_engagement_with_jira_project_and_epic_mapping(self, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):

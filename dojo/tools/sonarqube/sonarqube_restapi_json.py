@@ -62,20 +62,20 @@ class SonarQubeRESTAPIJSON:
                     message = issue.get("message")
                     cwe = None
                     if "Category: CWE-" in message:
-                        cwe_pattern = r'Category: CWE-\d{1,5}'
+                        cwe_pattern = r"Category: CWE-\d{1,5}"
                         cwes = re.findall(cwe_pattern, message)
                         if cwes:
                             cwe = cwes[0].split("Category: CWE-")[1]
                     cvss = None
                     if "CVSS Score: " in message:
-                        cvss_pattern = r'CVSS Score: \d{1}.\d{1}'
+                        cvss_pattern = r"CVSS Score: \d{1}.\d{1}"
                         cvsss = re.findall(cvss_pattern, message)
                         if cvsss:
                             cvss = cvsss[0].split("CVSS Score: ")[1]
                     component_name = None
                     component_version = None
                     if "Filename: " in message and " | " in message:
-                        component_pattern = r'Filename: .* \| '
+                        component_pattern = r"Filename: .* \| "
                         comp = re.findall(component_pattern, message)
                         if comp:
                             component_result = comp[0].split("Filename: ")[1].split(" | ")[0]
@@ -119,22 +119,22 @@ class SonarQubeRESTAPIJSON:
                     )
                     vulnids = []
                     if "Reference: CVE" in message:
-                        cve_pattern = r'Reference: CVE-\d{4}-\d{4,7}'
+                        cve_pattern = r"Reference: CVE-\d{4}-\d{4,7}"
                         cves = re.findall(cve_pattern, message)
                         for cve in cves:
                             vulnids.append(cve.split("Reference: ")[1])
                     if "References: CVE" in message:
-                        cve_pattern = r'References: CVE-\d{4}-\d{4,7}'
+                        cve_pattern = r"References: CVE-\d{4}-\d{4,7}"
                         cves = re.findall(cve_pattern, message)
                         for cve in cves:
                             vulnids.append(cve.split("References: ")[1])
                     if "Reference: GHSA" in message:
-                        cve_pattern = r'Reference: GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}'
+                        cve_pattern = r"Reference: GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}"
                         cves = re.findall(cve_pattern, message)
                         for cve in cves:
                             vulnids.append(cve.split("Reference: ")[1])
                     if "References: GHSA" in message:
-                        cve_pattern = r'References: GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}'
+                        cve_pattern = r"References: GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}"
                         cves = re.findall(cve_pattern, message)
                         for cve in cves:
                             vulnids.append(cve.split("References: ")[1])

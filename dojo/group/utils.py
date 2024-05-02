@@ -9,12 +9,12 @@ from dojo.models import Dojo_Group, Dojo_Group_Member, Role
 
 def get_auth_group_name(group, attempt=0):
     if attempt > 999:
-        msg = f'Cannot find name for authorization group for Dojo_Group {group.name}, aborted after 999 attempts.'
+        msg = f"Cannot find name for authorization group for Dojo_Group {group.name}, aborted after 999 attempts."
         raise Exception(msg)
     if attempt == 0:
         auth_group_name = group.name
     else:
-        auth_group_name = group.name + '_' + str(attempt)
+        auth_group_name = group.name + "_" + str(attempt)
 
     try:
         # Attempt to fetch an existing group before moving forward with the real operation
@@ -26,8 +26,8 @@ def get_auth_group_name(group, attempt=0):
 
 @receiver(post_save, sender=Dojo_Group)
 def group_post_save_handler(sender, **kwargs):
-    created = kwargs.pop('created')
-    group = kwargs.pop('instance')
+    created = kwargs.pop("created")
+    group = kwargs.pop("instance")
     if created:
         # Create authentication group
         auth_group = Group(name=get_auth_group_name(group))
@@ -48,7 +48,7 @@ def group_post_save_handler(sender, **kwargs):
 
 @receiver(post_delete, sender=Dojo_Group)
 def group_post_delete_handler(sender, **kwargs):
-    group = kwargs.pop('instance')
+    group = kwargs.pop("instance")
     # Authorization group doesn't get deleted automatically
     if group.auth_group:
         group.auth_group.delete()
@@ -56,8 +56,8 @@ def group_post_delete_handler(sender, **kwargs):
 
 @receiver(post_save, sender=Dojo_Group_Member)
 def group_member_post_save_handler(sender, **kwargs):
-    created = kwargs.pop('created')
-    group_member = kwargs.pop('instance')
+    created = kwargs.pop("created")
+    group_member = kwargs.pop("instance")
     if created:
         # Add user to authentication group as well
         if group_member.group.auth_group:
@@ -66,7 +66,7 @@ def group_member_post_save_handler(sender, **kwargs):
 
 @receiver(post_delete, sender=Dojo_Group_Member)
 def group_member_post_delete_handler(sender, **kwargs):
-    group_member = kwargs.pop('instance')
+    group_member = kwargs.pop("instance")
     # Remove user from the authentication group as well
     if group_member.group.auth_group:
         group_member.group.auth_group.user_set.remove(group_member.user)

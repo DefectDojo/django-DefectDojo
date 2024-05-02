@@ -8,6 +8,6 @@ class SonarQubeRESTAPIZIP:
         total_findings_per_file = []
         for dictkey in files.keys():
             if dictkey.endswith(".json"):
-                json_content = json.loads(files[dictkey].decode('ascii'))
+                json_content = json.loads(files[dictkey].decode("ascii"))
                 total_findings_per_file += SonarQubeRESTAPIJSON().get_json_items(json_content, test, mode)
         return total_findings_per_file

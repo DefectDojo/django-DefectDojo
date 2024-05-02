@@ -55,7 +55,7 @@ class EndpointManager:
             Endpoint_Status.objects.get_or_create(
                 finding=finding,
                 endpoint=ep,
-                defaults={'date': finding.date})
+                defaults={"date": finding.date})
         logger.debug(f"IMPORT_SCAN: {len(endpoints)} imported")
         return None
 

@@ -11,10 +11,10 @@ logger = logging.getLogger(__name__)
 
 
 class TestCleanupAlerts(DojoTestCase):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def setUp(self):
-        testuser = User.objects.get(username='admin')
+        testuser = User.objects.get(username="admin")
         Alerts.objects.filter(user_id=testuser).delete()
         Alerts.objects.create(title="A", user_id=testuser)
         Alerts.objects.create(title="B", user_id=testuser)
@@ -22,7 +22,7 @@ class TestCleanupAlerts(DojoTestCase):
 
     def test_delete_alerts_disabled(self):
         settings.MAX_ALERTS_PER_USER = -1
-        testuser = User.objects.get(username='admin')
+        testuser = User.objects.get(username="admin")
         alerts_before = Alerts.objects.filter(user_id=testuser).count()
         cleanup_alerts()
         alerts_after = Alerts.objects.filter(user_id=testuser).count()
@@ -30,14 +30,14 @@ class TestCleanupAlerts(DojoTestCase):
 
     def test_delete_all_alerts(self):
         settings.MAX_ALERTS_PER_USER = 0
-        testuser = User.objects.get(username='admin')
+        testuser = User.objects.get(username="admin")
         cleanup_alerts()
         alerts_after = Alerts.objects.filter(user_id=testuser).count()
         self.assertEqual(alerts_after, 0)
 
     def test_delete_more_than_two_alerts(self):
         settings.MAX_ALERTS_PER_USER = 2
-        testuser = User.objects.get(username='admin')
+        testuser = User.objects.get(username="admin")
         cleanup_alerts()
         alerts_after = Alerts.objects.filter(user_id=testuser).count()
         self.assertEqual(alerts_after, 2)
