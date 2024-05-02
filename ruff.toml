@@ -51,7 +51,7 @@ select = [
    "INP",
    "SLOT",
    "PIE",
-   "Q001",
+   "Q001", "Q002",
    "RSE",
    "TID",
    "PD",
