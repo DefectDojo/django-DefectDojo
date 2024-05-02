@@ -223,7 +223,7 @@ def delete_endpoint(request, eid):
                                      'Endpoint and relationships removed.',
                                      extra_tags='alert-success')
                 create_notification(event='other',
-                                    title='Deletion of %s' % endpoint,
+                                    title=f'Deletion of {endpoint}',
                                     product=product,
                                     description=f'The endpoint "{endpoint}" was deleted by {request.user}',
                                     url=reverse('endpoint'),
@@ -287,7 +287,7 @@ def add_product_endpoint(request):
                                  messages.SUCCESS,
                                  'Endpoint added successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('endpoint') + "?product=%s" % form.product.id)
+            return HttpResponseRedirect(reverse('endpoint') + f"?product={form.product.id}")
     add_breadcrumb(title="Add Endpoint", top_level=False, request=request)
     return render(request,
                   'dojo/add_endpoint.html',
@@ -507,7 +507,7 @@ def import_endpoint_meta(request, pid):
                 endpoint_meta_import(file, product, create_endpoints, create_tags, create_dojo_meta, origin='UI', request=request)
             except Exception as e:
                 logger.exception(e)
-                add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
+                add_error_message_to_response(f'An exception error occurred during the report import:{str(e)}')
             return HttpResponseRedirect(reverse('endpoint') + "?product=" + pid)
 
     add_breadcrumb(title="Endpoint Meta Importer", top_level=False, request=request)

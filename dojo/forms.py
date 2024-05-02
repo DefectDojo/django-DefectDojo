@@ -171,7 +171,7 @@ class MonthYearWidget(Widget):
         if 'id' in self.attrs:
             id_ = self.attrs['id']
         else:
-            id_ = 'id_%s' % name
+            id_ = f'id_{name}'
 
         month_choices = list(MONTHS.items())
         if not (self.required and value):
@@ -194,7 +194,7 @@ class MonthYearWidget(Widget):
         return mark_safe('\n'.join(output))
 
     def id_for_label(self, id_):
-        return '%s_month' % id_
+        return f'{id_}_month'
 
     id_for_label = classmethod(id_for_label)
 
@@ -783,7 +783,7 @@ class EditRiskAcceptanceForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
+        self.fields['path'].help_text = f'Existing proof uploaded: {self.instance.filename()}' if self.instance.filename() else 'None'
         self.fields['expiration_date_warned'].disabled = True
         self.fields['expiration_date_handled'].disabled = True
 
@@ -2795,9 +2795,9 @@ class JIRAProjectForm(forms.ModelForm):
         if self.target == 'engagement':
             product_name = self.product.name if self.product else self.engagement.product.name if self.engagement.product else ''
 
-            self.fields['project_key'].widget = forms.TextInput(attrs={'placeholder': 'JIRA settings inherited from product ''%s''' % product_name})
-            self.fields['project_key'].help_text = 'JIRA settings are inherited from product ''%s'', unless configured differently here.' % product_name
-            self.fields['jira_instance'].help_text = 'JIRA settings are inherited from product ''%s'' , unless configured differently here.' % product_name
+            self.fields['project_key'].widget = forms.TextInput(attrs={'placeholder': f"JIRA settings inherited from product '{product_name}'"})
+            self.fields['project_key'].help_text = f"JIRA settings are inherited from product '{product_name}', unless configured differently here."
+            self.fields['jira_instance'].help_text = f"JIRA settings are inherited from product '{product_name}' , unless configured differently here."
 
             # if we don't have an instance, django will insert a blank empty one :-(
             # so we have to check for id to make sure we only trigger this when there is a real instance from db

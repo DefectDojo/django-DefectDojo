@@ -3072,7 +3072,7 @@ class Finding(models.Model):
                 if not val and field == "title":
                     setattr(self, field, "No title given")
                 if not val and field in bigfields:
-                    setattr(self, field, "No %s given" % field)
+                    setattr(self, field, f"No {field} given")
 
     def severity_display(self):
         return self.severity
@@ -3958,7 +3958,8 @@ class JIRA_Issue(models.Model):
         elif isinstance(obj, Engagement):
             self.engagement = obj
         else:
-            raise TypeError('unknown object type while creating JIRA_Issue: %s' % to_str_typed(obj))
+            msg = f'unknown object type while creating JIRA_Issue: {to_str_typed(obj)}'
+            raise TypeError(msg)
 
 
 NOTIFICATION_CHOICE_SLACK = ("slack", "slack")

@@ -1290,7 +1290,7 @@ def close_finding(request, fid):
                 )
                 create_notification(
                     event="other",
-                    title="Closing of %s" % finding.title,
+                    title=f"Closing of {finding.title}",
                     finding=finding,
                     description=f'The finding "{finding.title}" was closed by {request.user}',
                     url=reverse("view_finding", args=(finding.id,)),
@@ -1453,7 +1453,7 @@ def reopen_finding(request, fid):
     )
     create_notification(
         event="other",
-        title="Reopening of %s" % finding.title,
+        title=f"Reopening of {finding.title}",
         finding=finding,
         description=f'The finding "{finding.title}" was reopened by {request.user}',
         url=reverse("view_finding", args=(finding.id,)),
@@ -1511,7 +1511,7 @@ def copy_finding(request, fid):
             )
             create_notification(
                 event="other",
-                title="Copying of %s" % finding.title,
+                title=f"Copying of {finding.title}",
                 description=f'The finding "{finding.title}" was copied by {request.user} to {test.title}',
                 product=product,
                 url=request.build_absolute_uri(
@@ -1829,8 +1829,7 @@ def mktemplate(request, fid):
             request,
             messages.SUCCESS,
             mark_safe(
-                'Finding template added successfully. You may edit it <a href="%s">here</a>.'
-                % reverse("edit_template", args=(template.id,))
+                'Finding template added successfully. You may edit it <a href="{}">here</a>.'.format(reverse("edit_template", args=(template.id,)))
             ),
             extra_tags="alert-success",
         )
@@ -2849,7 +2848,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     if added:
                         add_success_message_to_response(
-                            "Created finding group with %s findings" % added
+                            f"Created finding group with {added} findings"
                         )
                         return_url = reverse(
                             "view_finding_group", args=(finding_group.id,)
@@ -2857,8 +2856,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     if skipped:
                         add_success_message_to_response(
-                            "Skipped %s findings in group creation, findings already part of another group"
-                            % skipped
+                            f"Skipped {skipped} findings in group creation, findings already part of another group"
                         )
 
                     # refresh findings from db
@@ -2912,8 +2910,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     if skipped:
                         add_success_message_to_response(
-                            "Skipped %s findings when removing from any finding group, findings not part of any group"
-                            % (skipped)
+                            f"Skipped {skipped} findings when removing from any finding group, findings not part of any group"
                         )
 
                     # refresh findings from db

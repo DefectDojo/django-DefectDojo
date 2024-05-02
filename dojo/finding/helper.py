@@ -251,14 +251,15 @@ def get_group_by_group_name(finding, finding_group_by_option):
                 (finding.component_version if finding.component_version else 'None'))
     elif finding_group_by_option == 'file_path':
         if finding.file_path:
-            group_name = 'Filepath %s' % (finding.file_path)
+            group_name = f'Filepath {finding.file_path}'
     elif finding_group_by_option == 'finding_title':
         group_name = finding.title
     else:
-        raise ValueError("Invalid group_by option %s" % finding_group_by_option)
+        msg = f"Invalid group_by option {finding_group_by_option}"
+        raise ValueError(msg)
 
     if group_name:
-        return 'Findings in: %s' % group_name
+        return f'Findings in: {group_name}'
 
     return group_name
 

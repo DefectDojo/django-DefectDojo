@@ -541,12 +541,12 @@ class DeleteJiraView(View):
                         extra_tags='alert-success')
                     create_notification(
                         event='other',
-                        title='Deletion of JIRA: %s' % jira_instance.configuration_name,
+                        title=f'Deletion of JIRA: {jira_instance.configuration_name}',
                         description=f"JIRA \"{jira_instance.configuration_name}\" was deleted by {request.user}",
                         url=request.build_absolute_uri(reverse('jira')))
                     return HttpResponseRedirect(reverse('jira'))
                 except Exception as e:
-                    add_error_message_to_response('Unable to delete JIRA Instance, probably because it is used by JIRA Issues: %s' % str(e))
+                    add_error_message_to_response(f'Unable to delete JIRA Instance, probably because it is used by JIRA Issues: {str(e)}')
         collector = NestedObjects(using=DEFAULT_DB_ALIAS)
         collector.collect([jira_instance])
         rels = collector.nested()

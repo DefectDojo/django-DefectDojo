@@ -81,13 +81,13 @@ class DojoTestUtilsMixin:
 
     def patch_product_api(self, product_id, product_details):
         payload = copy.deepcopy(product_details)
-        response = self.client.patch(reverse('product-list') + '%s/' % product_id, payload, format='json')
+        response = self.client.patch(reverse('product-list') + f'{product_id}/', payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
     def patch_endpoint_api(self, endpoint_id, endpoint_details):
         payload = copy.deepcopy(endpoint_details)
-        response = self.client.patch(reverse('endpoint-list') + '%s/' % endpoint_id, payload, format='json')
+        response = self.client.patch(reverse('endpoint-list') + f'{endpoint_id}/', payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
@@ -105,7 +105,7 @@ class DojoTestUtilsMixin:
         return Test.objects.get(id=id)
 
     def get_test_api(self, test_id):
-        response = self.client.patch(reverse('engagement-list') + '%s/' % test_id)
+        response = self.client.patch(reverse('engagement-list') + f'{test_id}/')
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
@@ -113,7 +113,7 @@ class DojoTestUtilsMixin:
         return Engagement.objects.get(id=id)
 
     def get_engagement_api(self, engagement_id):
-        response = self.client.patch(reverse('engagement-list') + '%s/' % engagement_id)
+        response = self.client.patch(reverse('engagement-list') + f'{engagement_id}/')
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
@@ -475,7 +475,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         return json.loads(response.content)
 
     def get_test_api(self, test_id):
-        response = self.client.get(reverse('test-list') + '%s/' % test_id, format='json')
+        response = self.client.get(reverse('test-list') + f'{test_id}/', format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
         # print('test.content: ', response.content)
         return json.loads(response.content)
@@ -603,7 +603,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             return self.endpoint_meta_import_scan(payload, expected_http_status_code)
 
     def get_finding_api(self, finding_id):
-        response = self.client.get(reverse('finding-list') + '%s/' % finding_id, format='json')
+        response = self.client.get(reverse('finding-list') + f'{finding_id}/', format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
@@ -623,12 +623,12 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if push_to_jira is not None:
             payload['push_to_jira'] = push_to_jira
 
-        response = self.client.put(reverse('finding-list') + '%s/' % finding_id, payload, format='json')
+        response = self.client.put(reverse('finding-list') + f'{finding_id}/', payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
     def delete_finding_api(self, finding_id):
-        response = self.client.delete(reverse('finding-list') + '%s/' % finding_id)
+        response = self.client.delete(reverse('finding-list') + f'{finding_id}/')
         self.assertEqual(204, response.status_code, response.content[:1000])
         return response.data
 
@@ -637,7 +637,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if push_to_jira is not None:
             payload['push_to_jira'] = push_to_jira
 
-        response = self.client.patch(reverse('finding-list') + '%s/' % finding_id, payload, format='json')
+        response = self.client.patch(reverse('finding-list') + f'{finding_id}/', payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
@@ -699,7 +699,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         return response.data
 
     def get_finding_api_filter_tags(self, tags):
-        response = self.client.get(reverse('finding-list') + '?tags=%s' % tags, format='json')
+        response = self.client.get(reverse('finding-list') + f'?tags={tags}', format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
         # print(response.data)
         return response.data
