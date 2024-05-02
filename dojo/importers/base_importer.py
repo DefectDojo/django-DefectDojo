@@ -567,7 +567,7 @@ class BaseImporter(ImporterOptions):
         # Ensure the final severity is one of the supported options
         if finding.severity not in SEVERITIES:
             msg = (
-                f"Finding severity \"{finding.severity}\" is not supported. "
+                f'Finding severity "{finding.severity}" is not supported. '
                 f"Any of the following are supported: {SEVERITIES}."
             )
             raise ValidationError(msg)
