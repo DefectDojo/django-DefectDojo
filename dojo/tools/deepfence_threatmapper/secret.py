@@ -1,7 +1,7 @@
 from dojo.models import Finding
 
 
-class DeepfenceThreatmapperSecret(object):
+class DeepfenceThreatmapperSecret:
     def get_findings(self, row, headers, test):
         description = ""
         Filename = row[headers["Filename"]]

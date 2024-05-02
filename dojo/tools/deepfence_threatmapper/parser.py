@@ -5,7 +5,7 @@ from dojo.tools.deepfence_threatmapper.malware import DeepfenceThreatmapperMalwa
 from dojo.tools.deepfence_threatmapper.vulnerability import DeepfenceThreatmapperVulnerability
 
 
-class DeepfenceThreatmapperParser(object):
+class DeepfenceThreatmapperParser:
     def get_scan_types(self):
         return ["Deepfence Threatmapper Report"]
 
@@ -19,7 +19,7 @@ class DeepfenceThreatmapperParser(object):
         workbook = load_workbook(filename)
         worksheet = workbook.active
         findings = []
-        headers = dict()
+        headers = []
         first = True
         for row in worksheet.iter_rows(min_row=1, values_only=True):
             if first:

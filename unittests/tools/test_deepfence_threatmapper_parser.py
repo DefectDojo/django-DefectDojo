@@ -1,6 +1,6 @@
+from dojo.models import Test
 from ..dojo_test_case import DojoTestCase
 from dojo.tools.deepfence_threatmapper.parser import DeepfenceThreatmapperParser
-from dojo.models import Test
 
 
 class TestDeepfenceThreatmapperParser(DojoTestCase):
