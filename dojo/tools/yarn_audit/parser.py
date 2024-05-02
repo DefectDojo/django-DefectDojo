@@ -25,6 +25,10 @@ class YarnAuditParser:
             lines = lines.split('\n')
             tree = (json.loads(line) for line in lines if "{" in line)
             return self.get_items_yarn(tree, test)
+        elif '"value"' in lines:
+            lines = lines.split('\n')
+            tree = (json.loads(line) for line in lines if "{" in line)
+            return self.get_items_yarn2(tree, test)
         else:
             tree = json.loads(lines)
             return self.get_items_auditci(tree, test)
@@ -42,6 +46,39 @@ class YarnAuditParser:
                 msg = "yarn audit report contains errors: %s"
                 raise ValueError(msg, error)
         return list(items.values())
+
+    def get_items_yarn2(self, tree, test):
+        items = []
+        for element in tree:
+            value = element.get("value", None)
+            child = element.get("children")
+            description = ""
+            childid = child.get("ID")
+            childissue = child.get("Issue")
+            childseverity = child.get("Severity")
+            child_vuln_version = child.get("Vulnerable Versions")
+            child_tree_versions = ', '.join(set(child.get("Tree Versions")))
+            child_dependents = ', '.join(set(child.get("Dependents")))
+            description += childissue + "\n"
+            description += "**Vulnerable Versions:** " + child_vuln_version + "\n"
+            description += "**Dependents:** " + child_dependents + "\n"
+            dojo_finding = Finding(
+                title=str(childid),
+                test=test,
+                severity=self.severitytranslator(severity=childseverity),
+                description=description,
+                component_version=str(child_tree_versions),
+                false_p=False,
+                duplicate=False,
+                out_of_scope=False,
+                mitigated=None,
+                static_finding=True,
+                dynamic_finding=False,
+            )
+            items.append(dojo_finding)
+            if value is not None:
+                dojo_finding.component_name = value
+        return items
 
     def get_items_auditci(self, tree, test):  # https://github.com/DefectDojo/django-DefectDojo/issues/6495
         items = []
