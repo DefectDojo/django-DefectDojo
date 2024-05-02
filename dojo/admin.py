@@ -85,8 +85,8 @@ class AnswerParentAdmin(PolymorphicParentModelAdmin):
     """
 
     list_display = (
-        'answered_survey',
-        'question',
+        "answered_survey",
+        "question",
     )
 
     base_model = Answer

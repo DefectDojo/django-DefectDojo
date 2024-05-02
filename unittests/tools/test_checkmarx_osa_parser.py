@@ -59,7 +59,7 @@ class TestCheckmarxOsaParser(DojoTestCase):
         self.assertEqual(float, type(item.cvssv3_score))
         self.assertEqual(7.5, item.cvssv3_score)
         self.assertEqual(datetime, type(item.publish_date))
-        self.assertEqual(datetime.strptime("2020-12-03T17:15:00", '%Y-%m-%dT%H:%M:%S'), item.publish_date)
+        self.assertEqual(datetime.strptime("2020-12-03T17:15:00", "%Y-%m-%dT%H:%M:%S"), item.publish_date)
         self.assertEqual(str, type(item.component_name))
         self.assertEqual("com.fasterxml.jackson.core:jackson-databind", item.component_name)
         self.assertEqual(str, type(item.component_version))

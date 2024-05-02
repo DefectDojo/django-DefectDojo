@@ -81,8 +81,8 @@ class TestMicrofocusWebinspectParser(DojoTestCase):
                     endpoint.clean()
             self.assertEqual(4, len(findings))
             item = findings[0]
-            self.assertEqual('Cache Management: Headers', item.title)
-            self.assertEqual('Info', item.severity)
+            self.assertEqual("Cache Management: Headers", item.title)
+            self.assertEqual("Info", item.severity)
             self.assertEqual(200, item.cwe)
             self.assertEqual(2, item.nb_occurences)
             self.assertEqual(2, len(item.unsaved_endpoints))

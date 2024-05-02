@@ -221,15 +221,15 @@ def get_snippet(result):
 def get_codeFlowsDescription(codeFlows):
     description = ""
     for codeFlow in codeFlows:
-        for threadFlow in codeFlow.get('threadFlows', []):
+        for threadFlow in codeFlow.get("threadFlows", []):
             if "locations" not in threadFlow:
                 continue
 
             description = f"**{_('Code flow')}:**\n"
             line = 1
 
-            for location in threadFlow.get('locations', []):
-                physicalLocation = location.get('location', {}).get('physicalLocation', {})
+            for location in threadFlow.get("locations", []):
+                physicalLocation = location.get("location", {}).get("physicalLocation", {})
                 region = physicalLocation.get("region", {})
                 uri = physicalLocation.get("artifactLocation").get("uri")
 
@@ -248,12 +248,12 @@ def get_codeFlowsDescription(codeFlows):
 
                 description += f"{line}. {uri}{start_line}{start_column}{snippet}\n"
 
-                if 'message' in location.get('location', {}):
-                    message_field = location.get('location', {}).get('message', {})
-                    if 'markdown' in message_field:
-                        message = message_field.get('markdown', '')
+                if "message" in location.get("location", {}):
+                    message_field = location.get("location", {}).get("message", {})
+                    if "markdown" in message_field:
+                        message = message_field.get("markdown", "")
                     else:
-                        message = message_field.get('text', '')
+                        message = message_field.get("text", "")
 
                     description += f"\t{message}\n"
 
@@ -443,7 +443,7 @@ def get_item(result, rules, artifacts, run_date):
 
     # manage tags provided in the report and rule and remove duplicated
     tags = list(set(get_properties_tags(rule) + get_properties_tags(result)))
-    tags = [s.removeprefix('external/cwe/') for s in tags]
+    tags = [s.removeprefix("external/cwe/") for s in tags]
     finding.tags = tags
 
     # manage fingerprints

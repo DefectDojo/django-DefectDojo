@@ -31,7 +31,7 @@ class TestKICSParser(DojoTestCase):
 **Category:** Secret Management
 **Issue type:** RedundantAttribute"""
                 self.assertEqual(description, finding.description)
-                self.assertEqual('https://kics.io/', finding.references)
+                self.assertEqual("https://kics.io/", finding.references)
                 self.assertEqual(1, finding.nb_occurences)
 
             with self.subTest(i=1):
@@ -50,7 +50,7 @@ class TestKICSParser(DojoTestCase):
 **Issue type:** IncorrectValue
 **Actual value:** aws_s3_bucket_policy[this].policy.Principal is equal to or contains \'*\'"""
                 self.assertEqual(description, finding.description)
-                self.assertEqual('https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy', finding.references)
+                self.assertEqual("https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy", finding.references)
                 self.assertEqual(1, finding.nb_occurences)
 
             with self.subTest(i=2):
