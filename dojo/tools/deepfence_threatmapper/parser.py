@@ -1,7 +1,8 @@
 from openpyxl import load_workbook
+
 from dojo.tools.deepfence_threatmapper.compliance import DeepfenceThreatmapperCompliance
-from dojo.tools.deepfence_threatmapper.secret import DeepfenceThreatmapperSecret
 from dojo.tools.deepfence_threatmapper.malware import DeepfenceThreatmapperMalware
+from dojo.tools.deepfence_threatmapper.secret import DeepfenceThreatmapperSecret
 from dojo.tools.deepfence_threatmapper.vulnerability import DeepfenceThreatmapperVulnerability
 
 

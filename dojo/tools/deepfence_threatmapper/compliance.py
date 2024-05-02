@@ -1,7 +1,7 @@
 from dojo.models import Finding
 
 
-class DeepfenceThreatmapperCompliance(object):
+class DeepfenceThreatmapperCompliance:
     def get_findings(self, row, headers, test):
         description = ""
         compliance_check_type = row[headers["compliance_check_type"]]
