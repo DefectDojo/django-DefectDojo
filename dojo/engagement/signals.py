@@ -13,7 +13,7 @@ from dojo.notifications.helper import create_notification
 @receiver(post_save, sender=Engagement)
 def engagement_post_save(sender, instance, created, **kwargs):
     if created:
-        title = 'Engagement created for ' + str(instance.product) + ': ' + str(instance.name)
+        title = _('Engagement created for "%(product)s": %(name)s') % {'product': instance.product, 'name': instance.name}
         create_notification(event='engagement_added', title=title, engagement=instance, product=instance.product,
                             url=reverse('view_engagement', args=(instance.id,)))
 

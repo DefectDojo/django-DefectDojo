@@ -541,7 +541,7 @@ class DeleteJiraView(View):
                         extra_tags='alert-success')
                     create_notification(
                         event='jira_config_deleted',
-                        title='Deletion of JIRA: %s' % jira_instance.configuration_name,
+                        title=_('Deletion of JIRA: %s') % jira_instance.configuration_name,
                         description=f"JIRA \"{jira_instance.configuration_name}\" was deleted by {request.user}",
                         url=request.build_absolute_uri(reverse('jira')))
                     return HttpResponseRedirect(reverse('jira'))

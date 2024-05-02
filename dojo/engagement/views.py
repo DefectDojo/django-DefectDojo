@@ -393,7 +393,7 @@ def copy_engagement(request, eid):
                 'Engagement Copied successfully.',
                 extra_tags='alert-success')
             create_notification(event='engagement_copied',  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
-                                title='Copying of %s' % engagement.name,
+                                title=_('Copying of %s') % engagement.name,
                                 description=f'The engagement "{engagement.name}" was copied by {request.user}',
                                 product=product,
                                 url=request.build_absolute_uri(reverse('view_engagement', args=(engagement_copy.id, ))),

@@ -22,6 +22,7 @@ from django.template.defaultfilters import pluralize
 from django.urls import reverse
 from django.utils import formats, timezone
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.http import require_POST
 from imagekit import ImageSpec
@@ -1300,7 +1301,7 @@ def close_finding(request, fid):
 
                 create_notification(
                     event="finding_closed",
-                    title="Closing of %s" % finding.title,
+                    title=_("Closing of %s") % finding.title,
                     finding=finding,
                     description=f'The finding "{finding.title}" was closed by {request.user}',
                     url=reverse("view_finding", args=(finding.id,)),
@@ -1468,7 +1469,7 @@ def reopen_finding(request, fid):
 
     create_notification(
         event="finding_reopened",
-        title="Reopening of %s" % finding.title,
+        title=_("Reopening of %s") % finding.title,
         finding=finding,
         description=f'The finding "{finding.title}" was reopened by {request.user}',
         url=reverse("view_finding", args=(finding.id,)),
@@ -1526,7 +1527,7 @@ def copy_finding(request, fid):
             )
             create_notification(
                 event="finding_copied",  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
-                title="Copying of %s" % finding.title,
+                title=_("Copying of %s") % finding.title,
                 description=f'The finding "{finding.title}" was copied by {request.user} to {test.title}',
                 product=product,
                 url=request.build_absolute_uri(
