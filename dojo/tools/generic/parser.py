@@ -28,11 +28,11 @@ class GenericParser(object):
         if filename.name.lower().endswith(".csv"):
             return self._get_findings_csv(filename, custom_fields_mapping=custom_fields_mapping)
         elif filename.name.lower().endswith(".json"):
-            data = json.load(filename, custom_fields_mapping=custom_fields_mapping)
-            test_internal = self._get_test_json(data)
+            data = json.load(filename)
+            test_internal = self._get_test_json(data, custom_fields_mapping=custom_fields_mapping)
             return test_internal.findings
         else:  # default to CSV like before
-            return self._get_findings_csv(filename)
+            return self._get_findings_csv(filename, custom_fields_mapping=custom_fields_mapping)
 
     def get_tests(self, scan_type, filename, custom_fields_mapping=None):
         # if the file is a CSV just use the old function
@@ -42,7 +42,7 @@ class GenericParser(object):
             return [test]
         # we manage it like a JSON file (default)
         data = json.load(filename)
-        return [self._get_test_json(data)]
+        return [self._get_test_json(data, custom_fields_mapping=custom_fields_mapping)]
 
     def requires_file(self, scan_type):
         return True
