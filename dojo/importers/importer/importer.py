@@ -1,4 +1,5 @@
 import base64
+import json
 
 from django.db.models.query_utils import Q
 from dojo.importers import utils as importer_utils
@@ -266,7 +267,7 @@ class DojoDefaultImporter(object):
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, close_old_findings_product_scope=False,
                     group_by=None, api_scan_configuration=None, service=None, title=None, create_finding_groups_for_all_findings=True,
-                    apply_tags_to_findings=False, apply_tags_to_endpoints=False):
+                    apply_tags_to_findings=False, apply_tags_to_endpoints=False, custom_fields_mapping=None):
 
         logger.debug(f'IMPORT_SCAN: parameters: {locals()}')
 
@@ -285,7 +286,11 @@ class DojoDefaultImporter(object):
         if hasattr(parser, 'get_tests'):
             logger.debug('IMPORT_SCAN parser v2: Create Test and parse findings')
             try:
-                tests = parser.get_tests(scan_type, scan)
+                if 'custom_fields_mapping' in parser.get_tests.__code__.co_varnames and isinstance(custom_fields_mapping, dict):
+                    logger.debug(f'IMPORT_SCAN: Using custom field mapping for {scan_type}: {custom_fields_mapping}')
+                    tests = parser.get_tests(scan_type, scan, custom_fields_mapping=custom_fields_mapping)
+                else:
+                    tests = parser.get_tests(scan_type, scan)
             except ValueError as e:
                 logger.warning(e)
                 raise ValidationError(e)
@@ -334,7 +339,14 @@ class DojoDefaultImporter(object):
             logger.debug('IMPORT_SCAN: Parse findings')
             parser = get_parser(scan_type)
             try:
-                parsed_findings = parser.get_findings(scan, test)
+                # verify that the get_findings method has the parameter "custom_field_mapping"
+                logger.debug(f"IMPORT_SCAN: Check if custom fields mapping param exists in parser: {('custom_fields_mapping' in parser.get_findings.__code__.co_varnames)}")
+                if 'custom_fields_mapping' in parser.get_findings.__code__.co_varnames and isinstance(custom_fields_mapping, dict):
+                    logger.debug(f'IMPORT_SCAN: Using custom field mapping for {scan_type}')
+                    parsed_findings = parser.get_findings(scan, test, custom_fields_mapping=custom_fields_mapping)
+                else:
+                    logger.debug(f'IMPORT_SCAN: Using default field mapping for {scan_type}')
+                    parsed_findings = parser.get_findings(scan, test)
             except ValueError as e:
                 logger.warning(e)
                 raise ValidationError(e)

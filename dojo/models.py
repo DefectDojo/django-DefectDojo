@@ -2500,7 +2500,11 @@ class Finding(models.Model):
                                         blank=True,
                                         verbose_name=_('Number of occurences'),
                                         help_text=_("Number of occurences in the source tool when several vulnerabilites were found and aggregated by the scanner."))
-
+    custom_fields = models.JSONField(null=True,
+                                     blank=True,
+                                     max_length=4000,
+                                     verbose_name=_('Custom Fields'),
+                                     help_text=_("JSON string that maps finding report information to custom fields for further processing"))
     # this is useful for vulnerabilities on dependencies : helps answer the question "Did I add this vulnerability or was it discovered recently?"
     publish_date = models.DateField(null=True,
                                          blank=True,
@@ -2996,6 +3000,10 @@ class Finding(models.Model):
     def has_jira_configured(self):
         import dojo.jira_link.helper as jira_helper
         return jira_helper.has_jira_configured(self)
+
+    @property
+    def has_custom_fields(self):
+        return self.custom_fields is not None
 
     @cached_property
     def has_finding_group(self):

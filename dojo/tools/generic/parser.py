@@ -7,6 +7,9 @@ from cvss import parser as cvss_parser
 from dateutil.parser import parse
 from dojo.models import Endpoint, Finding
 from dojo.tools.parser_test import ParserTest
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class GenericParser(object):
@@ -21,21 +24,21 @@ class GenericParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import Generic findings in CSV or JSON format."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, custom_fields_mapping=None):
         if filename.name.lower().endswith(".csv"):
-            return self._get_findings_csv(filename)
+            return self._get_findings_csv(filename, custom_fields_mapping=custom_fields_mapping)
         elif filename.name.lower().endswith(".json"):
-            data = json.load(filename)
+            data = json.load(filename, custom_fields_mapping=custom_fields_mapping)
             test_internal = self._get_test_json(data)
             return test_internal.findings
         else:  # default to CSV like before
             return self._get_findings_csv(filename)
 
-    def get_tests(self, scan_type, filename):
+    def get_tests(self, scan_type, filename, custom_fields_mapping=None):
         # if the file is a CSV just use the old function
         if filename.name.lower().endswith(".csv"):
             test = ParserTest(name=self.ID, type=self.ID, version=None)
-            test.findings = self._get_findings_csv(filename)
+            test.findings = self._get_findings_csv(filename, custom_fields_mapping=custom_fields_mapping)
             return [test]
         # we manage it like a JSON file (default)
         data = json.load(filename)
@@ -44,7 +47,7 @@ class GenericParser(object):
     def requires_file(self, scan_type):
         return True
 
-    def _get_test_json(self, data):
+    def _get_test_json(self, data, custom_fields_mapping=None):
         test_internal = ParserTest(
             name=data.get("name", self.ID),
             type=data.get("type", self.ID),
@@ -119,6 +122,26 @@ class GenericParser(object):
                 "effort_for_fixing",
                 "tags",
             }.union(required)
+
+            # verify that custom field mapping is of type dict
+            if custom_fields_mapping and isinstance(custom_fields_mapping, dict):
+                extracted_custom_fields = dict()
+                for custom_field, report_column in custom_fields_mapping.items():
+                    if not custom_field or not report_column:
+                        logger.warning(
+                            f"custom_fields_mapping contains empty key or value: {custom_fields_mapping}"
+                        )
+                        continue
+
+                    if report_column in item:
+                        allowed.add(report_column)  # add custom report column to allowed fields
+                        extracted_custom_fields[custom_field] = item[report_column]
+
+                # write extracted custom fields into finding as json string
+                if len(extracted_custom_fields) > 0:
+                    item.custom_fields = extracted_custom_fields
+                    allowed.add("custom_fields")
+
             not_allowed = sorted(set(item).difference(allowed))
             if not_allowed:
                 raise ValueError(
@@ -159,7 +182,7 @@ class GenericParser(object):
             test_internal.findings.append(finding)
         return test_internal
 
-    def _get_findings_csv(self, filename):
+    def _get_findings_csv(self, filename, custom_fields_mapping=None):
         content = filename.read()
         if isinstance(content, bytes):
             content = content.decode("utf-8")
@@ -226,6 +249,24 @@ class GenericParser(object):
                     if "://" in row["Url"]
                     else Endpoint.from_uri("//" + row["Url"])
                 ]
+
+            # custom report field mapping
+            logger.debug(f"custom_fields_mapping: {custom_fields_mapping}")
+            if custom_fields_mapping and isinstance(custom_fields_mapping, dict):
+                extracted_custom_fields = dict()
+                for custom_field, report_column in custom_fields_mapping.items():
+                    if not custom_field or not report_column:
+                        logger.warning(
+                            f"custom_fields_mapping contains empty key or value: {custom_fields_mapping}"
+                        )
+                        continue
+
+                    if report_column in row:
+                        extracted_custom_fields[custom_field] = row[report_column]
+
+                # write extracted custom fields dict into finding
+                if len(extracted_custom_fields) > 0:
+                    finding.custom_fields = extracted_custom_fields
 
             # manage internal de-duplication
             key = hashlib.sha256(

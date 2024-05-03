@@ -1324,6 +1324,7 @@ class ApiFindingFilter(DojoFilter):
     hash_code = CharFilter(lookup_expr='icontains')
     impact = CharFilter(lookup_expr='icontains')
     mitigation = CharFilter(lookup_expr='icontains')
+    custom_fields = CharFilter(lookup_expr="icontains", field_name="custom_fields")
     numerical_severity = CharFilter(method=custom_filter, field_name='numerical_severity')
     param = CharFilter(lookup_expr='icontains')
     payload = CharFilter(lookup_expr='icontains')
@@ -2819,7 +2820,7 @@ class ReportFindingFilter(FindingTagFilter):
     duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())
     out_of_scope = ReportBooleanFilter()
     outside_of_sla = FindingSLAFilter(label="Outside of SLA")
-
+    custom_fields = CharFilter(lookup_expr="icontains", field_name="custom_fields")
     file_path = CharFilter(lookup_expr='icontains')
 
     class Meta:

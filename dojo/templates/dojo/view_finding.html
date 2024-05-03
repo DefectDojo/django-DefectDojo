@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load as_key_value_list %}
 {% load display_tags %}
 {% load multiply %}
 {% load authorization_tags %}
@@ -568,6 +569,9 @@
                 <th>JIRA</th>
                 <th>JIRA Change</th>
                 {% endif %}
+                {% if finding.has_custom_fields %}
+                <th>JIRA Custom Fields</th>
+                {% endif %}
                 {% if finding.github_conf_new or finding.github_issue %}
                 <th>GitHub</th>
                 {% endif %}
@@ -623,7 +627,7 @@
                     </span>
                 </td>
                 {% endif %}
-                {% if finding.has_jira_configured or finding.has_jira_issue or finding.has_jira_group_issue %}
+                {% if finding.has_jira_configured or finding.has_jira_issue or finding.has_jira_group_issue or finding.has_custom_fields %}
                     <td id="jira">
                         {% if finding.has_jira_group_issue %}
                             <a href="{{ finding.finding_group | jira_issue_url }}"
@@ -658,6 +662,11 @@
                             <div title="{{ finding.jira_issue.jira_change|date:"DATETIME_FORMAT" }}">{{ finding.jira_issue.jira_change|naturalday }}</div>
                         {% endif %}
                     </td>
+                    {% if finding.has_custom_fields %}
+                        <td>
+                            <div title="{{ finding.custom_fields }}">{{ finding.custom_fields | as_key_value_list | markdown_render }}</div>
+                        </td>
+                    {% endif %}
                 {% endif %}
                 {% if finding.github_conf_new or finding.github_issue %}
                     <td>

@@ -2979,6 +2979,9 @@ class JIRAImportScanForm(forms.Form):
             self.fields['push_to_jira'].disabled = True
 
     push_to_jira = forms.BooleanField(required=False, label="Push to JIRA", help_text="Checking this will create a new jira issue for each new finding.")
+    custom_fields_mapping = forms.JSONField(max_length=4000, required=False, label="JIRA Custom fields report mapping",
+                                            help_text='A JSON map of JIRA custom field id (key) to report column name (value): Example {"customfield_12345":"estimatedMonthlyCost"}',
+                                            widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}), empty_value={})
 
 
 class JIRAEngagementForm(forms.Form):
