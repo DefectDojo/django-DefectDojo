@@ -5,7 +5,7 @@ from dojo.tools.progpilot.parser import ProgpilotParser
 
 class TestProgpilotParser(DojoTestCase):
 
-    def test_crunch42parser_single_has_many_findings(self):
+    def test_progpilotparser_single_has_many_findings(self):
         testfile = open("unittests/scans/progpilot/progpilot.json")
         parser = ProgpilotParser()
         findings = parser.get_findings(testfile, Test())
