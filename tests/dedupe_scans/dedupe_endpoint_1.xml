@@ -17,7 +17,7 @@
 
 	<Vulnerability>
 		<ID></ID>
-		<Name>Matching title not Endpoints</Name>
+		<Name>Matching title not Description</Name>
 		<Date></Date>
 		<Status></Status>
 		<Type></Type>
@@ -26,7 +26,7 @@
 		<CVSSv3></CVSSv3>
 		<Risk>CRITICAL</Risk>
 		<URL>https://www.same.com/samesies</URL>
-		<Description>Test Description</Description>
+		<Description>Different Description</Description>
 		<PoC></PoC>
 	</Vulnerability>
 

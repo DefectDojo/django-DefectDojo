@@ -1,0 +1,181 @@
+{
+  "banner": {
+    "description": "WordPress Security Scanner by the WPScan Team",
+    "version": "3.8.17",
+    "authors": [
+      "@_WPScan_",
+      "@ethicalhack3r",
+      "@erwan_lr",
+      "@firefart"
+    ],
+    "sponsor": "Sponsored by Automattic - https://automattic.com/"
+  },
+  "start_time": 1616759450,
+  "start_memory": 44929024,
+  "target_url": "https://s1.demo.opensourcecms.com/wordpress/",
+  "target_ip": "78.46.101.82",
+  "effective_url": "https://s1.demo.opensourcecms.com/wordpress/",
+  "interesting_findings": [
+    {
+      "url": "https://s1.demo.opensourcecms.com/wordpress/",
+      "to_s": "Headers",
+      "type": "headers",
+      "found_by": "Headers (Passive Detection)",
+      "confidence": 100,
+      "confirmed_by": {
+
+      },
+      "references": {
+
+      },
+      "interesting_entries": [
+        "Server: Apache",
+        "X-Mod-Pagespeed: 1.13.35.2-0",
+        "X-Robots-Tag: noindex,nofollow"
+      ]
+    },
+    {
+      "url": "https://s1.demo.opensourcecms.com/wordpress/xmlrpc.php",
+      "to_s": "XML-RPC seems to be enabled: https://s1.demo.opensourcecms.com/wordpress/xmlrpc.php",
+      "type": "xmlrpc",
+      "found_by": "Direct Access (Aggressive Detection)",
+      "confidence": 100,
+      "confirmed_by": {
+
+      },
+      "references": {
+        "url": [
+          "http://codex.wordpress.org/XML-RPC_Pingback_API"
+        ],
+        "metasploit": [
+          "auxiliary/scanner/http/wordpress_ghost_scanner",
+          "auxiliary/dos/http/wordpress_xmlrpc_dos",
+          "auxiliary/scanner/http/wordpress_xmlrpc_login",
+          "auxiliary/scanner/http/wordpress_pingback_access"
+        ]
+      },
+      "interesting_entries": [
+
+      ]
+    },
+    {
+      "url": "https://s1.demo.opensourcecms.com/wordpress/readme.html",
+      "to_s": "WordPress readme found: https://s1.demo.opensourcecms.com/wordpress/readme.html",
+      "type": "readme",
+      "found_by": "Direct Access (Aggressive Detection)",
+      "confidence": 100,
+      "confirmed_by": {
+
+      },
+      "references": {
+
+      },
+      "interesting_entries": [
+
+      ]
+    },
+    {
+      "url": "https://s1.demo.opensourcecms.com/wordpress/wp-cron.php",
+      "to_s": "The external WP-Cron seems to be enabled: https://s1.demo.opensourcecms.com/wordpress/wp-cron.php",
+      "type": "wp_cron",
+      "found_by": "Direct Access (Aggressive Detection)",
+      "confidence": 60,
+      "confirmed_by": {
+
+      },
+      "references": {
+        "url": [
+          "https://www.iplocation.net/defend-wordpress-from-ddos",
+          "https://github.com/wpscanteam/wpscan/issues/1299"
+        ]
+      },
+      "interesting_entries": [
+
+      ]
+    }
+  ],
+  "version": {
+    "number": "5.6.2",
+    "release_date": "2021-02-22",
+    "status": "latest",
+    "found_by": "Rss Generator (Passive Detection)",
+    "confidence": 100,
+    "interesting_entries": [
+      "https://s1.demo.opensourcecms.com/wordpress/feed/, <generator>https://wordpress.org/?v=5.6.2</generator>",
+      "https://s1.demo.opensourcecms.com/wordpress/comments/feed/, <generator>https://wordpress.org/?v=5.6.2</generator>"
+    ],
+    "confirmed_by": {
+
+    },
+    "vulnerabilities": [
+
+    ]
+  },
+  "main_theme": {
+    "slug": "twentyseventeen",
+    "location": "https://s1.demo.opensourcecms.com/wordpress/wp-content/themes/twentyseventeen/",
+    "latest_version": "2.6",
+    "last_updated": "2021-03-09T00:00:00.000Z",
+    "outdated": true,
+    "readme_url": "https://s1.demo.opensourcecms.com/wordpress/wp-content/themes/twentyseventeen/readme.txt",
+    "directory_listing": false,
+    "error_log_url": null,
+    "style_url": "https://s1.demo.opensourcecms.com/wordpress/wp-content/themes/twentyseventeen/style.css?ver=20201208",
+    "style_name": "Twenty Seventeen",
+    "style_uri": "https://wordpress.org/themes/twentyseventeen/",
+    "description": "Twenty Seventeen brings your site to life with header video and immersive featured images. With a focus on business sites, it features multiple sections on the front page as well as widgets, navigation and social menus, a logo, and more. Personalize its asymmetrical grid with a custom color scheme and showcase your multimedia content with post formats. Our default theme for 2017 works great in many languages, for any abilities, and on any device.",
+    "author": "the WordPress team",
+    "author_uri": "https://wordpress.org/",
+    "template": null,
+    "license": "GNU General Public License v2 or later",
+    "license_uri": "http://www.gnu.org/licenses/gpl-2.0.html",
+    "tags": "one-column, two-columns, right-sidebar, flexible-header, accessibility-ready, custom-colors, custom-header, custom-menu, custom-logo, editor-style, featured-images, footer-widgets, post-formats, rtl-language-support, sticky-post, theme-options, threaded-comments, translation-ready, block-patterns",
+    "text_domain": "twentyseventeen",
+    "found_by": "Css Style In 404 Page (Passive Detection)",
+    "confidence": 70,
+    "interesting_entries": [
+
+    ],
+    "confirmed_by": {
+
+    },
+    "vulnerabilities": [
+
+    ],
+    "version": {
+      "number": "2.5",
+      "confidence": 80,
+      "found_by": "Style (Passive Detection)",
+      "interesting_entries": [
+        "https://s1.demo.opensourcecms.com/wordpress/wp-content/themes/twentyseventeen/style.css?ver=20201208, Match: 'Version: 2.5'"
+      ],
+      "confirmed_by": {
+
+      }
+    },
+    "parents": [
+
+    ]
+  },
+  "plugins": {
+
+  },
+  "config_backups": {
+
+  },
+  "vuln_api": {
+    "plan": "free",
+    "requests_done_during_scan": 2,
+    "requests_remaining": 14
+  },
+  "stop_time": 1616759456,
+  "elapsed": 5,
+  "requests_done": 57,
+  "cached_requests": 6,
+  "data_sent": 16603,
+  "data_sent_humanised": "16.214 KB",
+  "data_received": 438313,
+  "data_received_humanised": "428.04 KB",
+  "used_memory": 235012096,
+  "used_memory_humanised": "224.125 MB"
+}

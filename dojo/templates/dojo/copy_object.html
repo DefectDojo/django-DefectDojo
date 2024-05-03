@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+{% block add_css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}"/>
+{% endblock add_css %}
+{% block content %}
+    {{ block.super }}
+    {% if product_tab.tab == "engagements" and destination_label == "Product" %}
+        <h3> Copy {{ source }} in {{ product_tab.product }}</h3>
+    {% else %}
+        <h3> Copy {{ source }} to a new {{ destination_label }}</h3>
+        <div class="alert alert-info" role="alert">
+            Please select the {{ destination_label }} you would like to copy this {{ source_label }} to
+        </div>
+    {% endif %}
+    <form class="form-horizontal" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" name="copy" type="submit" value="Copy"/>
+            </div>
+        </div>
+    </form>
+{% endblock content %}

@@ -3,7 +3,6 @@ import logging
 
 # Third party imports
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.contrib.admin.utils import NestedObjects
 from django.urls import reverse
 from django.db import DEFAULT_DB_ALIAS
@@ -16,6 +15,7 @@ from github import Github
 from dojo.forms import GITHUBForm, DeleteGITHUBConfForm
 from dojo.models import GITHUB_Conf
 from dojo.utils import add_breadcrumb
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 
 logger = logging.getLogger(__name__)
 
@@ -25,12 +25,7 @@ def webhook(request):
     return HttpResponse('')
 
 
-@user_passes_test(lambda u: u.is_staff)
-def express_new_github(request):
-    return HttpResponse('')
-
-
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.add_github_conf')
 def new_github(request):
     if request.method == 'POST':
         gform = GITHUBForm(request.POST, instance=GITHUB_Conf())
@@ -46,34 +41,34 @@ def new_github(request):
                 new_j.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Github Configuration Successfully Created.',
+                                     'GitHub Configuration Successfully Created.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('github', ))
             except Exception as info:
                 logger.error(info)
                 messages.add_message(request,
                                      messages.ERROR,
-                                     'Unable to authenticate on github.',
+                                     'Unable to authenticate on GitHub.',
                                      extra_tags='alert-danger')
                 return HttpResponseRedirect(reverse('github', ))
     else:
         gform = GITHUBForm()
-        add_breadcrumb(title="New Github Configuration", top_level=False, request=request)
+        add_breadcrumb(title="New GitHub Configuration", top_level=False, request=request)
         return render(request, 'dojo/new_github.html',
                     {'gform': gform})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.view_github_conf')
 def github(request):
     confs = GITHUB_Conf.objects.all()
-    add_breadcrumb(title="Github List", top_level=not len(request.GET), request=request)
+    add_breadcrumb(title="GitHub List", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/github.html',
                   {'confs': confs,
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.delete_github_conf')
 def delete_github(request, tid):
     github_instance = get_object_or_404(GITHUB_Conf, pk=tid)
     # eng = test.engagement
@@ -87,7 +82,7 @@ def delete_github(request, tid):
                 github_instance.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Github Conf and relationships removed.',
+                                     'GitHub Conf and relationships removed.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('github'))
 

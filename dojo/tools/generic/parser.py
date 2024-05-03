@@ -1,341 +1,258 @@
-import io
 import csv
 import hashlib
-from dojo.models import Finding, Endpoint
+import io
+import json
+
+from cvss import parser as cvss_parser
 from dateutil.parser import parse
-import re
-from urllib.parse import urlparse
-import socket
+from dojo.models import Endpoint, Finding
+from dojo.tools.parser_test import ParserTest
 
 
-class ColumnMappingStrategy(object):
+class GenericParser(object):
+    ID = "Generic Findings Import"
 
-    mapped_column = None
+    def get_scan_types(self):
+        return [self.ID]
 
-    def __init__(self):
-        self.successor = None
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
 
-    def map_column_value(self, finding, column_value):
-        pass
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Generic findings in CSV or JSON format."
 
-    @staticmethod
-    def evaluate_bool_value(column_value):
-        if column_value.lower() == 'true':
-            return True
-        elif column_value.lower() == 'false':
-            return False
-        else:
-            return None
+    def get_findings(self, filename, test):
+        if filename.name.lower().endswith(".csv"):
+            return self._get_findings_csv(filename)
+        elif filename.name.lower().endswith(".json"):
+            data = json.load(filename)
+            test_internal = self._get_test_json(data)
+            return test_internal.findings
+        else:  # default to CSV like before
+            return self._get_findings_csv(filename)
 
-    def process_column(self, column_name, column_value, finding):
+    def get_tests(self, scan_type, filename):
+        # if the file is a CSV just use the old function
+        if filename.name.lower().endswith(".csv"):
+            test = ParserTest(name=self.ID, type=self.ID, version=None)
+            test.findings = self._get_findings_csv(filename)
+            return [test]
+        # we manage it like a JSON file (default)
+        data = json.load(filename)
+        return [self._get_test_json(data)]
 
-        if column_name.lower() == self.mapped_column and column_value is not None:
-            self.map_column_value(finding, column_value)
-        elif self.successor is not None:
-            self.successor.process_column(column_name, column_value, finding)
+    def requires_file(self, scan_type):
+        return True
 
+    def _get_test_json(self, data):
+        test_internal = ParserTest(
+            name=data.get("name", self.ID),
+            type=data.get("type", self.ID),
+            version=data.get("version"),
+        )
+        test_internal.findings = list()
+        for item in data.get("findings", []):
+            # remove endpoints of the dictionnary
+            unsaved_endpoints = None
+            if "endpoints" in item:
+                unsaved_endpoints = item["endpoints"]
+                del item["endpoints"]
+            # remove files of the dictionnary
+            unsaved_files = None
+            if "files" in item:
+                unsaved_files = item["files"]
+                del item["files"]
+            # remove vulnerability_ids of the dictionnary
+            unsaved_vulnerability_ids = None
+            if "vulnerability_ids" in item:
+                unsaved_vulnerability_ids = item["vulnerability_ids"]
+                del item["vulnerability_ids"]
 
-class DateColumnMappingStrategy(ColumnMappingStrategy):
+            # check for required keys
+            required = {"title", "severity", "description"}
+            missing = sorted(required.difference(item))
+            if missing:
+                raise ValueError(f"Required fields are missing: {missing}")
 
-    def __init__(self):
-        self.mapped_column = 'date'
-        super(DateColumnMappingStrategy, self).__init__()
+            # check for allowed keys
+            allowed = {
+                "date",
+                "cwe",
+                "cve",
+                "cvssv3",
+                "cvssv3_score",
+                "mitigation",
+                "impact",
+                "steps_to_reproduce",
+                "severity_justification",
+                "references",
+                "active",
+                "verified",
+                "false_p",
+                "out_of_scope",
+                "risk_accepted",
+                "under_review",
+                "is_mitigated",
+                "thread_id",
+                "mitigated",
+                "numerical_severity",
+                "param",
+                "payload",
+                "line",
+                "file_path",
+                "component_name",
+                "component_version",
+                "static_finding",
+                "dynamic_finding",
+                "scanner_confidence",
+                "unique_id_from_tool",
+                "vuln_id_from_tool",
+                "sast_source_object",
+                "sast_sink_object",
+                "sast_source_line",
+                "sast_source_file_path",
+                "nb_occurences",
+                "publish_date",
+                "service",
+                "planned_remediation_date",
+                "planned_remediation_version",
+                "effort_for_fixing",
+                "tags",
+            }.union(required)
+            not_allowed = sorted(set(item).difference(allowed))
+            if not_allowed:
+                raise ValueError(
+                    f"Not allowed fields are present: {not_allowed}"
+                )
 
-    def map_column_value(self, finding, column_value):
-        finding.date = parse(column_value).date()
+            finding = Finding(**item)
 
+            # manage endpoints
+            if unsaved_endpoints:
+                finding.unsaved_endpoints = []
+                for endpoint_item in unsaved_endpoints:
+                    if isinstance(endpoint_item, str):
+                        if "://" in endpoint_item:  # is the host full uri?
+                            endpoint = Endpoint.from_uri(endpoint_item)
+                            # can raise exception if the host is not valid URL
+                        else:
+                            endpoint = Endpoint.from_uri("//" + endpoint_item)
+                            # can raise exception if there is no way to parse
+                            # the host
+                    else:
+                        endpoint = Endpoint(**endpoint_item)
+                    finding.unsaved_endpoints.append(endpoint)
 
-class TitleColumnMappingStrategy(ColumnMappingStrategy):
-
-    def __init__(self):
-        self.mapped_column = 'title'
-        super(TitleColumnMappingStrategy, self).__init__()
-
-    def map_column_value(self, finding, column_value):
-        finding.title = column_value
-
-
-class CweColumnMappingStrategy(ColumnMappingStrategy):
-
-    def __init__(self):
-        self.mapped_column = 'cweid'
-        super(CweColumnMappingStrategy, self).__init__()
-
-    def map_column_value(self, finding, column_value):
-        if column_value.isdigit():
-            finding.cwe = int(column_value)
-
-
-class UrlColumnMappingStrategy(ColumnMappingStrategy):
-
-    def __init__(self):
-        self.mapped_column = 'url'
-        super(UrlColumnMappingStrategy, self).__init__()
-
-    def is_valid_ipv4_address(self, address):
-        valid = True
-        try:
-            socket.inet_aton(address.strip())
-        except:
-            valid = False
-
-        return valid
-
-    def map_column_value(self, finding, column_value):
-        url = column_value
-        finding.url = url
-        o = urlparse(url)
-
-        """
-        Todo: Replace this with a centralized parsing function as many of the parsers
-        use the same method for parsing urls.
-
-        ParseResult(scheme='http', netloc='www.cwi.nl:80', path='/%7Eguido/Python.html',
-                    params='', query='', fragment='')
-        """
-        if self.is_valid_ipv4_address(url) is False:
-            rhost = re.search(
-                "(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
-                url)
-
-            if rhost:
-                protocol = o.scheme
-                host = o.netloc
-                path = o.path
-                query = o.query
-                fragment = o.fragment
-
-                port = 80
-                if protocol == 'https':
-                    port = 443
-
-                if rhost.group(11) is not None:
-                    port = rhost.group(11)
-
-                try:
-                    dupe_endpoint = Endpoint.objects.get(protocol=protocol,
-                                                         host=host + (":" + port) if port is not None else "",
-                                                         query=query,
-                                                         fragment=fragment,
-                                                         path=path,
-                                                         product=finding.test.engagement.product)
-                except:
-                    dupe_endpoint = None
-
-                if not dupe_endpoint:
-                    endpoint = Endpoint(protocol=protocol,
-                                        host=host + (":" + str(port)) if port is not None else "",
-                                        query=query,
-                                        fragment=fragment,
-                                        path=path,
-                                        product=finding.test.engagement.product)
+            if unsaved_files:
+                finding.unsaved_files = unsaved_files
+            if finding.cve:
+                finding.unsaved_vulnerability_ids = [finding.cve]
+            if unsaved_vulnerability_ids:
+                if finding.unsaved_vulnerability_ids:
+                    finding.unsaved_vulnerability_ids.append(
+                        unsaved_vulnerability_ids
+                    )
                 else:
-                    endpoint = dupe_endpoint
+                    finding.unsaved_vulnerability_ids = (
+                        unsaved_vulnerability_ids
+                    )
+            test_internal.findings.append(finding)
+        return test_internal
 
-                if not dupe_endpoint:
-                    endpoints = [endpoint]
-                else:
-                    endpoints = [endpoint, dupe_endpoint]
-
-                finding.unsaved_endpoints = endpoints
-
-        # URL is an IP so save as an IP endpoint
-        elif self.is_valid_ipv4_address(url) is True:
-            try:
-                dupe_endpoint = Endpoint.objects.get(protocol=None,
-                                                     host=url,
-                                                     path=None,
-                                                     query=None,
-                                                     fragment=None,
-                                                     product=finding.test.engagement.product)
-            except:
-                dupe_endpoint = None
-
-            if not dupe_endpoint:
-                endpoints = [Endpoint(host=url, product=finding.test.engagement.product)]
-            else:
-                endpoints = [dupe_endpoint]
-
-            finding.unsaved_endpoints = endpoints
-
-
-class SeverityColumnMappingStrategy(ColumnMappingStrategy):
-
-    @staticmethod
-    def is_valid_severity(severity):
-        valid_severity = ('Info', 'Low', 'Medium', 'High', 'Critical')
-        return severity in valid_severity
-
-    def __init__(self):
-        self.mapped_column = 'severity'
-        super(SeverityColumnMappingStrategy, self).__init__()
-
-    def map_column_value(self, finding, column_value):
-        if self.is_valid_severity(column_value):
-            finding.severity = column_value
-        else:
-            finding.severity = 'Info'
-
-
-class DescriptionColumnMappingStrategy(ColumnMappingStrategy):
-
-    def __init__(self):
-        self.mapped_column = 'description'
-        super(DescriptionColumnMappingStrategy, self).__init__()
-
-    def map_column_value(self, finding, column_value):
-        finding.description = column_value
-
-
-class MitigationColumnMappingStrategy(ColumnMappingStrategy):
-
-    def __init__(self):
-        self.mapped_column = 'mitigation'
-        super(MitigationColumnMappingStrategy, self).__init__()
-
-    def map_column_value(self, finding, column_value):
-        finding.mitigation = column_value
-
-
-class ImpactColumnMappingStrategy(ColumnMappingStrategy):
-
-    def __init__(self):
-        self.mapped_column = 'impact'
-        super(ImpactColumnMappingStrategy, self).__init__()
-
-    def map_column_value(self, finding, column_value):
-        finding.impact = column_value
-
-
-class ReferencesColumnMappingStrategy(ColumnMappingStrategy):
-
-    def __init__(self):
-        self.mapped_column = 'references'
-        super(ReferencesColumnMappingStrategy, self).__init__()
-
-    def map_column_value(self, finding, column_value):
-        finding.references = column_value
-
-
-class ActiveColumnMappingStrategy(ColumnMappingStrategy):
-
-    def __init__(self):
-        self.mapped_column = 'active'
-        super(ActiveColumnMappingStrategy, self).__init__()
-
-    def map_column_value(self, finding, column_value):
-        finding.active = self.evaluate_bool_value(column_value)
-
-
-class VerifiedColumnMappingStrategy(ColumnMappingStrategy):
-
-    def __init__(self):
-        self.mapped_column = 'verified'
-        super(VerifiedColumnMappingStrategy, self).__init__()
-
-    def map_column_value(self, finding, column_value):
-        finding.verified = self.evaluate_bool_value(column_value)
-
-
-class FalsePositiveColumnMappingStrategy(ColumnMappingStrategy):
-
-    def __init__(self):
-        self.mapped_column = 'falsepositive'
-        super(FalsePositiveColumnMappingStrategy, self).__init__()
-
-    def map_column_value(self, finding, column_value):
-        finding.false_p = self.evaluate_bool_value(column_value)
-
-
-class DuplicateColumnMappingStrategy(ColumnMappingStrategy):
-
-    def __init__(self):
-        self.mapped_column = 'duplicate'
-        super(DuplicateColumnMappingStrategy, self).__init__()
-
-    def map_column_value(self, finding, column_value):
-        finding.duplicate = self.evaluate_bool_value(column_value)
-
-
-class GenericFindingUploadCsvParser(object):
-
-    def create_chain(self):
-        date_column_strategy = DateColumnMappingStrategy()
-        title_column_strategy = TitleColumnMappingStrategy()
-        cwe_column_strategy = CweColumnMappingStrategy()
-        url_column_strategy = UrlColumnMappingStrategy()
-        severity_column_strategy = SeverityColumnMappingStrategy()
-        description_column_strategy = DescriptionColumnMappingStrategy()
-        mitigation_column_strategy = MitigationColumnMappingStrategy()
-        impact_column_strategy = ImpactColumnMappingStrategy()
-        references_column_strategy = ReferencesColumnMappingStrategy()
-        active_column_strategy = ActiveColumnMappingStrategy()
-        verified_column_strategy = VerifiedColumnMappingStrategy()
-        false_positive_strategy = FalsePositiveColumnMappingStrategy()
-        duplicate_strategy = DuplicateColumnMappingStrategy()
-
-        false_positive_strategy.successor = duplicate_strategy
-        verified_column_strategy.successor = false_positive_strategy
-        active_column_strategy.successor = verified_column_strategy
-        references_column_strategy.successor = active_column_strategy
-        impact_column_strategy.successor = references_column_strategy
-        mitigation_column_strategy.successor = impact_column_strategy
-        description_column_strategy.successor = mitigation_column_strategy
-        severity_column_strategy.successor = description_column_strategy
-        url_column_strategy.successor = severity_column_strategy
-        cwe_column_strategy.successor = url_column_strategy
-        title_column_strategy.successor = cwe_column_strategy
-        date_column_strategy.successor = title_column_strategy
-
-        self.chain = date_column_strategy
-
-    def read_column_names(self, row):
-        index = 0
-        for column in row:
-            self.column_names[index] = column
-            index += 1
-
-    def __init__(self, filename, test, active, verified):
-        self.chain = None
-        self.column_names = dict()
-        self.dupes = dict()
-        self.items = ()
-        self.create_chain()
-        self.active = active
-        self.verified = verified
-        if filename is None:
-            self.items = ()
-            return
-
+    def _get_findings_csv(self, filename):
         content = filename.read()
-        if type(content) is bytes:
-            content = content.decode('utf-8')
-        row_number = 0
-        reader = csv.reader(io.StringIO(content), delimiter=',', quotechar='"')
+        if isinstance(content, bytes):
+            content = content.decode("utf-8")
+        reader = csv.DictReader(
+            io.StringIO(content), delimiter=",", quotechar='"'
+        )
+
+        dupes = dict()
         for row in reader:
-            finding = Finding(test=test)
+            finding = Finding(
+                title=row["Title"],
+                description=row["Description"],
+                date=parse(row["Date"]).date(),
+                severity=self.get_severity(row["Severity"]),
+                duplicate=self._convert_bool(
+                    row.get("Duplicate", "FALSE")
+                ),  # bool False by default
+                nb_occurences=1,
+            )
+            # manage active
+            if "Active" in row:
+                finding.active = self._convert_bool(row.get("Active"))
+            # manage mitigation
+            if "Mitigation" in row:
+                finding.mitigation = row["Mitigation"]
+            # manage impact
+            if "Impact" in row:
+                finding.impact = row["Impact"]
+            # manage impact
+            if "References" in row:
+                finding.references = row["References"]
+            # manage verified
+            if "Verified" in row:
+                finding.verified = self._convert_bool(row.get("Verified"))
+            # manage false positives
+            if "FalsePositive" in row:
+                finding.false_p = self._convert_bool(row.get("FalsePositive"))
+            # manage CVE
+            if "CVE" in row and [row["CVE"]]:
+                finding.unsaved_vulnerability_ids = [row["CVE"]]
+            # manage Vulnerability Id
+            if "Vulnerability Id" in row and row["Vulnerability Id"]:
+                if finding.unsaved_vulnerability_ids:
+                    finding.unsaved_vulnerability_ids.append(
+                        row["Vulnerability Id"]
+                    )
+                else:
+                    finding.unsaved_vulnerability_ids = [
+                        row["Vulnerability Id"]
+                    ]
+            # manage CWE
+            if "CweId" in row:
+                finding.cwe = int(row["CweId"])
 
-            if row_number == 0:
-                self.read_column_names(row)
-                row_number += 1
-                continue
+            if "CVSSV3" in row:
+                cvss_objects = cvss_parser.parse_cvss_from_text(row["CVSSV3"])
+                if len(cvss_objects) > 0:
+                    finding.cvssv3 = cvss_objects[0].clean_vector()
 
-            column_number = 0
-            for column in row:
-                self.chain.process_column(self.column_names[column_number], column, finding)
+            # manage endpoints
+            if "Url" in row:
+                finding.unsaved_endpoints = [
+                    Endpoint.from_uri(row["Url"])
+                    if "://" in row["Url"]
+                    else Endpoint.from_uri("//" + row["Url"])
+                ]
 
-                column_number += 1
+            # manage internal de-duplication
+            key = hashlib.sha256(
+                f"{finding.severity}|{finding.title}|{finding.description}".encode("utf-8")
+            ).hexdigest()
+            if key in dupes:
+                find = dupes[key]
+                find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                if find.unsaved_vulnerability_ids:
+                    find.unsaved_vulnerability_ids.extend(
+                        finding.unsaved_vulnerability_ids
+                    )
+                else:
+                    find.unsaved_vulnerability_ids = (
+                        finding.unsaved_vulnerability_ids
+                    )
+                find.nb_occurences += 1
+            else:
+                dupes[key] = finding
 
-            if not self.active:
-                finding.active = False
-            if not self.verified:
-                finding.verified = False
-            if finding is not None:
-                key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode("utf-8")).hexdigest()
+        return list(dupes.values())
 
-                if key not in self.dupes:
-                    self.dupes[key] = finding
+    def _convert_bool(self, val):
+        return val.lower()[0:1] == "t"  # bool False by default
 
-            row_number += 1
-
-        self.items = list(self.dupes.values())
+    def get_severity(self, input):
+        if input in ["Info", "Low", "Medium", "High", "Critical"]:
+            return input
+        else:
+            return "Info"

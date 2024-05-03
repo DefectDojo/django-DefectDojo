@@ -1,49 +1,158 @@
 import json
+
 from dojo.models import Finding
-from dojo.tools.semgrep.models import SemgrepJSONResult
 
 
-class SemgrepJSONParser(object):
+class SemgrepParser(object):
+    def get_scan_types(self):
+        return ["Semgrep JSON Report"]
 
-    def __init__(self, filehandle, test):
-        tree = self.parse_json(filehandle)
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
 
-        self.items = []
-        if tree:
-            results = tree.get('results')
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Semgrep output (--json)"
 
-            if not results:
-                return
+    def get_findings(self, filename, test):
+        data = json.load(filename)
 
-            for item in results:
-                title = item['check_id']
-                semgrep_result = SemgrepJSONResult(item['extra'], item['path'], item['start'], item['end'])
+        dupes = dict()
 
-                findingItem = Finding(
-                    title=semgrep_result.title,
-                    severity=semgrep_result.severity,
-                    numerical_severity=Finding.get_numerical_severity(semgrep_result.severity),
-                    description=semgrep_result.message,
-                    mitigation='N/A',
-                    file_path=item['path'],
-                    cwe=semgrep_result.cwe,
-                    line=semgrep_result.start,
-                    url='N/A',
-                    impact='N/A',
+        if "results" in data:
+            for item in data.get("results", []):
+                finding = Finding(
+                    test=test,
+                    title=item.get("check_id"),
+                    severity=self.convert_severity(item["extra"]["severity"]),
+                    description=self.get_description(item),
+                    file_path=item["path"],
+                    line=item["start"]["line"],
                     static_finding=True,
-                    test=test
+                    dynamic_finding=False,
+                    vuln_id_from_tool=item["check_id"],
+                    nb_occurences=1,
                 )
-                self.items.append(findingItem)
 
-    def parse_json(self, filehandle):
-        try:
-            data = filehandle.read()
-        except:
-            return None
+                # fingerprint detection
+                unique_id_from_tool = item.get("extra", {}).get("fingerprint")
+                if unique_id_from_tool:
+                    finding.unique_id_from_tool = unique_id_from_tool
 
-        try:
-            tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
+                # manage CWE
+                if "cwe" in item["extra"]["metadata"]:
+                    if isinstance(item["extra"]["metadata"].get("cwe"), list):
+                        finding.cwe = int(
+                            item["extra"]["metadata"]
+                            .get("cwe")[0]
+                            .partition(":")[0]
+                            .partition("-")[2]
+                        )
+                    else:
+                        finding.cwe = int(
+                            item["extra"]["metadata"]
+                            .get("cwe")
+                            .partition(":")[0]
+                            .partition("-")[2]
+                        )
 
-        return tree
+                # manage references from metadata
+                if "references" in item["extra"]["metadata"]:
+                    finding.references = "\n".join(
+                        item["extra"]["metadata"]["references"]
+                    )
+
+                # manage mitigation from metadata
+                if "fix" in item["extra"]:
+                    finding.mitigation = item["extra"]["fix"]
+                elif "fix_regex" in item["extra"]:
+                    finding.mitigation = "\n".join(
+                        [
+                            "**You can automaticaly apply this regex:**",
+                            "\n```\n",
+                            json.dumps(item["extra"]["fix_regex"]),
+                            "\n```\n",
+                        ]
+                    )
+
+                dupe_key = finding.title + finding.file_path + str(finding.line)
+
+                if dupe_key in dupes:
+                    find = dupes[dupe_key]
+                    find.nb_occurences += 1
+                else:
+                    dupes[dupe_key] = finding
+
+        elif "vulns" in data:
+            for item in data.get("vulns", []):
+                finding = Finding(
+                    test=test,
+                    title=item.get("title"),
+                    severity=self.convert_severity(item["advisory"]["severity"]),
+                    description=item.get("advisory", {}).get("description"),
+                    file_path=item["dependencyFileLocation"]["path"],
+                    line=item["dependencyFileLocation"]["startLine"],
+                    static_finding=True,
+                    dynamic_finding=False,
+                    vuln_id_from_tool=item["repositoryId"],
+                    nb_occurences=1,
+                )
+
+                # fingerprint detection
+                unique_id_from_tool = item.get("extra", {}).get("fingerprint")
+                if unique_id_from_tool:
+                    finding.unique_id_from_tool = unique_id_from_tool
+
+                # manage CWE
+                if "cweIds" in item["advisory"]["references"]:
+                    if isinstance(item["advisory"]["references"].get("cweIds"), list):
+                        finding.cwe = int(
+                            item["advisory"]["references"]
+                            .get("cweIds")[0]
+                            .partition(":")[0]
+                            .partition("-")[2]
+                        )
+                    else:
+                        finding.cwe = int(
+                            item["advisory"]["references"]
+                            .get("cweIds")
+                            .partition(":")[0]
+                            .partition("-")[2]
+                        )
+
+                dupe_key = finding.title + finding.file_path + str(finding.line)
+
+                if dupe_key in dupes:
+                    find = dupes[dupe_key]
+                    find.nb_occurences += 1
+                else:
+                    dupes[dupe_key] = finding
+
+        return list(dupes.values())
+
+    def convert_severity(self, val):
+        if "CRITICAL" == val.upper():
+            return "Critical"
+        elif "WARNING" == val.upper():
+            return "Medium"
+        elif "ERROR" == val.upper() or "HIGH" == val.upper():
+            return "High"
+        elif "INFO" == val.upper():
+            return "Info"
+        else:
+            raise ValueError(f"Unknown value for severity: {val}")
+
+    def get_description(self, item):
+        description = ""
+
+        message = item["extra"]["message"]
+        description += "**Result message:** {}\n".format(message)
+
+        snippet = item["extra"].get("lines")
+        if snippet is not None:
+            if "<![" in snippet:
+                snippet = snippet.replace("<![", "<! [")
+                description += "**Snippet:** ***Caution:*** Please remove the space between `!` and `[` to have the real value due to a workaround to circumvent [#8435](https://github.com/DefectDojo/django-DefectDojo/issues/8435).\n```{}```\n".format(snippet)
+            else:
+                description += "**Snippet:**\n```{}```\n".format(snippet)
+
+        return description

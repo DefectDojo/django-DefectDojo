@@ -30,16 +30,6 @@ def _process_field_attributes(field, attr, process):
 
 
 @register.filter
-def subtract(value, arg):
-    return value - arg
-
-
-@register.filter
-def modulo(num, val):
-    return num % val
-
-
-@register.filter
 def addcss(field, attr):
     def process(widget, attrs, attribute, value):
         if attrs.get(attribute):
@@ -96,38 +86,3 @@ def nice_title(title):
         return ret
     except:
         return title
-
-
-@register.filter
-def pad_zeroes(num):
-    return str(num).zfill(3)
-
-
-@register.filter
-def hash(h, key):
-    return h[key]
-
-
-@register.filter
-def getZero(h, key):
-    return h[key][0]
-
-
-@register.filter
-def getOne(h, key):
-    return h[key][1]
-
-
-@register.filter
-def getTwo(h, key):
-    return h[key][2]
-
-
-@register.filter
-def getThree(h, key):
-    return h[key][3]
-
-
-@register.filter
-def getFour(h, key):
-    return h[key][4]

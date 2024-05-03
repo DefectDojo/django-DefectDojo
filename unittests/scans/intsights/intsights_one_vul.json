@@ -1,0 +1,44 @@
+{
+  "Alerts": [
+    {
+      "_id": "5c80dbf83b4a3900078b6be6",
+      "Details": {
+        "Source": {
+          "URL": "https://www.initech.com/websec/?id=DSHv46Jg",
+          "Date": "2019-03-07T08:52:08.917Z",
+          "Type": "Other",
+          "NetworkType": "ClearWeb"
+        },
+        "Images": [
+          "5c80dbfa3963a40007e01e8d",
+          "5c80dbfb3b4a3900078b6bea",
+          "5c80dbfc4626bd0007bd64db"
+        ],
+        "Title": "HTTP headers weakness in initech.com web server",
+        "Tags": [],
+        "Type": "ExploitableData",
+        "Severity": "Critical",
+        "SubType": "VulnerabilityInTechnologyInUse",
+        "Description": "X-XSS-PROTECTION and CONTENT-SECURITY-POLICY headers were not sent by the server, which makes it vulnerable for various attack vectors"
+      },
+      "Assignees": [
+        "5c3c8f64903dfd0006ge5e61"
+      ],
+      "FoundDate": "2019-03-08T13:03:30.655Z",
+      "Assets": [
+        {
+          "Type": "Domains",
+          "Value": "initech.com"
+        }
+      ],
+      "TakedownStatus": "NotSent",
+      "IsFlagged": false,
+      "UpdateDate": "2019-03-08T13:03:30.655Z",
+      "RelatedIocs": [],
+      "RelatedThreatIDs": [],
+      "Closed": {
+        "IsClosed": false
+      }
+    }
+  ]
+}

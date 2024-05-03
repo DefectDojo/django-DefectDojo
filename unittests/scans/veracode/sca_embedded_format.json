@@ -1,0 +1,618 @@
+{
+    "_embedded": {
+        "findings": [
+            {
+                "scan_type": "SCA",
+                "description": "spring-boot-autoconfigure is vulnerable to Denial Of Service (DoS). The vulnerability is applicable when the application has Spring MVC auto-configuration enabled and uses the Spring Boot welcome page, which can be either static or templated, and the application is deployed behind a proxy which caches the 404 responses. An attacker can cause the application to crash by submitting a request to the welcome page which the server is unable to properly respond to.",
+                "count": 1,
+                "context_type": "APPLICATION",
+                "context_guid": "zyx789-xyz987",
+                "violates_policy": true,
+                "finding_status": {
+                    "first_found_date": "2023-05-31T16:11:27.482Z",
+                    "status": "OPEN",
+                    "resolution": "UNRESOLVED",
+                    "new": false,
+                    "resolution_status": "NONE",
+                    "last_seen_date": "2023-07-17T00:29:40.651Z"
+                },
+                "finding_details": {
+                    "severity": 4,
+                    "cwe": {
+                        "id": 400,
+                        "name": "Uncontrolled Resource Consumption",
+                        "href": "https://api.veracode.com/appsec/v1/cwes/400"
+                    },
+                    "component_id": "efg456-gfe654",
+                    "licenses": [
+                        {
+                            "license_id": "apache-2.0",
+                            "risk_rating": "2"
+                        }
+                    ],
+                    "metadata": {
+                        "sca_scan_mode": "UPLOAD",
+                        "sca_dep_mode": "UNKNOWN"
+                    },
+                    "cve": {
+                        "name": "CVE-2023-20883",
+                        "cvss": 7.1,
+                        "href": "http://nvd.nist.gov/vuln/detail/CVE-2023-20883",
+                        "severity": "High",
+                        "vector": "AV:N/AC:M/Au:N/C:N/I:N/A:C",
+                        "cvss3": {
+                            "score": 7.5,
+                            "severity": "High",
+                            "vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+                        }
+                    },
+                    "product_id": "abc123-bca321",
+                    "component_filename": "spring-boot-autoconfigure-2.5.14.jar",
+                    "language": "JAVA",
+                    "component_path": [
+                        {
+                            "path": "path/to/alpha/spring-boot-autoconfigure-2.5.14.jar"
+                        },
+                        {
+                            "path": "path/to/beta/spring-boot-autoconfigure-2.5.14.jar"
+                        },
+                        {
+                            "path": "path/to/charlie/spring-boot-autoconfigure-2.5.14.jar"
+                        },
+                        {
+                            "path": "path/to/delta/spring-boot-autoconfigure-2.5.14.jar"
+                        }
+                    ],
+                    "version": "2.5.14"
+                }
+            },
+            {
+                "scan_type": "SCA",
+                "description": "Okio is vulnerable to Denial of Service (DoS). The vulnerability arises due to improper handling of the `xlen` parameter in the `consumeHeader` function of `GzipSource.kt`. When the parsing value exceeds `0x7fff` in a maliciously crafted gzip buffer, an attacker can crash the application.",
+                "count": 1,
+                "context_type": "APPLICATION",
+                "context_guid": "zyx789-xyz987",
+                "violates_policy": true,
+                "finding_status": {
+                    "first_found_date": "2023-07-14T16:50:18.629Z",
+                    "status": "OPEN",
+                    "resolution": "UNRESOLVED",
+                    "new": false,
+                    "resolution_status": "NONE",
+                    "last_seen_date": "2023-07-17T00:29:40.651Z"
+                },
+                "finding_details": {
+                    "severity": 3,
+                    "component_id": "efg456-gfe654",
+                    "licenses": [
+                        {
+                            "license_id": "apache-2.0",
+                            "risk_rating": "2"
+                        }
+                    ],
+                    "metadata": {
+                        "sca_scan_mode": "UPLOAD",
+                        "sca_dep_mode": "UNKNOWN"
+                    },
+                    "cve": {
+                        "name": "CVE-2023-3635",
+                        "cvss": 5.4,
+                        "href": "http://nvd.nist.gov/vuln/detail/CVE-2023-3635",
+                        "severity": "Medium",
+                        "vector": "AV:N/AC:H/Au:N/C:N/I:N/A:C",
+                        "cvss3": {
+                            "score": 5.9,
+                            "severity": "Medium",
+                            "vector": "AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+                        }
+                    },
+                    "product_id": "abc123-bca321",
+                    "component_filename": "okio-2.8.0.jar",
+                    "language": "JAVA",
+                    "component_path": [
+                        {
+                            "path": "path/to/alpha/okio-2.8.0.jar"
+                        }
+                    ],
+                    "version": "2.8.0"
+                }
+            },
+            {
+                "scan_type": "SCA",
+                "description": "com.google.guava, guava is vulnerable to Information Disclosure. The vulnerability exits due to incorrect default file permissions in `FileBackedOutputStream`, which allow an attacker to access the temporary directory.",
+                "count": 1,
+                "context_type": "APPLICATION",
+                "context_guid": "zyx789-xyz987",
+                "violates_policy": true,
+                "finding_status": {
+                    "first_found_date": "2023-06-15T19:19:21.853Z",
+                    "status": "OPEN",
+                    "resolution": "UNRESOLVED",
+                    "new": false,
+                    "resolution_status": "NONE",
+                    "last_seen_date": "2023-07-17T00:29:40.651Z"
+                },
+                "finding_details": {
+                    "severity": 3,
+                    "cwe": {
+                        "id": 552,
+                        "name": "Files or Directories Accessible to External Parties",
+                        "href": "https://api.veracode.com/appsec/v1/cwes/552"
+                    },
+                    "component_id": "efg456-gfe654",
+                    "licenses": [
+                        {
+                            "license_id": "apache-2.0",
+                            "risk_rating": "2"
+                        }
+                    ],
+                    "metadata": {
+                        "sca_scan_mode": "UPLOAD",
+                        "sca_dep_mode": "UNKNOWN"
+                    },
+                    "cve": {
+                        "name": "CVE-2023-2976",
+                        "cvss": 5.2,
+                        "href": "http://nvd.nist.gov/vuln/detail/CVE-2023-2976",
+                        "severity": "Medium",
+                        "vector": "AV:L/AC:L/Au:S/C:C/I:P/A:N",
+                        "cvss3": {
+                            "score": 7.1,
+                            "severity": "High",
+                            "vector": "AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N"
+                        }
+                    },
+                    "product_id": "abc123-bca321",
+                    "component_filename": "guava-30.0-jre.jar",
+                    "language": "JAVA",
+                    "component_path": [
+                        {
+                            "path": "path/to/alpha/guava-30.0-jre.jar"
+                        },
+                        {
+                            "path": "path/to/beta/guava-30.0-jre.jar"
+                        },
+                        {
+                            "path": "path/to/charlie/guava-30.0-jre.jar"
+                        },
+                        {
+                            "path": "path/to/delta/guava-30.0-jre.jar"
+                        }
+                    ],
+                    "version": "30.0-jre"
+                }
+            },
+            {
+                "scan_type": "SCA",
+                "description": "semver is vulnerable to Regular Expression Denial Of Service (ReDoS) attacks. A malicious user is able to cause parsing slowdowns when untrusted user data is provided as a range via the function `parseRange` due to the usage of regex expression with inefficient time complexity.",
+                "count": 1,
+                "context_type": "APPLICATION",
+                "context_guid": "zyx789-xyz987",
+                "violates_policy": true,
+                "finding_status": {
+                    "first_found_date": "2023-06-29T21:07:28.570Z",
+                    "status": "CLOSED",
+                    "resolution": "UNRESOLVED",
+                    "new": false,
+                    "resolution_status": "NONE",
+                    "last_seen_date": "2023-07-17T00:29:40.651Z"
+                },
+                "finding_details": {
+                    "severity": 3,
+                    "cwe": {
+                        "id": 1333,
+                        "name": "Inefficient Regular Expression Complexity",
+                        "href": "https://api.veracode.com/appsec/v1/cwes/1333"
+                    },
+                    "component_id": "efg456-gfe654",
+                    "licenses": [
+                        {
+                            "license_id": "isc",
+                            "risk_rating": "2"
+                        }
+                    ],
+                    "metadata": {
+                        "sca_scan_mode": "UPLOAD",
+                        "sca_dep_mode": "UNKNOWN"
+                    },
+                    "cve": {
+                        "name": "CVE-2022-25883",
+                        "cvss": 5.0,
+                        "href": "http://nvd.nist.gov/vuln/detail/CVE-2022-25883",
+                        "severity": "Medium",
+                        "vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+                        "cvss3": {
+                            "score": 7.5,
+                            "severity": "High",
+                            "vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+                        }
+                    },
+                    "product_id": "abc123-bca321",
+                    "component_filename": "semver",
+                    "language": "JAVASCRIPT",
+                    "component_path": [
+                        {
+                            "path": "path/to/alpha/node_modules:semver"
+                        }
+                    ],
+                    "version": "5.7.1"
+                }
+            },
+            {
+                "scan_type": "SCA",
+                "description": "inflight is vulnerable to a Memory Leak. The vulnerability is caused by improper memory management due to a lack of resource freeing, which can result in Denial of Service conditions.",
+                "count": 1,
+                "context_type": "APPLICATION",
+                "context_guid": "zyx789-xyz987",
+                "violates_policy": true,
+                "finding_status": {
+                    "first_found_date": "2023-07-06T14:17:13.144Z",
+                    "status": "OPEN",
+                    "resolution": "UNRESOLVED",
+                    "new": false,
+                    "resolution_status": "NONE",
+                    "last_seen_date": "2023-07-17T00:29:40.651Z"
+                },
+                "finding_details": {
+                    "severity": 3,
+                    "component_id": "efg456-gfe654",
+                    "licenses": [
+                        {
+                            "license_id": "isc",
+                            "risk_rating": "2"
+                        }
+                    ],
+                    "metadata": {
+                        "sca_scan_mode": "UPLOAD",
+                        "sca_dep_mode": "UNKNOWN"
+                    },
+                    "cve": {
+                        "name": "SRCCLR-SID-41137",
+                        "cvss": 5.0,
+                        "href": "https://sca.analysiscenter.veracode.com/vulnerability-database/search#query=SRCCLR-SID-41137",
+                        "severity": "Medium",
+                        "vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+                        "cvss3": {
+                            "score": 7.5,
+                            "severity": "High",
+                            "vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+                        }
+                    },
+                    "product_id": "abc123-bca321",
+                    "component_filename": "inflight",
+                    "language": "JAVASCRIPT",
+                    "component_path": [
+                        {
+                            "path": "path/to/alpha/node_modules:inflight"
+                        }
+                    ],
+                    "version": "1.0.6"
+                }
+            },
+            {
+                "scan_type": "SCA",
+                "description": "org.bouncycastle is vulnerable to LDAP injection. The vulnerability exists because the `engineGetCRLs` function in `X509LDAPCertStoreSpi.java` does not properly validate the `X.509` certificates, allowing an attacker to insert malicious certificate's subject name with special characters such as `CN=Subject*)(objectclass=.` into an LDAP search filter without any escape mechanism.",
+                "count": 1,
+                "context_type": "APPLICATION",
+                "context_guid": "zyx789-xyz987",
+                "violates_policy": true,
+                "finding_status": {
+                    "first_found_date": "2023-07-06T16:10:34.656Z",
+                    "status": "OPEN",
+                    "resolution": "UNRESOLVED",
+                    "new": false,
+                    "resolution_status": "NONE",
+                    "last_seen_date": "2023-07-17T00:29:40.651Z"
+                },
+                "finding_details": {
+                    "severity": 3,
+                    "cwe": {
+                        "id": 295,
+                        "name": "Improper Certificate Validation",
+                        "href": "https://api.veracode.com/appsec/v1/cwes/295"
+                    },
+                    "component_id": "efg456-gfe654",
+                    "licenses": [
+                        {
+                            "license_id": "mit",
+                            "risk_rating": "2"
+                        }
+                    ],
+                    "metadata": {
+                        "sca_scan_mode": "UPLOAD",
+                        "sca_dep_mode": "UNKNOWN"
+                    },
+                    "cve": {
+                        "name": "CVE-2023-33201",
+                        "cvss": 4.6,
+                        "href": "http://nvd.nist.gov/vuln/detail/CVE-2023-33201",
+                        "severity": "Medium",
+                        "vector": "AV:L/AC:L/Au:S/C:C/I:N/A:N",
+                        "cvss3": {
+                            "score": 5.3,
+                            "severity": "Medium",
+                            "vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+                        }
+                    },
+                    "product_id": "abc123-bca321",
+                    "component_filename": "bcprov-ext-jdk15on-1.69.jar",
+                    "language": "JAVA",
+                    "component_path": [
+                        {
+                            "path": "path/to/alpha/bcprov-ext-jdk15on-1.69.jar"
+                        },
+                        {
+                            "path": "path/to/beta/bcprov-ext-jdk15on-1.69.jar"
+                        }
+                    ],
+                    "version": "1.69"
+                }
+            },
+            {
+                "scan_type": "SCA",
+                "description": "org.bouncycastle is vulnerable to LDAP injection. The vulnerability exists because the `engineGetCRLs` function in `X509LDAPCertStoreSpi.java` does not properly validate the `X.509` certificates, allowing an attacker to insert malicious certificate's subject name with special characters such as `CN=Subject*)(objectclass=.` into an LDAP search filter without any escape mechanism.",
+                "count": 1,
+                "context_type": "APPLICATION",
+                "context_guid": "zyx789-xyz987",
+                "violates_policy": true,
+                "finding_status": {
+                    "first_found_date": "2023-07-06T16:10:32.992Z",
+                    "status": "OPEN",
+                    "resolution": "UNRESOLVED",
+                    "new": false,
+                    "resolution_status": "NONE",
+                    "last_seen_date": "2023-07-17T00:29:40.651Z"
+                },
+                "finding_details": {
+                    "severity": 3,
+                    "cwe": {
+                        "id": 295,
+                        "name": "Improper Certificate Validation",
+                        "href": "https://api.veracode.com/appsec/v1/cwes/295"
+                    },
+                    "component_id": "efg456-gfe654",
+                    "licenses": [
+                        {
+                            "license_id": "mit",
+                            "risk_rating": "2"
+                        }
+                    ],
+                    "metadata": {
+                        "sca_scan_mode": "UPLOAD",
+                        "sca_dep_mode": "UNKNOWN"
+                    },
+                    "cve": {
+                        "name": "CVE-2023-33201",
+                        "cvss": 4.6,
+                        "href": "http://nvd.nist.gov/vuln/detail/CVE-2023-33201",
+                        "severity": "Medium",
+                        "vector": "AV:L/AC:L/Au:S/C:C/I:N/A:N",
+                        "cvss3": {
+                            "score": 5.3,
+                            "severity": "Medium",
+                            "vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+                        }
+                    },
+                    "product_id": "abc123-bca321",
+                    "component_filename": "bcprov-jdk15on-1.69.jar",
+                    "language": "JAVA",
+                    "component_path": [
+                        {
+                            "path": "path/to/alpha/bcprov-jdk15on-1.69.jar"
+                        },
+                        {
+                            "path": "path/to/beta/bcprov-jdk15on-1.69.jar"
+                        },
+                        {
+                            "path": "path/to/charlie/bcprov-jdk15on-1.69.jar"
+                        },
+                        {
+                            "path": "path/to/delta/bcprov-jdk15on-1.69.jar"
+                        }
+                    ],
+                    "version": "1.69"
+                }
+            },
+            {
+                "scan_type": "SCA",
+                "description": "org.bouncycastle is vulnerable to LDAP injection. The vulnerability exists because the `engineGetCRLs` function in `X509LDAPCertStoreSpi.java` does not properly validate the `X.509` certificates, allowing an attacker to insert malicious certificate's subject name with special characters such as `CN=Subject*)(objectclass=.` into an LDAP search filter without any escape mechanism.",
+                "count": 1,
+                "context_type": "APPLICATION",
+                "context_guid": "zyx789-xyz987",
+                "violates_policy": true,
+                "finding_status": {
+                    "first_found_date": "2023-07-06T16:10:32.943Z",
+                    "status": "CLOSED",
+                    "resolution": "UNRESOLVED",
+                    "new": false,
+                    "resolution_status": "NONE",
+                    "last_seen_date": "2023-07-17T00:29:40.651Z"
+                },
+                "finding_details": {
+                    "severity": 3,
+                    "cwe": {
+                        "id": 295,
+                        "name": "Improper Certificate Validation",
+                        "href": "https://api.veracode.com/appsec/v1/cwes/295"
+                    },
+                    "component_id": "efg456-gfe654",
+                    "licenses": [
+                        {
+                            "license_id": "mit",
+                            "risk_rating": "2"
+                        }
+                    ],
+                    "metadata": {
+                        "sca_scan_mode": "UPLOAD",
+                        "sca_dep_mode": "UNKNOWN"
+                    },
+                    "cve": {
+                        "name": "CVE-2023-33201",
+                        "cvss": 4.6,
+                        "href": "http://nvd.nist.gov/vuln/detail/CVE-2023-33201",
+                        "severity": "Medium",
+                        "vector": "AV:L/AC:L/Au:S/C:C/I:N/A:N",
+                        "cvss3": {
+                            "score": 5.3,
+                            "severity": "Medium",
+                            "vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+                        }
+                    },
+                    "product_id": "abc123-bca321",
+                    "component_filename": "bcprov-jdk15to18-1.69.jar",
+                    "language": "JAVA",
+                    "component_path": [
+                        {
+                            "path": "path/to/alpha/bcprov-jdk15to18-1.69.jar"
+                        }
+                    ],
+                    "version": "1.69"
+                }
+            },
+            {
+                "scan_type": "SCA",
+                "description": "org.bouncycastle is vulnerable to LDAP injection. The vulnerability exists because the `engineGetCRLs` function in `X509LDAPCertStoreSpi.java` does not properly validate the `X.509` certificates, allowing an attacker to insert malicious certificate's subject name with special characters such as `CN=Subject*)(objectclass=.` into an LDAP search filter without any escape mechanism.",
+                "count": 1,
+                "context_type": "APPLICATION",
+                "context_guid": "zyx789-xyz987",
+                "violates_policy": true,
+                "finding_status": {
+                    "first_found_date": "2023-07-06T16:10:32.649Z",
+                    "status": "CLOSED",
+                    "resolution": "UNRESOLVED",
+                    "new": false,
+                    "resolution_status": "NONE",
+                    "last_seen_date": "2023-07-17T00:29:40.651Z"
+                },
+                "finding_details": {
+                    "severity": 3,
+                    "cwe": {
+                        "id": 295,
+                        "name": "Improper Certificate Validation",
+                        "href": "https://api.veracode.com/appsec/v1/cwes/295"
+                    },
+                    "component_id": "efg456-gfe654",
+                    "licenses": [
+                        {
+                            "license_id": "mit",
+                            "risk_rating": "2"
+                        }
+                    ],
+                    "metadata": {
+                        "sca_scan_mode": "UPLOAD",
+                        "sca_dep_mode": "UNKNOWN"
+                    },
+                    "cve": {
+                        "name": "CVE-2023-33201",
+                        "cvss": 4.6,
+                        "href": "http://nvd.nist.gov/vuln/detail/CVE-2023-33201",
+                        "severity": "Medium",
+                        "vector": "AV:L/AC:L/Au:S/C:C/I:N/A:N",
+                        "cvss3": {
+                            "score": 5.3,
+                            "severity": "Medium",
+                            "vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+                        }
+                    },
+                    "product_id": "abc123-bca321",
+                    "component_filename": "bcprov-ext-jdk15to18-1.69.jar",
+                    "language": "JAVA",
+                    "component_path": [
+                        {
+                            "path": "path/to/alpha/bcprov-ext-jdk15to18-1.69.jar"
+                        }
+                    ],
+                    "version": "1.69"
+                }
+            },
+            {
+                "scan_type": "SCA",
+                "description": "esapi is vulnerable to cross-site scripting. The vulnerability exists due to the lack of sanitization use in the `onsiteURL` regular expression of `antisamy-esapi.xml`, allowing an attacker to inject and execute malicious javascript",
+                "count": 1,
+                "context_type": "APPLICATION",
+                "context_guid": "zyx789-xyz987",
+                "violates_policy": false,
+                "finding_status": {
+                    "first_found_date": "2023-02-17T02:54:55.674Z",
+                    "status": "OPEN",
+                    "resolution": "POTENTIAL_FALSE_POSITIVE",
+                    "new": false,
+                    "resolution_status": "APPROVED",
+                    "last_seen_date": "2023-07-17T00:29:40.651Z"
+                },
+                "finding_details": {
+                    "severity": 3,
+                    "cwe": {
+                        "id": 79,
+                        "name": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+                        "href": "https://api.veracode.com/appsec/v1/cwes/79"
+                    },
+                    "component_id": "efg456-gfe654",
+                    "licenses": [
+                        {
+                            "license_id": "bsd-3-clause",
+                            "risk_rating": "2"
+                        },
+                        {
+                            "license_id": "cc-by-sa-3.0",
+                            "risk_rating": "4"
+                        }
+                    ],
+                    "metadata": {
+                        "sca_scan_mode": "UPLOAD",
+                        "sca_dep_mode": "UNKNOWN"
+                    },
+                    "cve": {
+                        "name": "CVE-2022-24891",
+                        "cvss": 4.3,
+                        "href": "http://nvd.nist.gov/vuln/detail/CVE-2022-24891",
+                        "severity": "Medium",
+                        "vector": "AV:N/AC:M/Au:N/C:N/I:P/A:N",
+                        "cvss3": {
+                            "score": 6.1,
+                            "severity": "Medium",
+                            "vector": "AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N"
+                        }
+                    },
+                    "product_id": "abc123-bca321",
+                    "component_filename": "esapi-2.2.0.0.jar",
+                    "language": "JAVA",
+                    "component_path": [
+                        {
+                            "path": "path/to/alpha//esapi-2.2.0.0.jar"
+                        }
+                    ],
+                    "version": "2.2.0.0"
+                }
+            }
+        ]
+    },
+    "_links": {
+        "first": {
+            "href": "link"
+        },
+        "self": {
+            "href": "link",
+            "templated": true
+        },
+        "next": {
+            "href": "link"
+        },
+        "last": {
+            "href": "link"
+        },
+        "application": {
+            "href": "link"
+        },
+        "non-sca": {
+            "href": "link",
+            "templated": true
+        }
+    },
+    "page": {
+        "size": 5,
+        "total_elements": 10,
+        "total_pages": 2,
+        "number": 0
+    }
+}

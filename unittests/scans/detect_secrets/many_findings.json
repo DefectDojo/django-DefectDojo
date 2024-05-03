@@ -1,0 +1,137 @@
+{
+  "version": "1.0.3",
+  "plugins_used": [
+    {
+      "name": "ArtifactoryDetector"
+    },
+    {
+      "name": "AWSKeyDetector"
+    },
+    {
+      "name": "AzureStorageKeyDetector"
+    },
+    {
+      "name": "Base64HighEntropyString",
+      "limit": 4.5
+    },
+    {
+      "name": "BasicAuthDetector"
+    },
+    {
+      "name": "CloudantDetector"
+    },
+    {
+      "name": "HexHighEntropyString",
+      "limit": 3.0
+    },
+    {
+      "name": "IbmCloudIamDetector"
+    },
+    {
+      "name": "IbmCosHmacDetector"
+    },
+    {
+      "name": "JwtTokenDetector"
+    },
+    {
+      "name": "KeywordDetector",
+      "keyword_exclude": ""
+    },
+    {
+      "name": "MailchimpDetector"
+    },
+    {
+      "name": "NpmDetector"
+    },
+    {
+      "name": "PrivateKeyDetector"
+    },
+    {
+      "name": "SlackDetector"
+    },
+    {
+      "name": "SoftlayerDetector"
+    },
+    {
+      "name": "SquareOAuthDetector"
+    },
+    {
+      "name": "StripeDetector"
+    },
+    {
+      "name": "TwilioKeyDetector"
+    }
+  ],
+  "filters_used": [
+    {
+      "path": "detect_secrets.filters.allowlist.is_line_allowlisted"
+    },
+    {
+      "path": "detect_secrets.filters.common.is_ignored_due_to_verification_policies",
+      "min_level": 2
+    },
+    {
+      "path": "detect_secrets.filters.heuristic.is_indirect_reference"
+    },
+    {
+      "path": "detect_secrets.filters.heuristic.is_likely_id_string"
+    },
+    {
+      "path": "detect_secrets.filters.heuristic.is_potential_uuid"
+    },
+    {
+      "path": "detect_secrets.filters.heuristic.is_prefixed_with_dollar_sign"
+    },
+    {
+      "path": "detect_secrets.filters.heuristic.is_sequential_string"
+    },
+    {
+      "path": "detect_secrets.filters.heuristic.is_templated_secret"
+    },
+    {
+      "path": "detect_secrets.filters.regex.should_exclude_file",
+      "pattern": [
+        "example/go.sum"
+      ]
+    }
+  ],
+  "results": {
+    "modules_images": [
+      {
+        "type": "Secret Keyword",
+        "filename": "modules_images",
+        "hashed_secret": "bd564db5d5cc358eb0e3523d3e03041739f230d5",
+        "is_verified": false,
+        "line_number": 151
+      },
+      {
+        "type": "Secret Keyword",
+        "filename": "modules_images",
+        "hashed_secret": "535850f35566365fddf9eb01a0d36962c0ffed8c",
+        "is_verified": false,
+        "line_number": 156,
+        "is_secret": true
+      }
+    ],
+    "example/pkg/docker_registry_watcher/docker_config.go": [
+      {
+        "type": "Secret Keyword",
+        "filename": "example/pkg/docker_registry_watcher/docker_config.go",
+        "hashed_secret": "0f7a136b462b257b9996c246e2e50cbd629e7928",
+        "is_verified": false,
+        "line_number": 109
+      }
+    ],
+    "example/pkg/docker_registry_watcher/docker_registry_watcher.go": [
+      {
+        "type": "Secret Keyword",
+        "filename": "example/pkg/docker_registry_watcher/docker_registry_watcher.go",
+        "hashed_secret": "b732fb611fd46a38e8667f9972e0cde777fbe37f",
+        "is_verified": false,
+        "line_number": 112,
+        "is_secret": false
+      }
+    ]
+  },
+  "generated_at": "2021-05-19T10:40:18Z"
+}

@@ -1,0 +1,55 @@
+{
+  "url": "https://www.meterian.com/projects/?pid=a4f21aff-0777-4957-9860-d98fc7757f5e&branch=head&mode=eli",
+  "timestamp": "2021-06-02 10:40:05",
+  "scores": {
+    "stability": "100",
+    "security": "100",
+    "licensing": "100"
+  },
+  "reports": {
+    "security": {
+      "score": 100,
+      "reports": [
+        {
+          "language": "nodejs",
+          "reports": []
+        }
+      ]
+    },
+    "stability": {
+      "reports": [
+        {
+          "language": "nodejs",
+          "versions": []
+        }
+      ]
+    },
+    "licensing": {
+      "reports": [
+        {
+          "language": "nodejs",
+          "results": [
+            {
+              "name": "big-integer",
+              "version": "1.6.48",
+              "warnings": [],
+              "violations": [],
+              "licenses": [
+                {
+                  "id": "Unlicense",
+                  "name": "The Unlicense",
+                  "uri": "https://spdx.org/licenses/Unlicense.html",
+                  "wildcard": false
+                }
+              ]
+            }
+          ],
+          "warningsCount": 0,
+          "violationsCount": 0
+        }
+      ],
+      "warningsCount": 0,
+      "violationsCount": 0
+    }
+  }
+}

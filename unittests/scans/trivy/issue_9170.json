@@ -1,0 +1,3691 @@
+{
+  "ClusterName": "minikube",
+  "Resources": [
+    {
+      "Namespace": "default",
+      "Kind": "Service",
+      "Name": "kubernetes",
+      "Metadata": {
+        "ImageConfig": {
+          "architecture": "",
+          "created": "0001-01-01T00:00:00Z",
+          "os": "",
+          "rootfs": {
+            "type": "",
+            "diff_ids": null
+          },
+          "config": {}
+        }
+      },
+      "Results": [
+        {
+          "Target": "Service/kubernetes",
+          "Class": "config",
+          "Type": "kubernetes",
+          "MisconfSummary": {
+            "Successes": 151,
+            "Failures": 1,
+            "Exceptions": 0
+          },
+          "Misconfigurations": [
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV116",
+              "AVDID": "AVD-KSV-0116",
+              "Title": "Runs with a root primary or supplementary GID",
+              "Description": "According to pod security standard 'Non-root groups', containers should be forbidden from running with a root primary or supplementary GID.",
+              "Message": "service kubernetes in default namespace should set spec.securityContext.runAsGroup, spec.securityContext.supplementalGroups[*] and spec.securityContext.fsGroup to integer greater than 0",
+              "Namespace": "builtin.kubernetes.KSV116",
+              "Query": "data.builtin.kubernetes.KSV116.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsGroup' to a non-zero integer or leave undefined.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv116",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-runasuser/",
+                "https://avd.aquasec.com/misconfig/ksv116"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "Code": {
+                  "Lines": null
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Namespace": "default",
+      "Kind": "Service",
+      "Name": "httpbin",
+      "Metadata": {
+        "ImageConfig": {
+          "architecture": "",
+          "created": "0001-01-01T00:00:00Z",
+          "os": "",
+          "rootfs": {
+            "type": "",
+            "diff_ids": null
+          },
+          "config": {}
+        }
+      },
+      "Results": [
+        {
+          "Target": "Service/httpbin",
+          "Class": "config",
+          "Type": "kubernetes",
+          "MisconfSummary": {
+            "Successes": 151,
+            "Failures": 1,
+            "Exceptions": 0
+          },
+          "Misconfigurations": [
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV116",
+              "AVDID": "AVD-KSV-0116",
+              "Title": "Runs with a root primary or supplementary GID",
+              "Description": "According to pod security standard 'Non-root groups', containers should be forbidden from running with a root primary or supplementary GID.",
+              "Message": "service httpbin in default namespace should set spec.securityContext.runAsGroup, spec.securityContext.supplementalGroups[*] and spec.securityContext.fsGroup to integer greater than 0",
+              "Namespace": "builtin.kubernetes.KSV116",
+              "Query": "data.builtin.kubernetes.KSV116.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsGroup' to a non-zero integer or leave undefined.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv116",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-runasuser/",
+                "https://avd.aquasec.com/misconfig/ksv116"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "Code": {
+                  "Lines": null
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Namespace": "default",
+      "Kind": "Service",
+      "Name": "vault-agent-injector-svc",
+      "Metadata": {
+        "ImageConfig": {
+          "architecture": "",
+          "created": "0001-01-01T00:00:00Z",
+          "os": "",
+          "rootfs": {
+            "type": "",
+            "diff_ids": null
+          },
+          "config": {}
+        }
+      },
+      "Results": [
+        {
+          "Target": "Service/vault-agent-injector-svc",
+          "Class": "config",
+          "Type": "kubernetes",
+          "MisconfSummary": {
+            "Successes": 151,
+            "Failures": 1,
+            "Exceptions": 0
+          },
+          "Misconfigurations": [
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV116",
+              "AVDID": "AVD-KSV-0116",
+              "Title": "Runs with a root primary or supplementary GID",
+              "Description": "According to pod security standard 'Non-root groups', containers should be forbidden from running with a root primary or supplementary GID.",
+              "Message": "service vault-agent-injector-svc in default namespace should set spec.securityContext.runAsGroup, spec.securityContext.supplementalGroups[*] and spec.securityContext.fsGroup to integer greater than 0",
+              "Namespace": "builtin.kubernetes.KSV116",
+              "Query": "data.builtin.kubernetes.KSV116.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsGroup' to a non-zero integer or leave undefined.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv116",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-runasuser/",
+                "https://avd.aquasec.com/misconfig/ksv116"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "Code": {
+                  "Lines": null
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Namespace": "default",
+      "Kind": "Service",
+      "Name": "vault",
+      "Metadata": {
+        "ImageConfig": {
+          "architecture": "",
+          "created": "0001-01-01T00:00:00Z",
+          "os": "",
+          "rootfs": {
+            "type": "",
+            "diff_ids": null
+          },
+          "config": {}
+        }
+      },
+      "Results": [
+        {
+          "Target": "Service/vault",
+          "Class": "config",
+          "Type": "kubernetes",
+          "MisconfSummary": {
+            "Successes": 151,
+            "Failures": 1,
+            "Exceptions": 0
+          },
+          "Misconfigurations": [
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV116",
+              "AVDID": "AVD-KSV-0116",
+              "Title": "Runs with a root primary or supplementary GID",
+              "Description": "According to pod security standard 'Non-root groups', containers should be forbidden from running with a root primary or supplementary GID.",
+              "Message": "service vault in default namespace should set spec.securityContext.runAsGroup, spec.securityContext.supplementalGroups[*] and spec.securityContext.fsGroup to integer greater than 0",
+              "Namespace": "builtin.kubernetes.KSV116",
+              "Query": "data.builtin.kubernetes.KSV116.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsGroup' to a non-zero integer or leave undefined.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv116",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-runasuser/",
+                "https://avd.aquasec.com/misconfig/ksv116"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "Code": {
+                  "Lines": null
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Namespace": "default",
+      "Kind": "ServiceAccount",
+      "Name": "caas-scanners",
+      "Metadata": {
+        "ImageConfig": {
+          "architecture": "",
+          "created": "0001-01-01T00:00:00Z",
+          "os": "",
+          "rootfs": {
+            "type": "",
+            "diff_ids": null
+          },
+          "config": {}
+        }
+      },
+      "Results": [
+        {
+          "Target": "ServiceAccount/caas-scanners",
+          "Class": "config",
+          "Type": "kubernetes",
+          "MisconfSummary": {
+            "Successes": 151,
+            "Failures": 1,
+            "Exceptions": 0
+          },
+          "Misconfigurations": [
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV116",
+              "AVDID": "AVD-KSV-0116",
+              "Title": "Runs with a root primary or supplementary GID",
+              "Description": "According to pod security standard 'Non-root groups', containers should be forbidden from running with a root primary or supplementary GID.",
+              "Message": "serviceaccount caas-scanners in default namespace should set spec.securityContext.runAsGroup, spec.securityContext.supplementalGroups[*] and spec.securityContext.fsGroup to integer greater than 0",
+              "Namespace": "builtin.kubernetes.KSV116",
+              "Query": "data.builtin.kubernetes.KSV116.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsGroup' to a non-zero integer or leave undefined.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv116",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-runasuser/",
+                "https://avd.aquasec.com/misconfig/ksv116"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "Code": {
+                  "Lines": null
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Namespace": "default",
+      "Kind": "Service",
+      "Name": "vault-internal",
+      "Metadata": {
+        "ImageConfig": {
+          "architecture": "",
+          "created": "0001-01-01T00:00:00Z",
+          "os": "",
+          "rootfs": {
+            "type": "",
+            "diff_ids": null
+          },
+          "config": {}
+        }
+      },
+      "Results": [
+        {
+          "Target": "Service/vault-internal",
+          "Class": "config",
+          "Type": "kubernetes",
+          "MisconfSummary": {
+            "Successes": 151,
+            "Failures": 1,
+            "Exceptions": 0
+          },
+          "Misconfigurations": [
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV116",
+              "AVDID": "AVD-KSV-0116",
+              "Title": "Runs with a root primary or supplementary GID",
+              "Description": "According to pod security standard 'Non-root groups', containers should be forbidden from running with a root primary or supplementary GID.",
+              "Message": "service vault-internal in default namespace should set spec.securityContext.runAsGroup, spec.securityContext.supplementalGroups[*] and spec.securityContext.fsGroup to integer greater than 0",
+              "Namespace": "builtin.kubernetes.KSV116",
+              "Query": "data.builtin.kubernetes.KSV116.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsGroup' to a non-zero integer or leave undefined.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv116",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-runasuser/",
+                "https://avd.aquasec.com/misconfig/ksv116"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "Code": {
+                  "Lines": null
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Namespace": "default",
+      "Kind": "ServiceAccount",
+      "Name": "default",
+      "Metadata": {
+        "ImageConfig": {
+          "architecture": "",
+          "created": "0001-01-01T00:00:00Z",
+          "os": "",
+          "rootfs": {
+            "type": "",
+            "diff_ids": null
+          },
+          "config": {}
+        }
+      },
+      "Results": [
+        {
+          "Target": "ServiceAccount/default",
+          "Class": "config",
+          "Type": "kubernetes",
+          "MisconfSummary": {
+            "Successes": 151,
+            "Failures": 1,
+            "Exceptions": 0
+          },
+          "Misconfigurations": [
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV116",
+              "AVDID": "AVD-KSV-0116",
+              "Title": "Runs with a root primary or supplementary GID",
+              "Description": "According to pod security standard 'Non-root groups', containers should be forbidden from running with a root primary or supplementary GID.",
+              "Message": "serviceaccount default in default namespace should set spec.securityContext.runAsGroup, spec.securityContext.supplementalGroups[*] and spec.securityContext.fsGroup to integer greater than 0",
+              "Namespace": "builtin.kubernetes.KSV116",
+              "Query": "data.builtin.kubernetes.KSV116.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsGroup' to a non-zero integer or leave undefined.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv116",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-runasuser/",
+                "https://avd.aquasec.com/misconfig/ksv116"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "Code": {
+                  "Lines": null
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Namespace": "default",
+      "Kind": "ServiceAccount",
+      "Name": "vault",
+      "Metadata": {
+        "ImageConfig": {
+          "architecture": "",
+          "created": "0001-01-01T00:00:00Z",
+          "os": "",
+          "rootfs": {
+            "type": "",
+            "diff_ids": null
+          },
+          "config": {}
+        }
+      },
+      "Results": [
+        {
+          "Target": "ServiceAccount/vault",
+          "Class": "config",
+          "Type": "kubernetes",
+          "MisconfSummary": {
+            "Successes": 151,
+            "Failures": 1,
+            "Exceptions": 0
+          },
+          "Misconfigurations": [
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV116",
+              "AVDID": "AVD-KSV-0116",
+              "Title": "Runs with a root primary or supplementary GID",
+              "Description": "According to pod security standard 'Non-root groups', containers should be forbidden from running with a root primary or supplementary GID.",
+              "Message": "serviceaccount vault in default namespace should set spec.securityContext.runAsGroup, spec.securityContext.supplementalGroups[*] and spec.securityContext.fsGroup to integer greater than 0",
+              "Namespace": "builtin.kubernetes.KSV116",
+              "Query": "data.builtin.kubernetes.KSV116.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsGroup' to a non-zero integer or leave undefined.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv116",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-runasuser/",
+                "https://avd.aquasec.com/misconfig/ksv116"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "Code": {
+                  "Lines": null
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Namespace": "default",
+      "Kind": "ServiceAccount",
+      "Name": "vault-agent-injector",
+      "Metadata": {
+        "ImageConfig": {
+          "architecture": "",
+          "created": "0001-01-01T00:00:00Z",
+          "os": "",
+          "rootfs": {
+            "type": "",
+            "diff_ids": null
+          },
+          "config": {}
+        }
+      },
+      "Results": [
+        {
+          "Target": "ServiceAccount/vault-agent-injector",
+          "Class": "config",
+          "Type": "kubernetes",
+          "MisconfSummary": {
+            "Successes": 151,
+            "Failures": 1,
+            "Exceptions": 0
+          },
+          "Misconfigurations": [
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV116",
+              "AVDID": "AVD-KSV-0116",
+              "Title": "Runs with a root primary or supplementary GID",
+              "Description": "According to pod security standard 'Non-root groups', containers should be forbidden from running with a root primary or supplementary GID.",
+              "Message": "serviceaccount vault-agent-injector in default namespace should set spec.securityContext.runAsGroup, spec.securityContext.supplementalGroups[*] and spec.securityContext.fsGroup to integer greater than 0",
+              "Namespace": "builtin.kubernetes.KSV116",
+              "Query": "data.builtin.kubernetes.KSV116.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsGroup' to a non-zero integer or leave undefined.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv116",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-runasuser/",
+                "https://avd.aquasec.com/misconfig/ksv116"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "Code": {
+                  "Lines": null
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Namespace": "default",
+      "Kind": "ConfigMap",
+      "Name": "kube-root-ca.crt",
+      "Metadata": {
+        "ImageConfig": {
+          "architecture": "",
+          "created": "0001-01-01T00:00:00Z",
+          "os": "",
+          "rootfs": {
+            "type": "",
+            "diff_ids": null
+          },
+          "config": {}
+        }
+      },
+      "Results": [
+        {
+          "Target": "ConfigMap/kube-root-ca.crt",
+          "Class": "config",
+          "Type": "kubernetes",
+          "MisconfSummary": {
+            "Successes": 151,
+            "Failures": 1,
+            "Exceptions": 0
+          },
+          "Misconfigurations": [
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV116",
+              "AVDID": "AVD-KSV-0116",
+              "Title": "Runs with a root primary or supplementary GID",
+              "Description": "According to pod security standard 'Non-root groups', containers should be forbidden from running with a root primary or supplementary GID.",
+              "Message": "configmap kube-root-ca.crt in default namespace should set spec.securityContext.runAsGroup, spec.securityContext.supplementalGroups[*] and spec.securityContext.fsGroup to integer greater than 0",
+              "Namespace": "builtin.kubernetes.KSV116",
+              "Query": "data.builtin.kubernetes.KSV116.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsGroup' to a non-zero integer or leave undefined.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv116",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-runasuser/",
+                "https://avd.aquasec.com/misconfig/ksv116"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "Code": {
+                  "Lines": null
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Namespace": "default",
+      "Kind": "ConfigMap",
+      "Name": "popeye-config",
+      "Metadata": {
+        "ImageConfig": {
+          "architecture": "",
+          "created": "0001-01-01T00:00:00Z",
+          "os": "",
+          "rootfs": {
+            "type": "",
+            "diff_ids": null
+          },
+          "config": {}
+        }
+      },
+      "Results": [
+        {
+          "Target": "ConfigMap/popeye-config",
+          "Class": "config",
+          "Type": "kubernetes",
+          "MisconfSummary": {
+            "Successes": 151,
+            "Failures": 1,
+            "Exceptions": 0
+          },
+          "Misconfigurations": [
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV116",
+              "AVDID": "AVD-KSV-0116",
+              "Title": "Runs with a root primary or supplementary GID",
+              "Description": "According to pod security standard 'Non-root groups', containers should be forbidden from running with a root primary or supplementary GID.",
+              "Message": "configmap popeye-config in default namespace should set spec.securityContext.runAsGroup, spec.securityContext.supplementalGroups[*] and spec.securityContext.fsGroup to integer greater than 0",
+              "Namespace": "builtin.kubernetes.KSV116",
+              "Query": "data.builtin.kubernetes.KSV116.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsGroup' to a non-zero integer or leave undefined.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv116",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-runasuser/",
+                "https://avd.aquasec.com/misconfig/ksv116"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "Code": {
+                  "Lines": null
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Namespace": "default",
+      "Kind": "Role",
+      "Name": "caas-scanners-role",
+      "Metadata": {
+        "ImageConfig": {
+          "architecture": "",
+          "created": "0001-01-01T00:00:00Z",
+          "os": "",
+          "rootfs": {
+            "type": "",
+            "diff_ids": null
+          },
+          "config": {}
+        }
+      },
+      "Results": [
+        {
+          "Target": "Deployment/httpbin",
+          "Class": "config",
+          "Type": "kubernetes",
+          "MisconfSummary": {
+            "Successes": 138,
+            "Failures": 14,
+            "Exceptions": 0
+          },
+          "Misconfigurations": [
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV001",
+              "AVDID": "AVD-KSV-0001",
+              "Title": "Can elevate its own privileges",
+              "Description": "A program inside the container can elevate its own privileges and run as root, which might give the program control over the container and node.",
+              "Message": "Container 'httpbin' of Deployment 'httpbin' should set 'securityContext.allowPrivilegeEscalation' to false",
+              "Namespace": "builtin.kubernetes.KSV001",
+              "Query": "data.builtin.kubernetes.KSV001.deny",
+              "Resolution": "Set 'set containers[].securityContext.allowPrivilegeEscalation' to 'false'.",
+              "Severity": "MEDIUM",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv001",
+              "References": [
+                "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+                "https://avd.aquasec.com/misconfig/ksv001"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 124,
+                "EndLine": 136,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 124,
+                      "Content": "                - image: kennethreitz/httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33mimage\u001b[0m: kennethreitz/httpbin",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 125,
+                      "Content": "                  imagePullPolicy: Always",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mimagePullPolicy\u001b[0m: Always",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 126,
+                      "Content": "                  name: httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mname\u001b[0m: httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 127,
+                      "Content": "                  ports:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mports\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 128,
+                      "Content": "                    - containerPort: 80",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mcontainerPort\u001b[0m: \u001b[38;5;37m80",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 129,
+                      "Content": "                      name: port-httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                      \u001b[38;5;33mname\u001b[0m: port-httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 130,
+                      "Content": "                      protocol: TCP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mprotocol\u001b[0m: TCP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 131,
+                      "Content": "                  resources:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mresources\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 132,
+                      "Content": "                    limits:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    \u001b[38;5;33mlimits\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 133,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV003",
+              "AVDID": "AVD-KSV-0003",
+              "Title": "Default capabilities: some containers do not drop all",
+              "Description": "The container should drop all default capabilities and add only those that are needed for its execution.",
+              "Message": "Container 'httpbin' of Deployment 'httpbin' should add 'ALL' to 'securityContext.capabilities.drop'",
+              "Namespace": "builtin.kubernetes.KSV003",
+              "Query": "data.builtin.kubernetes.KSV003.deny",
+              "Resolution": "Add 'ALL' to containers[].securityContext.capabilities.drop.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv003",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-capabilities-drop-index-all/",
+                "https://avd.aquasec.com/misconfig/ksv003"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 124,
+                "EndLine": 136,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 124,
+                      "Content": "                - image: kennethreitz/httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33mimage\u001b[0m: kennethreitz/httpbin",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 125,
+                      "Content": "                  imagePullPolicy: Always",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mimagePullPolicy\u001b[0m: Always",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 126,
+                      "Content": "                  name: httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mname\u001b[0m: httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 127,
+                      "Content": "                  ports:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mports\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 128,
+                      "Content": "                    - containerPort: 80",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mcontainerPort\u001b[0m: \u001b[38;5;37m80",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 129,
+                      "Content": "                      name: port-httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                      \u001b[38;5;33mname\u001b[0m: port-httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 130,
+                      "Content": "                      protocol: TCP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mprotocol\u001b[0m: TCP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 131,
+                      "Content": "                  resources:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mresources\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 132,
+                      "Content": "                    limits:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    \u001b[38;5;33mlimits\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 133,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV012",
+              "AVDID": "AVD-KSV-0012",
+              "Title": "Runs as root user",
+              "Description": "Force the running image to run as a non-root user to ensure least privileges.",
+              "Message": "Container 'httpbin' of Deployment 'httpbin' should set 'securityContext.runAsNonRoot' to true",
+              "Namespace": "builtin.kubernetes.KSV012",
+              "Query": "data.builtin.kubernetes.KSV012.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsNonRoot' to true.",
+              "Severity": "MEDIUM",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv012",
+              "References": [
+                "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+                "https://avd.aquasec.com/misconfig/ksv012"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 124,
+                "EndLine": 136,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 124,
+                      "Content": "                - image: kennethreitz/httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33mimage\u001b[0m: kennethreitz/httpbin",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 125,
+                      "Content": "                  imagePullPolicy: Always",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mimagePullPolicy\u001b[0m: Always",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 126,
+                      "Content": "                  name: httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mname\u001b[0m: httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 127,
+                      "Content": "                  ports:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mports\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 128,
+                      "Content": "                    - containerPort: 80",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mcontainerPort\u001b[0m: \u001b[38;5;37m80",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 129,
+                      "Content": "                      name: port-httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                      \u001b[38;5;33mname\u001b[0m: port-httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 130,
+                      "Content": "                      protocol: TCP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mprotocol\u001b[0m: TCP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 131,
+                      "Content": "                  resources:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mresources\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 132,
+                      "Content": "                    limits:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    \u001b[38;5;33mlimits\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 133,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV013",
+              "AVDID": "AVD-KSV-0013",
+              "Title": "Image tag \":latest\" used",
+              "Description": "It is best to avoid using the ':latest' image tag when deploying containers in production. Doing so makes it hard to track which version of the image is running, and hard to roll back the version.",
+              "Message": "Container 'httpbin' of Deployment 'httpbin' should specify an image tag",
+              "Namespace": "builtin.kubernetes.KSV013",
+              "Query": "data.builtin.kubernetes.KSV013.deny",
+              "Resolution": "Use a specific container image tag that is not 'latest'.",
+              "Severity": "MEDIUM",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv013",
+              "References": [
+                "https://kubernetes.io/docs/concepts/configuration/overview/#container-images",
+                "https://avd.aquasec.com/misconfig/ksv013"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 124,
+                "EndLine": 136,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 124,
+                      "Content": "                - image: kennethreitz/httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33mimage\u001b[0m: kennethreitz/httpbin",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 125,
+                      "Content": "                  imagePullPolicy: Always",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mimagePullPolicy\u001b[0m: Always",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 126,
+                      "Content": "                  name: httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mname\u001b[0m: httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 127,
+                      "Content": "                  ports:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mports\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 128,
+                      "Content": "                    - containerPort: 80",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mcontainerPort\u001b[0m: \u001b[38;5;37m80",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 129,
+                      "Content": "                      name: port-httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                      \u001b[38;5;33mname\u001b[0m: port-httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 130,
+                      "Content": "                      protocol: TCP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mprotocol\u001b[0m: TCP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 131,
+                      "Content": "                  resources:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mresources\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 132,
+                      "Content": "                    limits:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    \u001b[38;5;33mlimits\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 133,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV014",
+              "AVDID": "AVD-KSV-0014",
+              "Title": "Root file system is not read-only",
+              "Description": "An immutable root file system prevents applications from writing to their local disk. This can limit intrusions, as attackers will not be able to tamper with the file system or write foreign executables to disk.",
+              "Message": "Container 'httpbin' of Deployment 'httpbin' should set 'securityContext.readOnlyRootFilesystem' to true",
+              "Namespace": "builtin.kubernetes.KSV014",
+              "Query": "data.builtin.kubernetes.KSV014.deny",
+              "Resolution": "Change 'containers[].securityContext.readOnlyRootFilesystem' to 'true'.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv014",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-readonlyrootfilesystem-true/",
+                "https://avd.aquasec.com/misconfig/ksv014"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 124,
+                "EndLine": 136,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 124,
+                      "Content": "                - image: kennethreitz/httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33mimage\u001b[0m: kennethreitz/httpbin",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 125,
+                      "Content": "                  imagePullPolicy: Always",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mimagePullPolicy\u001b[0m: Always",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 126,
+                      "Content": "                  name: httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mname\u001b[0m: httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 127,
+                      "Content": "                  ports:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mports\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 128,
+                      "Content": "                    - containerPort: 80",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mcontainerPort\u001b[0m: \u001b[38;5;37m80",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 129,
+                      "Content": "                      name: port-httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                      \u001b[38;5;33mname\u001b[0m: port-httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 130,
+                      "Content": "                      protocol: TCP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mprotocol\u001b[0m: TCP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 131,
+                      "Content": "                  resources:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mresources\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 132,
+                      "Content": "                    limits:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    \u001b[38;5;33mlimits\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 133,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV015",
+              "AVDID": "AVD-KSV-0015",
+              "Title": "CPU requests not specified",
+              "Description": "When containers have resource requests specified, the scheduler can make better decisions about which nodes to place pods on, and how to deal with resource contention.",
+              "Message": "Container 'httpbin' of Deployment 'httpbin' should set 'resources.requests.cpu'",
+              "Namespace": "builtin.kubernetes.KSV015",
+              "Query": "data.builtin.kubernetes.KSV015.deny",
+              "Resolution": "Set 'containers[].resources.requests.cpu'.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv015",
+              "References": [
+                "https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-resource-requests-and-limits",
+                "https://avd.aquasec.com/misconfig/ksv015"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 124,
+                "EndLine": 136,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 124,
+                      "Content": "                - image: kennethreitz/httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33mimage\u001b[0m: kennethreitz/httpbin",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 125,
+                      "Content": "                  imagePullPolicy: Always",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mimagePullPolicy\u001b[0m: Always",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 126,
+                      "Content": "                  name: httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mname\u001b[0m: httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 127,
+                      "Content": "                  ports:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mports\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 128,
+                      "Content": "                    - containerPort: 80",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mcontainerPort\u001b[0m: \u001b[38;5;37m80",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 129,
+                      "Content": "                      name: port-httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                      \u001b[38;5;33mname\u001b[0m: port-httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 130,
+                      "Content": "                      protocol: TCP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mprotocol\u001b[0m: TCP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 131,
+                      "Content": "                  resources:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mresources\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 132,
+                      "Content": "                    limits:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    \u001b[38;5;33mlimits\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 133,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV016",
+              "AVDID": "AVD-KSV-0016",
+              "Title": "Memory requests not specified",
+              "Description": "When containers have memory requests specified, the scheduler can make better decisions about which nodes to place pods on, and how to deal with resource contention.",
+              "Message": "Container 'httpbin' of Deployment 'httpbin' should set 'resources.requests.memory'",
+              "Namespace": "builtin.kubernetes.KSV016",
+              "Query": "data.builtin.kubernetes.KSV016.deny",
+              "Resolution": "Set 'containers[].resources.requests.memory'.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv016",
+              "References": [
+                "https://kubesec.io/basics/containers-resources-limits-memory/",
+                "https://avd.aquasec.com/misconfig/ksv016"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 124,
+                "EndLine": 136,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 124,
+                      "Content": "                - image: kennethreitz/httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33mimage\u001b[0m: kennethreitz/httpbin",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 125,
+                      "Content": "                  imagePullPolicy: Always",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mimagePullPolicy\u001b[0m: Always",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 126,
+                      "Content": "                  name: httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mname\u001b[0m: httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 127,
+                      "Content": "                  ports:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mports\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 128,
+                      "Content": "                    - containerPort: 80",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mcontainerPort\u001b[0m: \u001b[38;5;37m80",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 129,
+                      "Content": "                      name: port-httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                      \u001b[38;5;33mname\u001b[0m: port-httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 130,
+                      "Content": "                      protocol: TCP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mprotocol\u001b[0m: TCP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 131,
+                      "Content": "                  resources:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mresources\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 132,
+                      "Content": "                    limits:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    \u001b[38;5;33mlimits\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 133,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV020",
+              "AVDID": "AVD-KSV-0020",
+              "Title": "Runs with UID \u003c= 10000",
+              "Description": "Force the container to run with user ID \u003e 10000 to avoid conflicts with the host’s user table.",
+              "Message": "Container 'httpbin' of Deployment 'httpbin' should set 'securityContext.runAsUser' \u003e 10000",
+              "Namespace": "builtin.kubernetes.KSV020",
+              "Query": "data.builtin.kubernetes.KSV020.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsUser' to an integer \u003e 10000.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv020",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-runasuser/",
+                "https://avd.aquasec.com/misconfig/ksv020"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 124,
+                "EndLine": 136,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 124,
+                      "Content": "                - image: kennethreitz/httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33mimage\u001b[0m: kennethreitz/httpbin",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 125,
+                      "Content": "                  imagePullPolicy: Always",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mimagePullPolicy\u001b[0m: Always",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 126,
+                      "Content": "                  name: httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mname\u001b[0m: httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 127,
+                      "Content": "                  ports:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mports\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 128,
+                      "Content": "                    - containerPort: 80",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mcontainerPort\u001b[0m: \u001b[38;5;37m80",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 129,
+                      "Content": "                      name: port-httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                      \u001b[38;5;33mname\u001b[0m: port-httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 130,
+                      "Content": "                      protocol: TCP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mprotocol\u001b[0m: TCP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 131,
+                      "Content": "                  resources:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mresources\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 132,
+                      "Content": "                    limits:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    \u001b[38;5;33mlimits\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 133,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV021",
+              "AVDID": "AVD-KSV-0021",
+              "Title": "Runs with GID \u003c= 10000",
+              "Description": "Force the container to run with group ID \u003e 10000 to avoid conflicts with the host’s user table.",
+              "Message": "Container 'httpbin' of Deployment 'httpbin' should set 'securityContext.runAsGroup' \u003e 10000",
+              "Namespace": "builtin.kubernetes.KSV021",
+              "Query": "data.builtin.kubernetes.KSV021.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsGroup' to an integer \u003e 10000.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv021",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-runasuser/",
+                "https://avd.aquasec.com/misconfig/ksv021"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 124,
+                "EndLine": 136,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 124,
+                      "Content": "                - image: kennethreitz/httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33mimage\u001b[0m: kennethreitz/httpbin",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 125,
+                      "Content": "                  imagePullPolicy: Always",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mimagePullPolicy\u001b[0m: Always",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 126,
+                      "Content": "                  name: httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mname\u001b[0m: httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 127,
+                      "Content": "                  ports:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mports\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 128,
+                      "Content": "                    - containerPort: 80",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mcontainerPort\u001b[0m: \u001b[38;5;37m80",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 129,
+                      "Content": "                      name: port-httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                      \u001b[38;5;33mname\u001b[0m: port-httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 130,
+                      "Content": "                      protocol: TCP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mprotocol\u001b[0m: TCP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 131,
+                      "Content": "                  resources:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mresources\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 132,
+                      "Content": "                    limits:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    \u001b[38;5;33mlimits\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 133,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV030",
+              "AVDID": "AVD-KSV-0030",
+              "Title": "Runtime/Default Seccomp profile not set",
+              "Description": "According to pod security standard 'Seccomp', the RuntimeDefault seccomp profile must be required, or allow specific additional profiles.",
+              "Message": "Either Pod or Container should set 'securityContext.seccompProfile.type' to 'RuntimeDefault'",
+              "Namespace": "builtin.kubernetes.KSV030",
+              "Query": "data.builtin.kubernetes.KSV030.deny",
+              "Resolution": "Set 'spec.securityContext.seccompProfile.type', 'spec.containers[*].securityContext.seccompProfile' and 'spec.initContainers[*].securityContext.seccompProfile' to 'RuntimeDefault' or undefined.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv030",
+              "References": [
+                "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+                "https://avd.aquasec.com/misconfig/ksv030"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 124,
+                "EndLine": 136,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 124,
+                      "Content": "                - image: kennethreitz/httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33mimage\u001b[0m: kennethreitz/httpbin",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 125,
+                      "Content": "                  imagePullPolicy: Always",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mimagePullPolicy\u001b[0m: Always",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 126,
+                      "Content": "                  name: httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mname\u001b[0m: httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 127,
+                      "Content": "                  ports:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mports\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 128,
+                      "Content": "                    - containerPort: 80",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mcontainerPort\u001b[0m: \u001b[38;5;37m80",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 129,
+                      "Content": "                      name: port-httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                      \u001b[38;5;33mname\u001b[0m: port-httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 130,
+                      "Content": "                      protocol: TCP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mprotocol\u001b[0m: TCP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 131,
+                      "Content": "                  resources:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mresources\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 132,
+                      "Content": "                    limits:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    \u001b[38;5;33mlimits\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 133,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV104",
+              "AVDID": "AVD-KSV-0104",
+              "Title": "Seccomp policies disabled",
+              "Description": "A program inside the container can bypass Seccomp protection policies.",
+              "Message": "container httpbin of deployment httpbin in default namespace should specify a seccomp profile",
+              "Namespace": "builtin.kubernetes.KSV104",
+              "Query": "data.builtin.kubernetes.KSV104.deny",
+              "Resolution": "Specify seccomp either by annotation or by seccomp profile type having allowed values as per pod security standards",
+              "Severity": "MEDIUM",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv104",
+              "References": [
+                "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+                "https://avd.aquasec.com/misconfig/ksv104"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "Code": {
+                  "Lines": null
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV106",
+              "AVDID": "AVD-KSV-0106",
+              "Title": "Container capabilities must only include NET_BIND_SERVICE",
+              "Description": "Containers must drop ALL capabilities, and are only permitted to add back the NET_BIND_SERVICE capability.",
+              "Message": "container should drop all",
+              "Namespace": "builtin.kubernetes.KSV106",
+              "Query": "data.builtin.kubernetes.KSV106.deny",
+              "Resolution": "Set 'spec.containers[*].securityContext.capabilities.drop' to 'ALL' and only add 'NET_BIND_SERVICE' to 'spec.containers[*].securityContext.capabilities.add'.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv106",
+              "References": [
+                "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+                "https://avd.aquasec.com/misconfig/ksv106"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 124,
+                "EndLine": 136,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 124,
+                      "Content": "                - image: kennethreitz/httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33mimage\u001b[0m: kennethreitz/httpbin",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 125,
+                      "Content": "                  imagePullPolicy: Always",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mimagePullPolicy\u001b[0m: Always",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 126,
+                      "Content": "                  name: httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mname\u001b[0m: httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 127,
+                      "Content": "                  ports:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mports\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 128,
+                      "Content": "                    - containerPort: 80",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mcontainerPort\u001b[0m: \u001b[38;5;37m80",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 129,
+                      "Content": "                      name: port-httpbin",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                      \u001b[38;5;33mname\u001b[0m: port-httpbin",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 130,
+                      "Content": "                      protocol: TCP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mprotocol\u001b[0m: TCP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 131,
+                      "Content": "                  resources:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33mresources\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 132,
+                      "Content": "                    limits:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    \u001b[38;5;33mlimits\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 133,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV116",
+              "AVDID": "AVD-KSV-0116",
+              "Title": "Runs with a root primary or supplementary GID",
+              "Description": "According to pod security standard 'Non-root groups', containers should be forbidden from running with a root primary or supplementary GID.",
+              "Message": "deployment httpbin in default namespace should set spec.securityContext.runAsGroup, spec.securityContext.supplementalGroups[*] and spec.securityContext.fsGroup to integer greater than 0",
+              "Namespace": "builtin.kubernetes.KSV116",
+              "Query": "data.builtin.kubernetes.KSV116.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsGroup' to a non-zero integer or leave undefined.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv116",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-runasuser/",
+                "https://avd.aquasec.com/misconfig/ksv116"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "Code": {
+                  "Lines": null
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV117",
+              "AVDID": "AVD-KSV-0117",
+              "Title": "Prevent binding to privileged ports",
+              "Description": "The ports which are lower than 1024 receive and transmit various sensitive and privileged data. Allowing containers to use them can bring serious implications.",
+              "Message": "deployment httpbin in default namespace should not set spec.template.spec.containers.ports.containerPort to less than 1024",
+              "Namespace": "builtin.kubernetes.KSV117",
+              "Query": "data.builtin.kubernetes.KSV117.deny",
+              "Resolution": "Do not map the container ports to privileged host ports when starting a container.",
+              "Severity": "HIGH",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv117",
+              "References": [
+                "https://kubernetes.io/docs/concepts/security/pod-security-standards/",
+                "https://avd.aquasec.com/misconfig/ksv117"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "Code": {
+                  "Lines": null
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Namespace": "default",
+      "Kind": "StatefulSet",
+      "Name": "vault",
+      "Metadata": {
+        "OS": {
+          "Family": "alpine",
+          "Name": "3.15.9",
+          "EOSL": true
+        },
+        "ImageID": "sha256:e5d0e3edb4467b55a57efce11dde2bd44def5718ea848b3e6eb39e32355059ac",
+        "DiffIDs": [
+          "sha256:579bc0f2bef2b2a8b9e33055679857993dd2a4bd8a06633bf0f9c9e9eb15dfd3",
+          "sha256:cd2e463c321b4995156773eb3af9212a59695a739dfe8e6cc889565b82d102f9",
+          "sha256:abff06489f308c4cf8d76294664fec2c186dd3cead767f667388dc3e9f3fcfd3",
+          "sha256:225bf0e44f50faf7a72dacef0f34c23457d9b08b4547a3ba78878af7fa04150c",
+          "sha256:03b7a2e65386465eff861c5b65374f8df4ff14b9017ad12331e0f888c6ad4901",
+          "sha256:82239321d6fcbb7a70f27e4db4d01872e2d62bff0fc64c6414a2b83b7a3c595c",
+          "sha256:ef681dd8e6de33a023e2c2c416a12795072487ee62f445cfd5cf7f8bec834cdd"
+        ],
+        "RepoTags": [
+          "hashicorp/vault:1.14.0"
+        ],
+        "RepoDigests": [
+          "hashicorp/vault@sha256:b2177a8bfe85f89ff403c9f51b8a00a6efd1be8e475bc2637390c36977df994d"
+        ],
+        "ImageConfig": {
+          "architecture": "amd64",
+          "created": "2023-06-19T15:57:07.759951559Z",
+          "history": [
+            {
+              "created": "2023-06-14T20:42:13.893052319Z",
+              "created_by": "/bin/sh -c #(nop) ADD file:4fa8e307f595ecff485113fb0ec6e2320979eaa6fb3eb467d2433771a6f016e6 in / "
+            },
+            {
+              "created": "2023-06-14T20:42:13.993588153Z",
+              "created_by": "/bin/sh -c #(nop)  CMD [\"/bin/sh\"]",
+              "empty_layer": true
+            },
+            {
+              "created": "2023-06-19T15:57:05.788765343Z",
+              "created_by": "ARG BIN_NAME",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2023-06-19T15:57:05.788765343Z",
+              "created_by": "ARG NAME=vault",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2023-06-19T15:57:05.788765343Z",
+              "created_by": "ARG PRODUCT_VERSION",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2023-06-19T15:57:05.788765343Z",
+              "created_by": "ARG PRODUCT_REVISION",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2023-06-19T15:57:05.788765343Z",
+              "created_by": "ARG TARGETOS TARGETARCH",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2023-06-19T15:57:05.788765343Z",
+              "created_by": "LABEL name=Vault maintainer=Vault Team \u003cvault@hashicorp.com\u003e vendor=HashiCorp version=1.14.0 release=13a649f860186dffe3f3a4459814d87191efc321 revision=13a649f860186dffe3f3a4459814d87191efc321 summary=Vault is a tool for securely accessing secrets. description=Vault is a tool for securely accessing secrets. A secret is anything that you want to tightly control access to, such as API keys, passwords, certificates, and more. Vault provides a unified interface to any secret, while providing tight access control and recording a detailed audit log.",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2023-06-19T15:57:05.788765343Z",
+              "created_by": "COPY LICENSE /licenses/mozilla.txt # buildkit",
+              "comment": "buildkit.dockerfile.v0"
+            },
+            {
+              "created": "2023-06-19T15:57:05.788765343Z",
+              "created_by": "ENV NAME=vault",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2023-06-19T15:57:05.788765343Z",
+              "created_by": "ENV VERSION=",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2023-06-19T15:57:05.8927642Z",
+              "created_by": "RUN |6 BIN_NAME=vault NAME=vault PRODUCT_VERSION=1.14.0 PRODUCT_REVISION=13a649f860186dffe3f3a4459814d87191efc321 TARGETOS=linux TARGETARCH=amd64 /bin/sh -c addgroup ${NAME} \u0026\u0026 adduser -S -G ${NAME} ${NAME} # buildkit",
+              "comment": "buildkit.dockerfile.v0"
+            },
+            {
+              "created": "2023-06-19T15:57:06.501616217Z",
+              "created_by": "RUN |6 BIN_NAME=vault NAME=vault PRODUCT_VERSION=1.14.0 PRODUCT_REVISION=13a649f860186dffe3f3a4459814d87191efc321 TARGETOS=linux TARGETARCH=amd64 /bin/sh -c apk add --no-cache libcap su-exec dumb-init tzdata # buildkit",
+              "comment": "buildkit.dockerfile.v0"
+            },
+            {
+              "created": "2023-06-19T15:57:07.691936141Z",
+              "created_by": "COPY dist/linux/amd64/vault /bin/ # buildkit",
+              "comment": "buildkit.dockerfile.v0"
+            },
+            {
+              "created": "2023-06-19T15:57:07.749628505Z",
+              "created_by": "RUN |6 BIN_NAME=vault NAME=vault PRODUCT_VERSION=1.14.0 PRODUCT_REVISION=13a649f860186dffe3f3a4459814d87191efc321 TARGETOS=linux TARGETARCH=amd64 /bin/sh -c mkdir -p /vault/logs \u0026\u0026     mkdir -p /vault/file \u0026\u0026     mkdir -p /vault/config \u0026\u0026     chown -R ${NAME}:${NAME} /vault # buildkit",
+              "comment": "buildkit.dockerfile.v0"
+            },
+            {
+              "created": "2023-06-19T15:57:07.749628505Z",
+              "created_by": "VOLUME [/vault/logs]",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2023-06-19T15:57:07.749628505Z",
+              "created_by": "VOLUME [/vault/file]",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2023-06-19T15:57:07.749628505Z",
+              "created_by": "EXPOSE map[8200/tcp:{}]",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2023-06-19T15:57:07.759951559Z",
+              "created_by": "COPY .release/docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh # buildkit",
+              "comment": "buildkit.dockerfile.v0"
+            },
+            {
+              "created": "2023-06-19T15:57:07.759951559Z",
+              "created_by": "ENTRYPOINT [\"docker-entrypoint.sh\"]",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            },
+            {
+              "created": "2023-06-19T15:57:07.759951559Z",
+              "created_by": "CMD [\"server\" \"-dev\"]",
+              "comment": "buildkit.dockerfile.v0",
+              "empty_layer": true
+            }
+          ],
+          "os": "linux",
+          "rootfs": {
+            "type": "layers",
+            "diff_ids": [
+              "sha256:579bc0f2bef2b2a8b9e33055679857993dd2a4bd8a06633bf0f9c9e9eb15dfd3",
+              "sha256:cd2e463c321b4995156773eb3af9212a59695a739dfe8e6cc889565b82d102f9",
+              "sha256:abff06489f308c4cf8d76294664fec2c186dd3cead767f667388dc3e9f3fcfd3",
+              "sha256:225bf0e44f50faf7a72dacef0f34c23457d9b08b4547a3ba78878af7fa04150c",
+              "sha256:03b7a2e65386465eff861c5b65374f8df4ff14b9017ad12331e0f888c6ad4901",
+              "sha256:82239321d6fcbb7a70f27e4db4d01872e2d62bff0fc64c6414a2b83b7a3c595c",
+              "sha256:ef681dd8e6de33a023e2c2c416a12795072487ee62f445cfd5cf7f8bec834cdd"
+            ]
+          },
+          "config": {
+            "Cmd": [
+              "server",
+              "-dev"
+            ],
+            "Entrypoint": [
+              "docker-entrypoint.sh"
+            ],
+            "Env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "NAME=vault",
+              "VERSION="
+            ],
+            "Labels": {
+              "description": "Vault is a tool for securely accessing secrets. A secret is anything that you want to tightly control access to, such as API keys, passwords, certificates, and more. Vault provides a unified interface to any secret, while providing tight access control and recording a detailed audit log.",
+              "maintainer": "Vault Team \u003cvault@hashicorp.com\u003e",
+              "name": "Vault",
+              "release": "13a649f860186dffe3f3a4459814d87191efc321",
+              "revision": "13a649f860186dffe3f3a4459814d87191efc321",
+              "summary": "Vault is a tool for securely accessing secrets.",
+              "vendor": "HashiCorp",
+              "version": "1.14.0"
+            },
+            "Volumes": {
+              "/vault/file": {},
+              "/vault/logs": {}
+            },
+            "ExposedPorts": {
+              "8200/tcp": {}
+            },
+            "ArgsEscaped": true
+          }
+        }
+      },
+      "Results": [
+        {
+          "Target": "StatefulSet/vault",
+          "Class": "config",
+          "Type": "kubernetes",
+          "MisconfSummary": {
+            "Successes": 140,
+            "Failures": 12,
+            "Exceptions": 0
+          },
+          "Misconfigurations": [
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV003",
+              "AVDID": "AVD-KSV-0003",
+              "Title": "Default capabilities: some containers do not drop all",
+              "Description": "The container should drop all default capabilities and add only those that are needed for its execution.",
+              "Message": "Container 'vault' of StatefulSet 'vault' should add 'ALL' to 'securityContext.capabilities.drop'",
+              "Namespace": "builtin.kubernetes.KSV003",
+              "Query": "data.builtin.kubernetes.KSV003.deny",
+              "Resolution": "Add 'ALL' to containers[].securityContext.capabilities.drop.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv003",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-capabilities-drop-index-all/",
+                "https://avd.aquasec.com/misconfig/ksv003"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 224,
+                "EndLine": 309,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 224,
+                      "Content": "                - args:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33margs\u001b[0m:",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 225,
+                      "Content": "                    - \"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;37m\"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 226,
+                      "Content": "                  command:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                  \u001b[38;5;33mcommand\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 227,
+                      "Content": "                    - /bin/sh",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - /bin/sh",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 228,
+                      "Content": "                    - -ec",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - -ec",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 229,
+                      "Content": "                  env:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33menv\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 230,
+                      "Content": "                    - name: HOST_IP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mname\u001b[0m: HOST_IP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 231,
+                      "Content": "                      valueFrom:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mvalueFrom\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 232,
+                      "Content": "                        fieldRef:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                        \u001b[38;5;33mfieldRef\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 233,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV011",
+              "AVDID": "AVD-KSV-0011",
+              "Title": "CPU not limited",
+              "Description": "Enforcing CPU limits prevents DoS via resource exhaustion.",
+              "Message": "Container 'vault' of StatefulSet 'vault' should set 'resources.limits.cpu'",
+              "Namespace": "builtin.kubernetes.KSV011",
+              "Query": "data.builtin.kubernetes.KSV011.deny",
+              "Resolution": "Set a limit value under 'containers[].resources.limits.cpu'.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv011",
+              "References": [
+                "https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-resource-requests-and-limits",
+                "https://avd.aquasec.com/misconfig/ksv011"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 224,
+                "EndLine": 309,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 224,
+                      "Content": "                - args:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33margs\u001b[0m:",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 225,
+                      "Content": "                    - \"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;37m\"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 226,
+                      "Content": "                  command:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                  \u001b[38;5;33mcommand\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 227,
+                      "Content": "                    - /bin/sh",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - /bin/sh",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 228,
+                      "Content": "                    - -ec",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - -ec",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 229,
+                      "Content": "                  env:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33menv\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 230,
+                      "Content": "                    - name: HOST_IP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mname\u001b[0m: HOST_IP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 231,
+                      "Content": "                      valueFrom:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mvalueFrom\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 232,
+                      "Content": "                        fieldRef:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                        \u001b[38;5;33mfieldRef\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 233,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV014",
+              "AVDID": "AVD-KSV-0014",
+              "Title": "Root file system is not read-only",
+              "Description": "An immutable root file system prevents applications from writing to their local disk. This can limit intrusions, as attackers will not be able to tamper with the file system or write foreign executables to disk.",
+              "Message": "Container 'vault' of StatefulSet 'vault' should set 'securityContext.readOnlyRootFilesystem' to true",
+              "Namespace": "builtin.kubernetes.KSV014",
+              "Query": "data.builtin.kubernetes.KSV014.deny",
+              "Resolution": "Change 'containers[].securityContext.readOnlyRootFilesystem' to 'true'.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv014",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-readonlyrootfilesystem-true/",
+                "https://avd.aquasec.com/misconfig/ksv014"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 224,
+                "EndLine": 309,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 224,
+                      "Content": "                - args:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33margs\u001b[0m:",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 225,
+                      "Content": "                    - \"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;37m\"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 226,
+                      "Content": "                  command:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                  \u001b[38;5;33mcommand\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 227,
+                      "Content": "                    - /bin/sh",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - /bin/sh",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 228,
+                      "Content": "                    - -ec",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - -ec",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 229,
+                      "Content": "                  env:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33menv\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 230,
+                      "Content": "                    - name: HOST_IP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mname\u001b[0m: HOST_IP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 231,
+                      "Content": "                      valueFrom:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mvalueFrom\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 232,
+                      "Content": "                        fieldRef:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                        \u001b[38;5;33mfieldRef\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 233,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV015",
+              "AVDID": "AVD-KSV-0015",
+              "Title": "CPU requests not specified",
+              "Description": "When containers have resource requests specified, the scheduler can make better decisions about which nodes to place pods on, and how to deal with resource contention.",
+              "Message": "Container 'vault' of StatefulSet 'vault' should set 'resources.requests.cpu'",
+              "Namespace": "builtin.kubernetes.KSV015",
+              "Query": "data.builtin.kubernetes.KSV015.deny",
+              "Resolution": "Set 'containers[].resources.requests.cpu'.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv015",
+              "References": [
+                "https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-resource-requests-and-limits",
+                "https://avd.aquasec.com/misconfig/ksv015"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 224,
+                "EndLine": 309,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 224,
+                      "Content": "                - args:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33margs\u001b[0m:",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 225,
+                      "Content": "                    - \"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;37m\"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 226,
+                      "Content": "                  command:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                  \u001b[38;5;33mcommand\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 227,
+                      "Content": "                    - /bin/sh",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - /bin/sh",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 228,
+                      "Content": "                    - -ec",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - -ec",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 229,
+                      "Content": "                  env:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33menv\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 230,
+                      "Content": "                    - name: HOST_IP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mname\u001b[0m: HOST_IP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 231,
+                      "Content": "                      valueFrom:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mvalueFrom\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 232,
+                      "Content": "                        fieldRef:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                        \u001b[38;5;33mfieldRef\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 233,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV016",
+              "AVDID": "AVD-KSV-0016",
+              "Title": "Memory requests not specified",
+              "Description": "When containers have memory requests specified, the scheduler can make better decisions about which nodes to place pods on, and how to deal with resource contention.",
+              "Message": "Container 'vault' of StatefulSet 'vault' should set 'resources.requests.memory'",
+              "Namespace": "builtin.kubernetes.KSV016",
+              "Query": "data.builtin.kubernetes.KSV016.deny",
+              "Resolution": "Set 'containers[].resources.requests.memory'.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv016",
+              "References": [
+                "https://kubesec.io/basics/containers-resources-limits-memory/",
+                "https://avd.aquasec.com/misconfig/ksv016"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 224,
+                "EndLine": 309,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 224,
+                      "Content": "                - args:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33margs\u001b[0m:",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 225,
+                      "Content": "                    - \"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;37m\"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 226,
+                      "Content": "                  command:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                  \u001b[38;5;33mcommand\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 227,
+                      "Content": "                    - /bin/sh",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - /bin/sh",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 228,
+                      "Content": "                    - -ec",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - -ec",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 229,
+                      "Content": "                  env:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33menv\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 230,
+                      "Content": "                    - name: HOST_IP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mname\u001b[0m: HOST_IP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 231,
+                      "Content": "                      valueFrom:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mvalueFrom\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 232,
+                      "Content": "                        fieldRef:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                        \u001b[38;5;33mfieldRef\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 233,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV018",
+              "AVDID": "AVD-KSV-0018",
+              "Title": "Memory not limited",
+              "Description": "Enforcing memory limits prevents DoS via resource exhaustion.",
+              "Message": "Container 'vault' of StatefulSet 'vault' should set 'resources.limits.memory'",
+              "Namespace": "builtin.kubernetes.KSV018",
+              "Query": "data.builtin.kubernetes.KSV018.deny",
+              "Resolution": "Set a limit value under 'containers[].resources.limits.memory'.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv018",
+              "References": [
+                "https://kubesec.io/basics/containers-resources-limits-memory/",
+                "https://avd.aquasec.com/misconfig/ksv018"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 224,
+                "EndLine": 309,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 224,
+                      "Content": "                - args:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33margs\u001b[0m:",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 225,
+                      "Content": "                    - \"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;37m\"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 226,
+                      "Content": "                  command:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                  \u001b[38;5;33mcommand\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 227,
+                      "Content": "                    - /bin/sh",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - /bin/sh",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 228,
+                      "Content": "                    - -ec",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - -ec",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 229,
+                      "Content": "                  env:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33menv\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 230,
+                      "Content": "                    - name: HOST_IP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mname\u001b[0m: HOST_IP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 231,
+                      "Content": "                      valueFrom:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mvalueFrom\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 232,
+                      "Content": "                        fieldRef:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                        \u001b[38;5;33mfieldRef\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 233,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV020",
+              "AVDID": "AVD-KSV-0020",
+              "Title": "Runs with UID \u003c= 10000",
+              "Description": "Force the container to run with user ID \u003e 10000 to avoid conflicts with the host’s user table.",
+              "Message": "Container 'vault' of StatefulSet 'vault' should set 'securityContext.runAsUser' \u003e 10000",
+              "Namespace": "builtin.kubernetes.KSV020",
+              "Query": "data.builtin.kubernetes.KSV020.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsUser' to an integer \u003e 10000.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv020",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-runasuser/",
+                "https://avd.aquasec.com/misconfig/ksv020"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 224,
+                "EndLine": 309,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 224,
+                      "Content": "                - args:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33margs\u001b[0m:",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 225,
+                      "Content": "                    - \"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;37m\"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 226,
+                      "Content": "                  command:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                  \u001b[38;5;33mcommand\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 227,
+                      "Content": "                    - /bin/sh",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - /bin/sh",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 228,
+                      "Content": "                    - -ec",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - -ec",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 229,
+                      "Content": "                  env:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33menv\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 230,
+                      "Content": "                    - name: HOST_IP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mname\u001b[0m: HOST_IP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 231,
+                      "Content": "                      valueFrom:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mvalueFrom\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 232,
+                      "Content": "                        fieldRef:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                        \u001b[38;5;33mfieldRef\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 233,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV021",
+              "AVDID": "AVD-KSV-0021",
+              "Title": "Runs with GID \u003c= 10000",
+              "Description": "Force the container to run with group ID \u003e 10000 to avoid conflicts with the host’s user table.",
+              "Message": "Container 'vault' of StatefulSet 'vault' should set 'securityContext.runAsGroup' \u003e 10000",
+              "Namespace": "builtin.kubernetes.KSV021",
+              "Query": "data.builtin.kubernetes.KSV021.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsGroup' to an integer \u003e 10000.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv021",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-runasuser/",
+                "https://avd.aquasec.com/misconfig/ksv021"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 224,
+                "EndLine": 309,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 224,
+                      "Content": "                - args:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33margs\u001b[0m:",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 225,
+                      "Content": "                    - \"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;37m\"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 226,
+                      "Content": "                  command:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                  \u001b[38;5;33mcommand\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 227,
+                      "Content": "                    - /bin/sh",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - /bin/sh",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 228,
+                      "Content": "                    - -ec",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - -ec",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 229,
+                      "Content": "                  env:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33menv\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 230,
+                      "Content": "                    - name: HOST_IP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mname\u001b[0m: HOST_IP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 231,
+                      "Content": "                      valueFrom:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mvalueFrom\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 232,
+                      "Content": "                        fieldRef:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                        \u001b[38;5;33mfieldRef\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 233,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV030",
+              "AVDID": "AVD-KSV-0030",
+              "Title": "Runtime/Default Seccomp profile not set",
+              "Description": "According to pod security standard 'Seccomp', the RuntimeDefault seccomp profile must be required, or allow specific additional profiles.",
+              "Message": "Either Pod or Container should set 'securityContext.seccompProfile.type' to 'RuntimeDefault'",
+              "Namespace": "builtin.kubernetes.KSV030",
+              "Query": "data.builtin.kubernetes.KSV030.deny",
+              "Resolution": "Set 'spec.securityContext.seccompProfile.type', 'spec.containers[*].securityContext.seccompProfile' and 'spec.initContainers[*].securityContext.seccompProfile' to 'RuntimeDefault' or undefined.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv030",
+              "References": [
+                "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+                "https://avd.aquasec.com/misconfig/ksv030"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 224,
+                "EndLine": 309,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 224,
+                      "Content": "                - args:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33margs\u001b[0m:",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 225,
+                      "Content": "                    - \"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;37m\"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 226,
+                      "Content": "                  command:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                  \u001b[38;5;33mcommand\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 227,
+                      "Content": "                    - /bin/sh",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - /bin/sh",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 228,
+                      "Content": "                    - -ec",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - -ec",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 229,
+                      "Content": "                  env:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33menv\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 230,
+                      "Content": "                    - name: HOST_IP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mname\u001b[0m: HOST_IP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 231,
+                      "Content": "                      valueFrom:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mvalueFrom\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 232,
+                      "Content": "                        fieldRef:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                        \u001b[38;5;33mfieldRef\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 233,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV104",
+              "AVDID": "AVD-KSV-0104",
+              "Title": "Seccomp policies disabled",
+              "Description": "A program inside the container can bypass Seccomp protection policies.",
+              "Message": "container vault of statefulset vault in default namespace should specify a seccomp profile",
+              "Namespace": "builtin.kubernetes.KSV104",
+              "Query": "data.builtin.kubernetes.KSV104.deny",
+              "Resolution": "Specify seccomp either by annotation or by seccomp profile type having allowed values as per pod security standards",
+              "Severity": "MEDIUM",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv104",
+              "References": [
+                "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+                "https://avd.aquasec.com/misconfig/ksv104"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "Code": {
+                  "Lines": null
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV106",
+              "AVDID": "AVD-KSV-0106",
+              "Title": "Container capabilities must only include NET_BIND_SERVICE",
+              "Description": "Containers must drop ALL capabilities, and are only permitted to add back the NET_BIND_SERVICE capability.",
+              "Message": "container should drop all",
+              "Namespace": "builtin.kubernetes.KSV106",
+              "Query": "data.builtin.kubernetes.KSV106.deny",
+              "Resolution": "Set 'spec.containers[*].securityContext.capabilities.drop' to 'ALL' and only add 'NET_BIND_SERVICE' to 'spec.containers[*].securityContext.capabilities.add'.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv106",
+              "References": [
+                "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+                "https://avd.aquasec.com/misconfig/ksv106"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 224,
+                "EndLine": 309,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 224,
+                      "Content": "                - args:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33margs\u001b[0m:",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 225,
+                      "Content": "                    - \"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;37m\"/usr/local/bin/docker-entrypoint.sh vault server -dev \\n\"",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 226,
+                      "Content": "                  command:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "\u001b[0m                  \u001b[38;5;33mcommand\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 227,
+                      "Content": "                    - /bin/sh",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - /bin/sh",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 228,
+                      "Content": "                    - -ec",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - -ec",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 229,
+                      "Content": "                  env:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                  \u001b[38;5;33menv\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 230,
+                      "Content": "                    - name: HOST_IP",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - \u001b[38;5;33mname\u001b[0m: HOST_IP",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 231,
+                      "Content": "                      valueFrom:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                      \u001b[38;5;33mvalueFrom\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 232,
+                      "Content": "                        fieldRef:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                        \u001b[38;5;33mfieldRef\u001b[0m:",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 233,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV116",
+              "AVDID": "AVD-KSV-0116",
+              "Title": "Runs with a root primary or supplementary GID",
+              "Description": "According to pod security standard 'Non-root groups', containers should be forbidden from running with a root primary or supplementary GID.",
+              "Message": "statefulset vault in default namespace should set spec.securityContext.runAsGroup, spec.securityContext.supplementalGroups[*] and spec.securityContext.fsGroup to integer greater than 0",
+              "Namespace": "builtin.kubernetes.KSV116",
+              "Query": "data.builtin.kubernetes.KSV116.deny",
+              "Resolution": "Set 'containers[].securityContext.runAsGroup' to a non-zero integer or leave undefined.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv116",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-runasuser/",
+                "https://avd.aquasec.com/misconfig/ksv116"
+              ],
+              "Status": "FAIL",
+              "Layer": {},
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "Code": {
+                  "Lines": null
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+[
+    {
+      "coordinates": "pkg:npm/auditjs@4.0.25",
+      "description": "Audit dependencies to identify known vulnerabilities and maintenance problems",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/auditjs@4.0.25?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/chalk@3.0.0",
+      "description": "Terminal string styling done right",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/chalk@3.0.0?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/mysql@2.0.0",
+      "description": "A node.js driver for mysql. It is written in JavaScript, does not require compiling, and is 100% MIT licensed.",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/mysql@2.0.0?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": [
+        {
+          "id": "da5a3b11-c75b-48e7-9c28-1123f0a492bf",
+          "title": "Unverified Certificate",
+          "description": "> When using SSL to connect to a MySQL server, the SSL procedure implemented does not actually check if the remote server has a trusted certificate or not.\n> \n> -- [github.com](https://github.com/mysqljs/mysql/issues/816)",
+          "cvssScore": 9.6,
+          "cvssVector": "CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+          "reference": "https://ossindex.sonatype.org/vulnerability/da5a3b11-c75b-48e7-9c28-1123f0a492bf?component-type=npm&component-name=mysql&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25"
+        }
+      ]
+    },
+    {
+      "coordinates": "pkg:npm/bignumber.js@1.0.1",
+      "description": "A library for arbitrary-precision decimal and non-decimal arithmetic",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/bignumber.js@1.0.1?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/readable-stream@1.1.14",
+      "description": "Streams3, a user-land copy of the stream library from Node.js",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/readable-stream@1.1.14?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/core-util-is@1.0.2",
+      "description": "The `util.is*` functions introduced in Node v0.12.",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/core-util-is@1.0.2?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/isarray@0.0.1",
+      "description": "Array#isArray for older browsers",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/isarray@0.0.1?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/string_decoder@0.10.31",
+      "description": "The string_decoder module from Node core",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/string_decoder@0.10.31?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/require-all@0.0.3",
+      "description": "An easy way to require all files within a directory.",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/require-all@0.0.3?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    }
+  ]

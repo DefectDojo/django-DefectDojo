@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-	<h3>Assign User to {{ survey }}</h3>
+    {{ block.super }}
+	<h3>Assign User to Questionnaire {{ survey }}</h3>
 	<form class="form-horizontal" method="post">{% csrf_token %}
 		{% include "dojo/form_fields.html" with form=form %}
 		<div class="form-group">

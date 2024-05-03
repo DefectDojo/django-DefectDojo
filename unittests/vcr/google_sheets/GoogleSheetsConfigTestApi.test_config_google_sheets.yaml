@@ -1,0 +1,254 @@
+interactions:
+- request:
+    body: assertion=eyJ0eXAiOiAiSldUIiwgImFsZyI6ICJSUzI1NiIsICJraWQiOiAiYWIyZmUxMWMzMmI1NzJjNWNlNzJmMGNhNDMyZDgwODlmYTg1YTUwNyJ9.eyJpYXQiOiAxNjEyNzMyOTA2LCAiZXhwIjogMTYxMjczNjUwNiwgImlzcyI6ICJ0ZXN0LWRvam8tc2hlZXRzQHRlc3QtZG9qby1zaGVldHMuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCAiYXVkIjogImh0dHBzOi8vb2F1dGgyLmdvb2dsZWFwaXMuY29tL3Rva2VuIiwgInNjb3BlIjogImh0dHBzOi8vd3d3Lmdvb2dsZWFwaXMuY29tL2F1dGgvZHJpdmUgaHR0cHM6Ly93d3cuZ29vZ2xlYXBpcy5jb20vYXV0aC9zcHJlYWRzaGVldHMifQ.PRgJJujIf5UIjaJg7JuiJ1K70Q95MMfC3kklfaezmEjGLhEHCB6yjrqO3Y54ZZm3afHi80KtEsgTlKFi1rHWDeNRI8saih7KrmdbuJA89xJdLv2NW6F7VitW3Suv3ACOr8SujBjhj_oU_lsbTnIYbc59QGXIV1O3pjYKdZ2sLrw3MAmn9HfstrSkYOvyQYbTnG0yBZQft5jZrPqubo07IU6AWt6Tm9e2lgAJq2YNDCG0TdK_nEgsoK6tbr02ThpaBFIsv0AV_vNc-DBpYMis5399FGsSwnw0R0ZNdkpQRXEdwelv8V-_P88bdaYykt9yA1y62IoxoiNZxDq2EYCTIg&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer
+    headers:
+      accept-encoding:
+      - gzip, deflate
+      content-type:
+      - application/x-www-form-urlencoded
+      user-agent:
+      - Python-httplib2/0.19.0 (gzip)
+    method: POST
+    uri: https://oauth2.googleapis.com/token
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/x3P226CMAAA0H/ps5qsXKR74xIUMAwQEPZCCinjtlJLEWTZv8/s/MH5AbiqyDQV
+        YuwJBe/giSE6VAePyYYWknIInatXMnErnVFBkMj6FvcyVMxqKDR28sx5RndX0Di3dBxnt1RdcdY0
+        KVncRSkCVAdUMulxjk/pLIWV3q37vX9p/ToK3U+qwk2kY27lsjr4UhWxh/CU4v5QjMC0Rs7sUfve
+        1OU54LfGT1BnukeuSZlN6mu7nCUB/QRj51JHXd/5UQIbr75/cDPTk7me0KX8is44sm3Z5SGlORQj
+        2AGyspaTqWhfW0lBaAf+64V4MvL6GwRzwsHvHxw4OXcZAQAA
+    headers:
+      Alt-Svc:
+      - h3-29=":443"; ma=2592000,h3-T051=":443"; ma=2592000,h3-Q050=":443"; ma=2592000,h3-Q046=":443";
+        ma=2592000,h3-Q043=":443"; ma=2592000,quic=":443"; ma=2592000; v="46,43"
+      Cache-Control:
+      - private
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 07 Feb 2021 21:21:46 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"title": "Test spreadsheet"}}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      authorization:
+      - Bearer ya29.c.Kp4B8QeblQISKbptWbIo592e4AzTk425Ccl_8pGKCuu9qJtnTYDAaTXWV6xaXhhVewJw5_P9fPn3Cn7uTGVu3QcAjx--NLiNfRQJZn62ztVoYDY46lN3cRpvtK5_qv5BPCDorpFo8mz6wyla1hNU9jCJ7r83XFefSiwH3t2NUaaILfRjkjNRU2hKfqOrCXAUufs9LbgRHaRFF4JrQnnY2to
+      content-length:
+      - '45'
+      content-type:
+      - application/json
+      user-agent:
+      - (gzip)
+      x-goog-api-client:
+      - gdcl/1.12.8 gl-python/3.6.12
+    method: POST
+    uri: https://sheets.googleapis.com/v4/spreadsheets?fields=spreadsheetId&alt=json
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/6vmUlBQKi4oSk1MKc5ITS3xTFGyUlAyjPLyNLPwL4qsCvGszDZPzIww9YoMKE8L
+        NfHI0Q0qyA7KCjX3DE2PKolPTVfiquUCAABktQVGAAAA
+    headers:
+      Alt-Svc:
+      - h3-29=":443"; ma=2592000,h3-T051=":443"; ma=2592000,h3-Q050=":443"; ma=2592000,h3-Q046=":443";
+        ma=2592000,h3-Q043=":443"; ma=2592000,quic=":443"; ma=2592000; v="46,43"
+      Cache-Control:
+      - private
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 07 Feb 2021 21:21:47 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      authorization:
+      - Bearer ya29.c.Kp4B8QeblQISKbptWbIo592e4AzTk425Ccl_8pGKCuu9qJtnTYDAaTXWV6xaXhhVewJw5_P9fPn3Cn7uTGVu3QcAjx--NLiNfRQJZn62ztVoYDY46lN3cRpvtK5_qv5BPCDorpFo8mz6wyla1hNU9jCJ7r83XFefSiwH3t2NUaaILfRjkjNRU2hKfqOrCXAUufs9LbgRHaRFF4JrQnnY2to
+      content-length:
+      - '0'
+      user-agent:
+      - (gzip)
+      x-goog-api-client:
+      - gdcl/1.12.8 gl-python/3.6.12
+    method: GET
+    uri: https://www.googleapis.com/drive/v3/files/1ZJI68OrYzTIyk7aiX5JYPwfU4Hl-RpkRjU7IUgZt_eg?fields=parents&alt=json
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAKvmUlAqSCxKzSspVrJSiOZSUFAycPQoN8mpLAzMyjArDM22DAhzVOJSiOWq5QIA
+        hsITdi0AAAA=
+    headers:
+      Alt-Svc:
+      - h3-29=":443"; ma=2592000,h3-T051=":443"; ma=2592000,h3-Q050=":443"; ma=2592000,h3-Q046=":443";
+        ma=2592000,h3-Q043=":443"; ma=2592000,quic=":443"; ma=2592000; v="46,43"
+      Cache-Control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - frame-ancestors 'self'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 07 Feb 2021 21:21:48 GMT
+      Expires:
+      - Mon, 01 Jan 1990 00:00:00 GMT
+      Pragma:
+      - no-cache
+      Server:
+      - GSE
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      authorization:
+      - Bearer ya29.c.Kp4B8QeblQISKbptWbIo592e4AzTk425Ccl_8pGKCuu9qJtnTYDAaTXWV6xaXhhVewJw5_P9fPn3Cn7uTGVu3QcAjx--NLiNfRQJZn62ztVoYDY46lN3cRpvtK5_qv5BPCDorpFo8mz6wyla1hNU9jCJ7r83XFefSiwH3t2NUaaILfRjkjNRU2hKfqOrCXAUufs9LbgRHaRFF4JrQnnY2to
+      content-length:
+      - '0'
+      user-agent:
+      - (gzip)
+      x-goog-api-client:
+      - gdcl/1.12.8 gl-python/3.6.12
+    method: PATCH
+    uri: https://www.googleapis.com/drive/v3/files/1ZJI68OrYzTIyk7aiX5JYPwfU4Hl-RpkRjU7IUgZt_eg?addParents=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX&removeParents=0AHw4lyqQjh6qUk9PVA&fields=id%2C+parents&alt=json
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAAKvmUlDKTFGyUlAyjPLyNLPwL4qsCvGszDZPzIww9YoMKE8LNfHI0Q0qyA7KCjX3
+        DE2PKolPTVfSAWorSCxKzSspBuqN5lIA6g+zyKowy0iKCCkM9DZJ9zLN8yw1DwtzCS4zy/DKKwkL
+        V+JSiOWq5QIASmbU5XIAAAA=
+    headers:
+      Alt-Svc:
+      - h3-29=":443"; ma=2592000,h3-T051=":443"; ma=2592000,h3-Q050=":443"; ma=2592000,h3-Q046=":443";
+        ma=2592000,h3-Q043=":443"; ma=2592000,quic=":443"; ma=2592000; v="46,43"
+      Cache-Control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - frame-ancestors 'self'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 07 Feb 2021 21:21:49 GMT
+      Expires:
+      - Mon, 01 Jan 1990 00:00:00 GMT
+      Pragma:
+      - no-cache
+      Server:
+      - GSE
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      authorization:
+      - Bearer ya29.c.Kp4B8QeblQISKbptWbIo592e4AzTk425Ccl_8pGKCuu9qJtnTYDAaTXWV6xaXhhVewJw5_P9fPn3Cn7uTGVu3QcAjx--NLiNfRQJZn62ztVoYDY46lN3cRpvtK5_qv5BPCDorpFo8mz6wyla1hNU9jCJ7r83XFefSiwH3t2NUaaILfRjkjNRU2hKfqOrCXAUufs9LbgRHaRFF4JrQnnY2to
+      content-length:
+      - '0'
+      user-agent:
+      - (gzip)
+      x-goog-api-client:
+      - gdcl/1.12.8 gl-python/3.6.12
+    method: DELETE
+    uri: https://www.googleapis.com/drive/v3/files/1ZJI68OrYzTIyk7aiX5JYPwfU4Hl-RpkRjU7IUgZt_eg
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3-29=":443"; ma=2592000,h3-T051=":443"; ma=2592000,h3-Q050=":443"; ma=2592000,h3-Q046=":443";
+        ma=2592000,h3-Q043=":443"; ma=2592000,quic=":443"; ma=2592000; v="46,43"
+      Cache-Control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      Date:
+      - Sun, 07 Feb 2021 21:21:49 GMT
+      Expires:
+      - Mon, 01 Jan 1990 00:00:00 GMT
+      Pragma:
+      - no-cache
+      Server:
+      - GSE
+      Vary:
+      - Origin
+      - X-Origin
+    status:
+      code: 204
+      message: No Content
+version: 1

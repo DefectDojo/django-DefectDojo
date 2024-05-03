@@ -1,8 +1,8 @@
 # # test types
 import logging
 
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -10,6 +10,7 @@ from dojo.filters import TestTypeFilter
 from dojo.forms import Test_TypeForm
 from dojo.models import Test_Type
 from dojo.utils import get_page_items, add_breadcrumb
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ Test Type views
 """
 
 
-@user_passes_test(lambda u: u.is_staff)
+@login_required
 def test_type(request):
     initial_queryset = Test_Type.objects.all().order_by('name')
     name_words = initial_queryset.values_list('name', flat=True)
@@ -36,7 +37,7 @@ def test_type(request):
         'name_words': name_words})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.add_test_type')
 def add_test_type(request):
     form = Test_TypeForm()
     if request.method == 'POST':
@@ -57,7 +58,7 @@ def add_test_type(request):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_configuration_authorized('dojo.change_test_type')
 def edit_test_type(request, ptid):
     tt = get_object_or_404(Test_Type, pk=ptid)
     form = Test_TypeForm(instance=tt)

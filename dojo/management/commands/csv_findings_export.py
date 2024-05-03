@@ -26,10 +26,6 @@ class Command(BaseCommand):
         findings = Finding.objects.filter(verified=True,
                                           active=True).select_related(
             "test__engagement__product")
-        opts = findings.model._meta
-        model = findings.model
-
-        model = findings.model
         writer = csv.writer(open(file_path, 'w'))
 
         headers = []
@@ -49,7 +45,7 @@ class Command(BaseCommand):
             row = []
             row.append(obj.test.engagement.product)
             for field in headers:
-                if field is not "product_name":
+                if field != "product_name":
                     value = getattr(obj, field)
                     if isinstance(value, str):
                         value = value.encode('utf-8').strip()

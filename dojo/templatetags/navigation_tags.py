@@ -1,8 +1,12 @@
 from django import template
 from django.utils.safestring import mark_safe as safe
 from django.utils.html import escape
+from urllib.parse import urlencode
+from django.utils.translation import gettext as _
 
-from dojo.models import Product_Type
+from dojo.authorization.roles_permissions import Permissions
+from dojo.product_type.queries import get_authorized_product_types
+
 
 register = template.Library()
 
@@ -17,16 +21,10 @@ def query_string_as_hidden(context):
         for param in parameters:
             parts = param.split('=')
             if len(parts) == 2:
-                inputs += "<input type='hidden' name='" + escape(parts[0]) + "' value='" + escape(parts[1]) + "'/>"
+                inputs += f"<input type='hidden' name='{escape(parts[0])}' value='{escape(parts[1])}'/>"
             else:
-                inputs += "<input type='hidden' name='" + escape(parts[0]) + "' value=''/>"
+                inputs += f"<input type='hidden' name='{escape(parts[0])}' value=''/>"
     return safe(inputs)
-
-
-@register.inclusion_tag('pt_nav_items.html')
-def pt_metric_nav():
-    pt = Product_Type.objects.all().order_by('name')
-    return {'pt': pt}
 
 
 @register.simple_tag
@@ -41,7 +39,7 @@ def url_replace(request, field='page', value=1):
 @register.simple_tag
 def dojo_sort(request, display='Name', value='title', default=None):
     field = 'o'
-    icon = '<i class="fa fa-sort'
+    icon = '<i class="fa-solid fa-sort'
     title = 'Click to sort '
     if field in request.GET:
         if value in request.GET[field]:
@@ -49,15 +47,15 @@ def dojo_sort(request, display='Name', value='title', default=None):
                 icon += '-desc'
                 title += 'ascending'
             else:
-                value = '-' + value
+                value = f'-{value}'
                 icon += '-asc'
                 title += 'descending'
         else:
             title += 'ascending'
     elif default:
-        icon += '-' + default
+        icon += f'-{default}'
         if default == 'asc':
-            value = '-' + value
+            value = f'-{value}'
             title += 'descending'
         else:
             title += 'ascending'
@@ -67,7 +65,7 @@ def dojo_sort(request, display='Name', value='title', default=None):
     icon += ' dd-sort"></i>'
     dict_ = request.GET.copy()
     dict_[field] = value
-    link = '<a title="' + title + '" href="?' + dict_.urlencode() + '">' + display + '&nbsp;' + icon + '</a>'
+    link = f'<a title="{title}" href="?{escape(urlencode(dict_))}">{_(display)}&nbsp;{icon}</a>'
     return safe(link)
 
 
@@ -133,3 +131,8 @@ def paginate(page, adjacent=2):
                      safe('Next')))
 
     return pages
+
+
+@register.filter
+def can_add_product(user):
+    return get_authorized_product_types(Permissions.Product_Type_Add_Product).count() > 0

@@ -1,0 +1,965 @@
+<?xml version="1.0"?><OWASPZAPReport version="D-2021-03-29" generated="Mon, 26 Apr 2021 07:03:32">
+<site name="http://172.17.0.2" host="172.17.0.2" port="80" ssl="false"><alerts><alertitem>
+  <pluginid>10020</pluginid>
+  <alertRef>10020</alertRef>
+  <alert>X-Frame-Options Header Not Set</alert>
+  <name>X-Frame-Options Header Not Set</name>
+  <riskcode>2</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Medium (Medium)</riskdesc>
+  <desc>&lt;p&gt;X-Frame-Options header is not included in the HTTP response to protect against &apos;ClickJacking&apos; attacks.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/brute/</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/sqli_blind/</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/exec/</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/instructions.php</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/setup.php</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/upload/</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/csrf/</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/sqli/</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/fi/?page=include.php</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/captcha/</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  </instances>
+  <count>11</count>
+  <solution>&lt;p&gt;Most modern Web browsers support the X-Frame-Options HTTP header. Ensure it&apos;s set on all web pages returned by your site (if you expect the page to be framed only by pages on your server (e.g. it&apos;s part of a FRAMESET) then you&apos;ll want to use SAMEORIGIN, otherwise if you never expect the page to be framed, you should use DENY. Alternatively consider implementing Content Security Policy&apos;s &quot;frame-ancestors&quot; directive. &lt;/p&gt;</solution>
+  <reference>&lt;p&gt;https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options&lt;/p&gt;</reference>
+  <cweid>16</cweid>
+  <wascid>15</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10038</pluginid>
+  <alertRef>10038</alertRef>
+  <alert>Content Security Policy (CSP) Header Not Set</alert>
+  <name>Content Security Policy (CSP) Header Not Set</name>
+  <riskcode>2</riskcode>
+  <confidence>3</confidence>
+  <riskdesc>Medium (High)</riskdesc>
+  <desc>&lt;p&gt;Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/fi/?page=include.php</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/instructions.php</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/sqli/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/exec/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/sitemap.xml</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/setup.php</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/captcha/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/upload/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/brute/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/csrf/</uri>
+  <method>GET</method>
+  </instance>
+  </instances>
+  <count>11</count>
+  <solution>&lt;p&gt;Ensure that your web server, application server, load balancer, etc. is configured to set the Content-Security-Policy header, to achieve optimal browser support: &quot;Content-Security-Policy&quot; for Chrome 25+, Firefox 23+ and Safari 7+, &quot;X-Content-Security-Policy&quot; for Firefox 4.0+ and Internet Explorer 10+, and &quot;X-WebKit-CSP&quot; for Chrome 14+ and Safari 6+.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;https://developer.mozilla.org/en-US/docs/Web/Security/CSP/Introducing_Content_Security_Policy&lt;/p&gt;&lt;p&gt;https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html&lt;/p&gt;&lt;p&gt;http://www.w3.org/TR/CSP/&lt;/p&gt;&lt;p&gt;http://w3c.github.io/webappsec/specs/content-security-policy/csp-specification.dev.html&lt;/p&gt;&lt;p&gt;http://www.html5rocks.com/en/tutorials/security/content-security-policy/&lt;/p&gt;&lt;p&gt;http://caniuse.com/#feat=contentsecuritypolicy&lt;/p&gt;&lt;p&gt;http://content-security-policy.com/&lt;/p&gt;</reference>
+  <cweid>16</cweid>
+  <wascid>15</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10108</pluginid>
+  <alertRef>10108</alertRef>
+  <alert>Reverse Tabnabbing</alert>
+  <name>Reverse Tabnabbing</name>
+  <riskcode>2</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Medium (Medium)</riskdesc>
+  <desc>&lt;p&gt;At least one link on this page is vulnerable to Reverse tabnabbing as it uses a target attribute without using both of the &quot;noopener&quot; and &quot;noreferrer&quot; keywords in the &quot;rel&quot; attribute, which allows the target page to take control of this page.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/brute/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;https://www.owasp.org/index.php/Testing_for_Brute_Force_(OWASP-AT-004)&quot; target=&quot;_blank&quot;&gt;https://www.owasp.org/index.php/Testing_for_Brute_Force_(OWASP-AT-004)&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;https://www.virtualbox.org/&quot; target=&quot;_blank&quot;&gt;VirtualBox&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/sqli/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;http://www.securiteam.com/securityreviews/5DP0N1P76E.html&quot; target=&quot;_blank&quot;&gt;http://www.securiteam.com/securityreviews/5DP0N1P76E.html&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/sqli_blind/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;http://www.securiteam.com/securityreviews/5DP0N1P76E.html&quot; target=&quot;_blank&quot;&gt;http://www.securiteam.com/securityreviews/5DP0N1P76E.html&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/xss_d/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;https://www.owasp.org/index.php/Cross-site_Scripting_(XSS)&quot; target=&quot;_blank&quot;&gt;https://www.owasp.org/index.php/Cross-site_Scripting_(XSS)&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/instructions.php</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;https://www.virtualbox.org/&quot; target=&quot;_blank&quot;&gt;https://www.virtualbox.org/&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/csrf/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;https://www.owasp.org/index.php/Cross-Site_Request_Forgery&quot; target=&quot;_blank&quot;&gt;https://www.owasp.org/index.php/Cross-Site_Request_Forgery&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/upload/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;https://www.owasp.org/index.php/Unrestricted_File_Upload&quot; target=&quot;_blank&quot;&gt;https://www.owasp.org/index.php/Unrestricted_File_Upload&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/fi/?page=include.php</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;https://en.wikipedia.org/wiki/Remote_File_Inclusion&quot; target=&quot;_blank&quot;&gt;https://en.wikipedia.org/wiki/Remote_File_Inclusion&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/captcha/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;https://www.google.com/recaptcha/admin/create&quot; target=&quot;_blank&quot;&gt;https://www.google.com/recaptcha/admin/create&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/exec/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;http://www.scribd.com/doc/2530476/Php-Endangers-Remote-Code-Execution&quot; target=&quot;_blank&quot;&gt;http://www.scribd.com/doc/2530476/Php-Endangers-Remote-Code-Execution&lt;/a&gt;</evidence>
+  </instance>
+  </instances>
+  <count>11</count>
+  <solution>&lt;p&gt;Do not use a target attribute, or if you have to then also add the attribute: rel=&quot;noopener noreferrer&quot;.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;https://owasp.org/www-community/attacks/Reverse_Tabnabbing&lt;/p&gt;&lt;p&gt;https://dev.to/ben/the-targetblank-vulnerability-by-example&lt;/p&gt;&lt;p&gt;https://mathiasbynens.github.io/rel-noopener/&lt;/p&gt;&lt;p&gt;https://medium.com/@jitbit/target-blank-the-most-underestimated-vulnerability-ever-96e328301f4c&lt;/p&gt;</reference>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10096</pluginid>
+  <alertRef>10096</alertRef>
+  <alert>Timestamp Disclosure - Unix</alert>
+  <name>Timestamp Disclosure - Unix</name>
+  <riskcode>0</riskcode>
+  <confidence>1</confidence>
+  <riskdesc>Informational (Low)</riskdesc>
+  <desc>&lt;p&gt;A timestamp was disclosed by the application/web server - Unix&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1019803690</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1839030562</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>909522486</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>722521979</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>40341101</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1309151649</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1732584194</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>405537848</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1894986606</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1473231341</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>155497632</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1990404162</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1700485571</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1069501632</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>38016083</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>2022574463</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>373897302</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1163531501</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>643717713</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1444681467</evidence>
+  </instance>
+  </instances>
+  <count>67</count>
+  <solution>&lt;p&gt;Manually confirm that the timestamp data is not sensitive, and that the data cannot be aggregated to disclose exploitable patterns.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;1019803690, which evaluates to: 2002-04-26 06:48:10&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;http://projects.webappsec.org/w/page/13246936/Information%20Leakage&lt;/p&gt;</reference>
+  <cweid>200</cweid>
+  <wascid>13</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10036</pluginid>
+  <alertRef>10036</alertRef>
+  <alert>Server Leaks Version Information via &quot;Server&quot; HTTP Response Header Field</alert>
+  <name>Server Leaks Version Information via &quot;Server&quot; HTTP Response Header Field</name>
+  <riskcode>1</riskcode>
+  <confidence>3</confidence>
+  <riskdesc>Low (High)</riskdesc>
+  <desc>&lt;p&gt;The web/application server is leaking version information via the &quot;Server&quot; HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/brute/</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/captcha/</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/csrf/</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/instructions.php</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/setup.php</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/upload/</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/robots.txt</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/sitemap.xml</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/fi/?page=include.php</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/exec/</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  </instances>
+  <count>11</count>
+  <solution>&lt;p&gt;Ensure that your web server, application server, load balancer, etc. is configured to suppress the &quot;Server&quot; header or provide generic details.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;http://httpd.apache.org/docs/current/mod/core.html#servertokens&lt;/p&gt;&lt;p&gt;http://msdn.microsoft.com/en-us/library/ff648552.aspx#ht_urlscan_007&lt;/p&gt;&lt;p&gt;http://blogs.msdn.com/b/varunm/archive/2013/04/23/remove-unwanted-http-response-headers.aspx&lt;/p&gt;&lt;p&gt;http://www.troyhunt.com/2012/02/shhh-dont-let-your-response-headers.html&lt;/p&gt;</reference>
+  <cweid>200</cweid>
+  <wascid>13</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10202</pluginid>
+  <alertRef>10202</alertRef>
+  <alert>Absence of Anti-CSRF Tokens</alert>
+  <name>Absence of Anti-CSRF Tokens</name>
+  <riskcode>1</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Low (Medium)</riskdesc>
+  <desc>&lt;p&gt;No Anti-CSRF tokens were found in a HTML submission form.&lt;/p&gt;&lt;p&gt;A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;CSRF attacks are effective in a number of situations, including:&lt;/p&gt;&lt;p&gt;    * The victim has an active session on the target site.&lt;/p&gt;&lt;p&gt;    * The victim is authenticated via HTTP auth on the target site.&lt;/p&gt;&lt;p&gt;    * The victim is on the same local network as the target site.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;CSRF has primarily been used to perform an action against a target site using the victim&apos;s privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/xss_d/</uri>
+  <method>GET</method>
+  <evidence>&lt;form name=&quot;XSS&quot; method=&quot;GET&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/captcha/</uri>
+  <method>GET</method>
+  <evidence>&lt;form action=&quot;#&quot; method=&quot;POST&quot; style=&quot;display:none;&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/xss_s/</uri>
+  <method>GET</method>
+  <evidence>&lt;form method=&quot;post&quot; name=&quot;guestform&quot; &quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/csrf/</uri>
+  <method>GET</method>
+  <evidence>&lt;form action=&quot;#&quot; method=&quot;GET&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/setup.php</uri>
+  <method>GET</method>
+  <evidence>&lt;form action=&quot;#&quot; method=&quot;post&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/brute/</uri>
+  <method>GET</method>
+  <evidence>&lt;form action=&quot;#&quot; method=&quot;GET&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/sqli/</uri>
+  <method>GET</method>
+  <evidence>&lt;form action=&quot;#&quot; method=&quot;GET&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/weak_id/</uri>
+  <method>GET</method>
+  <evidence>&lt;form method=&quot;post&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/exec/</uri>
+  <method>GET</method>
+  <evidence>&lt;form name=&quot;ping&quot; action=&quot;#&quot; method=&quot;post&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/sqli_blind/</uri>
+  <method>GET</method>
+  <evidence>&lt;form action=&quot;#&quot; method=&quot;GET&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/xss_r/</uri>
+  <method>GET</method>
+  <evidence>&lt;form name=&quot;XSS&quot; action=&quot;#&quot; method=&quot;GET&quot;&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/upload/</uri>
+  <method>GET</method>
+  <evidence>&lt;form enctype=&quot;multipart/form-data&quot; action=&quot;#&quot; method=&quot;POST&quot;&gt;</evidence>
+  </instance>
+  </instances>
+  <count>12</count>
+  <solution>&lt;p&gt;Phase: Architecture and Design&lt;/p&gt;&lt;p&gt;Use a vetted library or framework that does not allow this weakness to occur or provides constructs that make this weakness easier to avoid.&lt;/p&gt;&lt;p&gt;For example, use anti-CSRF packages such as the OWASP CSRFGuard.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Phase: Implementation&lt;/p&gt;&lt;p&gt;Ensure that your application is free of cross-site scripting issues, because most CSRF defenses can be bypassed using attacker-controlled script.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Phase: Architecture and Design&lt;/p&gt;&lt;p&gt;Generate a unique nonce for each form, place the nonce into the form, and verify the nonce upon receipt of the form. Be sure that the nonce is not predictable (CWE-330).&lt;/p&gt;&lt;p&gt;Note that this can be bypassed using XSS.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Identify especially dangerous operations. When the user performs a dangerous operation, send a separate confirmation request to ensure that the user intended to perform that operation.&lt;/p&gt;&lt;p&gt;Note that this can be bypassed using XSS.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Use the ESAPI Session Management control.&lt;/p&gt;&lt;p&gt;This control includes a component for CSRF.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Do not use the GET method for any request that triggers a state change.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Phase: Implementation&lt;/p&gt;&lt;p&gt;Check the HTTP Referer header to see if the request originated from an expected page. This could break legitimate functionality, because users or proxies may have disabled sending the Referer for privacy reasons.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;No known Anti-CSRF token [anticsrf, CSRFToken, __RequestVerificationToken, csrfmiddlewaretoken, authenticity_token, OWASP_CSRFTOKEN, anoncsrf, csrf_token, _csrf, _csrfSecret, __csrf_magic, CSRF] was found in the following HTML form: [Form 1: &quot;&quot; ].&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;http://projects.webappsec.org/Cross-Site-Request-Forgery&lt;/p&gt;&lt;p&gt;http://cwe.mitre.org/data/definitions/352.html&lt;/p&gt;</reference>
+  <cweid>352</cweid>
+  <wascid>9</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10031</pluginid>
+  <alertRef>10031</alertRef>
+  <alert>User Controllable HTML Element Attribute (Potential XSS)</alert>
+  <name>User Controllable HTML Element Attribute (Potential XSS)</name>
+  <riskcode>0</riskcode>
+  <confidence>1</confidence>
+  <riskdesc>Informational (Low)</riskdesc>
+  <desc>&lt;p&gt;This check looks at user-supplied input in query string parameters and POST data to identify where certain HTML attribute values might be controlled. This provides hot-spot detection for XSS (cross-site scripting) that will require further review by a security analyst to determine exploitability.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/captcha/</uri>
+  <method>POST</method>
+  <param>Change</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/exec/</uri>
+  <method>POST</method>
+  <param>Submit</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/csrf/?Change=Change&amp;password_conf=ZAP&amp;password_new=ZAP</uri>
+  <method>GET</method>
+  <param>Change</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/captcha/</uri>
+  <method>POST</method>
+  <param>Change</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/exec/</uri>
+  <method>POST</method>
+  <param>Submit</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/brute/?Login=Login&amp;password=ZAP&amp;username=ZAP</uri>
+  <method>GET</method>
+  <param>Login</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/upload/</uri>
+  <method>POST</method>
+  <param>MAX_FILE_SIZE</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/upload/</uri>
+  <method>POST</method>
+  <param>Upload</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/upload/</uri>
+  <method>POST</method>
+  <param>Upload</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/upload/</uri>
+  <method>POST</method>
+  <param>Upload</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/brute/?Login=Login&amp;password=ZAP&amp;username=ZAP</uri>
+  <method>GET</method>
+  <param>Login</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/csrf/?Change=Change&amp;password_conf=ZAP&amp;password_new=ZAP</uri>
+  <method>GET</method>
+  <param>Change</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/exec/</uri>
+  <method>POST</method>
+  <param>Submit</param>
+  </instance>
+  </instances>
+  <count>13</count>
+  <solution>&lt;p&gt;Validate all input and sanitize output it before writing to any HTML attributes.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;User-controlled HTML attribute values were found. Try injecting special characters to see if XSS might be possible. The page at the following URL:&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;http://172.17.0.2/vulnerabilities/captcha/&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;appears to include user input in: &lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;a(n) [input] tag [name] attribute &lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;The user input found was:&lt;/p&gt;&lt;p&gt;Change=Change&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;The user-controlled value was:&lt;/p&gt;&lt;p&gt;change&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;http://websecuritytool.codeplex.com/wikipage?title=Checks#user-controlled-html-attribute&lt;/p&gt;</reference>
+  <cweid>20</cweid>
+  <wascid>20</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10024</pluginid>
+  <alertRef>10024</alertRef>
+  <alert>Information Disclosure - Sensitive Information in URL</alert>
+  <name>Information Disclosure - Sensitive Information in URL</name>
+  <riskcode>0</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Informational (Medium)</riskdesc>
+  <desc>&lt;p&gt;The request appeared to contain sensitive information leaked in the URL. This can violate PCI and most organizational compliance policies. You can configure the list of strings for this check to add or remove values specific to your environment.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/brute/?Login=Login&amp;password=ZAP&amp;username=ZAP</uri>
+  <method>GET</method>
+  <param>username</param>
+  <evidence>username</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/csrf/?Change=Change&amp;password_conf=ZAP&amp;password_new=ZAP</uri>
+  <method>GET</method>
+  <param>password_conf</param>
+  <evidence>password_conf</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/brute/?Login=Login&amp;password=ZAP&amp;username=ZAP</uri>
+  <method>GET</method>
+  <param>password</param>
+  <evidence>password</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/csrf/?Change=Change&amp;password_conf=ZAP&amp;password_new=ZAP</uri>
+  <method>GET</method>
+  <param>password_new</param>
+  <evidence>password_new</evidence>
+  </instance>
+  </instances>
+  <count>4</count>
+  <solution>&lt;p&gt;Do not pass sensitive information in URIs.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;The URL contains potentially sensitive information. The following string was found via the pattern: user&lt;/p&gt;&lt;p&gt;username&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;&lt;/p&gt;</reference>
+  <cweid>200</cweid>
+  <wascid>13</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10054</pluginid>
+  <alertRef>10054</alertRef>
+  <alert>Cookie Without SameSite Attribute</alert>
+  <name>Cookie Without SameSite Attribute</name>
+  <riskcode>1</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Low (Medium)</riskdesc>
+  <desc>&lt;p&gt;A cookie has been set without the SameSite attribute, which means that the cookie can be sent as a result of a &apos;cross-site&apos; request. The SameSite attribute is an effective counter measure to cross-site request forgery, cross-site script inclusion, and timing attacks.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/security.php</uri>
+  <method>POST</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/security.php</uri>
+  <method>POST</method>
+  <param>PHPSESSID</param>
+  <evidence>Set-Cookie: PHPSESSID</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/weak_id/</uri>
+  <method>POST</method>
+  </instance>
+  </instances>
+  <count>3</count>
+  <solution>&lt;p&gt;Ensure that the SameSite attribute is set to either &apos;lax&apos; or ideally &apos;strict&apos; for all cookies.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site&lt;/p&gt;</reference>
+  <cweid>16</cweid>
+  <wascid>13</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10029</pluginid>
+  <alertRef>10029</alertRef>
+  <alert>Cookie Poisoning</alert>
+  <name>Cookie Poisoning</name>
+  <riskcode>0</riskcode>
+  <confidence>1</confidence>
+  <riskdesc>Informational (Low)</riskdesc>
+  <desc>&lt;p&gt;This check looks at user-supplied input in query string parameters and POST data to identify where cookie parameters might be controlled. This is called a cookie poisoning attack, and becomes exploitable when an attacker can manipulate the cookie in various ways. In some cases this will not be exploitable, however, allowing URL parameters to set cookie values is generally considered a bug.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/security.php</uri>
+  <method>POST</method>
+  <param>security</param>
+  </instance>
+  </instances>
+  <count>1</count>
+  <solution>&lt;p&gt;Do not allow user input to control cookie names and values. If some query string parameters must be set in cookie values, be sure to filter out semicolon&apos;s that can serve as name/value pair delimiters.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;An attacker may be able to poison cookie values through POST parameters. To test if this is a more serious issue, you should try resending that request as a GET, with the POST parameter included as a query string parameter. For example:  http://nottrusted.com/page?value=maliciousInput.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;This was identified at:&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;http://172.17.0.2/security.php&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;User-input was found in the following cookie:&lt;/p&gt;&lt;p&gt;security=low&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;The user input was:&lt;/p&gt;&lt;p&gt;security=low&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;http://websecuritytool.codeplex.com/wikipage?title=Checks#user-controlled-cookie&lt;/p&gt;</reference>
+  <cweid>20</cweid>
+  <wascid>20</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10021</pluginid>
+  <alertRef>10021</alertRef>
+  <alert>X-Content-Type-Options Header Missing</alert>
+  <name>X-Content-Type-Options Header Missing</name>
+  <riskcode>1</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Low (Medium)</riskdesc>
+  <desc>&lt;p&gt;The Anti-MIME-Sniffing header X-Content-Type-Options was not set to &apos;nosniff&apos;. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/upload/</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/robots.txt</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/instructions.php</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/fi/?page=include.php</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/sqli/</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/captcha/</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/csrf/</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/brute/</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/exec/</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/setup.php</uri>
+  <method>GET</method>
+  <param>X-Content-Type-Options</param>
+  </instance>
+  </instances>
+  <count>11</count>
+  <solution>&lt;p&gt;Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to &apos;nosniff&apos; for all web pages.&lt;/p&gt;&lt;p&gt;If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.&lt;/p&gt;&lt;p&gt;At &quot;High&quot; threshold this scan rule will not alert on client or server error responses.&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;http://msdn.microsoft.com/en-us/library/ie/gg622941%28v=vs.85%29.aspx&lt;/p&gt;&lt;p&gt;https://owasp.org/www-community/Security_Headers&lt;/p&gt;</reference>
+  <cweid>16</cweid>
+  <wascid>15</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10017</pluginid>
+  <alertRef>10017</alertRef>
+  <alert>Cross-Domain JavaScript Source File Inclusion</alert>
+  <name>Cross-Domain JavaScript Source File Inclusion</name>
+  <riskcode>1</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Low (Medium)</riskdesc>
+  <desc>&lt;p&gt;The page includes one or more script files from a third-party domain.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/captcha/</uri>
+  <method>POST</method>
+  <param>https://www.google.com/recaptcha/api.js</param>
+  <evidence>&lt;script src=&apos;https://www.google.com/recaptcha/api.js&apos;&gt;&lt;/script&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/captcha/</uri>
+  <method>GET</method>
+  <param>https://www.google.com/recaptcha/api.js</param>
+  <evidence>&lt;script src=&apos;https://www.google.com/recaptcha/api.js&apos;&gt;&lt;/script&gt;</evidence>
+  </instance>
+  </instances>
+  <count>2</count>
+  <solution>&lt;p&gt;Ensure JavaScript source files are loaded from only trusted sources, and the sources can&apos;t be controlled by end users of the application.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;&lt;/p&gt;</reference>
+  <cweid>829</cweid>
+  <wascid>15</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10109</pluginid>
+  <alertRef>10109</alertRef>
+  <alert>Modern Web Application</alert>
+  <name>Modern Web Application</name>
+  <riskcode>0</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Informational (Medium)</riskdesc>
+  <desc>&lt;p&gt;The application appears to be a modern web application. If you need to explore it automatically then the Ajax Spider may well be more effective than the standard one.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/phpinfo.php</uri>
+  <method>GET</method>
+  <evidence>&lt;a name=&quot;module_apache2handler&quot;&gt;apache2handler&lt;/a&gt;</evidence>
+  </instance>
+  </instances>
+  <count>1</count>
+  <solution>&lt;p&gt;This is an informational alert and so no changes are required.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;Links have been found that do not have traditional href attributes, which is an indication that this is a modern web application.&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;&lt;/p&gt;</reference>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10010</pluginid>
+  <alertRef>10010</alertRef>
+  <alert>Cookie No HttpOnly Flag</alert>
+  <name>Cookie No HttpOnly Flag</name>
+  <riskcode>1</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Low (Medium)</riskdesc>
+  <desc>&lt;p&gt;A cookie has been set without the HttpOnly flag, which means that the cookie can be accessed by JavaScript. If a malicious script can be run on this page then the cookie will be accessible and can be transmitted to another site. If this is a session cookie then session hijacking may be possible.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/security.php</uri>
+  <method>POST</method>
+  <param>PHPSESSID</param>
+  <evidence>Set-Cookie: PHPSESSID</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/security.php</uri>
+  <method>POST</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/weak_id/</uri>
+  <method>POST</method>
+  </instance>
+  </instances>
+  <count>3</count>
+  <solution>&lt;p&gt;Ensure that the HttpOnly flag is set for all cookies.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;https://owasp.org/www-community/HttpOnly&lt;/p&gt;</reference>
+  <cweid>16</cweid>
+  <wascid>13</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10027</pluginid>
+  <alertRef>10027</alertRef>
+  <alert>Information Disclosure - Suspicious Comments</alert>
+  <name>Information Disclosure - Suspicious Comments</name>
+  <riskcode>0</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Informational (Medium)</riskdesc>
+  <desc>&lt;p&gt;The response appears to contain suspicious comments which may help an attacker. Note: Matches made within script blocks or files are against the entire content not only comments.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/setup.php</uri>
+  <method>GET</method>
+  <evidence>db</evidence>
+  </instance>
+  </instances>
+  <count>1</count>
+  <solution>&lt;p&gt;Remove all comments that return information that may help an attacker and fix any underlying problems they refer to.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;The following pattern was used: \bDB\b and was detected in the element starting with: &quot;&lt;!-- Create db button --&gt;&quot;, see evidence field for the suspicious comment/snippet.&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;&lt;/p&gt;</reference>
+  <cweid>200</cweid>
+  <wascid>13</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10023</pluginid>
+  <alertRef>10023</alertRef>
+  <alert>Information Disclosure - Debug Error Messages</alert>
+  <name>Information Disclosure - Debug Error Messages</name>
+  <riskcode>1</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Low (Medium)</riskdesc>
+  <desc>&lt;p&gt;The response appeared to contain common error messages returned by platforms such as ASP.NET, and Web-servers such as IIS and Apache. You can configure the list of common debug messages.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/instructions.php</uri>
+  <method>GET</method>
+  <evidence>PHP warning</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/instructions.php?doc=readme</uri>
+  <method>GET</method>
+  <evidence>PHP warning</evidence>
+  </instance>
+  </instances>
+  <count>2</count>
+  <solution>&lt;p&gt;Disable debugging messages before pushing to production.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;&lt;/p&gt;</reference>
+  <cweid>200</cweid>
+  <wascid>13</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10027</pluginid>
+  <alertRef>10027</alertRef>
+  <alert>Information Disclosure - Suspicious Comments</alert>
+  <name>Information Disclosure - Suspicious Comments</name>
+  <riskcode>0</riskcode>
+  <confidence>1</confidence>
+  <riskdesc>Informational (Low)</riskdesc>
+  <desc>&lt;p&gt;The response appears to contain suspicious comments which may help an attacker. Note: Matches made within script blocks or files are against the entire content not only comments.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>POST</method>
+  <evidence>from</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>from</evidence>
+  </instance>
+  </instances>
+  <count>2</count>
+  <solution>&lt;p&gt;Remove all comments that return information that may help an attacker and fix any underlying problems they refer to.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;The following pattern was used: \bFROM\b and was detected in the element starting with: &quot;&lt;script&gt;&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;/*&lt;/p&gt;&lt;p&gt;MD5 code from here&lt;/p&gt;&lt;p&gt;https://github.com/blueimp/JavaScript-MD5&lt;/p&gt;&lt;p&gt;*/&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;!function(n){&quot;use strict&quot;;function t(n,t){var r=(6&quot;, see evidence field for the suspicious comment/snippet.&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;&lt;/p&gt;</reference>
+  <cweid>200</cweid>
+  <wascid>13</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10055</pluginid>
+  <alertRef>10055</alertRef>
+  <alert>CSP: Wildcard Directive</alert>
+  <name>CSP: Wildcard Directive</name>
+  <riskcode>2</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Medium (Medium)</riskdesc>
+  <desc>&lt;p&gt;The following directives either allow wildcard sources (or ancestors), are not defined, or are overly broadly defined: &lt;/p&gt;&lt;p&gt;style-src, style-src-elem, style-src-attr, img-src, connect-src, frame-src, frame-ancestors, font-src, media-src, object-src, manifest-src, prefetch-src, form-action&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;The directive(s): frame-ancestors, form-action are among the directives that do not fallback to default-src, missing/excluding them is the same as allowing anything.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/csp/</uri>
+  <method>GET</method>
+  <param>Content-Security-Policy</param>
+  <evidence>script-src &apos;self&apos; https://pastebin.com  example.com code.jquery.com https://ssl.google-analytics.com ;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/csp/</uri>
+  <method>POST</method>
+  <param>Content-Security-Policy</param>
+  <evidence>script-src &apos;self&apos; https://pastebin.com  example.com code.jquery.com https://ssl.google-analytics.com ;</evidence>
+  </instance>
+  </instances>
+  <count>2</count>
+  <solution>&lt;p&gt;Ensure that your web server, application server, load balancer, etc. is properly configured to set the Content-Security-Policy header.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;http://www.w3.org/TR/CSP2/&lt;/p&gt;&lt;p&gt;http://www.w3.org/TR/CSP/&lt;/p&gt;&lt;p&gt;http://caniuse.com/#search=content+security+policy&lt;/p&gt;&lt;p&gt;http://content-security-policy.com/&lt;/p&gt;&lt;p&gt;https://github.com/shapesecurity/salvation&lt;/p&gt;&lt;p&gt;https://developers.google.com/web/fundamentals/security/csp#policy_applies_to_a_wide_variety_of_resources&lt;/p&gt;</reference>
+  <cweid>16</cweid>
+  <wascid>15</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>2</pluginid>
+  <alertRef>2</alertRef>
+  <alert>Private IP Disclosure</alert>
+  <name>Private IP Disclosure</name>
+  <riskcode>1</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Low (Medium)</riskdesc>
+  <desc>&lt;p&gt;A private IP (such as 10.x.x.x, 172.x.x.x, 192.168.x.x) or an Amazon EC2 private hostname (for example, ip-10-0-56-78) has been found in the HTTP response body. This information might be helpful for further attacks targeting internal systems.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/fi/?page=file3.php</uri>
+  <method>GET</method>
+  <evidence>172.17.0.3</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/fi/?page=file1.php</uri>
+  <method>GET</method>
+  <evidence>172.17.0.3</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/phpinfo.php</uri>
+  <method>GET</method>
+  <evidence>172.17.0.3</evidence>
+  </instance>
+  </instances>
+  <count>3</count>
+  <solution>&lt;p&gt;Remove the private IP address from the HTTP response body.  For comments, use JSP/ASP/PHP comment instead of HTML/JavaScript comment which can be seen by client browsers.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;172.17.0.3&lt;/p&gt;&lt;p&gt;&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;https://tools.ietf.org/html/rfc1918&lt;/p&gt;</reference>
+  <cweid>200</cweid>
+  <wascid>13</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+</alerts></site></OWASPZAPReport>

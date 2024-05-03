@@ -1,0 +1,1451 @@
+{
+    "vulnerabilities": [
+      {
+        "id": "SNYK-DEBIAN11-GCC10-5901313",
+        "cpes": [],
+        "title": "CVE-2023-4039",
+        "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+        "credit": [
+          ""
+        ],
+        "semver": {
+          "vulnerable": [
+            "*"
+          ]
+        },
+        "exploit": "Not Defined",
+        "fixedIn": [],
+        "patches": [],
+        "insights": {
+          "triageAdvice": null
+        },
+        "language": "linux",
+        "severity": "low",
+        "cvssScore": 4.8,
+        "malicious": false,
+        "isDisputed": false,
+        "references": [
+          {
+            "url": "https://security-tracker.debian.org/tracker/CVE-2023-4039",
+            "title": "https://security-tracker.debian.org/tracker/CVE-2023-4039"
+          },
+          {
+            "url": "https://developer.arm.com/Arm%20Security%20Center/GCC%20Stack%20Protector%20Vulnerability%20AArch64",
+            "title": "https://developer.arm.com/Arm%20Security%20Center/GCC%20Stack%20Protector%20Vulnerability%20AArch64"
+          },
+          {
+            "url": "https://github.com/metaredteam/external-disclosures/security/advisories/GHSA-x7ch-h5rf-w2mf",
+            "title": "https://github.com/metaredteam/external-disclosures/security/advisories/GHSA-x7ch-h5rf-w2mf"
+          }
+        ],
+        "cvssDetails": [
+          {
+            "assigner": "SUSE",
+            "severity": "high",
+            "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "cvssV3BaseScore": 8.1,
+            "modificationTime": "2023-09-20T11:09:16.812999Z"
+          },
+          {
+            "assigner": "NVD",
+            "severity": "medium",
+            "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+            "cvssV3BaseScore": 4.8,
+            "modificationTime": "2023-09-15T01:10:52.576715Z"
+          },
+          {
+            "assigner": "Red Hat",
+            "severity": "medium",
+            "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+            "cvssV3BaseScore": 4.8,
+            "modificationTime": "2023-11-08T09:43:38.403520Z"
+          }
+        ],
+        "description": "## NVD Description\n**_Note:_** _Versions mentioned in the description apply only to the upstream `gcc-10` package and not the `gcc-10` package as distributed by `Debian`._\n_See `How to fix?` for `Debian:11` relevant fixed versions and status._\n\n\n\nA failure in the -fstack-protector feature in GCC-based toolchains \nthat target AArch64 allows an attacker to exploit an existing buffer \noverflow in dynamically-sized local variables in your application \nwithout this being detected. This stack-protector failure only applies \nto C99-style dynamically-sized local variables or those created using \nalloca(). The stack-protector operates as intended for statically-sized \nlocal variables.\n\nThe default behavior when the stack-protector \ndetects an overflow is to terminate your application, resulting in \ncontrolled loss of availability. An attacker who can exploit a buffer \noverflow without triggering the stack-protector might be able to change \nprogram flow control to cause an uncontrolled loss of availability or to\n go further and affect confidentiality or integrity.\n\n\n\n\n\n\n## Remediation\nThere is no fixed version for `Debian:11` `gcc-10`.\n## References\n- [ADVISORY](https://security-tracker.debian.org/tracker/CVE-2023-4039)\n- [arm-security@arm.com](https://developer.arm.com/Arm%20Security%20Center/GCC%20Stack%20Protector%20Vulnerability%20AArch64)\n- [arm-security@arm.com](https://github.com/metaredteam/external-disclosures/security/advisories/GHSA-x7ch-h5rf-w2mf)\n",
+        "epssDetails": {
+          "percentile": "0.14414",
+          "probability": "0.00046",
+          "modelVersion": "v2023.03.01"
+        },
+        "identifiers": {
+          "CVE": [
+            "CVE-2023-4039"
+          ],
+          "CWE": [],
+          "ALTERNATIVE": []
+        },
+        "nvdSeverity": "medium",
+        "packageName": "gcc-10",
+        "creationTime": "2023-09-14T00:55:43.720861Z",
+        "disclosureTime": "2023-09-13T09:15:15.690000Z",
+        "packageManager": "debian:11",
+        "publicationTime": "2023-09-14T00:54:21.518198Z",
+        "modificationTime": "2023-11-08T09:43:38.403520Z",
+        "socialTrendAlert": false,
+        "relativeImportance": "minor issue",
+        "severityWithCritical": "low",
+        "from": [
+          "docker-image|sarim04/juiceshop@latest",
+          "gcc-10/libgcc-s1@10.2.1-6"
+        ],
+        "upgradePath": [],
+        "isUpgradable": false,
+        "isPatchable": false,
+        "name": "gcc-10/libgcc-s1",
+        "version": "10.2.1-6"
+      }
+    ],
+    "ok": false,
+    "dependencyCount": 9,
+    "org": "sarim04",
+    "policy": "# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.\nversion: v1.25.1\nignore: {}\npatch: {}\n",
+    "isPrivate": true,
+    "licensesPolicy": {
+      "severities": {},
+      "orgLicenseRules": {
+        "AGPL-1.0": {
+          "licenseType": "AGPL-1.0",
+          "severity": "high",
+          "instructions": ""
+        },
+        "AGPL-3.0": {
+          "licenseType": "AGPL-3.0",
+          "severity": "high",
+          "instructions": ""
+        },
+        "Artistic-1.0": {
+          "licenseType": "Artistic-1.0",
+          "severity": "medium",
+          "instructions": ""
+        },
+        "Artistic-2.0": {
+          "licenseType": "Artistic-2.0",
+          "severity": "medium",
+          "instructions": ""
+        },
+        "CDDL-1.0": {
+          "licenseType": "CDDL-1.0",
+          "severity": "medium",
+          "instructions": ""
+        },
+        "CPOL-1.02": {
+          "licenseType": "CPOL-1.02",
+          "severity": "high",
+          "instructions": ""
+        },
+        "EPL-1.0": {
+          "licenseType": "EPL-1.0",
+          "severity": "medium",
+          "instructions": ""
+        },
+        "GPL-2.0": {
+          "licenseType": "GPL-2.0",
+          "severity": "high",
+          "instructions": ""
+        },
+        "GPL-3.0": {
+          "licenseType": "GPL-3.0",
+          "severity": "high",
+          "instructions": ""
+        },
+        "LGPL-2.0": {
+          "licenseType": "LGPL-2.0",
+          "severity": "medium",
+          "instructions": ""
+        },
+        "LGPL-2.1": {
+          "licenseType": "LGPL-2.1",
+          "severity": "medium",
+          "instructions": ""
+        },
+        "LGPL-3.0": {
+          "licenseType": "LGPL-3.0",
+          "severity": "medium",
+          "instructions": ""
+        },
+        "MPL-1.1": {
+          "licenseType": "MPL-1.1",
+          "severity": "medium",
+          "instructions": ""
+        },
+        "MPL-2.0": {
+          "licenseType": "MPL-2.0",
+          "severity": "medium",
+          "instructions": ""
+        },
+        "MS-RL": {
+          "licenseType": "MS-RL",
+          "severity": "medium",
+          "instructions": ""
+        },
+        "SimPL-2.0": {
+          "licenseType": "SimPL-2.0",
+          "severity": "high",
+          "instructions": ""
+        }
+      }
+    },
+    "packageManager": "deb",
+    "ignoreSettings": {
+      "adminOnly": false,
+      "reasonRequired": false,
+      "disregardFilesystemIgnores": false
+    },
+    "docker": {
+      "binariesVulns": {
+        "issuesData": {},
+        "affectedPkgs": {}
+      }
+    },
+    "summary": "67 vulnerable dependency paths",
+    "filesystemPolicy": false,
+    "filtered": {
+      "ignore": [],
+      "patch": []
+    },
+    "uniqueCount": 13,
+    "projectName": "docker-image|sarim04/juiceshop",
+    "platform": "linux/amd64",
+    "hasUnknownVersions": false,
+    "path": "sarim04/juiceshop:latest/juiceshop",
+    "applications": [
+      {
+        "vulnerabilities": [
+          {
+            "id": "SNYK-JS-EXPRESSJWT-575022",
+            "title": "Authorization Bypass",
+            "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "credit": [
+              "IST Group"
+            ],
+            "semver": {
+              "vulnerable": [
+                "<6.0.0"
+              ]
+            },
+            "exploit": "Not Defined",
+            "fixedIn": [
+              "6.0.0"
+            ],
+            "patches": [],
+            "insights": {
+              "triageAdvice": null
+            },
+            "language": "js",
+            "severity": "high",
+            "cvssScore": 7.4,
+            "functions": [],
+            "malicious": false,
+            "isDisputed": false,
+            "moduleName": "express-jwt",
+            "references": [
+              {
+                "url": "https://github.com/auth0/express-jwt/commit/7ecab5f8f0cab5297c2b863596566eb0c019cdef",
+                "title": "GitHub Commit"
+              }
+            ],
+            "cvssDetails": [
+              {
+                "assigner": "NVD",
+                "severity": "critical",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+                "cvssV3BaseScore": 9.1,
+                "modificationTime": "2022-10-22T01:10:30.246806Z"
+              }
+            ],
+            "description": "## Overview\n[express-jwt](https://www.npmjs.com/package/express-jwt) is a JWT authentication middleware.\n\nAffected versions of this package are vulnerable to Authorization Bypass. The `algorithms` entry to be specified in the configuration is not being enforced. When `algorithms` is not specified in the configuration, with the combination of `jwks-rsa`, it may lead to authorization bypass.\n## Remediation\nUpgrade `express-jwt` to version 6.0.0 or higher.\n## References\n- [GitHub Commit](https://github.com/auth0/express-jwt/commit/7ecab5f8f0cab5297c2b863596566eb0c019cdef)\n",
+            "epssDetails": {
+              "percentile": "0.57214",
+              "probability": "0.00197",
+              "modelVersion": "v2023.03.01"
+            },
+            "identifiers": {
+              "CVE": [
+                "CVE-2020-15084"
+              ],
+              "CWE": [
+                "CWE-285"
+              ],
+              "GHSA": [
+                "GHSA-6g6m-m6h5-w9gf"
+              ]
+            },
+            "packageName": "express-jwt",
+            "proprietary": false,
+            "creationTime": "2020-07-01T09:33:11.790635Z",
+            "functions_new": [],
+            "alternativeIds": [],
+            "disclosureTime": "2020-07-01T09:30:03Z",
+            "packageManager": "npm",
+            "publicationTime": "2020-07-01T15:32:36Z",
+            "modificationTime": "2022-10-22T01:10:30.246806Z",
+            "socialTrendAlert": false,
+            "severityWithCritical": "high",
+            "from": [
+              "juice-shop@15.3.0",
+              "express-jwt@0.1.3"
+            ],
+            "upgradePath": [
+              false,
+              "express-jwt@6.0.0"
+            ],
+            "isUpgradable": true,
+            "isPatchable": false,
+            "name": "express-jwt",
+            "version": "0.1.3"
+          },
+          {
+            "id": "SNYK-JS-JSONWEBTOKEN-3180022",
+            "title": "Improper Authentication",
+            "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:L/I:H/A:L",
+            "credit": [
+              "Unknown"
+            ],
+            "semver": {
+              "vulnerable": [
+                "<9.0.0"
+              ]
+            },
+            "exploit": "Not Defined",
+            "fixedIn": [
+              "9.0.0"
+            ],
+            "patches": [],
+            "insights": {
+              "triageAdvice": null
+            },
+            "language": "js",
+            "severity": "medium",
+            "cvssScore": 6.4,
+            "functions": [],
+            "malicious": false,
+            "isDisputed": false,
+            "moduleName": "jsonwebtoken",
+            "references": [
+              {
+                "url": "https://github.com/auth0/node-jsonwebtoken/commit/e1fa9dcc12054a8681db4e6373da1b30cf7016e3",
+                "title": "GitHub Commit"
+              },
+              {
+                "url": "https://github.com/auth0/node-jsonwebtoken/releases/tag/v9.0.0",
+                "title": "GitHub Release"
+              }
+            ],
+            "cvssDetails": [
+              {
+                "assigner": "NVD",
+                "severity": "high",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:L",
+                "cvssV3BaseScore": 7.6,
+                "modificationTime": "2023-02-28T01:10:17.504751Z"
+              }
+            ],
+            "description": "## Overview\n[jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) is a JSON Web Token implementation (symmetric and asymmetric)\n\nAffected versions of this package are vulnerable to Improper Authentication such that the lack of algorithm definition in the `jwt.verify()` function can lead to signature validation bypass due to defaulting to the `none` algorithm for signature verification. \r\n\r\n## Exploitability\r\nUsers are affected only if all of the following conditions are true for the `jwt.verify()` function:\r\n\r\n1) A token with no signature is received.\r\n\r\n2) No algorithms are specified.\r\n\r\n3) A falsy (e.g., `null`, `false`, `undefined`) secret or key is passed.\n## Remediation\nUpgrade `jsonwebtoken` to version 9.0.0 or higher.\n## References\n- [GitHub Commit](https://github.com/auth0/node-jsonwebtoken/commit/e1fa9dcc12054a8681db4e6373da1b30cf7016e3)\n- [GitHub Release](https://github.com/auth0/node-jsonwebtoken/releases/tag/v9.0.0)\n",
+            "epssDetails": {
+              "percentile": "0.13102",
+              "probability": "0.00046",
+              "modelVersion": "v2023.03.01"
+            },
+            "identifiers": {
+              "CVE": [
+                "CVE-2022-23540"
+              ],
+              "CWE": [
+                "CWE-287"
+              ],
+              "GHSA": [
+                "GHSA-qwph-4952-7xr6"
+              ]
+            },
+            "packageName": "jsonwebtoken",
+            "proprietary": false,
+            "creationTime": "2022-12-22T09:09:36.072853Z",
+            "functions_new": [],
+            "alternativeIds": [],
+            "disclosureTime": "2022-12-22T03:32:59Z",
+            "packageManager": "npm",
+            "publicationTime": "2022-12-22T09:13:25.290846Z",
+            "modificationTime": "2023-02-28T01:10:17.504751Z",
+            "socialTrendAlert": false,
+            "severityWithCritical": "medium",
+            "from": [
+              "juice-shop@15.3.0",
+              "jsonwebtoken@0.4.0"
+            ],
+            "upgradePath": [
+              false,
+              "jsonwebtoken@9.0.0"
+            ],
+            "isUpgradable": true,
+            "isPatchable": false,
+            "name": "jsonwebtoken",
+            "version": "0.4.0"
+          },
+          {
+            "id": "SNYK-JS-JSONWEBTOKEN-3180024",
+            "title": "Improper Restriction of Security Token Assignment",
+            "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
+            "credit": [
+              "Unknown"
+            ],
+            "semver": {
+              "vulnerable": [
+                "<9.0.0"
+              ]
+            },
+            "exploit": "Not Defined",
+            "fixedIn": [
+              "9.0.0"
+            ],
+            "patches": [],
+            "insights": {
+              "triageAdvice": null
+            },
+            "language": "js",
+            "severity": "medium",
+            "cvssScore": 6.5,
+            "functions": [],
+            "malicious": false,
+            "isDisputed": false,
+            "moduleName": "jsonwebtoken",
+            "references": [
+              {
+                "url": "https://github.com/auth0/node-jsonwebtoken/commit/e1fa9dcc12054a8681db4e6373da1b30cf7016e3",
+                "title": "GitHub Commit"
+              },
+              {
+                "url": "https://github.com/auth0/node-jsonwebtoken/releases/tag/v9.0.0",
+                "title": "GitHub Release"
+              }
+            ],
+            "cvssDetails": [
+              {
+                "assigner": "NVD",
+                "severity": "medium",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L",
+                "cvssV3BaseScore": 6.3,
+                "modificationTime": "2023-02-28T01:10:17.572355Z"
+              }
+            ],
+            "description": "## Overview\n[jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) is a JSON Web Token implementation (symmetric and asymmetric)\n\nAffected versions of this package are vulnerable to Improper Restriction of Security Token Assignment via the `secretOrPublicKey ` argument due to misconfigurations of the key retrieval function `jwt.verify()`. Exploiting this vulnerability might result in incorrect verification of forged tokens when tokens signed with an asymmetric public key could be verified with a symmetric HS256 algorithm.\r\n\r\n**Note:**\r\nThis vulnerability affects your application if it supports the usage of both symmetric and asymmetric keys in `jwt.verify()` implementation with the same key retrieval function.\n## Remediation\nUpgrade `jsonwebtoken` to version 9.0.0 or higher.\n## References\n- [GitHub Commit](https://github.com/auth0/node-jsonwebtoken/commit/e1fa9dcc12054a8681db4e6373da1b30cf7016e3)\n- [GitHub Release](https://github.com/auth0/node-jsonwebtoken/releases/tag/v9.0.0)\n",
+            "epssDetails": {
+              "percentile": "0.19014",
+              "probability": "0.00053",
+              "modelVersion": "v2023.03.01"
+            },
+            "identifiers": {
+              "CVE": [
+                "CVE-2022-23541"
+              ],
+              "CWE": [
+                "CWE-1259"
+              ],
+              "GHSA": [
+                "GHSA-hjrf-2m68-5959"
+              ]
+            },
+            "packageName": "jsonwebtoken",
+            "proprietary": false,
+            "creationTime": "2022-12-22T09:14:27.155728Z",
+            "functions_new": [],
+            "alternativeIds": [],
+            "disclosureTime": "2022-12-22T03:33:19Z",
+            "packageManager": "npm",
+            "publicationTime": "2022-12-22T09:16:03.621406Z",
+            "modificationTime": "2023-02-28T01:10:17.572355Z",
+            "socialTrendAlert": false,
+            "severityWithCritical": "medium",
+            "from": [
+              "juice-shop@15.3.0",
+              "jsonwebtoken@0.4.0"
+            ],
+            "upgradePath": [
+              false,
+              "jsonwebtoken@9.0.0"
+            ],
+            "isUpgradable": true,
+            "isPatchable": false,
+            "name": "jsonwebtoken",
+            "version": "0.4.0"
+          },
+          {
+            "id": "SNYK-JS-JSONWEBTOKEN-3180026",
+            "title": "Use of a Broken or Risky Cryptographic Algorithm",
+            "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:N",
+            "credit": [
+              "Unknown"
+            ],
+            "semver": {
+              "vulnerable": [
+                "<9.0.0"
+              ]
+            },
+            "exploit": "Not Defined",
+            "fixedIn": [
+              "9.0.0"
+            ],
+            "patches": [],
+            "insights": {
+              "triageAdvice": null
+            },
+            "language": "js",
+            "severity": "medium",
+            "cvssScore": 6.8,
+            "functions": [],
+            "malicious": false,
+            "isDisputed": false,
+            "moduleName": "jsonwebtoken",
+            "references": [
+              {
+                "url": "https://github.com/auth0/node-jsonwebtoken/commit/e1fa9dcc12054a8681db4e6373da1b30cf7016e3",
+                "title": "GitHub Commit"
+              },
+              {
+                "url": "https://github.com/auth0/node-jsonwebtoken/releases/tag/v9.0.0",
+                "title": "GitHub Release"
+              }
+            ],
+            "cvssDetails": [
+              {
+                "assigner": "NVD",
+                "severity": "high",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N",
+                "cvssV3BaseScore": 8.1,
+                "modificationTime": "2022-12-31T01:11:45.823807Z"
+              }
+            ],
+            "description": "## Overview\n[jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) is a JSON Web Token implementation (symmetric and asymmetric)\n\nAffected versions of this package are vulnerable to Use of a Broken or Risky Cryptographic Algorithm such that the library can be misconfigured to use legacy, insecure key types for signature verification. For example, DSA keys could be used with the RS256 algorithm. \r\n\r\n## Exploitability\r\n\r\nUsers are affected when using an algorithm and a key type _other_ than the combinations mentioned below:\r\n\r\nEC: ES256, ES384, ES512\r\n                  \r\nRSA: RS256, RS384, RS512, PS256, PS384, PS512 \r\n\r\nRSA-PSS: PS256, PS384, PS512                      \r\n\r\nAnd for Elliptic Curve algorithms:\r\n\r\nES256: prime256v1\r\n\r\nES384: secp384r1\r\n\r\nES512:  secp521r1 \r\n\r\n## Workaround \r\n\r\nUsers who are unable to upgrade to the fixed version can use the  `allowInvalidAsymmetricKeyTypes` option  to `true` in the `sign()` and `verify()` functions to continue usage of invalid key type/algorithm combination in 9.0.0 for legacy compatibility.\n## Remediation\nUpgrade `jsonwebtoken` to version 9.0.0 or higher.\n## References\n- [GitHub Commit](https://github.com/auth0/node-jsonwebtoken/commit/e1fa9dcc12054a8681db4e6373da1b30cf7016e3)\n- [GitHub Release](https://github.com/auth0/node-jsonwebtoken/releases/tag/v9.0.0)\n",
+            "epssDetails": {
+              "percentile": "0.17011",
+              "probability": "0.00050",
+              "modelVersion": "v2023.03.01"
+            },
+            "identifiers": {
+              "CVE": [
+                "CVE-2022-23539"
+              ],
+              "CWE": [
+                "CWE-327"
+              ],
+              "GHSA": [
+                "GHSA-8cf7-32gw-wr33"
+              ]
+            },
+            "packageName": "jsonwebtoken",
+            "proprietary": false,
+            "creationTime": "2022-12-22T09:19:03.430735Z",
+            "functions_new": [],
+            "alternativeIds": [],
+            "disclosureTime": "2022-12-22T03:32:22Z",
+            "packageManager": "npm",
+            "publicationTime": "2022-12-22T10:32:50.173080Z",
+            "modificationTime": "2023-01-01T13:30:43.098324Z",
+            "socialTrendAlert": false,
+            "severityWithCritical": "medium",
+            "from": [
+              "juice-shop@15.3.0",
+              "jsonwebtoken@0.4.0"
+            ],
+            "upgradePath": [
+              false,
+              "jsonwebtoken@9.0.0"
+            ],
+            "isUpgradable": true,
+            "isPatchable": false,
+            "name": "jsonwebtoken",
+            "version": "0.4.0"
+          },
+          {
+            "id": "npm:jsonwebtoken:20150331",
+            "title": "Authentication Bypass",
+            "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N/E:P",
+            "credit": [
+              "Tim McLean"
+            ],
+            "semver": {
+              "vulnerable": [
+                "<4.2.2"
+              ]
+            },
+            "exploit": "Proof of Concept",
+            "fixedIn": [
+              "4.2.2"
+            ],
+            "patches": [
+              {
+                "id": "patch:npm:jsonwebtoken:20150331:0",
+                "urls": [
+                  "https://snyk-patches.s3.amazonaws.com/npm/jsonwebtoken/20150331/jsonwebtoken_20150331_0_0_1bb584bc382295eeb7ee8c4452a673a77a68b687_snyk.patch"
+                ],
+                "version": "=4.0.0 || =4.1.0 || =4.2.1",
+                "comments": [],
+                "modificationTime": "2019-12-03T11:40:45.753281Z"
+              }
+            ],
+            "insights": {
+              "triageAdvice": null
+            },
+            "language": "js",
+            "severity": "high",
+            "cvssScore": 7.5,
+            "functions": [],
+            "malicious": false,
+            "isDisputed": false,
+            "moduleName": "jsonwebtoken",
+            "references": [
+              {
+                "url": "https://auth0.com/blog/2015/03/31/critical-vulnerabilities-in-json-web-token-libraries/",
+                "title": "Auth0 Blog"
+              },
+              {
+                "url": "https://github.com/auth0/node-jsonwebtoken/commit/1bb584bc382295eeb7ee8c4452a673a77a68b687",
+                "title": "GitHub Commit"
+              },
+              {
+                "url": "https://github.com/WinDyAlphA/CVE-2015-9235_JWT_key_confusion",
+                "title": "PoC"
+              },
+              {
+                "url": "https://www.timmclean.net/2015/02/25/jwt-alg-none.html",
+                "title": "Tim McLean Blog"
+              }
+            ],
+            "cvssDetails": [
+              {
+                "assigner": "NVD",
+                "severity": "critical",
+                "cvssV3Vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                "cvssV3BaseScore": 9.8,
+                "modificationTime": "2022-01-03T17:48:53.018995Z"
+              }
+            ],
+            "description": "## Overview\r\n[`jsonwebtoken`](https://www.npmjs.com/package/jsonwebtoken) is a JSON Web token implementation for symmetric and asymmetric keys.\r\nAffected versions of this package are vulnerable to an Authentication Bypass attack, due to the \"algorithm\" not being enforced. Attackers are given the opportunity to choose the algorithm sent to the server and generate signatures with arbitrary contents. The server expects an asymmetric key (RSA) but is sent a symmetric key (HMAC-SHA) with RSA's public key, so instead of going through a key validation process, the server will think the public key is actually an HMAC private key.\r\n\r\n## Remediation\r\nUpgrade `jsonwebtoken` to version 4.2.2 or greater.\r\n\r\n## References\r\n- [GitHub Commit](https://github.com/auth0/node-jsonwebtoken/commit/1bb584bc382295eeb7ee8c4452a673a77a68b687)\r\n- [Tim McLean Blog](https://www.timmclean.net/2015/02/25/jwt-alg-none.html)\r\n- [Auth0 Blog](https://auth0.com/blog/2015/03/31/critical-vulnerabilities-in-json-web-token-libraries/)",
+            "epssDetails": {
+              "percentile": "0.75071",
+              "probability": "0.00559",
+              "modelVersion": "v2023.03.01"
+            },
+            "identifiers": {
+              "CVE": [
+                "CVE-2015-9235"
+              ],
+              "CWE": [
+                "CWE-592"
+              ],
+              "NSP": [
+                "17"
+              ],
+              "GHSA": [
+                "GHSA-c7hr-j4mj-j2w6"
+              ],
+              "ALTERNATIVE": [
+                "SNYK-JS-JSONWEBTOKEN-10037"
+              ]
+            },
+            "packageName": "jsonwebtoken",
+            "proprietary": false,
+            "creationTime": "2015-03-31T16:00:00Z",
+            "functions_new": [],
+            "alternativeIds": [
+              "SNYK-JS-JSONWEBTOKEN-10037"
+            ],
+            "disclosureTime": "2015-03-31T16:00:00Z",
+            "packageManager": "npm",
+            "publicationTime": "2015-03-31T16:00:00Z",
+            "modificationTime": "2023-09-29T09:15:01.983455Z",
+            "socialTrendAlert": false,
+            "severityWithCritical": "high",
+            "from": [
+              "juice-shop@15.3.0",
+              "jsonwebtoken@0.4.0"
+            ],
+            "upgradePath": [
+              false,
+              "jsonwebtoken@5.0.0"
+            ],
+            "isUpgradable": true,
+            "isPatchable": false,
+            "name": "jsonwebtoken",
+            "version": "0.4.0"
+          },
+          {
+            "id": "SNYK-JS-SANITIZEHTML-1070780",
+            "title": "Validation Bypass",
+            "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N/E:P",
+            "credit": [
+              "Ron Masas",
+              "Checkmarx"
+            ],
+            "semver": {
+              "vulnerable": [
+                "<2.3.2"
+              ]
+            },
+            "exploit": "Proof of Concept",
+            "fixedIn": [
+              "2.3.2"
+            ],
+            "patches": [],
+            "insights": {
+              "triageAdvice": null
+            },
+            "language": "js",
+            "severity": "medium",
+            "cvssScore": 6.5,
+            "functions": [],
+            "malicious": false,
+            "isDisputed": false,
+            "moduleName": "sanitize-html",
+            "references": [
+              {
+                "url": "https://github.com/apostrophecms/sanitize-html/commit/6012524e7824a2c8f6782b2bc5f93b1261723403",
+                "title": "GitHub Commit"
+              },
+              {
+                "url": "https://github.com/apostrophecms/sanitize-html/pull/460",
+                "title": "GitHub PR"
+              },
+              {
+                "url": "https://advisory.checkmarx.net/advisory/CX-2021-4309",
+                "title": "POC: Potential Exploit"
+              }
+            ],
+            "cvssDetails": [
+              {
+                "assigner": "NVD",
+                "severity": "medium",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+                "cvssV3BaseScore": 5.3,
+                "modificationTime": "2022-01-03T16:36:59.234021Z"
+              },
+              {
+                "assigner": "Red Hat",
+                "severity": "medium",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+                "cvssV3BaseScore": 5.3,
+                "modificationTime": "2023-11-08T09:37:50.578095Z"
+              }
+            ],
+            "description": "## Overview\n[sanitize-html](https://github.com/punkave/sanitize-html) is a library that allows you to clean up user-submitted HTML, preserving whitelisted elements and whitelisted attributes on a per-element basis\n\nAffected versions of this package are vulnerable to Validation Bypass. There is no proper validation of the hostnames set by the `allowedIframeHostnames` option when the `allowIframeRelativeUrls` is set to `true`. This allows attackers to bypass the hostname whitelist for the iframe element.\n## Details\n\nA cross-site scripting attack occurs when the attacker tricks a legitimate web-based application or site to accept a request as originating from a trusted source.\n\nThis is done by escaping the context of the web application; the web application then delivers that data to its users along with other trusted dynamic content, without validating it. The browser unknowingly executes malicious script on the client side (through client-side languages; usually JavaScript or HTML)  in order to perform actions that are otherwise typically blocked by the browser’s Same Origin Policy.\n\nInjecting malicious code is the most prevalent manner by which XSS is exploited; for this reason, escaping characters in order to prevent this manipulation is the top method for securing code against this vulnerability.\n\nEscaping means that the application is coded to mark key characters, and particularly key characters included in user input, to prevent those characters from being interpreted in a dangerous context. For example, in HTML, `<` can be coded as  `&lt`; and `>` can be coded as `&gt`; in order to be interpreted and displayed as themselves in text, while within the code itself, they are used for HTML tags. If malicious content is injected into an application that escapes special characters and that malicious content uses `<` and `>` as HTML tags, those characters are nonetheless not interpreted as HTML tags by the browser if they’ve been correctly escaped in the application code and in this way the attempted attack is diverted.\n \nThe most prominent use of XSS is to steal cookies (source: OWASP HttpOnly) and hijack user sessions, but XSS exploits have been used to expose sensitive information, enable access to privileged services and functionality and deliver malware. \n\n### Types of attacks\nThere are a few methods by which XSS can be manipulated:\n\n|Type|Origin|Description|\n|--|--|--|\n|**Stored**|Server|The malicious code is inserted in the application (usually as a link) by the attacker. The code is activated every time a user clicks the link.|\n|**Reflected**|Server|The attacker delivers a malicious link externally from the vulnerable web site application to a user. When clicked, malicious code is sent to the vulnerable web site, which reflects the attack back to the user’s browser.| \n|**DOM-based**|Client|The attacker forces the user’s browser to render a malicious page. The data in the page itself delivers the cross-site scripting data.|\n|**Mutated**| |The attacker injects code that appears safe, but is then rewritten and modified by the browser, while parsing the markup. An example is rebalancing unclosed quotation marks or even adding quotation marks to unquoted parameters.|\n\n### Affected environments\nThe following environments are susceptible to an XSS attack:\n\n* Web servers\n* Application servers\n* Web application environments\n\n### How to prevent\nThis section describes the top best practices designed to specifically protect your code: \n\n* Sanitize data input in an HTTP request before reflecting it back, ensuring all data is validated, filtered or escaped before echoing anything back to the user, such as the values of query parameters during searches. \n* Convert special characters such as `?`, `&`, `/`, `<`, `>` and spaces to their respective HTML or URL encoded equivalents. \n* Give users the option to disable client-side scripts.\n* Redirect invalid requests.\n* Detect simultaneous logins, including those from two separate IP addresses, and invalidate those sessions.\n* Use and enforce a Content Security Policy (source: Wikipedia) to disable any features that might be manipulated for an XSS attack.\n* Read the documentation for any of the libraries referenced in your code to understand which elements allow for embedded HTML.\n\n## Remediation\nUpgrade `sanitize-html` to version 2.3.2 or higher.\n## References\n- [GitHub Commit](https://github.com/apostrophecms/sanitize-html/commit/6012524e7824a2c8f6782b2bc5f93b1261723403)\n- [GitHub PR](https://github.com/apostrophecms/sanitize-html/pull/460)\n- [POC: Potential Exploit](https://advisory.checkmarx.net/advisory/CX-2021-4309)\n",
+            "epssDetails": {
+              "percentile": "0.48819",
+              "probability": "0.00137",
+              "modelVersion": "v2023.03.01"
+            },
+            "identifiers": {
+              "CVE": [
+                "CVE-2021-26540"
+              ],
+              "CWE": [
+                "CWE-20"
+              ],
+              "GHSA": [
+                "GHSA-mjxr-4v3x-q3m4"
+              ]
+            },
+            "packageName": "sanitize-html",
+            "proprietary": false,
+            "creationTime": "2021-02-09T08:21:52.232749Z",
+            "functions_new": [],
+            "alternativeIds": [],
+            "disclosureTime": "2021-02-09T08:07:33Z",
+            "packageManager": "npm",
+            "publicationTime": "2021-02-09T16:34:45.881363Z",
+            "modificationTime": "2023-11-08T09:37:50.578095Z",
+            "socialTrendAlert": false,
+            "severityWithCritical": "medium",
+            "from": [
+              "juice-shop@15.3.0",
+              "sanitize-html@1.4.2"
+            ],
+            "upgradePath": [
+              false,
+              "sanitize-html@2.3.2"
+            ],
+            "isUpgradable": true,
+            "isPatchable": false,
+            "name": "sanitize-html",
+            "version": "1.4.2"
+          },
+          {
+            "id": "SNYK-JS-SANITIZEHTML-1070786",
+            "title": "Access Restriction Bypass",
+            "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
+            "credit": [
+              "Ron Masas",
+              "Checkmarx"
+            ],
+            "semver": {
+              "vulnerable": [
+                "<2.3.1"
+              ]
+            },
+            "exploit": "Not Defined",
+            "fixedIn": [
+              "2.3.1"
+            ],
+            "patches": [],
+            "insights": {
+              "triageAdvice": null
+            },
+            "language": "js",
+            "severity": "medium",
+            "cvssScore": 6.5,
+            "functions": [],
+            "malicious": false,
+            "isDisputed": false,
+            "moduleName": "sanitize-html",
+            "references": [
+              {
+                "url": "https://github.com/apostrophecms/sanitize-html/pull/458",
+                "title": "GitHub PR"
+              }
+            ],
+            "cvssDetails": [
+              {
+                "assigner": "NVD",
+                "severity": "medium",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+                "cvssV3BaseScore": 5.3,
+                "modificationTime": "2022-04-27T01:10:36.338203Z"
+              },
+              {
+                "assigner": "Red Hat",
+                "severity": "medium",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+                "cvssV3BaseScore": 5.3,
+                "modificationTime": "2023-11-08T09:37:50.738101Z"
+              }
+            ],
+            "description": "## Overview\n[sanitize-html](https://github.com/punkave/sanitize-html) is a library that allows you to clean up user-submitted HTML, preserving whitelisted elements and whitelisted attributes on a per-element basis\n\nAffected versions of this package are vulnerable to Access Restriction Bypass. Internationalized domain name (IDN) is not properly handled. This allows attackers to bypass hostname whitelist validation set by the `allowedIframeHostnames` option.\n## Remediation\nUpgrade `sanitize-html` to version 2.3.1 or higher.\n## References\n- [GitHub PR](https://github.com/apostrophecms/sanitize-html/pull/458)\n",
+            "epssDetails": {
+              "percentile": "0.48819",
+              "probability": "0.00137",
+              "modelVersion": "v2023.03.01"
+            },
+            "identifiers": {
+              "CVE": [
+                "CVE-2021-26539"
+              ],
+              "CWE": [
+                "CWE-20"
+              ],
+              "GHSA": [
+                "GHSA-rjqq-98f6-6j3r"
+              ]
+            },
+            "packageName": "sanitize-html",
+            "proprietary": false,
+            "creationTime": "2021-02-09T08:37:16.368073Z",
+            "functions_new": [],
+            "alternativeIds": [],
+            "disclosureTime": "2021-02-09T08:21:55Z",
+            "packageManager": "npm",
+            "publicationTime": "2021-02-09T16:34:49Z",
+            "modificationTime": "2023-11-08T09:37:50.738101Z",
+            "socialTrendAlert": false,
+            "severityWithCritical": "medium",
+            "from": [
+              "juice-shop@15.3.0",
+              "sanitize-html@1.4.2"
+            ],
+            "upgradePath": [
+              false,
+              "sanitize-html@2.3.1"
+            ],
+            "isUpgradable": true,
+            "isPatchable": false,
+            "name": "sanitize-html",
+            "version": "1.4.2"
+          },
+          {
+            "id": "SNYK-JS-SANITIZEHTML-2957526",
+            "title": "Regular Expression Denial of Service (ReDoS)",
+            "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+            "credit": [
+              "Nariyoshi Chida of NTT Security Japan"
+            ],
+            "semver": {
+              "vulnerable": [
+                "<2.7.1"
+              ]
+            },
+            "exploit": "Not Defined",
+            "fixedIn": [
+              "2.7.1"
+            ],
+            "patches": [],
+            "insights": {
+              "triageAdvice": null
+            },
+            "language": "js",
+            "severity": "medium",
+            "cvssScore": 5.3,
+            "functions": [],
+            "malicious": false,
+            "isDisputed": false,
+            "moduleName": "sanitize-html",
+            "references": [
+              {
+                "url": "https://github.com/apostrophecms/sanitize-html/commit/b4682c12fd30e12e82fa2d9b766de91d7d2cd23c",
+                "title": "GitHub Commit"
+              },
+              {
+                "url": "https://github.com/apostrophecms/sanitize-html/pull/557",
+                "title": "GitHub PR"
+              }
+            ],
+            "cvssDetails": [
+              {
+                "assigner": "NVD",
+                "severity": "high",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                "cvssV3BaseScore": 7.5,
+                "modificationTime": "2022-09-02T01:11:51.670814Z"
+              },
+              {
+                "assigner": "Red Hat",
+                "severity": "medium",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+                "cvssV3BaseScore": 5.3,
+                "modificationTime": "2023-11-08T09:37:50.786715Z"
+              }
+            ],
+            "description": "## Overview\n[sanitize-html](https://github.com/punkave/sanitize-html) is a library that allows you to clean up user-submitted HTML, preserving whitelisted elements and whitelisted attributes on a per-element basis\n\nAffected versions of this package are vulnerable to Regular Expression Denial of Service (ReDoS) due to insecure global regular expression replacement logic of HTML comment removal.\n\n## Details\n\nDenial of Service (DoS) describes a family of attacks, all aimed at making a system inaccessible to its original and legitimate users. There are many types of DoS attacks, ranging from trying to clog the network pipes to the system by generating a large volume of traffic from many machines (a Distributed Denial of Service - DDoS - attack) to sending crafted requests that cause a system to crash or take a disproportional amount of time to process.\n\nThe Regular expression Denial of Service (ReDoS) is a type of Denial of Service attack. Regular expressions are incredibly powerful, but they aren't very intuitive and can ultimately end up making it easy for attackers to take your site down.\n\nLet’s take the following regular expression as an example:\n```js\nregex = /A(B|C+)+D/\n```\n\nThis regular expression accomplishes the following:\n- `A` The string must start with the letter 'A'\n- `(B|C+)+` The string must then follow the letter A with either the letter 'B' or some number of occurrences of the letter 'C' (the `+` matches one or more times). The `+` at the end of this section states that we can look for one or more matches of this section.\n- `D` Finally, we ensure this section of the string ends with a 'D'\n\nThe expression would match inputs such as `ABBD`, `ABCCCCD`, `ABCBCCCD` and `ACCCCCD`\n\nIt most cases, it doesn't take very long for a regex engine to find a match:\n\n```bash\n$ time node -e '/A(B|C+)+D/.test(\"ACCCCCCCCCCCCCCCCCCCCCCCCCCCCD\")'\n0.04s user 0.01s system 95% cpu 0.052 total\n\n$ time node -e '/A(B|C+)+D/.test(\"ACCCCCCCCCCCCCCCCCCCCCCCCCCCCX\")'\n1.79s user 0.02s system 99% cpu 1.812 total\n```\n\nThe entire process of testing it against a 30 characters long string takes around ~52ms. But when given an invalid string, it takes nearly two seconds to complete the test, over ten times as long as it took to test a valid string. The dramatic difference is due to the way regular expressions get evaluated.\n\nMost Regex engines will work very similarly (with minor differences). The engine will match the first possible way to accept the current character and proceed to the next one. If it then fails to match the next one, it will backtrack and see if there was another way to digest the previous character. If it goes too far down the rabbit hole only to find out the string doesn’t match in the end, and if many characters have multiple valid regex paths, the number of backtracking steps can become very large, resulting in what is known as _catastrophic backtracking_.\n\nLet's look at how our expression runs into this problem, using a shorter string: \"ACCCX\". While it seems fairly straightforward, there are still four different ways that the engine could match those three C's:\n1. CCC\n2. CC+C\n3. C+CC\n4. C+C+C.\n\nThe engine has to try each of those combinations to see if any of them potentially match against the expression. When you combine that with the other steps the engine must take, we can use [RegEx 101 debugger](https://regex101.com/debugger) to see the engine has to take a total of 38 steps before it can determine the string doesn't match.\n\nFrom there, the number of steps the engine must use to validate a string just continues to grow.\n\n| String | Number of C's | Number of steps |\n| -------|-------------:| -----:|\n| ACCCX | 3 | 38\n| ACCCCX | 4 | 71\n| ACCCCCX | 5 | 136\n| ACCCCCCCCCCCCCCX | 14 | 65,553\n\n\nBy the time the string includes 14 C's, the engine has to take over 65,000 steps just to see if the string is valid. These extreme situations can cause them to work very slowly (exponentially related to input size, as shown above), allowing an attacker to exploit this and can cause the service to excessively consume CPU, resulting in a Denial of Service.\n\n## Remediation\nUpgrade `sanitize-html` to version 2.7.1 or higher.\n## References\n- [GitHub Commit](https://github.com/apostrophecms/sanitize-html/commit/b4682c12fd30e12e82fa2d9b766de91d7d2cd23c)\n- [GitHub PR](https://github.com/apostrophecms/sanitize-html/pull/557)\n",
+            "epssDetails": {
+              "percentile": "0.44428",
+              "probability": "0.00112",
+              "modelVersion": "v2023.03.01"
+            },
+            "identifiers": {
+              "CVE": [
+                "CVE-2022-25887"
+              ],
+              "CWE": [
+                "CWE-1333"
+              ]
+            },
+            "packageName": "sanitize-html",
+            "proprietary": true,
+            "creationTime": "2022-07-21T08:00:56.827849Z",
+            "functions_new": [],
+            "alternativeIds": [],
+            "disclosureTime": "2022-07-21T07:37:40Z",
+            "packageManager": "npm",
+            "publicationTime": "2022-08-29T13:28:12.439235Z",
+            "modificationTime": "2023-11-08T09:37:50.786715Z",
+            "socialTrendAlert": false,
+            "severityWithCritical": "medium",
+            "from": [
+              "juice-shop@15.3.0",
+              "sanitize-html@1.4.2"
+            ],
+            "upgradePath": [
+              false,
+              "sanitize-html@2.7.1"
+            ],
+            "isUpgradable": true,
+            "isPatchable": false,
+            "name": "sanitize-html",
+            "version": "1.4.2"
+          },
+          {
+            "id": "SNYK-JS-SANITIZEHTML-585892",
+            "title": "Arbitrary Code Execution",
+            "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:L",
+            "credit": [
+              "mikesamuel"
+            ],
+            "semver": {
+              "vulnerable": [
+                "<2.0.0-beta"
+              ]
+            },
+            "exploit": "Not Defined",
+            "fixedIn": [
+              "2.0.0-beta"
+            ],
+            "patches": [],
+            "insights": {
+              "triageAdvice": null
+            },
+            "language": "js",
+            "severity": "critical",
+            "cvssScore": 9.4,
+            "functions": [],
+            "malicious": false,
+            "isDisputed": false,
+            "moduleName": "sanitize-html",
+            "references": [
+              {
+                "url": "https://github.com/apostrophecms/sanitize-html/pull/156",
+                "title": "GitHub PR"
+              }
+            ],
+            "cvssDetails": [],
+            "description": "## Overview\n[sanitize-html](https://github.com/punkave/sanitize-html) is a library that allows you to clean up user-submitted HTML, preserving whitelisted elements and whitelisted attributes on a per-element basis\n\nAffected versions of this package are vulnerable to Arbitrary Code Execution. Tag transformations which turn an attribute value into a text node using `transformTags` could be vulnerable to code execution.\n## Remediation\nUpgrade `sanitize-html` to version 2.0.0-beta or higher.\n## References\n- [GitHub PR](https://github.com/apostrophecms/sanitize-html/pull/156)\n",
+            "epssDetails": null,
+            "identifiers": {
+              "CVE": [],
+              "CWE": [
+                "CWE-94"
+              ]
+            },
+            "packageName": "sanitize-html",
+            "proprietary": false,
+            "creationTime": "2020-07-17T15:02:43.082824Z",
+            "functions_new": [],
+            "alternativeIds": [],
+            "disclosureTime": "2020-09-07T09:46:18Z",
+            "packageManager": "npm",
+            "publicationTime": "2020-09-07T09:46:10Z",
+            "modificationTime": "2020-09-07T15:37:06.961614Z",
+            "socialTrendAlert": false,
+            "severityWithCritical": "critical",
+            "from": [
+              "juice-shop@15.3.0",
+              "sanitize-html@1.4.2"
+            ],
+            "upgradePath": [
+              false,
+              "sanitize-html@2.0.0"
+            ],
+            "isUpgradable": true,
+            "isPatchable": false,
+            "name": "sanitize-html",
+            "version": "1.4.2"
+          },
+          {
+            "id": "npm:sanitize-html:20141024",
+            "title": "Cross-site Scripting (XSS)",
+            "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:N",
+            "credit": [
+              "Unknown"
+            ],
+            "semver": {
+              "vulnerable": [
+                "<1.4.3"
+              ]
+            },
+            "exploit": "Not Defined",
+            "fixedIn": [
+              "1.4.3"
+            ],
+            "patches": [],
+            "insights": {
+              "triageAdvice": null
+            },
+            "language": "js",
+            "severity": "medium",
+            "cvssScore": 4.3,
+            "functions": [],
+            "malicious": false,
+            "isDisputed": false,
+            "moduleName": "sanitize-html",
+            "references": [
+              {
+                "url": "https://raw.githubusercontent.com/distributedweaknessfiling/cvelist/master/2016/1000xxx/CVE-2016-1000237.json",
+                "title": "CVE"
+              },
+              {
+                "url": "https://github.com/punkave/sanitize-html/issues/29",
+                "title": "GitHub Issue"
+              },
+              {
+                "url": "https://nodesecurity.io/advisories/135",
+                "title": "Node Security Advisories"
+              }
+            ],
+            "cvssDetails": [
+              {
+                "assigner": "NVD",
+                "severity": "medium",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+                "cvssV3BaseScore": 6.1,
+                "modificationTime": "2022-01-03T17:40:52.414772Z"
+              }
+            ],
+            "description": "## Overview\r\n\r\nSince the sanitize-html module trusts 'text' coming from htmlparser2, and outputs it without further escaping (because htmlparser2 does not decode entities in text before delivering it), this results in an XSS attack vector if sanitize-html ignores the img tag (according to user-configured filter rules) but passes the text intact, as it must do to keep any text in documents.\r\n\r\n\r\n## References\r\n- https://github.com/punkave/sanitize-html/issues/29",
+            "epssDetails": {
+              "percentile": "0.47924",
+              "probability": "0.00132",
+              "modelVersion": "v2023.03.01"
+            },
+            "identifiers": {
+              "CVE": [
+                "CVE-2016-1000237"
+              ],
+              "CWE": [
+                "CWE-79"
+              ],
+              "GHSA": [
+                "GHSA-3j7m-hmh3-9jmp"
+              ],
+              "ALTERNATIVE": [
+                "SNYK-JS-SANITIZEHTML-10048"
+              ]
+            },
+            "packageName": "sanitize-html",
+            "proprietary": false,
+            "creationTime": "2015-11-06T02:09:36.180000Z",
+            "functions_new": [],
+            "alternativeIds": [
+              "SNYK-JS-SANITIZEHTML-10048"
+            ],
+            "disclosureTime": "2015-11-06T02:09:36Z",
+            "packageManager": "npm",
+            "publicationTime": "2015-11-06T02:09:36Z",
+            "modificationTime": "2022-01-03T17:40:52.414772Z",
+            "socialTrendAlert": false,
+            "severityWithCritical": "medium",
+            "from": [
+              "juice-shop@15.3.0",
+              "sanitize-html@1.4.2"
+            ],
+            "upgradePath": [
+              false,
+              "sanitize-html@1.4.3"
+            ],
+            "isUpgradable": true,
+            "isPatchable": false,
+            "name": "sanitize-html",
+            "version": "1.4.2"
+          },
+          {
+            "id": "npm:sanitize-html:20160801",
+            "title": "Cross-site Scripting (XSS)",
+            "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:N/I:L/A:N",
+            "credit": [
+              "Björn Kimminich"
+            ],
+            "semver": {
+              "vulnerable": [
+                "<=1.4.2"
+              ]
+            },
+            "exploit": "Not Defined",
+            "fixedIn": [],
+            "patches": [],
+            "insights": {
+              "triageAdvice": null
+            },
+            "language": "js",
+            "severity": "medium",
+            "cvssScore": 4.7,
+            "functions": [],
+            "malicious": false,
+            "isDisputed": false,
+            "moduleName": "sanitize-html",
+            "references": [
+              {
+                "url": "https://github.com/punkave/sanitize-html/commit/762fbc7bba389f3f789cc291c1eb2b64f60f2caf",
+                "title": "GitHub Commit"
+              },
+              {
+                "url": "https://github.com/punkave/sanitize-html/issues/29",
+                "title": "GitHub Issue"
+              }
+            ],
+            "cvssDetails": [],
+            "description": "## Overview\nSanitization of HTML strings is not applied recursively to input, allowing an attacker to potentially inject script and other markup.\n\nSource: _Node Security Project_\n\n## Details\nA cross-site scripting attack occurs when the attacker tricks a legitimate web-based application or site to accept a request as originating from a trusted source.\r\n\r\nThis is done by escaping the context of the web application; the web application then delivers that data to its users along with other trusted dynamic content, without validating it. The browser unknowingly executes malicious script on the client side (through client-side languages; usually JavaScript or HTML)  in order to perform actions that are otherwise typically blocked by the browser’s Same Origin Policy.\r\n\r\nֿInjecting malicious code is the most prevalent manner by which XSS is exploited; for this reason, escaping characters in order to prevent this manipulation is the top method for securing code against this vulnerability.\r\n\r\nEscaping means that the application is coded to mark key characters, and particularly key characters included in user input, to prevent those characters from being interpreted in a dangerous context. For example, in HTML, `<` can be coded as  `&lt`; and `>` can be coded as `&gt`; in order to be interpreted and displayed as themselves in text, while within the code itself, they are used for HTML tags. If malicious content is injected into an application that escapes special characters and that malicious content uses `<` and `>` as HTML tags, those characters are nonetheless not interpreted as HTML tags by the browser if they’ve been correctly escaped in the application code and in this way the attempted attack is diverted.\r\n \r\nThe most prominent use of XSS is to steal cookies (source: OWASP HttpOnly) and hijack user sessions, but XSS exploits have been used to expose sensitive information, enable access to privileged services and functionality and deliver malware. \r\n\r\n### Types of attacks\r\nThere are a few methods by which XSS can be manipulated:\r\n\r\n|Type|Origin|Description|\r\n|--|--|--|\r\n|**Stored**|Server|The malicious code is inserted in the application (usually as a link) by the attacker. The code is activated every time a user clicks the link.|\r\n|**Reflected**|Server|The attacker delivers a malicious link externally from the vulnerable web site application to a user. When clicked, malicious code is sent to the vulnerable web site, which reflects the attack back to the user’s browser.| \r\n|**DOM-based**|Client|The attacker forces the user’s browser to render a malicious page. The data in the page itself delivers the cross-site scripting data.|\r\n|**Mutated**| |The attacker injects code that appears safe, but is then rewritten and modified by the browser, while parsing the markup. An example is rebalancing unclosed quotation marks or even adding quotation marks to unquoted parameters.|\r\n\r\n### Affected environments\r\nThe following environments are susceptible to an XSS attack:\r\n\r\n* Web servers\r\n* Application servers\r\n* Web application environments\r\n\r\n### How to prevent\r\nThis section describes the top best practices designed to specifically protect your code: \r\n\r\n* Sanitize data input in an HTTP request before reflecting it back, ensuring all data is validated, filtered or escaped before echoing anything back to the user, such as the values of query parameters during searches. \r\n* Convert special characters such as `?`, `&`, `/`, `<`, `>` and spaces to their respective HTML or URL encoded equivalents. \r\n* Give users the option to disable client-side scripts.\r\n* Redirect invalid requests.\r\n* Detect simultaneous logins, including those from two separate IP addresses, and invalidate those sessions.\r\n* Use and enforce a Content Security Policy (source: Wikipedia) to disable any features that might be manipulated for an XSS attack.\r\n* Read the documentation for any of the libraries referenced in your code to understand which elements allow for embedded HTML.\n\n\n## Remediation\nUpgrade `sanitize-html` to `1.4.3` or later\n\n## References\n- https://github.com/punkave/sanitize-html/issues/29\n- https://github.com/punkave/sanitize-html/commit/762fbc7bba389f3f789cc291c1eb2b64f60f2caf\n\n",
+            "epssDetails": null,
+            "identifiers": {
+              "CVE": [],
+              "CWE": [
+                "CWE-79"
+              ],
+              "NSP": [
+                "135"
+              ],
+              "ALTERNATIVE": [
+                "SNYK-JS-SANITIZEHTML-10127"
+              ]
+            },
+            "packageName": "sanitize-html",
+            "proprietary": false,
+            "creationTime": "2016-08-02T08:28:08.097000Z",
+            "functions_new": [],
+            "alternativeIds": [
+              "SNYK-JS-SANITIZEHTML-10127"
+            ],
+            "disclosureTime": "2016-08-01T18:02:31Z",
+            "packageManager": "npm",
+            "publicationTime": "2016-08-01T18:02:31Z",
+            "modificationTime": "2020-12-14T14:41:17.951016Z",
+            "socialTrendAlert": false,
+            "severityWithCritical": "medium",
+            "from": [
+              "juice-shop@15.3.0",
+              "sanitize-html@1.4.2"
+            ],
+            "upgradePath": [
+              false,
+              "sanitize-html@1.4.3"
+            ],
+            "isUpgradable": true,
+            "isPatchable": false,
+            "name": "sanitize-html",
+            "version": "1.4.2"
+          },
+          {
+            "id": "npm:sanitize-html:20161026",
+            "title": "Cross-site Scripting (XSS)",
+            "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N/E:F/RL:O/RC:C",
+            "credit": [
+              "Andrew Krasichkov"
+            ],
+            "semver": {
+              "vulnerable": [
+                "<1.11.4"
+              ]
+            },
+            "exploit": "Functional",
+            "fixedIn": [
+              "1.11.4"
+            ],
+            "patches": [],
+            "insights": {
+              "triageAdvice": null
+            },
+            "language": "js",
+            "severity": "medium",
+            "cvssScore": 5.4,
+            "functions": [],
+            "malicious": false,
+            "isDisputed": false,
+            "moduleName": "sanitize-html",
+            "references": [
+              {
+                "url": "https://github.com/punkave/sanitize-html/commit/5d205a1005ba0df80e21d8c64a15bb3accdb2403",
+                "title": "GitHub Commit"
+              },
+              {
+                "url": "https://github.com/punkave/sanitize-html/issues/100",
+                "title": "GitHub Issue"
+              }
+            ],
+            "cvssDetails": [
+              {
+                "assigner": "NVD",
+                "severity": "medium",
+                "cvssV3Vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+                "cvssV3BaseScore": 6.1,
+                "modificationTime": "2022-01-03T16:21:19.197646Z"
+              }
+            ],
+            "description": "## Overview\n[`sanitize-html`](https://www.npmjs.com/package/sanitize-html) is a library for scrubbing html input of malicious values.\n\nAffected versions of this package are vulnerable to Cross-site Scripting (XSS) attacks. If at least one `nonTextTags` tag is allowed, a malicious user may potentially conduct an XSS attack.\n\n**PoC:**\n```js\nvar sanitizeHtml = require('sanitize-html');\n\nvar dirty = '!<textarea>&lt;/textarea&gt;<svg/onload=prompt`xs`&gt;</textarea>!';\nvar clean = sanitizeHtml(dirty, {\n    allowedTags: [ 'textarea' ]\n});\n\nconsole.log(clean);\n\n// !<textarea></textarea><svg/onload=prompt`xs`></textarea>!\n```\n\n## Details\nA cross-site scripting attack occurs when the attacker tricks a legitimate web-based application or site to accept a request as originating from a trusted source.\r\n\r\nThis is done by escaping the context of the web application; the web application then delivers that data to its users along with other trusted dynamic content, without validating it. The browser unknowingly executes malicious script on the client side (through client-side languages; usually JavaScript or HTML)  in order to perform actions that are otherwise typically blocked by the browser’s Same Origin Policy.\r\n\r\nֿInjecting malicious code is the most prevalent manner by which XSS is exploited; for this reason, escaping characters in order to prevent this manipulation is the top method for securing code against this vulnerability.\r\n\r\nEscaping means that the application is coded to mark key characters, and particularly key characters included in user input, to prevent those characters from being interpreted in a dangerous context. For example, in HTML, `<` can be coded as  `&lt`; and `>` can be coded as `&gt`; in order to be interpreted and displayed as themselves in text, while within the code itself, they are used for HTML tags. If malicious content is injected into an application that escapes special characters and that malicious content uses `<` and `>` as HTML tags, those characters are nonetheless not interpreted as HTML tags by the browser if they’ve been correctly escaped in the application code and in this way the attempted attack is diverted.\r\n \r\nThe most prominent use of XSS is to steal cookies (source: OWASP HttpOnly) and hijack user sessions, but XSS exploits have been used to expose sensitive information, enable access to privileged services and functionality and deliver malware. \r\n\r\n### Types of attacks\r\nThere are a few methods by which XSS can be manipulated:\r\n\r\n|Type|Origin|Description|\r\n|--|--|--|\r\n|**Stored**|Server|The malicious code is inserted in the application (usually as a link) by the attacker. The code is activated every time a user clicks the link.|\r\n|**Reflected**|Server|The attacker delivers a malicious link externally from the vulnerable web site application to a user. When clicked, malicious code is sent to the vulnerable web site, which reflects the attack back to the user’s browser.| \r\n|**DOM-based**|Client|The attacker forces the user’s browser to render a malicious page. The data in the page itself delivers the cross-site scripting data.|\r\n|**Mutated**| |The attacker injects code that appears safe, but is then rewritten and modified by the browser, while parsing the markup. An example is rebalancing unclosed quotation marks or even adding quotation marks to unquoted parameters.|\r\n\r\n### Affected environments\r\nThe following environments are susceptible to an XSS attack:\r\n\r\n* Web servers\r\n* Application servers\r\n* Web application environments\r\n\r\n### How to prevent\r\nThis section describes the top best practices designed to specifically protect your code: \r\n\r\n* Sanitize data input in an HTTP request before reflecting it back, ensuring all data is validated, filtered or escaped before echoing anything back to the user, such as the values of query parameters during searches. \r\n* Convert special characters such as `?`, `&`, `/`, `<`, `>` and spaces to their respective HTML or URL encoded equivalents. \r\n* Give users the option to disable client-side scripts.\r\n* Redirect invalid requests.\r\n* Detect simultaneous logins, including those from two separate IP addresses, and invalidate those sessions.\r\n* Use and enforce a Content Security Policy (source: Wikipedia) to disable any features that might be manipulated for an XSS attack.\r\n* Read the documentation for any of the libraries referenced in your code to understand which elements allow for embedded HTML.\n\n\n## Remediation\nUpgrade `sanitize-html` to version 1.11.4 or later.\n\n## References\n- [GitHub Issue](https://github.com/punkave/sanitize-html/issues/100)\n- [GitHub Commit](https://github.com/punkave/sanitize-html/commit/5d205a1005ba0df80e21d8c64a15bb3accdb2403)\n",
+            "epssDetails": {
+              "percentile": "0.35000",
+              "probability": "0.00084",
+              "modelVersion": "v2023.03.01"
+            },
+            "identifiers": {
+              "CVE": [
+                "CVE-2017-16016"
+              ],
+              "CWE": [
+                "CWE-79"
+              ],
+              "NSP": [
+                "154"
+              ],
+              "GHSA": [
+                "GHSA-xc6g-ggrc-qq4r"
+              ],
+              "ALTERNATIVE": [
+                "SNYK-JS-SANITIZEHTML-10461"
+              ]
+            },
+            "packageName": "sanitize-html",
+            "proprietary": false,
+            "creationTime": "2017-04-12T10:49:58.283000Z",
+            "functions_new": [],
+            "alternativeIds": [
+              "SNYK-JS-SANITIZEHTML-10461"
+            ],
+            "disclosureTime": "2016-03-26T23:49:58.283000Z",
+            "packageManager": "npm",
+            "publicationTime": "2017-04-12T11:00:58.283000Z",
+            "modificationTime": "2022-01-03T16:21:19.197646Z",
+            "socialTrendAlert": false,
+            "severityWithCritical": "medium",
+            "from": [
+              "juice-shop@15.3.0",
+              "sanitize-html@1.4.2"
+            ],
+            "upgradePath": [
+              false,
+              "sanitize-html@1.11.4"
+            ],
+            "isUpgradable": true,
+            "isPatchable": false,
+            "name": "sanitize-html",
+            "version": "1.4.2"
+          }
+        ],
+        "ok": false,
+        "dependencyCount": 71,
+        "org": "sarim04",
+        "policy": "# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.\nversion: v1.25.1\nignore: {}\npatch: {}\n",
+        "isPrivate": true,
+        "licensesPolicy": {
+          "severities": {},
+          "orgLicenseRules": {
+            "AGPL-1.0": {
+              "licenseType": "AGPL-1.0",
+              "severity": "high",
+              "instructions": ""
+            },
+            "AGPL-3.0": {
+              "licenseType": "AGPL-3.0",
+              "severity": "high",
+              "instructions": ""
+            },
+            "Artistic-1.0": {
+              "licenseType": "Artistic-1.0",
+              "severity": "medium",
+              "instructions": ""
+            },
+            "Artistic-2.0": {
+              "licenseType": "Artistic-2.0",
+              "severity": "medium",
+              "instructions": ""
+            },
+            "CDDL-1.0": {
+              "licenseType": "CDDL-1.0",
+              "severity": "medium",
+              "instructions": ""
+            },
+            "CPOL-1.02": {
+              "licenseType": "CPOL-1.02",
+              "severity": "high",
+              "instructions": ""
+            },
+            "EPL-1.0": {
+              "licenseType": "EPL-1.0",
+              "severity": "medium",
+              "instructions": ""
+            },
+            "GPL-2.0": {
+              "licenseType": "GPL-2.0",
+              "severity": "high",
+              "instructions": ""
+            },
+            "GPL-3.0": {
+              "licenseType": "GPL-3.0",
+              "severity": "high",
+              "instructions": ""
+            },
+            "LGPL-2.0": {
+              "licenseType": "LGPL-2.0",
+              "severity": "medium",
+              "instructions": ""
+            },
+            "LGPL-2.1": {
+              "licenseType": "LGPL-2.1",
+              "severity": "medium",
+              "instructions": ""
+            },
+            "LGPL-3.0": {
+              "licenseType": "LGPL-3.0",
+              "severity": "medium",
+              "instructions": ""
+            },
+            "MPL-1.1": {
+              "licenseType": "MPL-1.1",
+              "severity": "medium",
+              "instructions": ""
+            },
+            "MPL-2.0": {
+              "licenseType": "MPL-2.0",
+              "severity": "medium",
+              "instructions": ""
+            },
+            "MS-RL": {
+              "licenseType": "MS-RL",
+              "severity": "medium",
+              "instructions": ""
+            },
+            "SimPL-2.0": {
+              "licenseType": "SimPL-2.0",
+              "severity": "high",
+              "instructions": ""
+            }
+          }
+        },
+        "packageManager": "npm",
+        "ignoreSettings": {
+          "adminOnly": false,
+          "reasonRequired": false,
+          "disregardFilesystemIgnores": false
+        },
+        "docker": {},
+        "summary": "12 vulnerable dependency paths",
+        "remediation": {
+          "unresolved": [],
+          "upgrade": {
+            "express-jwt@0.1.3": {
+              "upgradeTo": "express-jwt@6.0.0",
+              "upgrades": [
+                "express-jwt@0.1.3"
+              ],
+              "vulns": [
+                "SNYK-JS-EXPRESSJWT-575022"
+              ]
+            },
+            "jsonwebtoken@0.4.0": {
+              "upgradeTo": "jsonwebtoken@9.0.0",
+              "upgrades": [
+                "jsonwebtoken@0.4.0",
+                "jsonwebtoken@0.4.0",
+                "jsonwebtoken@0.4.0",
+                "jsonwebtoken@0.4.0"
+              ],
+              "vulns": [
+                "SNYK-JS-JSONWEBTOKEN-3180022",
+                "SNYK-JS-JSONWEBTOKEN-3180024",
+                "SNYK-JS-JSONWEBTOKEN-3180026",
+                "npm:jsonwebtoken:20150331"
+              ]
+            },
+            "sanitize-html@1.4.2": {
+              "upgradeTo": "sanitize-html@2.7.1",
+              "upgrades": [
+                "sanitize-html@1.4.2",
+                "sanitize-html@1.4.2",
+                "sanitize-html@1.4.2",
+                "sanitize-html@1.4.2",
+                "sanitize-html@1.4.2",
+                "sanitize-html@1.4.2",
+                "sanitize-html@1.4.2"
+              ],
+              "vulns": [
+                "SNYK-JS-SANITIZEHTML-2957526",
+                "SNYK-JS-SANITIZEHTML-1070780",
+                "SNYK-JS-SANITIZEHTML-1070786",
+                "SNYK-JS-SANITIZEHTML-585892",
+                "npm:sanitize-html:20161026",
+                "npm:sanitize-html:20141024",
+                "npm:sanitize-html:20160801"
+              ]
+            }
+          },
+          "patch": {},
+          "ignore": {},
+          "pin": {}
+        },
+        "filesystemPolicy": false,
+        "filtered": {
+          "ignore": [],
+          "patch": []
+        },
+        "uniqueCount": 12,
+        "targetFile": "/juice-shop/package.json",
+        "projectName": "juice-shop",
+        "displayTargetFile": "/juice-shop/package.json",
+        "hasUnknownVersions": false,
+        "path": "sarim04/juiceshop:latest"
+      }
+    ]
+  }
+  

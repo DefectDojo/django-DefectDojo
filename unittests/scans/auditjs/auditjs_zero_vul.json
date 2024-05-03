@@ -1,0 +1,44 @@
+[
+    {
+      "coordinates": "pkg:npm/is-fullwidth-code-point@3.0.0",
+      "description": "Check if the character represented by a given Unicode code point is fullwidth",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/is-fullwidth-code-point@3.0.0?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/wrap-ansi@7.0.0",
+      "description": "Wordwrap a string with ANSI escape codes",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/wrap-ansi@7.0.0?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/escalade@3.1.1",
+      "description": "A tiny (183B to 210B) and fast utility to ascend parent directories",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/escalade@3.1.1?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/get-caller-file@2.0.5",
+      "description": "[![Build Status](https://travis-ci.org/stefanpenner/get-caller-file.svg?branch=master)](https://travis-ci.org/stefanpenner/get-caller-file) [![Build status](https://ci.appveyor.com/api/projects/status/ol2q94g1932cy14a/branch/master?svg=true)](https://ci.a",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/get-caller-file@2.0.5?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/require-directory@2.1.1",
+      "description": "Recursively iterates over specified directory, require()'ing each file, and returning a nested hash structure containing those modules.",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/require-directory@2.1.1?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/y18n@5.0.8",
+      "description": "the bare-bones internationalization library used by yargs",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/y18n@5.0.8?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/yargs-parser@20.2.7",
+      "description": "the mighty option parser used by yargs",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/yargs-parser@20.2.7?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    }
+  ]

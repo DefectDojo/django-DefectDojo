@@ -73,7 +73,7 @@ class OktaOpenIdConnect(OktaOAuth2, OpenIdConnectAuth):
         """
         Validates the id_token using Okta.
         """
-        client_id, client_secret = self.get_key_and_secret()
+        client_id, _client_secret = self.get_key_and_secret()
         claims = None
         k = None
 
@@ -85,7 +85,7 @@ class OktaOpenIdConnect(OktaOAuth2, OpenIdConnectAuth):
             except ExpiredSignatureError:
                 k = key
                 break
-            except JWTError as e:
+            except JWTError:
                 if k is None and client_id == 'a-key':
                     k = self.get_jwks_keys()[0]
                 pass

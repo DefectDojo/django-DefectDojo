@@ -1,0 +1,163 @@
+{
+  "total": 6,
+  "subtotal": 6,
+  "selectable": 6,
+  "page": 1,
+  "per_page": 20,
+  "error": null,
+  "search": null,
+  "sort": {
+    "by": "updated",
+    "order": "desc"
+  },
+  "results": [
+    {
+      "id": 1,
+      "pulp_id": "RHSA-1966:12313",
+      "title": "Important: firefox security update",
+      "errata_id": "RHSA-1966:12313",
+      "issued": "1966-01-02",
+      "updated": "1966-01-02",
+      "severity": "Important",
+      "description": "Mozilla Firefox is an open-source web browser, designed for stox to ves section.",
+      "solution": "For details on how to apply this update, which includes the changes described in this advisory, refer to:\n\nhttps://accee effect.",
+      "summary": "An update for firefox is now available for Red Hat Entere References section.",
+      "reboot_suggested": false,
+      "uuid": "RHSA-1966:12313",
+      "name": "Important: firefox security update",
+      "type": "security",
+      "cves": [
+        {
+          "cve_id": "CVE-1990-1",
+          "href": "https://access.redhat.com/security/cve/CVE-1990-1"
+        },
+        {
+          "cve_id": "CVE-1990-2",
+          "href": "https://access.redhat.com/security/cve/CVE-1990-2"
+        },
+        {
+          "cve_id": "CVE-1990-3",
+          "href": "https://access.redhat.com/security/cve/CVE-1990-3"
+        },
+        {
+          "cve_id": "CVE-1990-4",
+          "href": "https://access.redhat.com/security/cve/CVE-1990-4"
+        },
+        {
+          "cve_id": "CVE-1990-5",
+          "href": "https://access.redhat.com/security/cve/CVE-1990-5"
+        }
+      ],
+      "bugs": [
+        {
+          "bug_id": "2255360",
+          "href": "https://bugzilla.redhat.com/show_bug.cgi?id=2255360"
+        },
+        {
+          "bug_id": "2255361",
+          "href": "https://bugzilla.redhat.com/show_bug.cgi?id=2255361"
+        },
+        {
+          "bug_id": "2255362",
+          "href": "https://bugzilla.redhat.com/show_bug.cgi?id=2255362"
+        },
+        {
+          "bug_id": "2255370",
+          "href": "https://bugzilla.redhat.com/show_bug.cgi?id=2255370"
+        }
+      ],
+      "hosts_available_count": 1,
+      "hosts_applicable_count": 1,
+      "packages": [
+        "firefox-11",
+        "firefox-1"
+      ],
+      "module_streams": [],
+      "installable": true
+    },
+    {
+      "id": 2,
+      "pulp_id": "RHSA-1966:0013",
+      "title": "Important: gstreamer1-plugins-bad-free security update",
+      "errata_id": "RHSA-1966:0013",
+      "issued": "1966-01-02",
+      "updated": "1966-01-02",
+      "severity": "Important",
+      "description": "G is a on.",
+      "solution": "For details on how to apply this update, w8",
+      "summary": "An updaten.",
+      "reboot_suggested": false,
+      "uuid": "RHSA-1966:0013",
+      "name": "Important: gstreamer1-plugins-bad-free security update",
+      "type": "security",
+      "cves": [
+        {
+          "cve_id": "CVE-1990-222",
+          "href": "https://access.redhat.com/security/cve/CVE-1990-222"
+        }
+      ],
+      "bugs": [
+        {
+          "bug_id": "333",
+          "href": "https://bugzilla.redhat.com/show_bug.cgi?id=333"
+        }
+      ],
+      "hosts_available_count": 2,
+      "hosts_applicable_count": 2,
+      "packages": [
+        "g",
+        "g64",
+        "g5",
+        "g4"
+      ],
+      "module_streams": [],
+      "installable": true
+    },
+    {
+      "id": 3,
+      "pulp_id": "RHSA-1966:0009",
+      "title": "Importantity update",
+      "errata_id": "RHSA-1966:0009",
+      "issued": "1966-01-02",
+      "updated": "1966-01-02",
+      "severity": "Important",
+      "description": "n.",
+      "solution": "For details on how to apply8",
+      "summary": "An updaton.",
+      "reboot_suggested": false,
+      "uuid": "RHSA-1966:0009",
+      "name": "Importity update",
+      "type": "security",
+      "cves": [
+        {
+          "cve_id": "CVE-1990-6377",
+          "href": "https://access.redhat.com/security/cve/CVE-1990-6377"
+        },
+        {
+          "cve_id": "CVE-1990-6478",
+          "href": "https://access.redhat.com/security/cve/CVE-1990-6478"
+        }
+      ],
+      "bugs": [
+        {
+          "bug_id": "33",
+          "href": "https://bugzilla.redhat.com/show_bug.cgi?id=33"
+        },
+        {
+          "bug_id": "123",
+          "href": "https://bugzilla.redhat.com/show_bug.cgi?id=123"
+        }
+      ],
+      "hosts_available_count": 3,
+      "hosts_applicable_count": 3,
+      "packages": [
+        "asfjoiwefjoewfjo1",
+        "asfjoiwefjoewfjo2",
+        "asfjoiwefjoewfjo3",
+        "asfjoiwefjoewfjo4"
+      ],
+      "module_streams": [],
+      "installable": true
+    }
+  ]
+}

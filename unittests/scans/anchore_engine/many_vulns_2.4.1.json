@@ -1,0 +1,3973 @@
+{
+  "base_digest": "sha256:1e40570071ce81df14d183c6227c7cee125ac5876344fded9dc412d04996a658",
+  "image_digest": "sha256:e010a676dba57f2110960b4e81a1d9098585ed6a8ac79e8c4a552ba4018d1674",
+  "vulnerabilities": [
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 6.4,
+            "exploitability_score": 10,
+            "impact_score": 4.9
+          },
+          "cvss_v3": {
+            "base_score": 6.5,
+            "exploitability_score": 3.9,
+            "impact_score": 2.5
+          },
+          "id": "CVE-2020-8927"
+        }
+      ],
+      "package": "brotli-1.0.6-2.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "brotli",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "1.0.6-2.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-8927",
+      "vendor_data": [],
+      "vuln": "CVE-2020-8927",
+      "extra": {
+        "description": "A buffer overflow exists in the Brotli library versions prior to 1.0.8 where an attacker controlling the input length of a \"one-shot\" decompression request to a script can trigger a crash, which happens when copying over chunks of data larger than 2 GiB. It is recommended to update your Brotli library to 1.0.8 or later. If one cannot update, we recommend to use the \"streaming\" API as opposed to the \"one-shot\" API, and impose chunk size limits.",
+        "id": "CVE-2020-8927",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-8927",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 6.4,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 4.9,
+                "integrity_impact": "PARTIAL"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:P/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "LOW",
+                "base_score": 6.5,
+                "base_severity": "Medium",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 2.5,
+                "integrity_impact": "LOW",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:L",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-8927"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 7.5,
+            "exploitability_score": 3.9,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-8231"
+        }
+      ],
+      "package": "curl-7.61.1-14.el8_3.1",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "curl",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "7.61.1-14.el8_3.1",
+      "severity": "Low",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-8231",
+      "vendor_data": [],
+      "vuln": "CVE-2020-8231",
+      "extra": {
+        "description": "Due to use of a dangling pointer, libcurl 7.29.0 through 7.71.1 can use the wrong connection when sending data.",
+        "id": "CVE-2020-8231",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-8231",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "NONE",
+                "base_score": 5,
+                "confidentiality_impact": "PARTIAL",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:P/I:N/A:N",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "NONE",
+                "base_score": 7.5,
+                "base_severity": "High",
+                "confidentiality_impact": "HIGH",
+                "exploitability_score": 3.9,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-8231"
+          }
+        ],
+        "references": null,
+        "severity": "Low",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 4.3,
+            "exploitability_score": 8.6,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 3.7,
+            "exploitability_score": 2.2,
+            "impact_score": 1.4
+          },
+          "id": "CVE-2020-8284"
+        }
+      ],
+      "package": "curl-7.61.1-14.el8_3.1",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "curl",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "7.61.1-14.el8_3.1",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-8284",
+      "vendor_data": [],
+      "vuln": "CVE-2020-8284",
+      "extra": {
+        "description": "A malicious server can use the FTP PASV response to trick curl 7.73.0 and earlier into connecting back to a given IP address and port, and this way potentially make curl extract information about services that are otherwise private and not disclosed, for example doing port scanning and service banner extractions.",
+        "id": "CVE-2020-8284",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-8284",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "MEDIUM",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "NONE",
+                "base_score": 4.3,
+                "confidentiality_impact": "PARTIAL",
+                "exploitability_score": 8.6,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:M/Au:N/C:P/I:N/A:N",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "HIGH",
+                "attack_vector": "NETWORK",
+                "availability_impact": "NONE",
+                "base_score": 3.7,
+                "base_severity": "Low",
+                "confidentiality_impact": "LOW",
+                "exploitability_score": 2.2,
+                "impact_score": 1.4,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-8284"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 7.5,
+            "exploitability_score": 3.9,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-8285"
+        }
+      ],
+      "package": "curl-7.61.1-14.el8_3.1",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "curl",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "7.61.1-14.el8_3.1",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-8285",
+      "vendor_data": [],
+      "vuln": "CVE-2020-8285",
+      "extra": {
+        "description": "curl 7.21.0 to and including 7.73.0 is vulnerable to uncontrolled recursion due to a stack overflow issue in FTP wildcard match parsing.",
+        "id": "CVE-2020-8285",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-8285",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 5,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 7.5,
+                "base_severity": "High",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-8285"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 7.5,
+            "exploitability_score": 3.9,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-8286"
+        }
+      ],
+      "package": "curl-7.61.1-14.el8_3.1",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "curl",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "7.61.1-14.el8_3.1",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-8286",
+      "vendor_data": [],
+      "vuln": "CVE-2020-8286",
+      "extra": {
+        "description": "curl 7.41.0 through 7.73.0 is vulnerable to an improper check for certificate revocation due to insufficient verification of the OCSP response.",
+        "id": "CVE-2020-8286",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-8286",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "NONE",
+                "base_score": 5,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "PARTIAL"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:P/A:N",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "NONE",
+                "base_score": 7.5,
+                "base_severity": "High",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 3.6,
+                "integrity_impact": "HIGH",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-8286"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [],
+      "package": "dbus-1.12.8-11.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "dbus",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "1.12.8-11.el8",
+      "severity": "Low",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-35512",
+      "vendor_data": [],
+      "vuln": "CVE-2020-35512",
+      "extra": {
+        "description": "none",
+        "id": "CVE-2020-35512",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-35512",
+        "namespace": "rhel:8",
+        "nvd_data": [],
+        "references": null,
+        "severity": "Low",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [],
+      "package": "dbus-common-1.12.8-11.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "dbus-common",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "1.12.8-11.el8",
+      "severity": "Low",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-35512",
+      "vendor_data": [],
+      "vuln": "CVE-2020-35512",
+      "extra": {
+        "description": "none",
+        "id": "CVE-2020-35512",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-35512",
+        "namespace": "rhel:8",
+        "nvd_data": [],
+        "references": null,
+        "severity": "Low",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [],
+      "package": "dbus-daemon-1.12.8-11.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "dbus-daemon",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "1.12.8-11.el8",
+      "severity": "Low",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-35512",
+      "vendor_data": [],
+      "vuln": "CVE-2020-35512",
+      "extra": {
+        "description": "none",
+        "id": "CVE-2020-35512",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-35512",
+        "namespace": "rhel:8",
+        "nvd_data": [],
+        "references": null,
+        "severity": "Low",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [],
+      "package": "dbus-libs-1.12.8-11.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "dbus-libs",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "1.12.8-11.el8",
+      "severity": "Low",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-35512",
+      "vendor_data": [],
+      "vuln": "CVE-2020-35512",
+      "extra": {
+        "description": "none",
+        "id": "CVE-2020-35512",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-35512",
+        "namespace": "rhel:8",
+        "nvd_data": [],
+        "references": null,
+        "severity": "Low",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [],
+      "package": "dbus-tools-1.12.8-11.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "dbus-tools",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "1.12.8-11.el8",
+      "severity": "Low",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-35512",
+      "vendor_data": [],
+      "vuln": "CVE-2020-35512",
+      "extra": {
+        "description": "none",
+        "id": "CVE-2020-35512",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-35512",
+        "namespace": "rhel:8",
+        "nvd_data": [],
+        "references": null,
+        "severity": "Low",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 7.1,
+            "exploitability_score": 8.6,
+            "impact_score": 6.9
+          },
+          "cvss_v3": {
+            "base_score": 5.9,
+            "exploitability_score": 2.2,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2019-25013"
+        }
+      ],
+      "package": "glibc-2.28-127.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "glibc",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "2.28-127.el8",
+      "severity": "High",
+      "url": "https://access.redhat.com/security/cve/CVE-2019-25013",
+      "vendor_data": [],
+      "vuln": "CVE-2019-25013",
+      "extra": {
+        "description": "The iconv feature in the GNU C Library (aka glibc or libc6) through 2.32, when processing invalid multi-byte input sequences in the EUC-KR encoding, may have a buffer over-read.",
+        "id": "CVE-2019-25013",
+        "link": "https://access.redhat.com/security/cve/CVE-2019-25013",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "MEDIUM",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "COMPLETE",
+                "base_score": 7.1,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 8.6,
+                "impact_score": 6.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "High",
+              "vector_string": "AV:N/AC:M/Au:N/C:N/I:N/A:C",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "HIGH",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 5.9,
+                "base_severity": "Medium",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 2.2,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2019-25013"
+          }
+        ],
+        "references": null,
+        "severity": "High",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [],
+      "package": "glibc-2.28-127.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "glibc",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "2.28-127.el8",
+      "severity": "Low",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-27618",
+      "vendor_data": [],
+      "vuln": "CVE-2020-27618",
+      "extra": {
+        "description": "none",
+        "id": "CVE-2020-27618",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-27618",
+        "namespace": "rhel:8",
+        "nvd_data": [],
+        "references": null,
+        "severity": "Low",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 7.1,
+            "exploitability_score": 8.6,
+            "impact_score": 6.9
+          },
+          "cvss_v3": {
+            "base_score": 5.9,
+            "exploitability_score": 2.2,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2019-25013"
+        }
+      ],
+      "package": "glibc-common-2.28-127.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "glibc-common",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "2.28-127.el8",
+      "severity": "High",
+      "url": "https://access.redhat.com/security/cve/CVE-2019-25013",
+      "vendor_data": [],
+      "vuln": "CVE-2019-25013",
+      "extra": {
+        "description": "The iconv feature in the GNU C Library (aka glibc or libc6) through 2.32, when processing invalid multi-byte input sequences in the EUC-KR encoding, may have a buffer over-read.",
+        "id": "CVE-2019-25013",
+        "link": "https://access.redhat.com/security/cve/CVE-2019-25013",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "MEDIUM",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "COMPLETE",
+                "base_score": 7.1,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 8.6,
+                "impact_score": 6.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "High",
+              "vector_string": "AV:N/AC:M/Au:N/C:N/I:N/A:C",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "HIGH",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 5.9,
+                "base_severity": "Medium",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 2.2,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2019-25013"
+          }
+        ],
+        "references": null,
+        "severity": "High",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [],
+      "package": "glibc-common-2.28-127.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "glibc-common",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "2.28-127.el8",
+      "severity": "Low",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-27618",
+      "vendor_data": [],
+      "vuln": "CVE-2020-27618",
+      "extra": {
+        "description": "none",
+        "id": "CVE-2020-27618",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-27618",
+        "namespace": "rhel:8",
+        "nvd_data": [],
+        "references": null,
+        "severity": "Low",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 7.1,
+            "exploitability_score": 8.6,
+            "impact_score": 6.9
+          },
+          "cvss_v3": {
+            "base_score": 5.9,
+            "exploitability_score": 2.2,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2019-25013"
+        }
+      ],
+      "package": "glibc-minimal-langpack-2.28-127.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "glibc-minimal-langpack",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "2.28-127.el8",
+      "severity": "High",
+      "url": "https://access.redhat.com/security/cve/CVE-2019-25013",
+      "vendor_data": [],
+      "vuln": "CVE-2019-25013",
+      "extra": {
+        "description": "The iconv feature in the GNU C Library (aka glibc or libc6) through 2.32, when processing invalid multi-byte input sequences in the EUC-KR encoding, may have a buffer over-read.",
+        "id": "CVE-2019-25013",
+        "link": "https://access.redhat.com/security/cve/CVE-2019-25013",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "MEDIUM",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "COMPLETE",
+                "base_score": 7.1,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 8.6,
+                "impact_score": 6.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "High",
+              "vector_string": "AV:N/AC:M/Au:N/C:N/I:N/A:C",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "HIGH",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 5.9,
+                "base_severity": "Medium",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 2.2,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2019-25013"
+          }
+        ],
+        "references": null,
+        "severity": "High",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [],
+      "package": "glibc-minimal-langpack-2.28-127.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "glibc-minimal-langpack",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "2.28-127.el8",
+      "severity": "Low",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-27618",
+      "vendor_data": [],
+      "vuln": "CVE-2020-27618",
+      "extra": {
+        "description": "none",
+        "id": "CVE-2020-27618",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-27618",
+        "namespace": "rhel:8",
+        "nvd_data": [],
+        "references": null,
+        "severity": "Low",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 7.5,
+            "exploitability_score": 3.9,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-28196"
+        }
+      ],
+      "package": "krb5-libs-1.18.2-5.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "krb5-libs",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "1.18.2-5.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-28196",
+      "vendor_data": [],
+      "vuln": "CVE-2020-28196",
+      "extra": {
+        "description": "MIT Kerberos 5 (aka krb5) before 1.17.2 and 1.18.x before 1.18.3 allows unbounded recursion via an ASN.1-encoded Kerberos message because the lib/krb5/asn.1/asn1_encode.c support for BER indefinite lengths lacks a recursion limit.",
+        "id": "CVE-2020-28196",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-28196",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 5,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 7.5,
+                "base_severity": "High",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-28196"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 7.5,
+            "exploitability_score": 3.9,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-8231"
+        }
+      ],
+      "package": "libcurl-7.61.1-14.el8_3.1",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "libcurl",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "7.61.1-14.el8_3.1",
+      "severity": "Low",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-8231",
+      "vendor_data": [],
+      "vuln": "CVE-2020-8231",
+      "extra": {
+        "description": "Due to use of a dangling pointer, libcurl 7.29.0 through 7.71.1 can use the wrong connection when sending data.",
+        "id": "CVE-2020-8231",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-8231",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "NONE",
+                "base_score": 5,
+                "confidentiality_impact": "PARTIAL",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:P/I:N/A:N",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "NONE",
+                "base_score": 7.5,
+                "base_severity": "High",
+                "confidentiality_impact": "HIGH",
+                "exploitability_score": 3.9,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-8231"
+          }
+        ],
+        "references": null,
+        "severity": "Low",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 4.3,
+            "exploitability_score": 8.6,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 3.7,
+            "exploitability_score": 2.2,
+            "impact_score": 1.4
+          },
+          "id": "CVE-2020-8284"
+        }
+      ],
+      "package": "libcurl-7.61.1-14.el8_3.1",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "libcurl",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "7.61.1-14.el8_3.1",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-8284",
+      "vendor_data": [],
+      "vuln": "CVE-2020-8284",
+      "extra": {
+        "description": "A malicious server can use the FTP PASV response to trick curl 7.73.0 and earlier into connecting back to a given IP address and port, and this way potentially make curl extract information about services that are otherwise private and not disclosed, for example doing port scanning and service banner extractions.",
+        "id": "CVE-2020-8284",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-8284",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "MEDIUM",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "NONE",
+                "base_score": 4.3,
+                "confidentiality_impact": "PARTIAL",
+                "exploitability_score": 8.6,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:M/Au:N/C:P/I:N/A:N",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "HIGH",
+                "attack_vector": "NETWORK",
+                "availability_impact": "NONE",
+                "base_score": 3.7,
+                "base_severity": "Low",
+                "confidentiality_impact": "LOW",
+                "exploitability_score": 2.2,
+                "impact_score": 1.4,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-8284"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 7.5,
+            "exploitability_score": 3.9,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-8285"
+        }
+      ],
+      "package": "libcurl-7.61.1-14.el8_3.1",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "libcurl",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "7.61.1-14.el8_3.1",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-8285",
+      "vendor_data": [],
+      "vuln": "CVE-2020-8285",
+      "extra": {
+        "description": "curl 7.21.0 to and including 7.73.0 is vulnerable to uncontrolled recursion due to a stack overflow issue in FTP wildcard match parsing.",
+        "id": "CVE-2020-8285",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-8285",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 5,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 7.5,
+                "base_severity": "High",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-8285"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 7.5,
+            "exploitability_score": 3.9,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-8286"
+        }
+      ],
+      "package": "libcurl-7.61.1-14.el8_3.1",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "libcurl",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "7.61.1-14.el8_3.1",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-8286",
+      "vendor_data": [],
+      "vuln": "CVE-2020-8286",
+      "extra": {
+        "description": "curl 7.41.0 through 7.73.0 is vulnerable to an improper check for certificate revocation due to insufficient verification of the OCSP response.",
+        "id": "CVE-2020-8286",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-8286",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "NONE",
+                "base_score": 5,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "PARTIAL"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:P/A:N",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "NONE",
+                "base_score": 7.5,
+                "base_severity": "High",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 3.6,
+                "integrity_impact": "HIGH",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-8286"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 4.3,
+            "exploitability_score": 8.6,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 5.9,
+            "exploitability_score": 2.2,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-16135"
+        }
+      ],
+      "package": "libssh-0.9.4-2.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "libssh",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "0.9.4-2.el8",
+      "severity": "Low",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-16135",
+      "vendor_data": [],
+      "vuln": "CVE-2020-16135",
+      "extra": {
+        "description": "libssh 0.9.4 has a NULL pointer dereference in tftpserver.c if ssh_buffer_new returns NULL.",
+        "id": "CVE-2020-16135",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-16135",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "MEDIUM",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 4.3,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 8.6,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "HIGH",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 5.9,
+                "base_severity": "Medium",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 2.2,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-16135"
+          }
+        ],
+        "references": null,
+        "severity": "Low",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 4.3,
+            "exploitability_score": 8.6,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 5.9,
+            "exploitability_score": 2.2,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-16135"
+        }
+      ],
+      "package": "libssh-config-0.9.4-2.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "libssh-config",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "0.9.4-2.el8",
+      "severity": "Low",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-16135",
+      "vendor_data": [],
+      "vuln": "CVE-2020-16135",
+      "extra": {
+        "description": "libssh 0.9.4 has a NULL pointer dereference in tftpserver.c if ssh_buffer_new returns NULL.",
+        "id": "CVE-2020-16135",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-16135",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "MEDIUM",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 4.3,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 8.6,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "HIGH",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 5.9,
+                "base_severity": "Medium",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 2.2,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-16135"
+          }
+        ],
+        "references": null,
+        "severity": "Low",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 6.4,
+            "exploitability_score": 10,
+            "impact_score": 4.9
+          },
+          "cvss_v3": {
+            "base_score": 6.5,
+            "exploitability_score": 3.9,
+            "impact_score": 2.5
+          },
+          "id": "CVE-2020-24977"
+        }
+      ],
+      "package": "libxml2-2.9.7-8.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "libxml2",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "2.9.7-8.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-24977",
+      "vendor_data": [],
+      "vuln": "CVE-2020-24977",
+      "extra": {
+        "description": "GNOME project libxml2 v2.9.10 has a global buffer over-read vulnerability in xmlEncodeEntitiesInternal at libxml2/entities.c. The issue has been fixed in commit 50f06b3e.",
+        "id": "CVE-2020-24977",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-24977",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 6.4,
+                "confidentiality_impact": "PARTIAL",
+                "exploitability_score": 10,
+                "impact_score": 4.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:P/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "LOW",
+                "base_score": 6.5,
+                "base_severity": "Medium",
+                "confidentiality_impact": "LOW",
+                "exploitability_score": 3.9,
+                "impact_score": 2.5,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:L",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-24977"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 5.3,
+            "exploitability_score": 3.9,
+            "impact_score": 1.4
+          },
+          "id": "CVE-2020-24370"
+        }
+      ],
+      "package": "lua-5.3.4-11.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "lua",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "5.3.4-11.el8",
+      "severity": "Low",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-24370",
+      "vendor_data": [],
+      "vuln": "CVE-2020-24370",
+      "extra": {
+        "description": "ldebug.c in Lua 5.4.0 allows a negation overflow and segmentation fault in getlocal and setlocal, as demonstrated by getlocal(3,2^31).",
+        "id": "CVE-2020-24370",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-24370",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 5,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "LOW",
+                "base_score": 5.3,
+                "base_severity": "Medium",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 1.4,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-24370"
+          }
+        ],
+        "references": null,
+        "severity": "Low",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 5.3,
+            "exploitability_score": 3.9,
+            "impact_score": 1.4
+          },
+          "id": "CVE-2020-24370"
+        }
+      ],
+      "package": "lua-libs-5.3.4-11.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "lua-libs",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "5.3.4-11.el8",
+      "severity": "Low",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-24370",
+      "vendor_data": [],
+      "vuln": "CVE-2020-24370",
+      "extra": {
+        "description": "ldebug.c in Lua 5.4.0 allows a negation overflow and segmentation fault in getlocal and setlocal, as demonstrated by getlocal(3,2^31).",
+        "id": "CVE-2020-24370",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-24370",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 5,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "LOW",
+                "base_score": 5.3,
+                "base_severity": "Medium",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 1.4,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-24370"
+          }
+        ],
+        "references": null,
+        "severity": "Low",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 7.5,
+            "exploitability_score": 3.9,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-29361"
+        }
+      ],
+      "package": "p11-kit-0.23.14-5.el8_0",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "p11-kit",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "0.23.14-5.el8_0",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-29361",
+      "vendor_data": [],
+      "vuln": "CVE-2020-29361",
+      "extra": {
+        "description": "An issue was discovered in p11-kit 0.21.1 through 0.23.21. Multiple integer overflows have been discovered in the array allocations in the p11-kit library and the p11-kit list command, where overflow checks are missing before calling realloc or calloc.",
+        "id": "CVE-2020-29361",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-29361",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 5,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 7.5,
+                "base_severity": "High",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-29361"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 5.3,
+            "exploitability_score": 3.9,
+            "impact_score": 1.4
+          },
+          "id": "CVE-2020-29362"
+        }
+      ],
+      "package": "p11-kit-0.23.14-5.el8_0",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "p11-kit",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "0.23.14-5.el8_0",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-29362",
+      "vendor_data": [],
+      "vuln": "CVE-2020-29362",
+      "extra": {
+        "description": "An issue was discovered in p11-kit 0.21.1 through 0.23.21. A heap-based buffer over-read has been discovered in the RPC protocol used by thep11-kit server/remote commands and the client library. When the remote entity supplies a byte array through a serialized PKCS#11 function call, the receiving entity may allow the reading of up to 4 bytes of memory past the heap allocation.",
+        "id": "CVE-2020-29362",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-29362",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "NONE",
+                "base_score": 5,
+                "confidentiality_impact": "PARTIAL",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:P/I:N/A:N",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "NONE",
+                "base_score": 5.3,
+                "base_severity": "Medium",
+                "confidentiality_impact": "LOW",
+                "exploitability_score": 3.9,
+                "impact_score": 1.4,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-29362"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 7.5,
+            "exploitability_score": 3.9,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-29363"
+        }
+      ],
+      "package": "p11-kit-0.23.14-5.el8_0",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "p11-kit",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "0.23.14-5.el8_0",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-29363",
+      "vendor_data": [],
+      "vuln": "CVE-2020-29363",
+      "extra": {
+        "description": "An issue was discovered in p11-kit 0.23.6 through 0.23.21. A heap-based buffer overflow has been discovered in the RPC protocol used by p11-kit server/remote commands and the client library. When the remote entity supplies a serialized byte array in a CK_ATTRIBUTE, the receiving entity may not allocate sufficient length for the buffer to store the deserialized value.",
+        "id": "CVE-2020-29363",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-29363",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 5,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 7.5,
+                "base_severity": "High",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-29363"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 7.5,
+            "exploitability_score": 3.9,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-29361"
+        }
+      ],
+      "package": "p11-kit-trust-0.23.14-5.el8_0",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "p11-kit-trust",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "0.23.14-5.el8_0",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-29361",
+      "vendor_data": [],
+      "vuln": "CVE-2020-29361",
+      "extra": {
+        "description": "An issue was discovered in p11-kit 0.21.1 through 0.23.21. Multiple integer overflows have been discovered in the array allocations in the p11-kit library and the p11-kit list command, where overflow checks are missing before calling realloc or calloc.",
+        "id": "CVE-2020-29361",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-29361",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 5,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 7.5,
+                "base_severity": "High",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-29361"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 5.3,
+            "exploitability_score": 3.9,
+            "impact_score": 1.4
+          },
+          "id": "CVE-2020-29362"
+        }
+      ],
+      "package": "p11-kit-trust-0.23.14-5.el8_0",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "p11-kit-trust",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "0.23.14-5.el8_0",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-29362",
+      "vendor_data": [],
+      "vuln": "CVE-2020-29362",
+      "extra": {
+        "description": "An issue was discovered in p11-kit 0.21.1 through 0.23.21. A heap-based buffer over-read has been discovered in the RPC protocol used by thep11-kit server/remote commands and the client library. When the remote entity supplies a byte array through a serialized PKCS#11 function call, the receiving entity may allow the reading of up to 4 bytes of memory past the heap allocation.",
+        "id": "CVE-2020-29362",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-29362",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "NONE",
+                "base_score": 5,
+                "confidentiality_impact": "PARTIAL",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:P/I:N/A:N",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "NONE",
+                "base_score": 5.3,
+                "base_severity": "Medium",
+                "confidentiality_impact": "LOW",
+                "exploitability_score": 3.9,
+                "impact_score": 1.4,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-29362"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 7.5,
+            "exploitability_score": 3.9,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-29363"
+        }
+      ],
+      "package": "p11-kit-trust-0.23.14-5.el8_0",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "p11-kit-trust",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "0.23.14-5.el8_0",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-29363",
+      "vendor_data": [],
+      "vuln": "CVE-2020-29363",
+      "extra": {
+        "description": "An issue was discovered in p11-kit 0.23.6 through 0.23.21. A heap-based buffer overflow has been discovered in the RPC protocol used by p11-kit server/remote commands and the client library. When the remote entity supplies a serialized byte array in a CK_ATTRIBUTE, the receiving entity may not allocate sufficient length for the buffer to store the deserialized value.",
+        "id": "CVE-2020-29363",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-29363",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 5,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 7.5,
+                "base_severity": "High",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-29363"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": false,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 6.4,
+            "exploitability_score": 10,
+            "impact_score": 4.9
+          },
+          "cvss_v3": {
+            "base_score": 8.2,
+            "exploitability_score": 3.9,
+            "impact_score": 4.2
+          },
+          "id": "CVE-2020-10543"
+        }
+      ],
+      "package": "perl-interpreter-5.26.3-416.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "perl-interpreter",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "5.26.3-416.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-10543",
+      "vendor_data": [],
+      "vuln": "CVE-2020-10543",
+      "extra": {
+        "description": "Perl before 5.30.3 on 32-bit platforms allows a heap-based buffer overflow because nested regular expression quantifiers have an integer overflow.",
+        "id": "CVE-2020-10543",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-10543",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 6.4,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 4.9,
+                "integrity_impact": "PARTIAL"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:P/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 8.2,
+                "base_severity": "High",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 4.2,
+                "integrity_impact": "LOW",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-10543"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": false,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 7.5,
+            "exploitability_score": 10,
+            "impact_score": 6.4
+          },
+          "cvss_v3": {
+            "base_score": 8.6,
+            "exploitability_score": 3.9,
+            "impact_score": 4.7
+          },
+          "id": "CVE-2020-10878"
+        }
+      ],
+      "package": "perl-interpreter-5.26.3-416.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "perl-interpreter",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "5.26.3-416.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-10878",
+      "vendor_data": [],
+      "vuln": "CVE-2020-10878",
+      "extra": {
+        "description": "Perl before 5.30.3 has an integer overflow related to mishandling of a \"PL_regkind[OP(n)] == NOTHING\" situation. A crafted regular expression could lead to malformed bytecode with a possibility of instruction injection.",
+        "id": "CVE-2020-10878",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-10878",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 7.5,
+                "confidentiality_impact": "PARTIAL",
+                "exploitability_score": 10,
+                "impact_score": 6.4,
+                "integrity_impact": "PARTIAL"
+              },
+              "severity": "High",
+              "vector_string": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 8.6,
+                "base_severity": "High",
+                "confidentiality_impact": "LOW",
+                "exploitability_score": 3.9,
+                "impact_score": 4.7,
+                "integrity_impact": "LOW",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-10878"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": false,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 7.5,
+            "exploitability_score": 3.9,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-12723"
+        }
+      ],
+      "package": "perl-interpreter-5.26.3-416.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "perl-interpreter",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "5.26.3-416.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-12723",
+      "vendor_data": [],
+      "vuln": "CVE-2020-12723",
+      "extra": {
+        "description": "regcomp.c in Perl before 5.30.3 allows a buffer overflow via a crafted regular expression because of recursive S_study_chunk calls.",
+        "id": "CVE-2020-12723",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-12723",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 5,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 7.5,
+                "base_severity": "High",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-12723"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": false,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 6.4,
+            "exploitability_score": 10,
+            "impact_score": 4.9
+          },
+          "cvss_v3": {
+            "base_score": 8.2,
+            "exploitability_score": 3.9,
+            "impact_score": 4.2
+          },
+          "id": "CVE-2020-10543"
+        }
+      ],
+      "package": "perl-libs-5.26.3-416.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "perl-libs",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "5.26.3-416.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-10543",
+      "vendor_data": [],
+      "vuln": "CVE-2020-10543",
+      "extra": {
+        "description": "Perl before 5.30.3 on 32-bit platforms allows a heap-based buffer overflow because nested regular expression quantifiers have an integer overflow.",
+        "id": "CVE-2020-10543",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-10543",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 6.4,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 4.9,
+                "integrity_impact": "PARTIAL"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:P/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 8.2,
+                "base_severity": "High",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 4.2,
+                "integrity_impact": "LOW",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-10543"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": false,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 7.5,
+            "exploitability_score": 10,
+            "impact_score": 6.4
+          },
+          "cvss_v3": {
+            "base_score": 8.6,
+            "exploitability_score": 3.9,
+            "impact_score": 4.7
+          },
+          "id": "CVE-2020-10878"
+        }
+      ],
+      "package": "perl-libs-5.26.3-416.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "perl-libs",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "5.26.3-416.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-10878",
+      "vendor_data": [],
+      "vuln": "CVE-2020-10878",
+      "extra": {
+        "description": "Perl before 5.30.3 has an integer overflow related to mishandling of a \"PL_regkind[OP(n)] == NOTHING\" situation. A crafted regular expression could lead to malformed bytecode with a possibility of instruction injection.",
+        "id": "CVE-2020-10878",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-10878",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 7.5,
+                "confidentiality_impact": "PARTIAL",
+                "exploitability_score": 10,
+                "impact_score": 6.4,
+                "integrity_impact": "PARTIAL"
+              },
+              "severity": "High",
+              "vector_string": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 8.6,
+                "base_severity": "High",
+                "confidentiality_impact": "LOW",
+                "exploitability_score": 3.9,
+                "impact_score": 4.7,
+                "integrity_impact": "LOW",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-10878"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": false,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 7.5,
+            "exploitability_score": 3.9,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-12723"
+        }
+      ],
+      "package": "perl-libs-5.26.3-416.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "perl-libs",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "5.26.3-416.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-12723",
+      "vendor_data": [],
+      "vuln": "CVE-2020-12723",
+      "extra": {
+        "description": "regcomp.c in Perl before 5.30.3 allows a buffer overflow via a crafted regular expression because of recursive S_study_chunk calls.",
+        "id": "CVE-2020-12723",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-12723",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 5,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 7.5,
+                "base_severity": "High",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-12723"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": false,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 6.4,
+            "exploitability_score": 10,
+            "impact_score": 4.9
+          },
+          "cvss_v3": {
+            "base_score": 8.2,
+            "exploitability_score": 3.9,
+            "impact_score": 4.2
+          },
+          "id": "CVE-2020-10543"
+        }
+      ],
+      "package": "perl-macros-5.26.3-416.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "perl-macros",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "5.26.3-416.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-10543",
+      "vendor_data": [],
+      "vuln": "CVE-2020-10543",
+      "extra": {
+        "description": "Perl before 5.30.3 on 32-bit platforms allows a heap-based buffer overflow because nested regular expression quantifiers have an integer overflow.",
+        "id": "CVE-2020-10543",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-10543",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 6.4,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 4.9,
+                "integrity_impact": "PARTIAL"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:P/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 8.2,
+                "base_severity": "High",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 4.2,
+                "integrity_impact": "LOW",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-10543"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": false,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 7.5,
+            "exploitability_score": 10,
+            "impact_score": 6.4
+          },
+          "cvss_v3": {
+            "base_score": 8.6,
+            "exploitability_score": 3.9,
+            "impact_score": 4.7
+          },
+          "id": "CVE-2020-10878"
+        }
+      ],
+      "package": "perl-macros-5.26.3-416.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "perl-macros",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "5.26.3-416.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-10878",
+      "vendor_data": [],
+      "vuln": "CVE-2020-10878",
+      "extra": {
+        "description": "Perl before 5.30.3 has an integer overflow related to mishandling of a \"PL_regkind[OP(n)] == NOTHING\" situation. A crafted regular expression could lead to malformed bytecode with a possibility of instruction injection.",
+        "id": "CVE-2020-10878",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-10878",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 7.5,
+                "confidentiality_impact": "PARTIAL",
+                "exploitability_score": 10,
+                "impact_score": 6.4,
+                "integrity_impact": "PARTIAL"
+              },
+              "severity": "High",
+              "vector_string": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 8.6,
+                "base_severity": "High",
+                "confidentiality_impact": "LOW",
+                "exploitability_score": 3.9,
+                "impact_score": 4.7,
+                "integrity_impact": "LOW",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-10878"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": false,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 5,
+            "exploitability_score": 10,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 7.5,
+            "exploitability_score": 3.9,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-12723"
+        }
+      ],
+      "package": "perl-macros-5.26.3-416.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "perl-macros",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "5.26.3-416.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-12723",
+      "vendor_data": [],
+      "vuln": "CVE-2020-12723",
+      "extra": {
+        "description": "regcomp.c in Perl before 5.30.3 allows a buffer overflow via a crafted regular expression because of recursive S_study_chunk calls.",
+        "id": "CVE-2020-12723",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-12723",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 5,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 10,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 7.5,
+                "base_severity": "High",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-12723"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 6.4,
+            "exploitability_score": 10,
+            "impact_score": 4.9
+          },
+          "cvss_v3": {
+            "base_score": 7.2,
+            "exploitability_score": 3.9,
+            "impact_score": 2.7
+          },
+          "id": "CVE-2020-26116"
+        }
+      ],
+      "package": "platform-python-3.6.8-31.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "platform-python",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "3.6.8-31.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-26116",
+      "vendor_data": [],
+      "vuln": "CVE-2020-26116",
+      "extra": {
+        "description": "http.client in Python 3.x before 3.5.10, 3.6.x before 3.6.12, 3.7.x before 3.7.9, and 3.8.x before 3.8.5 allows CRLF injection if the attacker controls the HTTP request method, as demonstrated by inserting CR and LF control characters in the first argument of HTTPConnection.request.",
+        "id": "CVE-2020-26116",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-26116",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "NONE",
+                "base_score": 6.4,
+                "confidentiality_impact": "PARTIAL",
+                "exploitability_score": 10,
+                "impact_score": 4.9,
+                "integrity_impact": "PARTIAL"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:P/I:P/A:N",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "NONE",
+                "base_score": 7.2,
+                "base_severity": "High",
+                "confidentiality_impact": "LOW",
+                "exploitability_score": 3.9,
+                "impact_score": 2.7,
+                "integrity_impact": "LOW",
+                "privileges_required": "NONE",
+                "scope": "CHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-26116"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 7.5,
+            "exploitability_score": 10,
+            "impact_score": 6.4
+          },
+          "cvss_v3": {
+            "base_score": 9.8,
+            "exploitability_score": 3.9,
+            "impact_score": 5.9
+          },
+          "id": "CVE-2020-27619"
+        }
+      ],
+      "package": "platform-python-3.6.8-31.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "platform-python",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "3.6.8-31.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-27619",
+      "vendor_data": [],
+      "vuln": "CVE-2020-27619",
+      "extra": {
+        "description": "In Python 3 through 3.9.0, the Lib/test/multibytecodec_support.py CJK codec tests call eval() on content retrieved via HTTP.",
+        "id": "CVE-2020-27619",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-27619",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 7.5,
+                "confidentiality_impact": "PARTIAL",
+                "exploitability_score": 10,
+                "impact_score": 6.4,
+                "integrity_impact": "PARTIAL"
+              },
+              "severity": "High",
+              "vector_string": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 9.8,
+                "base_severity": "Critical",
+                "confidentiality_impact": "HIGH",
+                "exploitability_score": 3.9,
+                "impact_score": 5.9,
+                "integrity_impact": "HIGH",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-27619"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 6.4,
+            "exploitability_score": 10,
+            "impact_score": 4.9
+          },
+          "cvss_v3": {
+            "base_score": 7.2,
+            "exploitability_score": 3.9,
+            "impact_score": 2.7
+          },
+          "id": "CVE-2020-26116"
+        }
+      ],
+      "package": "python3-libs-3.6.8-31.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "python3-libs",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "3.6.8-31.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-26116",
+      "vendor_data": [],
+      "vuln": "CVE-2020-26116",
+      "extra": {
+        "description": "http.client in Python 3.x before 3.5.10, 3.6.x before 3.6.12, 3.7.x before 3.7.9, and 3.8.x before 3.8.5 allows CRLF injection if the attacker controls the HTTP request method, as demonstrated by inserting CR and LF control characters in the first argument of HTTPConnection.request.",
+        "id": "CVE-2020-26116",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-26116",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "NONE",
+                "base_score": 6.4,
+                "confidentiality_impact": "PARTIAL",
+                "exploitability_score": 10,
+                "impact_score": 4.9,
+                "integrity_impact": "PARTIAL"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:P/I:P/A:N",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "NONE",
+                "base_score": 7.2,
+                "base_severity": "High",
+                "confidentiality_impact": "LOW",
+                "exploitability_score": 3.9,
+                "impact_score": 2.7,
+                "integrity_impact": "LOW",
+                "privileges_required": "NONE",
+                "scope": "CHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-26116"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 7.5,
+            "exploitability_score": 10,
+            "impact_score": 6.4
+          },
+          "cvss_v3": {
+            "base_score": 9.8,
+            "exploitability_score": 3.9,
+            "impact_score": 5.9
+          },
+          "id": "CVE-2020-27619"
+        }
+      ],
+      "package": "python3-libs-3.6.8-31.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "python3-libs",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "3.6.8-31.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-27619",
+      "vendor_data": [],
+      "vuln": "CVE-2020-27619",
+      "extra": {
+        "description": "In Python 3 through 3.9.0, the Lib/test/multibytecodec_support.py CJK codec tests call eval() on content retrieved via HTTP.",
+        "id": "CVE-2020-27619",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-27619",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 7.5,
+                "confidentiality_impact": "PARTIAL",
+                "exploitability_score": 10,
+                "impact_score": 6.4,
+                "integrity_impact": "PARTIAL"
+              },
+              "severity": "High",
+              "vector_string": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "HIGH",
+                "base_score": 9.8,
+                "base_severity": "Critical",
+                "confidentiality_impact": "HIGH",
+                "exploitability_score": 3.9,
+                "impact_score": 5.9,
+                "integrity_impact": "HIGH",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-27619"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 6.4,
+            "exploitability_score": 10,
+            "impact_score": 4.9
+          },
+          "cvss_v3": {
+            "base_score": 6.5,
+            "exploitability_score": 3.9,
+            "impact_score": 2.5
+          },
+          "id": "CVE-2020-24977"
+        }
+      ],
+      "package": "python3-libxml2-2.9.7-8.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "python3-libxml2",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "2.9.7-8.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-24977",
+      "vendor_data": [],
+      "vuln": "CVE-2020-24977",
+      "extra": {
+        "description": "GNOME project libxml2 v2.9.10 has a global buffer over-read vulnerability in xmlEncodeEntitiesInternal at libxml2/entities.c. The issue has been fixed in commit 50f06b3e.",
+        "id": "CVE-2020-24977",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-24977",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "NETWORK",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 6.4,
+                "confidentiality_impact": "PARTIAL",
+                "exploitability_score": 10,
+                "impact_score": 4.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:N/AC:L/Au:N/C:P/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "NETWORK",
+                "availability_impact": "LOW",
+                "base_score": 6.5,
+                "base_severity": "Medium",
+                "confidentiality_impact": "LOW",
+                "exploitability_score": 3.9,
+                "impact_score": 2.5,
+                "integrity_impact": "NONE",
+                "privileges_required": "NONE",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:L",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-24977"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 2.1,
+            "exploitability_score": 3.9,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 5.5,
+            "exploitability_score": 1.8,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-13434"
+        }
+      ],
+      "package": "sqlite-libs-3.26.0-11.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "sqlite-libs",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "3.26.0-11.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-13434",
+      "vendor_data": [],
+      "vuln": "CVE-2020-13434",
+      "extra": {
+        "description": "SQLite through 3.32.0 has an integer overflow in sqlite3_str_vappendf in printf.c.",
+        "id": "CVE-2020-13434",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-13434",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "LOCAL",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 2.1,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Low",
+              "vector_string": "AV:L/AC:L/Au:N/C:N/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "LOCAL",
+                "availability_impact": "HIGH",
+                "base_score": 5.5,
+                "base_severity": "Medium",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 1.8,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "LOW",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-13434"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 2.1,
+            "exploitability_score": 3.9,
+            "impact_score": 2.9
+          },
+          "cvss_v3": {
+            "base_score": 5.5,
+            "exploitability_score": 1.8,
+            "impact_score": 3.6
+          },
+          "id": "CVE-2020-15358"
+        }
+      ],
+      "package": "sqlite-libs-3.26.0-11.el8",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "sqlite-libs",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "3.26.0-11.el8",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-15358",
+      "vendor_data": [],
+      "vuln": "CVE-2020-15358",
+      "extra": {
+        "description": "In SQLite before 3.32.3, select.c mishandles query-flattener optimization, leading to a multiSelectOrderBy heap overflow because of misuse of transitive properties for constant propagation.",
+        "id": "CVE-2020-15358",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-15358",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": false
+              },
+              "base_metrics": {
+                "access_complexity": "LOW",
+                "access_vector": "LOCAL",
+                "authentication": "NONE",
+                "availability_impact": "PARTIAL",
+                "base_score": 2.1,
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 3.9,
+                "impact_score": 2.9,
+                "integrity_impact": "NONE"
+              },
+              "severity": "Low",
+              "vector_string": "AV:L/AC:L/Au:N/C:N/I:N/A:P",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "LOW",
+                "attack_vector": "LOCAL",
+                "availability_impact": "HIGH",
+                "base_score": 5.5,
+                "base_severity": "Medium",
+                "confidentiality_impact": "NONE",
+                "exploitability_score": 1.8,
+                "impact_score": 3.6,
+                "integrity_impact": "NONE",
+                "privileges_required": "LOW",
+                "scope": "UNCHANGED",
+                "user_interaction": "NONE"
+              },
+              "vector_string": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-15358"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 6.2,
+            "exploitability_score": 1.9,
+            "impact_score": 10
+          },
+          "cvss_v3": {
+            "base_score": 6.7,
+            "exploitability_score": 0.8,
+            "impact_score": 5.9
+          },
+          "id": "CVE-2020-13776"
+        }
+      ],
+      "package": "systemd-239-41.el8_3.1",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "systemd",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "239-41.el8_3.1",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-13776",
+      "vendor_data": [],
+      "vuln": "CVE-2020-13776",
+      "extra": {
+        "description": "systemd through v245 mishandles numerical usernames such as ones composed of decimal digits or 0x followed by hex digits, as demonstrated by use of root privileges when privileges of the 0x0 user account were intended. NOTE: this issue exists because of an incomplete fix for CVE-2017-1000082.",
+        "id": "CVE-2020-13776",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-13776",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": true
+              },
+              "base_metrics": {
+                "access_complexity": "HIGH",
+                "access_vector": "LOCAL",
+                "authentication": "NONE",
+                "availability_impact": "COMPLETE",
+                "base_score": 6.2,
+                "confidentiality_impact": "COMPLETE",
+                "exploitability_score": 1.9,
+                "impact_score": 10,
+                "integrity_impact": "COMPLETE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:L/AC:H/Au:N/C:C/I:C/A:C",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "HIGH",
+                "attack_vector": "LOCAL",
+                "availability_impact": "HIGH",
+                "base_score": 6.7,
+                "base_severity": "Medium",
+                "confidentiality_impact": "HIGH",
+                "exploitability_score": 0.8,
+                "impact_score": 5.9,
+                "integrity_impact": "HIGH",
+                "privileges_required": "LOW",
+                "scope": "UNCHANGED",
+                "user_interaction": "REQUIRED"
+              },
+              "vector_string": "CVSS:3.1/AV:L/AC:H/PR:L/UI:R/S:U/C:H/I:H/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-13776"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 6.2,
+            "exploitability_score": 1.9,
+            "impact_score": 10
+          },
+          "cvss_v3": {
+            "base_score": 6.7,
+            "exploitability_score": 0.8,
+            "impact_score": 5.9
+          },
+          "id": "CVE-2020-13776"
+        }
+      ],
+      "package": "systemd-libs-239-41.el8_3.1",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "systemd-libs",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "239-41.el8_3.1",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-13776",
+      "vendor_data": [],
+      "vuln": "CVE-2020-13776",
+      "extra": {
+        "description": "systemd through v245 mishandles numerical usernames such as ones composed of decimal digits or 0x followed by hex digits, as demonstrated by use of root privileges when privileges of the 0x0 user account were intended. NOTE: this issue exists because of an incomplete fix for CVE-2017-1000082.",
+        "id": "CVE-2020-13776",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-13776",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": true
+              },
+              "base_metrics": {
+                "access_complexity": "HIGH",
+                "access_vector": "LOCAL",
+                "authentication": "NONE",
+                "availability_impact": "COMPLETE",
+                "base_score": 6.2,
+                "confidentiality_impact": "COMPLETE",
+                "exploitability_score": 1.9,
+                "impact_score": 10,
+                "integrity_impact": "COMPLETE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:L/AC:H/Au:N/C:C/I:C/A:C",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "HIGH",
+                "attack_vector": "LOCAL",
+                "availability_impact": "HIGH",
+                "base_score": 6.7,
+                "base_severity": "Medium",
+                "confidentiality_impact": "HIGH",
+                "exploitability_score": 0.8,
+                "impact_score": 5.9,
+                "integrity_impact": "HIGH",
+                "privileges_required": "LOW",
+                "scope": "UNCHANGED",
+                "user_interaction": "REQUIRED"
+              },
+              "vector_string": "CVSS:3.1/AV:L/AC:H/PR:L/UI:R/S:U/C:H/I:H/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-13776"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    },
+    {
+      "feed": "vulnerabilities",
+      "feed_group": "rhel:8",
+      "fix": "None",
+      "inherited_from_base": true,
+      "nvd_data": [
+        {
+          "cvss_v2": {
+            "base_score": 6.2,
+            "exploitability_score": 1.9,
+            "impact_score": 10
+          },
+          "cvss_v3": {
+            "base_score": 6.7,
+            "exploitability_score": 0.8,
+            "impact_score": 5.9
+          },
+          "id": "CVE-2020-13776"
+        }
+      ],
+      "package": "systemd-pam-239-41.el8_3.1",
+      "package_cpe": "None",
+      "package_cpe23": "None",
+      "package_name": "systemd-pam",
+      "package_path": "pkgdb",
+      "package_type": "rpm",
+      "package_version": "239-41.el8_3.1",
+      "severity": "Medium",
+      "url": "https://access.redhat.com/security/cve/CVE-2020-13776",
+      "vendor_data": [],
+      "vuln": "CVE-2020-13776",
+      "extra": {
+        "description": "systemd through v245 mishandles numerical usernames such as ones composed of decimal digits or 0x followed by hex digits, as demonstrated by use of root privileges when privileges of the 0x0 user account were intended. NOTE: this issue exists because of an incomplete fix for CVE-2017-1000082.",
+        "id": "CVE-2020-13776",
+        "link": "https://access.redhat.com/security/cve/CVE-2020-13776",
+        "namespace": "rhel:8",
+        "nvd_data": [
+          {
+            "cvss_v2": {
+              "additional_information": {
+                "ac_insuf_info": false,
+                "obtain_all_privilege": false,
+                "obtain_other_privilege": false,
+                "obtain_user_privilege": false,
+                "user_interaction_required": true
+              },
+              "base_metrics": {
+                "access_complexity": "HIGH",
+                "access_vector": "LOCAL",
+                "authentication": "NONE",
+                "availability_impact": "COMPLETE",
+                "base_score": 6.2,
+                "confidentiality_impact": "COMPLETE",
+                "exploitability_score": 1.9,
+                "impact_score": 10,
+                "integrity_impact": "COMPLETE"
+              },
+              "severity": "Medium",
+              "vector_string": "AV:L/AC:H/Au:N/C:C/I:C/A:C",
+              "version": "2.0"
+            },
+            "cvss_v3": {
+              "base_metrics": {
+                "attack_complexity": "HIGH",
+                "attack_vector": "LOCAL",
+                "availability_impact": "HIGH",
+                "base_score": 6.7,
+                "base_severity": "Medium",
+                "confidentiality_impact": "HIGH",
+                "exploitability_score": 0.8,
+                "impact_score": 5.9,
+                "integrity_impact": "HIGH",
+                "privileges_required": "LOW",
+                "scope": "UNCHANGED",
+                "user_interaction": "REQUIRED"
+              },
+              "vector_string": "CVSS:3.1/AV:L/AC:H/PR:L/UI:R/S:U/C:H/I:H/A:H",
+              "version": "3.1"
+            },
+            "id": "CVE-2020-13776"
+          }
+        ],
+        "references": null,
+        "severity": "Medium",
+        "vendor_data": []
+      }
+    }
+  ],
+  "vulnerability_type": "all",
+  "imageFullTag": "registry1.dsop.io/ironbank-staging/cloudbees/core/agent:152299"
+}

@@ -1,161 +1,164 @@
 # DefectDojo
 
-[![OWASP Flagship](https://img.shields.io/badge/owasp-flagship%20project-orange.svg)](https://www.owasp.org/index.php/OWASP_DefectDojo_Project) [![GitHub release](https://img.shields.io/github/release/DefectDojo/django-DefectDojo.svg)](https://github.com/DefectDojo/django-DefectDojo) [![YouTube Subscribe](https://img.shields.io/badge/youtube-subscribe-%23c4302b.svg)](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ) ![Twitter Follow](https://img.shields.io/twitter/follow/defectdojo.svg?style=social&label=Follow)
+<table>
+    <tr styl="margin: 0; position: absolute; top: 50%; -ms-transform: translateY(-50%); transform: translateY(-50%);">
+        <th>
+            <a href="https://opensourcesecurityindex.io/" target="_blank" rel="noopener">
+                <img style="width: 282px; height: 56px" src="https://opensourcesecurityindex.io/badge.svg"
+                alt="Open Source Security Index - Fastest Growing Open Source Security Projects" width="282" height="56" />
+            </a>
+        </th>
+        <th>
+            <p>
+                <a href="https://www.owasp.org/index.php/OWASP_DefectDojo_Project"><img src="https://img.shields.io/badge/owasp-flagship%20project-orange.svg" alt="OWASP Flagship"></a>
+                <a href="https://github.com/DefectDojo/django-DefectDojo/releases/latest"><img src="https://img.shields.io/github/release/DefectDojo/django-DefectDojo.svg" alt="GitHub release"></a>
+                <a href="https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ"><img src="https://img.shields.io/badge/youtube-subscribe-%23c4302b.svg" alt="YouTube Subscribe"></a>
+                <a href="https://twitter.com/defectdojo/"><img src="https://img.shields.io/twitter/follow/defectdojo.svg?style=social&amp;label=Follow" alt="Twitter Follow"></a>
+            </p>
+            <p>
+                <a href="https://github.com/DefectDojo/django-DefectDojo/actions"><img src="https://github.com/DefectDojo/django-DefectDojo/actions/workflows/unit-tests.yml/badge.svg?branch=master" alt="Unit Tests"></a>
+                <a href="https://github.com/DefectDojo/django-DefectDojo/actions"><img src="https://github.com/DefectDojo/django-DefectDojo/actions/workflows/integration-tests.yml/badge.svg?branch=master" alt="Integration Tests"></a>
+                <a href="https://bestpractices.coreinfrastructure.org/projects/2098"><img src="https://bestpractices.coreinfrastructure.org/projects/2098/badge" alt="CII Best Practices"></a>
+            </p>
+        </th>
+    </tr>
+ </table>
 
-[![Build Status](https://travis-ci.org/DefectDojo/django-DefectDojo.svg?branch=master)](https://travis-ci.org/DefectDojo/django-DefectDojo) [![Documentation Status](https://readthedocs.org/projects/defectdojo/badge/?version=latest)](https://defectdojo.readthedocs.io/en/latest/?badge=latest) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2098/badge)](https://bestpractices.coreinfrastructure.org/projects/2098)
+![Screenshot of DefectDojo](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/screenshot1.png)
 
-![Screenshot of DefectDojo](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/screenshot1.png)
+[DefectDojo](https://www.defectdojo.com/) is a DevSecOps, ASPM (application security posture management), and
+vulnerability management tool.  DefectDojo orchestrates end-to-end security testing, vulnerability tracking,
+deduplication, remediation, and reporting.
 
-[DefectDojo](https://www.defectdojo.org/) is a security program and
-vulnerability management tool.
-DefectDojo allows you to manage your application security program, maintain
-product and application information, schedule scans, triage vulnerabilities and
-push findings into defect trackers.
-Consolidate your findings into one source of truth with DefectDojo.
+## Demo
 
-## Quick Start
+Try out DefectDojo on our demo server at [demo.defectdojo.org](https://demo.defectdojo.org)
+
+Log in with username `admin` and password `1Defectdojo@demo#appsec`. Please note that the demo is publicly accessible
+and regularly reset. Do not put sensitive data in the demo.
+
+## Quick Start for Compose V2
+
+From July 2023 Compose V1 [stopped receiving updates](https://docs.docker.com/compose/reference/).
+
+Compose V2 integrates compose functions into the Docker platform, continuing to support most of the previous
+docker-compose features and flags. You can run Compose V2 by replacing the hyphen (-) with a space, using
+`docker compose` instead of `docker-compose`.
 
 ```sh
+# Clone the project
 git clone https://github.com/DefectDojo/django-DefectDojo
 cd django-DefectDojo
-# building
-docker-compose build
-# running
-docker-compose up
-# obtain admin credentials
-docker-compose logs initializer | grep "Admin password:"
+
+# Building Docker images
+./dc-build.sh
+
+# Run the application (for other profiles besides postgres-redis see  
+# https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md)
+./dc-up-d.sh postgres-redis
+
+# Obtain admin credentials. The initializer can take up to 3 minutes to run.
+# Use docker compose logs -f initializer to track its progress.
+docker compose logs initializer | grep "Admin password:"
 ```
 
-Navigate to <http://localhost:8080>.
+## For Docker Compose V1
+
+You can run Compose V1 by editing the files below to add the hyphen (-) between `docker compose`. 
+```sh
+     dc-build.sh
+     dc-down.sh
+     dc-stop.sh
+     dc-unittest.sh
+     dc-up-d.sh
+     dc-up.sh
+     docker/docker-compose-check.sh
+     docker/entrypoint-initializer.sh
+     docker/setEnv.sh
+```
+
+Navigate to `http://localhost:8080` to see your new instance!
 
 ## Documentation
 
-For detailed documentation you can visit
-[Read the Docs](https://defectdojo.readthedocs.io/).
+* [Official Docs](https://documentation.defectdojo.com/)
+    * [Docs for our `dev` branch](https://documentation.defectdojo.com/dev/)
+* [REST APIs](https://documentation.defectdojo.com/integrations/api-v2-docs/)
+* [Client APIs and Wrappers](https://documentation.defectdojo.com/integrations/api-v2-docs/#clients--api-wrappers)
+* Authentication options:
+    * [OAuth2/SAML2](https://documentation.defectdojo.com/integrations/social-authentication/)
+    * [LDAP](https://documentation.defectdojo.com/integrations/ldap-authentication/)
+* [Supported tools](https://documentation.defectdojo.com/integrations/parsers/)
 
 ## Supported Installation Options
 
-* [Docker / Docker Compose](DOCKER.md)
-* [Setup.bash](https://github.com/DefectDojo/django-DefectDojo/blob/master/setup/README.md)
+* [Docker / Docker Compose](readme-docs/DOCKER.md)
+* [SaaS](https://www.defectdojo.com/pricing) - Includes Support & Supports the Project
+* [AWS AMI](https://aws.amazon.com/marketplace/pp/prodview-m2a25gr67xbzk) - Supports the Project
 
-## Getting Started
+## Community, Getting Involved, and Updates
 
-We recommend checking out the
-[about](https://defectdojo.readthedocs.io/en/latest/about.html) document to
-learn the terminology of DefectDojo and the
-[getting started guide](https://defectdojo.readthedocs.io/en/latest/getting-started.html)
-for setting up a new installation.
-We've also created some example
-[workflows](https://defectdojo.readthedocs.io/en/latest/workflows.html) that
-should give you an idea of how to use DefectDojo for your own team.
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/slack-logo-icon.png" alt="Slack" height="50"/>](https://owasp.org/slack/invite)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/Linkedin-logo-icon-png.png" alt="LinkedIn" height="50"/>](https://www.linkedin.com/company/defectdojo)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/Twitter_Logo.png" alt="Twitter" height="50"/>](https://twitter.com/defectdojo)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/YouTube-Emblem.png" alt="Youtube" height="50"/>](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ)
 
-## REST APIs
+[Join the OWASP Slack community](https://owasp.org/slack/invite) and participate in the discussion! You can find us in
+our channel there, [#defectdojo](https://owasp.slack.com/channels/defectdojo). Follow DefectDojo on
+[Twitter](https://twitter.com/defectdojo), [LinkedIn](https://www.linkedin.com/company/defectdojo), and
+[YouTube](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ) for project updates!
 
-> ** Deprecation notice ** apiv1 is deprecated and EOS is on 12-31-2020. EOL is planned for 06-30-2021.
-> Please move on to apiv2 and raise issues for any unsupported operations.
+## Contributing
 
-Defectdojo can be accessed through a Swagger REST API. Please see [the API documentation](https://defectdojo.readthedocs.io/en/latest/api-v2-docs.html) or the in-app Swagger documentation.
+:warning: We have instituted a [feature freeze](https://github.com/DefectDojo/django-DefectDojo/discussions/8002) on v2
+of DefectDojo as we begin work on v3. Please see our [contributing guidelines](readme-docs/CONTRIBUTING.md) for more
+information. Check out our latest update on v3 [here](https://github.com/DefectDojo/django-DefectDojo/discussions/8974).
 
-## Client APIs and wrappers
-This section presents different ways to programmatically interact with DefectDojo APIs.
+## Pro Edition
+[Upgrade to DefectDojo Pro](https://www.defectdojo.com/pricing) today to take your DevSecOps to 11. DefectDojo Pro is
+designed to meet you wherever you are on your security journey and help you scale, with enhanced dashboards, additional
+smart features, tunable deduplication, and support from DevSecOps experts.
 
-See [Wrappers](WRAPPERS.md)
-
-
-## Release and branch model
-See [Release and branch model](BRANCHING-MODEL.md)
-
-
-## Getting Involved
-
-![Slack](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/slack_rgb.png)
-
-Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
-[Get Access.](https://owasp-slack.herokuapp.com/)
-
-![Twitter](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/Twitter_Logo.png)
-
-More info: [Contributing guideline](CONTRIBUTING.md)
-
-[DefectDojo Twitter Account](https://twitter.com/defectdojo) tweets project
-updates and changes.
-
-## Available Plugins
-
-[Engagement Surveys](https://github.com/grendel513/defectDojo-engagement-survey)
-– A plugin that adds answerable surveys to engagements.
-
-[LDAP Integration](https://django-auth-ldap.readthedocs.io/en/latest/)
-
-[SAML Integration](https://pypi.python.org/pypi/djangosaml2/)
-
-[Multi-Factor Auth](https://django-mfa.readthedocs.io/en/latest/)
+Alternatively, for information please email info@defectdojo.com
 
 ## About Us
 
 DefectDojo is maintained by:
+* Greg Anderson ([@devGregA](https://github.com/devgrega) | [LinkedIn](https://www.linkedin.com/in/g-anderson/))
+* Matt Tesauro ([@mtesauro](https://github.com/mtesauro) | [LinkedIn](https://www.linkedin.com/in/matttesauro/) |
+  [@matt_tesauro](https://twitter.com/matt_tesauro))
 
-* [Greg Anderson](https://www.linkedin.com/in/g-anderson/)
-* [Aaron Weaver](https://www.linkedin.com/in/aweaver/) ([@weavera](https://twitter.com/weavera))
-* [Matt Tesauro](https://www.linkedin.com/in/matttesauro/) ([@matt_tesauro](https://twitter.com/matt_tesauro))
+Core Moderators can help you with pull requests or feedback on dev ideas:
+* Cody Maffucci ([@Maffooch](https://github.com/maffooch) | [LinkedIn](https://www.linkedin.com/in/cody-maffucci))
 
-
-## Project Moderators
-
-Project Moderators can help you with pull requests or feedback on dev ideas.
-
-* [Alex Dracea](https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/)
-* [Valentijn Scholten](https://www.linkedin.com/in/valentijn-scholten/)
-* Jannik Jürgens
-* [Fred Blaise](https://www.linkedin.com/in/fredblaise/)
-* Saurabh kumar
-* Cody Maffucci
-* Pascal Trovatelli / [Sopra Steria](https://www.soprasteria.com/)
+Moderators can help you with pull requests or feedback on dev ideas:
+* Damien Carol ([@damiencarol](https://github.com/damiencarol) | [LinkedIn](https://www.linkedin.com/in/damien-carol/))
+* Jannik Jürgens ([@alles-klar](https://github.com/alles-klar))
+* Dubravko Sever ([@dsever](https://github.com/dsever))
+* Charles Neill ([@cneill](https://github.com/cneill) | [@ccneill](https://twitter.com/ccneill))
+* Jay Paz ([@jjpaz](https://twitter.com/jjpaz))
+* Blake Owens ([@blakeaowens](https://github.com/blakeaowens))
 
 ## Hall of Fame
 
-* Charles Neill ([@ccneill](https://twitter.com/ccneill)) – Charles served as a
-    DefectDojo Maintainer for years and wrote some of Dojo's core functionality.
-* Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) – Jay was a DefectDojo
-  maintainer for years. He performed Dojo's first UI overhaul, optimized code structure/features, and added numerous enhancements.
+* Valentijn Scholten ([@valentijnscholten](https://github.com/valentijnscholten) |
+  [Sponsor](https://github.com/sponsors/valentijnscholten) |
+  [LinkedIn](https://www.linkedin.com/in/valentijn-scholten/)) - Valentijn served as a core moderator for 3 years.
+  Valentijn’s contributions were numerous and extensive. He overhauled, improved, and optimized many parts of the
+  codebase. He consistently fielded questions, provided feedback on pull requests, and provided a helping hand wherever
+  it was needed.
+* Fred Blaise ([@madchap](https://github.com/madchap) | [LinkedIn](https://www.linkedin.com/in/fredblaise/)) - Fred
+  served as a core moderator during a critical time for DefectDojo. He contributed code, helped the team stay organized,
+  and architected important policies and procedures.
+* Aaron Weaver ([@aaronweaver](https://github.com/aaronweaver) | [LinkedIn](https://www.linkedin.com/in/aweaver/)) -
+  Aaron has been a long time contributor and user of DefectDojo. He did the second major UI overhaul and his
+  contributions include automation enhancements, CI/CD engagements, increased metadata at the product level, and many
+  more.
 
+## Security
 
-## Contributing
-
-We greatly appreciate all of our
-[contributors](https://github.com/DefectDojo/django-DefectDojo/graphs/contributors).
-
-We would also like to highlight the contributions from Michael Dong and Fatimah
-Zohra who contributed to DefectDojo before it was open source.
-
-### Swag Rewards
-
-If you fix an issue with the `swag reward` tag,  we'll send you a shirt and some
-stickers!
-
-![Dojo tshirt front](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/dojo_tshirt_front.png)
-
-## Support
-
-Proceeds are used for testing, infrastructure, etc.
-
-[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=paypal%40owasp%2eorg&lc=US&item_name=OWASP%20DefectDojo&no_note=0&currency_code=USD&bn=PP%2dDonationsBF)
-
-## Sponsors
-
-[![Xing](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/XING_logo.png)](https://corporate.xing.com/en/about-xing/security/)
-[![10Security](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/10Security-logo.png)](https://10security.com/services-by-technology/defectdojo-commercial-support/)
-[![GCSecurity](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/gc_logo_2018.png)](https://gcsec.com.br/)
-[![ISAAC](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/isaac.png)](https://isaac.nl "ISAAC")
-[![Timo-Pagel](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/timo-pagel-logo.png )](https://pagel.pro/)
-[![SDA-SE](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/sda-se-logo.png)](https://sda-se.com/)
-[![Signal-Iduna](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/signal-iduna.png)](https://signal-iduna.de/)
-[![WSO2](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/wso2-logo-for-screen.png)](https://wso2.com/)
-[![CloudBees](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/cloudbees-logo.png)](https://cloudbees.com/)
-
-Interested in becoming a sponsor and having your logo displayed? Please review
-our [sponsorship information](SPONSORING.md) or email greg.anderson@owasp.org
+Please report Security issues via our [disclosure policy](readme-docs/SECURITY.md).
 
 ## License
 
-DefectDojo is licensed under the [BSD Simplified license](LICENSE.md)
+DefectDojo is licensed under the [BSD 3-Clause License](LICENSE.md)

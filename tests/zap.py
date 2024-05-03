@@ -19,7 +19,7 @@ class Main:
 
         try:
             s.connect((address, port))
-        except socket.error as e:
+        except socket.error:
             print("Error connecting to ZAP, exiting.")
             sys.exit(0)
 

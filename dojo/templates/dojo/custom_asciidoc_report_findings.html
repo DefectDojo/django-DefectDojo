@@ -14,7 +14,7 @@
         {% if find.tags %}
             <sup>
                 [
-                {% for tag in find.tags %}
+                {% for tag in find.tags.all %}
                 {{ tag }}
                 {% endfor %}
                 ]
@@ -32,7 +32,7 @@
         {{ find.status }}
     </p>
     <br>
-    <p><b>==== CVSSv3: ====</b>
+    <p><b>==== CVSS v3: ====</b>
         <br>
         {{ find.cvssv3|linebreaksasciidocbr }}
     </p>
@@ -48,6 +48,12 @@
 {{ find.severity }} ({{ find.numerical_severity }})
 </span>
     </p>
+    <br>
+    <p><b>==== EPSS Score / Percentile: ====</b>
+        <br>
+        {{ find.epss_score|format_epss }} / {{ find.epss_percentile|format_epss }}
+    </p>
+    <br>
     <p><b>==== Description / Exploit: ====</b>
         <br>
         {{ find.description|linebreaksbr }}
@@ -60,7 +66,7 @@
     <br>
     {% with endpoints=find|get_vulnerable_endpoints %}
         {% if endpoints %}
-            <p><b>==== Systems Vulnerable: ====</b><br>
+            <p><b>==== Vulnerable Endpoints: ====</b><br>
                 {% for endpoint in endpoints %}
                     {{ endpoint }} +<br/>
                 {% endfor %}
@@ -71,7 +77,7 @@
 
     {% with endpoints=find|get_mitigated_endpoints %}
         {% if endpoints %}
-            <p><b>==== Systems Remediated: ====</b><br>
+            <p><b>==== Remediated Endpoints: ====</b><br>
                 {% for endpoint in endpoints %}
                     {{ endpoint }} +<br/>
                 {% endfor %}
@@ -97,13 +103,7 @@
     {% if include_finding_images %}
         <p><b>==== Finding Images: ====</b>
             <br>
-            {% if find.images.all %}
-                {% for pic in find.images.all %}
-                    image::{{ host }}{% pic_token pic 'small' %}[] +<br>
-                {% endfor %}
-            {% else %}
-                No images found.
-            {% endif %}
+            {% include "dojo/snippets/file_images.html" with size='small' obj=find format="AsciiDoc" %}
         </p><br>
     {% else %}
         <br>

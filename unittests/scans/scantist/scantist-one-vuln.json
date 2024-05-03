@@ -1,0 +1,16 @@
+[
+  {
+	"Public ID": "CVE-2015-0886",
+	"Library": "org.mindrot jbcrypt",
+	"Library Version": "0.3m",
+	"Issue Source": "source_code",
+	"Issue Type": "cve",
+	"Description": "Integer overflow in the crypt_raw method in the key-stretching implementation in jBCrypt before 0.4 makes it easier for remote attackers to determine cleartext values of password hashes via a brute-force attack against hashes associated with the maximum exponent.",
+	"File Path": "example-java-gradle/build.gradle",
+	"Score": "Medium",
+	"Priority": "",
+	"Comments": "",
+	"Patched Version": "0.4",
+	"Latest Component Version": "0.3"
+  }
+]

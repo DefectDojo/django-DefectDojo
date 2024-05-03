@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VulnSummary>
+    <AppVersion>7.0.011.1</AppVersion>
+    <ScanName>TestFire</ScanName>
+    <Metadata></Metadata>
+    <ScanStarted>2017-11-15 14:05:42</ScanStarted>
+    <ScanDuration>00:00:24</ScanDuration>
+    <ScanEnded>2017-11-15 14:06:06</ScanEnded>
+    <UTCOffset>-5</UTCOffset>
+    <ResourcesCrawled>6</ResourcesCrawled>
+    <NumberOfRequests>115</NumberOfRequests>
+    <NumberOfFailedRequests>0</NumberOfFailedRequests>
+    <VulnList>
+        <Vuln>
+            <DbId>FB9AF4A1755E408BB0B40E69EA0F5A8A</DbId>
+            <ParentDbId>00000000000000000000000000000000</ParentDbId>
+            <ScanName>TestFire</ScanName>
+            <WebSite>https://testfire.net:443</WebSite>
+            <WebSiteIP>65.61.137.117</WebSiteIP>
+            <VulnType>Browser Cache directive (leaking sensitive information)</VulnType>
+            <VulnUrl>https://testfire.net/search.aspx</VulnUrl>
+            <NormalizedUrl>https://testfire.net/search.aspx</NormalizedUrl>
+            <MatchedString>Cache-Control: private</MatchedString>
+            <NormalizedPostParams></NormalizedPostParams>
+            <VulnParam></VulnParam>
+            <ParameterName>N/A</ParameterName>
+            <HtmlEntityAttacked>URL</HtmlEntityAttacked>
+            <ModuleId>E33B272027B844D5BBB8EDE541983474</ModuleId>
+            <AttackType>Browser Cache Directive</AttackType>
+            <AttackScore>2-Low</AttackScore>
+            <AttackValue>N/A</AttackValue>
+            <OriginalValue>N/A</OriginalValue>
+            <Method>N/A</Method>
+            <RootCauseId>B8121EFA52A155EECF6EFE0521D2766F</RootCauseId>
+            <LuxorRootCauseId>C917FEF0D7F913EF4B2FC9A4F7F96550</LuxorRootCauseId>
+            <FindingDbId>2DB933E5C03C4E58AB769B59C7C6080D</FindingDbId>
+            <Description>
+                <![CDATA[
+        <p>
+        The response browser cache headers allow response caching. If the response contains sensitive information then it may be leaked into the browser cache.
+        </p><p>
+        By default, a response is cacheable if the requirements of the request method, request header fields, and the response status indicate that it is cacheable. 
+        Finally, unless specifically constrained by a cache-control directive, a caching system MAY always store a successful response as a cache entry, 
+        MAY return it without validation if it is fresh, and MAY return it after successful validation. If there is neither a cache validator nor an explicit expiration time associated with a response, 
+        we do not expect it to be cached, but certain caches MAY violate this expectation (for example, when little or no network connectivity is available). 
+        A client can usually detect that such a response was taken from a cache by comparing the Date header to the current time. 
+        Therefore, the browser has a capability to temporarily store some of the pages browsed. These cached files are stored in a folder. 
+        When we ask for these pages again, the browser displays them from its cache. Logging out from an application obviously does not clear the browser cache of any sensitive information 
+        that might have been stored.
+        </p>]]>
+            </Description>
+            <Recommendation>
+                <![CDATA[
+      <p>
+      Update Cache-Control http header to include no-store directive. The purpose of this directive is to prevent the inadvertent release or retention of sensitive information.
+      The suggested HTTP response headers are: <br/>
+        Cache-Control: no-cache, no-store <br/>
+        Expires: 0 <br/>
+        Pragma: no-cache <br/></p>]]>
+            </Recommendation>
+            <Page>https://testfire.net/search.aspx</Page>
+            <Url>https://testfire.net/search.aspx</Url>
+            <VulnParamType>unknown</VulnParamType>
+            <CrawlTraffic>R0VUIC9zZWFyY2guYXNweD90eHRTZWFyY2g9d2F0ZXIgSFRUUC8xLjENCkFjY2VwdDogdGV4dC9odG1sLGFwcGxpY2F0aW9uL3hodG1sK3htbCxhcHBsaWNhdGlvbi94bWw7cT0wLjksKi8qO3E9MC44DQpBY2NlcHQtRW5jb2Rpbmc6IGd6aXAsIGRlZmxhdGUNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDYuMTsgV09XNjQ7IFRyaWRlbnQvNy4wOyBydjoxMS4wKSBsaWtlIEdlY2tvDQpIb3N0OiB0ZXN0ZmlyZS5uZXQNClJlZmVyZXI6IGh0dHBzOi8vdGVzdGZpcmUubmV0Lw0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi94LXd3dy1mb3JtLXVybGVuY29kZWQNCkNvb2tpZTogQVNQLk5FVF9TZXNzaW9uSWQ9eGh3MmdkNTVlcHQ1bXgza25lZmxtdTU1OyBhbVNlc3Npb25JZD0xMDU4MTAxMjcxNjgNCg0K</CrawlTraffic>
+            <CrawlTrafficTemplate>R0VUIC9zZWFyY2guYXNweD90eHRTZWFyY2g9d2F0ZXIgSFRUUC8xLjENCkFjY2VwdDogdGV4dC9odG1sLGFwcGxpY2F0aW9uL3hodG1sK3htbCxhcHBsaWNhdGlvbi94bWw7cT0wLjksKi8qO3E9MC44DQpBY2NlcHQtRW5jb2Rpbmc6IGd6aXAsIGRlZmxhdGUNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDYuMTsgV09XNjQ7IFRyaWRlbnQvNy4wOyBydjoxMS4wKSBsaWtlIEdlY2tvDQpIb3N0OiB0ZXN0ZmlyZS5uZXQNClJlZmVyZXI6IGh0dHBzOi8vdGVzdGZpcmUubmV0Lw0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi94LXd3dy1mb3JtLXVybGVuY29kZWQNCkNvb2tpZTogQVNQLk5FVF9TZXNzaW9uSWQ9eGh3MmdkNTVlcHQ1bXgza25lZmxtdTU1OyBhbVNlc3Npb25JZD0xMDU4MTAxMjcxNjgNCg0K</CrawlTrafficTemplate>
+            <CrawlTrafficResponse>SFRUUC8xLjEgMjAwIE9LDQpDYWNoZS1Db250cm9sOiBwcml2YXRlDQpDb25uZWN0aW9uOiBjbG9zZQ0KRGF0ZTogV2VkLCAxNSBOb3YgMjAxNyAxNjo1ODoxMCBHTVQNCkNvbnRlbnQtTGVuZ3RoOiA3Mjc1DQpDb250ZW50LVR5cGU6IHRleHQvaHRtbDsgY2hhcnNldD11dGYtOA0KU2VydmVyOiBNaWNyb3NvZnQtSUlTLzguMA0KWC1Bc3BOZXQtVmVyc2lvbjogMi4wLjUwNzI3DQpYLVBvd2VyZWQtQnk6IEFTUC5ORVQNCg0KCgo8IURPQ1RZUEUgaHRtbCBQVUJMSUMgIi0vL1czQy8vRFREIFhIVE1MIDEuMCBUcmFuc2l0aW9uYWwvL0VOIiAiaHR0cDovL3d3dy53My5vcmcvVFIveGh0bWwxL0RURC94aHRtbDEtdHJhbnNpdGlvbmFsLmR0ZCI+Cgo8aHRtbCB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94aHRtbCIgeG1sOmxhbmc9ImVuIiA+CjxoZWFkIGlkPSJfY3RsMF9fY3RsMF9oZWFkIj48dGl0bGU+CglBbHRvcm8gTXV0dWFsOiBTZWFyY2ggUmVzdWx0cwo8L3RpdGxlPjxtZXRhIGh0dHAtZXF1aXY9IkNvbnRlbnQtVHlwZSIgY29udGVudD0idGV4dC9odG1sOyBjaGFyc2V0PWlzby04ODU5LTEiPjxsaW5rIGhyZWY9InN0eWxlLmNzcyIgcmVsPSJzdHlsZXNoZWV0IiB0eXBlPSJ0ZXh0L2NzcyIgLz48bWV0YSBuYW1lPSJrZXl3b3JkcyIgY29udGVudD0iQWx0b3JvIE11dHVhbCwgc2VhcmNoLCBxdWVyeSwgZmluZCI+PC9oZWFkPgo8Ym9keSBzdHlsZT0ibWFyZ2luLXRvcDo1cHg7Ij4KCjxkaXYgaWQ9ImhlYWRlciIgc3R5bGU9Im1hcmdpbi1ib3R0b206NXB4OyB3aWR0aDogOTklOyI+CiAgPGZvcm0gaWQ9ImZybVNlYXJjaCIgbWV0aG9kPSJnZXQiIGFjdGlvbj0iL3NlYXJjaC5hc3B4Ij4KCSAgPHRhYmxlIHdpZHRoPSIxMDAlIiBib3JkZXI9IjAiIGNlbGxwYWRkaW5nPSIwIiBjZWxsc3BhY2luZz0iMCI+CgkJICA8dHI+CgkJICAgICAgPHRkIHJvd3NwYW49IjIiPjxhIGlkPSJfY3RsMF9fY3RsMF9IeXBlckxpbmsxIiBocmVmPSJkZWZhdWx0LmFzcHgiIHN0eWxlPSJoZWlnaHQ6ODBweDt3aWR0aDoxODNweDsiPjxpbWcgc3JjPSJpbWFnZXMvbG9nby5naWYiIGJvcmRlcj0iMCIgLz48L2E+PC90ZD4KCQkJICA8dGQgYWxpZ249InJpZ2h0IiB2YWxpZ249InRvcCI+CiAgCQkJICA8YSBpZD0iX2N0bDBfX2N0bDBfTG9naW5MaW5rIiB0aXRsZT0iSXQgZG9lcyBub3QgYXBwZWFyIHRoYXQgeW91IGhhdmUgcHJvcGVybHkgYXV0aGVudGljYXRlZCB5b3Vyc2VsZi4gIFBsZWFzZSBjbGljayBoZXJlIHRvIHNpZ24gaW4uIiBocmVmPSJiYW5rL2xvZ2luLmFzcHgiIHN0eWxlPSJjb2xvcjpSZWQ7Zm9udC13ZWlnaHQ6Ym9sZDsiPlNpZ24gSW48L2E+IHwgPGEgaWQ9Il9jdGwwX19jdGwwX0h5cGVyTGluazMiIGhyZWY9ImRlZmF1bHQuYXNweD9jb250ZW50PWluc2lkZV9jb250YWN0Lmh0bSI+Q29udGFjdCBVczwvYT4gfCA8YSBpZD0iX2N0bDBfX2N0bDBfSHlwZXJMaW5rNCIgaHJlZj0iZmVlZGJhY2suYXNweCI+RmVlZGJhY2s8L2E+IHwgPGxhYmVsIGZvcj0idHh0U2VhcmNoIj5TZWFyY2g8L2xhYmVsPgogICAgICAgICAgPGlucHV0IHR5cGU9InRleHQiIG5hbWU9InR4dFNlYXJjaCIgaWQ9InR4dFNlYXJjaCIgYWNjZXNza2V5PSJTIiAvPgogICAgICAgICAgPGlucHV0IHR5cGU9InN1Ym1pdCIgdmFsdWU9IkdvIiAvPgoJCQkgIDwvdGQ+CgkJICA8L3RyPgoJCSAgPHRyPgoJCQkgIDx0ZCBhbGlnbj0icmlnaHQiIHN0eWxlPSJiYWNrZ3JvdW5kLWltYWdlOnVybCgvaW1hZ2VzL2dyYWRpZW50LmpwZyk7cGFkZGluZzowcHg7bWFyZ2luOjBweDsiPjxpbWcgaWQ9Il9jdGwwX19jdGwwX0ltYWdlMSIgc3JjPSJpbWFnZXMvaGVhZGVyX3BpYy5qcGciIGJvcmRlcj0iMCIgc3R5bGU9ImhlaWdodDo2MHB4O3dpZHRoOjM1NHB4OyIgLz48L3RkPgoJCSAgPC90cj4KCSAgPC90YWJsZT4KCTwvZm9ybT4KPC9kaXY+Cgo8ZGl2IGlkPSJ3cmFwcGVyIiBzdHlsZT0id2lkdGg6IDk5JTsiPgogICAgCgo8dGFibGUgY2VsbHNwYWNpbmc9IjAiIHdpZHRoPSIxMDAlIj4KICA8dHI+CiAgICA8dGQgd2lkdGg9IjI1JSIgY2xhc3M9ImJ0IGJyIGJiIj48ZGl2IGlkPSJIZWFkZXIxIj48aW1nIGlkPSJfY3RsMF9fY3RsMF9Db250ZW50X0ltYWdlMSIgc3JjPSJpbWFnZXMvcGZfbG9jay5naWYiIGFsdD0iU2VjdXJlIExvZ2luIiBhbGlnbj0iYWJzYm90dG9tIiBib3JkZXI9IjAiIHN0eWxlPSJoZWlnaHQ6MTRweDt3aWR0aDoxMnB4OyIgLz4gJm5ic3A7IDxhIGlkPSJfY3RsMF9fY3RsMF9Db250ZW50X0FjY291bnRMaW5rIiB0aXRsZT0iWW91IGRvIG5vdCBhcHBlYXIgdG8gaGF2ZSBhdXRoZW50aWNhdGVkIHlvdXJzZWxmIHdpdGggdGhlIGFwcGxpY2F0aW9uLiAgQ2xpY2sgaGVyZSB0byBlbnRlciB5b3VyIHZhbGlkIHVzZXJuYW1lIGFuZCBwYXNzd29yZC4iIGNsYXNzPSJmb2N1cyIgaHJlZj0iYmFuay9sb2dpbi5hc3B4Ij5PTkxJTkUgQkFOS0lORyBMT0dJTjwvYT48L2Rpdj48L3RkPgogICAgPHRkIHdpZHRoPSIyNSUiIGNsYXNzPSJjYyBidCBiciBiYiI+PGRpdiBpZD0iSGVhZGVyMiI+PGEgaWQ9Il9jdGwwX19jdGwwX0NvbnRlbnRfTGlua0hlYWRlcjIiIGNsYXNzPSJmb2N1cyIgaHJlZj0iZGVmYXVsdC5hc3B4P2NvbnRlbnQ9cGVyc29uYWwuaHRtIj5QRVJTT05BTDwvYT48L2Rpdj48L3RkPgogICAgPHRkIHdpZHRoPSIyNSUiIGNsYXNzPSJjYyBidCBiciBiYiI+PGRpdiBpZD0iSGVhZGVyMyI+PGEgaWQ9Il9jdGwwX19jdGwwX0NvbnRlbnRfTGlua0hlYWRlcjMiIGNsYXNzPSJmb2N1cyIgaHJlZj0iZGVmYXVsdC5hc3B4P2NvbnRlbnQ9YnVzaW5lc3MuaHRtIj5TTUFMTCBCVVNJTkVTUzwvYT48L2Rpdj48L3RkPgogICAgPHRkIHdpZHRoPSIyNSUiIGNsYXNzPSJjYyBidCBiYiI+PGRpdiBpZD0iSGVhZGVyNCI+PGEgaWQ9Il9jdGwwX19jdGwwX0NvbnRlbnRfTGlua0hlYWRlcjQiIGNsYXNzPSJmb2N1cyIgaHJlZj0iZGVmYXVsdC5hc3B4P2NvbnRlbnQ9aW5zaWRlLmh0bSI+SU5TSURFIEFMVE9STyBNVVRVQUw8L2E+PC9kaXY+PC90ZD4KICA8L3RyPgogIDx0cj4KICAgIDx0ZCB2YWxpZ249InRvcCIgY2xhc3M9ImNjIGJyIGJiIj4KICAgICAgICA8YnIgc3R5bGU9ImxpbmUtaGVpZ2h0OiAxMHB4OyIvPgogICAgICAgIDxhIGlkPSJfY3RsMF9fY3RsMF9Db250ZW50X0NhdExpbmsxIiBjbGFzcz0ic3ViaGVhZGVyIiBocmVmPSJkZWZhdWx0LmFzcHg/Y29udGVudD1wZXJzb25hbC5odG0iPlBFUlNPTkFMPC9hPgogICAgICAgIDx1bCBjbGFzcz0ic2lkZWJhciI+CiAgICAgICAgICAgIDxsaT48YSBpZD0iX2N0bDBfX2N0bDBfQ29udGVudF9NZW51SHlwZXJMaW5rMSIgaHJlZj0iZGVmYXVsdC5hc3B4P2NvbnRlbnQ9cGVyc29uYWxfZGVwb3NpdC5odG0iPkRlcG9zaXQgUHJvZHVjdDwvYT48L2xpPgogICAgICAgICAgICA8bGk+PGEgaWQ9Il9jdGwwX19jdGwwX0NvbnRlbnRfTWVudUh5cGVyTGluazIiIGhyZWY9ImRlZmF1bHQuYXNweD9jb250ZW50PXBlcnNvbmFsX2NoZWNraW5nLmh0bSI+Q2hlY2tpbmc8L2E+PC9saT4KICAgICAgICAgICAgPGxpPjxhIGlkPSJfY3RsMF9fY3RsMF9Db250ZW50X01lbnVIeXBlckxpbmszIiBocmVmPSJkZWZhdWx0LmFzcHg/Y29udGVudD1wZXJzb25hbF9sb2Fucy5odG0iPkxvYW4gUHJvZHVjdHM8L2E+PC9saT4KICAgICAgICAgICAgPGxpPjxhIGlkPSJfY3RsMF9fY3RsMF9Db250ZW50X01lbnVIeXBlckxpbms0IiBocmVmPSJkZWZhdWx0LmFzcHg/Y29udGVudD1wZXJzb25hbF9jYXJkcy5odG0iPkNhcmRzPC9hPjwvbGk+CiAgICAgICAgICAgIDxsaT48YSBpZD0iX2N0bDBfX2N0bDBfQ29udGVudF9NZW51SHlwZXJMaW5rNSIgaHJlZj0iZGVmYXVsdC5hc3B4P2NvbnRlbnQ9cGVyc29uYWxfaW52ZXN0bWVudHMuaHRtIj5JbnZlc3RtZW50cyAmYW1wOyBJbnN1cmFuY2U8L2E+PC9saT4KICAgICAgICAgICAgPGxpPjxhIGlkPSJfY3RsMF9fY3RsMF9Db250ZW50X01lbnVIeXBlckxpbms2IiBocmVmPSJkZWZhdWx0LmFzcHg/Y29udGVudD1wZXJzb25hbF9vdGhlci5odG0iPk90aGVyIFNlcnZpY2VzPC9hPjwvbGk+CiAgICAgICAgPC91bD4KCiAgICAgICAgPGEgaWQ9Il9jdGwwX19jdGwwX0NvbnRlbnRfQ2F0TGluazIiIGNsYXNzPSJzdWJoZWFkZXIiIGhyZWY9ImRlZmF1bHQuYXNweD9jb250ZW50PWJ1c2luZXNzLmh0bSI+U01BTEwgQlVTSU5FU1M8L2E+CiAgICAgICAgPHVsIGNsYXNzPSJzaWRlYmFyIj4KICAgICAgICAgICAgPGxpPjxhIGlkPSJfY3RsMF9fY3RsMF9Db250ZW50X01lbnVIeXBlckxpbms3IiBocmVmPSJkZWZhdWx0LmFzcHg/Y29udGVudD1idXNpbmVzc19kZXBvc2l0Lmh0bSI+RGVwb3NpdCBQcm9kdWN0czwvYT48L2xpPgogICAgICAgICAgICA8bGk+PGEgaWQ9Il9jdGwwX19jdGwwX0NvbnRlbnRfTWVudUh5cGVyTGluazgiIGhyZWY9ImRlZmF1bHQuYXNweD9jb250ZW50PWJ1c2luZXNzX2xlbmRpbmcuaHRtIj5MZW5kaW5nIFNlcnZpY2VzPC9hPjwvbGk+CiAgICAgICAgICAgIDxsaT48YSBpZD0iX2N0bDBfX2N0bDBfQ29udGVudF9NZW51SHlwZXJMaW5rOSIgaHJlZj0iZGVmYXVsdC5hc3B4P2NvbnRlbnQ9YnVzaW5lc3NfY2FyZHMuaHRtIj5DYXJkczwvYT48L2xpPgogICAgICAgICAgICA8bGk+PGEgaWQ9Il9jdGwwX19jdGwwX0NvbnRlbnRfTWVudUh5cGVyTGluazEwIiBocmVmPSJkZWZhdWx0LmFzcHg/Y29udGVudD1idXNpbmVzc19pbnN1cmFuY2UuaHRtIj5JbnN1cmFuY2U8L2E+PC9saT4KICAgICAgICAgICAgPGxpPjxhIGlkPSJfY3RsMF9fY3RsMF9Db250ZW50X01lbnVIeXBlckxpbmsxMSIgaHJlZj0iZGVmYXVsdC5hc3B4P2NvbnRlbnQ9YnVzaW5lc3NfcmV0aXJlbWVudC5odG0iPlJldGlyZW1lbnQ8L2E+PC9saT4KICAgICAgICAgICAgPGxpPjxhIGlkPSJfY3RsMF9fY3RsMF9Db250ZW50X01lbnVIeXBlckxpbmsxMiIgaHJlZj0iZGVmYXVsdC5hc3B4P2NvbnRlbnQ9YnVzaW5lc3Nfb3RoZXIuaHRtIj5PdGhlciBTZXJ2aWNlczwvYT48L2xpPgogICAgICAgIDwvdWw+CgogICAgICAgIDxhIGlkPSJfY3RsMF9fY3RsMF9Db250ZW50X0NhdExpbmszIiBjbGFzcz0ic3ViaGVhZGVyIiBocmVmPSJkZWZhdWx0LmFzcHg/Y29udGVudD1pbnNpZGUuaHRtIj5JTlNJREUgQUxUT1JPIE1VVFVBTDwvYT4KICAgICAgICA8dWwgY2xhc3M9InNpZGViYXIiPgogICAgICAgICAgICA8bGk+PGEgaWQ9Il9jdGwwX19jdGwwX0NvbnRlbnRfTWVudUh5cGVyTGluazEzIiBocmVmPSJkZWZhdWx0LmFzcHg/Y29udGVudD1pbnNpZGVfYWJvdXQuaHRtIj5BYm91dCBVczwvYT48L2xpPgogICAgICAgICAgICA8bGk+PGEgaWQ9Il9jdGwwX19jdGwwX0NvbnRlbnRfTWVudUh5cGVyTGluazE0IiBocmVmPSJkZWZhdWx0LmFzcHg/Y29udGVudD1pbnNpZGVfY29udGFjdC5odG0iPkNvbnRhY3QgVXM8L2E+PC9saT4KICAgICAgICAgICAgPGxpPjxhIGlkPSJfY3RsMF9fY3RsMF9Db250ZW50X01lbnVIeXBlckxpbmsxNSIgaHJlZj0iY2dpLmV4ZSI+TG9jYXRpb25zPC9hPjwvbGk+CiAgICAgICAgICAgIDxsaT48YSBpZD0iX2N0bDBfX2N0bDBfQ29udGVudF9NZW51SHlwZXJMaW5rMTYiIGhyZWY9ImRlZmF1bHQuYXNweD9jb250ZW50PWluc2lkZV9pbnZlc3Rvci5odG0iPkludmVzdG9yIFJlbGF0aW9uczwvYT48L2xpPgogICAgICAgICAgICA8bGk+PGEgaWQ9Il9jdGwwX19jdGwwX0NvbnRlbnRfTWVudUh5cGVyTGluazE3IiBocmVmPSJkZWZhdWx0LmFzcHg/Y29udGVudD1pbnNpZGVfcHJlc3MuaHRtIj5QcmVzcyBSb29tPC9hPjwvbGk+CiAgICAgICAgICAgIDxsaT48YSBpZD0iX2N0bDBfX2N0bDBfQ29udGVudF9NZW51SHlwZXJMaW5rMTgiIGhyZWY9ImRlZmF1bHQuYXNweD9jb250ZW50PWluc2lkZV9jYXJlZXJzLmh0bSI+Q2FyZWVyczwvYT48L2xpPgogICAgICAgIDwvdWw+CiAgICA8L3RkPgogICAgPHRkIHZhbGlnbj0idG9wIiBjb2xzcGFuPSIzIiBjbGFzcz0iYmIiPgoKCjxkaXYgY2xhc3M9ImZsIiBzdHlsZT0id2lkdGg6IDk5JTsiPgoKPGgxPlNlYXJjaCBSZXN1bHRzPC9oMT4KCjxwPk5vIHJlc3VsdHMgd2VyZSBmb3VuZCBmb3IgdGhlIHF1ZXJ5OjxiciAvPjxiciAvPgo8c3BhbiBpZD0iX2N0bDBfX2N0bDBfQ29udGVudF9NYWluX2xibFNlYXJjaCI+d2F0ZXI8L3NwYW4+PC9wPgoKPC9kaXY+CgoKICAgIDwvdGQ+CiAgPC90cj4KPC90YWJsZT4KCgo8L2Rpdj4KCjxkaXYgaWQ9ImZvb3RlciIgc3R5bGU9IndpZHRoOiA5OSU7Ij4KICAgIDxhIGlkPSJfY3RsMF9fY3RsMF9IeXBlckxpbms1IiBocmVmPSJkZWZhdWx0LmFzcHg/Y29udGVudD1wcml2YWN5Lmh0bSI+UHJpdmFjeSBQb2xpY3k8L2E+CiAgICAmbmJzcDsmbmJzcDt8Jm5ic3A7Jm5ic3A7CiAgICA8YSBpZD0iX2N0bDBfX2N0bDBfSHlwZXJMaW5rNiIgaHJlZj0iZGVmYXVsdC5hc3B4P2NvbnRlbnQ9c2VjdXJpdHkuaHRtIj5TZWN1cml0eSBTdGF0ZW1lbnQ8L2E+CiAgICAmbmJzcDsmbmJzcDt8Jm5ic3A7Jm5ic3A7CiAgICAmY29weTsgMjAxNyBBbHRvcm8gTXV0dWFsLCBJbmMuCgogICAgPGRpdiBjbGFzcz0iZGlzY2xhaW1lciI+CiAgICAgICAgVGhlIEFsdG9ybyBNdXR1YWwgd2Vic2l0ZSBpcyBwdWJsaXNoZWQgYnkgV2F0Y2hmaXJlLCBJbmMuIGZvciB0aGUgc29sZSBwdXJwb3NlIG9mCiAgICAgICAgZGVtb25zdHJhdGluZyB0aGUgZWZmZWN0aXZlbmVzcyBvZiBXYXRjaGZpcmUgcHJvZHVjdHMgaW4gZGV0ZWN0aW5nIHdlYiBhcHBsaWNhdGlvbgogICAgICAgIHZ1bG5lcmFiaWxpdGllcyBhbmQgd2Vic2l0ZSBkZWZlY3RzLiBUaGlzIHNpdGUgaXMgbm90IGEgcmVhbCBiYW5raW5nIHNpdGUuIFNpbWlsYXJpdGllcywKICAgICAgICBpZiBhbnksIHRvIHRoaXJkIHBhcnR5IHByb2R1Y3RzIGFuZC9vciB3ZWJzaXRlcyBhcmUgcHVyZWx5IGNvaW5jaWRlbnRhbC4gVGhpcyBzaXRlIGlzCiAgICAgICAgcHJvdmlkZWQgImFzIGlzIiB3aXRob3V0IHdhcnJhbnR5IG9mIGFueSBraW5kLCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLiBXYXRjaGZpcmUgZG9lcwogICAgICAgIG5vdCBhc3N1bWUgYW55IHJpc2sgaW4gcmVsYXRpb24gdG8geW91ciB1c2Ugb2YgdGhpcyB3ZWJzaXRlLiBGb3IgYWRkaXRpb25hbCBUZXJtcyBvZiBVc2UsCiAgICAgICAgcGxlYXNlIGdvIHRvIDxhIGlkPSJfY3RsMF9fY3RsMF9IeXBlckxpbms3IiBocmVmPSJodHRwOi8vd3d3LndhdGNoZmlyZS5jb20vc3RhdGVtZW50cy90ZXJtcy5hc3B4Ij5odHRwOi8vd3d3LndhdGNoZmlyZS5jb20vc3RhdGVtZW50cy90ZXJtcy5hc3B4PC9hPi48YnIgLz48YnIgLz4KCiAgICAgICAgQ29weXJpZ2h0ICZjb3B5OyAyMDE3LCBXYXRjaGZpcmUgQ29ycG9yYXRpb24sIEFsbCByaWdodHMgcmVzZXJ2ZWQuCiAgICA8L2Rpdj4KPC9kaXY+Cgo8L2JvZHk+CjwvaHRtbD4=</CrawlTrafficResponse>
+            <AttackClass>Application Developer</AttackClass>
+            <CweId>525</CweId>
+            <CAPEC>1</CAPEC>
+            <DISSA_ASC>3480</DISSA_ASC>
+            <OWASP2007>9</OWASP2007>
+            <OWASP2010>9</OWASP2010>
+            <OWASP2013>6</OWASP2013>
+            <OVAL>0</OVAL>
+            <WASC>0</WASC>
+            <ScanDate>2017-11-15 14:05:42</ScanDate>
+            <ScanEnd>2017-11-15 14:06:06</ScanEnd>
+            <StatisticallyPrevalentOriginalResponseCode>200</StatisticallyPrevalentOriginalResponseCode>
+            <Confidence>High</Confidence>
+            <DefenseBL>
+                <DbId>C05A9475E6754810A49E9FB3E6E06388</DbId>
+                <ParentDbId>68871E3279B5446EA369DD78C5F1A619</ParentDbId>
+                <PcreRegex></PcreRegex>
+                <ModSecurity></ModSecurity>
+                <Snort></Snort>
+                <Imperva></Imperva>
+            </DefenseBL>
+            <DefenseWL>
+                <DbId>25A095FB84E34EA8807EB78C4884044A</DbId>
+                <ParentDbId>68871E3279B5446EA369DD78C5F1A619</ParentDbId>
+                <PcreRegex></PcreRegex>
+                <ModSecurity></ModSecurity>
+                <Snort></Snort>
+                <Imperva></Imperva>
+            </DefenseWL>
+            <AttackList>
+                <Attack>
+                    <DbId>52E30FB758D84C0982C08FC946EC680F</DbId>
+                    <ParentDbId>00000000000000000000000000000000</ParentDbId>
+                    <AttackId>BROWSERCACHECHECK02</AttackId>
+                    <AttackValue></AttackValue>
+                    <AttackVulnUrl>https://testfire.net/search.aspx</AttackVulnUrl>
+                    <AttackPostParams></AttackPostParams>
+                    <AttackMatchedString>Cache-Control: private</AttackMatchedString>
+                    <AttackDescription></AttackDescription>
+                    <AttackConfigDescription>Browser Cache Directive</AttackConfigDescription>
+                    <AttackUserNotes></AttackUserNotes>
+                    <OriginalValue></OriginalValue>
+                    <OriginalResponseCode>200</OriginalResponseCode>
+                </Attack>
+            </AttackList>
+        </Vuln>
+    </VulnList>
+</VulnSummary>

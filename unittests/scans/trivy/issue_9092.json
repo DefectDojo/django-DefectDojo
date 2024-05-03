@@ -1,0 +1,74 @@
+{
+    "SchemaVersion": 2,
+    "ArtifactName": "sbom.json",
+    "ArtifactType": "cyclonedx",
+    "Metadata": {
+      "ImageConfig": {
+        "architecture": "",
+        "created": "0001-01-01T00:00:00Z",
+        "os": "",
+        "rootfs": {
+          "type": "",
+          "diff_ids": null
+        },
+        "config": {}
+      }
+    },
+    "Results": [
+      {
+        "Target": "requirements.txt",
+        "Class": "lang-pkgs",
+        "Type": "pip",
+        "Vulnerabilities": [
+          {
+            "VulnerabilityID": "CVE-2023-37920",
+            "PkgName": "certifi",
+            "InstalledVersion": "2022.5.18.1",
+            "FixedVersion": "2023.7.22",
+            "Layer": {},
+            "SeveritySource": "ghsa",
+            "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2023-37920",
+            "Ref": "pkg:pypi/certifi@2022.5.18.1",
+            "DataSource": {
+              "ID": "ghsa",
+              "Name": "GitHub Security Advisory pip",
+              "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+            },
+            "Title": "python-certifi: Removal of e-Tugra root certificate",
+            "Description": "Certifi is a curated collection of Root Certificates for validating the trustworthiness of SSL certificates while verifying the identity of TLS hosts. Certifi prior to version 2023.07.22 recognizes \"e-Tugra\" root certificates. e-Tugra's root certificates were subject to an investigation prompted by reporting of security issues in their systems. Certifi 2023.07.22 removes root certificates from \"e-Tugra\" from the root store.",
+            "Severity": "HIGH",
+            "CweIDs": [
+              "CWE-345"
+            ],
+            "CVSS": {
+              "ghsa": {
+                "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+                "V3Score": 9.8
+              },
+              "nvd": {
+                "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                "V3Score": 7.5
+              },
+              "redhat": {
+                "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+                "V3Score": 7.5
+              }
+            },
+            "References": [
+              "https://access.redhat.com/security/cve/CVE-2023-37920",
+              "https://github.com/certifi/python-certifi",
+              "https://github.com/certifi/python-certifi/commit/8fb96ed81f71e7097ed11bc4d9b19afd7ea5c909",
+              "https://github.com/certifi/python-certifi/security/advisories/GHSA-xqr8-7jwr-rhp7",
+              "https://github.com/pypa/advisory-database/tree/main/vulns/certifi/PYSEC-2023-135.yaml",
+              "https://groups.google.com/a/mozilla.org/g/dev-security-policy/c/C-HrP1SEq1A",
+              "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/5EX6NG7WUFNUKGFHLM35KHHU3GAKXRTG/",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-37920",
+              "https://www.cve.org/CVERecord?id=CVE-2023-37920"
+            ],
+            "PublishedDate": "2023-07-25T21:15:00Z",
+            "LastModifiedDate": "2023-08-12T06:16:00Z"
+          }
+        ]
+      }
+    ]
+  }

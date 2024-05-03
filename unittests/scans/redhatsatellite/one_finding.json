@@ -1,0 +1,47 @@
+{
+  "total": 3,
+  "subtotal": 3,
+  "selectable": 3,
+  "page": 1,
+  "per_page": 20,
+  "error": null,
+  "search": null,
+  "sort": {
+    "by": "updated",
+    "order": "desc"
+  },
+  "results": [
+    {
+      "id": 1,
+      "pulp_id": "RHBA-1978:1",
+      "title": "Satellite 6 Client Bug Fix Update",
+      "errata_id": "RHBA-1978:1",
+      "issued": "1978-07-12",
+      "updated": "1978-07-12",
+      "severity": "None",
+      "description": "Red Hat Satellite is a system gs.",
+      "solution": "Before applyindex",
+      "summary": "Updated Satelliellite.",
+      "reboot_suggested": false,
+      "uuid": "RHBA-1978:1",
+      "name": "Satellite 6 Client Bug Fix Update",
+      "type": "bugfix",
+      "cves": [],
+      "bugs": [
+        {
+          "bug_id": "3",
+          "href": "https://bugzilla.redhat.com/show_bug.cgi?id=3"
+        }
+      ],
+      "hosts_available_count": 9,
+      "hosts_applicable_count": 9,
+      "packages": [
+        "asdf-fwje0-12.21.12.33.1",
+        "asdf-fwje0-12.21.12.33.2",
+        "asdf-fwje0-12.21.12.33.3"
+      ],
+      "module_streams": [],
+      "installable": true
+    }
+  ]
+}

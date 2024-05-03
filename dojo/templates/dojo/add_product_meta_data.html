@@ -1,8 +1,10 @@
 {% extends "base.html" %}
-{% load static from staticfiles %}
+{% load static %}
 
 {% block content %}
+    {{ block.super }}
     <h3> Add {{ product.name }} Custom Fields</h3>
+    <br />
     <form class="form-horizontal" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">

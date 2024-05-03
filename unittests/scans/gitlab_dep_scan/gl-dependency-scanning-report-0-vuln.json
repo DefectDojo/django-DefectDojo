@@ -1,0 +1,27 @@
+{
+  "version": "3.0.0",
+  "vulnerabilities": [],
+  "remediations": [],
+  "dependency_files": [
+    {
+      "path": "service/go.sum",
+      "package_manager": "go",
+      "dependencies": []
+    }
+  ],
+  "scan": {
+    "scanner": {
+      "id": "gemnasium",
+      "name": "Gemnasium",
+      "url": "https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium",
+      "vendor": {
+        "name": "GitLab"
+      },
+      "version": "2.24.1"
+    },
+    "type": "dependency_scanning",
+    "start_time": "2020-12-23T13:44:07",
+    "end_time": "2020-12-23T13:44:08",
+    "status": "success"
+  }
+}

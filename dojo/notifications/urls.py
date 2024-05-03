@@ -1,8 +1,9 @@
-from django.conf.urls import url
+from django.urls import re_path
 from . import views
 
 urlpatterns = [
-    url(r'^notifications$', views.personal_notifications, name='notifications'),
-    url(r'^notifications/system$', views.system_notifications, name='notifications'),
-    url(r'^notifications/personal$', views.personal_notifications, name='notifications')
+    re_path(r'^notifications$', views.PersonalNotificationsView.as_view(), name='notifications'),
+    re_path(r'^notifications/system$', views.SystemNotificationsView.as_view(), name='system_notifications'),
+    re_path(r'^notifications/personal$', views.PersonalNotificationsView.as_view(), name='personal_notifications'),
+    re_path(r'^notifications/template$', views.TemplateNotificationsView.as_view(), name='template_notifications')
 ]

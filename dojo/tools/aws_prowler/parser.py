@@ -1,99 +1,241 @@
-__author__ = 'Aaron Weaver'
+import csv
+import hashlib
+import io
+import json
+import re
+import sys
+import textwrap
+from datetime import date
 
 from dojo.models import Finding
-from datetime import datetime
-import pandas as pd
-import re
-from django.utils.text import Truncator
 
 
 class AWSProwlerParser(object):
-    item_data = ""
-    pdepth = 0
+    def get_scan_types(self):
+        return ["AWS Prowler Scan"]
 
-    def __init__(self, filename, test):
-        find_date = datetime.now()
-        dupes = {}
+    def get_label_for_scan_types(self, scan_type):
+        return "AWS Prowler Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Export of AWS Prowler in CSV or JSON format."
+
+    def get_findings(self, file, test):
+        if file.name.lower().endswith(".csv"):
+            return self.process_csv(file, test)
+        elif file.name.lower().endswith(".json"):
+            return self.process_json(file, test)
+        else:
+            raise ValueError("Unknown file format")
+
+    def process_csv(self, file, test):
+        content = file.read()
+        if isinstance(content, bytes):
+            content = content.decode("utf-8")
+        csv.field_size_limit(int(sys.maxsize / 10))  # the request/resp are big
+        reader = csv.DictReader(io.StringIO(content))
+        dupes = dict()
+
         account = None
 
-        df = pd.read_csv(filename, header=0, error_bad_lines=False)
+        for row in reader:
+            # Getting all available fields from the Prowler CSV
+            # Fields in order of appearence
+            row.get("PROFILE")
+            account = row.get("ACCOUNT_NUM")
+            region = row.get("REGION")
+            title_id = row.get("TITLE_ID")
+            result = row.get("CHECK_RESULT")
+            row.get("ITEM_SCORED")
+            level = row.get("ITEM_LEVEL")
+            title_text = row.get("TITLE_TEXT")
+            result_extended = row.get("CHECK_RESULT_EXTENDED")
+            asff_compliance_type = row.get("CHECK_ASFF_COMPLIANCE_TYPE")
+            severity = row.get("CHECK_SEVERITY")
+            aws_service_name = row.get("CHECK_SERVICENAME")
+            asff_resource_type = row.get("CHECK_ASFF_RESOURCE_TYPE")
+            asff_type = row.get("CHECK_ASFF_TYPE")
+            impact = row.get("CHECK_RISK")
+            mitigation = row.get("CHECK_REMEDIATION")
+            documentation = row.get("CHECK_DOC")
+            security_domain = row.get("CHECK_CAF_EPIC")
+            # get prowler check number, usefull for exceptions
+            prowler_check_number = re.search(r"\[(.*?)\]", title_text).group(1)
+            # remove '[check000] ' at the start of each title
+            # title = re.sub(r"\[.*\]\s", "", result_extended)
+            control = re.sub(r"\[.*\]\s", "", title_text)
+            sev = self.getCriticalityRating(result, level, severity)
+            if result == "INFO" or result == "PASS":
+                active = False
+            else:
+                active = True
 
-        for i, row in df.iterrows():
-            profile = df.loc[i, 'PROFILE']
-            account = df.loc[i, 'ACCOUNT_NUM']
-            region = df.loc[i, 'REGION']
-            title_id = df.loc[i, 'TITLE_ID']
-            result = df.loc[i, 'RESULT']
-            scored = df.loc[i, 'SCORED']
-            level = df.loc[i, 'LEVEL']
-            title_text = df.loc[i, 'TITLE_TEXT']
-            title_text = re.sub(r'\[.*\]\s', '', title_text)
-            title_text_trunc = Truncator(title_text).words(8)
-            notes = df.loc[i, 'NOTES']
+            # creating description early will help with duplication control
+            if not level:
+                level = ""
+            else:
+                level = ", " + level
+            description = (
+                "**Issue:** "
+                + str(result_extended)
+                + "\n**Control:** "
+                + str(control)
+                + "\n**AWS Account:** "
+                + str(account)
+                + " | **Region:** "
+                + str(region)
+                + "\n**CIS Control:** "
+                + str(title_id)
+                + str(level)
+                + "\n**Prowler check:** "
+                + str(prowler_check_number)
+                + "\n**AWS Service:** "
+                + str(aws_service_name)
+                + "\n**ASFF Resource Type:** "
+                + str(asff_resource_type)
+                + "\n**ASFF Type:** "
+                + str(asff_type)
+                + "\n**ASFF Compliance Type:** "
+                + str(asff_compliance_type)
+                + "\n**Security Domain:** "
+                + str(security_domain)
+            )
 
-            sev = self.getCriticalityRating(result, level)
-            description = "**Region:** " + region + "\n\n" + notes + "\n"
-            dupe_key = sev + title_text
+            # improving key to get duplicates
+            dupe_key = hashlib.sha256(
+                (sev + "|" + region + "|" + result_extended).encode("utf-8")
+            ).hexdigest()
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 if description is not None:
                     find.description += description + "\n\n"
+                find.nb_occurences += 1
             else:
-                find = Finding(title=title_text_trunc,
-                               cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
-                               test=test,
-                               active=False,
-                               verified=False,
-                               description="**AWS Account:** " + str(account) + "\n**Control:** " + title_text + "\n**CIS Control:** " + str(title_id) + ", " + level + "\n\n" + description,
-                               severity=sev,
-                               numerical_severity=Finding.get_numerical_severity(sev),
-                               references=None,
-                               date=find_date,
-                               dynamic_finding=True)
+                find = Finding(
+                    active=active,
+                    title=textwrap.shorten(result_extended, 150),
+                    cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
+                    test=test,
+                    description=description,
+                    severity=sev,
+                    references=documentation,
+                    static_finding=True,
+                    dynamic_finding=False,
+                    nb_occurences=1,
+                    mitigation=mitigation,
+                    impact=impact,
+                )
                 dupes[dupe_key] = find
-        self.items = list(dupes.values())
 
-        if account:
-            test_description = ""
-            test_description = "%s\n* **AWS Account:** %s\n" % (test_description, str(account))
-            test.description = test_description
-            test.save()
+        return list(dupes.values())
+
+    def process_json(self, file, test):
+        dupes = dict()
+
+        data = file.readlines()
+        for issue in data:
+            deserialized = json.loads(issue)
+
+            status = deserialized.get("Status")
+            if status.upper() != "FAIL":
+                continue
+
+            account = deserialized.get("Account Number")
+            region = deserialized.get("Region")
+            title_id = deserialized.get("Control ID")
+            level = deserialized.get("Level")
+            title_text = deserialized.get("Control")
+            result_extended = deserialized.get("Message")
+            asff_compliance_type = deserialized.get("Compliance")
+            severity = deserialized.get("Severity")
+            aws_service_name = deserialized.get("Service")
+            impact = deserialized.get("Risk")
+            mitigation = deserialized.get("Remediation")
+            documentation = deserialized.get("Doc link")
+            security_domain = deserialized.get("CAF Epic")
+            timestamp = deserialized.get("Timestamp")
+            # get prowler check number, usefull for exceptions
+            prowler_check_number = re.search(r"\[(.*?)\]", title_text).group(1)
+            control = re.sub(r"\[.*\]\s", "", title_text)
+            sev = self.getCriticalityRating("FAIL", level, severity)
+
+            # creating description early will help with duplication control
+            if not level:
+                level = ""
+            else:
+                level = ", " + level
+            description = (
+                "**Issue:** "
+                + str(result_extended)
+                + "\n**Control:** "
+                + str(control)
+                + "\n**AWS Account:** "
+                + str(account)
+                + " | **Region:** "
+                + str(region)
+                + "\n**CIS Control:** "
+                + str(title_id)
+                + str(level)
+                + "\n**Prowler check:** "
+                + str(prowler_check_number)
+                + "\n**AWS Service:** "
+                + str(aws_service_name)
+                + "\n**ASFF Compliance Type:** "
+                + str(asff_compliance_type)
+                + "\n**Security Domain:** "
+                + str(security_domain)
+            )
+
+            # improving key to get duplicates
+            dupe_key = hashlib.sha256(
+                (sev + "|" + region + "|" + result_extended).encode("utf-8")
+            ).hexdigest()
+            if dupe_key in dupes:
+                find = dupes[dupe_key]
+                if description is not None:
+                    find.description += description + "\n\n"
+                find.nb_occurences += 1
+            else:
+                find = Finding(
+                    title=textwrap.shorten(result_extended, 150),
+                    cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
+                    test=test,
+                    description=description,
+                    severity=sev,
+                    references=documentation,
+                    date=date.fromisoformat(timestamp[:10]),
+                    static_finding=True,
+                    dynamic_finding=False,
+                    nb_occurences=1,
+                    mitigation=mitigation,
+                    impact=impact,
+                )
+                dupes[dupe_key] = find
+
+        return list(dupes.values())
 
     def formatview(self, depth):
         if depth > 1:
             return "* "
-            # print("depth hit")
         else:
             return ""
 
-    def recursive_print(self, src, depth=0, key=''):
-        tabs = lambda n: ' ' * n * 2
-        if isinstance(src, dict):
-            for key, value in src.items():
-                if isinstance(src, str):
-                    self.item_data = self.item_data + key + "\n"
-                self.recursive_print(value, depth + 1, key)
-        elif isinstance(src, list):
-            for litem in src:
-                self.recursive_print(litem, depth + 2)
-        else:
-            if self.pdepth != depth:
-                self.item_data = self.item_data + "\n"
-            if key:
-                self.item_data = self.item_data + self.formatview(depth) + '**%s:** %s\n\n' % (key.title(), src)
-            else:
-                self.item_data = self.item_data + self.formatview(depth) + '%s\n' % src
-            self.pdepth = depth
-
     # Criticality rating
-    def getCriticalityRating(self, result, level):
+    def getCriticalityRating(self, result, level, severity):
         criticality = "Info"
         if result == "INFO" or result == "PASS":
             criticality = "Info"
         elif result == "FAIL":
-            if level == "Level 1":
-                criticality = "Critical"
+            if severity:
+                # control is failing but marked as Info so we want to mark as
+                # Low to appear in the Dojo
+                if severity == "Informational":
+                    return "Low"
+                return severity
             else:
-                criticality = "High"
+                if level == "Level 1":
+                    criticality = "Critical"
+                else:
+                    criticality = "High"
 
         return criticality

@@ -1,0 +1,46 @@
+@startuml
+!pragma teoz true
+
+== Monthly release ==
+participant "Dev branch" as devbranch order 10 #LightBlue
+participant "Release branch" as rlsbranch order 20 #YellowGreen
+participant "Master branch" as master order 30 #99FF99
+'participant "Maintenance branch" as maintainbranch order 40 #YellowGreen
+
+{startrc} devbranch -> rlsbranch ++ #YellowGreen: Create branch "release/1.0.0"
+
+rlsbranch -> master: Merge
+note right of master
+    Official release
+    - Tag "1.0.0"
+    - Push "1.0.0" to DockerHub
+end note
+
+master --> devbranch: Merge master back to dev to re-align
+
+... ...
+
+== Maintenance/security releases ==
+master -> rlsbranch ++ #YellowGreen: Create branch "release/1.0.x"
+note left of rlsbranch
+    Official release
+    - Tag "1.0.1"
+    - Push "1.0.1" to DockerHub
+end note
+rlsbranch -> master: Merge
+master --> devbranch: Merge
+
+... ...
+
+master -> rlsbranch ++ #YellowGreen: Create branch "release/1.0.x"
+note left of rlsbranch
+    Official release
+    - Tag "1.0.2"
+    - Push "1.0.2" to DockerHub
+end note
+rlsbranch -> master: Merge
+master --> devbranch: Merge
+
+... ...
+
+@enduml

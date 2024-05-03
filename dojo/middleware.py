@@ -1,10 +1,12 @@
 from django.http import HttpResponseRedirect
 from django.conf import settings
-from django.utils.http import urlquote
+from urllib.parse import quote
 from re import compile
 import logging
 from threading import local
 from django.db import models
+from django.urls import reverse
+
 
 logger = logging.getLogger(__name__)
 
@@ -39,13 +41,26 @@ class LoginRequiredMiddleware:
             path = request.path_info.lstrip('/')
             if not any(m.match(path) for m in EXEMPT_URLS):
                 if path == 'logout':
-                    fullURL = "%s?next=%s" % (settings.LOGIN_URL, '/')
+                    fullURL = f"{settings.LOGIN_URL}?next=/"
                 else:
-                    fullURL = "%s?next=%s" % (settings.LOGIN_URL, urlquote(request.get_full_path()))
+                    fullURL = f"{settings.LOGIN_URL}?next={quote(request.get_full_path())}"
                 return HttpResponseRedirect(fullURL)
 
-        response = self.get_response(request)
-        return response
+        if request.user.is_authenticated:
+            logger.debug("Authenticated user: %s", str(request.user))
+            try:
+                uwsgi = __import__('uwsgi', globals(), locals(), ['set_logvar'], 0)
+                # this populates dd_user log var, so can appear in the uwsgi logs
+                uwsgi.set_logvar('dd_user', str(request.user))
+            except:
+                # to avoid unittests to fail
+                pass
+            path = request.path_info.lstrip('/')
+            from dojo.models import Dojo_User
+            if Dojo_User.force_password_reset(request.user) and path != 'change_password':
+                return HttpResponseRedirect(reverse('change_password'))
+
+        return self.get_response(request)
 
 
 class DojoSytemSettingsMiddleware(object):
@@ -112,3 +127,40 @@ class System_Settings_Manager(models.Manager):
             return self.get_from_db(*args, **kwargs)
 
         return from_cache
+
+
+class APITrailingSlashMiddleware:
+    """
+    Middleware that will send a more informative error response to POST requests
+    made without the trailing slash. When this middleware is not active, POST requests
+    without the trailing slash will return a 301 status code, with no explanation as to why
+    """
+
+    def __init__(self, get_response):
+
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        path = request.path_info.lstrip('/')
+        if request.method == 'POST' and 'api/v2/' in path and path[-1] != '/' and response.status_code == 400:
+            response.data = {'message': 'Please add a trailing slash to your request.'}
+            # you need to change private attribute `_is_render`
+            # to call render second time
+            response._is_rendered = False
+            response.render()
+        return response
+
+
+class AdditionalHeaderMiddleware:
+    """
+    Middleware that will add an arbitray amount of HTTP Request headers toall requests.
+    """
+
+    def __init__(self, get_response):
+
+        self.get_response = get_response
+
+    def __call__(self, request):
+        request.META.update(settings.ADDITIONAL_HEADERS)
+        return self.get_response(request)

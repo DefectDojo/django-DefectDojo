@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load authorization_tags %}
+{% load static %}
+
+{% block content %}
+    {{ block.super }}
+    <div class="support-page-wrapper">
+        <h2 style="color: #546474;">Options are available for teams of all sizes.</h2>
+        <br />
+        <div class="support-container">
+            <div class="support-box">
+                <div class="support-box shape community hover">
+                    <h2 style="text-align: center;">Community Support</h2>
+                    <div class="divider dark"></div>
+                    <p>What's included:</p>
+                    <p><i class="fa-solid fa-lg fa-circle-check"></i> Support from the community via OWASP Slack</p>
+                    <p><i class="fa-solid fa-lg fa-circle-check"></i> Community based discussion</p>
+                </div>
+                <a href="https://owasp.org/slack/invite" target="_blank" class="btn btn-primary community support dark">Join #defectdojo</a>
+            </div>
+            
+            <div class="support-box">
+                <div class="support-box shape hover commercial">
+                    <h2 style="text-align: center;">Get DefectDojo Pro</h2>
+                    <div class="divider light"></div>
+                    <p>What's included:</p>
+                    <p><i class="fa-solid fa-lg fa-circle-check"></i> Support directly from the creators</p>
+                    <p><i class="fa-solid fa-lg fa-circle-check"></i> Additional features</p>
+                    <p><i class="fa-solid fa-lg fa-circle-check"></i> Response time SLA</p>
+                    <p><i class="fa-solid fa-lg fa-circle-check"></i> Bug fixes</p>
+                    <p><i class="fa-solid fa-lg fa-circle-check"></i> Feature enhancements</p>
+                    <p><i class="fa-solid fa-lg fa-circle-check"></i> Best practice advice</p>
+                </div>
+                <a href="https://www.defectdojo.com/contact" target="_blank" class="btn btn-primary support commercial light">Meet The Creators</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

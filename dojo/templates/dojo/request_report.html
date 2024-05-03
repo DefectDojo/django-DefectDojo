@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load humanize %}
+{% load display_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
@@ -18,13 +20,13 @@
                         {% endif %}
                         Report
                         <div class="dropdown pull-right">
-
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                         </div>
 
                     </h3>
                 </div>
 
-                <div id="the-filters" class="panel-body {% if request.META.QUERY_STRING %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body {% if findings.form.has_changed %}in{% endif %}">
                     <div class="dojo-filter-heading">Filters</div>
                     <div class="filter-set">
 
@@ -34,7 +36,7 @@
                     <br/>
 
                     <div class="alert alert-info" role="alert">
-                        <span class="fa fa-lightbulb-o" aria-hidden="true"></span>
+                        <span class="fa-solid fa-lightbulb" aria-hidden="true"></span>
                         <span class=""><b>Hint:</b></span>
                         To generate a report of all mitigated findings select: Active: Either, Verified: Either,
                         Mitigated: Yes
@@ -69,21 +71,16 @@
                             <th>Status</th>
                             <th>Mitigated</th>
                             <th>Severity</th>
+                            <th>EPSS Score / Percentile</th>
                             <th>Product</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for finding in paged_findings %}
                             <tr>
-                                <td><a title="{{ finding.title }}"
-                                       href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:50 }}</a>
-                                       {% if finding.tags %}
-                                       <sup>
-                                           {% for tag in finding.tags %}
-                                           <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                           {% endfor %}
-                                       </sup>
-                                       {% endif %}
+                                <td>
+                                    <a title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:50 }}</a>
+                                    {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                                 </td>
                                 <td class="nowrap">{{ finding.date }}</td>
                                 <td class="">{{ finding.status }}</td>
@@ -91,6 +88,11 @@
                                 <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
                                     <p class="text-error">
                                 {% else %}<p>{% endif %}{{ finding.severity }}</p></td>
+                                <td>
+                                    {{ finding.epss_score|format_epss }}
+                                    /
+                                    {{ finding.epss_percentile|format_epss }}
+                                </td>
                                 <td>{{ finding.test.engagement.product }}</td>
                             </tr>
                         {% endfor %}
@@ -108,5 +110,6 @@
 
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

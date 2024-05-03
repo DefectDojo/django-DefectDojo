@@ -1,0 +1,86 @@
+{
+  "errors": [ ],
+  "results": [
+    {
+      "check_id": "javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage",
+      "end": {
+        "col": 22,
+        "line": 12,
+        "offset": 357
+      },
+      "extra": {
+        "fingerprint": "143cb0c62f3740d62180cbde3ffa976e",
+        "is_ignored": false,
+        "lines": "const app = express();",
+        "message": "A CSRF middleware was not detected in your express application. Ensure you are either using one  such as `csurf` or `csrf` (see rule references) and/or you are properly doing CSRF validation in your routes with a token or cookies.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-352: Cross-Site Request Forgery (CSRF)"
+          ],
+          "license": "Commons Clause License Condition v1.0[LGPL-2.1-only]",
+          "owasp": [
+            "A01:2021 - Broken Access Control",
+            "A05:2017 - Broken Access Control"
+          ],
+          "references": [
+            "https://www.npmjs.com/package/csurf",
+            "https://www.npmjs.com/package/csrf",
+            "https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html"
+          ],
+          "shortlink": "https://sg.run/BxzR",
+          "source": "https://semgrep.dev/r/javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage",
+          "technology": [
+            "javascript",
+            "typescript",
+            "express"
+          ]
+        },
+        "metavars": {
+          "$APP": {
+            "abstract_content": "app",
+            "end": {
+              "col": 10,
+              "line": 12,
+              "offset": 345
+            },
+            "start": {
+              "col": 7,
+              "line": 12,
+              "offset": 342
+            },
+            "unique_id": {
+              "sid": 9,
+              "type": "id"
+            }
+          },
+          "$EXPRESS": {
+            "abstract_content": "express",
+            "end": {
+              "col": 20,
+              "line": 12,
+              "offset": 355
+            },
+            "start": {
+              "col": 13,
+              "line": 12,
+              "offset": 348
+            },
+            "unique_id": {
+              "sid": 1,
+              "type": "id"
+            }
+          }
+        },
+        "severity": "INFO"
+      },
+      "path": "index.js",
+      "start": {
+        "col": 7,
+        "line": 12,
+        "offset": 342
+      }
+    }
+  ],
+  "version": "0.96.0"
+}

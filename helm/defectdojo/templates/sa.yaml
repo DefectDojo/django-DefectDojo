@@ -15,3 +15,6 @@ metadata:
     {{- with .Values.annotations }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
+    {{- if ne .Values.gke.workloadIdentityEmail "" }}
+    iam.gke.io/gcp-service-account: {{ .Values.gke.workloadIdentityEmail }}
+    {{- end }}
