@@ -27,6 +27,7 @@ class TestGenericParser(DojoTestCase):
         file = open("unittests/scans/generic/generic_report1.csv")
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
+        file.close()
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -436,6 +437,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         file = open("unittests/scans/generic/generic_report1.json")
         parser = GenericParser()
         findings = parser.get_findings(file, Test())
+        file.close()
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -467,6 +469,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         file = open("unittests/scans/generic/generic_report2.json")
         parser = GenericParser()
         findings = parser.get_findings(file, Test())
+        file.close()
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -490,6 +493,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         file = open("unittests/scans/generic/generic_report3.json")
         parser = GenericParser()
         findings = parser.get_findings(file, Test())
+        file.close()
         self.assertEqual(3, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
@@ -528,6 +532,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         file = open("unittests/scans/generic/generic_report4.json")
         parser = GenericParser()
         findings = parser.get_findings(file, Test())
+        file.close()
         self.assertEqual(1, len(findings))
         finding = findings[0]
         finding.clean()
@@ -560,6 +565,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         parser = GenericParser()
         findings = parser.get_findings(file, Test())
         self.assertEqual(4, len(findings))
+        file.close()
 
         finding = findings[0]
         finding.clean()
@@ -602,6 +608,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         parser = GenericParser()
         findings = parser.get_findings(file, Test())
         self.assertEqual(1, len(findings))
+        file.close()
 
         finding = findings[0]
         finding.clean()
@@ -614,6 +621,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         file = open("unittests/scans/generic/generic_custom_test.json")
         parser = GenericParser()
         tests = parser.get_tests(parser.get_scan_types()[0], file)
+        file.close()
         self.assertEqual(1, len(tests))
         findings = tests[0].findings
         for finding in findings:
@@ -641,6 +649,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         with self.assertRaisesMessage(ValueError,
                 "Required fields are missing: ['description', 'severity', 'title']"):
             parser.get_findings(file, Test())
+            file.close()
 
     def test_parse_json_invalid_finding(self):
         file = open("unittests/scans/generic/generic_invalid.json")
@@ -648,3 +657,4 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         with self.assertRaisesMessage(ValueError,
                 "Not allowed fields are present: ['invalid_field', 'last_status_update']"):
             parser.get_findings(file, Test())
+            file.close()
