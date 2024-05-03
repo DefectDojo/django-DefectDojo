@@ -2171,7 +2171,7 @@ class ImportScanSerializer(serializers.Serializer):
         required=False,
         default=True,
     )
-    custom_fields_mapping = serializers.CharField(
+    custom_fields_mapping = serializers.JSONField(
         required=False,
         help_text='A JSON map of JIRA custom field id (key) to report column name (value): Example '
                   '{"customfield_12345":"estimatedMonthlyCost"}',
@@ -2476,7 +2476,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         required=False,
         default=True,
     )
-    custom_fields_mapping = serializers.CharField(
+    custom_fields_mapping = serializers.JSONField(
         required=False,
         help_text='A JSON map of JIRA custom field id (key) to report column name (value): Example '
                   '{"customfield_12345":"estimatedMonthlyCost"}',
