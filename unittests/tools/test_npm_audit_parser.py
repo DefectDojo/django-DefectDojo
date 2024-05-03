@@ -2,8 +2,7 @@ from os import path
 
 from dojo.models import Test
 from dojo.tools.npm_audit.parser import NpmAuditParser, censor_path_hashes
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestNpmAuditParser(DojoTestCase):

@@ -35,8 +35,7 @@ from dojo.models import (
     Stub_Finding,
     Test,
 )
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAuthorization(DojoTestCase):

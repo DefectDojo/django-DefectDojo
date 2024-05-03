@@ -4,8 +4,7 @@ from django.test import override_settings
 
 from dojo.models import Endpoint, Engagement, Product, Product_Type, Test
 from dojo.tools.veracode.parser import VeracodeParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestVeracodeScannerParser(DojoTestCase):

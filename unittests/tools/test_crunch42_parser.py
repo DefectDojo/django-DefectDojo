@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.crunch42.parser import Crunch42Parser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestCrunch42Parser(DojoTestCase):

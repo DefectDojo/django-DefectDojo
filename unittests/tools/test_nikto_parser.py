@@ -1,7 +1,6 @@
 from dojo.models import Engagement, Product, Test
 from dojo.tools.nikto.parser import NiktoParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestNiktoParser(DojoTestCase):

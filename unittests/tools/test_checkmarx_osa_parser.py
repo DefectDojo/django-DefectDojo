@@ -2,8 +2,7 @@ from datetime import datetime
 
 from dojo.models import Engagement, Product, Test
 from dojo.tools.checkmarx_osa.parser import CheckmarxOsaParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestCheckmarxOsaParser(DojoTestCase):

@@ -2,8 +2,7 @@ import datetime
 
 from dojo.models import Finding, Test
 from dojo.tools.cyclonedx.parser import CycloneDXParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestCyclonedxParser(DojoTestCase):

@@ -2,8 +2,7 @@ from pathlib import Path
 
 from dojo.models import Test
 from dojo.tools.blackduck_binary_analysis.parser import BlackduckBinaryAnalysisParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestBlackduckBinaryAnalysisParser(DojoTestCase):

@@ -3,8 +3,7 @@ import re
 
 from dojo.models import Test
 from dojo.tools.trivy.parser import TrivyParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 def sample_path(file_name):
