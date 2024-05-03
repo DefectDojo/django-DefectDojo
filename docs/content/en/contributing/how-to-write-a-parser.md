@@ -43,7 +43,7 @@ $ docker-compose build --build-arg uid=1000
 
 ## Factory contract
 
-Parser are loaded dynamicaly with a factory pattern. To have your parser loaded and works correctly, you need to implement the contract.
+Parsers are loaded dynamicaly with a factory pattern. To have your parser loaded and works correctly, you need to implement the contract.
 
 1. your parser **MUST** be in a sub-module of module `dojo.tools`
    - ex: `dojo.tools.my_tool.parser` module
