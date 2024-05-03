@@ -343,10 +343,11 @@ class AutoCreateContextManager:
         # Iterate ovr the dict and extract the elements based
         # on whether they are a single item, or a list
         for key, value in query_dict_data.items():
-            # Accommodate lists
-            if isinstance(value, list):
-                copy[key] = value if len(value) > 1 else value[0]
-            else:
-                copy[key] = value
+            if value:
+                # Accommodate lists
+                if isinstance(value, list):
+                    copy[key] = value if len(value) > 1 else value[0]
+                else:
+                    copy[key] = value
         # Convert to a regular dict
         return copy

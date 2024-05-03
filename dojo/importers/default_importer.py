@@ -342,7 +342,13 @@ class DefaultImporter(BaseImporter):
         A stub function for making function definitions easier to follow
         with correct type signatures
         """
-        return super().parse_findings(self, parser, scan_type, scan, **kwargs)
+        return BaseImporter.parse_findings(
+            self,
+            parser,
+            scan_type,
+            scan,
+            **kwargs,
+        )
 
     def parse_findings_static_test_type(
         self,
