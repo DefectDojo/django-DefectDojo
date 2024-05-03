@@ -14,7 +14,7 @@ class ProgpilotParser:
         return "Progpilot JSON vulnerability report format."
 
     def get_findings(self, filename, test):
-        findings = list()
+        findings = []
         description = ""
         results = json.load(filename)
         for result in results:
