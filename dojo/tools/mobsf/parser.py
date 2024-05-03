@@ -378,8 +378,7 @@ class MobSFParser:
         """
         if "dangerous" == status:
             return "High"
-        else:
-            return "Info"
+        return "Info"
 
     # Criticality rating
     def getCriticalityRating(self, rating):

@@ -343,14 +343,13 @@ def webhooks_notification_request(endpoint, event, *args, **kwargs):
 
     timeout = get_system_setting("webhooks_notifications_timeout")
 
-    res = requests.request(
+    return requests.request(
         method="POST",
         url=endpoint.url,
         headers=headers,
         json=data,
         timeout=timeout,
     )
-    return res
 
 
 def test_webhooks_notification(endpoint):
@@ -522,18 +521,17 @@ def get_slack_user_id(user_email):
             logger.error("Slack is complaining. See error message below.")
             logger.error(user)
             raise RuntimeError("Error getting user list from Slack: " + res.text)
-        else:
-            if "email" in user["user"]["profile"]:
-                if user_email == user["user"]["profile"]["email"]:
-                    if "id" in user["user"]:
-                        user_id = user["user"]["id"]
-                        logger.debug(f"Slack user ID is {user_id}")
-                        slack_user_is_found = True
-                else:
-                    logger.warning(f"A user with email {user_email} could not be found in this Slack workspace.")
+        if "email" in user["user"]["profile"]:
+            if user_email == user["user"]["profile"]["email"]:
+                if "id" in user["user"]:
+                    user_id = user["user"]["id"]
+                    logger.debug(f"Slack user ID is {user_id}")
+                    slack_user_is_found = True
+            else:
+                logger.warning(f"A user with email {user_email} could not be found in this Slack workspace.")
 
-            if not slack_user_is_found:
-                logger.warning("The Slack user was not found.")
+        if not slack_user_is_found:
+            logger.warning("The Slack user was not found.")
 
     return user_id
 

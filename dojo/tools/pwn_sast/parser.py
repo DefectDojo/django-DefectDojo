@@ -119,3 +119,4 @@ class PWNSASTParser:
                         findings[unique_finding_key] = finding
 
             return list(findings.values())
+        return None
