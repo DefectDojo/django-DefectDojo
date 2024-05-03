@@ -330,6 +330,20 @@ class DefaultImporter(BaseImporter):
 
         return old_findings
 
+    def parse_findings(
+        self,
+        parser: Parser,
+        scan_type: str,
+        scan: TemporaryUploadedFile,
+        test: Test = None,
+        **kwargs: dict,
+    ) -> Tuple[Test, List[Finding]]:
+        """
+        A stub function for making function definitions easier to follow
+        with correct type signatures
+        """
+        return super().parse_findings(self, parser, scan_type, scan, test=test, **kwargs)
+
     def parse_findings_static_test_type(
         self,
         parser: Parser,
@@ -383,7 +397,7 @@ class DefaultImporter(BaseImporter):
         # Make sure we have at least one test returned
         if len(tests) == 0:
             logger.info(f'No tests found in import for {scan_type}')
-            return parsed_findings
+            return None, parsed_findings
         # for now we only consider the first test in the list and artificially aggregate all findings of all tests
         # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
         # when there is more than 1 test

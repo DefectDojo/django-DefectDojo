@@ -201,7 +201,7 @@ class DefaultReImporter(BaseImporter):
             deduplicationLogger.debug(f"unsaved finding's hash_code: {unsaved_finding.hash_code}")
             # Match any findings to this new one coming in
             matched_findings = self.match_new_finding_to_existing_finding(unsaved_finding, test, deduplication_algorithm)
-            deduplicationLogger.debug(f"found {len(parsed_findings)} findings matching with current new finding")
+            deduplicationLogger.debug(f"found {len(matched_findings)} findings matching with current new finding")
             # Determine how to proceed based on whether matches were found or not
             if matched_findings:
                 existing_finding = matched_findings[0]
