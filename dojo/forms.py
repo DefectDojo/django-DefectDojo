@@ -101,7 +101,13 @@ from dojo.product_type.queries import get_authorized_product_types
 from dojo.tools.factory import get_choices_sorted, requires_file, requires_tool_type
 from dojo.user.queries import get_authorized_users, get_authorized_users_for_product_and_product_type
 from dojo.user.utils import get_configuration_permissions_fields
-from dojo.utils import get_password_requirements_string, get_product, get_system_setting, is_finding_groups_enabled
+from dojo.utils import (
+    get_password_requirements_string,
+    get_product,
+    get_system_setting,
+    is_finding_groups_enabled,
+    is_scan_file_too_large,
+)
 from dojo.widgets import TableCheckboxWidget
 
 logger = logging.getLogger(__name__)
@@ -548,10 +554,18 @@ class ImportScanForm(forms.Form):
         create_finding_groups_for_all_findings = forms.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, initial=True)
 
     def __init__(self, *args, **kwargs):
+        environment = kwargs.pop("environment", None)
+        endpoints = kwargs.pop("endpoints", None)
+        api_scan_configuration = kwargs.pop("api_scan_configuration", None)
         super().__init__(*args, **kwargs)
         self.fields['active'].initial = self.active_verified_choices[0]
         self.fields['verified'].initial = self.active_verified_choices[0]
-
+        if environment:
+            self.fields['environment'].initial = environment
+        if endpoints:
+            self.fields['endpoints'].queryset = endpoints
+        if api_scan_configuration:
+            self.fields['api_scan_configuration'].queryset = api_scan_configuration
         # couldn't find a cleaner way to add empty default
         if 'group_by' in self.fields:
             choices = self.fields['group_by'].choices
@@ -564,10 +578,13 @@ class ImportScanForm(forms.Form):
         cleaned_data = super().clean()
         scan_type = cleaned_data.get("scan_type")
         file = cleaned_data.get("file")
-        if requires_file(scan_type) and not file:
-            msg = f'Uploading a Report File is required for {scan_type}'
-            raise forms.ValidationError(msg)
         tool_type = requires_tool_type(scan_type)
+        if requires_file(scan_type) and not file:
+            msg = _(f"Uploading a Report File is required for {scan_type}")
+            raise forms.ValidationError(msg)
+        if file and is_scan_file_too_large(file):
+            msg = _(f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB")
+            raise forms.ValidationError(msg)
         if tool_type:
             api_scan_configuration = cleaned_data.get('api_scan_configuration')
             if api_scan_configuration and tool_type != api_scan_configuration.tool_configuration.tool_type.name:
@@ -649,6 +666,9 @@ class ReImportScanForm(forms.Form):
         create_finding_groups_for_all_findings = forms.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, initial=True)
 
     def __init__(self, *args, test=None, **kwargs):
+        endpoints = kwargs.pop("endpoints", None)
+        api_scan_configuration = kwargs.pop("api_scan_configuration", None)
+        api_scan_configuration_queryset = kwargs.pop("api_scan_configuration_queryset", None)
         super().__init__(*args, **kwargs)
         self.fields['active'].initial = self.active_verified_choices[0]
         self.fields['verified'].initial = self.active_verified_choices[0]
@@ -656,7 +676,12 @@ class ReImportScanForm(forms.Form):
         if test:
             self.scan_type = test.test_type.name
             self.fields['tags'].initial = test.tags.all()
-
+        if endpoints:
+            self.fields["endpoints"].queryset = endpoints
+        if api_scan_configuration:
+            self.initial["api_scan_configuration"] = api_scan_configuration
+        if api_scan_configuration_queryset:
+            self.fields["api_scan_configuration"].queryset = api_scan_configuration_queryset
         # couldn't find a cleaner way to add empty default
         if 'group_by' in self.fields:
             choices = self.fields['group_by'].choices
@@ -667,7 +692,10 @@ class ReImportScanForm(forms.Form):
         cleaned_data = super().clean()
         file = cleaned_data.get("file")
         if requires_file(self.scan_type) and not file:
-            msg = "Uploading a report file is required for re-uploading findings."
+            msg = _("Uploading a report file is required for re-uploading findings.")
+            raise forms.ValidationError(msg)
+        if file and is_scan_file_too_large(file):
+            msg = _(f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB")
             raise forms.ValidationError(msg)
         tool_type = requires_tool_type(self.scan_type)
         if tool_type:
@@ -2645,13 +2673,22 @@ class ObjectSettingsForm(forms.ModelForm):
 
 
 class CredMappingForm(forms.ModelForm):
-    cred_user = forms.ModelChoiceField(queryset=Cred_Mapping.objects.all().select_related('cred_id'), required=False,
-                                       label='Select a Credential')
+    cred_user = forms.ModelChoiceField(
+        queryset=Cred_Mapping.objects.all().select_related('cred_id'),
+        required=False,
+        label='Select a Credential',
+    )
 
     class Meta:
         model = Cred_Mapping
         fields = ['cred_user']
         exclude = ['product', 'finding', 'engagement', 'test', 'url', 'is_authn_provider']
+
+    def __init__(self, *args, **kwargs):
+        cred_user_queryset = kwargs.pop("cred_user_queryset", None)
+        super().__init__(*args, **kwargs)
+        if cred_user_queryset is not None:
+            self.fields["cred_user"].queryset = cred_user_queryset
 
 
 class CredMappingFormProd(forms.ModelForm):
