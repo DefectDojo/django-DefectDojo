@@ -253,6 +253,24 @@ For ex:
             self.assertEqual("TEST1", finding.vuln_id_from_tool)
 ```
 
+### Use with to open example files
+
+In order to make certain that file handles are closed properly, please use the with pattern to open files.
+Instead of:
+```python
+    testfile = open("path_to_file.json")
+    ...
+    testfile.close()
+```
+
+use:
+```python
+    with open("path_to_file.json") as testfile:
+        ...
+```
+
+This ensures the file is closed at the end of the with statement, even if an exception occurs somewhere in the block.
+
 ### Test database
 
 To test your unit tests locally, you first need to grant some rights. Get your MySQL root password from the docker-compose logs, login as root and issue the following commands:
