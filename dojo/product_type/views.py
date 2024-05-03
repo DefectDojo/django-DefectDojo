@@ -1,5 +1,5 @@
 import logging
-
+from django.http import JsonResponse
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from django.contrib import messages
@@ -11,8 +11,10 @@ from dojo.filters import ProductTypeFilter
 from dojo.forms import Product_TypeForm, Delete_Product_TypeForm, Add_Product_Type_MemberForm, \
     Edit_Product_Type_MemberForm, Delete_Product_Type_MemberForm, Add_Product_Type_GroupForm, \
     Edit_Product_Type_Group_Form, Delete_Product_Type_GroupForm
-from dojo.models import Product_Type, Product_Type_Member, Role, Product_Type_Group
+from dojo.models import Product_Type, Product_Type_Member, Role, Product_Type_Group, Product, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs, get_setting, async_delete
+from dojo.product_type.utils import add_technical_contact_whit_member
+from dojo.api_v2.utils import http_response
 from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
@@ -30,6 +32,36 @@ Jay
 Status: in prod
 Product Type views
 """
+
+
+def get_description_product(_request, pid):
+    """
+    Returns a list of products with their contacts.
+    """
+    product = Product.objects.get(id=pid)
+    engagements = Engagement.objects.filter(product=product)
+    engagement_list = []
+    for engagement in engagements:
+        engagement_list.append({"id": engagement.id, "engagement_name": engagement.name})
+    contacts = {
+        "contacts": {
+            "product_manager": {
+                "id": product.product_manager.id if product.product_manager else "",
+                "username": product.product_manager.username if product.product_manager else ""
+            },
+            "technical_contact": {
+                "id": product.technical_contact.id if product.technical_contact else "",
+                "username": product.technical_contact.username if product.technical_contact else ""
+            },
+            "team_manager": {
+                "id": product.team_manager.id if product.team_manager else "",
+                "username": product.team_manager.username if product.team_manager else ""
+            }
+        }
+    }
+    data = {"message": "Success", "id": product.id, "engagements": engagement_list}
+    data.update(contacts)
+    return JsonResponse(data)
 
 
 def product_type(request):
@@ -169,6 +201,7 @@ def edit_product_type(request, ptid):
         pt_form = Product_TypeForm(request.POST, instance=pt)
         if pt_form.is_valid():
             pt = pt_form.save()
+            add_technical_contact_whit_member(pt)
             messages.add_message(
                 request,
                 messages.SUCCESS,

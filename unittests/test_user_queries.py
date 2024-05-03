@@ -1,8 +1,9 @@
 from unittest.mock import patch
 from .dojo_test_case import DojoTestCase
+from django.contrib.auth import get_user_model
 from dojo.authorization.roles_permissions import Permissions
 from dojo.models import Dojo_User, Global_Role, Role, Product_Type, Product, Product_Type_Member, Product_Member
-from dojo.user.queries import get_authorized_users
+from dojo.user.queries import get_authorized_users, get_all_user_by_role
 
 
 class TestUserQueries(DojoTestCase):
@@ -81,3 +82,12 @@ class TestUserQueries(DojoTestCase):
 
         users = Dojo_User.objects.exclude(username='invisible_user').order_by('first_name', 'last_name', 'username')
         self.assertQuerysetEqual(users, get_authorized_users(Permissions.Product_View))
+    
+    def test_get_all_user_by_role(self):
+        role = Role.objects.get(name="Leader")
+        users_leader = Product_Type_Member.objects.filter(role_id=role).values("user_id").union(Product_Member.objects.filter(role_id=role).values("user_id"))
+        user_model = get_user_model()
+        user = user_model._default_manager.create_user(username="test", password="pwd")
+        query_function = get_all_user_by_role(user=user, role="Leader")
+        self.assertQuerysetEqual(users_leader, query_function)
+

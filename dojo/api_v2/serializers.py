@@ -16,6 +16,7 @@ from dojo.importers.reimporter.utils import (
     get_target_product_if_exists,
     get_target_test_if_exists,
 )
+from dojo.transfer_findings import helper
 from dojo.models import (
     IMPORT_ACTIONS,
     SEVERITIES,
@@ -88,6 +89,8 @@ from dojo.models import (
     Answered_Survey,
     General_Survey,
     Check_List,
+    TransferFinding,
+    TransferFindingFinding,
     Announcement,
 )
 
@@ -1823,6 +1826,11 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         return serialized_burps.data
 
 
+class FindingUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Finding
+        fields = ('risk_status',)
+
 class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
     notes = serializers.PrimaryKeyRelatedField(
         read_only=True, allow_null=True, required=False, many=True
@@ -3269,6 +3277,83 @@ class QuestionnaireGeneralSurveySerializer(serializers.ModelSerializer):
         model = General_Survey
         fields = "__all__"
 
+
+class TransferFindinFindingsSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Finding
+        fields = "__all__"
+
+
+class FindingDeleteSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Finding
+        fields = ['id']
+
+
+class TransferFindingDeleteSerializer(serializers.Serializer):
+    findings = FindingDeleteSerializers(required=False)
+
+
+class FindingTfSerlilizer(serializers.ModelSerializer):
+    class Meta:
+        model = Finding 
+        fields = '__all__'
+
+
+class TransferFindingFindingSerializer(serializers.ModelSerializer):
+    findings = FindingTfSerlilizer(read_only=True)
+
+    class Meta:
+        model = TransferFindingFinding
+        fields = '__all__'
+
+
+class TransferFindingSerializer(serializers.ModelSerializer):
+    transfer_findings = TransferFindingFindingSerializer(many=True)
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['actions'] = []
+        transfer_finding_obj = TransferFinding.objects.get(id=representation.get("id"))
+        for permission in [Permissions.Transfer_Finding_View,
+                           Permissions.Transfer_Finding_Edit,
+                           Permissions.Transfer_Finding_Delete,
+                           Permissions.Transfer_Finding_Add]:
+            if user_has_permission(
+                    self.context["request"].user,
+                    transfer_finding_obj,
+                    permission):
+                representation['actions'].append(permission)
+
+        return representation
+
+    class Meta:
+        model = TransferFinding
+        fields = "__all__"
+
+
+class TransferFindingUpdateSerializer(serializers.ModelSerializer):
+    findings = TransferFindinFindingsSerializers(many=True, read_only=True)
+    
+    class Meta:
+        model = TransferFinding
+        fields = ("findings",)
+
+
+class TransferFindingFindingsSerializer(serializers.ModelSerializer):
+    findings = FindingTfSerlilizer(read_only=True)
+
+    class Meta:
+        model = TransferFindingFinding
+        fields = '__all__'
+
+
+class TransferFindingFindingsDetailSerializer(serializers.Serializer):
+    risk_status = serializers.CharField()
+
+
+class TransferFindingFindingsUpdateSerializer(serializers.Serializer):
+    findings = serializers.DictField(child=TransferFindingFindingsDetailSerializer())
 
 class AnnouncementSerializer(serializers.ModelSerializer):
 

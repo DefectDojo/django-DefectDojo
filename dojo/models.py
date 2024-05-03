@@ -483,6 +483,12 @@ class System_Settings(models.Model):
     risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text=_("Default expiry period for risk acceptance form."))
     risk_acceptance_notify_before_expiration = models.IntegerField(null=True, blank=True, default=10,
                     verbose_name=_('Risk acceptance expiration heads up days'), help_text=_("Notify X days before risk acceptance expires. Leave empty to disable."))
+    enable_transfer_finding = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_('Enable Transfer Finding'),
+        help_text=_("Enable transfer of findings between different product types"))
+    orphan_findings = models.CharField(max_length=100, default='', blank=True, help_text=_("Name of the producttype that contains the orphan findings"))
     enable_credentials = models.BooleanField(
         default=True,
         blank=False,
@@ -2219,12 +2225,16 @@ class Test_Import_Finding_Action(TimeStampedModel):
         return '%i: %s' % (self.finding.id, self.action)
 
 
+
 class Finding(models.Model):
 
     STATUS_CHOICES = (('Risk Pending', 'Risk Pending'),
                       ('Risk Rejected', 'Risk Rejected'),
                       ('Risk Accepted', 'Risk Accepted'),
-                      ('Risk Active', 'Risk Active'))
+                      ('Risk Active', 'Risk Active'),
+                      ('Transfer Pending', 'Transfer Pending'),
+                      ('Transfer Rejected', 'Transfer Rejected'),
+                      ('Transfer Accepted', 'Transfer Accepted'))
 
     title = models.CharField(max_length=511,
                              verbose_name=_('Title'),
@@ -2887,6 +2897,12 @@ class Finding(models.Model):
             status += ['Out Of Scope']
         if self.duplicate:
             status += ['Duplicate']
+        if self.risk_status == "Transfer Accepted":
+            status += ['Transfer Accepted']
+        if self.risk_status == "Transfer Pending":
+            status += ['Transfer Pending']
+        if self.risk_status == "Transfer Rejected":
+            status += ['Transfer Rejected']
         if self.risk_status == "Risk Pending":
             status += ['Risk pending']
         if self.risk_status == "Risk Rejected":
@@ -3378,6 +3394,92 @@ class Finding(models.Model):
     @property
     def violates_sla(self):
         return (self.sla_expiration_date and self.sla_expiration_date < timezone.now().date())
+
+
+class TransferFinding(models.Model):
+    title = models.CharField(max_length=255, verbose_name=("Titile"))
+    date = models.DateField(auto_now_add=True, verbose_name=("Date"))
+    destination_product_type = models.ForeignKey(
+        Product_Type,
+        related_name="destination_product_type",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text=_("Destination Product Type Name"))
+
+    destination_product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="destination_product",
+        blank=True,
+        null=True,
+        help_text=_("Destination Product name"))
+    
+    destination_engagement = models.ForeignKey(
+        Engagement,
+        related_name="destination_engagement",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text=_("Destination Engagement"))
+
+    origin_product_type = models.ForeignKey(
+        Product_Type,
+        related_name="origin_product_type",
+        editable=True,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text=_("Origin Product Type"))
+
+    origin_product = models.ForeignKey(
+        Product,
+        related_name="origin_product",
+        editable=True,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text=_(" Origin Product name"))
+
+    origin_engagement = models.ForeignKey(
+        Engagement,
+        related_name="origin_engagement",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text=_("Origin Engagement Name"))
+
+    accepted_by = models.ForeignKey(
+        Dojo_User,
+        related_name="accepted_by",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text=_("The user that accepts the tranfer finding, The user must belong to the product whit contact"))
+
+    path = models.FileField(upload_to='transfer_finding/%Y/%m/%d',
+                            editable=True, null=True,
+                            blank=True, verbose_name=('Proof'))
+
+    owner = models.ForeignKey(Dojo_User,
+                             related_name="owner",
+                             null=False,
+                             blank=False,
+                             on_delete=models.CASCADE,
+                             verbose_name=_('Owner'), help_text=_("The person that Owner the Tranfer finding"))
+
+    notes = models.CharField(max_length=2500, editable=True, blank=True)
+
+    class Meta:
+
+        def __str__(self):
+            return self.title
+
+class TransferFindingFinding(models.Model):
+    findings = models.ForeignKey(Finding, verbose_name=("Finding ID"), related_name="findings", on_delete=models.CASCADE)
+    transfer_findings = models.ForeignKey(TransferFinding, verbose_name=("Transfer Finding"), related_name="transfer_findings", on_delete=models.CASCADE)
+    finding_related = models.OneToOneField(Finding, verbose_name=("finding_related"), on_delete=models.CASCADE, null=True)
+    engagement_related = models.ForeignKey(Finding, related_name="engagement_related", on_delete=models.CASCADE, null=True)
 
 
 class FindingAdmin(admin.ModelAdmin):
@@ -4087,6 +4189,9 @@ class Notifications(models.Model):
     risk_acceptance_request = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
         verbose_name=_('Risk Acceptance Request'),
         help_text=_('Send notification to the contacts of the product type'))
+    transfer_finding = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
+        verbose_name=_('Transfer Finding'),
+        help_text=_('Send notification to the contacts of the product'))
     sla_breach_combined = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
         verbose_name=_('SLA breach (combined)'),
         help_text=_('Get notified of (upcoming) SLA breaches (a message per project)'))
@@ -4128,6 +4233,7 @@ class Notifications(models.Model):
                 result.sla_breach = {*result.sla_breach, *notifications.sla_breach}
                 result.sla_breach_combined = {*result.sla_breach_combined, *notifications.sla_breach_combined}
                 result.risk_acceptance_expiration = {*result.risk_acceptance_expiration, *notifications.risk_acceptance_expiration}
+                result.risk_acceptance_request = {*result.risk_acceptance_request, *notifications.risk_acceptance_request}
         return result
 
     def __str__(self):
@@ -4656,6 +4762,8 @@ admin.site.register(FileAccessToken)
 admin.site.register(Stub_Finding)
 admin.site.register(Engagement)
 admin.site.register(Risk_Acceptance)
+admin.site.register(TransferFinding)
+admin.site.register(TransferFindingFinding)
 admin.site.register(Check_List)
 admin.site.register(Test_Type)
 admin.site.register(Endpoint_Params)

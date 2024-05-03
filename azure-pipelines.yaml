@@ -55,6 +55,7 @@ steps:
       export DD_DATABASE_NAME=test_defectdojo
       export DD_SECRET_KEY='.'
       export DD_PROVIDER_TOKEN='.'
+      export DD_CUSTOM_TAG_PARSER="asff_regex=."
 
       python manage.py makemigrations dojo
       python manage.py migrate

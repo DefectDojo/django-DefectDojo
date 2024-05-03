@@ -22,7 +22,7 @@ from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product.queries import get_authorized_products
 from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
-
+from dojo.utils import get_remote_json_config
 
 logger = logging.getLogger(__name__)
 
@@ -291,7 +291,7 @@ def assign_product_type_product_to_leaders(user, job_title, office_location, rol
     elif any(sub_part in job_title for sub_part in conf_jobs[1].split("-")):
         keys = [
             (key_pt, key_user)
-            for key_pt, value in get_remote_json_config(connection).items()
+            for key_pt, value in get_remote_json_config(connection, settings.AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH.split(",")[0]).items()
             for key_user, val in value.items()
             if val.lower() == user_login.lower()
         ]
@@ -310,19 +310,6 @@ def assign_product_type_product_to_leaders(user, job_title, office_location, rol
             if pt_key in user_product_types_names:
                 user_product_types_names.remove(pt_key)
         clean_project_type_user(user_product_types_names, user, user_login)
-
-def get_remote_json_config(connection: Connection):
-    try:
-        git_client = connection.clients.get_git_client()
-        file_content = git_client.get_item_text(
-            repository_id=settings.AZURE_DEVOPS_REPOSITORY_ID,
-            path=settings.AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH,
-            project=settings.AZURE_DEVOPS_OFFICES_LOCATION.split(",")[0]
-        )
-        data = json.loads(b"".join(file_content).decode("utf-8"))
-        return data
-    except Exception as e:
-        logger.error("Error getting remote configuration file: " + str(e))
 
 
 def clean_project_type_user(user_product_types_names, user, user_login):

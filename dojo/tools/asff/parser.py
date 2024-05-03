@@ -2,6 +2,7 @@ import json
 import dateutil
 from netaddr import IPAddress
 from dojo.models import Endpoint, Finding
+import re
 
 SEVERITY_MAPPING = {
     "INFORMATIONAL": "Info",  # No issue was found.
@@ -54,7 +55,7 @@ class AsffParser(object):
                 active = True
             else:
                 active = False
-
+            vuln_id_tool = re.match(r"" + settings.DD_CUSTOM_TAG_PARSER.get("asff_regex"), item.get("Title"))
             finding = Finding(
                 title=item.get("Title"),
                 description=self.get_description(item),
@@ -64,6 +65,7 @@ class AsffParser(object):
                 severity=self.get_severity(item.get("Severity")),
                 active=active,
                 unique_id_from_tool=item.get("Id"),
+                vuln_id_from_tool=vuln_id_tool.group(0).upper() if vuln_id_tool else ""
             )
             finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("asff")]
             

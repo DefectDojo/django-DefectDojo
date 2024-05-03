@@ -9,6 +9,7 @@ from dateutil.relativedelta import relativedelta
 from github import Github
 from math import ceil
 
+from django.core.paginator import Paginator
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.contrib.postgres.aggregates import StringAgg
@@ -48,7 +49,7 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, \
     Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Product_Summary, Endpoint_Status, \
     Endpoint, Engagement_Presets, DojoMeta, Notifications, BurpRawRequestResponse, Product_Member, \
-    Product_Group, Product_API_Scan_Configuration
+    Product_Group, Product_API_Scan_Configuration, TransferFinding
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, \
     add_breadcrumb, async_delete, calculate_finding_age, \
     get_system_setting, get_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs, \
@@ -683,6 +684,7 @@ def async_burndown_metrics(request, pid):
         'max': open_findings_burndown.get('y_max', 0),
         'min': open_findings_burndown.get('y_min', 0)
     })
+
 
 
 @user_is_authorized(Product, Permissions.Engagement_View, 'pid')
@@ -1937,3 +1939,12 @@ def add_product_group(request, pid):
         'form': group_form,
         'product_tab': product_tab,
     })
+
+
+def view_transfer_finding(request, pid=None):
+    pt = get_object_or_404(Product, id=pid)
+    transfer_finding = TransferFinding.objects.filter(origin_product=pt) | TransferFinding.objects.filter(destination_product=pt).order_by('-id')
+    paginator = Paginator(transfer_finding, 25)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'dojo/view_transfer_finding.html', {'page_obj': page_obj})

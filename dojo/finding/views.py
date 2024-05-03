@@ -487,6 +487,12 @@ class ListAcceptedFindings(ListFindings):
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
+class ListTransferFinding(ListFindings):
+    def get(self, request: HttpRequest, product_id: int = None, engagement_id: int= None):
+        self.filter_name = "Transfer Accepted"
+        return super().get(request, product_id=product_id, engagement_id=engagement_id)
+
+
 class ListClosedFindings(ListFindings):
     def get(self, request: HttpRequest, product_id: int = None, engagement_id: int = None):
         self.filter_name = "Closed"

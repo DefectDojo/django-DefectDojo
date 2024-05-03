@@ -8,6 +8,7 @@ from openpyxl.styles import Font
 from tempfile import NamedTemporaryFile
 
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import operator
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -33,7 +34,7 @@ from dojo.filters import (
     EngagementTestFilterWithoutObjectLookups
 )
 from dojo.forms import CheckForm, \
-    UploadThreatForm, RiskAcceptanceForm, RiskPendingForm, NoteForm, DoneForm, \
+    UploadThreatForm, RiskAcceptanceForm, TransferFindingForm, RiskPendingForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
     CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm, \
     EditRiskAcceptanceForm
@@ -42,7 +43,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Import, Notes, \
     Risk_Acceptance, Development_Environment, Endpoint, \
     Cred_Mapping, System_Settings, Note_Type, Product_API_Scan_Configuration, \
-    Product_Type
+    Product_Type, Dojo_User, Product_Type, TransferFinding, TransferFindingFinding
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, async_delete, \
@@ -66,9 +67,10 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 import dojo.notifications.helper as notifications_helper
 from dojo.endpoint.utils import save_endpoints_to_add
-
+from django.views import View
 
 logger = logging.getLogger(__name__)
+
 
 
 @cache_page(60 * 5)  # cache for 5 minutes
@@ -988,7 +990,7 @@ def get_risk_acceptance_pending(request,
     return form
 
 
-def post_risk_acceptance_pending_successfully(request, finding: Finding, eng, eid, product: Product, product_type: Product_Type, white_list=False):
+def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: Product, product_type: Product_Type):
     form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity,product_id=product.id, product_type_id=product_type.id)
 
     if form.is_valid():
@@ -1003,6 +1005,65 @@ def post_risk_acceptance_pending_successfully(request, finding: Finding, eng, ei
 
         del form.cleaned_data['notes']
 
+        findings = form.cleaned_data['accepted_findings']
+        form.fields["accepted_findings"].queryset = form.fields["accepted_findings"].queryset.filter(duplicate=False, test__engagement=eng, active=True, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        white_list_final = None
+        len_white_list = 0
+        findings_not_on_white_list = []
+        conf_risk = ra_helper.get_config_risk()
+        for finding in findings:
+            if (
+                rp_helper.validate_list_findings(conf_risk, "black_list", finding, eng)
+                and (
+                    request.user.is_superuser
+                    or rp_helper.role_has_exclusive_permissions(request.user)
+                )
+                is False
+            ):
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    f"The finding {finding.id} with vulnerability id {finding.vulnerability_ids}-{finding.vuln_id_from_tool} is on the black list",
+                    extra_tags="alert-danger",
+                )
+                return render(request, "dojo/add_risk_acceptance.html", {"form": form})
+            white_list = rp_helper.validate_list_findings(
+                conf_risk, "white_list", finding, eng
+            )
+            if white_list:
+                white_list_final = white_list
+                len_white_list = len_white_list + 1
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    f"The finding {finding.id} is on the white list",
+                    extra_tags="alert-warning",
+                )
+            else:
+                findings_not_on_white_list.append(finding.id)
+
+            abuse_control_result = rp_helper.abuse_control(
+                request.user, finding, product, product_type
+            )
+            for abuse_control, result in abuse_control_result.items():
+                if not abuse_control_result[abuse_control]["status"]:
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        abuse_control_result[abuse_control]["message"],
+                        extra_tags="alert-danger",
+                    )
+                    return render(
+                        request, "dojo/add_risk_acceptance.html", {"form": form}
+                    )
+
+        if len_white_list != len(findings) and white_list_final:
+            messages.add_message(request,
+            messages.WARNING,
+            f'The findings {findings_not_on_white_list} are not on the white list, not is possible to continue with the risk acceptance',
+            extra_tags='alert-danger')
+            return render(request, "dojo/add_risk_acceptance.html", {"form": form})
+
         try:
             risk_acceptance = form.save()
             id_risk_acceptance = risk_acceptance.id
@@ -1015,14 +1076,25 @@ def post_risk_acceptance_pending_successfully(request, finding: Finding, eng, ei
         if notes:
             risk_acceptance.notes.add(notes)
 
-        eng.risk_acceptance.add(risk_acceptance)
+        if white_list_final:
+            risk_acceptance.recommendation = Risk_Acceptance.TREATMENT_AVOID
+            risk_acceptance.decision = Risk_Acceptance.TREATMENT_AVOID
+            actual_date = timezone.now().date()
+            expired_date = datetime.strptime(
+                white_list_final.get("expired_date", actual_date), "%d%m%Y"
+            )
+            difference_date = expired_date.date() - actual_date
+            risk_acceptance.expiration_date = actual_date + relativedelta(
+                days=difference_date.days
+            )
+            risk_acceptance.recommendation_details = f"{risk_acceptance.recommendation_details}\nHU: {white_list_final.get('hu', '')} - {white_list_final.get('reason', '')}"
 
-        findings = form.cleaned_data['accepted_findings']
+        eng.risk_acceptance.add(risk_acceptance)
 
         if settings.RISK_PENDING is True:
             if (request.user.is_superuser is True
                 or rp_helper.role_has_exclusive_permissions(request.user)
-                or white_list
+                or white_list_final
                 or rp_helper.get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
             elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
@@ -1039,34 +1111,6 @@ def post_risk_acceptance_pending_successfully(request, finding: Finding, eng, ei
         return redirect_to_return_url_or_else(request, reverse('view_risk_acceptance', args=(eid, id_risk_acceptance)))
 
     return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
-
-
-def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: Product, product_type: Product_Type):
-    if any(vulnerability_id in settings.BLACK_LIST_FINDING for vulnerability_id in finding.vulnerability_ids):
-        messages.add_message(request,
-        messages.WARNING,
-        'This risk is on the black list',
-        extra_tags='alert-danger')
-        return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, ))) 
-
-    if any(vulnerability_id in settings.WHITE_LIST_FINDING for vulnerability_id in finding.vulnerability_ids):
-        messages.add_message(request,
-        messages.WARNING,
-        'This risk is on the white list',
-        extra_tags='alert-warning')
-        return post_risk_acceptance_pending_successfully(request, finding, eng, eid, product, product_type, white_list=True)
-
-    abuse_control_result = rp_helper.abuse_control(request.user, finding, product, product_type)
-    for abuse_control, result in abuse_control_result.items():
-        if not abuse_control_result[abuse_control]["status"]:
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                abuse_control_result[abuse_control]["message"],
-                extra_tags='alert-danger')
-            return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
-
-    return post_risk_acceptance_pending_successfully(request, finding, eng, eid, product, product_type)
 
 
 def add_risk_acceptance_pending(request, eid, fid):
@@ -1086,7 +1130,7 @@ def add_risk_acceptance_pending(request, eid, fid):
             return post_risk_acceptance_pending(request, finding, eng, eid, product, product_type)
         else:
             form = get_risk_acceptance_pending(request, finding, eng, product, product_type)
-        finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng, active=True, risk_status = "Risk Active" , severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
         form.fields['accepted_findings'].queryset = finding_choices
         if fid:
             form.fields['accepted_findings'].initial = {fid}
@@ -1105,7 +1149,6 @@ def add_risk_acceptance_pending(request, eid, fid):
         return render(request, 'dojo/add_risk_acceptance.html', {
             'form': form
         })
-
 
 
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid')
@@ -1180,6 +1223,82 @@ def add_risk_acceptance(request, eid, fid=None):
                   'product_tab': product_tab,
                   'form': form
                   })
+
+@user_is_authorized(Engagement, Permissions.Transfer_Finding_Add, 'eid')
+def add_transfer_finding(request, eid, fid=None):
+    eng = get_object_or_404(Engagement, id=eid)
+    product = eng.product
+    finding = None
+    if fid:
+        finding = get_object_or_404(Finding, id=fid)
+
+    if request.method == 'POST':
+        request.POST._mutable = True
+        data = request.POST
+        form = TransferFindingForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                # Save
+                transfer_findings: TransferFinding = form.save()
+                # Origin
+                transfer_findings.origin_product_type = eng.product.prod_type
+                transfer_findings.origin_product = eng.product
+                # Destination
+                id_destination_product = data.get("destination_product")
+                destination_product_obj: Product = Product.objects.get(id=id_destination_product) if id_destination_product else None
+                transfer_findings.destination_product_type = destination_product_obj.prod_type
+                transfer_findings.destination_product = destination_product_obj
+                transfer_findings.save()
+                findings = request.POST.getlist('findings')
+                for finding in findings:
+                    # create tansferFindigFinding
+                    obj_finding = Finding.objects.get(id=int(finding))
+                    transfer_finding_finding = TransferFindingFinding.objects.create(findings=obj_finding,
+                                                                                     transfer_findings=transfer_findings,
+                                                                                     finding_related=None,
+                                                                                     engagement_related=None)
+                    obj_finding.risk_status = "Transfer Pending"
+                    obj_finding.save()
+                    transfer_finding_finding.save()
+                    logger.debug("Risk Transfer created {transfer_finding_finding.name}")
+                    # Create notification
+                create_notification(event="transfer_finding",
+                                    title=f"{transfer_findings.title[:30]}",
+                                    icon="check-circle",
+                                    color_icon="#096C11",
+                                    recipients=[transfer_findings.accepted_by.get_username()],
+                                    engagement=eng, url=reverse('view_transfer_finding', args=(product.id, )))
+                logger.debug("Transfer Finding send notification {transfer_finding.title}")
+
+            except Exception as e:
+                logger.debug(vars(request.POST))
+                logger.error(vars(form))
+                logger.exception(e)
+                raise
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Transfer Finding saved.',
+                extra_tags='alert-success')
+
+            return redirect_to_return_url_or_else(request, reverse('view_transfer_finding', args=(product.id, )))
+        else:
+            logger.error(form.errors)
+    else:
+        form = TransferFindingForm(initial={"engagement_name":eng,
+                                            "title": f"transfer finding - {finding.title}",
+                                            "findings": finding,
+                                            "owner": request.user.username,
+                                            "status": "Transfer Pending",
+                                            "severity": finding.severity,
+                                            "owner": request.user})
+
+    return render(request, 'dojo/add_transfer_finding.html', {
+                  'eng': eng,
+                  'product_tab': "product_tab test",
+                  'form': form
+                  })
+
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
 def view_risk_acceptance(request, eid, raid):
@@ -1322,6 +1441,28 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             if not errors:
                 findings = add_findings_form.cleaned_data['accepted_findings']
                 if settings.RISK_PENDING:
+                    conf_risk = ra_helper.get_config_risk()
+                    if risk_acceptance.decision == Risk_Acceptance.TREATMENT_AVOID:
+                        messages.add_message(
+                            request,
+                            messages.WARNING,
+                            f"Risk acceptance is of Avoid Type, it is not possible to add findings.",
+                            extra_tags="alert-danger",
+                        )
+                        return redirect_to_return_url_or_else(
+                            request, reverse("view_risk_acceptance", args=(eid, raid))
+                        )
+                    for finding in findings:
+                        if rp_helper.validate_list_findings(conf_risk, "black_list", finding, eng):
+                            messages.add_message(
+                                request,
+                                messages.WARNING,
+                                f"The finding {finding.id} with vulnerability id {finding.vulnerability_ids}-{finding.vuln_id_from_tool} is on the black list",
+                                extra_tags="alert-danger",
+                            )
+                            return redirect_to_return_url_or_else(
+                                request, reverse("view_risk_acceptance", args=(eid, raid))
+                            )
                     ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
                 else:
                     ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
@@ -1349,7 +1490,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     accepted_findings = risk_acceptance.accepted_findings.order_by('id')
     fpage = get_page_items(request, accepted_findings, 15)
     if settings.RISK_PENDING:
-        unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False, severity=risk_acceptance.severity, duplicate=False) \
+        unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), active=True, risk_status = "Risk Active", risk_accepted=False, severity=risk_acceptance.severity, duplicate=False) \
             .exclude(id__in=accepted_findings).order_by("title")
     else:
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False) \

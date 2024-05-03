@@ -59,7 +59,8 @@ import crum
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
-
+from azure.devops.connection import Connection
+import json
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -2668,6 +2669,19 @@ def get_open_findings_burndown(product):
 
     return past_90_days
 
+
+def get_remote_json_config(connection: Connection, path_file: str):
+    try:
+        git_client = connection.clients.get_git_client()
+        file_content = git_client.get_item_text(
+            repository_id=settings.AZURE_DEVOPS_REPOSITORY_ID,
+            path=path_file,
+            project=settings.AZURE_DEVOPS_OFFICES_LOCATION.split(",")[0]
+        )
+        data = json.loads(b"".join(file_content).decode("utf-8"))
+        return data
+    except Exception as e:
+        logger.error("Error getting remote configuration file: " + str(e))
 
 class Response:
 

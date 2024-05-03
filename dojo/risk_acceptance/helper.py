@@ -1,6 +1,6 @@
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
-from dojo.utils import get_system_setting, get_full_url
+from dojo.utils import get_system_setting, get_full_url, get_remote_json_config
 from dateutil.relativedelta import relativedelta
 import dojo.jira_link.helper as jira_helper
 from dojo.jira_link.helper import escape_for_jira
@@ -11,6 +11,9 @@ from dojo.models import System_Settings, Risk_Acceptance, Finding
 import logging
 import crum
 import requests
+from azure.devops.connection import Connection
+from msrest.authentication import BasicAuthentication
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -126,13 +129,18 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
             risk_pending.accepted_findings.add(finding)
     risk_pending.save()
     title = f"{risk_pending.TREATMENT_TRANSLATIONS.get(risk_pending.recommendation)} is requested:  {str(risk_pending.engagement.name)}"
-    create_notification(event='risk_acceptance_request', title=title, risk_acceptance=risk_pending, accepted_findings=risk_pending.accepted_findings,
-    reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
-    product=risk_pending.engagement.product,
-    recipients=eval(risk_pending.accepted_by),
-    icon="bell",
-    color_icon="#1B30DE",
-    url=reverse('view_risk_acceptance', args=(risk_pending.engagement.id, risk_pending.id, )))
+    create_notification(event='risk_acceptance_request',
+                        title=title, risk_acceptance=risk_pending,
+                        subject=f"🙋‍♂️Request of aceptance of risk {risk_pending.id}🙏",
+                        accepted_findings=risk_pending.accepted_findings.all(),
+                        reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
+                        product=risk_pending.engagement.product,
+                        description=f"requested acceptance of the risks <b>{risk_pending.name}</b> for the findings",
+                        recipients=eval(risk_pending.accepted_by),
+                        icon="bell",
+                        owner=risk_pending.owner,
+                        color_icon="#1B30DE",
+                        url=reverse('view_risk_acceptance', args=(risk_pending.engagement.id, risk_pending.id, )))
     post_jira_comments(risk_pending, findings, accepted_message_creator)
 
 
@@ -354,6 +362,7 @@ def update_endpoint_statuses(finding: Finding, accept_risk: bool) -> None:
         status.last_modified = timezone.now()
         status.save()
 
+
 def risk_accept_provider(
         finding_id: str,
         provider: str,
@@ -370,6 +379,13 @@ def risk_accept_provider(
         logger.info(f"Risk accept response from provider: {provider}, response: {response.text}")
     logger.error(f"Error for provider: {provider}, response: {response.text}")
 
+
 def get_matching_value(list_a, list_b):
     matches = [item for item in list_a if item in list_b]
     return matches[0] if matches else None
+
+
+def get_config_risk():
+    credentials = BasicAuthentication("", settings.AZURE_DEVOPS_TOKEN)
+    connection = Connection(base_url=settings.AZURE_DEVOPS_ORGANIZATION_URL, creds=credentials)
+    return get_remote_json_config(connection, settings.AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH.split(",")[1])

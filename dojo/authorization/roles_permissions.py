@@ -57,11 +57,11 @@ class Permissions(IntEnum):
     Risk_Acceptance_Edit = 1209
     Risk_Acceptance_Add = 1210
     Risk_Acceptance_Delete = 1211
-    Risk_Acceptance_Expire = 1213
-    Risk_Acceptance_Reinstance = 1214
-    Risk_Unaccept = 1215
-    Risk_Acceptance_Bullk = 1216
-
+    Risk_Acceptance_Expire = 1212
+    Risk_Acceptance_Reinstance = 1213
+    Risk_Unaccept = 1214
+    Risk_Acceptance_Bullk = 1215
+    
     Test_View = 1302
     Test_Add = 1303
     Test_Edit = 1306
@@ -136,6 +136,13 @@ class Permissions(IntEnum):
     Credential_Add = 2703
     Credential_Edit = 2706
     Credential_Delete = 2707
+    
+    Metrics_Panel = 2708
+
+    Transfer_Finding_View = 2801
+    Transfer_Finding_Edit = 2802
+    Transfer_Finding_Delete = 2803
+    Transfer_Finding_Add = 2804
 
     @classmethod
     def has_value(cls, value):
@@ -165,6 +172,7 @@ class Permissions(IntEnum):
             Permissions.Note_Delete,
             Permissions.Note_Edit,
             Permissions.Note_View_History,
+
         }.union(cls.get_test_permissions())
 
     @classmethod
@@ -194,7 +202,17 @@ class Permissions(IntEnum):
             Permissions.Note_Delete,
             Permissions.Note_Edit,
             Permissions.Note_View_History,
+            Permissions.Transfer_Finding_Add,
         }.union(cls.get_finding_group_permissions())
+    
+    @classmethod
+    def get_transfer_finding_permissions(cls):
+        return {
+            Permissions.Transfer_Finding_View,
+            Permissions.Transfer_Finding_Edit,
+            Permissions.Transfer_Finding_Delete,
+            Permissions.Transfer_Finding_Add,
+        }
 
     @classmethod
     def get_finding_group_permissions(cls):
@@ -429,6 +447,7 @@ def get_roles_with_permissions():
             Permissions.Credential_Add,
             Permissions.Credential_Edit,
             Permissions.Credential_Delete,
+            Permissions.Metrics_Panel,
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -529,11 +548,14 @@ def get_roles_with_permissions():
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
-            Permissions.Risk_Acceptance
+            Permissions.Risk_Acceptance,
+            Permissions.Transfer_Finding_Add,
+            Permissions.Transfer_Finding_View
         },
         Roles.Leader: {
             Permissions.Product_Type_View,
             Permissions.Product_View,
+            Permissions.Product_Type_Edit,
             Permissions.Product_Configure_Notifications,
             Permissions.Engagement_View,
             Permissions.Risk_Acceptance,
@@ -558,6 +580,9 @@ def get_roles_with_permissions():
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
+            Permissions.Transfer_Finding_Edit,
+            Permissions.Transfer_Finding_View,
+            Permissions.Transfer_Finding_Delete,
         },
         Roles.Cibersecurity: {
             Permissions.Product_Type_View,

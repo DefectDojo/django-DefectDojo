@@ -6,6 +6,7 @@ from django.db.models import Q, Count, Prefetch
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.conf import settings
 from django.utils.translation import gettext as _
 
 from dojo.authorization.roles_permissions import Permissions
@@ -13,6 +14,7 @@ from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
 from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
+from dojo.aws import ses_email
 
 logger = logging.getLogger(__name__)
 
@@ -266,8 +268,8 @@ def send_msteams_notification(event, user=None, *args, **kwargs):
         pass
 
 
-@dojo_async_task
-@app.task
+# @dojo_async_task
+# @app.task
 def send_mail_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
     email_from_address = get_system_setting('email_from')
@@ -282,25 +284,35 @@ def send_mail_notification(event, user=None, *args, **kwargs):
     logger.debug('notification email for user %s to %s', user, address)
 
     try:
-        subject = f"{get_system_setting('team_name')} notification"
-        if 'title' in kwargs:
-            subject += f": {kwargs['title']}"
+        if settings.AWS_SES_EMAIL:
+            ses_email.aws_ses(email=address,
+                              email_from_address=f"{get_system_setting('team_name')} <{email_from_address}>",
+                              html_contect=create_notification_message(event, user, "mail", *args, **kwargs),
+                              template_name=event,
+                              subject=kwargs.get("subject", event),
+                              text=event
+                              )
+        else:
+            subject = f"{get_system_setting('team_name')} notification"
+            if 'title' in kwargs:
+                subject += f": {kwargs['title']}"
 
-        email = EmailMessage(
-            subject,
-            create_notification_message(event, user, 'mail', *args, **kwargs),
-            email_from_address,
-            [address],
-            headers={"From": f"{email_from_address}"},
-        )
-        email.content_subtype = 'html'
-        logger.debug('sending email alert')
-        # logger.info(create_notification_message(event, user, 'mail', *args, **kwargs))
-        email.send(fail_silently=False)
+            email = EmailMessage(
+                subject,
+                create_notification_message(event, user, 'mail', *args, **kwargs),
+                email_from_address,
+                [address],
+                headers={"From": f"{email_from_address}"},
+            )
+            email.content_subtype = 'html'
+            logger.debug('sending email alert')
+            # logger.info(create_notification_message(event, user, 'mail', *args, **kwargs))
+            email.send(fail_silently=False)
 
     except Exception as e:
         logger.exception(e)
         log_alert(e, "Email Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
+
 
 
 def send_alert_notification(event, user=None, *args, **kwargs):

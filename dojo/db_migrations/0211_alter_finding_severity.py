@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0208_merge_acunetix'),
+        ('dojo', '0210_transferfinding_notifications_transfer_finding_and_more'),
     ]
 
     operations = [

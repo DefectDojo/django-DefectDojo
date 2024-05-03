@@ -68,6 +68,13 @@ def get_authorized_findings(permission, queryset=None, user=None):
     return findings
 
 
+def get_authorized_findings_by_status(permission, queryset=None, user=None):
+    findings = get_authorized_findings(permission, queryset, user)
+    rs = findings[0].risk_status
+    findings = findings.filter(risk_status="Risk Active")
+    return findings
+
+
 def get_authorized_stub_findings(permission):
     user = get_current_user()
 

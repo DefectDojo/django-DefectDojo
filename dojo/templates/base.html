@@ -422,6 +422,13 @@
                                                         {% trans "Engineer Metrics" %}
                                                     </a>
                                                 </li> -->
+                                                {% if "Metrics_Panel"|has_global_permission %}
+                                                    <li>
+                                                        <a rel="noopener noreferrer" href="{% url 'metrics_panel' %}">
+                                                            {% trans "Metrics Panel" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
@@ -727,6 +734,12 @@
                                                     <a rel="noopener noreferrer" href="{% url 'product_accepted_findings' product_tab.product.id %}">
                                                         <i class="fa-solid fa-check"></i>
                                                         {% trans "View Risk Accepted Findings" %}
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a rel="noopener noreferrer" href="{% url 'view_transfer_finding' product_tab.product.id %}">
+                                                        <i class="fa-solid fa-shuffle"></i>
+                                                        {% trans "View Transfer Findings" %}
                                                     </a>
                                                 </li>
                                                 <li>
