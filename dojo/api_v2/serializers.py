@@ -2171,6 +2171,11 @@ class ImportScanSerializer(serializers.Serializer):
         required=False,
         default=True,
     )
+    custom_fields_mapping = serializers.CharField(
+        required=False,
+        help_text='A JSON map of JIRA custom field id (key) to report column name (value): Example '
+                  '{"customfield_12345":"estimatedMonthlyCost"}',
+    )
 
     # extra fields populated in response
     # need to use the _id suffix as without the serializer framework gets
@@ -2215,6 +2220,7 @@ class ImportScanSerializer(serializers.Serializer):
         source_code_management_uri = data.get(
             "source_code_management_uri", None
         )
+        custom_fields_mapping = data.get("custom_fields_mapping", None)
 
         if "active" in self.initial_data:
             active = data.get("active")
@@ -2312,6 +2318,7 @@ class ImportScanSerializer(serializers.Serializer):
                 create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
                 apply_tags_to_findings=apply_tags_to_findings,
                 apply_tags_to_endpoints=apply_tags_to_endpoints,
+                custom_fields_mapping=custom_fields_mapping
             )
 
             if test:
@@ -2469,6 +2476,11 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         required=False,
         default=True,
     )
+    custom_fields_mapping = serializers.CharField(
+        required=False,
+        help_text='A JSON map of JIRA custom field id (key) to report column name (value): Example '
+                  '{"customfield_12345":"estimatedMonthlyCost"}',
+    )
 
     # extra fields populated in response
     # need to use the _id suffix as without the serializer framework gets
@@ -2528,6 +2540,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             "source_code_management_uri", None
         )
         engagement_end_date = data.get("engagement_end_date", None)
+        custom_fields_mapping = data.get("custom_fields_mapping", None)
 
         if "active" in self.initial_data:
             active = data.get("active")
@@ -2611,6 +2624,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
                     apply_tags_to_findings=apply_tags_to_findings,
                     apply_tags_to_endpoints=apply_tags_to_endpoints,
+                    custom_fields_mapping=custom_fields_mapping
                 )
 
                 if test_import:
@@ -2662,6 +2676,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
                     apply_tags_to_findings=apply_tags_to_findings,
                     apply_tags_to_endpoints=apply_tags_to_endpoints,
+                    custom_fields_mapping=custom_fields_mapping
                 )
 
             else:

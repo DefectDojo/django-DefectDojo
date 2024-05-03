@@ -576,6 +576,7 @@ class DojoDefaultReImporter(object):
         create_finding_groups_for_all_findings=True,
         apply_tags_to_findings=False,
         apply_tags_to_endpoints=False,
+        custom_fields_mapping=None
     ):
 
         logger.debug(f"REIMPORT_SCAN: parameters: {locals()}")
@@ -598,7 +599,11 @@ class DojoDefaultReImporter(object):
         if hasattr(parser, "get_tests"):
             logger.debug("REIMPORT_SCAN parser v2: Create parse findings")
             try:
-                tests = parser.get_tests(scan_type, scan)
+                # pass custom fields mapping if the argument is supported
+                if "custom_fields_mapping" in parser.get_tests.__code__.co_varnames:
+                    tests = parser.get_tests(scan_type, scan, custom_fields_mapping=custom_fields_mapping)
+                else:
+                    tests = parser.get_tests(scan_type, scan)
             except ValueError as e:
                 logger.warning(e)
                 raise ValidationError(e)

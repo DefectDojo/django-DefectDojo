@@ -35,7 +35,7 @@ class TestDojoCloseOld(DojoTestCase):
         _test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
                     active=True, verified=False, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None)
+                    commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None, custom_fields_mapping=None)
 
         self.assertEqual(4, len_new_findings)
         self.assertEqual(0, len_closed_findings)
@@ -43,7 +43,7 @@ class TestDojoCloseOld(DojoTestCase):
         _test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
                     active=True, verified=False, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, api_scan_configuration=None)
+                    commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, api_scan_configuration=None, custom_fields_mapping=None)
         self.assertEqual(4, len_new_findings)
         self.assertEqual(0, len_closed_findings)
         # Import test with only one finding. Remaining findings should close
@@ -51,7 +51,7 @@ class TestDojoCloseOld(DojoTestCase):
         _test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement, lead=None, environment=environment,
                     active=True, verified=False, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, api_scan_configuration=None)
+                    commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, api_scan_configuration=None, custom_fields_mapping=None)
         self.assertEqual(1, len_new_findings)
         # Dedupe is off and close old findings does not close old findings if they are the same finding.
         # If this behaviour changes, or dedupe is on, the number of closed findings will be 4
@@ -103,7 +103,7 @@ class TestDojoCloseOld(DojoTestCase):
         _test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement2, lead=None, environment=environment,
                     active=True, verified=False, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=True, close_old_findings_product_scope=True, group_by=None, api_scan_configuration=None)
+                    commit_hash=None, push_to_jira=None, close_old_findings=True, close_old_findings_product_scope=True, group_by=None, api_scan_configuration=None, custom_fields_mapping=None)
         self.assertEqual(4, len_new_findings)
         self.assertEqual(0, len_closed_findings)
         # Import test with only one finding. Remaining findings should close
@@ -111,7 +111,7 @@ class TestDojoCloseOld(DojoTestCase):
         _test, len_new_findings, len_closed_findings, _ = importer.import_scan(scan, scan_type, engagement3, lead=None, environment=environment,
                     active=True, verified=False, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=True, close_old_findings_product_scope=True, group_by=None, api_scan_configuration=None)
+                    commit_hash=None, push_to_jira=None, close_old_findings=True, close_old_findings_product_scope=True, group_by=None, api_scan_configuration=None, custom_fields_mapping=None)
         self.assertEqual(1, len_new_findings)
         # Dedupe is off, and close old findings does not close old findings if they are the same finding.
         # If this behaviour changes, or dedupe is on, the number of closed findings will be 4
