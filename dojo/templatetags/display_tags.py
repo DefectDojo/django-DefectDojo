@@ -191,9 +191,10 @@ def percentage(fraction, value):
 
 @register.filter
 def format_epss(value):
-    if value is None:
+    try:
+        return f'{value:.2%}'
+    except (ValueError, TypeError):
         return 'N.A.'
-    return f'{value:.2%}'
 
 
 def asvs_calc_level(benchmark_score):

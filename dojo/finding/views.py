@@ -39,8 +39,11 @@ import copy
 from dojo.filters import (
     TemplateFindingFilter,
     SimilarFindingFilter,
+    SimilarFindingFilterWithoutObjectLookups,
     FindingFilter,
+    FindingFilterWithoutObjectLookups,
     AcceptedFindingFilter,
+    AcceptedFindingFilterWithoutObjectLookups,
     TestImportFindingActionFilter,
     TestImportFilter,
 )
@@ -346,10 +349,13 @@ class BaseListFindings:
             "pid": self.get_product_id(),
         }
 
+        filter_string_matching = get_system_setting("filter_string_matching", False)
+        finding_filter_class = FindingFilterWithoutObjectLookups if filter_string_matching else FindingFilter
+        accepted_finding_filter_class = AcceptedFindingFilterWithoutObjectLookups if filter_string_matching else AcceptedFindingFilter
         return (
-            AcceptedFindingFilter(*args, **kwargs)
+            accepted_finding_filter_class(*args, **kwargs)
             if self.get_filter_name() == "Accepted"
-            else FindingFilter(*args, **kwargs)
+            else finding_filter_class(*args, **kwargs)
         )
 
     def get_filtered_findings(self):
@@ -597,6 +603,14 @@ class ViewFinding(View):
         }
 
     def get_similar_findings(self, request: HttpRequest, finding: Finding):
+        similar_findings_enabled = get_system_setting("enable_similar_findings", True)
+        if similar_findings_enabled is False:
+            return {
+                "similar_findings_enabled": similar_findings_enabled,
+                "duplicate_cluster": duplicate_cluster(request, finding),
+                "similar_findings": None,
+                "similar_findings_filter": None,
+            }
         # add related actions for non-similar and non-duplicate cluster members
         finding.related_actions = calculate_possible_related_actions_for_similar_finding(
             request, finding, finding
@@ -607,7 +621,9 @@ class ViewFinding(View):
                     request, finding, finding.duplicate_finding
                 )
             )
-        similar_findings_filter = SimilarFindingFilter(
+        filter_string_matching = get_system_setting("filter_string_matching", False)
+        finding_filter_class = SimilarFindingFilterWithoutObjectLookups if filter_string_matching else SimilarFindingFilter
+        similar_findings_filter = finding_filter_class(
             request.GET,
             queryset=get_authorized_findings(Permissions.Finding_View),
             user=request.user,
@@ -631,6 +647,7 @@ class ViewFinding(View):
             )
 
         return {
+            "similar_findings_enabled": similar_findings_enabled,
             "duplicate_cluster": duplicate_cluster(request, finding),
             "similar_findings": similar_findings,
             "similar_findings_filter": similar_findings_filter,

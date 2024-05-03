@@ -84,9 +84,9 @@ class CheckmarxOneParser(object):
                             vulnerability.get("similarityId")
                         )
                     findings.append(finding)
-                if result_type == "kics":
+                elif result_type == "kics":
                     description = vulnerability.get("description")
-                    file_path = vulnerability.get("data").get("filename")
+                    file_path = vulnerability.get("data").get("filename", vulnerability.get("data").get("fileName"))
                     finding = Finding(
                         title=f'{description}',
                         description=description,
@@ -107,4 +107,31 @@ class CheckmarxOneParser(object):
                             vulnerability.get("similarityId")
                         )
                     findings.append(finding)
+                elif result_type in ["sca", "sca-container"]:
+                    description = vulnerability.get("description")
+                    finding = Finding(
+                        title=description,
+                        description=description,
+                        date=date,
+                        severity=vulnerability.get("severity").title(),
+                        verified=vulnerability.get("state") != "TO_VERIFY",
+                        test=test,
+                        cwe=cwe,
+                        static_finding=True,
+                    )
+                    if vulnerability.get("cveId"):
+                        finding.unsaved_vulnerability_ids = [
+                            vulnerability.get("cveId")
+                        ]
+                    if vulnerability.get("id"):
+                        finding.unique_id_from_tool = vulnerability.get(
+                            "id"
+                        )
+                    else:
+                        finding.unique_id_from_tool = str(
+                            vulnerability.get("similarityId")
+                        )
+                    finding.unsaved_tags = [result_type]
+                    findings.append(finding)
+
         return findings

@@ -17,7 +17,7 @@ from django.core.exceptions import PermissionDenied
 from django.views import View
 
 from dojo.filters import ReportFindingFilter, EndpointReportFilter, \
-    EndpointFilter
+    EndpointFilter, EndpointFilterWithoutObjectLookups
 from dojo.forms import ReportOptionsForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Dojo_User, Endpoint, Risk_Acceptance
@@ -63,8 +63,9 @@ def report_builder(request):
                                         finding__duplicate=False,
                                         finding__out_of_scope=False,
                                         ).distinct()
-
-    endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
+    endpoints = filter_class(request.GET, queryset=endpoints, user=request.user)
 
     in_use_widgets = [ReportOptions(request=request)]
     available_widgets = [CoverPage(request=request),
