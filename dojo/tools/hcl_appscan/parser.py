@@ -14,7 +14,9 @@ class HCLAppScanParser(object):
         return "Import XML output of HCL AppScan."
 
     def xmltreehelper(self, input):
-        if "\n" in input.text:
+        if input.text is None:
+            output = None
+        elif "\n" in input.text:
             output = ""
             for i in input:
                 output = output + " " + i.text
@@ -39,7 +41,10 @@ class HCLAppScanParser(object):
                     match item.tag:
                         case 'severity':
                             output = self.xmltreehelper(item)
-                            severity = output.strip(" ").capitalize()
+                            if output is None:
+                                severity = "Info"
+                            else:
+                                severity = output.strip(" ").capitalize()
                         case 'cwe':
                             cwe = int(self.xmltreehelper(item))
                         case 'remediation':
