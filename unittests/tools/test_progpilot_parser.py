@@ -35,7 +35,7 @@ class TestProgpilotParser(DojoTestCase):
         testfile.close()
         self.assertEqual(3, len(findings))
 
-    def test_crunch42parser_single_has_many_findings4(self):
+    def test_progpilotparser_single_has_many_findings4(self):
         testfile = open("unittests/scans/progpilot/progpilot4.json")
         parser = ProgpilotParser()
         findings = parser.get_findings(testfile, Test())
