@@ -29,53 +29,52 @@ class MobsfscanParser:
         data = json.load(filename)
         if len(data.get("results")) == 0:
             return []
-        else:
-            dupes = {}
-            for key, item in data.get("results").items():
-                metadata = item.get("metadata")
-                cwe = int(
-                    re.match(r"(cwe|CWE)-([0-9]+)", metadata.get("cwe")).group(
-                        2
-                    )
+        dupes = {}
+        for key, item in data.get("results").items():
+            metadata = item.get("metadata")
+            cwe = int(
+                re.match(r"(cwe|CWE)-([0-9]+)", metadata.get("cwe")).group(
+                    2
                 )
-                masvs = metadata.get("masvs")
-                owasp_mobile = metadata.get("owasp-mobile")
-                description = "\n".join(
-                    [
-                        f"**Description:** `{metadata.get('description')}`",
-                        f"**OWASP MASVS:** `{masvs}`",
-                        f"**OWASP Mobile:** `{owasp_mobile}`",
-                    ]
-                )
-                references = metadata.get("reference")
-                if metadata.get("severity") in self.SEVERITY:
-                    severity = self.SEVERITY[metadata.get("severity")]
-                else:
-                    severity = "Info"
+            )
+            masvs = metadata.get("masvs")
+            owasp_mobile = metadata.get("owasp-mobile")
+            description = "\n".join(
+                [
+                    f"**Description:** `{metadata.get('description')}`",
+                    f"**OWASP MASVS:** `{masvs}`",
+                    f"**OWASP Mobile:** `{owasp_mobile}`",
+                ]
+            )
+            references = metadata.get("reference")
+            if metadata.get("severity") in self.SEVERITY:
+                severity = self.SEVERITY[metadata.get("severity")]
+            else:
+                severity = "Info"
 
-                finding = Finding(
-                    title=f"{key}",
-                    test=test,
-                    severity=severity,
-                    nb_occurences=1,
-                    cwe=cwe,
-                    description=description,
-                    references=references,
-                )
-                if item.get("files"):
-                    for file in item.get("files"):
-                        file_path = file.get("file_path")
-                        line = file.get("match_lines")[0]
-                        finding.file_path = file_path
-                        finding.line = line
+            finding = Finding(
+                title=f"{key}",
+                test=test,
+                severity=severity,
+                nb_occurences=1,
+                cwe=cwe,
+                description=description,
+                references=references,
+            )
+            if item.get("files"):
+                for file in item.get("files"):
+                    file_path = file.get("file_path")
+                    line = file.get("match_lines")[0]
+                    finding.file_path = file_path
+                    finding.line = line
 
-                dupe_key = hashlib.sha256(
-                    (key + str(cwe) + masvs + owasp_mobile).encode("utf-8")
-                ).hexdigest()
+            dupe_key = hashlib.sha256(
+                (key + str(cwe) + masvs + owasp_mobile).encode("utf-8")
+            ).hexdigest()
 
-                if dupe_key in dupes:
-                    finding = dupes[dupe_key]
-                    finding.nb_occurences += 1
-                else:
-                    dupes[dupe_key] = finding
-            return list(dupes.values())
+            if dupe_key in dupes:
+                finding = dupes[dupe_key]
+                finding.nb_occurences += 1
+            else:
+                dupes[dupe_key] = finding
+        return list(dupes.values())

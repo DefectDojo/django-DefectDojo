@@ -66,8 +66,7 @@ def get_references(vulnerability):
             else:
                 ref += "- " + reference + "\n"
         return ref
-    else:
-        return None
+    return None
 
 
 def get_remediation(extended_information):
@@ -125,8 +124,7 @@ def process_component(component):
 
 def get_cve(vulnerability):
     if "cves" in vulnerability:
-        cves = vulnerability["cves"]
-        return cves
+        return vulnerability["cves"]
     return []
 
 

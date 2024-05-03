@@ -59,11 +59,9 @@ def get_authorized_products(permission, user=None):
         member=Exists(authorized_product_roles),
         prod_type__authorized_group=Exists(authorized_product_type_groups),
         authorized_group=Exists(authorized_product_groups)).order_by('name')
-    products = products.filter(
+    return products.filter(
         Q(prod_type__member=True) | Q(member=True)
         | Q(prod_type__authorized_group=True) | Q(authorized_group=True))
-
-    return products
 
 
 def get_authorized_members_for_product(product, permission):
@@ -71,8 +69,7 @@ def get_authorized_members_for_product(product, permission):
 
     if user.is_superuser or user_has_permission(user, product, permission):
         return Product_Member.objects.filter(product=product).order_by('user__first_name', 'user__last_name').select_related('role', 'user')
-    else:
-        return None
+    return None
 
 
 def get_authorized_groups_for_product(product, permission):
@@ -81,8 +78,7 @@ def get_authorized_groups_for_product(product, permission):
     if user.is_superuser or user_has_permission(user, product, permission):
         authorized_groups = get_authorized_groups(Permissions.Group_View)
         return Product_Group.objects.filter(product=product, group__in=authorized_groups).order_by('group__name').select_related('role')
-    else:
-        return None
+    return None
 
 
 def get_authorized_product_members(permission):
@@ -164,11 +160,9 @@ def get_authorized_app_analysis(permission):
         product__member=Exists(authorized_product_roles),
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups)).order_by('name')
-    app_analysis = app_analysis.filter(
+    return app_analysis.filter(
         Q(product__prod_type__member=True) | Q(product__member=True)
         | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
-
-    return app_analysis
 
 
 def get_authorized_dojo_meta(permission):
@@ -246,7 +240,7 @@ def get_authorized_dojo_meta(permission):
         finding__test__engagement__product__prod_type__authorized_group=Exists(finding_authorized_product_type_groups),
         finding__test__engagement__product__authorized_group=Exists(finding_authorized_product_groups)
     ).order_by('name')
-    dojo_meta = dojo_meta.filter(
+    return dojo_meta.filter(
         Q(product__prod_type__member=True)
         | Q(product__member=True)
         | Q(product__prod_type__authorized_group=True)
@@ -259,8 +253,6 @@ def get_authorized_dojo_meta(permission):
         | Q(finding__test__engagement__product__member=True)
         | Q(finding__test__engagement__product__prod_type__authorized_group=True)
         | Q(finding__test__engagement__product__authorized_group=True))
-
-    return dojo_meta
 
 
 def get_authorized_languages(permission):
@@ -297,11 +289,9 @@ def get_authorized_languages(permission):
         product__member=Exists(authorized_product_roles),
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups)).order_by('language')
-    languages = languages.filter(
+    return languages.filter(
         Q(product__prod_type__member=True) | Q(product__member=True)
         | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
-
-    return languages
 
 
 def get_authorized_engagement_presets(permission):
@@ -338,11 +328,9 @@ def get_authorized_engagement_presets(permission):
         product__member=Exists(authorized_product_roles),
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups)).order_by('title')
-    engagement_presets = engagement_presets.filter(
+    return engagement_presets.filter(
         Q(product__prod_type__member=True) | Q(product__member=True)
         | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
-
-    return engagement_presets
 
 
 def get_authorized_product_api_scan_configurations(permission):
@@ -379,8 +367,6 @@ def get_authorized_product_api_scan_configurations(permission):
         product__member=Exists(authorized_product_roles),
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups))
-    product_api_scan_configurations = product_api_scan_configurations.filter(
+    return product_api_scan_configurations.filter(
         Q(product__prod_type__member=True) | Q(product__member=True)
         | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
-
-    return product_api_scan_configurations

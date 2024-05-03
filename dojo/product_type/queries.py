@@ -35,9 +35,7 @@ def get_authorized_product_types(permission):
     product_types = Product_Type.objects.annotate(
         member=Exists(authorized_roles),
         authorized_group=Exists(authorized_groups)).order_by('name')
-    product_types = product_types.filter(Q(member=True) | Q(authorized_group=True))
-
-    return product_types
+    return product_types.filter(Q(member=True) | Q(authorized_group=True))
 
 
 def get_authorized_members_for_product_type(product_type, permission):
@@ -45,8 +43,7 @@ def get_authorized_members_for_product_type(product_type, permission):
 
     if user.is_superuser or user_has_permission(user, product_type, permission):
         return Product_Type_Member.objects.filter(product_type=product_type).order_by('user__first_name', 'user__last_name').select_related('role', 'product_type', 'user')
-    else:
-        return None
+    return None
 
 
 def get_authorized_groups_for_product_type(product_type, permission):
@@ -55,8 +52,7 @@ def get_authorized_groups_for_product_type(product_type, permission):
     if user.is_superuser or user_has_permission(user, product_type, permission):
         authorized_groups = get_authorized_groups(Permissions.Group_View)
         return Product_Type_Group.objects.filter(product_type=product_type, group__in=authorized_groups).order_by('group__name').select_related('role', 'group')
-    else:
-        return None
+    return None
 
 
 def get_authorized_product_type_members(permission):

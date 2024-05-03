@@ -63,7 +63,7 @@ def get_authorized_jira_projects(permission, user=None):
         product__member=Exists(product_authorized_product_roles),
         product__prod_type__authorized_group=Exists(product_authorized_product_type_groups),
         product__authorized_group=Exists(product_authorized_product_groups))
-    jira_projects = jira_projects.filter(
+    return jira_projects.filter(
         Q(engagement__product__prod_type__member=True)
         | Q(engagement__product__member=True)
         | Q(engagement__product__prod_type__authorized_group=True)
@@ -72,8 +72,6 @@ def get_authorized_jira_projects(permission, user=None):
         | Q(product__member=True)
         | Q(product__prod_type__authorized_group=True)
         | Q(product__authorized_group=True))
-
-    return jira_projects
 
 
 def get_authorized_jira_issues(permission):
@@ -152,7 +150,7 @@ def get_authorized_jira_issues(permission):
         finding__test__engagement__product__member=Exists(finding_authorized_product_roles),
         finding__test__engagement__product__prod_type__authorized_group=Exists(finding_authorized_product_type_groups),
         finding__test__engagement__product__authorized_group=Exists(finding_authorized_product_groups))
-    jira_issues = jira_issues.filter(
+    return jira_issues.filter(
         Q(engagement__product__prod_type__member=True)
         | Q(engagement__product__member=True)
         | Q(engagement__product__prod_type__authorized_group=True)
@@ -165,5 +163,3 @@ def get_authorized_jira_issues(permission):
         | Q(finding__test__engagement__product__member=True)
         | Q(finding__test__engagement__product__prod_type__authorized_group=True)
         | Q(finding__test__engagement__product__authorized_group=True))
-
-    return jira_issues

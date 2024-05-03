@@ -143,14 +143,13 @@ class NmapParser:
         val = float(raw_value)
         if val == 0.0:
             return "Info"
-        elif val < 4.0:
+        if val < 4.0:
             return "Low"
-        elif val < 7.0:
+        if val < 7.0:
             return "Medium"
-        elif val < 9.0:
+        if val < 9.0:
             return "High"
-        else:
-            return "Critical"
+        return "Critical"
 
     def manage_vulner_script(
         self, test, dupes, script_element, endpoint, report_date=None

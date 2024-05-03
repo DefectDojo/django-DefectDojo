@@ -29,8 +29,7 @@ class BearerParser:
 
                 if bearerfinding["fingerprint"] in dupes:
                     continue
-                else:
-                    dupes.add(bearerfinding["fingerprint"])
+                dupes.add(bearerfinding["fingerprint"])
 
                 finding = Finding(
                     title=bearerfinding["title"] + " in " + bearerfinding["filename"] + ":" + str(bearerfinding["line_number"]),

@@ -21,8 +21,7 @@ class CheckmarxParser:
     def get_description_for_scan_types(self, scan_type):
         if scan_type == "Checkmarx Scan":
             return "Simple Report. Aggregates vulnerabilities per categories, cwe, name, sinkFilename"
-        else:
-            return "Detailed Report. Import all vulnerabilities from checkmarx without aggregation"
+        return "Detailed Report. Import all vulnerabilities from checkmarx without aggregation"
 
     # mode:
     # None (default): aggregates vulnerabilites per sink filename (legacy behavior)
@@ -333,8 +332,7 @@ class CheckmarxParser:
                 codefragment.find("Code").text.strip(),
             )
 
-        findingdetail = f"{findingdetail}-----\n"
-        return findingdetail
+        return f"{findingdetail}-----\n"
 
     # Get name, cwe and categories from the global query tag (1 query = 1 type
     # of vulnerability)
@@ -362,16 +360,14 @@ class CheckmarxParser:
     def get_findings(self, file, test):
         if file.name.strip().lower().endswith(".json"):
             return self._get_findings_json(file, test)
-        else:
-            return self._get_findings_xml(file, test)
+        return self._get_findings_xml(file, test)
 
     def _parse_date(self, value):
         if isinstance(value, str):
             return parser.parse(value).date()
-        elif isinstance(value, dict) and isinstance(value.get("seconds"), int):
+        if isinstance(value, dict) and isinstance(value.get("seconds"), int):
             return datetime.datetime.utcfromtimestamp(value.get("seconds")).date()
-        else:
-            return None
+        return None
 
     def _get_findings_json(self, file, test):
         """"""

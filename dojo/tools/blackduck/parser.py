@@ -28,10 +28,9 @@ class BlackduckParser:
     def normalize_findings(self, filename):
         importer = BlackduckImporter()
 
-        findings = sorted(
+        return sorted(
             importer.parse_findings(filename), key=lambda f: f.vuln_id
         )
-        return findings
 
     def ingest_findings(self, normalized_findings, test):
         dupes = {}

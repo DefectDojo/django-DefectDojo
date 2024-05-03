@@ -92,16 +92,15 @@ class DependencyTrackParser:
         severity = dependency_track_severity.lower()
         if severity == "critical":
             return "Critical"
-        elif severity == "high":
+        if severity == "high":
             return "High"
-        elif severity == "medium":
+        if severity == "medium":
             return "Medium"
-        elif severity == "low":
+        if severity == "low":
             return "Low"
-        elif severity.startswith("info"):
+        if severity.startswith("info"):
             return "Informational"
-        else:
-            return None
+        return None
 
     def _convert_dependency_track_finding_to_dojo_finding(self, dependency_track_finding, test):
         """

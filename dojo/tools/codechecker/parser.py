@@ -19,11 +19,12 @@ class CodeCheckerParser:
 
     def get_findings(self, json_output, test):
         if json_output is None:
-            return
+            return None
 
         tree = self.parse_json(json_output)
         if tree:
             return self.get_items(tree)
+        return None
 
     def parse_json(self, json_output):
         data = json_output.read()
@@ -99,7 +100,7 @@ def get_item(vuln):
     else:
         title = unique_id_from_tool
 
-    finding = Finding(
+    return Finding(
         title=title,
         description=description,
         severity=severity,
@@ -118,8 +119,6 @@ def get_item(vuln):
             vuln["analyzer_name"],
         ],
     )
-
-    return finding
 
 
 def get_mapped_severity(severity):

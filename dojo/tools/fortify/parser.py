@@ -15,5 +15,6 @@ class FortifyParser:
     def get_findings(self, filename, test):
         if str(filename.name).endswith('.xml'):
             return FortifyXMLParser().parse_xml(filename, test)
-        elif str(filename.name).endswith('.fpr'):
+        if str(filename.name).endswith('.fpr'):
             return FortifyFPRParser().parse_fpr(filename, test)
+        return None

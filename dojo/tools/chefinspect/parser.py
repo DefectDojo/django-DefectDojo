@@ -17,14 +17,13 @@ class ChefInspectParser:
         val = float(raw_value)
         if val == 0.0:
             return "Info"
-        elif val < 0.4:
+        if val < 0.4:
             return "Low"
-        elif val < 0.7:
+        if val < 0.7:
             return "Medium"
-        elif val < 0.9:
+        if val < 0.9:
             return "High"
-        else:
-            return "Critical"
+        return "Critical"
 
     def get_findings(self, file, test):
         lines = file.read()

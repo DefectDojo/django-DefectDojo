@@ -24,8 +24,7 @@ class BlackduckImporter(Importer):
 
         if zipfile.is_zipfile(str(report)):
             return self._process_zipfile(report)
-        else:
-            return self._process_csvfile(report)
+        return self._process_csvfile(report)
 
     def _process_csvfile(self, report):
         """

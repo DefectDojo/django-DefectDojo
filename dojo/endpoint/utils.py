@@ -79,15 +79,14 @@ def endpoint_get_or_create(**kwargs):
         count = qs.count()
         if count == 0:
             return Endpoint.objects.get_or_create(**kwargs)
-        else:
-            logger.warning(
-                f"Endpoints in your database are broken. "
-                f"Please access {reverse('endpoint_migrate')} and migrate them to new format or remove them."
-            )
-            # Get the oldest endpoint first, and return that instead
-            # a datetime is not captured on the endpoint model, so ID
-            # will have to work here instead
-            return qs.order_by("id").first(), False
+        logger.warning(
+            f"Endpoints in your database are broken. "
+            f"Please access {reverse('endpoint_migrate')} and migrate them to new format or remove them."
+        )
+        # Get the oldest endpoint first, and return that instead
+        # a datetime is not captured on the endpoint model, so ID
+        # will have to work here instead
+        return qs.order_by("id").first(), False
 
 
 def clean_hosts_run(apps, change):
@@ -323,7 +322,7 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
                 'The column "hostname" must be present to map host to Endpoint.',
                 extra_tags='alert-danger')
             return HttpResponseRedirect(reverse('import_endpoint_meta', args=(product.id, )))
-        elif origin == 'API':
+        if origin == 'API':
             msg = 'The column "hostname" must be present to map host to Endpoint.'
             raise ValidationError(msg)
 
@@ -359,14 +358,14 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
                         for tag in existing_tags:
                             if item[0] not in tag:
                                 continue
-                            else:
-                                # found existing. Update it
-                                existing_tags.remove(tag)
-                                break
+                            # found existing. Update it
+                            existing_tags.remove(tag)
+                            break
                         existing_tags += [item[0] + ':' + item[1]]
                     # if tags are not supposed to be added, this value remain unchanged
                     endpoint.tags = existing_tags
             endpoint.save()
+    return None
 
 
 def remove_broken_endpoint_statuses(apps):
