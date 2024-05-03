@@ -62,13 +62,13 @@ class RedHatSatelliteParser(object):
             description += "**installable:** " + str(installable) + "\n"
             description += "**bugs:** " + str(bugs) + "\n"
             description += "**module_streams:** " + str(module_streams) + "\n"
+            description += "**packages:** " + ', '.join(packages)
             find = Finding(
                 title=title,
                 test=test,
                 description=description,
                 severity=self.severity_mapping(input=severity),
                 mitigation=solution,
-                component_name=packages,
                 dynamic_finding=True,
             )
             if errata_id is not None:
