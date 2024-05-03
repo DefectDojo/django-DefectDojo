@@ -119,5 +119,4 @@ class HCLAppScanParser:
                 except UnboundLocalError:
                     pass
             return findings
-        else:
-            return findings
+        return findings

@@ -41,13 +41,12 @@ class CobaltAPI:
 
         if response.ok:
             return response.json().get("data")
-        else:
-            msg = (
-                "Unable to get assets due to {} - {}".format(
-                    response.status_code, response.content.decode("utf-8"),
-                )
+        msg = (
+            "Unable to get assets due to {} - {}".format(
+                response.status_code, response.content.decode("utf-8"),
             )
-            raise Exception(msg)
+        )
+        raise Exception(msg)
 
     def get_findings(self, asset_id):
         """
@@ -62,13 +61,12 @@ class CobaltAPI:
 
         if response.ok:
             return response.json()
-        else:
-            msg = (
-                "Unable to get asset findings due to {} - {}".format(
-                    response.status_code, response.content.decode("utf-8"),
-                )
+        msg = (
+            "Unable to get asset findings due to {} - {}".format(
+                response.status_code, response.content.decode("utf-8"),
             )
-            raise Exception(msg)
+        )
+        raise Exception(msg)
 
     def test_connection(self):
         # Request orgs for the org name
@@ -91,14 +89,13 @@ class CobaltAPI:
             org = list(orgs)[0]
             org_name = org["resource"]["name"]
             return f'You have access to the "{org_name}" organization'
-        else:
-            msg = (
-                "Connection failed (error: {} - {})".format(
-                    response_assets.status_code,
-                    response_assets.content.decode("utf-8"),
-                )
+        msg = (
+            "Connection failed (error: {} - {})".format(
+                response_assets.status_code,
+                response_assets.content.decode("utf-8"),
             )
-            raise Exception(msg)
+        )
+        raise Exception(msg)
 
     def test_product_connection(self, api_scan_configuration):
         asset = self.get_asset(api_scan_configuration.service_key_1)

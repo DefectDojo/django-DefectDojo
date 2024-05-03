@@ -878,8 +878,7 @@ class FindingViewSet(
     def get_serializer_class(self):
         if self.request and self.request.method == "POST":
             return serializers.FindingCreateSerializer
-        else:
-            return serializers.FindingSerializer
+        return serializers.FindingSerializer
 
     @extend_schema(
         methods=["POST"],
@@ -1226,10 +1225,9 @@ class FindingViewSet(
                 {"success": "Tag(s) Removed"},
                 status=status.HTTP_204_NO_CONTENT,
             )
-        else:
-            return Response(
-                delete_tags.errors, status=status.HTTP_400_BAD_REQUEST,
-            )
+        return Response(
+            delete_tags.errors, status=status.HTTP_400_BAD_REQUEST,
+        )
 
     @extend_schema(
         responses={
@@ -1367,10 +1365,9 @@ class FindingViewSet(
                 )
 
             return Response(data=metadata_data.data, status=status.HTTP_200_OK)
-        else:
-            return Response(
-                metadata_data.errors, status=status.HTTP_400_BAD_REQUEST,
-            )
+        return Response(
+            metadata_data.errors, status=status.HTTP_400_BAD_REQUEST,
+        )
 
     def _remove_metadata(self, request, finding):
         name = request.query_params.get("name", None)
@@ -1457,13 +1454,13 @@ class FindingViewSet(
 
         if request.method == "GET":
             return self._get_metadata(request, finding)
-        elif request.method == "POST":
+        if request.method == "POST":
             return self._add_metadata(request, finding)
-        elif request.method == "PUT":
+        if request.method == "PUT":
             return self._edit_metadata(request, finding)
-        elif request.method == "PATCH":
+        if request.method == "PATCH":
             return self._edit_metadata(request, finding)
-        elif request.method == "DELETE":
+        if request.method == "DELETE":
             return self._remove_metadata(request, finding)
 
         return Response(
@@ -2091,8 +2088,7 @@ class StubFindingsViewSet(
     def get_serializer_class(self):
         if self.request and self.request.method == "POST":
             return serializers.StubFindingCreateSerializer
-        else:
-            return serializers.StubFindingSerializer
+        return serializers.StubFindingSerializer
 
 
 # Authorization: authenticated, configuration
@@ -2144,8 +2140,7 @@ class TestsViewSet(
             if self.action == "accept_risks":
                 return ra_api.AcceptedRiskSerializer
             return serializers.TestCreateSerializer
-        else:
-            return serializers.TestSerializer
+        return serializers.TestSerializer
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,

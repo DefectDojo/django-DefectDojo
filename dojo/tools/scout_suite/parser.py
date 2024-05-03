@@ -150,8 +150,7 @@ class ScoutSuiteParser:
     def formatview(self, depth):
         if depth > 1:
             return "* "
-        else:
-            return ""
+        return ""
 
     def recursive_print(self, src, depth=0, key=""):
         def tabs(n):

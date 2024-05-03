@@ -401,6 +401,7 @@ def simple_search(request):
     operators: {'tags': ['anchore'], 'vulnerability_id': ['CVE-2020-1234']}
     keywords:  ['jquery']
     """
+    return None
 
 
 # it's not google grade parsing, but let's do some basic stuff right
@@ -448,8 +449,7 @@ def vulnerability_id_fix(keyword):
 
     if vulnerability_ids:
         return " ".join(vulnerability_ids)
-    else:
-        return keyword
+    return keyword
 
 
 def apply_tag_filters(qs, operators, skip_relations=False):

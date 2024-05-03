@@ -18,11 +18,12 @@ class GitlabSastParser:
     def get_findings(self, json_output, test):
 
         if json_output is None:
-            return
+            return None
 
         tree = self.parse_json(json_output)
         if tree:
             return self.get_items(tree)
+        return None
 
     def get_tests(self, scan_type, handle):
         tree = self.parse_json(handle)

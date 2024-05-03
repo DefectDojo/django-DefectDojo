@@ -43,8 +43,7 @@ def dojo_async_task(func):
         countdown = kwargs.pop("countdown", 0)
         if we_want_async(*args, func=func, **kwargs):
             return func.apply_async(args=args, kwargs=kwargs, countdown=countdown)
-        else:
-            return func(*args, **kwargs)
+        return func(*args, **kwargs)
 
     return __wrapper__
 
@@ -78,8 +77,7 @@ def dojo_model_to_id(_func=None, *, parameter=0):
     if _func is None:
         # decorator called without parameters
         return dojo_model_to_id_internal
-    else:
-        return dojo_model_to_id_internal(_func)
+    return dojo_model_to_id_internal(_func)
 
 
 # decorator with parameters needs another wrapper layer
@@ -123,8 +121,7 @@ def dojo_model_from_id(_func=None, *, model=Finding, parameter=0):
     if _func is None:
         # decorator called without parameters
         return dojo_model_from_id_internal
-    else:
-        return dojo_model_from_id_internal(_func)
+    return dojo_model_from_id_internal(_func)
 
 
 def get_parameter_froms_args_kwargs(args, kwargs, parameter):

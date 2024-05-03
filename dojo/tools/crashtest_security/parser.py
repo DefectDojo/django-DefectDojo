@@ -131,14 +131,13 @@ class CrashtestSecurityJsonParser:
         """
         if cvss_base_score == 0:
             return "Info"
-        elif cvss_base_score < 4:
+        if cvss_base_score < 4:
             return "Low"
-        elif cvss_base_score < 7:
+        if cvss_base_score < 7:
             return "Medium"
-        elif cvss_base_score < 9:
+        if cvss_base_score < 9:
             return "High"
-        else:
-            return "Critical"
+        return "Critical"
 
 
 class CrashtestSecurityXmlParser:
@@ -153,8 +152,7 @@ class CrashtestSecurityXmlParser:
 
         if tree:
             return self.get_items(tree, test)
-        else:
-            return []
+        return []
 
     def parse_xml(self, xml_output):
         """
@@ -244,8 +242,7 @@ class CrashtestSecurityParser:
 
         if filename.name.lower().endswith(".xml"):
             return CrashtestSecurityXmlParser().get_findings(filename, test)
-        elif filename.name.lower().endswith(".json"):
+        if filename.name.lower().endswith(".json"):
             return CrashtestSecurityJsonParser().get_findings(filename, test)
-        else:
-            msg = "Unknown File Format"
-            raise ValueError(msg)
+        msg = "Unknown File Format"
+        raise ValueError(msg)

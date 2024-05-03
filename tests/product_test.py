@@ -25,8 +25,7 @@ class WaitForPageLoad:
         while time.time() < self.timeout:
             if self.page_has_loaded():
                 return True
-            else:
-                time.sleep(0.2)
+            time.sleep(0.2)
         msg = f"Timeout waiting for {self.timeout}s"
         raise Exception(msg)
 

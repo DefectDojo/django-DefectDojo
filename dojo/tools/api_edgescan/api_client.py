@@ -28,6 +28,7 @@ class EdgescanAPI:
             except (JSONDecodeError, TypeError):
                 msg = "JSON not provided in Extras field."
                 raise ValueError(msg)
+        return None
 
     def get_findings(self, asset_ids):
         if asset_ids:
@@ -47,13 +48,11 @@ class EdgescanAPI:
         return response.json()
 
     def get_headers(self):
-        headers = {
+        return {
             "X-API-TOKEN": self.api_key,
             "Content-Type": "application/json",
             "User-Agent": "DefectDojo",
         }
-
-        return headers
 
     def get_proxies(self):
         if self.options and "proxy" in self.options:
