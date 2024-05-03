@@ -39,8 +39,9 @@ class TestHCLAppScanParser(DojoTestCase):
         self.assertEqual(findings[10].cwe, 1275)
 
     def test_issue_10074(self):
-        my_file_handle = open("unittests/scans/hcl_appscan/issue_10074.xml")
-        parser = HCLAppScanParser()
-        findings = parser.get_findings(my_file_handle, None)
-        my_file_handle.close()
-        self.assertEqual(4, len(findings))
+        with open("unittests/scans/hcl_appscan/issue_10074.xml") as my_file_handle:
+            parser = HCLAppScanParser()
+            findings = parser.get_findings(my_file_handle, None)
+            my_file_handle.close()
+            self.assertEqual(4, len(findings))
+            self.assertEqual(findings[0].severity, "Info")
