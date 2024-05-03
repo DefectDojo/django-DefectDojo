@@ -73,11 +73,7 @@ from dojo.group.queries import (
     get_authorized_group_members,
     get_authorized_groups,
 )
-from dojo.importers.reimporter.utils import (
-    get_target_engagement_if_exists,
-    get_target_product_if_exists,
-    get_target_test_if_exists,
-)
+from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.jira_link.queries import (
     get_authorized_jira_issues,
     get_authorized_jira_projects,
@@ -2604,41 +2600,27 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = (IsAuthenticated, permissions.UserHasImportPermission)
 
     def perform_create(self, serializer):
-        (
-            _,
-            _,
-            _,
-            engagement_id,
-            engagement_name,
-            product_name,
-            _product_type_name,
-            _auto_create_context,
-            _deduplication_on_engagement,
-            _do_not_reactivate,
-        ) = serializers.get_import_meta_data_from_dict(
-            serializer.validated_data
-        )
-        product = get_target_product_if_exists(product_name)
-        engagement = get_target_engagement_if_exists(
-            engagement_id, engagement_name, product
-        )
+        auto_create = AutoCreateContextManager()
+        # Process the context to make an conversions needed. Catch any exceptions
+        # in this case and wrap them in a DRF exception
+        try:
+            converted_dict = auto_create.convert_querydict_to_dict(serializer.validated_data)
+            auto_create.process_import_meta_data_from_dict(converted_dict)
+            # Get an existing product
+            product = auto_create.get_target_product_if_exists(**converted_dict)
+            engagement = auto_create.get_target_engagement_if_exists(**converted_dict)
+        except (ValueError, TypeError) as e:
+            # Raise an explicit drf exception here
+            raise ValidationError(str(e))
 
         # when using auto_create_context, the engagement or product may not
         # have been created yet
-        jira_driver = (
-            engagement if engagement else product if product else None
-        )
-        jira_project = (
-            jira_helper.get_jira_project(jira_driver) if jira_driver else None
-        )
-
         push_to_jira = serializer.validated_data.get("push_to_jira")
-        if get_system_setting("enable_jira") and jira_project:
-            push_to_jira = push_to_jira or jira_project.push_all_issues
-
-        logger.debug(
-            "push_to_jira: %s", serializer.validated_data.get("push_to_jira")
-        )
+        if get_system_setting("enable_jira"):
+            jira_driver = (engagement if engagement else product if product else None)
+            if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
+                push_to_jira = push_to_jira or jira_project.push_all_issues
+        logger.debug(f"push_to_jira: {push_to_jira}")
         serializer.save(push_to_jira=push_to_jira)
 
     def get_queryset(self):
@@ -2783,50 +2765,30 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         return get_authorized_tests(Permissions.Import_Scan_Result)
 
     def perform_create(self, serializer):
-        (
-            test_id,
-            test_title,
-            scan_type,
-            _,
-            engagement_name,
-            product_name,
-            _product_type_name,
-            _auto_create_context,
-            _deduplication_on_engagement,
-            _do_not_reactivate,
-        ) = serializers.get_import_meta_data_from_dict(
-            serializer.validated_data
-        )
-        product = get_target_product_if_exists(product_name)
-        engagement = get_target_engagement_if_exists(
-            None, engagement_name, product
-        )
-        test = get_target_test_if_exists(
-            test_id, test_title, scan_type, engagement
-        )
+        auto_create = AutoCreateContextManager()
+        # Process the context to make an conversions needed. Catch any exceptions
+        # in this case and wrap them in a DRF exception
+        try:
+            converted_dict = auto_create.convert_querydict_to_dict(serializer.validated_data)
+            auto_create.process_import_meta_data_from_dict(converted_dict)
+            # Get an existing product
+            product = auto_create.get_target_product_if_exists(**converted_dict)
+            engagement = auto_create.get_target_engagement_if_exists(**converted_dict)
+            test = auto_create.get_target_test_if_exists(**converted_dict)
+        except (ValueError, TypeError) as e:
+            # Raise an explicit drf exception here
+            raise ValidationError(str(e))
 
         # when using auto_create_context, the engagement or product may not
         # have been created yet
-        jira_driver = (
-            test
-            if test
-            else engagement
-            if engagement
-            else product
-            if product
-            else None
-        )
-        jira_project = (
-            jira_helper.get_jira_project(jira_driver) if jira_driver else None
-        )
-
         push_to_jira = serializer.validated_data.get("push_to_jira")
-        if get_system_setting("enable_jira") and jira_project:
-            push_to_jira = push_to_jira or jira_project.push_all_issues
-
-        logger.debug(
-            "push_to_jira: %s", serializer.validated_data.get("push_to_jira")
-        )
+        if get_system_setting("enable_jira"):
+            jira_driver = (
+                test if test else engagement if engagement else product if product else None
+            )
+            if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
+                push_to_jira = push_to_jira or jira_project.push_all_issues
+        logger.debug(f"push_to_jira: {push_to_jira}")
         serializer.save(push_to_jira=push_to_jira)
 
 
