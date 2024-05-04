@@ -108,13 +108,12 @@ class CustomReport(View):
 
     def _set_state(self, request: HttpRequest):
         self.request = request
-        self.host = report_url_resolver(request)
         self.selected_widgets = self.get_selected_widgets(request)
         self.widgets = list(self.selected_widgets.values())
 
     def get_selected_widgets(self, request):
-        selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, host=self.host,
-                                                      user=self.request.user, finding_notes=False, finding_images=False)
+        selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, finding_notes=False,
+                                                 finding_images=False)
 
         if options := selected_widgets.get('report-options', None):
             self.report_format = options.report_type
@@ -125,9 +124,8 @@ class CustomReport(View):
             self.finding_notes = True
             self.finding_images = True
 
-        return report_widget_factory(json_data=request.POST['json'], request=request, host=self.host,
-                              user=request.user, finding_notes=self.finding_notes,
-                              finding_images=self.finding_images)
+        return report_widget_factory(json_data=request.POST['json'], request=request, finding_notes=self.finding_notes,
+                                     finding_images=self.finding_images)
 
     def get_form(self, request):
         return CustomReportJsonForm(request.POST)
@@ -136,17 +134,15 @@ class CustomReport(View):
         if self.report_format == 'AsciiDoc':
             return 'dojo/custom_asciidoc_report.html',
         elif self.report_format == 'HTML':
-            return 'dojo/custom_html_report'
+            return 'dojo/custom_html_report.html'
         else:
             raise PermissionDenied()
 
     def get_context(self):
         return {
             "widgets": self.widgets,
-            "host": self.host,
             "finding_notes": self.finding_notes,
-            "finding_images": self.finding_images,
-            "user_id": self.request.user.id, }
+            "finding_images": self.finding_images, }
 
 
 def report_findings(request):
