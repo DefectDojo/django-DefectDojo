@@ -133,3 +133,12 @@ class TestHorusecParser(DojoTestCase):
                 self.assertGreaterEqual(finding.scanner_confidence, 3)  # "Firm"
                 self.assertLessEqual(finding.scanner_confidence, 5)  # "Firm"
                 self.assertEqual(datetime.date(2022, 5, 6), finding.date.date())
+
+    def test_issue_9939(self):
+        """"""
+        with open(path.join(path.dirname(__file__), "../scans/horusec/issue_9939.json")) as testfile:
+            parser = HorusecParser()
+            tests = parser.get_tests("Horusec Scan", testfile)
+            self.assertEqual(1, len(tests))
+            test = tests[0]
+            self.assertEqual(1, len(test.findings))

@@ -737,6 +737,7 @@
         </div>
     {% endif %}
 
+    {% if similar_findings_enabled %}
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4 class="has-filters">Similar Findings ({{ similar_findings.paginator.count }})
@@ -767,8 +768,8 @@
                     </div>
                 {% endif %}
             </span>
-        </div>
-
+        </div>  
+    {% endif %}
     {% comment %} Add a form to (ab)use to submit any actions related to similar/duplicates as POST requests {% endcomment %}
     <form method="post" style="display: none" id="related_action">
         {% csrf_token %}
@@ -793,7 +794,7 @@
                                 <span>Active</span>
                             </label>
                             <label style="font-size: 80%; font-weight: normal; display: block">
-                                <input id="id_bulk_false_p" label="false_positive name="false_positive" type="checkbox"/>
+                                <input id="id_bulk_false_p" label="false_positive" name="false_positive" type="checkbox"/>
                                 <span>False Positive</span>
                             </label>
                             <label style="font-size: 80%; font-weight: normal; display: block">

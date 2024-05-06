@@ -27,7 +27,6 @@ django-watson==1.6.3
 django-prometheus==2.3.1
 Django==4.1.13
 djangorestframework==3.14.0
-gunicorn==21.2.0
 html2text==2020.1.16
 humanize==4.9.0
 jira==3.6.0
@@ -49,7 +48,7 @@ uWSGI==2.0.23
 vobject==0.9.6.1
 whitenoise==5.2.0
 titlecase==2.4.1
-social-auth-app-django==5.4.0
+social-auth-app-django==5.4.1
 social-auth-core==4.5.2
 Python-jose==3.3.0
 GitPython==3.1.41

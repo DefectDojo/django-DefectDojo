@@ -422,6 +422,12 @@ class System_Settings(models.Model):
         verbose_name=_('Enable Remediation Advice'),
         help_text=_("Enables global remediation advice and matching on CWE and Title. The text will be replaced for mitigation, impact and references on a finding. Useful for providing consistent impact and remediation advice regardless of the scanner."))
 
+    enable_similar_findings = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Enable Similar Findings"),
+        help_text=_("Enable the query of similar findings on the view finding page. This feature can involve potentially large queries and negatively impact performance"))
+
     engagement_auto_close = models.BooleanField(
         default=False,
         blank=False,
@@ -578,6 +584,14 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("API expose error details"),
         help_text=_("When turned on, the API will expose error details in the response."))
+    filter_string_matching = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Filter String Matching Optimization"),
+        help_text=_(
+            "When turned on, all filter operations in the UI will require string matches rather than ID. "
+            "This is a performance enhancement to avoid fetching objects unnecessarily."
+        ))
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
@@ -2273,7 +2287,7 @@ class Finding(models.Model):
                            help_text=_("External reference that provides more information about this flaw."))  # not displayed and pretty much the same as references. To remove?
     severity = models.CharField(max_length=200,
                                 verbose_name=_('Severity'),
-                                help_text=_('The severity level of this flaw (Critical, High, Medium, Low, Informational).'))
+                                help_text=_('The severity level of this flaw (Critical, High, Medium, Low, Info).'))
     description = models.TextField(verbose_name=_('Description'),
                                 help_text=_("Longer more descriptive information about the flaw."))
     mitigation = models.TextField(verbose_name=_('Mitigation'),

@@ -62,7 +62,7 @@ class HorusecParser(object):
                 data["vulnerabilities"]["details"].split("\n")[-1],
                 "**Code:**",
                 f"```{data['vulnerabilities']['language']}",
-                data["vulnerabilities"]["code"].replace("```", "``````"),
+                data["vulnerabilities"]["code"].replace("```", "``````").replace("\x00", ""),
                 "```",
             ]
         )
