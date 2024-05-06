@@ -1,0 +1,18 @@
+{
+    "findings": [
+        {
+            "title": "title",
+            "severity": "Low",
+            "description": "description",
+            "customFieldA": "CustomValueA",
+            "customFieldB": "CustomValueB"
+        },
+        {
+            "title": "title",
+            "severity": "Low",
+            "description": "description",
+            "customFieldA": "CustomValueC",
+            "customFieldB": "CustomValueD"
+        }
+    ]
+}

@@ -658,3 +658,82 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
                 "Not allowed fields are present: ['invalid_field', 'last_status_update']"):
             parser.get_findings(file, Test())
             file.close()
+
+    def test_parse_report_with_custom_columns_csv(self):
+        file = open("unittests/scans/generic/generic_report5.csv")
+        parser = GenericParser()
+        custom_report_mapping = {'custom_field1': 'CustomColumnA', 'custom_field2': 'CustomColumnB'}
+        findings = parser.get_findings(file, Test(), custom_fields_mapping=custom_report_mapping)
+        self.assertEqual(2, len(findings))
+        file.close()
+
+        finding = findings[0]
+        finding.clean()
+        self.assertEqual({'custom_field1': 'CustomValueA', 'custom_field2': 'CustomValueB'}, finding.custom_fields)
+
+        finding = findings[1]
+        finding.clean()
+        self.assertEqual({'custom_field1': 'CustomValueC', 'custom_field2': 'CustomValueD'}, finding.custom_fields)
+
+    def test_parse_report_with_custom_columns_csv_without_mapping_is_fine(self):
+        file = open("unittests/scans/generic/generic_report5.csv")
+        parser = GenericParser()
+        findings = parser.get_findings(file, Test())
+        self.assertEqual(2, len(findings))
+        file.close()
+
+        finding = findings[0]
+        finding.clean()
+        self.assertIsNone(finding.custom_fields)
+
+        finding = findings[1]
+        finding.clean()
+        self.assertIsNone(finding.custom_fields)
+
+    def test_parse_report_with_not_matching_column_mapping(self):
+        file = open("unittests/scans/generic/generic_report5.csv")
+        parser = GenericParser()
+        custom_report_mapping = {'custom_field1': 'NotExistingA', 'custom_field2': 'NotExistingB'}
+        findings = parser.get_findings(file, Test(), custom_fields_mapping=custom_report_mapping)
+        self.assertEqual(2, len(findings))
+        file.close()
+
+        finding = findings[0]
+        finding.clean()
+        self.assertIsNone(finding.custom_fields)
+
+        finding = findings[1]
+        finding.clean()
+        self.assertIsNone(finding.custom_fields)
+
+    def test_parse_report_with_partially_matching_column_mapping(self):
+        file = open("unittests/scans/generic/generic_report5.csv")
+        parser = GenericParser()
+        custom_report_mapping = {'custom_field1': 'CustomColumnA', 'custom_field2': 'NotExisting'}
+        findings = parser.get_findings(file, Test(), custom_fields_mapping=custom_report_mapping)
+        self.assertEqual(2, len(findings))
+        file.close()
+
+        finding = findings[0]
+        finding.clean()
+        self.assertEqual({'custom_field1': 'CustomValueA'}, finding.custom_fields)
+
+        finding = findings[1]
+        finding.clean()
+        self.assertEqual({'custom_field1': 'CustomValueC'}, finding.custom_fields)
+
+    def test_parse_report_with_custom_columns_json(self):
+        file = open("unittests/scans/generic/generic_report5.json")
+        parser = GenericParser()
+        custom_report_mapping = {'custom_field1': 'customFieldA', 'custom_field2': 'customFieldB'}
+        findings = parser.get_findings(file, Test(), custom_fields_mapping=custom_report_mapping)
+        self.assertEqual(2, len(findings))
+        file.close()
+
+        finding = findings[0]
+        finding.clean()
+        self.assertEqual({'custom_field1': 'CustomValueA', 'custom_field2': 'CustomValueB'}, finding.custom_fields)
+
+        finding = findings[1]
+        finding.clean()
+        self.assertEqual({'custom_field1': 'CustomValueC', 'custom_field2': 'CustomValueD'}, finding.custom_fields)

@@ -134,12 +134,14 @@ class GenericParser(object):
                         continue
 
                     if report_column in item:
-                        allowed.add(report_column)  # add custom report column to allowed fields
                         extracted_custom_fields[custom_field] = item[report_column]
+
+                        # remove custom report column from item as finding model most likely will not know this field
+                        del item[report_column]
 
                 # write extracted custom fields into finding as json string
                 if len(extracted_custom_fields) > 0:
-                    item.custom_fields = extracted_custom_fields
+                    item['custom_fields'] = extracted_custom_fields
                     allowed.add("custom_fields")
 
             not_allowed = sorted(set(item).difference(allowed))
