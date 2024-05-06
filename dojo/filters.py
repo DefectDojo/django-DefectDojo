@@ -2974,6 +2974,7 @@ class UserFilter(DojoFilter):
             ('email', 'email'),
             ('is_active', 'is_active'),
             ('is_superuser', 'is_superuser'),
+            ('date_joined', 'date_joined'),
             ('last_login', 'last_login'),
         ),
         field_labels={
