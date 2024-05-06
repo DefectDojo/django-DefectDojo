@@ -1,7 +1,9 @@
 from django.test import Client, override_settings
 from netaddr import IPSet
-from dojo.models import User, Dojo_Group, Dojo_Group_Member
+
+from dojo.models import Dojo_Group, Dojo_Group_Member, User
 from dojo.remote_user import RemoteUserScheme
+
 from .dojo_test_case import DojoTestCase
 
 
@@ -198,11 +200,20 @@ class TestRemoteUser(DojoTestCase):
     @override_settings(
         AUTH_REMOTEUSER_ENABLED=True,
         AUTH_REMOTEUSER_USERNAME_HEADER="HTTP_OUR_REMOTE_USER",
+        AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER=True,
     )
-    def test_api_schema(self):
+    def test_api_schema_visible(self):
         security_definition = RemoteUserScheme.get_security_definition(None, None)
         self.assertEqual(security_definition, {
             "type": "apiKey",
             "in": "header",
             "name": "Our-remote-user",
         })
+
+    @override_settings(
+        AUTH_REMOTEUSER_ENABLED=True,
+        AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER=False,
+    )
+    def test_api_schema_hidden(self):
+        security_definition = RemoteUserScheme.get_security_definition(None, None)
+        self.assertEqual(security_definition, {})

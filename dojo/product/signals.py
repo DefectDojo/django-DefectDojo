@@ -1,10 +1,12 @@
 import contextlib
+import logging
+
 from django.db.models import signals
 from django.dispatch import receiver
-import logging
-from dojo.models import Product, Engagement, Test, Finding, Endpoint
-from dojo.utils import get_system_setting
+
+from dojo.models import Endpoint, Engagement, Finding, Product, Test
 from dojo.product import helpers as async_product_funcs
+from dojo.utils import get_system_setting
 
 logger = logging.getLogger(__name__)
 

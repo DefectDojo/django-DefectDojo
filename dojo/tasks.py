@@ -1,18 +1,18 @@
 import logging
-from auditlog.models import LogEntry
-from datetime import timedelta, date
-from dateutil.relativedelta import relativedelta
-from django.db.models import Count, Prefetch
-from django.conf import settings
-from django.urls import reverse
-from dojo.celery import app
-from celery.utils.log import get_task_logger
-from dojo.models import Alerts, Product, Engagement, Finding, System_Settings, User
-from django.utils import timezone
-from dojo.utils import calculate_grade
-from dojo.utils import sla_compute_and_notify
-from dojo.notifications.helper import create_notification
+from datetime import date, timedelta
 
+from auditlog.models import LogEntry
+from celery.utils.log import get_task_logger
+from dateutil.relativedelta import relativedelta
+from django.conf import settings
+from django.db.models import Count, Prefetch
+from django.urls import reverse
+from django.utils import timezone
+
+from dojo.celery import app
+from dojo.models import Alerts, Engagement, Finding, Product, System_Settings, User
+from dojo.notifications.helper import create_notification
+from dojo.utils import calculate_grade, sla_compute_and_notify
 
 logger = get_task_logger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -31,7 +31,7 @@ def add_alerts(self, runinterval):
     upcoming_engagements = Engagement.objects.filter(target_start__gt=now + timedelta(days=3), target_start__lt=now + timedelta(days=3) + runinterval).order_by('target_start')
     for engagement in upcoming_engagements:
         create_notification(event='upcoming_engagement',
-                            title='Upcoming engagement: %s' % engagement.name,
+                            title=f'Upcoming engagement: {engagement.name}',
                             engagement=engagement,
                             recipients=[engagement.lead],
                             url=reverse('view_engagement', args=(engagement.id,)))
@@ -42,8 +42,8 @@ def add_alerts(self, runinterval):
         status='In Progress').order_by('-target_end')
     for eng in stale_engagements:
         create_notification(event='stale_engagement',
-                            title='Stale Engagement: %s' % eng.name,
-                            description='The engagement "%s" is stale. Target end was %s.' % (eng.name, eng.target_end.strftime("%b. %d, %Y")),
+                            title=f'Stale Engagement: {eng.name}',
+                            description='The engagement "{}" is stale. Target end was {}.'.format(eng.name, eng.target_end.strftime("%b. %d, %Y")),
                             url=reverse('view_engagement', args=(eng.id,)),
                             recipients=[eng.lead])
 
@@ -57,7 +57,7 @@ def add_alerts(self, runinterval):
         for eng in unclosed_engagements:
             create_notification(event='auto_close_engagement',
                                 title=eng.name,
-                                description='The engagement "%s" has auto-closed. Target end was %s.' % (eng.name, eng.target_end.strftime("%b. %d, %Y")),
+                                description='The engagement "{}" has auto-closed. Target end was {}.'.format(eng.name, eng.target_end.strftime("%b. %d, %Y")),
                                 url=reverse('view_engagement', args=(eng.id,)),
                                 recipients=[eng.lead])
 
@@ -139,8 +139,8 @@ def async_dupe_delete(*args, **kwargs):
         originals_with_too_many_duplicates = Finding.objects.filter(id__in=originals_with_too_many_duplicates_ids).order_by('id')
 
         # prefetch to make it faster
-        originals_with_too_many_duplicates = originals_with_too_many_duplicates.prefetch_related((Prefetch("original_finding",
-            queryset=Finding.objects.filter(duplicate=True).order_by('date'))))
+        originals_with_too_many_duplicates = originals_with_too_many_duplicates.prefetch_related(Prefetch("original_finding",
+            queryset=Finding.objects.filter(duplicate=True).order_by('date')))
 
         total_deleted_count = 0
         for original in originals_with_too_many_duplicates:
@@ -148,7 +148,7 @@ def async_dupe_delete(*args, **kwargs):
             dupe_count = len(duplicate_list) - dupe_max
 
             for finding in duplicate_list:
-                deduplicationLogger.debug('deleting finding {}:{} ({}))'.format(finding.id, finding.title, finding.hash_code))
+                deduplicationLogger.debug(f'deleting finding {finding.id}:{finding.title} ({finding.hash_code}))')
                 finding.delete()
                 total_deleted_count += 1
                 dupe_count -= 1
@@ -177,7 +177,7 @@ def async_sla_compute_and_notify_task(*args, **kwargs):
             sla_compute_and_notify(*args, **kwargs)
     except Exception as e:
         logger.exception(e)
-        logger.error("An unexpected error was thrown calling the SLA code: {}".format(e))
+        logger.error(f"An unexpected error was thrown calling the SLA code: {e}")
 
 
 @app.task

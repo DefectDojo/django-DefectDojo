@@ -1,19 +1,19 @@
 # #dev envs
 import logging
 
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.urls import reverse
-from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from django.db.models.deletion import RestrictedError
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 
-from dojo.filters import DevelopmentEnvironmentFilter
-from dojo.forms import Development_EnvironmentForm, Delete_Dev_EnvironmentForm
-from dojo.models import Development_Environment
-from dojo.utils import get_page_items, add_breadcrumb
 from dojo.authorization.authorization import user_has_configuration_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+from dojo.filters import DevelopmentEnvironmentFilter
+from dojo.forms import Delete_Dev_EnvironmentForm, Development_EnvironmentForm
+from dojo.models import Development_Environment
+from dojo.utils import add_breadcrumb, get_page_items
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +85,7 @@ def edit_dev_env(request, deid):
             except RestrictedError as err:
                 messages.add_message(request,
                                         messages.WARNING,
-                                        'Environment cannot be deleted: {}'.format(err),
+                                        f'Environment cannot be deleted: {err}',
                                         extra_tags='alert-warning')
             return HttpResponseRedirect(reverse('dev_env'))
 

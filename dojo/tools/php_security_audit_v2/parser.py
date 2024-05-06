@@ -4,7 +4,7 @@ import math
 from dojo.models import Finding
 
 
-class PhpSecurityAuditV2Parser(object):
+class PhpSecurityAuditV2Parser:
     def get_scan_types(self):
         return ["PHP Security Audit v2"]
 
@@ -20,7 +20,7 @@ class PhpSecurityAuditV2Parser(object):
             data = json.loads(str(tree, "utf-8"))
         except Exception:
             data = json.loads(tree)
-        dupes = dict()
+        dupes = {}
 
         for filepath, report in list(data["files"].items()):
             errors = report.get("errors") or 0

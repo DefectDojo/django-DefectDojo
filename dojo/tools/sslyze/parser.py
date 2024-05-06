@@ -2,7 +2,7 @@ from .parser_json import SSLyzeJSONParser
 from .parser_xml import SSLyzeXMLParser
 
 
-class SslyzeParser(object):
+class SslyzeParser:
     """SSLyze support JSON and XML"""
 
     def get_scan_types(self):
@@ -18,11 +18,12 @@ class SslyzeParser(object):
 
     def get_findings(self, filename, test):
         if filename is None:
-            return list()
+            return []
 
         if filename.name.lower().endswith(".xml"):
             return SSLyzeXMLParser().get_findings(filename, test)
         elif filename.name.lower().endswith(".json"):
             return SSLyzeJSONParser().get_findings(filename, test)
         else:
-            raise ValueError("Unknown File Format")
+            msg = "Unknown File Format"
+            raise ValueError(msg)

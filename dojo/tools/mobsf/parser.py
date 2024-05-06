@@ -7,7 +7,7 @@ from html2text import html2text
 from dojo.models import Finding
 
 
-class MobSFParser(object):
+class MobSFParser:
 
     def get_scan_types(self):
         return ["MobSF Scan"]
@@ -30,57 +30,57 @@ class MobSFParser(object):
         if "name" in data:
             test_description = "**Info:**\n"
             if "packagename" in data:
-                test_description = "%s  **Package Name:** %s\n" % (test_description, data["packagename"])
+                test_description = "{}  **Package Name:** {}\n".format(test_description, data["packagename"])
 
             if "mainactivity" in data:
-                test_description = "%s  **Main Activity:** %s\n" % (test_description, data["mainactivity"])
+                test_description = "{}  **Main Activity:** {}\n".format(test_description, data["mainactivity"])
 
             if "pltfm" in data:
-                test_description = "%s  **Platform:** %s\n" % (test_description, data["pltfm"])
+                test_description = "{}  **Platform:** {}\n".format(test_description, data["pltfm"])
 
             if "sdk" in data:
-                test_description = "%s  **SDK:** %s\n" % (test_description, data["sdk"])
+                test_description = "{}  **SDK:** {}\n".format(test_description, data["sdk"])
 
             if "min" in data:
-                test_description = "%s  **Min SDK:** %s\n" % (test_description, data["min"])
+                test_description = "{}  **Min SDK:** {}\n".format(test_description, data["min"])
 
             if "targetsdk" in data:
-                test_description = "%s  **Target SDK:** %s\n" % (test_description, data["targetsdk"])
+                test_description = "{}  **Target SDK:** {}\n".format(test_description, data["targetsdk"])
 
             if "minsdk" in data:
-                test_description = "%s  **Min SDK:** %s\n" % (test_description, data["minsdk"])
+                test_description = "{}  **Min SDK:** {}\n".format(test_description, data["minsdk"])
 
             if "maxsdk" in data:
-                test_description = "%s  **Max SDK:** %s\n" % (test_description, data["maxsdk"])
+                test_description = "{}  **Max SDK:** {}\n".format(test_description, data["maxsdk"])
 
-            test_description = "%s\n**File Information:**\n" % (test_description)
+            test_description = f"{test_description}\n**File Information:**\n"
 
             if "name" in data:
-                test_description = "%s  **Name:** %s\n" % (test_description, data["name"])
+                test_description = "{}  **Name:** {}\n".format(test_description, data["name"])
 
             if "md5" in data:
-                test_description = "%s  **MD5:** %s\n" % (test_description, data["md5"])
+                test_description = "{}  **MD5:** {}\n".format(test_description, data["md5"])
 
             if "sha1" in data:
-                test_description = "%s  **SHA-1:** %s\n" % (test_description, data["sha1"])
+                test_description = "{}  **SHA-1:** {}\n".format(test_description, data["sha1"])
 
             if "sha256" in data:
-                test_description = "%s  **SHA-256:** %s\n" % (test_description, data["sha256"])
+                test_description = "{}  **SHA-256:** {}\n".format(test_description, data["sha256"])
 
             if "size" in data:
-                test_description = "%s  **Size:** %s\n" % (test_description, data["size"])
+                test_description = "{}  **Size:** {}\n".format(test_description, data["size"])
 
             if "urls" in data:
                 curl = ""
                 for url in data["urls"]:
                     for curl in url["urls"]:
-                        curl = "%s\n" % (curl)
+                        curl = f"{curl}\n"
 
                 if curl:
-                    test_description = "%s\n**URL's:**\n %s\n" % (test_description, curl)
+                    test_description = f"{test_description}\n**URL's:**\n {curl}\n"
 
             if "bin_anal" in data:
-                test_description = "%s  \n**Binary Analysis:** %s\n" % (test_description, data["bin_anal"])
+                test_description = "{}  \n**Binary Analysis:** {}\n".format(test_description, data["bin_anal"])
 
         test.description = html2text(test_description)
 

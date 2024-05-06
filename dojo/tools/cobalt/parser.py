@@ -7,7 +7,7 @@ from dojo.models import Finding
 __author__ = "dr3dd589"
 
 
-class CobaltParser(object):
+class CobaltParser:
     def get_scan_types(self):
         return ["Cobalt.io Scan"]
 
@@ -19,7 +19,7 @@ class CobaltParser(object):
 
     def get_findings(self, filename, test):
         if filename is None:
-            return list()
+            return []
 
         content = filename.read()
         if isinstance(content, bytes):
@@ -27,7 +27,7 @@ class CobaltParser(object):
         reader = csv.DictReader(
             io.StringIO(content), delimiter=",", quotechar='"'
         )
-        dupes = dict()
+        dupes = {}
         for row in reader:
             finding = Finding(test=test)
             finding.title = (

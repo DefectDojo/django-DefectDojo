@@ -5,7 +5,7 @@ from collections import namedtuple
 from dojo.models import Finding
 
 
-class OrtParser(object):
+class OrtParser:
     """Oss Review Toolkit Parser"""
 
     def get_scan_types(self):
@@ -19,13 +19,13 @@ class OrtParser(object):
 
     def get_findings(self, json_output, test):
         if json_output is None:
-            return list()
+            return []
 
         evaluated_model = self.parse_json(json_output)
         if evaluated_model:
             return self.get_items(evaluated_model, test)
         else:
-            return list()
+            return []
 
     def parse_json(self, json_output):
         try:
@@ -35,7 +35,8 @@ class OrtParser(object):
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return tree
 

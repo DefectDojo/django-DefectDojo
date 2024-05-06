@@ -1,12 +1,14 @@
 import logging
-from django.contrib.auth.middleware import RemoteUserMiddleware as OriginalRemoteUserMiddleware
-from django.contrib.auth.backends import RemoteUserBackend as OriginalRemoteUserBackend
-from drf_spectacular.extensions import OpenApiAuthenticationExtension
-from rest_framework.authentication import RemoteUserAuthentication as OriginalRemoteUserAuthentication
-from netaddr import IPAddress
+
 from django.conf import settings
-from dojo.pipeline import assign_user_to_groups, cleanup_old_groups_for_user
+from django.contrib.auth.backends import RemoteUserBackend as OriginalRemoteUserBackend
+from django.contrib.auth.middleware import RemoteUserMiddleware as OriginalRemoteUserMiddleware
+from drf_spectacular.extensions import OpenApiAuthenticationExtension
+from netaddr import IPAddress
+from rest_framework.authentication import RemoteUserAuthentication as OriginalRemoteUserAuthentication
+
 from dojo.models import Dojo_Group
+from dojo.pipeline import assign_user_to_groups, cleanup_old_groups_for_user
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +100,9 @@ class RemoteUserScheme(OpenApiAuthenticationExtension):
     priority = 1
 
     def get_security_definition(self, auto_schema):
+        if not settings.AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER:
+            return {}
+
         header_name = settings.AUTH_REMOTEUSER_USERNAME_HEADER
         if header_name.startswith('HTTP_'):
             header_name = header_name[5:]

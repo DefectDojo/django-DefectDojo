@@ -15,10 +15,24 @@ from vcr_unittest import VCRTestCase
 
 from dojo.jira_link import helper as jira_helper
 from dojo.jira_link.views import get_custom_field
-from dojo.models import (SEVERITIES, DojoMeta, Endpoint, Endpoint_Status,
-                         Engagement, Finding, JIRA_Issue, JIRA_Project, Notes,
-                         Product, Product_Type, System_Settings, Test,
-                         SLA_Configuration, Test_Type, User)
+from dojo.models import (
+    SEVERITIES,
+    DojoMeta,
+    Endpoint,
+    Endpoint_Status,
+    Engagement,
+    Finding,
+    JIRA_Issue,
+    JIRA_Project,
+    Notes,
+    Product,
+    Product_Type,
+    SLA_Configuration,
+    System_Settings,
+    Test,
+    Test_Type,
+    User,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +41,7 @@ def get_unit_tests_path():
     return os.path.dirname(os.path.realpath(__file__))
 
 
-class DojoTestUtilsMixin(object):
+class DojoTestUtilsMixin:
 
     def get_test_admin(self, *args, **kwargs):
         return User.objects.get(username='admin')
@@ -67,13 +81,13 @@ class DojoTestUtilsMixin(object):
 
     def patch_product_api(self, product_id, product_details):
         payload = copy.deepcopy(product_details)
-        response = self.client.patch(reverse('product-list') + '%s/' % product_id, payload, format='json')
+        response = self.client.patch(reverse('product-list') + f'{product_id}/', payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
     def patch_endpoint_api(self, endpoint_id, endpoint_details):
         payload = copy.deepcopy(endpoint_details)
-        response = self.client.patch(reverse('endpoint-list') + '%s/' % endpoint_id, payload, format='json')
+        response = self.client.patch(reverse('endpoint-list') + f'{endpoint_id}/', payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
@@ -91,7 +105,7 @@ class DojoTestUtilsMixin(object):
         return Test.objects.get(id=id)
 
     def get_test_api(self, test_id):
-        response = self.client.patch(reverse('engagement-list') + '%s/' % test_id)
+        response = self.client.patch(reverse('engagement-list') + f'{test_id}/')
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
@@ -99,7 +113,7 @@ class DojoTestUtilsMixin(object):
         return Engagement.objects.get(id=id)
 
     def get_engagement_api(self, engagement_id):
-        response = self.client.patch(reverse('engagement-list') + '%s/' % engagement_id)
+        response = self.client.patch(reverse('engagement-list') + f'{engagement_id}/')
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
@@ -377,7 +391,7 @@ class DojoTestUtilsMixin(object):
         findings = Test.objects.get(id=test_id).finding_set.all()
         for finding in findings:
             logger.debug('finding!')
-            self.assertNotEquals(jira_helper.get_jira_updated(finding), updated_map[finding.id])
+            self.assertNotEqual(jira_helper.get_jira_updated(finding), updated_map[finding.id])
 
     # Toggle epic mapping on jira product
     def toggle_jira_project_epic_mapping(self, obj, value):
@@ -461,7 +475,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         return json.loads(response.content)
 
     def get_test_api(self, test_id):
-        response = self.client.get(reverse('test-list') + '%s/' % test_id, format='json')
+        response = self.client.get(reverse('test-list') + f'{test_id}/', format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
         # print('test.content: ', response.content)
         return json.loads(response.content)
@@ -470,122 +484,126 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
                                 push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None, engagement_name=None,
                                 product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None,
                                 scan_date=None, service=None, forceActive=True, forceVerified=True):
-        payload = {
-                "minimum_severity": minimum_severity,
-                "active": active,
-                "verified": verified,
-                "scan_type": scan_type,
-                "file": open(get_unit_tests_path() + '/' + filename),
-                "version": "1.0.1",
-                "close_old_findings": close_old_findings,
-        }
 
-        if engagement:
-            payload['engagement'] = engagement
+        with open(get_unit_tests_path() + '/' + filename) as testfile:
+            payload = {
+                    "minimum_severity": minimum_severity,
+                    "active": active,
+                    "verified": verified,
+                    "scan_type": scan_type,
+                    "file": testfile,
+                    "version": "1.0.1",
+                    "close_old_findings": close_old_findings,
+            }
 
-        if engagement_name:
-            payload['engagement_name'] = engagement_name
+            if engagement:
+                payload['engagement'] = engagement
 
-        if product_name:
-            payload['product_name'] = product_name
+            if engagement_name:
+                payload['engagement_name'] = engagement_name
 
-        if product_type_name:
-            payload['product_type_name'] = product_type_name
+            if product_name:
+                payload['product_name'] = product_name
 
-        if auto_create_context:
-            payload['auto_create_context'] = auto_create_context
+            if product_type_name:
+                payload['product_type_name'] = product_type_name
 
-        if push_to_jira is not None:
-            payload['push_to_jira'] = push_to_jira
+            if auto_create_context:
+                payload['auto_create_context'] = auto_create_context
 
-        if endpoint_to_add is not None:
-            payload['endpoint_to_add'] = endpoint_to_add
+            if push_to_jira is not None:
+                payload['push_to_jira'] = push_to_jira
 
-        if tags is not None:
-            payload['tags'] = tags
+            if endpoint_to_add is not None:
+                payload['endpoint_to_add'] = endpoint_to_add
 
-        if group_by is not None:
-            payload['group_by'] = group_by
+            if tags is not None:
+                payload['tags'] = tags
 
-        if test_title is not None:
-            payload['test_title'] = test_title
+            if group_by is not None:
+                payload['group_by'] = group_by
 
-        if scan_date is not None:
-            payload['scan_date'] = scan_date
+            if test_title is not None:
+                payload['test_title'] = test_title
 
-        if service is not None:
-            payload['service'] = service
+            if scan_date is not None:
+                payload['scan_date'] = scan_date
 
-        return self.import_scan(payload, expected_http_status_code)
+            if service is not None:
+                payload['service'] = service
+
+            return self.import_scan(payload, expected_http_status_code)
 
     def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=False, push_to_jira=None,
                                   tags=None, close_old_findings=True, group_by=None, engagement_name=None, scan_date=None,
                                   product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None):
-        payload = {
-                "minimum_severity": minimum_severity,
-                "active": active,
-                "verified": verified,
-                "scan_type": scan_type,
-                "file": open(get_unit_tests_path() + '/' + filename),
-                "version": "1.0.1",
-                "close_old_findings": close_old_findings,
-        }
+        with open(get_unit_tests_path() + '/' + filename) as testfile:
+            payload = {
+                    "minimum_severity": minimum_severity,
+                    "active": active,
+                    "verified": verified,
+                    "scan_type": scan_type,
+                    "file": testfile,
+                    "version": "1.0.1",
+                    "close_old_findings": close_old_findings,
+            }
 
-        if test_id is not None:
-            payload['test'] = test_id
+            if test_id is not None:
+                payload['test'] = test_id
 
-        if engagement:
-            payload['engagement'] = engagement
+            if engagement:
+                payload['engagement'] = engagement
 
-        if engagement_name:
-            payload['engagement_name'] = engagement_name
+            if engagement_name:
+                payload['engagement_name'] = engagement_name
 
-        if product_name:
-            payload['product_name'] = product_name
+            if product_name:
+                payload['product_name'] = product_name
 
-        if product_type_name:
-            payload['product_type_name'] = product_type_name
+            if product_type_name:
+                payload['product_type_name'] = product_type_name
 
-        if auto_create_context:
-            payload['auto_create_context'] = auto_create_context
+            if auto_create_context:
+                payload['auto_create_context'] = auto_create_context
 
-        if push_to_jira is not None:
-            payload['push_to_jira'] = push_to_jira
+            if push_to_jira is not None:
+                payload['push_to_jira'] = push_to_jira
 
-        if tags is not None:
-            payload['tags'] = tags
+            if tags is not None:
+                payload['tags'] = tags
 
-        if group_by is not None:
-            payload['group_by'] = group_by
+            if group_by is not None:
+                payload['group_by'] = group_by
 
-        if test_title is not None:
-            payload['test_title'] = test_title
+            if test_title is not None:
+                payload['test_title'] = test_title
 
-        if scan_date is not None:
-            payload['scan_date'] = scan_date
+            if scan_date is not None:
+                payload['scan_date'] = scan_date
 
-        return self.reimport_scan(payload, expected_http_status_code=expected_http_status_code)
+            return self.reimport_scan(payload, expected_http_status_code=expected_http_status_code)
 
     def endpoint_meta_import_scan_with_params(self, filename, product=1, product_name=None,
                                               create_endpoints=True, create_tags=True, create_dojo_meta=True,
                                               expected_http_status_code=201):
-        payload = {
-            "create_endpoints": create_endpoints,
-            "create_tags": create_tags,
-            "create_dojo_meta": create_dojo_meta,
-            "file": open(get_unit_tests_path() + '/' + filename),
-        }
+        with open(get_unit_tests_path() + '/' + filename) as testfile:
+            payload = {
+                "create_endpoints": create_endpoints,
+                "create_tags": create_tags,
+                "create_dojo_meta": create_dojo_meta,
+                "file": testfile,
+            }
 
-        if product:
-            payload['product'] = product
+            if product:
+                payload['product'] = product
 
-        if product_name:
-            payload['product_name'] = product_name
+            if product_name:
+                payload['product_name'] = product_name
 
-        return self.endpoint_meta_import_scan(payload, expected_http_status_code)
+            return self.endpoint_meta_import_scan(payload, expected_http_status_code)
 
     def get_finding_api(self, finding_id):
-        response = self.client.get(reverse('finding-list') + '%s/' % finding_id, format='json')
+        response = self.client.get(reverse('finding-list') + f'{finding_id}/', format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
@@ -605,12 +623,12 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if push_to_jira is not None:
             payload['push_to_jira'] = push_to_jira
 
-        response = self.client.put(reverse('finding-list') + '%s/' % finding_id, payload, format='json')
+        response = self.client.put(reverse('finding-list') + f'{finding_id}/', payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
     def delete_finding_api(self, finding_id):
-        response = self.client.delete(reverse('finding-list') + '%s/' % finding_id)
+        response = self.client.delete(reverse('finding-list') + f'{finding_id}/')
         self.assertEqual(204, response.status_code, response.content[:1000])
         return response.data
 
@@ -619,7 +637,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if push_to_jira is not None:
             payload['push_to_jira'] = push_to_jira
 
-        response = self.client.patch(reverse('finding-list') + '%s/' % finding_id, payload, format='json')
+        response = self.client.patch(reverse('finding-list') + f'{finding_id}/', payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
@@ -681,7 +699,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         return response.data
 
     def get_finding_api_filter_tags(self, tags):
-        response = self.client.get(reverse('finding-list') + '?tags=%s' % tags, format='json')
+        response = self.client.get(reverse('finding-list') + f'?tags={tags}', format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
         # print(response.data)
         return response.data

@@ -1,8 +1,5 @@
-from dojo.utils import Product_Tab, add_breadcrumb, get_words_for_field, get_page_items, get_system_setting
-from dojo.forms import DeleteFindingGroupForm, EditFindingGroupForm, FindingBulkUpdateForm
-from dojo.notifications.helper import create_notification
-from dojo.finding.views import prefetch_for_findings
-from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups
+import logging
+
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.db.utils import DEFAULT_DB_ALIAS
@@ -10,12 +7,17 @@ from django.http.response import HttpResponse, HttpResponseRedirect, JsonRespons
 from django.shortcuts import get_object_or_404, render
 from django.urls.base import reverse
 from django.views.decorators.http import require_POST
-from dojo.models import Finding_Group, Product, Engagement, Finding, GITHUB_PKey
-import logging
+
 import dojo.jira_link.helper as jira_helper
+from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups
+from dojo.finding.views import prefetch_for_findings
+from dojo.forms import DeleteFindingGroupForm, EditFindingGroupForm, FindingBulkUpdateForm
+from dojo.models import Engagement, Finding, Finding_Group, GITHUB_PKey, Product
+from dojo.notifications.helper import create_notification
+from dojo.utils import Product_Tab, add_breadcrumb, get_page_items, get_system_setting, get_words_for_field
 
 logger = logging.getLogger(__name__)
 
@@ -121,9 +123,9 @@ def delete_finding_group(request, fgid):
                                      extra_tags='alert-success')
 
                 create_notification(event='other',
-                                    title='Deletion of %s' % finding_group.name,
+                                    title=f'Deletion of {finding_group.name}',
                                     product=product,
-                                    description='The finding group "%s" was deleted by %s' % (finding_group.name, request.user),
+                                    description=f'The finding group "{finding_group.name}" was deleted by {request.user}',
                                     url=request.build_absolute_uri(reverse('view_test', args=(finding_group.test.id,))),
                                     icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_test', args=(finding_group.test.id,)))

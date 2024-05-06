@@ -2,18 +2,19 @@ import json
 import logging
 import re
 import textwrap
+
 import dateutil.parser
 from django.utils.translation import gettext as _
 
-from dojo.tools.parser_test import ParserTest
 from dojo.models import Finding
+from dojo.tools.parser_test import ParserTest
 
 logger = logging.getLogger(__name__)
 
 CWE_REGEX = r"cwe-\d+"
 
 
-class SarifParser(object):
+class SarifParser:
     """OASIS Static Analysis Results Interchange Format (SARIF) for version 2.1.0 only.
 
     https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif
@@ -31,16 +32,16 @@ class SarifParser(object):
     def get_findings(self, filehandle, test):
         """For simple interface of parser contract we just aggregate everything"""
         tree = json.load(filehandle)
-        items = list()
+        items = []
         # for each runs we just aggregate everything
-        for run in tree.get("runs", list()):
+        for run in tree.get("runs", []):
             items.extend(self.__get_items_from_run(run))
         return items
 
     def get_tests(self, scan_type, handle):
         tree = json.load(handle)
-        tests = list()
-        for run in tree.get("runs", list()):
+        tests = []
+        for run in tree.get("runs", []):
             test = ParserTest(
                 name=run["tool"]["driver"]["name"],
                 type=run["tool"]["driver"]["name"],
@@ -51,13 +52,13 @@ class SarifParser(object):
         return tests
 
     def __get_items_from_run(self, run):
-        items = list()
+        items = []
         # load rules
         rules = get_rules(run)
         artifacts = get_artifacts(run)
         # get the timestamp of the run if possible
         run_date = self.__get_last_invocation_date(run)
-        for result in run.get("results", list()):
+        for result in run.get("results", []):
             item = get_item(result, rules, artifacts, run_date)
             if item is not None:
                 items.append(item)
@@ -180,7 +181,8 @@ def get_title(result, rule):
             title = rule["id"]
 
     if title is None:
-        raise ValueError("No information found to create a title")
+        msg = "No information found to create a title"
+        raise ValueError(msg)
 
     return textwrap.shorten(title, 150)
 
@@ -267,9 +269,9 @@ def get_description(result, rule):
         message = get_message_from_multiformatMessageString(
             result["message"], rule
         )
-        description += "**Result message:** {}\n".format(message)
+        description += f"**Result message:** {message}\n"
     if get_snippet(result) is not None:
-        description += "**Snippet:**\n```{}```\n".format(get_snippet(result))
+        description += f"**Snippet:**\n```\n{get_snippet(result)}\n```\n"
     if rule is not None:
         if "name" in rule:
             description += f"**{_('Rule name')}:** {rule.get('name')}\n"
@@ -462,7 +464,7 @@ def get_fingerprints_hashes(values):
     Method that generate a `unique_id_from_tool` data from the `fingerprints` attribute.
      - for now, we take the value of the last version of the first hash method.
     """
-    fingerprints = dict()
+    fingerprints = {}
     for key in values:
         if "/" in key:
             key_method = key.split("/")[-2]

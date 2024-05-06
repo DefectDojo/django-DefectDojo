@@ -1,0 +1,734 @@
+{
+    "task_id": "3",
+    "scan_status": "auditing",
+    "scan_metrics": {
+        "crawl_requests_made": 90,
+        "crawl_network_errors": 0,
+        "crawl_unique_locations_visited": 19,
+        "crawl_requests_queued": 0,
+        "audit_queue_items_completed": 0,
+        "audit_queue_items_waiting": 27,
+        "audit_requests_made": 4336,
+        "audit_network_errors": 0,
+        "issue_events": 1,
+        "crawl_and_audit_caption": "Auditing. Estimating time remaining...",
+        "crawl_and_audit_progress": 0
+    },
+    "message": "",
+    "issue_events": [
+        {
+            "id": "0",
+            "type": "issue_found",
+            "issue": {
+                "name": "Robots.txt file",
+                "type_index": 6292992,
+                "serial_number": "3242427303404163072",
+                "origin": "https://juice-shop.herokuapp.com",
+                "path": "/robots.txt",
+                "severity": "info",
+                "confidence": "certain",
+                "description": "The web server contains a robots.txt file.",
+                "caption": "/robots.txt",
+                "evidence": [
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "L2Z0cC9janVtLmJhaw==",
+                                    "length": 13
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "IEhUVFAvMS4xDQpIb3N0OiBqdWljZS1zaG9wLmhlcm9rdWFwcC5jb20NCkFjY2VwdC1FbmNvZGluZzogZ3ppcCwgZGVmbGF0ZQ0KQWNjZXB0OiAqLyoNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMsZW4tR0I7cT0wLjksZW47cT0wLjgNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS84Ni4wLjQyNDAuMTgzIFNhZmFyaS81MzcuMzYNCkNvbm5lY3Rpb246IGNsb3NlDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTANClJlZmVyZXI6IGh0dHBzOi8vanVpY2Utc2hvcC5oZXJva3VhcHAuY29tL2Z0cC8NCkNvb2tpZTogaW89blNTbUFxS1RCaDBnNGhEOEFBYVQ7IGxhbmd1YWdlPWVuOyB3ZWxjb21lYmFubmVyX3N0YXR1cz1kaXNtaXNzDQoNCg==",
+                                    "length": 433
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEg",
+                                    "length": 9
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "NDAz",
+                                    "length": 3
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "IEZvcmJpZGRlbg0KU2VydmVyOiBDb3dib3kNCkNvbm5lY3Rpb246IGNsb3NlDQpBY2Nlc3MtQ29udHJvbC1BbGxvdy1PcmlnaW46ICoNClgtQ29udGVudC1UeXBlLU9wdGlvbnM6IG5vc25pZmYNClgtRnJhbWUtT3B0aW9uczogU0FNRU9SSUdJTg0KRmVhdHVyZS1Qb2xpY3k6IHBheW1lbnQgJ3NlbGYnDQpDb250ZW50LVR5cGU6IA==",
+                                    "length": 187
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "dGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04",
+                                    "length": 24
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6Mjc6MzUgR01UDQpWaWE6IDEuMSB2ZWd1cg0KQ29udGVudC1MZW5ndGg6IA==",
+                                    "length": 94
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "MTg1Mg==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "DQoNCjxodG1sPgogIDxoZWFkPgogICAgPG1ldGEgY2hhcnNldD0ndXRmLTgnPiAKICAgIDx0aXRsZT4=",
+                                    "length": 59
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "RXJyb3I6IE9ubHkgLm1kIGFuZCAucGRmIGZpbGVzIGFyZSBhbGxvd2VkIQ==",
+                                    "length": 43
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC90aXRsZT4KICAgIDxzdHlsZT4qIHsKICBtYXJnaW46IDA7CiAgcGFkZGluZzogMDsKICBvdXRsaW5lOiAwOwp9Cgpib2R5IHsKICBwYWRkaW5nOiA4MHB4IDEwMHB4OwogIGZv",
+                                    "length": 102
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 577
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PGgxPg==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "T1dBU1AgSnVpY2UgU2hvcCAoRXhwcmVzcyBeNC4xNy4xKQ==",
+                                    "length": 34
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC9oMT4=",
+                                    "length": 5
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 861
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PGxpPg==",
+                                    "length": 4
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "ICZuYnNwOyAmbmJzcDthdCAvYXBwL25vZGVfbW9kdWxlcy9zZXJ2ZS1pbmRleC9pbmRleC5qczoxMzU6MTY=",
+                                    "length": 62
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC9saT48bGk+",
+                                    "length": 9
+                                },
+                                {
+                                    "type": "HighlightSegment",
+                                    "data": "ICZuYnNwOyAmbmJzcDthdCBGU1JlcUNhbGxiYWNrLm9uY29tcGxldGUgKGZzLmpzOjE4MzoyMSk=",
+                                    "length": 56
+                                },
+                                {
+                                    "type": "DataSegment",
+                                    "data": "PC9saT4=",
+                                    "length": 5
+                                },
+                                {
+                                    "type": "SnipSegment",
+                                    "length": 35
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    },
+                    {
+                        "type": "FirstOrderEvidence",
+                        "detail": {
+                            "band_flags": [
+                                "in_band"
+                            ]
+                        },
+                        "request_response": {
+                            "url": "https://juice-shop.herokuapp.com/robots.txt",
+                            "request": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "R0VUIA==",
+                                    "length": 4
+                                }
+                            ],
+                            "response": [
+                                {
+                                    "type": "DataSegment",
+                                    "data": "SFRUUC8xLjEgMjAwIE9LDQpTZXJ2ZXI6IENvd2JveQ0KQ29ubmVjdGlvbjogY2xvc2UNCkFjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbjogKg0KWC1Db250ZW50LVR5cGUtT3B0aW9uczogbm9zbmlmZg0KWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lODQpGZWF0dXJlLVBvbGljeTogcGF5bWVudCAnc2VsZicNCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1MZW5ndGg6IDI4DQpFdGFnOiBXLyIxYy04SGdGNm1OeWhzU0ZLMHBhc2NDOXVCMHdqWDAiDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkRhdGU6IFR1ZSwgMTkgSmFuIDIwMjEgMTQ6MjQ6NTEgR01UDQpWaWE6IDEuMSB2ZWd1cg0KDQpVc2VyLWFnZW50OiAqCkRpc2FsbG93OiAvZnRw",
+                                    "length": 387
+                                }
+                            ],
+                            "was_redirect_followed": false,
+                            "request_time": "1611066291482"
+                        }
+                    }
+                ],
+                "internal_data": "eyJmbGFncyI6MCwidmFyaWFudCI6MCwiaXNzdWVfZGV0YWlsc19tYXAiOnt9fQ=="
+            }
+        }
+    ]
+}

@@ -4,7 +4,7 @@ import json
 from dojo.models import Finding
 
 
-class GitleaksParser(object):
+class GitleaksParser:
     """
     A class that can be used to parse the Gitleaks JSON report files
     """
@@ -25,9 +25,9 @@ class GitleaksParser(object):
         issues = json.load(filename)
         # empty report are just null object
         if issues is None:
-            return list()
+            return []
 
-        dupes = dict()
+        dupes = {}
 
         for issue in issues:
             if issue.get("rule"):
@@ -35,7 +35,8 @@ class GitleaksParser(object):
             elif issue.get("Description"):
                 self.get_finding_current(issue, test, dupes)
             else:
-                raise ValueError("Format is not recognized for Gitleaks")
+                msg = "Format is not recognized for Gitleaks"
+                raise ValueError(msg)
 
         return list(dupes.values())
 

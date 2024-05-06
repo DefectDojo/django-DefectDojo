@@ -10,17 +10,19 @@ class RiskReconAPI:
         self.toe_map = {}
 
         if not self.key:
-            raise Exception(
+            msg = (
                 "Please supply a Risk Recon API key. \n"
                 "This can be generated in the system admin panel. \n"
                 "See https://documentation.defectdojo.com/integrations/import/#risk-recon-api-importer \n"
             )
+            raise Exception(msg)
         if not self.url:
-            raise Exception(
+            msg = (
                 "Please supply a Risk Recon API url. \n"
                 "A general url is https://api.riskrecon.com/v1/ \n"
                 "See https://documentation.defectdojo.com/integrations/import/#risk-recon-api-importer \n"
             )
+            raise Exception(msg)
         if self.url.endswith("/"):
             self.url = endpoint[:-1]
         self.session = requests.Session()
@@ -29,7 +31,7 @@ class RiskReconAPI:
 
     def map_toes(self):
         response = self.session.get(
-            url="{}/toes".format(self.url),
+            url=f"{self.url}/toes",
             headers={"accept": "application/json", "Authorization": self.key},
         )
 
@@ -50,11 +52,8 @@ class RiskReconAPI:
                     filters = comps.get(name, None)
                     self.toe_map[toe_id] = filters if filters else self.data
         else:
-            raise Exception(
-                "Unable to query Target of Evaluations due to {} - {}".format(
-                    response.status_code, response.content
-                )
-            )
+            msg = f"Unable to query Target of Evaluations due to {response.status_code} - {response.content}"
+            raise Exception(msg)
 
     def filter_finding(self, finding):
         filters = self.toe_map[finding["toe_id"]]
@@ -71,7 +70,7 @@ class RiskReconAPI:
     def get_findings(self):
         for toe in self.toe_map.keys():
             response = self.session.get(
-                url="{}/findings/{}".format(self.url, toe),
+                url=f"{self.url}/findings/{toe}",
                 headers={
                     "accept": "application/json",
                     "Authorization": self.key,
@@ -84,8 +83,5 @@ class RiskReconAPI:
                     if not self.filter_finding(finding):
                         self.findings.append(finding)
             else:
-                raise Exception(
-                    "Unable to collect findings from toe: {} due to {} - {}".format(
-                        toe, response.status_code, response.content
-                    )
-                )
+                msg = f"Unable to collect findings from toe: {toe} due to {response.status_code} - {response.content}"
+                raise Exception(msg)
