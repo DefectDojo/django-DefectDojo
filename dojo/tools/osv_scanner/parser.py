@@ -1,8 +1,9 @@
 import json
+
 from dojo.models import Finding
 
 
-class OSVScannerParser(object):
+class OSVScannerParser:
 
     def get_scan_types(self):
         return ["OSV Scan"]
@@ -28,7 +29,7 @@ class OSVScannerParser(object):
             data = json.load(file)
         except json.decoder.JSONDecodeError:
             return []
-        findings = list()
+        findings = []
         for result in data["results"]:
             source_path = result["source"]["path"]
             source_type = result["source"]["type"]
@@ -37,7 +38,7 @@ class OSVScannerParser(object):
                 package_version = package["package"]["version"]
                 package_ecosystem = package["package"]["ecosystem"]
                 for vulnerability in package["vulnerabilities"]:
-                    vulnerabilityid = vulnerability["id"]
+                    vulnerabilityid = vulnerability.get("id", "")
                     vulnerabilitysummary = vulnerability.get("summary", "")
                     vulnerabilitydetails = vulnerability["details"]
                     vulnerabilitypackagepurl = vulnerability["affected"][0].get("package", "")
@@ -65,9 +66,11 @@ class OSVScannerParser(object):
                         component_name=package_name,
                         component_version=package_version,
                         cwe=cwe,
-                        cve=vulnerabilityid,
                         file_path=source_path,
                         references=reference,
                     )
+                    if vulnerabilityid != "":
+                        finding.unsaved_vulnerability_ids = []
+                        finding.unsaved_vulnerability_ids.append(vulnerabilityid)
                     findings.append(finding)
         return findings

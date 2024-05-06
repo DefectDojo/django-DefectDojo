@@ -9,11 +9,11 @@ class Sql_GroupConcat(Aggregate):
         self, expression, separator, distinct=False, ordering=None, **extra
     ):
         self.separator = separator
-        super(Sql_GroupConcat, self).__init__(
+        super().__init__(
             expression,
             distinct="DISTINCT " if distinct else "",
-            ordering=" ORDER BY %s" % ordering if ordering is not None else "",
-            separator=' SEPARATOR "%s"' % separator,
+            ordering=f" ORDER BY {ordering}" if ordering is not None else "",
+            separator=f' SEPARATOR "{separator}"',
             output_field=CharField(),
             **extra
         )
@@ -23,7 +23,7 @@ class Sql_GroupConcat(Aggregate):
             compiler,
             connection,
             template="%(function)s(%(distinct)s%(expressions)s%(ordering)s%(separator)s)",
-            separator=" SEPARATOR '%s'" % self.separator,
+            separator=f" SEPARATOR '{self.separator}'",
         )
 
     def as_sql(self, compiler, connection, **extra):

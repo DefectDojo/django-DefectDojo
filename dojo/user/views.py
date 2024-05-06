@@ -1,45 +1,55 @@
 import contextlib
 import logging
-from crum import get_current_user
 from datetime import timedelta
 
+import hyperlink
+from crum import get_current_user
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.contrib.auth import logout
-from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.contrib.auth.views import LoginView, PasswordResetView
 from django.contrib.humanize.templatetags.humanize import naturaltime
-from django.core.mail import get_connection
-from django.core.mail.backends.smtp import EmailBackend
 from django.core import serializers
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.mail import get_connection
+from django.core.mail.backends.smtp import EmailBackend
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Q
 from django.db.models.deletion import RestrictedError
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.http import urlencode
-from django.utils.translation import gettext as _
 from django.utils.timezone import now
-
+from django.utils.translation import gettext as _
 from rest_framework.authtoken.models import Token
 
-from dojo.filters import UserFilter
-from dojo.forms import DojoUserForm, ChangePasswordForm, AddDojoUserForm, EditDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
-    Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm, GlobalRoleForm, Add_Group_Member_UserForm, ConfigurationPermissionsForm
-from dojo.models import Dojo_User, Alerts, Product_Member, Product_Type_Member, Dojo_Group_Member
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
-from dojo.product.queries import get_authorized_product_members_for_user
-from dojo.group.queries import get_authorized_group_members_for_user
-from dojo.product_type.queries import get_authorized_product_type_members_for_user
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.decorators import dojo_ratelimit
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
-
-import hyperlink
+from dojo.filters import UserFilter
+from dojo.forms import (
+    Add_Group_Member_UserForm,
+    Add_Product_Member_UserForm,
+    Add_Product_Type_Member_UserForm,
+    AddDojoUserForm,
+    APIKeyForm,
+    ChangePasswordForm,
+    ConfigurationPermissionsForm,
+    DeleteUserForm,
+    DojoUserForm,
+    EditDojoUserForm,
+    GlobalRoleForm,
+    UserContactInfoForm,
+)
+from dojo.group.queries import get_authorized_group_members_for_user
+from dojo.models import Alerts, Dojo_Group_Member, Dojo_User, Product_Member, Product_Type_Member
+from dojo.product.queries import get_authorized_product_members_for_user
+from dojo.product_type.queries import get_authorized_product_type_members_for_user
+from dojo.utils import add_breadcrumb, get_page_items, get_system_setting
 
 logger = logging.getLogger(__name__)
 
@@ -617,7 +627,8 @@ class DojoForgotUsernameForm(PasswordResetForm):
                 connection.open()
                 connection.close()
         except Exception:
-            raise ValidationError("SMTP server is not configured correctly...")
+            msg = "SMTP server is not configured correctly..."
+            raise ValidationError(msg)
 
 
 class DojoPasswordResetForm(PasswordResetForm):
@@ -643,7 +654,8 @@ class DojoPasswordResetForm(PasswordResetForm):
                 connection.close()
         except Exception as e:
             logger.error(f"SMTP Server Connection Failure: {str(e)}")
-            raise ValidationError("SMTP server is not configured correctly...")
+            msg = "SMTP server is not configured correctly..."
+            raise ValidationError(msg)
 
 
 class DojoPasswordResetView(PasswordResetView):

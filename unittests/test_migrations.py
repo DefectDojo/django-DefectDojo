@@ -1,8 +1,8 @@
 import datetime
 from unittest import skip
 
-from django_test_migrations.contrib.unittest_case import MigratorTestCase
 from django.utils import timezone
+from django_test_migrations.contrib.unittest_case import MigratorTestCase
 
 
 @skip("Outdated - this class was testing some version of migration; it is not needed anymore")

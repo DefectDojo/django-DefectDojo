@@ -14,7 +14,7 @@ from django.utils.safestring import mark_safe
 from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups, ReportFindingFilter
 from dojo.forms import CustomReportOptionsForm
 from dojo.models import Endpoint, Finding
-from dojo.utils import get_page_items, get_words_for_field, get_system_setting
+from dojo.utils import get_page_items, get_system_setting, get_words_for_field
 
 """
 Widgets are content sections that can be included on reports.  The report builder will allow any number of widgets
@@ -30,7 +30,8 @@ class CustomReportJsonForm(forms.Form):
         try:
             json.loads(jdata)
         except:
-            raise forms.ValidationError("Invalid data in json")
+            msg = "Invalid data in json"
+            raise forms.ValidationError(msg)
         return jdata
 
 
@@ -57,7 +58,7 @@ class Div(form_widget):
         default_attrs = {'style': 'width:100%;min-height:400px'}
         if attrs:
             default_attrs.update(attrs)
-        super(Div, self).__init__(default_attrs)
+        super().__init__(default_attrs)
 
     def render(self, name, value, attrs=None, renderer=None):
         if value is None:
@@ -109,7 +110,7 @@ class WYSIWYGContentForm(forms.Form):
 
 
 # base Widget class others will inherit from
-class Widget(object):
+class Widget:
     def __init__(self, *args, **kwargs):
         self.title = 'Base Widget'
         self.form = None
@@ -130,7 +131,7 @@ class Widget(object):
 
 class PageBreak(Widget):
     def __init__(self, *args, **kwargs):
-        super(PageBreak, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.title = 'Page Break'
         self.form = None
         self.multiple = "true"
@@ -151,7 +152,7 @@ class PageBreak(Widget):
 
 class ReportOptions(Widget):
     def __init__(self, *args, **kwargs):
-        super(ReportOptions, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.title = 'Report Options'
         self.form = CustomReportOptionsForm()
         self.extra_help = "Choose additional report options.  These will apply to the overall report."
@@ -172,7 +173,7 @@ class ReportOptions(Widget):
 
 class CoverPage(Widget):
     def __init__(self, *args, **kwargs):
-        super(CoverPage, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.title = 'Cover Page'
         self.form = CoverPageForm()
         self.help_text = "The cover page includes a page break after its content."
@@ -197,7 +198,7 @@ class CoverPage(Widget):
 
 class TableOfContents(Widget):
     def __init__(self, *args, **kwargs):
-        super(TableOfContents, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.title = 'Table Of Contents'
         self.form = TableOfContentsForm()
         self.help_text = "The table of contents includes a page break after its content."
@@ -220,7 +221,7 @@ class TableOfContents(Widget):
 
 class WYSIWYGContent(Widget):
     def __init__(self, *args, **kwargs):
-        super(WYSIWYGContent, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.title = 'WYSIWYG Content'
         self.form = WYSIWYGContentForm()
         self.multiple = 'true'
@@ -246,16 +247,12 @@ class FindingList(Widget):
     def __init__(self, *args, **kwargs):
         if 'request' in kwargs:
             self.request = kwargs.get('request')
-        if 'user_id' in kwargs:
-            self.user_id = kwargs.get('user_id')
-
-        if 'host' in kwargs:
-            self.host = kwargs.get('host')
 
         if 'findings' in kwargs:
             self.findings = kwargs.get('findings')
         else:
-            raise Exception("Need to instantiate with finding queryset.")
+            msg = "Need to instantiate with finding queryset."
+            raise Exception(msg)
 
         if 'finding_notes' in kwargs:
             self.finding_notes = kwargs.get('finding_notes')
@@ -267,7 +264,7 @@ class FindingList(Widget):
         else:
             self.finding_images = False
 
-        super(FindingList, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.title = 'Finding List'
         if hasattr(self.findings, 'form'):
@@ -288,10 +285,8 @@ class FindingList(Widget):
     def get_asciidoc(self):
         asciidoc = render_to_string("dojo/custom_asciidoc_report_findings.html",
                                     {"findings": self.findings.qs,
-                                     "host": self.host,
                                      "include_finding_notes": self.finding_notes,
-                                     "include_finding_images": self.finding_images,
-                                     "user_id": self.user_id})
+                                     "include_finding_images": self.finding_images, })
         return mark_safe(asciidoc)
 
     def get_html(self):
@@ -299,9 +294,7 @@ class FindingList(Widget):
                                 {"title": self.title,
                                  "findings": self.findings.qs,
                                  "include_finding_notes": self.finding_notes,
-                                 "include_finding_images": self.finding_images,
-                                 "host": self.host,
-                                 "user_id": self.user_id})
+                                 "include_finding_images": self.finding_images, })
         return mark_safe(html)
 
     def get_option_form(self):
@@ -321,16 +314,12 @@ class EndpointList(Widget):
     def __init__(self, *args, **kwargs):
         if 'request' in kwargs:
             self.request = kwargs.get('request')
-        if 'user_id' in kwargs:
-            self.user_id = kwargs.get('user_id')
-
-        if 'host' in kwargs:
-            self.host = kwargs.get('host')
 
         if 'endpoints' in kwargs:
             self.endpoints = kwargs.get('endpoints')
         else:
-            raise Exception("Need to instantiate with endpoint queryset.")
+            msg = "Need to instantiate with endpoint queryset."
+            raise Exception(msg)
 
         if 'finding_notes' in kwargs:
             self.finding_notes = kwargs.get('finding_notes')
@@ -342,7 +331,7 @@ class EndpointList(Widget):
         else:
             self.finding_images = False
 
-        super(EndpointList, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.title = 'Endpoint List'
         self.form = self.endpoints.form
@@ -360,18 +349,14 @@ class EndpointList(Widget):
                                 {"title": self.title,
                                  "endpoints": self.endpoints.qs,
                                  "include_finding_notes": self.finding_notes,
-                                 "include_finding_images": self.finding_images,
-                                 "host": self.host,
-                                 "user_id": self.user_id})
+                                 "include_finding_images": self.finding_images, })
         return mark_safe(html)
 
     def get_asciidoc(self):
         asciidoc = render_to_string("dojo/custom_asciidoc_report_endpoints.html",
                                     {"endpoints": self.endpoints.qs,
-                                     "host": self.host,
                                      "include_finding_notes": self.finding_notes,
-                                     "include_finding_images": self.finding_images,
-                                     "user_id": self.user_id})
+                                     "include_finding_images": self.finding_images, })
         return mark_safe(asciidoc)
 
     def get_option_form(self):
@@ -385,8 +370,7 @@ class EndpointList(Widget):
         return mark_safe(html)
 
 
-def report_widget_factory(json_data=None, request=None, user=None, finding_notes=False, finding_images=False,
-                          host=None):
+def report_widget_factory(json_data=None, request=None, finding_notes=False, finding_images=False):
     selected_widgets = OrderedDict()
     widgets = json.loads(json_data)
     for idx, widget in enumerate(widgets):
@@ -410,9 +394,8 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
             filter_string_matching = get_system_setting("filter_string_matching", False)
             filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
             endpoints = filter_class(d, queryset=endpoints, user=request.user)
-            user_id = user.id if user is not None else None
             endpoints = EndpointList(request=request, endpoints=endpoints, finding_notes=finding_notes,
-                                     finding_images=finding_images, host=host, user_id=user_id)
+                                     finding_images=finding_images)
 
             selected_widgets[list(widget.keys())[0] + '-' + str(idx)] = endpoints
 
@@ -426,11 +409,9 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
                     d[item['name']] = item['value']
 
             findings = ReportFindingFilter(d, queryset=findings)
-            user_id = user.id if user is not None else None
             selected_widgets[list(widget.keys())[0] + '-' + str(idx)] = FindingList(request=request, findings=findings,
                                                                               finding_notes=finding_notes,
-                                                                              finding_images=finding_images,
-                                                                              host=host, user_id=user_id)
+                                                                              finding_images=finding_images)
 
         if list(widget.keys())[0] == 'wysiwyg-content':
             wysiwyg_content = WYSIWYGContent(request=request)

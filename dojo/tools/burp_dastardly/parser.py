@@ -1,11 +1,13 @@
 import logging
+
 from defusedxml import ElementTree as etree
+
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
 
-class BurpDastardlyParser(object):
+class BurpDastardlyParser:
 
     def get_scan_types(self):
         return ["Burp Dastardly Scan"]
@@ -23,7 +25,7 @@ class BurpDastardlyParser(object):
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):
-        items = list()
+        items = []
         for node in tree.findall("testsuite"):
             if int(node.attrib["failures"]) != 0:
                 name = node.attrib["name"]

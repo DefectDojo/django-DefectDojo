@@ -1,12 +1,10 @@
 from django import template
-from django.utils.safestring import mark_safe as safe
 from django.utils.html import escape
-from urllib.parse import urlencode
+from django.utils.safestring import mark_safe as safe
 from django.utils.translation import gettext as _
 
 from dojo.authorization.roles_permissions import Permissions
 from dojo.product_type.queries import get_authorized_product_types
-
 
 register = template.Library()
 
@@ -65,11 +63,12 @@ def dojo_sort(request, display='Name', value='title', default=None):
     icon += ' dd-sort"></i>'
     dict_ = request.GET.copy()
     dict_[field] = value
-    link = f'<a title="{title}" href="?{escape(urlencode(dict_))}">{_(display)}&nbsp;{icon}</a>'
+    # QueryDict.urlencode() used here to properly handle cases when keys have multiple values
+    link = f'<a title="{title}" href="?{escape(dict_.urlencode())}">{_(display)}&nbsp;{icon}</a>'
     return safe(link)
 
 
-class PaginationNav(object):
+class PaginationNav:
     def __init__(self, page_number=None, display=None, is_current=False):
         self.page_number = page_number
         self.is_current = is_current

@@ -7,7 +7,7 @@ from defusedxml.ElementTree import parse
 from dojo.models import Endpoint, Finding
 
 
-class MicrofocusWebinspectParser(object):
+class MicrofocusWebinspectParser:
     """Micro Focus Webinspect XML report parser"""
 
     def get_scan_types(self):
@@ -24,11 +24,10 @@ class MicrofocusWebinspectParser(object):
         # get root of tree.
         root = tree.getroot()
         if "Sessions" not in root.tag:
-            raise ValueError(
-                "This doesn't seem to be a valid Webinspect xml file."
-            )
+            msg = "This doesn't seem to be a valid Webinspect xml file."
+            raise ValueError(msg)
 
-        dupes = dict()
+        dupes = {}
         for session in root:
             url = session.find("URL").text
             endpoint = Endpoint.from_uri(url)
@@ -82,7 +81,7 @@ class MicrofocusWebinspectParser(object):
 
                 # make dupe hash key
                 dupe_key = hashlib.sha256(
-                    f"{finding.description}|{finding.title}|{finding.severity}".encode("utf-8")
+                    f"{finding.description}|{finding.title}|{finding.severity}".encode()
                 ).hexdigest()
                 # check if dupes are present.
                 if dupe_key in dupes:

@@ -1,9 +1,9 @@
 from django.core.management.base import BaseCommand
 from pytz import timezone
 
+import dojo.jira_link.helper as jira_helper
 from dojo.models import Finding
 from dojo.utils import get_system_setting
-import dojo.jira_link.helper as jira_helper
 
 locale = timezone(get_system_setting('time_zone'))
 

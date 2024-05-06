@@ -1,44 +1,65 @@
-from dojo.authorization.roles_permissions import Permissions
-from dojo.finding.queries import get_authorized_findings
-import re
 import binascii
-import os
+import calendar as tcalendar
 import hashlib
-import bleach
+import logging
 import mimetypes
-import hyperlink
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
+import os
+import re
 from calendar import monthrange
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
+
+import bleach
+import crum
+import hyperlink
 import vobject
-from dateutil.relativedelta import relativedelta, MO, SU
+from asteval import Interpreter
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from dateutil.parser import parse
+from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.core.paginator import Paginator
-from django.urls import get_resolver, reverse, get_script_prefix
-from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
+from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
+from django.db.models.query import QuerySet
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.http import HttpResponseRedirect
+from django.urls import get_resolver, get_script_prefix, reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from django.dispatch import receiver
-from django.db.models.signals import post_save
-from django.db.models.query import QuerySet
-import calendar as tcalendar
-from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
-from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Product, \
-    Test, User, Dojo_User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Dojo_Group_Member, NOTIFICATION_CHOICES
-from asteval import Interpreter
-from dojo.notifications.helper import create_notification
-import logging
-from django.contrib import messages
-from django.http import HttpResponseRedirect
-import crum
+
+from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
-from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
-
+from dojo.finding.queries import get_authorized_findings
+from dojo.github import (
+    add_external_issue_github,
+    close_external_issue_github,
+    reopen_external_issue_github,
+    update_external_issue_github,
+)
+from dojo.models import (
+    NOTIFICATION_CHOICES,
+    Benchmark_Type,
+    Dojo_Group_Member,
+    Dojo_User,
+    Endpoint,
+    Engagement,
+    Finding,
+    Finding_Group,
+    Finding_Template,
+    Language_Type,
+    Languages,
+    Notifications,
+    Product,
+    System_Settings,
+    Test,
+    User,
+)
+from dojo.notifications.helper import create_notification
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -136,7 +157,8 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         custom_filter = {'test': test}
 
     else:
-        raise ValueError('No product, engagement or test provided as argument.')
+        msg = 'No product, engagement or test provided as argument.'
+        raise ValueError(msg)
 
     deduplication_algorithm = finding.test.deduplication_algorithm
 
@@ -252,7 +274,7 @@ def are_endpoints_duplicates(new_finding, to_duplicate_finding):
     list1 = get_endpoints_as_url(new_finding)
     list2 = get_endpoints_as_url(to_duplicate_finding)
 
-    deduplicationLogger.debug("Starting deduplication by endpoint fields for finding {} with urls {} and finding {} with urls {}".format(new_finding.id, list1, to_duplicate_finding.id, list2))
+    deduplicationLogger.debug(f"Starting deduplication by endpoint fields for finding {new_finding.id} with urls {list1} and finding {to_duplicate_finding.id} with urls {list2}")
     if list1 == [] and list2 == []:
         return True
 
@@ -486,13 +508,17 @@ def set_duplicate(new_finding, existing_finding):
     deduplicationLogger.debug(f"existing_finding.status(): {existing_finding.id} {existing_finding.status()}")
     if existing_finding.duplicate:
         deduplicationLogger.debug('existing finding: %s:%s:duplicate=%s;duplicate_finding=%s', existing_finding.id, existing_finding.title, existing_finding.duplicate, existing_finding.duplicate_finding.id if existing_finding.duplicate_finding else 'None')
-        raise Exception("Existing finding is a duplicate")
+        msg = "Existing finding is a duplicate"
+        raise Exception(msg)
     if existing_finding.id == new_finding.id:
-        raise Exception("Can not add duplicate to itself")
+        msg = "Can not add duplicate to itself"
+        raise Exception(msg)
     if is_duplicate_reopen(new_finding, existing_finding):
-        raise Exception("Found a regression. Ignore this so that a new duplicate chain can be made")
+        msg = "Found a regression. Ignore this so that a new duplicate chain can be made"
+        raise Exception(msg)
     if new_finding.duplicate and finding_mitigated(existing_finding):
-        raise Exception("Skip this finding as we do not want to attach a new duplicate to a mitigated finding")
+        msg = "Skip this finding as we do not want to attach a new duplicate to a mitigated finding"
+        raise Exception(msg)
 
     deduplicationLogger.debug('Setting new finding ' + str(new_finding.id) + ' as a duplicate of existing finding ' + str(existing_finding.id))
     new_finding.duplicate = True
@@ -786,8 +812,8 @@ def get_punchcard_data(objs, start_date, weeks, view='Finding'):
         # map from python to javascript, do not use week numbers or day numbers from database.
         day_offset = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1, 5: 0, 6: 6}
 
-        punchcard = list()
-        ticks = list()
+        punchcard = []
+        ticks = []
         highest_day_count = 0
         tick = 0
         day_counts = [0, 0, 0, 0, 0, 0, 0]
@@ -870,8 +896,8 @@ def get_period_counts_legacy(findings,
                              period_interval,
                              start_date,
                              relative_delta='months'):
-    opened_in_period = list()
-    accepted_in_period = list()
+    opened_in_period = []
+    accepted_in_period = []
     opened_in_period.append(
         ['Timestamp', 'Date', 'S0', 'S1', 'S2', 'S3', 'Total', 'Closed'])
     accepted_in_period.append(
@@ -965,9 +991,9 @@ def get_period_counts(findings,
 
     start_date = datetime(start_date.year, start_date.month, start_date.day, tzinfo=tz)
 
-    opened_in_period = list()
-    active_in_period = list()
-    accepted_in_period = list()
+    opened_in_period = []
+    active_in_period = []
+    accepted_in_period = []
     opened_in_period.append(
         ['Timestamp', 'Date', 'S0', 'S1', 'S2', 'S3', 'Total', 'Closed'])
     active_in_period.append(
@@ -1174,7 +1200,7 @@ def opened_in_period(start_date, end_date, **kwargs):
     return oip
 
 
-class FileIterWrapper(object):
+class FileIterWrapper:
     def __init__(self, flo, chunk_size=1024**2):
         self.flo = flo
         self.chunk_size = chunk_size
@@ -1228,7 +1254,7 @@ def build_query(query_string, search_fields):
     for term in terms:
         or_query = None  # Query to search for a given term in each field
         for field_name in search_fields:
-            q = Q(**{"%s__icontains" % field_name: term})
+            q = Q(**{f"{field_name}__icontains": term})
 
             if or_query:
                 or_query = or_query | q
@@ -1288,23 +1314,21 @@ def handle_uploaded_threat(f, eng):
     if not os.path.isdir(settings.MEDIA_ROOT + '/threat/'):
         # Create the folder
         os.mkdir(settings.MEDIA_ROOT + '/threat/')
-    with open(settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension),
+    with open(settings.MEDIA_ROOT + f'/threat/{eng.id}{extension}',
               'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
-    eng.tmodel_path = settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id,
-                                                              extension)
+    eng.tmodel_path = settings.MEDIA_ROOT + f'/threat/{eng.id}{extension}'
     eng.save()
 
 
 def handle_uploaded_selenium(f, cred):
     _name, extension = os.path.splitext(f.name)
-    with open(settings.MEDIA_ROOT + '/selenium/%s%s' % (cred.id, extension),
+    with open(settings.MEDIA_ROOT + f'/selenium/{cred.id}{extension}',
               'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
-    cred.selenium_script = settings.MEDIA_ROOT + '/selenium/%s%s' % (cred.id,
-                                                                     extension)
+    cred.selenium_script = settings.MEDIA_ROOT + f'/selenium/{cred.id}{extension}'
     cred.save()
 
 
@@ -1360,7 +1384,7 @@ def reopen_external_issue(find, note, external_issue_provider, **kwargs):
 def process_notifications(request, note, parent_url, parent_title):
     regex = re.compile(r'(?:\A|\s)@(\w+)\b')
 
-    usernames_to_check = set([un.lower() for un in regex.findall(note.entry)])
+    usernames_to_check = set(un.lower() for un in regex.findall(note.entry))  # noqa: C401
 
     users_to_notify = [
         User.objects.filter(username=username).get()
@@ -1376,7 +1400,7 @@ def process_notifications(request, note, parent_url, parent_title):
         event='user_mentioned',
         section=parent_title,
         note=note,
-        title='%s jotted a note' % request.user,
+        title=f'{request.user} jotted a note',
         url=parent_url,
         icon='commenting',
         recipients=users_to_notify)
@@ -1514,8 +1538,7 @@ def calculate_grade(product, *args, **kwargs):
                 low = severity_count['numerical_severity__count']
         aeval = Interpreter()
         aeval(system_settings.product_grade)
-        grade_product = "grade_product(%s, %s, %s, %s)" % (
-            critical, high, medium, low)
+        grade_product = f"grade_product({critical}, {high}, {medium}, {low})"
         product.prod_numeric_grade = aeval(grade_product)
         super(Product, product).save()
 
@@ -1562,7 +1585,7 @@ def get_work_days(start: date, end: date):
 
 
 # Used to display the counts and enabled tabs in the product view
-class Product_Tab():
+class Product_Tab:
     def __init__(self, product, title=None, tab=None):
         self.product = product
         self.title = title
@@ -1755,8 +1778,7 @@ def is_safe_url(url):
         from django.utils.http import url_has_allowed_host_and_scheme
     except ImportError:
         # django < 3
-        from django.utils.http import \
-            is_safe_url as url_has_allowed_host_and_scheme
+        from django.utils.http import is_safe_url as url_has_allowed_host_and_scheme
 
     return url_has_allowed_host_and_scheme(url, allowed_hosts=None)
 
@@ -1789,7 +1811,8 @@ def redirect(request, redirect_to):
     """Only allow redirects to allowed_hosts to prevent open redirects"""
     if is_safe_url(redirect_to):
         return HttpResponseRedirect(redirect_to)
-    raise ValueError('invalid redirect, host and scheme not in allowed_hosts')
+    msg = 'invalid redirect, host and scheme not in allowed_hosts'
+    raise ValueError(msg)
 
 
 def file_size_mb(file_obj):
@@ -1855,7 +1878,7 @@ def sla_compute_and_notify(*args, **kwargs):
             combined_notifications[pt] = {p: {kind: [notification]}}
 
     def _notification_title_for_finding(finding, kind, sla_age):
-        title = "Finding %s - " % (finding.id)
+        title = f"Finding {finding.id} - "
         if kind == 'breached':
             abs_sla_age = abs(sla_age)
             period = "day"
@@ -1897,7 +1920,7 @@ def sla_compute_and_notify(*args, **kwargs):
                         findings_list.append(n.finding)
 
                     # producing a "combined" SLA breach notification
-                    title_combined = "SLA alert (%s): product type '%s', product '%s'" % (kind, pt, p)
+                    title_combined = f"SLA alert ({kind}): product type '{pt}', product '{p}'"
                     product = combined_notifications[pt][p][kind][0].finding.test.engagement.product
                     create_notification(
                         event='sla_breach_combined',
@@ -1921,20 +1944,14 @@ def sla_compute_and_notify(*args, **kwargs):
     try:
         if system_settings.enable_finding_sla:
             logger.info("About to process findings for SLA notifications.")
-            logger.debug("Active {}, Verified {}, Has JIRA {}, pre-breach {}, post-breach {}".format(
-                system_settings.enable_notify_sla_active,
-                system_settings.enable_notify_sla_active_verified,
-                system_settings.enable_notify_sla_jira_only,
-                settings.SLA_NOTIFY_PRE_BREACH,
-                settings.SLA_NOTIFY_POST_BREACH,
-            ))
+            logger.debug(f"Active {system_settings.enable_notify_sla_active}, Verified {system_settings.enable_notify_sla_active_verified}, Has JIRA {system_settings.enable_notify_sla_jira_only}, pre-breach {settings.SLA_NOTIFY_PRE_BREACH}, post-breach {settings.SLA_NOTIFY_POST_BREACH}")
 
             query = None
             if system_settings.enable_notify_sla_active_verified:
                 query = Q(active=True, verified=True, is_mitigated=False, duplicate=False)
             elif system_settings.enable_notify_sla_active:
                 query = Q(active=True, is_mitigated=False, duplicate=False)
-            logger.debug("My query: {}".format(query))
+            logger.debug(f"My query: {query}")
 
             no_jira_findings = {}
             if system_settings.enable_notify_sla_jira_only:
@@ -1967,7 +1984,7 @@ def sla_compute_and_notify(*args, **kwargs):
                 if (sla_age < 0) and (settings.SLA_NOTIFY_POST_BREACH < abs(sla_age)):
                     post_breach_no_notify_count += 1
                     # Skip finding notification if breached for too long
-                    logger.debug("Finding {} breached the SLA {} days ago. Skipping notifications.".format(finding.id, abs(sla_age)))
+                    logger.debug(f"Finding {finding.id} breached the SLA {abs(sla_age)} days ago. Skipping notifications.")
                     continue
 
                 do_jira_sla_comment = False
@@ -1981,29 +1998,26 @@ def sla_compute_and_notify(*args, **kwargs):
                     jira_count += 1
                     jira_instance = jira_helper.get_jira_instance(finding)
                     if jira_instance is not None:
-                        logger.debug("JIRA config for finding is {}".format(jira_instance))
+                        logger.debug(f"JIRA config for finding is {jira_instance}")
                         # global config or product config set, product level takes precedence
                         try:
                             # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
                             product_jira_sla_comment_enabled = jira_helper.get_jira_project(finding).product_jira_sla_notification
                         except Exception as e:
                             logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
-                            logger.error("Error is: {}".format(e))
+                            logger.error(f"Error is: {e}")
 
                         jiraconfig_sla_notification_enabled = jira_instance.global_jira_sla_notification
 
                         if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
-                            logger.debug("Global setting {} -- Product setting {}".format(
-                                jiraconfig_sla_notification_enabled,
-                                product_jira_sla_comment_enabled
-                            ))
+                            logger.debug(f"Global setting {jiraconfig_sla_notification_enabled} -- Product setting {product_jira_sla_comment_enabled}")
                             do_jira_sla_comment = True
-                            logger.debug("JIRA issue is {}".format(jira_issue.jira_key))
+                            logger.debug(f"JIRA issue is {jira_issue.jira_key}")
 
-                logger.debug("Finding {} has {} days left to breach SLA.".format(finding.id, sla_age))
+                logger.debug(f"Finding {finding.id} has {sla_age} days left to breach SLA.")
                 if (sla_age < 0):
                     post_breach_count += 1
-                    logger.info("Finding {} has breached by {} days.".format(finding.id, abs(sla_age)))
+                    logger.info(f"Finding {finding.id} has breached by {abs(sla_age)} days.")
                     abs_sla_age = abs(sla_age)
                     if not system_settings.enable_notify_sla_exponential_backoff or abs_sla_age == 1 or (abs_sla_age & (abs_sla_age - 1) == 0):
                         _add_notification(finding, 'breached')
@@ -2012,23 +2026,16 @@ def sla_compute_and_notify(*args, **kwargs):
                 # The finding is within the pre-breach period
                 elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
                     pre_breach_count += 1
-                    logger.info("Security SLA pre-breach warning for finding ID {}. Days remaining: {}".format(finding.id, sla_age))
+                    logger.info(f"Security SLA pre-breach warning for finding ID {finding.id}. Days remaining: {sla_age}")
                     _add_notification(finding, 'prebreach')
                 # The finding breaches the SLA today
                 elif (sla_age == 0):
                     at_breach_count += 1
-                    logger.info("Security SLA breach warning. Finding ID {} breaching today ({})".format(finding.id, sla_age))
+                    logger.info(f"Security SLA breach warning. Finding ID {finding.id} breaching today ({sla_age})")
                     _add_notification(finding, 'breaching')
 
             _create_notifications()
-            logger.info("SLA run results: Pre-breach: {}, at-breach: {}, post-breach: {}, post-breach-no-notify: {}, with-jira: {}, TOTAL: {}".format(
-                pre_breach_count,
-                at_breach_count,
-                post_breach_count,
-                post_breach_no_notify_count,
-                jira_count,
-                total_count
-            ))
+            logger.info(f"SLA run results: Pre-breach: {pre_breach_count}, at-breach: {at_breach_count}, post-breach: {post_breach_count}, post-breach-no-notify: {post_breach_no_notify_count}, with-jira: {jira_count}, TOTAL: {total_count}")
 
     except System_Settings.DoesNotExist:
         logger.info("Findings SLA is not enabled.")
@@ -2044,7 +2051,7 @@ def get_words_for_field(model, fieldname):
 
     if models is not None:
         words = [
-            word for field_value in models.order_by().filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (field_value.split() if field_value else []) if len(word) > 2
+            word for field_value in models.order_by().filter(**{f'{fieldname}__isnull': False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (field_value.split() if field_value else []) if len(word) > 2
         ]
     else:
         words = []
@@ -2087,10 +2094,11 @@ def get_object_or_none(klass, *args, **kwargs):
 
     if not hasattr(queryset, 'get'):
         klass__name = klass.__name__ if isinstance(klass, type) else klass.__class__.__name__
-        raise ValueError(
+        msg = (
             "First argument to get_object_or_None() must be a Model, Manager, "
-            "or QuerySet, not '%s'." % klass__name
+            f"or QuerySet, not '{klass__name}'."
         )
+        raise ValueError(msg)
     try:
         return queryset.get(*args, **kwargs)
     except queryset.model.DoesNotExist:
@@ -2113,10 +2121,11 @@ def get_last_object_or_none(klass, *args, **kwargs):
 
     if not hasattr(queryset, 'get'):
         klass__name = klass.__name__ if isinstance(klass, type) else klass.__class__.__name__
-        raise ValueError(
+        msg = (
             "First argument to get_last_object_or_None() must be a Model, Manager, "
-            "or QuerySet, not '%s'." % klass__name
+            f"or QuerySet, not '{klass__name}'."
         )
+        raise ValueError(msg)
     try:
         results = queryset.filter(*args, **kwargs).order_by('id')
         logger.debug('last_object_or_none: %s', results.query)
@@ -2169,7 +2178,8 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
         # get maximum, which is the first due to descending order
         last_id = models.first().id + 1
     else:
-        raise ValueError('order must be ''asc'' or ''desc''')
+        msg = 'order must be ''asc'' or ''desc'''
+        raise ValueError(msg)
     # use filter to make count fast on mysql
     total_count = models.filter(id__gt=0).count()
     logger.debug('%s found %d models for mass update:', log_prefix, total_count)
@@ -2214,7 +2224,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
 
 def to_str_typed(obj):
     """ for code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
-    return '%s: %s' % (type(obj), obj)
+    return f'{type(obj)}: {obj}'
 
 
 def get_product(obj):
@@ -2267,7 +2277,7 @@ def get_enabled_notifications_list():
     # Alerts need to enabled by default
     enabled = ['alert']
     for choice in NOTIFICATION_CHOICES:
-        if get_system_setting('enable_{}_notifications'.format(choice[0])):
+        if get_system_setting(f'enable_{choice[0]}_notifications'):
             enabled.append(choice[0])
     return enabled
 
@@ -2277,7 +2287,7 @@ def is_finding_groups_enabled():
     return get_system_setting("enable_finding_groups")
 
 
-class async_delete():
+class async_delete:
     def __init__(self, *args, **kwargs):
         self.mapping = {
             'Product_Type': [

@@ -1,10 +1,11 @@
-import unittest
 import sys
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
+import unittest
+
 from base_test_class import BaseTestCase
 from product_test import ProductTest, WaitForPageLoad
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import Select
 
 
 class FalsePositiveHistoryTest(BaseTestCase):

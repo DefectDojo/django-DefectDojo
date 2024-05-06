@@ -16,11 +16,8 @@ class BlackduckAPI:
                 timeout=120,
             )
         else:
-            raise ValueError(
-                "Authentication type {} not supported".format(
-                    tool_config.authentication_type
-                )
-            )
+            msg = f"Authentication type {tool_config.authentication_type} not supported"
+            raise ValueError(msg)
 
     # TODO
     # def test_connection(self):

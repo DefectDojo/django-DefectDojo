@@ -1,8 +1,9 @@
 from datetime import datetime
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
-class GuardDuty(object):
+class GuardDuty:
     def get_item(self, finding: dict, test):
         finding_id = finding.get("Id", "")
         title = finding.get("Title", "")
@@ -15,7 +16,7 @@ class GuardDuty(object):
         mitigations = finding.get("FindingProviderFields", {}).get("Types")
         for mitigate in mitigations:
             mitigation += mitigate + "\n"
-        mitigation += "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html"
+        mitigation += "[https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html)"
         active = True
         if finding.get("RecordState") == "ACTIVE":
             is_Mitigated = False
@@ -29,12 +30,16 @@ class GuardDuty(object):
                     mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
             else:
                 mitigated = datetime.utcnow()
-        description = f"This is a GuardDuty Finding\n{finding.get('Description', '')}"
-        description += f"SourceURL: {finding.get('SourceUrl', '')}\n"
-        description += f"AwsAccountId: {finding.get('AwsAccountId', '')}\n"
-        description += f"Region: {finding.get('Region', '')}\n"
+        description = f"This is a GuardDuty Finding\n{finding.get('Description', '')}" + "\n"
+        description += f"**AWS Finding ARN:** {finding_id}\n"
+        if finding.get('SourceUrl'):
+            sourceurl = "[" + finding.get('SourceUrl') + "](" + finding.get('SourceUrl') + ")"
+            description += f"**SourceURL:** {sourceurl}\n"
+        description += f"**AwsAccountId:** {finding.get('AwsAccountId', '')}\n"
+        description += f"**Region:** {finding.get('Region', '')}\n"
+        description += f"**Generator ID:** {finding.get('GeneratorId', '')}\n"
         title_suffix = ""
-        hosts = list()
+        hosts = []
         for resource in finding.get("Resources", []):
             component_name = resource.get("Type")
             if component_name in ("AwsEcrContainerImage", "AwsEc2Instance"):
@@ -73,7 +78,7 @@ class GuardDuty(object):
             dynamic_finding=False,
             component_name=component_name,
         )
-        result.unsaved_endpoints = list()
+        result.unsaved_endpoints = []
         result.unsaved_endpoints.extend(hosts)
         if epss_score is not None:
             result.epss_score = epss_score

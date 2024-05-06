@@ -7,7 +7,7 @@ from defusedxml import ElementTree
 from dojo.models import Finding
 
 
-class VCGFinding(object):
+class VCGFinding:
     def get_finding_severity(self):
         return self.priority_mapping[self.priority]
 
@@ -47,7 +47,7 @@ class VCGFinding(object):
         self.filename = ""
         self.line = ""
         self.code_line = ""
-        self.priority_mapping = dict()
+        self.priority_mapping = {}
         self.priority_mapping[1] = "Critical"
         self.priority_mapping[2] = "High"
         self.priority_mapping[3] = "Medium"
@@ -57,7 +57,7 @@ class VCGFinding(object):
         self.priority_mapping[7] = "Info"
 
 
-class VCGXmlParser(object):
+class VCGXmlParser:
     @staticmethod
     def get_field_from_xml(issue, field):
         if (
@@ -101,7 +101,7 @@ class VCGXmlParser(object):
         return finding
 
     def parse(self, content, test):
-        dupes = dict()
+        dupes = {}
 
         if content is None:
             return dupes
@@ -128,7 +128,7 @@ class VCGXmlParser(object):
         return dupes
 
 
-class VCGCsvParser(object):
+class VCGCsvParser:
     @staticmethod
     def get_field_from_row(row, column):
         if row[column] is not None:
@@ -172,7 +172,7 @@ class VCGCsvParser(object):
         return finding
 
     def parse(self, content, test):
-        dupes = dict()
+        dupes = {}
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.reader(io.StringIO(content), delimiter=",", quotechar='"')
@@ -199,7 +199,7 @@ class VCGCsvParser(object):
         pass
 
 
-class VCGParser(object):
+class VCGParser:
     """VCG (VisualCodeGrepper) support CSV and XML"""
 
     def get_scan_types(self):
@@ -213,7 +213,7 @@ class VCGParser(object):
 
     def get_findings(self, filename, test):
         if filename is None:
-            return list()
+            return []
 
         content = filename.read()
         #  'utf-8' This line was added to pass a unittest in test_parsers.TestParsers.test_file_existence.
@@ -222,4 +222,5 @@ class VCGParser(object):
         elif filename.name.lower().endswith(".csv"):
             return list(VCGCsvParser().parse(content, test).values())
         else:
-            raise ValueError("Unknown File Format")
+            msg = "Unknown File Format"
+            raise ValueError(msg)

@@ -1,12 +1,13 @@
-import json
-import html2text
 import datetime
+import json
 
+import html2text
 from cvss import parser as cvss_parser
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
-class NetsparkerParser(object):
+class NetsparkerParser:
     def get_scan_types(self):
         return ["Netsparker Scan"]
 
@@ -22,7 +23,7 @@ class NetsparkerParser(object):
             data = json.loads(str(tree, "utf-8-sig"))
         except Exception:
             data = json.loads(tree)
-        dupes = dict()
+        dupes = {}
         if "UTC" in data["Generated"]:
             scan_date = datetime.datetime.strptime(
                 data["Generated"].split(" ")[0], "%d/%m/%Y"

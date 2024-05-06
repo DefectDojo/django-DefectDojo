@@ -1,10 +1,12 @@
 import json
 from unittest import mock
+
 from django.core.exceptions import ValidationError
 
+from dojo.models import Engagement, Product, Product_API_Scan_Configuration, Test
 from dojo.tools.api_sonarqube.importer import SonarQubeApiImporter
+
 from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-from dojo.models import Test, Engagement, Product, Product_API_Scan_Configuration
 
 
 def dummy_product(self, *args, **kwargs):
@@ -62,7 +64,7 @@ def dummy_hotspot_rule_wo_risk_description(self, *args, **kwargs):
 
 
 def empty_list(self, *args, **kwargs):
-    return list()
+    return []
 
 
 class TestSonarqubeImporterNoSQToolConfig(DojoTestCase):
