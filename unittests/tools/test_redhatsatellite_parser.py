@@ -19,7 +19,7 @@ class TestRedHatSatelliteParser(DojoTestCase):
             self.assertEqual(1, len(findings))
 
     def test_parse_file_with_multiple_findingse(self):
-       with open("unittests/scans/redhatsatellite/many_findings.json") as testfile:
+        with open("unittests/scans/redhatsatellite/many_findings.json") as testfile:
             parser = RedHatSatelliteParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
