@@ -1,5 +1,9 @@
+from unittest.mock import patch
+
+from dojo.models import DEFAULT_NOTIFICATION, Notifications, Product, User
+from dojo.notifications.helper import create_notification, send_alert_notification
+
 from .dojo_test_case import DojoTestCase
-from dojo.models import Product, User, Notifications
 
 
 class TestNotifications(DojoTestCase):
@@ -55,3 +59,46 @@ class TestNotifications(DojoTestCase):
         self.assertEqual('slack' in merged_notifications.other, True)  # default alert from global
         self.assertEqual(len(merged_notifications.other), 3)
         self.assertEqual(merged_notifications.other, {'alert', 'mail', 'slack'})
+
+    @patch('dojo.notifications.helper.send_alert_notification', wraps=send_alert_notification)
+    def test_notifications_system_level_trump(self, mock):
+        notif_user, _ = Notifications.objects.get_or_create(user=User.objects.get(username='admin'))
+        notif_system, _ = Notifications.objects.get_or_create(user=None, template=False)
+
+        last_count = 0
+        with self.subTest('user off, system off'):
+            notif_user.user_mentioned = ()  # no alert
+            notif_user.save()
+            notif_system.user_mentioned = ()  # no alert
+            notif_system.save()
+            create_notification(event="user_mentioned", title="user_mentioned", recipients=['admin'])
+            self.assertEqual(mock.call_count, last_count)
+
+        last_count = mock.call_count
+        with self.subTest('user off, system on'):
+            notif_user.user_mentioned = ()  # no alert
+            notif_user.save()
+            notif_system.user_mentioned = DEFAULT_NOTIFICATION  # alert only
+            notif_system.save()
+            create_notification(event="user_mentioned", title="user_mentioned", recipients=['admin'])
+            self.assertEqual(mock.call_count, last_count + 1)
+
+        # Small note for this test-cast: Trump works only in positive direction - system is not able to disable some kind of notification if user enabled it
+        last_count = mock.call_count
+        with self.subTest('user on, system off'):
+            notif_user.user_mentioned = DEFAULT_NOTIFICATION  # alert only
+            notif_user.save()
+            notif_system.user_mentioned = ()  # no alert
+            notif_system.save()
+            create_notification(event="user_mentioned", title="user_mentioned", recipients=['admin'])
+            self.assertEqual(mock.call_count, last_count + 1)
+
+        last_count = mock.call_count
+        with self.subTest('user on, system on'):
+            notif_user.user_mentioned = DEFAULT_NOTIFICATION  # alert only
+            notif_user.save()
+            notif_system.user_mentioned = DEFAULT_NOTIFICATION  # alert only
+            notif_system.save()
+            create_notification(event="user_mentioned", title="user_mentioned", recipients=['admin'])
+            self.assertEqual(mock.call_count, last_count + 1)
+        last_count = mock.call_count

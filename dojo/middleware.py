@@ -1,12 +1,12 @@
-from django.http import HttpResponseRedirect
-from django.conf import settings
-from urllib.parse import quote
-from re import compile
 import logging
+from re import compile
 from threading import local
-from django.db import models
-from django.urls import reverse
+from urllib.parse import quote
 
+from django.conf import settings
+from django.db import models
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ class LoginRequiredMiddleware:
         return self.get_response(request)
 
 
-class DojoSytemSettingsMiddleware(object):
+class DojoSytemSettingsMiddleware:
     _thread_local = local()
 
     def __init__(self, get_response):
@@ -106,7 +106,7 @@ class System_Settings_Manager(models.Manager):
     def get_from_db(self, *args, **kwargs):
         # logger.debug('refreshing system_settings from db')
         try:
-            from_db = super(System_Settings_Manager, self).get(*args, **kwargs)
+            from_db = super().get(*args, **kwargs)
         except:
             from dojo.models import System_Settings
             # this mimics the existing code that was in filters.py and utils.py.

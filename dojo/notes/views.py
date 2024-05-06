@@ -3,18 +3,19 @@ import logging
 
 # Third party imports
 from django.contrib import messages
-from django.urls import reverse
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from django.core.exceptions import PermissionDenied
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-# Local application/library imports
-from dojo.forms import DeleteNoteForm, NoteForm, TypedNoteForm
-from dojo.models import Notes, Engagement, Test, Finding, NoteHistory, Note_Type
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
+
+# Local application/library imports
+from dojo.forms import DeleteNoteForm, NoteForm, TypedNoteForm
+from dojo.models import Engagement, Finding, Note_Type, NoteHistory, Notes, Test
 
 logger = logging.getLogger(__name__)
 

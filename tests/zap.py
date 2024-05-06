@@ -1,11 +1,12 @@
 #!/usr/bin/python3
-import time
 import collections
-import socket
-from zapv2 import ZAPv2
-from urllib.parse import urlparse
-from prettytable import PrettyTable
 import re
+import socket
+import time
+from urllib.parse import urlparse
+
+from prettytable import PrettyTable
+from zapv2 import ZAPv2
 
 
 class Main:
@@ -14,12 +15,12 @@ class Main:
         address = "127.0.0.1"
         port = 8080
 
-        print(("Checking if ZAP is running, connecting to ZAP on http://" + address + ":" + str(port)))
+        print("Checking if ZAP is running, connecting to ZAP on http://" + address + ":" + str(port))
         s = socket.socket()
 
         try:
             s.connect((address, port))
-        except socket.error:
+        except OSError:
             print("Error connecting to ZAP, exiting.")
             sys.exit(0)
 
@@ -35,19 +36,19 @@ class Main:
 
         # Defining context name as hostname from URL and creating context using it.
         contextname = urlparse(targetURL).netloc
-        print(("Context Name: " + contextname))
+        print("Context Name: " + contextname)
 
         # Step1: Create context
         contextid = zap.context.new_context(contextname, apikey)
-        print(("ContextID: " + contextid))
+        print("ContextID: " + contextid)
 
         # Step2: Include in the context
         result = zap.context.include_in_context(contextname, targetURLregex, apikey)
-        print(("URL regex defined in context: " + result))
+        print("URL regex defined in context: " + result)
 
         # Step3: Session Management - Default is cookieBasedSessionManagement
         result = zap.sessionManagement.set_session_management_method(contextid, "cookieBasedSessionManagement", None, apikey)
-        print(("Session method defined: " + result))
+        print("Session method defined: " + result)
 
         loginUrl = "http://os.environ['DD_BASE_URL']/login"
         # loginUrlregex = "\Q" + loginUrl + "\E.*"
@@ -58,14 +59,14 @@ class Main:
 
         # Wait for passive scanning to complete
         while (int(zap.pscan.records_to_scan) > 0):
-            print(('Records to passive scan : ' + zap.pscan.records_to_scan))
+            print('Records to passive scan : ' + zap.pscan.records_to_scan)
             time.sleep(15)
         print('Passive scanning complete')
 
-        print(('Actively Scanning target ' + targetURL))
+        print('Actively Scanning target ' + targetURL)
         ascan_id = zap.ascan.scan(targetURL, None, None, None, None, None, apikey)  # Can provide more options for active scan here instead of using None.
         while (int(zap.ascan.status(ascan_id)) < 100):
-            print(('Scan progress %: ' + zap.ascan.status(ascan_id)))
+            print('Scan progress %: ' + zap.ascan.status(ascan_id))
             time.sleep(15)
 
         print('Scan completed')

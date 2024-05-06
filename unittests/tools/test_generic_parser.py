@@ -1,10 +1,12 @@
 import datetime
-from ..dojo_test_case import DojoTestCase
-from dojo.models import Test, Engagement, Product, Finding
+
+from dojo.models import Engagement, Finding, Product, Test
 from dojo.tools.generic.parser import GenericParser
 
+from ..dojo_test_case import DojoTestCase
 
-class TestFile(object):
+
+class TestFile:
 
     def read(self):
         return self.content
@@ -24,24 +26,24 @@ class TestGenericParser(DojoTestCase):
         self.test = Test(engagement=self.engagement)
 
     def test_parse_report1(self):
-        file = open("unittests/scans/generic/generic_report1.csv")
-        parser = GenericParser()
-        findings = parser.get_findings(file, self.test)
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
-        self.assertEqual(1, len(findings))
-        finding = findings[0]
-        self.assertEqual(5, len(finding.unsaved_endpoints))
-        endpoint = finding.unsaved_endpoints[0]
-        self.assertEqual("vulnerable.endpoint.com", endpoint.host)
-        self.assertEqual(443, endpoint.port)
-        self.assertEqual("resource1/asdf", endpoint.path)
-        endpoint = finding.unsaved_endpoints[1]
-        self.assertEqual("vulnerable.endpoint.com", endpoint.host)
-        self.assertEqual(443, endpoint.port)
-        self.assertEqual("resource2/qwerty", endpoint.path)
-        self.assertEqual("https", endpoint.protocol)
+        with open("unittests/scans/generic/generic_report1.csv") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, self.test)
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual(1, len(findings))
+            finding = findings[0]
+            self.assertEqual(5, len(finding.unsaved_endpoints))
+            endpoint = finding.unsaved_endpoints[0]
+            self.assertEqual("vulnerable.endpoint.com", endpoint.host)
+            self.assertEqual(443, endpoint.port)
+            self.assertEqual("resource1/asdf", endpoint.path)
+            endpoint = finding.unsaved_endpoints[1]
+            self.assertEqual("vulnerable.endpoint.com", endpoint.host)
+            self.assertEqual(443, endpoint.port)
+            self.assertEqual("resource2/qwerty", endpoint.path)
+            self.assertEqual("https", endpoint.protocol)
 
     def test_parse_no_csv_content_no_findings(self):
         findings = ""
@@ -433,218 +435,218 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         self.assertEqual(fields1, fields2)
 
     def test_parse_json(self):
-        file = open("unittests/scans/generic/generic_report1.json")
-        parser = GenericParser()
-        findings = parser.get_findings(file, Test())
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
-        self.assertEqual(2, len(findings))
-        with self.subTest(i=0):
-            finding = findings[0]
-            self.assertEqual("test title", finding.title)
-            self.assertEqual(True, finding.active)
-            self.assertEqual(True, finding.verified)
-            self.assertEqual(False, finding.duplicate)
-            self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
-            self.assertEqual("CVE-2020-36234", finding.unsaved_vulnerability_ids[0])
-            self.assertEqual(261, finding.cwe)
-            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
-            self.assertIn("security", finding.tags)
-            self.assertIn("network", finding.tags)
-            self.assertEqual("3287f2d0-554f-491b-8516-3c349ead8ee5", finding.unique_id_from_tool)
-            self.assertEqual("TEST1", finding.vuln_id_from_tool)
-        with self.subTest(i=1):
-            finding = findings[1]
-            self.assertEqual("test title2", finding.title)
-            self.assertEqual(True, finding.active)
-            self.assertEqual(False, finding.verified)
-            self.assertEqual(False, finding.duplicate)
-            self.assertIn(finding.severity, Finding.SEVERITIES)
+        with open("unittests/scans/generic/generic_report1.json") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual(2, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("test title", finding.title)
+                self.assertEqual(True, finding.active)
+                self.assertEqual(True, finding.verified)
+                self.assertEqual(False, finding.duplicate)
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+                self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+                self.assertEqual("CVE-2020-36234", finding.unsaved_vulnerability_ids[0])
+                self.assertEqual(261, finding.cwe)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
+                self.assertIn("security", finding.tags)
+                self.assertIn("network", finding.tags)
+                self.assertEqual("3287f2d0-554f-491b-8516-3c349ead8ee5", finding.unique_id_from_tool)
+                self.assertEqual("TEST1", finding.vuln_id_from_tool)
+            with self.subTest(i=1):
+                finding = findings[1]
+                self.assertEqual("test title2", finding.title)
+                self.assertEqual(True, finding.active)
+                self.assertEqual(False, finding.verified)
+                self.assertEqual(False, finding.duplicate)
+                self.assertIn(finding.severity, Finding.SEVERITIES)
 
     def test_parse_json2(self):
-        file = open("unittests/scans/generic/generic_report2.json")
-        parser = GenericParser()
-        findings = parser.get_findings(file, Test())
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
-        self.assertEqual(2, len(findings))
-        with self.subTest(i=0):
-            finding = findings[0]
-            self.assertEqual("test title3", finding.title)
-            self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
-            self.assertEqual("CVE-2020-36234", finding.unsaved_vulnerability_ids[0])
-            self.assertEqual(261, finding.cwe)
-            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
-            self.assertEqual("Some mitigation", finding.mitigation)
-        with self.subTest(i=1):
-            finding = findings[1]
-            self.assertEqual("test title4", finding.title)
-            self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertEqual("Some mitigation", finding.mitigation)
+        with open("unittests/scans/generic/generic_report2.json") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual(2, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("test title3", finding.title)
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+                self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+                self.assertEqual("CVE-2020-36234", finding.unsaved_vulnerability_ids[0])
+                self.assertEqual(261, finding.cwe)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
+                self.assertEqual("Some mitigation", finding.mitigation)
+            with self.subTest(i=1):
+                finding = findings[1]
+                self.assertEqual("test title4", finding.title)
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+                self.assertEqual("Some mitigation", finding.mitigation)
 
     def test_parse_json3(self):
-        file = open("unittests/scans/generic/generic_report3.json")
-        parser = GenericParser()
-        findings = parser.get_findings(file, Test())
-        self.assertEqual(3, len(findings))
-        with self.subTest(i=0):
+        with open("unittests/scans/generic/generic_report3.json") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, Test())
+            self.assertEqual(3, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                finding.clean()
+                self.assertEqual("test title with endpoints as dict", finding.title)
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+                self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+                self.assertEqual("CVE-2020-36234", finding.unsaved_vulnerability_ids[0])
+                self.assertEqual(261, finding.cwe)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
+                self.assertEqual("Some mitigation", finding.mitigation)
+                self.assertEqual(1, len(finding.unsaved_endpoints))
+                endpoint = finding.unsaved_endpoints[0]
+                endpoint.clean()
+                self.assertEqual("exemple.com", endpoint.host)
+            with self.subTest(i=1):
+                finding = findings[1]
+                self.assertEqual("test title with endpoints as strings", finding.title)
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+                self.assertEqual("Some mitigation", finding.mitigation)
+                self.assertEqual(2, len(finding.unsaved_endpoints))
+                endpoint = finding.unsaved_endpoints[0]
+                endpoint.clean()
+                self.assertEqual("http", endpoint.protocol)
+                self.assertEqual("urlfiltering.paloaltonetworks.com", endpoint.host)
+                self.assertEqual(80, endpoint.port)
+                self.assertEqual("test-command-and-control", endpoint.path)
+                endpoint = finding.unsaved_endpoints[1]
+                endpoint.clean()
+                self.assertEqual("https", endpoint.protocol)
+                self.assertEqual("urlfiltering.paloaltonetworks.com", endpoint.host)
+                self.assertEqual(2345, endpoint.port)
+                self.assertEqual("test-pest", endpoint.path)
+
+    def test_parse_endpoints_and_vulnerability_ids_json(self):
+        with open("unittests/scans/generic/generic_report4.json") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, Test())
+            self.assertEqual(1, len(findings))
             finding = findings[0]
             finding.clean()
-            self.assertEqual("test title with endpoints as dict", finding.title)
-            self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
-            self.assertEqual("CVE-2020-36234", finding.unsaved_vulnerability_ids[0])
-            self.assertEqual(261, finding.cwe)
-            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
-            self.assertEqual("Some mitigation", finding.mitigation)
+            self.assertEqual(4, len(finding.unsaved_endpoints))
+
+            endpoint = finding.unsaved_endpoints[0]
+            endpoint.clean()
+            self.assertEqual("www.example.com", endpoint.host)
+
+            endpoint = finding.unsaved_endpoints[1]
+            endpoint.clean()
+            self.assertEqual("localhost", endpoint.host)
+
+            endpoint = finding.unsaved_endpoints[2]
+            endpoint.clean()
+            self.assertEqual("127.0.0.1", endpoint.host)
+            self.assertEqual(80, endpoint.port)
+
+            endpoint = finding.unsaved_endpoints[3]
+            endpoint.clean()
+            self.assertEqual("foo.bar", endpoint.host)
+            self.assertEqual("path", endpoint.path)
+
+            self.assertEqual(2, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual("GHSA-5mrr-rgp6-x4gr", finding.unsaved_vulnerability_ids[0])
+            self.assertEqual("CVE-2015-9235", finding.unsaved_vulnerability_ids[1])
+
+    def test_parse_host_and_vulnerability_id_csv(self):
+        with open("unittests/scans/generic/generic_report4.csv") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, Test())
+            self.assertEqual(4, len(findings))
+
+            finding = findings[0]
+            finding.clean()
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertEqual("exemple.com", endpoint.host)
-        with self.subTest(i=1):
+            self.assertEqual("www.example.com", endpoint.host)
+            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual("CVE-2015-9235", finding.unsaved_vulnerability_ids[0])
+
             finding = findings[1]
-            self.assertEqual("test title with endpoints as strings", finding.title)
-            self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertEqual("Some mitigation", finding.mitigation)
-            self.assertEqual(2, len(finding.unsaved_endpoints))
+            finding.clean()
+            self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertEqual("http", endpoint.protocol)
-            self.assertEqual("urlfiltering.paloaltonetworks.com", endpoint.host)
-            self.assertEqual(80, endpoint.port)
-            self.assertEqual("test-command-and-control", endpoint.path)
-            endpoint = finding.unsaved_endpoints[1]
+            self.assertEqual("localhost", endpoint.host)
+            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual("GHSA-5mrr-rgp6-x4gr", finding.unsaved_vulnerability_ids[0])
+
+            finding = findings[2]
+            finding.clean()
+            self.assertEqual(1, len(finding.unsaved_endpoints))
+            endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertEqual("https", endpoint.protocol)
-            self.assertEqual("urlfiltering.paloaltonetworks.com", endpoint.host)
-            self.assertEqual(2345, endpoint.port)
-            self.assertEqual("test-pest", endpoint.path)
+            self.assertEqual("127.0.0.1", endpoint.host)
+            self.assertEqual(80, endpoint.port)
+            self.assertIsNone(finding.unsaved_vulnerability_ids)
 
-    def test_parse_endpoints_and_vulnerability_ids_json(self):
-        file = open("unittests/scans/generic/generic_report4.json")
-        parser = GenericParser()
-        findings = parser.get_findings(file, Test())
-        self.assertEqual(1, len(findings))
-        finding = findings[0]
-        finding.clean()
-        self.assertEqual(4, len(finding.unsaved_endpoints))
-
-        endpoint = finding.unsaved_endpoints[0]
-        endpoint.clean()
-        self.assertEqual("www.example.com", endpoint.host)
-
-        endpoint = finding.unsaved_endpoints[1]
-        endpoint.clean()
-        self.assertEqual("localhost", endpoint.host)
-
-        endpoint = finding.unsaved_endpoints[2]
-        endpoint.clean()
-        self.assertEqual("127.0.0.1", endpoint.host)
-        self.assertEqual(80, endpoint.port)
-
-        endpoint = finding.unsaved_endpoints[3]
-        endpoint.clean()
-        self.assertEqual("foo.bar", endpoint.host)
-        self.assertEqual("path", endpoint.path)
-
-        self.assertEqual(2, len(finding.unsaved_vulnerability_ids))
-        self.assertEqual("GHSA-5mrr-rgp6-x4gr", finding.unsaved_vulnerability_ids[0])
-        self.assertEqual("CVE-2015-9235", finding.unsaved_vulnerability_ids[1])
-
-    def test_parse_host_and_vulnerability_id_csv(self):
-        file = open("unittests/scans/generic/generic_report4.csv")
-        parser = GenericParser()
-        findings = parser.get_findings(file, Test())
-        self.assertEqual(4, len(findings))
-
-        finding = findings[0]
-        finding.clean()
-        self.assertEqual(1, len(finding.unsaved_endpoints))
-        endpoint = finding.unsaved_endpoints[0]
-        endpoint.clean()
-        self.assertEqual("www.example.com", endpoint.host)
-        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
-        self.assertEqual("CVE-2015-9235", finding.unsaved_vulnerability_ids[0])
-
-        finding = findings[1]
-        finding.clean()
-        self.assertEqual(1, len(finding.unsaved_endpoints))
-        endpoint = finding.unsaved_endpoints[0]
-        endpoint.clean()
-        self.assertEqual("localhost", endpoint.host)
-        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
-        self.assertEqual("GHSA-5mrr-rgp6-x4gr", finding.unsaved_vulnerability_ids[0])
-
-        finding = findings[2]
-        finding.clean()
-        self.assertEqual(1, len(finding.unsaved_endpoints))
-        endpoint = finding.unsaved_endpoints[0]
-        endpoint.clean()
-        self.assertEqual("127.0.0.1", endpoint.host)
-        self.assertEqual(80, endpoint.port)
-        self.assertIsNone(finding.unsaved_vulnerability_ids)
-
-        finding = findings[3]
-        finding.clean()
-        self.assertEqual(1, len(finding.unsaved_endpoints))
-        endpoint = finding.unsaved_endpoints[0]
-        endpoint.clean()
-        self.assertEqual("foo.bar", endpoint.host)
-        self.assertEqual("path", endpoint.path)
-        self.assertIsNone(finding.unsaved_vulnerability_ids)
+            finding = findings[3]
+            finding.clean()
+            self.assertEqual(1, len(finding.unsaved_endpoints))
+            endpoint = finding.unsaved_endpoints[0]
+            endpoint.clean()
+            self.assertEqual("foo.bar", endpoint.host)
+            self.assertEqual("path", endpoint.path)
+            self.assertIsNone(finding.unsaved_vulnerability_ids)
 
     def test_parse_json_with_image(self):
-        file = open("unittests/scans/generic/test_with_image.json")
-        parser = GenericParser()
-        findings = parser.get_findings(file, Test())
-        self.assertEqual(1, len(findings))
+        with open("unittests/scans/generic/test_with_image.json") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, Test())
+            self.assertEqual(1, len(findings))
 
-        finding = findings[0]
-        finding.clean()
-        self.assertEqual(1, len(finding.unsaved_files))
-        image = finding.unsaved_files[0]
-        self.assertEqual("Screenshot from 2017-04-10 16-54-19.png", image.get("title"))
-        self.assertIn("data", image)
+            finding = findings[0]
+            finding.clean()
+            self.assertEqual(1, len(finding.unsaved_files))
+            image = finding.unsaved_files[0]
+            self.assertEqual("Screenshot from 2017-04-10 16-54-19.png", image.get("title"))
+            self.assertIn("data", image)
 
     def test_parse_json_custom_test(self):
-        file = open("unittests/scans/generic/generic_custom_test.json")
-        parser = GenericParser()
-        tests = parser.get_tests(parser.get_scan_types()[0], file)
-        self.assertEqual(1, len(tests))
-        findings = tests[0].findings
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
-        self.assertEqual(1, len(findings))
-        with self.subTest(i=0):
-            finding = findings[0]
-            self.assertEqual("test title", finding.title)
-            self.assertEqual(True, finding.active)
-            self.assertEqual(True, finding.verified)
-            self.assertEqual(False, finding.duplicate)
-            self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertEqual("CVE-2020-36234", finding.cve)
-            self.assertEqual(261, finding.cwe)
-            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
-            self.assertIn("security", finding.tags)
-            self.assertIn("network", finding.tags)
-            self.assertEqual("3287f2d0-554f-491b-8516-3c349ead8ee5", finding.unique_id_from_tool)
-            self.assertEqual("TEST1", finding.vuln_id_from_tool)
+        with open("unittests/scans/generic/generic_custom_test.json") as file:
+            parser = GenericParser()
+            tests = parser.get_tests(parser.get_scan_types()[0], file)
+            self.assertEqual(1, len(tests))
+            findings = tests[0].findings
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual(1, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("test title", finding.title)
+                self.assertEqual(True, finding.active)
+                self.assertEqual(True, finding.verified)
+                self.assertEqual(False, finding.duplicate)
+                self.assertIn(finding.severity, Finding.SEVERITIES)
+                self.assertEqual("CVE-2020-36234", finding.cve)
+                self.assertEqual(261, finding.cwe)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
+                self.assertIn("security", finding.tags)
+                self.assertIn("network", finding.tags)
+                self.assertEqual("3287f2d0-554f-491b-8516-3c349ead8ee5", finding.unique_id_from_tool)
+                self.assertEqual("TEST1", finding.vuln_id_from_tool)
 
     def test_parse_json_empty_finding(self):
-        file = open("unittests/scans/generic/generic_empty.json")
-        parser = GenericParser()
-        with self.assertRaisesMessage(ValueError,
-                "Required fields are missing: ['description', 'severity', 'title']"):
-            parser.get_findings(file, Test())
+        with open("unittests/scans/generic/generic_empty.json") as file:
+            parser = GenericParser()
+            with self.assertRaisesMessage(ValueError,
+                    "Required fields are missing: ['description', 'severity', 'title']"):
+                parser.get_findings(file, Test())
 
     def test_parse_json_invalid_finding(self):
-        file = open("unittests/scans/generic/generic_invalid.json")
-        parser = GenericParser()
-        with self.assertRaisesMessage(ValueError,
-                "Not allowed fields are present: ['invalid_field', 'last_status_update']"):
-            parser.get_findings(file, Test())
+        with open("unittests/scans/generic/generic_invalid.json") as file:
+            parser = GenericParser()
+            with self.assertRaisesMessage(ValueError,
+                    "Not allowed fields are present: ['invalid_field', 'last_status_update']"):
+                parser.get_findings(file, Test())

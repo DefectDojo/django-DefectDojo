@@ -1,17 +1,19 @@
 import datetime
-from django.urls import reverse
-from dojo.models import Test_Type, User, Test, Finding
-from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient
-from django.test.client import Client
-from django.utils import timezone
 
-from .dojo_test_case import DojoAPITestCase, get_unit_tests_path
-from .test_utils import assertTestImportModelsCreated
-from django.test import override_settings
 # from unittest import skip
 import logging
 
+from django.test import override_settings
+from django.test.client import Client
+from django.urls import reverse
+from django.utils import timezone
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient
+
+from dojo.models import Finding, Test, Test_Type, User
+
+from .dojo_test_case import DojoAPITestCase, get_unit_tests_path
+from .test_utils import assertTestImportModelsCreated
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +52,7 @@ PRODUCT_TYPE_NAME_DEFAULT = 'Type type'
 # 5 active sev medium
 
 # test methods to be used both by API Test and UI Test
-class ImportReimportMixin(object):
+class ImportReimportMixin:
     def __init__(self, *args, **kwargs):
         self.scans_path = '/scans/'
 
@@ -1786,33 +1788,36 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         elif not verified:
             verifiedPayload = "force_to_false"
 
-        payload = {
-                "minimum_severity": minimum_severity,
-                "active": activePayload,
-                "verified": verifiedPayload,
-                "scan_type": scan_type,
-                "file": open(get_unit_tests_path() + filename),
-                "environment": 1,
-                "version": "1.0.1",
-                "close_old_findings": close_old_findings,
-        }
+        with open(get_unit_tests_path() + filename) as testfile:
+            payload = {
+                    "minimum_severity": minimum_severity,
+                    "active": activePayload,
+                    "verified": verifiedPayload,
+                    "scan_type": scan_type,
+                    "file": testfile,
+                    "environment": 1,
+                    "version": "1.0.1",
+                    "close_old_findings": close_old_findings,
+            }
 
-        if push_to_jira is not None:
-            payload['push_to_jira'] = push_to_jira
+            if push_to_jira is not None:
+                payload['push_to_jira'] = push_to_jira
 
-        if endpoint_to_add is not None:
-            payload['endpoints'] = [endpoint_to_add]
+            if endpoint_to_add is not None:
+                payload['endpoints'] = [endpoint_to_add]
 
-        if tags is not None:
-            payload['tags'] = tags
+            if tags is not None:
+                payload['tags'] = tags
 
-        if scan_date is not None:
-            payload['scan_date'] = scan_date
+            if scan_date is not None:
+                payload['scan_date'] = scan_date
 
-        if service is not None:
-            payload['service'] = service
+            if service is not None:
+                payload['service'] = service
 
-        return self.import_scan_ui(engagement, payload)
+            result = self.import_scan_ui(engagement, payload)
+
+            return result
 
     def reimport_scan_with_params_ui(self, test_id, filename, scan_type='ZAP Scan', minimum_severity='Low', active=True, verified=False, push_to_jira=None, tags=None, close_old_findings=True, scan_date=None):
         # Mimic old functionality for active/verified to avoid breaking tests
@@ -1823,26 +1828,28 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         if not verified:
             verifiedPayload = "force_to_false"
 
-        payload = {
-                "minimum_severity": minimum_severity,
-                "active": activePayload,
-                "verified": verifiedPayload,
-                "scan_type": scan_type,
-                "file": open(get_unit_tests_path() + filename),
-                "version": "1.0.1",
-                "close_old_findings": close_old_findings,
-        }
+        with open(get_unit_tests_path() + filename) as testfile:
+            payload = {
+                    "minimum_severity": minimum_severity,
+                    "active": activePayload,
+                    "verified": verifiedPayload,
+                    "scan_type": scan_type,
+                    "file": testfile,
+                    "version": "1.0.1",
+                    "close_old_findings": close_old_findings,
+            }
 
-        if push_to_jira is not None:
-            payload['push_to_jira'] = push_to_jira
+            if push_to_jira is not None:
+                payload['push_to_jira'] = push_to_jira
 
-        if tags is not None:
-            payload['tags'] = tags
+            if tags is not None:
+                payload['tags'] = tags
 
-        if scan_date is not None:
-            payload['scan_date'] = scan_date
+            if scan_date is not None:
+                payload['scan_date'] = scan_date
 
-        return self.reimport_scan_ui(test_id, payload)
+            result = self.reimport_scan_ui(test_id, payload)
+            return result
 
 # Observations:
 # - When reopening a mitigated finding, almost no fields are updated such as title, description, severity, impact, references, ....

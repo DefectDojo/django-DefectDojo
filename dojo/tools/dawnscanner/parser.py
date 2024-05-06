@@ -2,10 +2,11 @@ import json
 import re
 
 from dateutil import parser
+
 from dojo.models import Finding
 
 
-class DawnScannerParser(object):
+class DawnScannerParser:
     CVE_REGEX = re.compile(r"CVE-\d{4}-\d{4,7}")
 
     def get_scan_types(self):

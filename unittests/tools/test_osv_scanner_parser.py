@@ -1,7 +1,9 @@
 from os import path
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.osv_scanner.parser import OSVScannerParser
+
 from dojo.models import Test
+from dojo.tools.osv_scanner.parser import OSVScannerParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestOSVScannerParser(DojoTestCase):
@@ -19,7 +21,8 @@ class TestOSVScannerParser(DojoTestCase):
             finding = findings[0]
             self.assertEqual(finding.cwe, "CWE-506")
             self.assertEqual(finding.title, "MAL-2023-1035_flot-axis")
-            self.assertEqual(finding.cve, "MAL-2023-1035")
+            self.assertEqual(finding.cve, None)
+            self.assertEqual(finding.unsaved_vulnerability_ids[0], "MAL-2023-1035")
             self.assertEqual(finding.severity, "Low")
 
     def test_many_findings(self):
@@ -29,7 +32,8 @@ class TestOSVScannerParser(DojoTestCase):
             self.assertEqual(66, len(findings))
             finding = findings[0]
             self.assertEqual(finding.title, "GHSA-25mq-v84q-4j7r_guzzlehttp/guzzle")
-            self.assertEqual(finding.cve, "GHSA-25mq-v84q-4j7r")
+            self.assertEqual(finding.cve, None)
+            self.assertEqual(finding.unsaved_vulnerability_ids[0], "GHSA-25mq-v84q-4j7r")
             self.assertEqual(finding.severity, "High")
             finding = findings[3]
             self.assertEqual(finding.static_finding, True)

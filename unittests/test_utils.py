@@ -1,14 +1,30 @@
-from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, IMPORT_REACTIVATED_FINDING, IMPORT_UNTOUCHED_FINDING, \
-    Engagement, Product, Test, Test_Import, Test_Import_Finding_Action, \
-    Dojo_User, Dojo_Group, Dojo_Group_Member, Role, System_Settings, Notifications, \
-    Product_Type, Endpoint
-from contextlib import contextmanager
-from .dojo_test_case import DojoTestCase
-from unittest.mock import patch, Mock
-from dojo.utils import dojo_crypto_encrypt, prepare_for_view, user_post_save
-from dojo.authorization.roles_permissions import Roles
 import logging
+from contextlib import contextmanager
+from unittest.mock import Mock, patch
 
+from dojo.authorization.roles_permissions import Roles
+from dojo.models import (
+    IMPORT_CLOSED_FINDING,
+    IMPORT_CREATED_FINDING,
+    IMPORT_REACTIVATED_FINDING,
+    IMPORT_UNTOUCHED_FINDING,
+    Dojo_Group,
+    Dojo_Group_Member,
+    Dojo_User,
+    Endpoint,
+    Engagement,
+    Notifications,
+    Product,
+    Product_Type,
+    Role,
+    System_Settings,
+    Test,
+    Test_Import,
+    Test_Import_Finding_Action,
+)
+from dojo.utils import dojo_crypto_encrypt, prepare_for_view, user_post_save
+
+from .dojo_test_case import DojoTestCase
 
 logger = logging.getLogger(__name__)
 
@@ -162,7 +178,7 @@ class TestUtils(DojoTestCase):
         save_mock_member.save.assert_not_called()
 
 
-class assertNumOfModelsCreated():
+class assertNumOfModelsCreated:
     def __init__(self, test_case, queryset, num):
         self.test_case = test_case
         self.queryset = queryset

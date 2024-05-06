@@ -1,7 +1,9 @@
-from rest_framework.serializers import ModelSerializer
-from . import utils
 import inspect
 import sys
+
+from rest_framework.serializers import ModelSerializer
+
+from . import utils
 
 # Reduce the scope of search for serializers.
 SERIALIZER_DEFS_MODULE = "dojo.api_v2.serializers"
@@ -20,7 +22,7 @@ class _Prefetcher:
         def _is_model_serializer(obj):
             return inspect.isclass(obj) and issubclass(obj, ModelSerializer)
 
-        serializers = dict()
+        serializers = {}
         # We process all the serializers found in the module SERIALIZER_DEFS_MODULE. We restrict the scope to avoid
         # processing all the classes in the symbol table
         available_serializers = inspect.getmembers(
@@ -37,7 +39,7 @@ class _Prefetcher:
 
     def __init__(self):
         self._serializers = _Prefetcher._build_serializers()
-        self._prefetch_data = dict()
+        self._prefetch_data = {}
 
     def _find_serializer(self, field_type):
         """Find the best suited serializer for the given type.
@@ -92,7 +94,7 @@ class _Prefetcher:
             )
 
             if field_to_fetch not in self._prefetch_data:
-                self._prefetch_data[field_to_fetch] = dict()
+                self._prefetch_data[field_to_fetch] = {}
 
             # Should not fail as django always generate an id field
             for data in field_data_list:

@@ -1,7 +1,8 @@
 import json
 
-from dojo.models import Endpoint, Finding
 from django.utils.dateparse import parse_datetime
+
+from dojo.models import Endpoint, Finding
 
 
 class StackHawkScanMetadata:
@@ -14,7 +15,7 @@ class StackHawkScanMetadata:
         self.service = completed_scan["scan"]["application"]
 
 
-class StackHawkParser(object):
+class StackHawkParser:
     """
     DAST findings from StackHawk
     """
@@ -123,12 +124,13 @@ class StackHawkParser(object):
             # Specifically, that the attributes accessed when parsing the finding will always exist.
             # See our documentation for more details on this data:
             # https://docs.stackhawk.com/workflow-integrations/webhook.html#scan-completed
-            raise ValueError(
+            msg = (
                 " Unexpected JSON format provided. "
                 "Need help? "
                 "Check out the StackHawk Docs at "
                 "https://docs.stackhawk.com/workflow-integrations/defect-dojo.html"
             )
+            raise ValueError(msg)
 
         return report["scanCompleted"]
 

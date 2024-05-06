@@ -372,6 +372,7 @@
                                                 {% endif %}
                                             </ul>
                                         </li>
+                                        {% block reports_tab %}
                                         <li>
                                             <a href="{% url 'report_builder' %}" aria-expanded="false" aria-label="Reports">
                                                 <i class="fa-solid fa-file-lines fa-fw"></i>
@@ -380,6 +381,7 @@
                                             </a>
                                             <!-- /.nav-second-level -->
                                         </li>
+                                        {% endblock %}
                                         <li>
                                             <a href="{% url 'metrics' %}?date=5&view=dashboard" aria-expanded="false" aria-label="Metrics">
                                                 <i class="fa-solid fa-chart-column fa-fw"></i>

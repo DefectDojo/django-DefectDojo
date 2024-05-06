@@ -1,18 +1,21 @@
 import hashlib
+import logging
+
 import dateutil
 import html2text
-import logging
 import hyperlink
 from cvss import parser as cvss_parser
 from defusedxml.ElementTree import parse
+
 from dojo.models import Endpoint, Finding
+
 logger = logging.getLogger(__name__)
 
 
-class AcunetixXMLParser(object):
+class AcunetixXMLParser:
     """This parser is written for Acunetix XML reports"""
     def get_findings(self, filename, test):
-        dupes = dict()
+        dupes = {}
         root = parse(filename).getroot()
         for scan in root.findall("Scan"):
             start_url = scan.findtext("StartURL")
@@ -54,7 +57,7 @@ class AcunetixXMLParser(object):
                 for reference in item.findall("References/Reference"):
                     url = reference.findtext("URL")
                     db = reference.findtext("Database") or url
-                    references.append(" * [{}]({})".format(db, url))
+                    references.append(f" * [{db}]({url})")
                 if len(references) > 0:
                     finding.references = "\n".join(references)
                 if item.findtext("CVSS3/Descriptor"):
@@ -81,7 +84,7 @@ class AcunetixXMLParser(object):
                         )
                     )
                 # add requests
-                finding.unsaved_req_resp = list()
+                finding.unsaved_req_resp = []
                 if len(item.findall("TechnicalDetails/Request")):
                     finding.dynamic_finding = (
                         True  # if there is some requests it's dynamic
@@ -128,9 +131,7 @@ class AcunetixXMLParser(object):
                     find.unsaved_req_resp.extend(finding.unsaved_req_resp)
                     find.nb_occurences += finding.nb_occurences
                     logger.debug(
-                        "Duplicate finding : {defectdojo_title}".format(
-                            defectdojo_title=finding.title
-                        )
+                        f"Duplicate finding : {finding.title}"
                     )
                 else:
                     dupes[dupe_key] = finding

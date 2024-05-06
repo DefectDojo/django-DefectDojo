@@ -1,10 +1,11 @@
-import json
 import hashlib
+import json
 from datetime import datetime
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
-class GitlabDastParser(object):
+class GitlabDastParser:
     """
     Import GitLab DAST Report in JSON format
     """

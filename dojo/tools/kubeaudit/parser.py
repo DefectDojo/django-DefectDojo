@@ -1,8 +1,9 @@
 import json
+
 from dojo.models import Finding
 
 
-class KubeAuditParser(object):
+class KubeAuditParser:
     def get_scan_types(self):
         return ["Kubeaudit Scan"]
 
@@ -25,7 +26,7 @@ class KubeAuditParser(object):
 
     def get_findings(self, filename, test):
         lines = filename.readlines()
-        findings = list()
+        findings = []
         for line in lines:
             try:
                 tree = json.loads(str(line, "utf-8"))

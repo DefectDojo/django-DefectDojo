@@ -1,10 +1,12 @@
 import re
 import zipfile
+
 from defusedxml import ElementTree
+
 from dojo.models import Finding
 
 
-class FortifyFPRParser(object):
+class FortifyFPRParser:
     def parse_fpr(self, filename, test):
         if str(filename.__class__) == "<class '_io.TextIOWrapper'>":
             input_zip = zipfile.ZipFile(filename.name, 'r')
@@ -18,7 +20,7 @@ class FortifyFPRParser(object):
             namespace = matches.group(0)
         except BaseException:
             namespace = ""
-        items = list()
+        items = []
         for child in root:
             if "Vulnerabilities" in child.tag:
                 for vuln in child:

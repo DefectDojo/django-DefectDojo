@@ -68,7 +68,7 @@ BSI_LINK = "https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/Tec
 REFERENCES = "TLS recommendations of German BSI: " + BSI_LINK
 
 
-class SSLyzeJSONParser(object):
+class SSLyzeJSONParser:
     def get_findings(self, json_output, test):
         if json_output is None:
             return
@@ -86,7 +86,8 @@ class SSLyzeJSONParser(object):
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise Exception("Invalid format")
+            msg = "Invalid format"
+            raise Exception(msg)
 
         return tree
 
@@ -587,7 +588,7 @@ def get_finding(
     if vulnerability_id:
         finding.unsaved_vulnerability_ids = [vulnerability_id]
     if endpoint is not None:
-        finding.unsaved_endpoints = list()
+        finding.unsaved_endpoints = []
         finding.unsaved_endpoints.append(endpoint)
     return finding
 

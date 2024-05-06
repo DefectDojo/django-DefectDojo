@@ -1,14 +1,14 @@
+import hashlib
 import json
 import re
-import hashlib
 
 from cvss import CVSS3
-from cvss.exceptions import CVSS3RHScoreDoesNotMatch, CVSS3RHMalformedError
+from cvss.exceptions import CVSS3RHMalformedError, CVSS3RHScoreDoesNotMatch
 
 from dojo.models import Finding
 
 
-class JFrogXrayApiSummaryArtifactParser(object):
+class JFrogXrayApiSummaryArtifactParser:
     # This function return a list of all the scan_type supported by your parser
     def get_scan_types(self):
         return ["JFrog Xray API Summary Artifact Scan"]
@@ -75,7 +75,7 @@ def get_item(
     # Some entries have no CVE entries, despite they exist. Example
     # CVE-2017-1000502.
     cves = vulnerability.get("cves", [])
-    vulnerability_ids = list()
+    vulnerability_ids = []
     if cves:
         if len(cves[0].get("cwe", [])) > 0:
             cwe = decode_cwe_number(cves[0].get("cwe", [])[0])
@@ -138,7 +138,7 @@ def get_item(
         finding.unsaved_vulnerability_ids = vulnerability_ids
 
     # Add vulnerability ids
-    vulnerability_ids = list()
+    vulnerability_ids = []
     if cves and "cve" in cves[0]:
         vulnerability_ids.append(cves[0]["cve"])
     if "issue_id" in vulnerability:

@@ -2,7 +2,7 @@ from dojo.tools.tenable.csv_format import TenableCSVParser
 from dojo.tools.tenable.xml_format import TenableXMLParser
 
 
-class TenableParser(object):
+class TenableParser:
     def get_scan_types(self):
         return ["Tenable Scan"]
 
@@ -22,6 +22,5 @@ class TenableParser(object):
         elif filename.name.lower().endswith(".csv"):
             return TenableCSVParser().get_findings(filename, test)
         else:
-            raise ValueError(
-                "Filename extension not recognized. Use .xml, .nessus or .csv"
-            )
+            msg = "Filename extension not recognized. Use .xml, .nessus or .csv"
+            raise ValueError(msg)

@@ -1,10 +1,11 @@
 import json
 
 from cvss.cvss3 import CVSS3
+
 from dojo.models import Finding
 
 
-class NancyParser(object):
+class NancyParser:
     def get_scan_types(self):
         return ["Nancy Scan"]
 
@@ -27,7 +28,8 @@ class NancyParser(object):
         if "vulnerable" in data:
             findings = self.get_items(data["vulnerable"], test)
         else:
-            raise ValueError("Invalid format, unable to parse json.")
+            msg = "Invalid format, unable to parse json."
+            raise ValueError(msg)
 
         return findings
 
@@ -63,7 +65,6 @@ class NancyParser(object):
                         static_finding=True,
                         dynamic_finding=False,
                         vuln_id_from_tool=associated_vuln["Id"],
-                        cve=associated_vuln['Cve'],
                         references="\n".join(references),
                     )
 

@@ -1,160 +1,21 @@
-from rest_framework.generics import GenericAPIView
-from drf_spectacular.types import OpenApiTypes
-from crum import get_current_user
-from django.http import HttpResponse, Http404, FileResponse
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from django.contrib.auth.models import Permission
-from django.core.exceptions import ValidationError
-from rest_framework import viewsets, mixins, status
-from rest_framework.response import Response
-from django.db import IntegrityError
-from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
-from rest_framework.decorators import action
-from rest_framework.parsers import MultiPartParser
-from django_filters.rest_framework import DjangoFilterBackend
 import base64
+import logging
 import mimetypes
-from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.importers.reimporter.utils import (
-    get_target_engagement_if_exists,
-    get_target_product_if_exists,
-    get_target_test_if_exists,
-)
-from dojo.models import (
-    Language_Type,
-    Languages,
-    Notifications,
-    Product,
-    Product_Type,
-    Engagement,
-    SLA_Configuration,
-    Test,
-    Test_Import,
-    Test_Type,
-    Finding,
-    User,
-    Stub_Finding,
-    Finding_Template,
-    Notes,
-    JIRA_Issue,
-    Tool_Product_Settings,
-    Tool_Configuration,
-    Tool_Type,
-    Endpoint,
-    JIRA_Project,
-    JIRA_Instance,
-    DojoMeta,
-    Development_Environment,
-    Dojo_User,
-    Note_Type,
-    System_Settings,
-    App_Analysis,
-    Endpoint_Status,
-    Sonarqube_Issue,
-    Sonarqube_Issue_Transition,
-    Regulation,
-    Risk_Acceptance,
-    BurpRawRequestResponse,
-    FileUpload,
-    Product_Type_Member,
-    Product_Member,
-    Dojo_Group,
-    Product_Group,
-    Product_Type_Group,
-    Role,
-    Global_Role,
-    Dojo_Group_Member,
-    Engagement_Presets,
-    Network_Locations,
-    UserContactInfo,
-    Product_API_Scan_Configuration,
-    Cred_Mapping,
-    Cred_User,
-    Question,
-    Answer,
-    Engagement_Survey,
-    Answered_Survey,
-    General_Survey,
-    Check_List,
-    Announcement,
-)
-from dojo.endpoint.views import get_endpoint_ids
-from dojo.reports.views import (
-    report_url_resolver,
-    prefetch_related_findings_for_report,
-)
-from dojo.finding.views import (
-    set_finding_as_original_internal,
-    reset_finding_duplicate_status_internal,
-    duplicate_cluster,
-)
-from dojo.filters import (
-    ReportFindingFilter,
-    ApiCredentialsFilter,
-    ApiFindingFilter,
-    ApiProductFilter,
-    ApiEngagementFilter,
-    ApiEndpointFilter,
-    ApiAppAnalysisFilter,
-    ApiTestFilter,
-    ApiTemplateFindingFilter,
-    ApiRiskAcceptanceFilter,
-)
-from dojo.risk_acceptance import api as ra_api
+from datetime import datetime
+
+import tagulous
+from crum import get_current_user
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from datetime import datetime
-from dojo.utils import (
-    get_system_setting,
-    get_setting,
-    async_delete,
-)
-from dojo.api_v2 import (
-    serializers,
-    permissions,
-    prefetch,
-    mixins as dojo_mixins,
-)
-import dojo.jira_link.helper as jira_helper
-import logging
-import tagulous
-from dojo.product_type.queries import (
-    get_authorized_product_types,
-    get_authorized_product_type_members,
-    get_authorized_product_type_groups,
-)
-from dojo.product.queries import (
-    get_authorized_products,
-    get_authorized_app_analysis,
-    get_authorized_dojo_meta,
-    get_authorized_product_members,
-    get_authorized_product_groups,
-    get_authorized_languages,
-    get_authorized_engagement_presets,
-    get_authorized_product_api_scan_configurations,
-)
-from dojo.engagement.queries import get_authorized_engagements
-from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
-from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
-from dojo.finding.queries import (
-    get_authorized_findings,
-    get_authorized_stub_findings,
-)
-from dojo.endpoint.queries import (
-    get_authorized_endpoints,
-    get_authorized_endpoint_status,
-)
-from dojo.group.queries import (
-    get_authorized_groups,
-    get_authorized_group_members,
-)
-from dojo.jira_link.queries import (
-    get_authorized_jira_projects,
-    get_authorized_jira_issues,
-)
-from dojo.tool_product.queries import get_authorized_tool_product_settings
-from dojo.cred.queries import get_authorized_cred_mappings
+from django.contrib.auth.models import Permission
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
+from django.http import FileResponse, Http404, HttpResponse
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.renderers import OpenApiJsonRenderer2
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiResponse,
@@ -162,9 +23,148 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 from drf_spectacular.views import SpectacularAPIView
-from drf_spectacular.renderers import OpenApiJsonRenderer2
+from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.generics import GenericAPIView
+from rest_framework.parsers import MultiPartParser
+from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
+from rest_framework.response import Response
+
+import dojo.jira_link.helper as jira_helper
+from dojo.api_v2 import (
+    mixins as dojo_mixins,
+)
+from dojo.api_v2 import (
+    permissions,
+    prefetch,
+    serializers,
+)
 from dojo.authorization.roles_permissions import Permissions
+from dojo.cred.queries import get_authorized_cred_mappings
+from dojo.endpoint.queries import (
+    get_authorized_endpoint_status,
+    get_authorized_endpoints,
+)
+from dojo.endpoint.views import get_endpoint_ids
+from dojo.engagement.queries import get_authorized_engagements
+from dojo.engagement.services import close_engagement, reopen_engagement
+from dojo.filters import (
+    ApiAppAnalysisFilter,
+    ApiCredentialsFilter,
+    ApiEndpointFilter,
+    ApiEngagementFilter,
+    ApiFindingFilter,
+    ApiProductFilter,
+    ApiRiskAcceptanceFilter,
+    ApiTemplateFindingFilter,
+    ApiTestFilter,
+    ReportFindingFilter,
+)
+from dojo.finding.queries import (
+    get_authorized_findings,
+    get_authorized_stub_findings,
+)
+from dojo.finding.views import (
+    duplicate_cluster,
+    reset_finding_duplicate_status_internal,
+    set_finding_as_original_internal,
+)
+from dojo.group.queries import (
+    get_authorized_group_members,
+    get_authorized_groups,
+)
+from dojo.importers.auto_create_context import AutoCreateContextManager
+from dojo.jira_link.queries import (
+    get_authorized_jira_issues,
+    get_authorized_jira_projects,
+)
+from dojo.models import (
+    Announcement,
+    Answer,
+    Answered_Survey,
+    App_Analysis,
+    BurpRawRequestResponse,
+    Check_List,
+    Cred_Mapping,
+    Cred_User,
+    Development_Environment,
+    Dojo_Group,
+    Dojo_Group_Member,
+    Dojo_User,
+    DojoMeta,
+    Endpoint,
+    Endpoint_Status,
+    Engagement,
+    Engagement_Presets,
+    Engagement_Survey,
+    FileUpload,
+    Finding,
+    Finding_Template,
+    General_Survey,
+    Global_Role,
+    JIRA_Instance,
+    JIRA_Issue,
+    JIRA_Project,
+    Language_Type,
+    Languages,
+    Network_Locations,
+    Note_Type,
+    Notes,
+    Notifications,
+    Product,
+    Product_API_Scan_Configuration,
+    Product_Group,
+    Product_Member,
+    Product_Type,
+    Product_Type_Group,
+    Product_Type_Member,
+    Question,
+    Regulation,
+    Risk_Acceptance,
+    Role,
+    SLA_Configuration,
+    Sonarqube_Issue,
+    Sonarqube_Issue_Transition,
+    Stub_Finding,
+    System_Settings,
+    Test,
+    Test_Import,
+    Test_Type,
+    Tool_Configuration,
+    Tool_Product_Settings,
+    Tool_Type,
+    User,
+    UserContactInfo,
+)
+from dojo.product.queries import (
+    get_authorized_app_analysis,
+    get_authorized_dojo_meta,
+    get_authorized_engagement_presets,
+    get_authorized_languages,
+    get_authorized_product_api_scan_configurations,
+    get_authorized_product_groups,
+    get_authorized_product_members,
+    get_authorized_products,
+)
+from dojo.product_type.queries import (
+    get_authorized_product_type_groups,
+    get_authorized_product_type_members,
+    get_authorized_product_types,
+)
+from dojo.reports.views import (
+    prefetch_related_findings_for_report,
+    report_url_resolver,
+)
+from dojo.risk_acceptance import api as ra_api
+from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
+from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
+from dojo.tool_product.queries import get_authorized_tool_product_settings
 from dojo.user.utils import get_configuration_permissions_codenames
+from dojo.utils import (
+    async_delete,
+    get_setting,
+    get_system_setting,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -1004,8 +1004,12 @@ class FindingViewSet(
                 return Response(
                     burps.errors, status=status.HTTP_400_BAD_REQUEST
                 )
-
+        # Not necessarily Burp scan specific - these are just any request/response pairs
         burp_req_resp = BurpRawRequestResponse.objects.filter(finding=finding)
+        var = settings.MAX_REQRESP_FROM_API
+        if var > -1:
+            burp_req_resp = burp_req_resp[:var]
+
         burp_list = []
         for burp in burp_req_resp:
             request = burp.get_request()
@@ -1214,9 +1218,7 @@ class FindingViewSet(
                 if tag not in all_tags:
                     return Response(
                         {
-                            "error": "'{}' is not a valid tag in list".format(
-                                tag
-                            )
+                            "error": f"'{tag}' is not a valid tag in list"
                         },
                         status=status.HTTP_400_BAD_REQUEST,
                     )
@@ -2598,41 +2600,27 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = (IsAuthenticated, permissions.UserHasImportPermission)
 
     def perform_create(self, serializer):
-        (
-            _,
-            _,
-            _,
-            engagement_id,
-            engagement_name,
-            product_name,
-            _product_type_name,
-            _auto_create_context,
-            _deduplication_on_engagement,
-            _do_not_reactivate,
-        ) = serializers.get_import_meta_data_from_dict(
-            serializer.validated_data
-        )
-        product = get_target_product_if_exists(product_name)
-        engagement = get_target_engagement_if_exists(
-            engagement_id, engagement_name, product
-        )
+        auto_create = AutoCreateContextManager()
+        # Process the context to make an conversions needed. Catch any exceptions
+        # in this case and wrap them in a DRF exception
+        try:
+            converted_dict = auto_create.convert_querydict_to_dict(serializer.validated_data)
+            auto_create.process_import_meta_data_from_dict(converted_dict)
+            # Get an existing product
+            product = auto_create.get_target_product_if_exists(**converted_dict)
+            engagement = auto_create.get_target_engagement_if_exists(**converted_dict)
+        except (ValueError, TypeError) as e:
+            # Raise an explicit drf exception here
+            raise ValidationError(str(e))
 
         # when using auto_create_context, the engagement or product may not
         # have been created yet
-        jira_driver = (
-            engagement if engagement else product if product else None
-        )
-        jira_project = (
-            jira_helper.get_jira_project(jira_driver) if jira_driver else None
-        )
-
         push_to_jira = serializer.validated_data.get("push_to_jira")
-        if get_system_setting("enable_jira") and jira_project:
-            push_to_jira = push_to_jira or jira_project.push_all_issues
-
-        logger.debug(
-            "push_to_jira: %s", serializer.validated_data.get("push_to_jira")
-        )
+        if get_system_setting("enable_jira"):
+            jira_driver = (engagement if engagement else product if product else None)
+            if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
+                push_to_jira = push_to_jira or jira_project.push_all_issues
+        logger.debug(f"push_to_jira: {push_to_jira}")
         serializer.save(push_to_jira=push_to_jira)
 
     def get_queryset(self):
@@ -2777,50 +2765,30 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         return get_authorized_tests(Permissions.Import_Scan_Result)
 
     def perform_create(self, serializer):
-        (
-            test_id,
-            test_title,
-            scan_type,
-            _,
-            engagement_name,
-            product_name,
-            _product_type_name,
-            _auto_create_context,
-            _deduplication_on_engagement,
-            _do_not_reactivate,
-        ) = serializers.get_import_meta_data_from_dict(
-            serializer.validated_data
-        )
-        product = get_target_product_if_exists(product_name)
-        engagement = get_target_engagement_if_exists(
-            None, engagement_name, product
-        )
-        test = get_target_test_if_exists(
-            test_id, test_title, scan_type, engagement
-        )
+        auto_create = AutoCreateContextManager()
+        # Process the context to make an conversions needed. Catch any exceptions
+        # in this case and wrap them in a DRF exception
+        try:
+            converted_dict = auto_create.convert_querydict_to_dict(serializer.validated_data)
+            auto_create.process_import_meta_data_from_dict(converted_dict)
+            # Get an existing product
+            product = auto_create.get_target_product_if_exists(**converted_dict)
+            engagement = auto_create.get_target_engagement_if_exists(**converted_dict)
+            test = auto_create.get_target_test_if_exists(**converted_dict)
+        except (ValueError, TypeError) as e:
+            # Raise an explicit drf exception here
+            raise ValidationError(str(e))
 
         # when using auto_create_context, the engagement or product may not
         # have been created yet
-        jira_driver = (
-            test
-            if test
-            else engagement
-            if engagement
-            else product
-            if product
-            else None
-        )
-        jira_project = (
-            jira_helper.get_jira_project(jira_driver) if jira_driver else None
-        )
-
         push_to_jira = serializer.validated_data.get("push_to_jira")
-        if get_system_setting("enable_jira") and jira_project:
-            push_to_jira = push_to_jira or jira_project.push_all_issues
-
-        logger.debug(
-            "push_to_jira: %s", serializer.validated_data.get("push_to_jira")
-        )
+        if get_system_setting("enable_jira"):
+            jira_driver = (
+                test if test else engagement if engagement else product if product else None
+            )
+            if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
+                push_to_jira = push_to_jira or jira_project.push_all_issues
+        logger.debug(f"push_to_jira: {push_to_jira}")
         serializer.save(push_to_jira=push_to_jira)
 
 
@@ -2877,7 +2845,7 @@ def report_generate(request, obj, options):
     include_executive_summary = False
     include_table_of_contents = False
 
-    report_info = "Generated By %s on %s" % (
+    report_info = "Generated By {} on {}".format(
         user.get_full_name(),
         (timezone.now().strftime("%m/%d/%Y %I:%M%p %Z")),
     )
@@ -2947,7 +2915,7 @@ def report_generate(request, obj, options):
         )
         report_name = "Engagement Report: " + str(engagement)
 
-        ids = set(finding.id for finding in findings.qs)
+        ids = set(finding.id for finding in findings.qs)  # noqa: C401
         ids = get_endpoint_ids(
             Endpoint.objects.filter(product=engagement.product).distinct()
         )

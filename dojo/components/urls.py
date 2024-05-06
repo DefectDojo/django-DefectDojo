@@ -1,4 +1,5 @@
 from django.urls import re_path
+
 from dojo.components import views
 
 urlpatterns = [

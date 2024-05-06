@@ -7,7 +7,7 @@ from dojo.models import Finding
 __author__ = "Kirill Gotsman"
 
 
-class H1Parser(object):
+class H1Parser:
     """
     A class that can be used to parse the Get All Reports JSON export from HackerOne API.
     """
@@ -33,7 +33,7 @@ class H1Parser(object):
         except Exception:
             tree = json.loads(data)
         # Convert JSON  report to DefectDojo format
-        dupes = dict()
+        dupes = {}
         for content in tree["data"]:
             # Get all relevant data
             date = content["attributes"]["created_at"]
@@ -53,9 +53,7 @@ class H1Parser(object):
                 issue_tracker_url = content["attributes"][
                     "issue_tracker_reference_url"
                 ]
-                references = "[{}]({})\n".format(
-                    issue_tracker_id, issue_tracker_url
-                )
+                references = f"[{issue_tracker_id}]({issue_tracker_url})\n"
             except Exception:
                 references = ""
 
@@ -72,7 +70,7 @@ class H1Parser(object):
             ref_link = "https://hackerone.com/reports/{}".format(
                 content.get("id")
             )
-            references += "[{}]({})".format(ref_link, ref_link)
+            references += f"[{ref_link}]({ref_link})"
 
             # Set active state of the Dojo finding
             if content["attributes"]["state"] in ["triaged", "new"]:
@@ -116,7 +114,7 @@ class H1Parser(object):
                     cwe=cwe,
                     dynamic_finding=False
                 )
-                finding.unsaved_endpoints = list()
+                finding.unsaved_endpoints = []
                 dupes[dupe_key] = finding
         return dupes.values()
 
@@ -132,7 +130,7 @@ class H1Parser(object):
 
         # Build the description of the Dojo finding
         description = "#" + content["attributes"]["title"]
-        description += "\nSubmitted: {}\nBy: {}\n".format(date, reporter)
+        description += f"\nSubmitted: {date}\nBy: {reporter}\n"
 
         # Add triaged date
         if triaged_date is not None:
@@ -140,14 +138,14 @@ class H1Parser(object):
                 datetime.strptime(triaged_date, "%Y-%m-%dT%H:%M:%S.%fZ"),
                 "%Y-%m-%d",
             )
-            description += "Triaged: {}\n".format(triaged_date)
+            description += f"Triaged: {triaged_date}\n"
 
         # Try to grab CVSS
         try:
             cvss = content["relationships"]["severity"]["data"]["attributes"][
                 "score"
             ]
-            description += "CVSS: {}\n".format(cvss)
+            description += f"CVSS: {cvss}\n"
         except Exception:
             pass
 
@@ -164,9 +162,7 @@ class H1Parser(object):
             weakness_desc = content["relationships"]["weakness"]["data"][
                 "attributes"
             ]["description"]
-            description += "\n##Weakness: {}\n{}".format(
-                weakness_title, weakness_desc
-            )
+            description += f"\n##Weakness: {weakness_title}\n{weakness_desc}"
         except Exception:
             pass
 
