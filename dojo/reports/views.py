@@ -1,10 +1,9 @@
 import csv
 import logging
 import re
-
-from typing import List
 from datetime import datetime
 from tempfile import NamedTemporaryFile
+from typing import List
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
