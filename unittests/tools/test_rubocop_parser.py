@@ -1,7 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-
 from dojo.models import Test
 from dojo.tools.rubocop.parser import RubocopParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestRubocopParser(DojoTestCase):

@@ -1,5 +1,6 @@
+from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, Test, User
+
 from .dojo_test_case import DojoTestCase
-from dojo.models import Endpoint, Endpoint_Status, Finding, Test, Engagement, Product, User
 
 
 class TestCopyFindingModel(DojoTestCase):

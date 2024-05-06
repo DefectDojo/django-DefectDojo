@@ -47,7 +47,7 @@ class KiuwanParser:
         for row in reader:
             csvarray.append(row)
 
-        dupes = dict()
+        dupes = {}
         for row in csvarray:
             finding = Finding(test=test)
             findingdict = {}

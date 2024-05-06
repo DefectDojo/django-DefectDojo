@@ -1,12 +1,12 @@
-from django.http import HttpResponseRedirect
-from django.conf import settings
-from urllib.parse import quote
-from re import compile
 import logging
+from re import compile
 from threading import local
-from django.db import models
-from django.urls import reverse
+from urllib.parse import quote
 
+from django.conf import settings
+from django.db import models
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 

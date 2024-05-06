@@ -113,17 +113,22 @@ class DependencyTrackParser:
         """
         # Validation of required fields
         if 'vulnerability' not in dependency_track_finding:
-            raise ValueError("Missing 'vulnerability' node from finding!")
+            msg = "Missing 'vulnerability' node from finding!"
+            raise ValueError(msg)
         if 'vulnId' not in dependency_track_finding['vulnerability']:
-            raise ValueError("Missing 'vulnId' node from vulnerability!")
+            msg = "Missing 'vulnId' node from vulnerability!"
+            raise ValueError(msg)
         vuln_id = dependency_track_finding['vulnerability']['vulnId']
         if 'source' not in dependency_track_finding['vulnerability']:
-            raise ValueError("Missing 'source' node from vulnerability!")
+            msg = "Missing 'source' node from vulnerability!"
+            raise ValueError(msg)
         source = dependency_track_finding['vulnerability']['source']
         if 'component' not in dependency_track_finding:
-            raise ValueError("Missing 'component' node from finding!")
+            msg = "Missing 'component' node from finding!"
+            raise ValueError(msg)
         if 'name' not in dependency_track_finding['component']:
-            raise ValueError("Missing 'name' node from component!")
+            msg = "Missing 'name' node from component!"
+            raise ValueError(msg)
         component_name = dependency_track_finding['component']['name']
 
         # Build the title of the Dojo finding
@@ -265,7 +270,7 @@ class DependencyTrackParser:
 
         # Exit if file is not provided
         if file is None:
-            return list()
+            return []
 
         # Load the contents of the JSON file into a dictionary
         data = file.read()
@@ -276,15 +281,15 @@ class DependencyTrackParser:
 
         # Exit if file is an empty JSON dictionary
         if len(findings_export_dict.keys()) == 0:
-            return list()
+            return []
 
         # Make sure the findings key exists in the dictionary and that it is not null or an empty list
         # If it is null or an empty list then exit
         if 'findings' not in findings_export_dict or not findings_export_dict['findings']:
-            return list()
+            return []
 
         # Start with an empty list of findings
-        items = list()
+        items = []
 
         # If we have gotten this far then there should be one or more findings
         # Loop through each finding from Dependency Track

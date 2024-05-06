@@ -1,6 +1,8 @@
 import json
+
 import dateutil
 from netaddr import IPAddress
+
 from dojo.models import Endpoint, Finding
 
 SEVERITY_MAPPING = {
@@ -26,7 +28,7 @@ class AsffParser:
 
     def get_findings(self, file, test):
         data = json.load(file)
-        result = list()
+        result = []
         for item in data:
             if item.get("Remediation"):
                 mitigation = item.get("Remediation").get("Recommendation").get("Text")

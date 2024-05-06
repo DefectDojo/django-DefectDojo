@@ -1,9 +1,9 @@
 import contextlib
 import logging
-from dojo.celery import app
-from dojo.models import SLA_Configuration, Product, Engagement, Test, Finding, Endpoint
-from dojo.decorators import dojo_async_task
 
+from dojo.celery import app
+from dojo.decorators import dojo_async_task
+from dojo.models import Endpoint, Engagement, Finding, Product, SLA_Configuration, Test
 
 logger = logging.getLogger(__name__)
 

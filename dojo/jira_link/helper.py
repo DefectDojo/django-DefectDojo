@@ -1,26 +1,47 @@
-import logging
-from typing import Any
-from dojo.utils import add_error_message_to_response, get_system_setting, to_str_typed
-import os
 import io
 import json
+import logging
+import os
+from typing import Any
+
 import requests
 from django.conf import settings
+from django.contrib import messages
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
-from dojo.models import Finding, Finding_Group, Risk_Acceptance, Stub_Finding, Test, Engagement, Product, \
-    JIRA_Issue, JIRA_Project, System_Settings, Notes, JIRA_Instance, User
 from requests.auth import HTTPBasicAuth
-from dojo.notifications.helper import create_notification
-from django.contrib import messages
+
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
-from dojo.utils import truncate_with_dots, prod_name, get_file_images
-from django.urls import reverse
-from dojo.forms import JIRAProjectForm, JIRAEngagementForm
+from dojo.forms import JIRAEngagementForm, JIRAProjectForm
+from dojo.models import (
+    Engagement,
+    Finding,
+    Finding_Group,
+    JIRA_Instance,
+    JIRA_Issue,
+    JIRA_Project,
+    Notes,
+    Product,
+    Risk_Acceptance,
+    Stub_Finding,
+    System_Settings,
+    Test,
+    User,
+)
+from dojo.notifications.helper import create_notification
+from dojo.utils import (
+    add_error_message_to_response,
+    get_file_images,
+    get_system_setting,
+    prod_name,
+    to_str_typed,
+    truncate_with_dots,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -87,10 +108,10 @@ def is_push_all_issues(instance):
 def can_be_pushed_to_jira(obj, form=None):
     # logger.debug('can be pushed to JIRA: %s', finding_or_form)
     if not get_jira_project(obj):
-        return False, '%s cannot be pushed to jira as there is no jira project configuration for this product.' % to_str_typed(obj), 'error_no_jira_project'
+        return False, f'{to_str_typed(obj)} cannot be pushed to jira as there is no jira project configuration for this product.', 'error_no_jira_project'
 
     if not hasattr(obj, 'has_jira_issue'):
-        return False, '%s cannot be pushed to jira as there is no jira_issue attribute.' % to_str_typed(obj), 'error_no_jira_issue_attribute'
+        return False, f'{to_str_typed(obj)} cannot be pushed to jira as there is no jira_issue attribute.', 'error_no_jira_issue_attribute'
 
     if isinstance(obj, Stub_Finding):
         # stub findings don't have active/verified/etc and can always be pushed
@@ -121,16 +142,16 @@ def can_be_pushed_to_jira(obj, form=None):
             jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
 
             if jira_minimum_threshold and jira_minimum_threshold > Finding.get_number_severity(severity):
-                logger.debug('Finding below the minimum JIRA severity threshold (%s).' % System_Settings.objects.get().jira_minimum_severity)
-                return False, 'Finding below the minimum JIRA severity threshold (%s).' % System_Settings.objects.get().jira_minimum_severity, 'below_minimum_threshold'
+                logger.debug(f'Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).')
+                return False, f'Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).', 'below_minimum_threshold'
     elif isinstance(obj, Finding_Group):
         if not obj.findings.all():
-            return False, '%s cannot be pushed to jira as it is empty.' % to_str_typed(obj), 'error_empty'
+            return False, f'{to_str_typed(obj)} cannot be pushed to jira as it is empty.', 'error_empty'
         if 'Active' not in obj.status():
-            return False, '%s cannot be pushed to jira as it is not active.' % to_str_typed(obj), 'error_inactive'
+            return False, f'{to_str_typed(obj)} cannot be pushed to jira as it is not active.', 'error_inactive'
 
     else:
-        return False, '%s cannot be pushed to jira as it is of unsupported type.' % to_str_typed(obj), 'error_unsupported'
+        return False, f'{to_str_typed(obj)} cannot be pushed to jira as it is of unsupported type.', 'error_unsupported'
 
     return True, None, None
 
@@ -427,11 +448,11 @@ def jira_transition(jira, issue, transition_id):
     except JIRAError as jira_error:
         logger.debug('error transitioning jira issue ' + issue.key + ' ' + str(jira_error))
         logger.exception(jira_error)
-        alert_text = "JiraError HTTP %s" % jira_error.status_code
+        alert_text = f"JiraError HTTP {jira_error.status_code}"
         if jira_error.url:
-            alert_text += " url: %s" % jira_error.url
+            alert_text += f" url: {jira_error.url}"
         if jira_error.text:
-            alert_text += "\ntext: %s" % jira_error.text
+            alert_text += f"\ntext: {jira_error.text}"
         log_jira_generic_alert('error transitioning jira issue ' + issue.key, alert_text)
         return None
 
@@ -604,7 +625,8 @@ def jira_environment(obj):
 
 def push_to_jira(obj, *args, **kwargs):
     if obj is None:
-        raise ValueError('Cannot push None to JIRA')
+        msg = 'Cannot push None to JIRA'
+        raise ValueError(msg)
 
     if isinstance(obj, Finding):
         finding = obj
@@ -1082,12 +1104,14 @@ def get_issuetype_fields(
             try:
                 project = meta['projects'][0]
             except Exception:
-                raise JIRAError("Project misconfigured or no permissions in Jira ?")
+                msg = "Project misconfigured or no permissions in Jira ?"
+                raise JIRAError(msg)
 
             try:
                 issuetype_fields = project['issuetypes'][0]['fields'].keys()
             except Exception:
-                raise JIRAError("Misconfigured default issue type ?")
+                msg = "Misconfigured default issue type ?"
+                raise JIRAError(msg)
 
         else:
             try:
@@ -1103,7 +1127,8 @@ def get_issuetype_fields(
                     break
 
             if not issuetype_id:
-                raise JIRAError("Issue type ID can not be matched. Misconfigured default issue type ?")
+                msg = "Issue type ID can not be matched. Misconfigured default issue type ?"
+                raise JIRAError(msg)
 
             try:
                 issuetype_fields = jira.project_issue_fields(project_key, issuetype_id)
@@ -1114,7 +1139,8 @@ def get_issuetype_fields(
             try:
                 issuetype_fields = [f.fieldId for f in issuetype_fields]
             except Exception:
-                raise JIRAError("Misconfigured default issue type ?")
+                msg = "Misconfigured default issue type ?"
+                raise JIRAError(msg)
 
     except JIRAError as e:
         e.text = f"Failed retrieving field metadata from Jira version: {jira._version}, project: {project_key}, issue type: {issuetype_name}. {e.text}"
@@ -1468,7 +1494,8 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
                 logger.debug('inheriting but no existing JIRA Project for engagement, so nothing to do')
             else:
                 error = True
-                raise ValueError('Not allowed to remove existing JIRA Config for an engagement')
+                msg = 'Not allowed to remove existing JIRA Config for an engagement'
+                raise ValueError(msg)
         elif jform.is_valid():
             try:
                 jira_project = jform.save(commit=False)
@@ -1481,7 +1508,8 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
                     obj = product
 
                 if not jira_project.product_id and not jira_project.engagement_id:
-                    raise ValueError('encountered JIRA_Project without product_id and without engagement_id')
+                    msg = 'encountered JIRA_Project without product_id and without engagement_id'
+                    raise ValueError(msg)
 
                 # only check jira project if form is sufficiently populated
                 if jira_project.jira_instance and jira_project.project_key:

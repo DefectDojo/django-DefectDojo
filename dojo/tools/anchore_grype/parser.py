@@ -1,4 +1,5 @@
 import json
+
 from cvss import parser as cvss_parser
 from cvss.cvss3 import CVSS3
 
@@ -25,7 +26,7 @@ class AnchoreGrypeParser:
 
     def get_findings(self, file, test):
         data = json.load(file)
-        dupes = dict()
+        dupes = {}
         for item in data.get("matches", []):
             vulnerability = item["vulnerability"]
             vuln_id = vulnerability["id"]
@@ -203,7 +204,7 @@ class AnchoreGrypeParser:
         return None
 
     def get_vulnerability_ids(self, vuln_id, related_vulnerabilities):
-        vulnerability_ids = list()
+        vulnerability_ids = []
         if vuln_id:
             vulnerability_ids.append(vuln_id)
         if related_vulnerabilities:

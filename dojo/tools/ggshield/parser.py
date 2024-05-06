@@ -1,7 +1,9 @@
-import json
 import hashlib
-from dojo.models import Finding
+import json
+
 from dateutil import parser
+
+from dojo.models import Finding
 
 
 class GgshieldParser:
@@ -24,7 +26,7 @@ class GgshieldParser:
         """
         json_data = json.load(filename)
         issues = json_data.get("scans")
-        dupes = dict()
+        dupes = {}
 
         for issue in issues:
             if issue.get("total_incidents") > 0:

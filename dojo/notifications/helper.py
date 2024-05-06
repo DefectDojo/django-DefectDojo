@@ -1,9 +1,9 @@
 import logging
-import requests
 
+import requests
 from django.conf import settings
 from django.core.mail import EmailMessage
-from django.db.models import Q, Count, Prefetch
+from django.db.models import Count, Prefetch, Q
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -12,7 +12,7 @@ from django.utils.translation import gettext as _
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
-from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
+from dojo.models import Alerts, Dojo_User, Notifications, System_Settings, UserContactInfo
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
 
 logger = logging.getLogger(__name__)
@@ -331,8 +331,9 @@ def send_alert_notification(event, user=None, *args, **kwargs):
 
 
 def get_slack_user_id(user_email):
-    from dojo.utils import get_system_setting
     import json
+
+    from dojo.utils import get_system_setting
 
     user_id = None
 
@@ -374,7 +375,7 @@ def log_alert(e, notification_type=None, *args, **kwargs):
             user_id=user,
             url=kwargs.get('url', reverse('alerts')),
             title=kwargs.get('title', 'Notification issue')[:250],
-            description=kwargs.get('description', '%s' % e)[:2000],
+            description=kwargs.get('description', str(e))[:2000],
             icon="exclamation-triangle",
             source=notification_type[:100] if notification_type else kwargs.get('source', 'unknown')[:100])
         # relative urls will fail validation
@@ -391,10 +392,10 @@ def notify_test_created(test):
 def notify_scan_added(test, updated_count, new_findings=[], findings_mitigated=[], findings_reactivated=[], findings_untouched=[]):
     logger.debug("Scan added notifications")
 
-    new_findings = sorted(list(new_findings), key=lambda x: x.numerical_severity)
-    findings_mitigated = sorted(list(findings_mitigated), key=lambda x: x.numerical_severity)
-    findings_reactivated = sorted(list(findings_reactivated), key=lambda x: x.numerical_severity)
-    findings_untouched = sorted(list(findings_untouched), key=lambda x: x.numerical_severity)
+    new_findings = sorted(new_findings, key=lambda x: x.numerical_severity)
+    findings_mitigated = sorted(findings_mitigated, key=lambda x: x.numerical_severity)
+    findings_reactivated = sorted(findings_reactivated, key=lambda x: x.numerical_severity)
+    findings_untouched = sorted(findings_untouched, key=lambda x: x.numerical_severity)
 
     title = 'Created/Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
 

@@ -1,50 +1,95 @@
 import collections
-import warnings
-from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
-from drf_spectacular.types import OpenApiTypes
-
-from drf_spectacular.utils import extend_schema_field
-from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, NOT_ACCEPTED_FINDINGS_QUERY, WAS_ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, FALSE_POSITIVE_FINDINGS_QUERY, INACTIVE_FINDINGS_QUERY, OPEN_FINDINGS_QUERY, OUT_OF_SCOPE_FINDINGS_QUERY, VERIFIED_FINDINGS_QUERY, UNDER_REVIEW_QUERY
+import decimal
 import logging
-from datetime import timedelta, datetime
+import warnings
+from datetime import datetime, timedelta
+
+import pytz
+import six
+import tagulous
+from auditlog.models import LogEntry
 from django import forms
 from django.apps import apps
-from auditlog.models import LogEntry
 from django.conf import settings
-import six
-from django.utils.translation import gettext_lazy as _
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import JSONField, Q
+from django.forms import HiddenInput
 from django.utils import timezone
-from django_filters import FilterSet, CharFilter, OrderingFilter, \
-    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
-    BooleanFilter, NumberFilter, DateFilter, RangeFilter
+from django.utils.translation import gettext_lazy as _
+from django_filters import (
+    BooleanFilter,
+    CharFilter,
+    DateFilter,
+    FilterSet,
+    ModelChoiceFilter,
+    ModelMultipleChoiceFilter,
+    MultipleChoiceFilter,
+    NumberFilter,
+    OrderingFilter,
+    RangeFilter,
+)
 from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate
-from django.db.models import JSONField
-import pytz
-from django.db.models import Q
-from dojo.models import Dojo_User, Finding_Group, Product_API_Scan_Configuration, Product_Type, Finding, Product, Test_Import, Test_Type, \
-    Endpoint, Development_Environment, Finding_Template, Note_Type, Risk_Acceptance, Cred_Mapping, \
-    Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
-    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, EFFORT_FOR_FIXING_CHOICES, Dojo_Group, Vulnerability_Id, \
-    Test_Import_Finding_Action, IMPORT_ACTIONS
-from dojo.utils import get_system_setting
-from django.contrib.contenttypes.models import ContentType
-import tagulous
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from polymorphic.base import ManagerInheritanceWarning
+
 # from tagulous.forms import TagWidget
 # import tagulous
 from dojo.authorization.roles_permissions import Permissions
-from dojo.product_type.queries import get_authorized_product_types
-from dojo.product.queries import get_authorized_products
-from dojo.engagement.queries import get_authorized_engagements
-from dojo.test.queries import get_authorized_tests
-from dojo.finding.queries import get_authorized_findings
 from dojo.endpoint.queries import get_authorized_endpoints
+from dojo.engagement.queries import get_authorized_engagements
+from dojo.finding.helper import (
+    ACCEPTED_FINDINGS_QUERY,
+    CLOSED_FINDINGS_QUERY,
+    FALSE_POSITIVE_FINDINGS_QUERY,
+    INACTIVE_FINDINGS_QUERY,
+    NOT_ACCEPTED_FINDINGS_QUERY,
+    OPEN_FINDINGS_QUERY,
+    OUT_OF_SCOPE_FINDINGS_QUERY,
+    UNDER_REVIEW_QUERY,
+    VERIFIED_FINDINGS_QUERY,
+    WAS_ACCEPTED_FINDINGS_QUERY,
+)
+from dojo.finding.queries import get_authorized_findings
 from dojo.finding_group.queries import get_authorized_finding_groups
+from dojo.models import (
+    EFFORT_FOR_FIXING_CHOICES,
+    ENGAGEMENT_STATUS_CHOICES,
+    IMPORT_ACTIONS,
+    SEVERITY_CHOICES,
+    App_Analysis,
+    ChoiceQuestion,
+    Cred_Mapping,
+    Development_Environment,
+    Dojo_Group,
+    Dojo_User,
+    Endpoint,
+    Endpoint_Status,
+    Engagement,
+    Engagement_Survey,
+    Finding,
+    Finding_Group,
+    Finding_Template,
+    Note_Type,
+    Product,
+    Product_API_Scan_Configuration,
+    Product_Type,
+    Question,
+    Risk_Acceptance,
+    Test,
+    Test_Import,
+    Test_Import_Finding_Action,
+    Test_Type,
+    TextQuestion,
+    Vulnerability_Id,
+)
+from dojo.product.queries import get_authorized_products
+from dojo.product_type.queries import get_authorized_product_types
+from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
+from dojo.test.queries import get_authorized_tests
 from dojo.user.queries import get_authorized_users
-from django.forms import HiddenInput
-from dojo.utils import is_finding_groups_enabled
-import decimal
+from dojo.utils import get_system_setting, is_finding_groups_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +101,7 @@ EARLIEST_FINDING = None
 
 def custom_filter(queryset, name, value):
     values = value.split(',')
-    filter = ('%s__in' % (name))
+    filter = (f'{name}__in')
     return queryset.filter(Q(**{filter: values}))
 
 
@@ -236,7 +281,7 @@ def get_earliest_finding(queryset=None):
 
 
 def cwe_options(queryset):
-    cwe = dict()
+    cwe = {}
     cwe = dict([cwe, cwe]
                 for cwe in queryset.order_by().values_list('cwe', flat=True).distinct()
                 if isinstance(cwe, int) and cwe is not None and cwe > 0)
@@ -277,14 +322,14 @@ def get_tags_model_from_field_name(field):
     try:
         parts = field.split('__')
         model_name = parts[-2]
-        return apps.get_model('dojo.%s' % model_name, require_ready=True), exclude
+        return apps.get_model(f'dojo.{model_name}', require_ready=True), exclude
     except Exception:
         return None, exclude
 
 
 def get_tags_label_from_model(model):
     if model:
-        return 'Tags (%s)' % model.__name__.title()
+        return f'Tags ({model.__name__.title()})'
     else:
         return 'Tags (Unknown)'
 
@@ -557,32 +602,32 @@ class DateRangeFilter(ChoiceFilter):
     options = {
         None: (_('Any date'), lambda qs, name: qs.all()),
         1: (_('Today'), lambda qs, name: qs.filter(**{
-            '%s__year' % name: now().year,
-            '%s__month' % name: now().month,
-            '%s__day' % name: now().day
+            f'{name}__year': now().year,
+            f'{name}__month': now().month,
+            f'{name}__day': now().day
         })),
         2: (_('Past 7 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=7)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+            f'{name}__gte': _truncate(now() - timedelta(days=7)),
+            f'{name}__lt': _truncate(now() + timedelta(days=1)),
         })),
         3: (_('Past 30 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=30)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+            f'{name}__gte': _truncate(now() - timedelta(days=30)),
+            f'{name}__lt': _truncate(now() + timedelta(days=1)),
         })),
         4: (_('Past 90 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=90)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+            f'{name}__gte': _truncate(now() - timedelta(days=90)),
+            f'{name}__lt': _truncate(now() + timedelta(days=1)),
         })),
         5: (_('Current month'), lambda qs, name: qs.filter(**{
-            '%s__year' % name: now().year,
-            '%s__month' % name: now().month
+            f'{name}__year': now().year,
+            f'{name}__month': now().month
         })),
         6: (_('Current year'), lambda qs, name: qs.filter(**{
-            '%s__year' % name: now().year,
+            f'{name}__year': now().year,
         })),
         7: (_('Past year'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=365)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+            f'{name}__gte': _truncate(now() - timedelta(days=365)),
+            f'{name}__lt': _truncate(now() + timedelta(days=1)),
         })),
     }
 
@@ -603,48 +648,48 @@ class DateRangeOmniFilter(ChoiceFilter):
     options = {
         None: (_('Any date'), lambda qs, name: qs.all()),
         1: (_('Today'), lambda qs, name: qs.filter(**{
-            '%s__year' % name: now().year,
-            '%s__month' % name: now().month,
-            '%s__day' % name: now().day
+            f'{name}__year': now().year,
+            f'{name}__month': now().month,
+            f'{name}__day': now().day
         })),
         2: (_('Next 7 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=7)),
+            f'{name}__gte': _truncate(now() + timedelta(days=1)),
+            f'{name}__lt': _truncate(now() + timedelta(days=7)),
         })),
         3: (_('Next 30 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=30)),
+            f'{name}__gte': _truncate(now() + timedelta(days=1)),
+            f'{name}__lt': _truncate(now() + timedelta(days=30)),
         })),
         4: (_('Next 90 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=90)),
+            f'{name}__gte': _truncate(now() + timedelta(days=1)),
+            f'{name}__lt': _truncate(now() + timedelta(days=90)),
         })),
         5: (_('Past 7 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=7)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+            f'{name}__gte': _truncate(now() - timedelta(days=7)),
+            f'{name}__lt': _truncate(now() + timedelta(days=1)),
         })),
         6: (_('Past 30 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=30)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+            f'{name}__gte': _truncate(now() - timedelta(days=30)),
+            f'{name}__lt': _truncate(now() + timedelta(days=1)),
         })),
         7: (_('Past 90 days'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=90)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+            f'{name}__gte': _truncate(now() - timedelta(days=90)),
+            f'{name}__lt': _truncate(now() + timedelta(days=1)),
         })),
         8: (_('Current month'), lambda qs, name: qs.filter(**{
-            '%s__year' % name: now().year,
-            '%s__month' % name: now().month
+            f'{name}__year': now().year,
+            f'{name}__month': now().month
         })),
         9: (_('Past year'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() - timedelta(days=365)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=1)),
+            f'{name}__gte': _truncate(now() - timedelta(days=365)),
+            f'{name}__lt': _truncate(now() + timedelta(days=1)),
         })),
         10: (_('Current year'), lambda qs, name: qs.filter(**{
-            '%s__year' % name: now().year,
+            f'{name}__year': now().year,
         })),
         11: (_('Next year'), lambda qs, name: qs.filter(**{
-            '%s__gte' % name: _truncate(now() + timedelta(days=1)),
-            '%s__lt' % name: _truncate(now() + timedelta(days=365)),
+            f'{name}__gte': _truncate(now() + timedelta(days=1)),
+            f'{name}__lt': _truncate(now() + timedelta(days=365)),
         })),
     }
 
@@ -665,10 +710,10 @@ class ReportBooleanFilter(ChoiceFilter):
     options = {
         None: (_('Either'), lambda qs, name: qs.all()),
         1: (_('Yes'), lambda qs, name: qs.filter(**{
-            '%s' % name: True
+            f'{name}': True
         })),
         2: (_('No'), lambda qs, name: qs.filter(**{
-            '%s' % name: False
+            f'{name}': False
         })),
     }
 
@@ -736,8 +781,8 @@ class MetricsDateRangeFilter(ChoiceFilter):
             datetime(now().year, now().month, 1, 0, 0, 0))
         self.end_date = now()
         return qs.filter(**{
-            '%s__year' % name: self.start_date.year,
-            '%s__month' % name: self.start_date.month
+            f'{name}__year': self.start_date.year,
+            f'{name}__month': self.start_date.month
         })
 
     def current_year(self, qs, name):
@@ -745,15 +790,15 @@ class MetricsDateRangeFilter(ChoiceFilter):
             datetime(now().year, 1, 1, 0, 0, 0))
         self.end_date = now()
         return qs.filter(**{
-            '%s__year' % name: now().year,
+            f'{name}__year': now().year,
         })
 
     def past_x_days(self, qs, name, days):
         self.start_date = _truncate(now() - timedelta(days=days))
         self.end_date = _truncate(now() + timedelta(days=1))
         return qs.filter(**{
-            '%s__gte' % name: self.start_date,
-            '%s__lt' % name: self.end_date,
+            f'{name}__gte': self.start_date,
+            f'{name}__lt': self.end_date,
         })
 
     def past_seven_days(self, qs, name):
@@ -1006,6 +1051,32 @@ class EngagementFilter(EngagementFilterHelper, DojoFilter):
     class Meta:
         model = Product
         fields = ['name', 'prod_type']
+
+
+class ProductEngagementsFilter(DojoFilter):
+    engagement__name = CharFilter(field_name='name', lookup_expr='icontains', label='Engagement name contains')
+    engagement__lead = ModelChoiceFilter(field_name='lead', queryset=Dojo_User.objects.none(), label="Lead")
+    engagement__version = CharFilter(field_name='version', lookup_expr='icontains', label='Engagement version')
+    engagement__test__version = CharFilter(field_name='test__version', lookup_expr='icontains', label='Test version')
+    engagement__status = MultipleChoiceFilter(field_name='status', choices=ENGAGEMENT_STATUS_CHOICES,
+                                              label="Status")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.form.fields['engagement__lead'].queryset = get_authorized_users(Permissions.Product_Type_View) \
+            .filter(engagement__lead__isnull=False).distinct()
+
+    class Meta:
+        model = Engagement
+        fields = []
+
+
+class ProductEngagementsFilterWithoutObjectLookups(ProductEngagementsFilter):
+    engagement__lead = CharFilter(
+        field_name="lead__username",
+        lookup_expr="iexact",
+        label="Lead Username",
+        help_text="Search for Lead username that are an exact match")
 
 
 class EngagementFilterWithoutObjectLookups(EngagementFilterHelper):

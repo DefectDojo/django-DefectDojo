@@ -1,8 +1,10 @@
 import json
 import logging
+
 from cvss.cvss3 import CVSS3
 
 from dojo.models import Endpoint, Finding
+
 from .importer import VulnersImporter
 
 logger = logging.getLogger(__name__)
@@ -42,9 +44,9 @@ class ApiVulnersParser:
         findings = []
 
         if file:
-            data = json.load(file).get("data", dict())
-            report = data.get("report", list())
-            vulns = data.get("vulns", dict())
+            data = json.load(file).get("data", {})
+            report = data.get("report", [])
+            vulns = data.get("vulns", {})
         else:
             report = VulnersImporter().get_findings(test)
             vulns_id = [vuln.get("vulnID") for vuln in report]
@@ -53,7 +55,7 @@ class ApiVulnersParser:
         # for each issue found
         for component in report:
             id = component.get("vulnID")
-            vuln = vulns.get(id, dict())
+            vuln = vulns.get(id, {})
             title = component.get("title", id)
             family = component.get("family")
             agentip = component.get("agentip")

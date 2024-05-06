@@ -1,6 +1,7 @@
-import io
 import csv
 import hashlib
+import io
+
 from dojo.models import Finding
 
 
@@ -15,7 +16,7 @@ class PmdParser:
         return "CSV Report"
 
     def get_findings(self, filename, test):
-        dupes = dict()
+        dupes = {}
 
         content = filename.read()
         if isinstance(content, bytes):

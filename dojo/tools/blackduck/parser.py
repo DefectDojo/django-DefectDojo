@@ -1,6 +1,7 @@
 import hashlib
 
 from dojo.models import Finding
+
 from .importer import BlackduckImporter
 
 
@@ -33,7 +34,7 @@ class BlackduckParser:
         return findings
 
     def ingest_findings(self, normalized_findings, test):
-        dupes = dict()
+        dupes = {}
         for i in normalized_findings:
             vulnerability_id = i.vuln_id
             cwe = 0  # need a way to automaticall retrieve that see #1119

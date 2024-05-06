@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+
 from dojo.models import Alerts, Dojo_User
 
 """
@@ -28,9 +29,9 @@ class Command(BaseCommand):
                 try:
                     user = Dojo_User.objects.get(username=user_name)
                     Alerts.objects.filter(user_id_id=user.id).delete()
-                    self.stdout.write('User Alerts for "%s" deleted with success!' % (user_name))
+                    self.stdout.write(f'User Alerts for "{user_name}" deleted with success!')
                 except:
-                    self.stdout.write('User "%s" does not exist.' % user_name)
+                    self.stdout.write(f'User "{user_name}" does not exist.')
         elif alls and not system:
             Alerts.objects.all().delete()
         elif system and not alls:

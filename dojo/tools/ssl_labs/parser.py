@@ -60,7 +60,7 @@ class SslLabsParser:
                 title = f"TLS Grade '{grade}' for {hostName}"
 
                 sev = self.getCriticalityRating(grade)
-                description = "%s \n\n" % title
+                description = f"{title} \n\n"
                 cert = ""
                 if "cert" in endpoints["details"]:
                     cert = endpoints["details"]["cert"]
@@ -333,7 +333,7 @@ class SslLabsParser:
                         dynamic_finding=True,
                     )
                     dupes[dupe_key] = find
-                    find.unsaved_endpoints = list()
+                    find.unsaved_endpoints = []
 
                 find.unsaved_endpoints.append(
                     Endpoint(host=hostName, port=port, protocol=protocol)

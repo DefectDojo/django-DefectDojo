@@ -1,6 +1,7 @@
 import hashlib
 import json
 import re
+
 from dojo.models import Finding
 
 
@@ -21,7 +22,7 @@ class PopeyeParser:
     def get_findings(self, file, test):
         data = json.load(file)
 
-        dupes = dict()
+        dupes = {}
         for sanitizer in data["popeye"]["sanitizers"]:
             issues = sanitizer.get("issues")
             if issues:

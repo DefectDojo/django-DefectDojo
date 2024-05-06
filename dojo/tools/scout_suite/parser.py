@@ -50,12 +50,9 @@ class ScoutSuiteParser:
 
         # Summary of Services
         test_description = (
-            "%s\n\n Services | Checked Items | Flagged Items | Max Level | Resource Count | Rules Count"
-            % (test_description)
+            f"{test_description}\n\n Services | Checked Items | Flagged Items | Max Level | Resource Count | Rules Count"
         )
-        test_description = "%s\n:---|---:|---:|---:|---:|---:" % (
-            test_description
-        )
+        test_description = f"{test_description}\n:---|---:|---:|---:|---:|---:"
         for service, items in list(last_run["summary"].items()):
             test_description += "\n"
             test_description += "|".join(
@@ -69,7 +66,7 @@ class ScoutSuiteParser:
                 ]
             )
 
-        tests = list()
+        tests = []
         test = ParserTest(
             name=self.ID,
             type=data["provider_name"],
@@ -178,7 +175,7 @@ class ScoutSuiteParser:
                 )
             else:
                 self.item_data = (
-                    self.item_data + self.formatview(depth) + "%s\n" % src
+                    self.item_data + self.formatview(depth) + f"{src}\n"
                 )
             self.pdepth = depth
 
